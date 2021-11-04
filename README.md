@@ -8,7 +8,7 @@
 In the same directory as the `Dockerfile`:
 
 ```
-docker build -t pephub .
+docker build -t pephubserver .
 ```
 
 ### Running container for development:
@@ -22,7 +22,25 @@ pephub serve -p 5000
 Better, though, is to use the container. Mount the source code directory:
 
 ```
-docker run --rm -p 80:80 \   
+docker run -p 5000:80 \       
+-e MODULE_NAME="pephub.main" \
 -v $(pwd)/pephub:/app/pephub \
-pephub pephub serve  
+pephubserver /start-reload.sh
+```
+
+Your development server with hot-reloading will be served at http://localhost:5000
+
+### Running container for production:
+Build the container:
+
+```
+docker build -t pephubserver .
+```
+
+Run the container using the pephub `cli` as entrypoint:
+
+```
+docker run --rm -d -p 80:80 \
+--name pephubservercon \
+pephubserver pephub serve
 ```

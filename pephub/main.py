@@ -8,12 +8,17 @@ from ._version import __version__ as server_v
 from .const import LOG_FORMAT, PKG_NAME
 from .helpers import build_parser
 
+from .routers import version1
+
 app = FastAPI(
     title=PKG_NAME,
     description="a web interface and RESTful API for PEPs",
     version=server_v,
 )
 
+# build routes
+app.include_router(version1.router)
+app.include_router(version1.router, prefix="/v1")
 
 def main():
     global _LOGGER
@@ -31,13 +36,8 @@ def main():
     _LOGGER = logmuse.setup_logger(**logger_args)
 
     if args.command == "serve":
-        from .routers import version1
-
-        app.include_router(version1.router)
-        app.include_router(version1.router, prefix="/v1")
-        
         uvicorn.run(app, host="0.0.0.0", port=args.port, debug=args.debug)
-        
+
     else:
         _LOGGER.error(f"unknown command: {args.command}")
         sys.exit(1)
