@@ -6,6 +6,8 @@ charset-normalizer==2.0.4
 click==8.0.1
 eido==0.1.5
 fastapi==0.68.1
+gitdb==4.0.9
+GitPython==3.1.24
 h11==0.12.0
 httptools==0.2.0
 idna==3.2
@@ -32,6 +34,7 @@ pytz==2021.1
 PyYAML==5.4.1
 requests==2.26.0
 six==1.16.0
+smmap==5.0.0
 starlette==0.14.2
 toml==0.10.2
 typing-extensions==3.10.0.2
