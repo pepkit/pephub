@@ -44,7 +44,14 @@ async def get_pep(namespace: str, pep_id: str):
             "message": f"PEP '{pep_id}'' not found."
         }
     
-    proj = peppy.Project(PEP_STORES[namespace][pep_id])
+    # validate pep
+    try:
+        proj = peppy.Project(PEP_STORES[namespace][pep_id])
+    except NotImplementedError as nie:
+        return {
+            "status": "error",
+            "message": "This PEP does not conform to the PEP 2.0 standards. You can read about those here: http://pep.databio.org/en/latest/specification/#sample-modifier-imply"
+        }
 
     return {
         "pep": proj
