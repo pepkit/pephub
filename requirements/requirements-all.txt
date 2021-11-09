@@ -1,3 +1,4 @@
+aiofiles==0.7.0
 asgiref==3.4.1
 attmap==0.13.0
 attrs==21.2.0

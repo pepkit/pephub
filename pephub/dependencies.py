@@ -16,8 +16,6 @@ def verify_project(namespace: str, pep_id: str) -> None:
 
 # valdiate the PEP
 def validate_pep(namespace: str, pep_id: str):
-    print("Here", flush=True)
-    # validate pep
     try:
         return peppy.Project(PEP_STORES[namespace][pep_id])
     except NotImplementedError as nie:
