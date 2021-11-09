@@ -15,9 +15,10 @@ def verify_project(namespace: str, pep_id: str) -> None:
         raise HTTPException(status_code=404, detail=f"pep_id '{pep_id}' not found in namespace {namespace}")
 
 # valdiate the PEP
-def validate_pep(namespace: str, pep_id: str) -> None:
+def validate_pep(namespace: str, pep_id: str):
+    print("Here", flush=True)
     # validate pep
     try:
-        proj = peppy.Project(PEP_STORES[namespace][pep_id])
+        return peppy.Project(PEP_STORES[namespace][pep_id])
     except NotImplementedError as nie:
         raise HTTPException(status_code=400, detail=f"Error loading PEP. {nie}")

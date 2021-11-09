@@ -11,12 +11,18 @@ def download_peps():
     """
     Download the repo and store in local storage for use
     """
+    # check if already downloaded:
+    if os.path.isdir(PEP_STORAGE_PATH):
+        return
+
     try:
         Repo.clone_from(
             DATA_REPO,
             PEP_STORAGE_PATH
         )
-    # catch repo already downloaded
+        
+    # catch repo already downloaded if above
+    # fails for some reason
     except GitCommandError:
         print("Repo already downloaded.")
     

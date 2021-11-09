@@ -11,17 +11,13 @@ PEP_STORES = load_data_tree()
 from ..dependencies import *
 
 router = APIRouter(
-    prefix="/v1"
+    prefix="/{namespace}/{pep_id}",
+    dependencies=[Depends(verify_namespace), Depends(verify_project), Depends(validate_pep)]
 )
 
 @router.get("/")
-async def root():
+async def get_pep(namespace: str, pep_id: str):
+    proj = validate_pep(namespace, pep_id)
     return {
-        "message": "welcome to the pepserver"
+        "pep": proj
     }
-
-@router.get("/pep-list")
-async def return_all_peps():
-    return PEP_STORES
-
-    

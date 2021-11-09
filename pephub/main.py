@@ -8,7 +8,7 @@ from ._version import __version__ as server_v
 from .const import LOG_FORMAT, PKG_NAME
 from .helpers import build_parser
 
-from .routers import version1
+from .routers import version1, namespace, project
 
 app = FastAPI(
     title=PKG_NAME,
@@ -19,6 +19,8 @@ app = FastAPI(
 # build routes
 app.include_router(version1.router)
 app.include_router(version1.router, prefix="/v1")
+app.include_router(namespace.router, prefix="/v1")
+app.include_router(project.router, prefix="/v1")
 
 def main():
     global _LOGGER
