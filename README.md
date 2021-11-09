@@ -57,9 +57,9 @@ docker build -t pephubserver-tests .
 Run the container with the pre-written shell script:
 
 ```
-./tests.sh
+./run_tests.sh
 ```
-_Note you may need to update permissions on this file to run directly. (`chmod +x tests.sh`)_
+_Note you may need to update permissions on this file to run directly. (`chmod +x run_tests.sh`)_
 
 Otherwise you can run the following command directly:
 
