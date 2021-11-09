@@ -5,7 +5,8 @@ from git.exc import GitCommandError
 import yaml
 import os
 
-from .const import DATA_REPO, PEP_STORAGE_PATH
+try: from const import DATA_REPO, PEP_STORAGE_PATH
+except: from .const import DATA_REPO, PEP_STORAGE_PATH
 
 def download_peps():
     """
@@ -20,7 +21,7 @@ def download_peps():
             DATA_REPO,
             PEP_STORAGE_PATH
         )
-        
+
     # catch repo already downloaded if above
     # fails for some reason
     except GitCommandError:
@@ -115,3 +116,6 @@ def load_data_tree() -> dict:
                     PEP_STORES[name][proj] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
 
     return PEP_STORES
+
+if __name__ == "__main__":
+    download_peps()

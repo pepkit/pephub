@@ -44,3 +44,28 @@ docker run --rm -d -p 80:80 \
 --name pephubservercon \
 pephubserver pephub serve
 ```
+
+### Running tests:
+Just as our development environment is identical to our production environment, we are going to run our tests in the same environment as well:
+
+Build our test container:
+
+```
+docker build -t pephubserver-tests .
+```
+
+Run the container with the pre-written shell script:
+
+```
+./tests.sh
+```
+_Note you may need to update permissions on this file to run directly. (`chmod +x tests.sh`)_
+
+Otherwise you can run the following command directly:
+
+```
+docker run --rm \
+--name pephubserver-tests \
+-v $(pwd)/tests:/app/tests \
+pephubserver-tests
+```
