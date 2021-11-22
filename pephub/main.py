@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from ._version import __version__ as server_v
-from .const import LOG_FORMAT, PKG_NAME
+from .const import LOG_FORMAT, PKG_NAME, TAGS_METADATA
 from .helpers import build_parser
 
 from .routers import version1, namespace, project
@@ -14,13 +14,13 @@ app = FastAPI(
     title=PKG_NAME,
     description="a web interface and RESTful API for PEPs",
     version=server_v,
+    tags=TAGS_METADATA
 )
 
 # build routes
 app.include_router(version1.router)
-app.include_router(version1.router, prefix="/v1")
-app.include_router(namespace.router, prefix="/v1")
-app.include_router(project.router, prefix="/v1")
+app.include_router(namespace.router)
+app.include_router(project.router)
 
 def main():
     global _LOGGER

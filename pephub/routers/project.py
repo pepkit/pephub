@@ -1,6 +1,11 @@
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import FileResponse
 
+from ..const import PEP_STORAGE_PATH
+
+# peppy
 import peppy
 
 # fetch peps
@@ -13,11 +18,15 @@ from ..dependencies import *
 
 router = APIRouter(
     prefix="/{namespace}/{pep_id}",
-    dependencies=[Depends(verify_namespace), Depends(verify_project), Depends(validate_pep)]
+    dependencies=[Depends(verify_namespace), Depends(verify_project), Depends(validate_pep)],
+    tags=["project"]
 )
 
-@router.get("/")
-async def get_pep(namespace: str, pep_id: str):
+@router.get("/", summary="Fetch a PEP")
+async def get_pep(namespace: str, pep_id: str,):
+    """
+    Fetch a PEP from a certain namespace
+    """
     proj = peppy.Project(PEP_STORES[namespace][pep_id])
     return {
         "pep": proj
@@ -36,6 +45,12 @@ async def get_samples(namespace: str, pep_id: str):
 
 # fetch specific sample for project
 @router.get("/samples/{sample_name}")
-async def get_samples(namespace: str, pep_id: str, sample_name: str):
+async def get_samples(namespace: str, pep_id: str, sample_name: str, download: bool = False):
     proj = peppy.Project(PEP_STORES[namespace][pep_id])
-    return proj.get_sample(sample_name)
+    if sample_name not in map(lambda s: s['sample_name'], proj.samples):
+        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
+    if download:
+        sample_file_path = f"{PEP_STORAGE_PATH}/{namespace}/{pep_id}/{proj.get_sample(sample_name)['file_path']}"
+        return FileResponse(sample_file_path)
+    else:
+        return proj.get_sample(sample_name)
