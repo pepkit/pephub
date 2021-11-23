@@ -1,0 +1,25 @@
+on:
+  release:
+    types:
+      - created
+  workflow_dispatch:
+    inputs: null
+    
+name: Deploy to Dockerhub on release
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Build and Push to DockerHub
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: databio/pephub
+        tags: latest
+        tag_with_ref: true
