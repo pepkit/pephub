@@ -13,7 +13,7 @@ from ..main import _PEP_STORES
 from ..dependencies import *
 
 router = APIRouter(
-    prefix="/{namespace}/{pep_id}",
+    prefix="/pep/{namespace}/{pep_id}",
     dependencies=[Depends(verify_namespace), Depends(verify_project), Depends(validate_pep)],
     tags=["project"]
 )
