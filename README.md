@@ -22,7 +22,7 @@ pephub serve -p 5000
 Better, though, is to use the container. Mount the source code directory:
 
 ```
-docker run -p 5000:80 \       
+docker run -p 5000:80 \
 -e MODULE_NAME="pephub.main" \
 -v $(pwd)/pephub:/app/pephub \
 pephubserver /start-reload.sh
