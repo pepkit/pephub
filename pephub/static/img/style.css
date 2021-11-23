@@ -1,0 +1,157 @@
+html,
+body {
+  height: 100%;
+}
+
+#vertical {
+    padding: 5px;
+}
+
+#main {
+  overflow: auto;
+  padding-bottom: 40px;
+  padding-top: 20px;
+  /* must be same height as the footer */
+}
+
+#footer {
+  position: relative;
+  margin-top: -40px;
+  /* negative value of footer height */
+  height: 40px;
+  padding-top: 5px;
+  padding-left: 10px;
+}
+
+.divider-15 {
+  /* adds spacing 15px */
+  width:90%;
+  min-height:1px;
+  margin-top:15px;
+  margin-bottom:15px;
+  margin-left:15px;
+  display:inline-block;
+  position:relative;
+}
+
+.divider-vertical {
+  margin-top:15px;
+  /*margin-bottom:15px;*/
+}
+
+span {
+  margin-left: 5px;
+}
+
+div.col-auto {
+  padding-left: 10px;
+  padding-right: 0px;
+}
+
+label.col-form-label {
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+.nav-item {
+  color: white;
+  font-size: 1rem;
+  }
+
+.nav-link {
+  color: white;
+  }
+
+.left_footer {
+  width: 40%;
+  float: left;
+  text-align:left;
+  display: inline-block;
+}
+
+.right_footer {
+  width: 40%;
+  float: right;
+  text-align:right;
+  display: inline-block;
+}
+
+.center_footer {
+  width: 20%;
+  overflow: hidden;
+  display: inline-block;
+  text-align: center;
+}
+
+.wrapper {
+  padding-left: 30px;
+  padding-right: 30px;
+  clear: both;
+  position: relative;
+  overflow: hidden;
+}
+
+div#navbar_links {
+  display: flex;
+}
+
+div.col-12#genome-asset {
+    margin: auto;
+    max-width: 1400px;
+}
+
+div.col-12#txt {
+    margin: auto;
+    max-width: 1400px;
+}
+
+.asset_name {
+    width: 200px;
+}
+
+.asset_desc {
+    width: 500px;
+    min-width: 250px;
+}
+
+.actions {
+    min-width: 180px;
+    width: 180px;
+}
+
+.size {
+    width: 150px;
+    min-width: 150px;
+}
+
+.checksum {
+    width: 280px;
+    min-width: 280px;
+}
+
+.container {
+    max-width: none;
+}
+
+th.footer {
+  font-size:12px;
+  padding: 3px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #464c56;
+  color: white;
+  min-width: 90px;
+}
+
+td.footer {
+  font-size:12px;
+  padding: 3px;
+  text-align: center;
+  color: #464c56;
+  font-weight: bold;
+  font-family: Courier New;
+}
+
+code.footer {
+  color:#464c56;
+}

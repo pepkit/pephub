@@ -52,6 +52,8 @@ def build_parser():
             help="Set logger verbosity to debug",
         )
 
+
+
     sps["serve"].add_argument(
         "-p",
         "--port",
@@ -60,6 +62,15 @@ def build_parser():
         help="The port the webserver should be run on.",
         default=DEFAULT_PORT,
     )
+
+    sps["serve"].add_argument(
+        "-r",
+        "--reload",
+        action="store_true",
+        default=False,
+        help="Live reloading with uvicorn"
+    )
+
 
     return parser
 
