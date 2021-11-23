@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-print("HELLO")
 import sys
 
 from setuptools import setup
@@ -18,8 +17,6 @@ with open("requirements/requirements-all.txt", "r") as reqs_file:
             continue
         DEPENDENCIES.append(line)
 
-print("DEPS:")
-print(DEPENDENCIES)
 extra = {"install_requires": DEPENDENCIES}
 
 with open("{}/_version.py".format(PACKAGE), "r") as versionfile:
