@@ -8,7 +8,7 @@ from ..main import _PEP_STORES
 from ..dependencies import *
 
 router = APIRouter(
-    prefix="/{namespace}",
+    prefix="/pep/{namespace}",
     dependencies=[Depends(verify_namespace)],
     tags=["namespace"]
 )

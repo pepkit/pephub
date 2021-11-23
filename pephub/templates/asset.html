@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ genome }}/{{ asset }}:{{ tag }}{% endblock %}
+{% block head %}
+    {{ super() }}
+    <script>
+        $(document).ready(function(){
+          $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+{% endblock %}
+{% block content %}
+{% set tag_data = rgc["genomes"][genome]["assets"][asset]["tags"][tag] %}
+<div class="container">
+    <div class="row align-items-center">
+        <div class="col-12">
+            <h2>{{ genome }}/{{ asset }}:{{ tag }}</h2>
+        </div>
+    </div>
+    <div class="row align-items-center">
+        <div class="col-12">
+            <p>Description: <i>{{ rgc["genomes"][genome]["assets"][asset]["asset_description"] }}</i></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <h3>Attributes</h3>
+            <ul>
+            {% for attr_name, value in tag_data.items() %}
+                {% if value is mapping %}
+                    <li>{{ attr_name }}:</li>
+                    <ul>
+                    {% for seek_key, path  in value.items() %}
+                        <li>{{ seek_key }}: <code>{{ path }}</code></li>
+                    {% endfor %}
+                    </ul>
+                {% elif value is iterable and value is not string %}
+                    <li>{{ attr_name }}:
+                    {% if value|length == 0 %}
+                        None</li>
+                    {% else %}
+                        <ul>
+                        {% for asset_registry_path in value | sort %}
+                            {% set parsed = prp(asset_registry_path) %}
+                            {% if parsed["namespace"] is none %}
+                            <!-- assign parent namespace to the same namespace the the asset of interest is in -->
+                                {% set parent_genome = genome %}
+                            {% else %}
+                            <!-- use the specified namespace -->
+                                {% set parent_genome = parsed["namespace"] %}
+                            {% endif %}
+                            <li><code><a href="/v2/asset/{{ parent_genome }}/{{ parsed['item'] }}/splash?tag={{ parsed['tag'] }}" data-toggle="tooltip" title="Asset splash page">{{ asset_registry_path }}</a></code>{{ "," if not loop.last }}</li>
+                        {% endfor %}
+                        </ul>
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li>{{ attr_name }}: <code>{{ value }}</code></li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+        <div class="col-6">
+            <h3>API endpoints</h3>
+            <ul>
+            {% for id, path in links_dict.items() %}
+                <li><a href="{{ path }}?tag={{tag}}">{{ id }}</a></li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
