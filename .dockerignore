@@ -1,0 +1,5 @@
+.env/
+.github/
+.vscode/
+tests/
+.pytest_cache

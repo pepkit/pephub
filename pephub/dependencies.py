@@ -13,7 +13,7 @@ def verify_namespace(namespace: str) -> None:
 def verify_project(namespace: str, pep_id: str) -> None:
     if pep_id not in PEP_STORES[namespace]:
         raise HTTPException(status_code=404, detail=f"pep_id '{pep_id}' not found in namespace {namespace}")
-
+        
 # valdiate the PEP
 def validate_pep(namespace: str, pep_id: str):
     try:

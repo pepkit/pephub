@@ -15,7 +15,6 @@ def download_peps():
     # check if already downloaded:
     if os.path.isdir(PEP_STORAGE_PATH):
         return
-
     try:
         Repo.clone_from(
             DATA_REPO,
