@@ -1,5 +1,8 @@
 from ubiquerg import VersionInHelpParser
 
+from os.path import exists
+from yaml import safe_load
+
 from ._version import __version__ as v
 from .const import DEFAULT_PORT, PKG_NAME
 
@@ -59,3 +62,11 @@ def build_parser():
     )
 
     return parser
+
+def read_server_configuration(path: str) -> dict:
+    """ Read in a server configuration file at a specified path"""
+    if not exists(path):
+        raise FileNotFoundError(f"Configuration file at {path} could not be found.")
+    with open(path, "r") as f:
+        return safe_load(f)
+

@@ -3,9 +3,7 @@ from fastapi import APIRouter, Depends
 import peppy
 
 # fetch peps
-from ..db import download_peps, load_data_tree
-download_peps()
-PEP_STORES = load_data_tree()
+from ..main import _PEP_STORES
 
 # load dependencies
 from ..dependencies import *
@@ -22,6 +20,6 @@ async def root() -> dict:
 
 @router.get("/pep-list", summary="Return list of all available PEPs")
 async def return_all_peps():
-    return PEP_STORES
+    return _PEP_STORES
 
     
