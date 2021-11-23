@@ -13,10 +13,12 @@ logmuse==0.2.7
 numpy==1.21.4
 packaging==21.3
 pandas==1.3.4
+pephub==0.0.1
 peppy==0.31.2
 pluggy==1.0.0
 py==1.11.0
 pydantic==1.8.2
+pypandoc==1.6.4
 pyparsing==3.0.6
 pytest==6.2.5
 python-dateutil==2.8.2

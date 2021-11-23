@@ -1,34 +1,5 @@
-from git import Repo
-from git import Repo
-from git.exc import GitCommandError
-
 import yaml
 import os
-
-try: from const import DATA_REPO, PEP_STORAGE_PATH
-except: from .const import DATA_REPO, PEP_STORAGE_PATH
-
-def download_peps():
-    """
-    Download the repo and store in local storage for use
-    """
-    # check if already downloaded:
-    if os.path.isdir(PEP_STORAGE_PATH):
-        return
-    try:
-        Repo.clone_from(
-            DATA_REPO,
-            PEP_STORAGE_PATH
-        )
-
-    # catch repo already downloaded if above
-    # fails for some reason
-    except GitCommandError:
-        print("Repo already downloaded.")
-    
-    # catch else
-    except Exception as err:
-        print(f"Unexpected error occured: {err}")
 
 def _is_valid_namespace(path: str, name: str) -> bool:
     """
@@ -89,32 +60,26 @@ def _extract_project_file_name(path_to_proj: str) -> str:
             return None
         else: return "project_config.yaml"
 
-def load_data_tree() -> dict:
+def load_data_tree(path: str, data_store: dict) -> None:
     """
-    Once the data.pephub repo is downloaded, we can
-    load the storage tree into memory by traversing
+    Load the storage tree into memory by traversing
     the folder structure and storing locations to
     configuration files into the dictonary
     """
-    # init storage dict
-    PEP_STORES = {}
     
     # traverse directory
-    for name in os.listdir(PEP_STORAGE_PATH):
+    for name in os.listdir(path):
         # build a path to the namespace
-        path_to_namespace = f"{PEP_STORAGE_PATH}/{name}"
+        path_to_namespace = f"{path}/{name}"
         if _is_valid_namespace(path_to_namespace, name):
             # init sub-dict
-            PEP_STORES[name] = {}
+            data_store[name] = {}
 
             # traverse projects
             for proj in os.listdir(path_to_namespace):
                 # build path to project
                 path_to_proj = f"{path_to_namespace}/{proj}"
                 if _is_valid_project(path_to_proj, proj):
-                    PEP_STORES[name][proj] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
+                    data_store[name][proj] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
 
-    return PEP_STORES
-
-if __name__ == "__main__":
-    download_peps()
+    return data_store
