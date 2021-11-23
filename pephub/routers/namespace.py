@@ -2,9 +2,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 # fetch peps
-from ..db import download_peps, load_data_tree
-download_peps()
-PEP_STORES = load_data_tree()
+from ..main import _PEP_STORES
 
 # load dependencies
 from ..dependencies import *
@@ -20,4 +18,4 @@ async def get_namespace(namespace: str):
     """
     Fetch namespace. Returns a
     """
-    return PEP_STORES[namespace]
+    return _PEP_STORES[namespace]

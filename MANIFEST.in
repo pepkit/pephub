@@ -2,4 +2,4 @@ include requirements/*
 include README.md
 include LICENSE.txt
 include Dockerfile
-recursive-include pepserver *
+recursive-include pephub *
