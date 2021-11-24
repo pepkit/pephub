@@ -24,8 +24,11 @@ templates = Jinja2Templates(directory=TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH))
 
 print("Schemas list")
-print(load_yaml("schemas.yaml"))
-schemas_to_test = load_yaml("schemas.yaml")
+try:
+    print(load_yaml("schemas.yaml"))
+    schemas_to_test = load_yaml("schemas.yaml")
+except Exception as e:
+    print(e)
 
 def vwrap(p, schema):
     """
