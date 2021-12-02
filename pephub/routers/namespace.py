@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 # fetch peps
@@ -18,4 +19,4 @@ async def get_namespace(namespace: str):
     """
     Fetch namespace. Returns a
     """
-    return _PEP_STORES[namespace]
+    return JSONResponse(content=_PEP_STORES[namespace])

@@ -1,0 +1,44 @@
+# This project config file describes the project.
+
+pep_version: 2.0.0
+sample_table: "TCGA_AllSamples_FinalBamList_annotation.csv"
+subsample_table: ["180113_mergeTable.csv"]
+
+# in your sample_annotation, columns with these names will be populated as described 
+# in the data_sources section below
+sample_modifiers:
+  append:
+    pipeline_interfaces: /share/PI/howchang/users/mcorces/tools/pipelines/ATACseq/pipeline_interface.yaml  # ABSOLUTE PATH the directory where looper will find the pipeline repository
+  derive:
+    attributes: [read1, read2]  
+    sources:  # This section describes paths to your data
+      read1: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/fastq/{sample_name}*R1*.fastq.gz"
+      read2: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/fastq/{sample_name}*R2*.fastq.gz"
+      read1_unmerged: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/fastq/{unmerged}*R1*.fastq.gz"
+      read2_unmerged: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/fastq/{unmerged}*R2*.fastq.gz"
+      # specify the ABSOLUTE PATH of input files using variable path expressions
+      # These keys then correspond to values in your sample annotation columns.
+      # Variables specified using brackets are populated from sample_annotation columns. 
+      # Variable syntax: {column_name}. For example, use {sample_name} to populate
+      # the file name with the value in the sample_name column for each sample.
+      # example_data_source: "/path/to/data/{sample_name}_R1.fastq.gz"
+  imply:
+    - if: 
+        organism: ["human"]
+      then:
+        genome: hg38
+        macs_genome_size: "hs"
+        prealignments: "rCRSd human_alphasat human_alu human_rDNA human_repeats"
+    - if:
+        organism: ["mouse"]
+      then:
+        genome: mm10
+        macs_genome_size: "mm"
+        prealignments: null
+    - if:
+        library: ATAC
+      then:
+        command_extra: "--trimmer skewer --recover"
+
+looper:
+  output_dir: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments"  # ABSOLUTE PATH to the parent, shared space where project results go

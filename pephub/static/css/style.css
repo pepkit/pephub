@@ -1,0 +1,23 @@
+.max-w-lg {
+    max-width: 1024px;
+}
+
+.h-header {
+    min-height: 5vh;
+}
+
+.h-footer {
+    min-height: 5vh;
+}
+
+.h-body {
+    min-height: 85vh;
+}
+
+.nav-item-hover {
+    opacity: 1;
+}
+.nav-item-hover:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}

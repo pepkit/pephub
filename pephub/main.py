@@ -45,6 +45,21 @@ app.include_router(namespace.router)
 app.include_router(project.router)
 app.include_router(eido.router)
 
+# mount the landing html/assets
+app.mount(
+    "/",
+    StaticFiles(directory=STATICS_PATH),
+    name="static",
+)
+
+# populate config
+# read in the configration file
+cfg = read_server_configuration("config.yaml")
+
+# read in files
+_PEP_STORAGE_PATH = cfg["data"]["path"]
+load_data_tree(_PEP_STORAGE_PATH, _PEP_STORES)
+
 # The eido validator is an SPA that can be servedas a static HTML
 # file. These can only be added on the main app, not on a router
 app.mount("/eido/validator", StaticFiles(directory=STATICS_PATH), name="static")
@@ -58,9 +73,11 @@ def main():
     # populate config
     # read in the configration file
     cfg = read_server_configuration(args.config)
+    print("here")
 
     # read in files
     _PEP_STORAGE_PATH = cfg["data"]["path"]
+    print(_PEP_STORAGE_PATH, flush=True)
     load_data_tree(_PEP_STORAGE_PATH, _PEP_STORES)
 
     if not args.command:
