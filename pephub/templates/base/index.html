@@ -1,79 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+  <div>
+    <h1>PEPHub API Demo</h1>
+    <p id="welcome" class="text-justify">
+    Welcome to the Sequence Collections API. This server hosts an implementation of the <a href="https://github.com/pepkit/pephub">the PEPHub API for PEP manipulation and sharing</a>.</p>
 
-<!doctype html>
-<html>
-	<head>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-        <link rel="stylesheet" href="css/style.css" />
-		<link rel="shortcut icon" type="svg" href="img/pep.svg"/>
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-		<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <p>View the <a href="/docs">complete API documentation</a> or try these examples:<br><br>
 
-		<!-- BABEL -->
-		<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <h3>Retrieving a sequence collection</h3>
+    Collection a6748 with 3 small sequences: <a href="/collection/a6748aa0f6a1e165f871dbed5e54ba62/1">/collection/a6748aa0f6a1e165f871dbed5e54ba62/1</a><br/>
+    Now, a6748 just top-level digests: <a href="/collection/a6748aa0f6a1e165f871dbed5e54ba62/0">/collection/a6748aa0f6a1e165f871dbed5e54ba62/0</a><br/>
+    Choose just the sequences, for example: <a href="/collection/3b379221b4d6ea26da26cec571e5911c/0">/collection/3b379221b4d6ea26da26cec571e5911c/0</a><br/>
+    A related collection, 2786e, adds topologies: <a href="/collection/2786eb8a921aa97018c214f64b9960a0/0">/collection/2786eb8a921aa97018c214f64b9960a0/0</a><br/>
+    Collection 2786e recursing down 1 level: <a href="/collection/2786eb8a921aa97018c214f64b9960a0/1">/collection/2786eb8a921aa97018c214f64b9960a0/1</a><br/>
+    Old example: <a href="/collection/6115e19530a7738af5be03469fe82b82c7485960b98741cd/1">/collection/6115e19530a7738af5be03469fe82b82c7485960b98741cd/1</a>
 
-		<!-- React-->
-  		<!-- Note: when deploying, replace "development.js" with "production.min.js". -->
-  		<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-  		<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-		<script type="text/babel" src="components/SearchBox.js"></script>
+    <h3>Comparing two sequence collections</h3>
 
-		<title>PepHub</title>
-	</head>
-	<header class="h-header">
-		<nav class="navbar navbar-expand-lg navbar-light bg-light px-5 border-bottom">
-			<a class="navbar-brand" href="#">
-				<img
-					src="img/pep-dark.svg"
-				/>
-			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-			  <span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			  <ul class="navbar-nav mr-auto">
-				<li class="nav-item active nav-item-hover">
-				  <a class="nav-link" href="/docs">📑 Docs <span class="sr-only">(current)</span></a>
-				</li>
-				<li class="nav-item active nav-item-hover">
-				  <a class="nav-link" href="https://github.com/pepkit/pephub">
-					  <img 
-					  	src="img/github.png"
-						height="15px"
-						width="15px"
-						class="mb-1"
-					  />
-					  GitHub
-				  </a>
-				</li>
-				<li class="nav-item active nav-item-hover">
-				  <a class="nav-link" href="http://pep.databio.org/en/latest/">💊 PEP Specification<span class="sr-only">(current)</span></a>
-				</li>
-				<li class="nav-item active nav-item-hover">
-					<a class="nav-link" href="http://databio.org">🌐 Databio<span class="sr-only">(current)</span></a>
-				  </li>
-			  </ul>
-			</div>
-		  </nav>
-	</header>
-	<body>
-		<div class="d-flex flex-column mx-lg-auto p-4 max-w-lg justify-content-center align-items-start h-body">
-            <h1>Welcome to PepHub</h1>
-			<p>Id consectetur pariatur enim et. Labore tempor aliquip in laboris. Voluptate culpa aliquip veniam proident enim sint exercitation duis do aliquip occaecat. Fugiat tempor ipsum quis aliquip ipsum cupidatat aliqua eiusmod. Exercitation reprehenderit dolore irure nulla non ullamco excepteur ex tempor laborum et eu. Adipisicing minim voluptate proident deserunt reprehenderit consequat magna. Fugiat commodo quis officia mollit cillum duis.</p>
-            <div class="row align-items-center justify-content-start">
-			  <a href="https://github.com/pepkit">
-                <button class="btn btn-lg btn-primary ml-3 mr-2">Learn More</button>
-			  </a>
-            </div>
-			<hr />
-			<h2 class="mt-4 mb-2">Try out the API:</h2>
-			<p>Below you can search for namespaces that exist in this server:</p>
-			<div class="w-100" id="_search_box"></div>
-        </div>
-	</body>
-	<footer class="h-footer max-w-lg mx-lg-auto p-4">
-		<div class="d-flex flex-row w-100 align-items-center justify-content-center">
-			<a class="text-primary" href="http://databio.org">Sheffield Computational Biology Lab</a>
-		</div>
-	</footer>
-</html>
+    <p>Comparing two versions of hg38:
+
+    <a href="/comparison/514c871928a74885ce981faa61ccbb1a/c345e091cce0b1df78bfc124b03fba1c">/comparison/514c871928a74885ce981faa61ccbb1a/c345e091cce0b1df78bfc124b03fba1c</a>
+    </p>
+  </div>
+{% endblock %}
