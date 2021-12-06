@@ -20,7 +20,7 @@ router = APIRouter(
 )
 
 @router.get("/", summary="Fetch a PEP")
-async def get_pep(namespace: str, pep_id: str, proj: peppy.Project = Depends(validate_pep)):
+async def get_pep(proj: peppy.Project = Depends(validate_pep)):
     """
     Fetch a PEP from a certain namespace
     """
@@ -35,14 +35,12 @@ async def get_config(namespace: str, pep_id: str):
 
 # fetch samples for project
 @router.get("/samples")
-async def get_samples(namespace: str, pep_id: str):
-    proj = peppy.Project(_PEP_STORES[namespace][pep_id])
+async def get_samples(proj: peppy.Project = Depends(validate_pep)):
     return proj.samples
 
 # fetch specific sample for project
 @router.get("/samples/{sample_name}")
-async def get_samples(namespace: str, pep_id: str, sample_name: str, download: bool = False):
-    proj = peppy.Project(_PEP_STORES[namespace][pep_id])
+async def get_samples(namespace: str, pep_id: str, sample_name: str, download: bool = False, proj: peppy.Project = Depends(validate_pep)):
     if sample_name not in map(lambda s: s['sample_name'], proj.samples):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     if download:
