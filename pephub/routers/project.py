@@ -20,11 +20,10 @@ router = APIRouter(
 )
 
 @router.get("/", summary="Fetch a PEP")
-async def get_pep(namespace: str, pep_id: str,):
+async def get_pep(namespace: str, pep_id: str, proj: peppy.Project = Depends(validate_pep)):
     """
     Fetch a PEP from a certain namespace
     """
-    proj = peppy.Project(_PEP_STORES[namespace][pep_id])
     return {
         "pep": proj
     }

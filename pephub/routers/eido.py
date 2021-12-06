@@ -138,5 +138,5 @@ async def validate_pep(request: Request, files: List[UploadFile] = File(...), sc
 @router.get("/validator")
 async def main():
     print(je.list_templates())
-    return FileResponse(os.path.join(STATICS_PATH, "validator.html"))
+    return FileResponse(os.path.join(STATICS_PATH, "index.html"))
 

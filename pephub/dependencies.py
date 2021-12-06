@@ -16,6 +16,6 @@ def verify_project(namespace: str, pep_id: str) -> None:
 # valdiate the PEP
 def validate_pep(namespace: str, pep_id: str):
     try:
-        return peppy.Project(_PEP_STORES[namespace][pep_id])
+        yield peppy.Project(_PEP_STORES[namespace][pep_id])
     except NotImplementedError as nie:
         raise HTTPException(status_code=400, detail=f"Error loading PEP. {nie}")
