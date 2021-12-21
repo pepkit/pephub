@@ -3,9 +3,13 @@
   <div>
     <h1>PEPHub API Demo</h1>
     <p id="welcome" class="text-justify">
-    Welcome to the Sequence Collections API. This server hosts an implementation of the <a href="https://github.com/pepkit/pephub">the PEPHub API for PEP manipulation and sharing</a>.</p>
+    Welcome to the PEPHub API. This server provides consumable sample tables through the <a href="https://github.com/pepkit/pephub">the PEPHub API for PEP sample metadata sharing</a>.</p>
 
-    <p>View the <a href="/docs">complete API documentation</a> or try these examples:<br><br>
+    <p>PEPHub uses `<namspace>/<projectid>` registry paths, similar to a Dockerhub or GitHub repository. The `demo` namespace provides several example PEPs so you can see the API in action. </p>
+
+    <h2>Sample metadata endpoints</h2>
+
+    <p>View the <a href="/docs">Swagger API docs</a> or try these examples:<br><br>
     <h3>View info about a namespace:</h3>
     <span class="d-flex flex-row align-items-center my-2">
       <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
@@ -38,5 +42,9 @@
     <p>
       Fetches the specific sample (<code>vistaEnhancers</code>) in a projects sample list.
     </p>
+
+    <h2>Validation endpoints</h2>
+
+    In addition to serving metadata, PEPHub also provides a validation service. You can provide  `<namespace>/<projectid>` and identify relevant schemas that this metadata satisfies. You can also `POST` your own PEP to the service to validate it.
   </div>
 {% endblock %}
