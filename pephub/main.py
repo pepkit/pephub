@@ -57,7 +57,7 @@ app.include_router(
 # mount the landing html/assets
 print(STATICS_PATH)
 app.mount(
-    "/",
+    "/static",
     StaticFiles(directory=STATICS_PATH),
     name="root_static",
 )
