@@ -4,7 +4,10 @@ from platform import python_version
 from starlette.responses import FileResponse 
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
+
 from ..const import BASE_TEMPLATES_PATH
+from ..main import _PEP_STORES
+
 import peppy
 
 # load dependencies
@@ -26,3 +29,7 @@ ALL_VERSIONS = {
 async def main(request: Request):
     templ_vars = {"request": request}
     return templates.TemplateResponse("index.html", dict(templ_vars, **ALL_VERSIONS))
+
+@router.get("/pep-list")
+async def pep_list():
+    return _PEP_STORES
