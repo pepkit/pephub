@@ -19,7 +19,7 @@ from ._version import __version__ as server_v
 from .const import LOG_FORMAT, PKG_NAME, TAGS_METADATA
 from .helpers import build_parser, read_server_configuration
 from .routers import version1, namespace, project, eido
-from .const import STATICS_PATH
+from .const import STATICS_PATH, EIDO_PATH
 
 # build server
 app = FastAPI(
@@ -55,19 +55,22 @@ app.include_router(
 )
 
 # mount the landing html/assets
-version1.router.mount(
+print(STATICS_PATH)
+app.mount(
     "/",
     StaticFiles(directory=STATICS_PATH),
     name="root_static",
 )
 
-# The eido validator is an SPA that can be servedas a static HTML
+# The eido validator is an SPA that can be served as a static HTML
 # file. These can only be added on the main app, not on a router
 app.mount(
     "/eido", 
-    StaticFiles(directory=STATICS_PATH), 
-    name="static"
+    StaticFiles(directory=EIDO_PATH), 
+    name="eido_validator"
 )
+
+# 
 
 # populate config
 # read in the configration file

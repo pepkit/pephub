@@ -22,6 +22,13 @@ STATICS_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), STATICS_DIRNAME
 )
 
+EIDO_DIRNAME = "eido_validator"
+EIDO_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), EIDO_DIRNAME
+)
+
+
+
 TAGS_METADATA = [
     {
         "name": "root",
