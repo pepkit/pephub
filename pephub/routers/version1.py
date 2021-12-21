@@ -1,7 +1,6 @@
 import jinja2
 from fastapi import APIRouter, Depends
 from platform import python_version
-from starlette.responses import FileResponse 
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 
