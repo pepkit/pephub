@@ -6,6 +6,21 @@
     Welcome to the Sequence Collections API. This server hosts an implementation of the <a href="https://github.com/pepkit/pephub">the PEPHub API for PEP manipulation and sharing</a>.</p>
 
     <p>View the <a href="/docs">complete API documentation</a> or try these examples:<br><br>
-
+    <h3>View info about a namespace:</h3>
+    <span class="d-flex flex-row align-items-center my-2">
+      <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
+      <a target="_blank" href="/api/pep/demo" class="fs-4"><code>/v1/pep/demo</code></a>
+    </span>
+    <p>
+      Get a list of all the PEPs in a particular namespace (<code>demo</code> in this case). A path to the configuration file is also given.
+    </p>
+    <h3>View a project's configuration file:</h3>
+    <span class="d-flex flex-row align-items-center my-2">
+      <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
+      <a target="_blank" href="/api/pep/demo/BiocProject" class="fs-4"><code>/v1/pep/demo/BiocProject</code></a>
+    </span>
+    <p>
+      Retrieves a JSON representation of a particular PEP's configuration file for a given project and namespace (<code>demo</code> and <code>BiocProject</code> in this case.)
+    </p>
   </div>
 {% endblock %}

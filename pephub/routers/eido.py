@@ -25,7 +25,6 @@ je = jinja2.Environment(loader=jinja2.FileSystemLoader(EIDO_TEMPLATES_PATH))
 
 path_to_schemas = f"{os.path.dirname(__file__)}/schemas.yaml"
 try:
-    print(load_yaml(path_to_schemas))
     schemas_to_test = load_yaml(path_to_schemas)
 except Exception as e:
     print(e, flush=True)
