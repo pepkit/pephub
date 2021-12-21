@@ -9,7 +9,7 @@
     <h3>View info about a namespace:</h3>
     <span class="d-flex flex-row align-items-center my-2">
       <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
-      <a target="_blank" href="/api/pep/demo" class="fs-4"><code>/v1/pep/demo</code></a>
+      <a target="_blank" href="/pep/demo" class="fs-4"><code>/pep/demo</code></a>
     </span>
     <p>
       Get a list of all the PEPs in a particular namespace (<code>demo</code> in this case). A path to the configuration file is also given.
@@ -17,10 +17,26 @@
     <h3>View a project's configuration file:</h3>
     <span class="d-flex flex-row align-items-center my-2">
       <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
-      <a target="_blank" href="/api/pep/demo/BiocProject" class="fs-4"><code>/v1/pep/demo/BiocProject</code></a>
+      <a target="_blank" href="/pep/demo/BiocProject" class="fs-4"><code>/pep/demo/BiocProject</code></a>
     </span>
     <p>
       Retrieves a JSON representation of a particular PEP's configuration file for a given project and namespace (<code>demo</code> and <code>BiocProject</code> in this case.)
+    </p>
+    <h3>View samples inside a project:</h3>
+    <span class="d-flex flex-row align-items-center my-2">
+      <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
+      <a target="_blank" href="/pep/demo/BiocProject/samples" class="fs-4"><code>/pep/demo/BiocProject/samples</code></a>
+    </span>
+    <p>
+      Retrieves a list of all samples in the PEP.
+    </p>
+    <h3>Retrieve a specific sample inside a PEP:</h3>
+    <span class="d-flex flex-row align-items-center my-2">
+      <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
+      <a target="_blank" href="/pep/demo/BiocProject/samples/vistaEnhancers" class="fs-4"><code>/pep/demo/BiocProject/samples/vistaEnhancers</code></a>
+    </span>
+    <p>
+      Fetches the specific sample (<code>vistaEnhancers</code>) in a projects sample list.
     </p>
   </div>
 {% endblock %}
