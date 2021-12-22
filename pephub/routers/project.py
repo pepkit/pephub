@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from tempfile import TemporaryFile
 
+# import the pep storage
 from ..main import _PEP_STORAGE_PATH
 
 # peppy
@@ -14,14 +15,23 @@ from ..main import _PEP_STORES
 # load dependencies
 from ..dependencies import *
 
+# route examples
+from ..route_examples import (
+    example_namespace, example_pep_id
+)
+
 router = APIRouter(
     prefix="/pep/{namespace}/{pep_id}",
-    dependencies=[Depends(verify_namespace), Depends(verify_project), Depends(validate_pep)],
+    dependencies=[
+        Depends(verify_namespace), 
+        Depends(verify_project), 
+        Depends(validate_pep)
+    ],
     tags=["project"]
 )
 
-@router.get("/", summary="Fetch a PEP")
-async def get_pep(proj: peppy.Project = Depends(validate_pep)):
+@router.get("/", summary="Fetch a PEP",)
+async def get_pep(namespace: str = example_namespace, pep_id: str = example_pep_id, proj: peppy.Project = Depends(validate_pep)):
     """
     Fetch a PEP from a certain namespace
     """
@@ -38,7 +48,7 @@ async def get_pep(proj: peppy.Project = Depends(validate_pep)):
 
 # fetch configuration file
 @router.get("/config")
-async def get_config(namespace: str, pep_id: str):
+async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
     return FileResponse(_PEP_STORES[namespace][pep_id])
 
 # fetch samples for project
