@@ -24,7 +24,7 @@ from .const import STATICS_PATH, EIDO_PATH
 # build server
 app = FastAPI(
     title=PKG_NAME,
-    description="a web interface and RESTful API for PEPs",
+    description="A web interface and RESTful API for PEPs",
     version=server_v,
     tags=TAGS_METADATA
 )

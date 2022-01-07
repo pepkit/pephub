@@ -3,7 +3,8 @@ from fastapi import Path
 # example for /pep/{namespace}
 example_namespace = Path(
     ...,
-    description="A pep namespace.",
+    description="A namespace that holds projects.",
+    regex=r"^\w+$",
     example="demo",
 )
 
