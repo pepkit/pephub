@@ -1,0 +1,20 @@
+pipelines/ProseqPEP:
+  name: "PEPPRO"
+  docs: "http://peppro.databio.org"
+  schema: "http://schema.databio.org/pipelines/ProseqPEP.yaml"
+pep/2.0.0:
+  name: "PEP v2.0.0"
+  docs: "http://pep.databio.org"
+  schema: "http://schema.databio.org/pep/2.0.0.yaml"
+pipelines/pepatac:
+  name: "PEPATAC"
+  docs: "http://pepatac.databio.org"
+  schema: "http://schema.databio.org/pipelines/pepatac.yaml"
+pipelines/bedmaker:
+  name: "bedmaker"
+  docs: "http://bedbase.org"
+  schema: "http://schema.databio.org/pipelines/bedmaker.yaml"
+bulker/manifest:
+  name: "bulker"
+  docs: "http://bulker.io"
+  schema: "http://schema.databio.org/bulker/manifest.yaml"

@@ -1,0 +1,39 @@
+# This project config file describes your project. See looper docs for details.
+pep_version: 2.1.0
+metadata:  # relative paths are relative to this config file
+  sample_annotation: TCGA_AllSamples_FinalBamList_annotation.csv
+  output_dir: /oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments  # ABSOLUTE PATH to the parent, shared space where project results go
+  pipeline_interfaces: /share/PI/howchang/users/mcorces/tools/pipelines/ATACseq/pipeline_interface.yaml  # ABSOLUTE PATH the directory where looper will find the pipeline repository
+  merge_table: /oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/config/180113_mergeTable.csv  # (optional) input for samples with more than one input file
+
+# in your sample_annotation, columns with these names will be populated as described 
+# in the data_sources section below
+derived_columns: [read1, read2]  
+
+data_sources:  # This section describes paths to your data
+  # specify the ABSOLUTE PATH of input files using variable path expressions
+  # These keys then correspond to values in your sample annotation columns.
+  # Variables specified using brackets are populated from sample_annotation columns. 
+  # Variable syntax: {column_name}. For example, use {sample_name} to populate
+  # the file name with the value in the sample_name column for each sample.
+  # example_data_source: "/path/to/data/{sample_name}_R1.fastq.gz"
+  read1: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/fastq/{sample_name}*R1*.fastq.gz"
+  read2: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/fastq/{sample_name}*R2*.fastq.gz"
+  read1_unmerged: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/fastq/{unmerged}*R1*.fastq.gz"
+  read2_unmerged: "/oak/stanford/groups/howchang/users/mcorces/TCGA_ATAC/alignments/fastq/{unmerged}*R2*.fastq.gz"
+
+implied_columns:
+  organism:
+    human:
+      genome: hg38
+      macs_genome_size: "hs"
+      prealignments: "rCRSd human_alphasat human_alu human_rDNA human_repeats"
+    mouse:
+      genome: mm10
+      macs_genome_size: "mm"
+      prealignments: null
+
+pipeline_args:
+  ATACseq.py:
+    "--trimmer": skewer
+    "--recover": null

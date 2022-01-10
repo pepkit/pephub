@@ -11,6 +11,12 @@ In the same directory as the `Dockerfile`:
 docker build -t databio/pephub .
 ```
 
+### Running natively for development:
+
+```
+uvicorn pephub.main:app --reload --port 3001
+```
+
 ### Running container for development:
 
 You can run it directly after installing with `pip install`, like this:

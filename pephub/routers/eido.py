@@ -16,19 +16,18 @@ from starlette.templating import Jinja2Templates
 from typing import List
 from yacman import load_yaml
 
-from ..const import TEMPLATES_PATH, STATICS_PATH
+from ..const import EIDO_TEMPLATES_PATH, STATICS_PATH
 from ..dependencies import *
 from ..main import _PEP_STORES
 
-templates = Jinja2Templates(directory=TEMPLATES_PATH)
-je = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH))
+templates = Jinja2Templates(directory=EIDO_TEMPLATES_PATH)
+je = jinja2.Environment(loader=jinja2.FileSystemLoader(EIDO_TEMPLATES_PATH))
 
-print("Schemas list")
+path_to_schemas = f"{os.path.dirname(__file__)}/schemas.yaml"
 try:
-    print(load_yaml("schemas.yaml"))
-    schemas_to_test = load_yaml("schemas.yaml")
+    schemas_to_test = load_yaml(path_to_schemas)
 except Exception as e:
-    print(e)
+    print(e, flush=True)
 
 def vwrap(p, schema):
     """
@@ -135,8 +134,8 @@ async def validate_pep(request: Request, files: List[UploadFile] = File(...), sc
 #     print(je.list_templates())
 #     return HTMLResponse(je.get_template("index.html").render())
 
-# @router.get("/validator")
-# async def main():
-#     print(je.list_templates())
-#     return FileResponse(os.path.join(STATICS_PATH, "validator.html"))
+@router.get("/validator")
+async def main():
+    print(je.list_templates())
+    return FileResponse(os.path.join(STATICS_PATH, "index.html"))
 
