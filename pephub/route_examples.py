@@ -1,4 +1,4 @@
-from fastapi import Path
+from fastapi import Path, Query
 
 # example for /pep/{namespace}
 example_namespace = Path(
@@ -12,4 +12,11 @@ example_pep_id = Path(
     ...,
     description="A project name inside a particular namespace",
     example="BiocProject"
+)
+
+# example for /pep/{namespace}/{pep}/convert
+example_filter = Query(
+    ...,
+    description="A valid eido conversion filter type. See /eido/filters for a list of valid filters.",
+    example="basic"
 )
