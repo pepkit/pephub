@@ -52,9 +52,12 @@ router = APIRouter(
     tags=["eido"]
 )
 
+@router.get("/filters")
+async def list_filters():
+    return JSONResponse(eido.get_available_pep_filters())
 
 @router.get("/status")
-async def status(request: Request):
+async def status():
     return JSONResponse({"status": "OK"})
 
 
