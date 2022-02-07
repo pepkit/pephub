@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
-from tempfile import TemporaryFile
+from typing import Optional
 
 # eido
 import eido
@@ -85,7 +85,7 @@ async def get_subsamples(namespace: str, pep_id: str, download: bool = False, pr
         return f"Project '{namespace}/{pep_id}' does not have any subsamples."
 
 @router.get("/convert")
-async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: str = example_filter):
+async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: Optional[str] = example_filter):
     """
     Convert a PEP to a specific format, f. For a list of available formats/filters,
     see /eido/filters.
@@ -93,6 +93,25 @@ async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: str =
     See, http://eido.databio.org/en/latest/filters/#convert-a-pep-into-an-alternative-format-with-a-filter
     for more information.
     """
+    # default to basic
     if filter is None:
         filter = "basic" # default to basic
-    return JSONResponse(eido.run_filter(proj, filter))
+
+    # validate filter exists
+    filter_list = eido.get_available_pep_filters()
+    if filter not in filter_list:
+        raise HTTPException(
+            400, 
+            f"Unknown filter '{filter}'. Available filters: {filter_list}"
+        )
+
+    # generate result
+    conv_result = eido.run_filter(
+        proj, 
+        filter,
+        verbose=False
+    )
+
+    return JSONResponse({
+        "result": conv_result
+    })
