@@ -85,7 +85,7 @@ async def get_subsamples(namespace: str, pep_id: str, download: bool = False, pr
         return f"Project '{namespace}/{pep_id}' does not have any subsamples."
 
 @router.get("/convert")
-async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: Optional[str] = example_filter):
+async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: Optional[str] = "basic"):
     """
     Convert a PEP to a specific format, f. For a list of available formats/filters,
     see /eido/filters.
@@ -102,7 +102,7 @@ async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: Optio
     if filter not in filter_list:
         raise HTTPException(
             400, 
-            f"Unknown filter '{filter}'. Available filters: {filter_list}"
+            f"Unknown filter '{filter}'. Available filterss: {filter_list}"
         )
 
     # generate result
