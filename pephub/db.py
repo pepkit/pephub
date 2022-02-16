@@ -86,13 +86,13 @@ def load_data_tree(path: str, data_store: dict) -> None:
         path_to_namespace = f"{path}/{name}"
         if _is_valid_namespace(path_to_namespace, name):
             # init sub-dict
-            data_store[name] = {}
+            data_store[name.lower()] = {}
 
             # traverse projects
             for proj in os.listdir(path_to_namespace):
                 # build path to project
                 path_to_proj = f"{path_to_namespace}/{proj}"
                 if _is_valid_project(path_to_proj, proj):
-                    data_store[name][proj] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
+                    data_store[name.lower()][proj.lower()] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
 
     return data_store

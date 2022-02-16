@@ -50,7 +50,7 @@ async def get_pep(namespace: str = example_namespace, pep_id: str = example_pep_
 # fetch configuration file
 @router.get("/config")
 async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
-    return FileResponse(_PEP_STORES[namespace][pep_id])
+    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()])
 
 # fetch samples for project
 @router.get("/samples")
@@ -66,7 +66,7 @@ async def get_sample(namespace: str, pep_id: str, sample_name: str, download: bo
     if sample_name not in map(lambda s: s['sample_name'], proj.samples):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     if download:
-        sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace}/{pep_id}/{proj.get_sample(sample_name)['file_path']}"
+        sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
         return FileResponse(sample_file_path)
     else:
         return proj.get_sample(sample_name)
@@ -82,7 +82,7 @@ async def get_subsamples(namespace: str, pep_id: str, download: bool = False, pr
         else:
             return str(proj.subsample_table.to_dict())
     else:
-        return f"Project '{namespace}/{pep_id}' does not have any subsamples."
+        return f"Project '{namespace.lower()}/{pep_id.lower()}' does not have any subsamples."
 
 @router.get("/convert")
 async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: Optional[str] = "basic"):
