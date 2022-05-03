@@ -21,4 +21,4 @@ router = APIRouter(
 @router.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(namespace: str = example_namespace):
     """Fetch namespace. Returns a JSON representation of the namespace and the projects inside it."""
-    return JSONResponse(content=_PEP_STORES[namespace])
+    return JSONResponse(content=_PEP_STORES[namespace.lower()])

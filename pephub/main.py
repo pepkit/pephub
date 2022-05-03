@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
+from pephub.exceptions import PepHubException
+
 try: from pephub.db import load_data_tree
 except: from .db import load_data_tree
 
@@ -84,6 +86,12 @@ def main():
     global _LOGGER
     parser = build_parser()
     args = parser.parse_args()
+
+    if args.config is None:
+        raise PepHubException(
+            "Configuration file required! " + \
+            "Please specify with '--config' flag."
+        )
 
     # populate config
     # read in the configration file

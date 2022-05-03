@@ -1,5 +1,9 @@
+from logging import getLogger
 import yaml
 import os
+from .const import PKG_NAME
+
+_LOGGER = getLogger(PKG_NAME)
 
 def _is_valid_namespace(path: str, name: str) -> bool:
     """
@@ -51,14 +55,23 @@ def _extract_project_file_name(path_to_proj: str) -> str:
             _pephub_yaml = yaml.safe_load(stream)
 
         # check for config_file attribute
-        if "config_file" in _pephub_yaml: return _pephub_yaml["config_file"]
-        else: return None
+        if "config_file" in _pephub_yaml: 
+            # check that the config file exists
+            if not os.path.exists(f"{path_to_proj}/{_pephub_yaml['config_file']}"):
+                _LOGGER.warn(
+                    f"Specified pep config file '{_pephub_yaml['config_file']}'\
+                    not found in directory, '{path_to_proj}'. This pep will be unloadable by pephub. "
+                )
+        return _pephub_yaml["config_file"]
 
     # catch no .pephub.yaml exists
     except FileNotFoundError:
         if not os.path.exists(f"{path_to_proj}/project_config.yaml"):
-            return None
-        else: return "project_config.yaml"
+            _LOGGER.warn(
+                f"No project config file found for {path_to_proj}.\
+                This project will not be accessible by pephub. "
+            )
+        return "project_config.yaml"
 
 def load_data_tree(path: str, data_store: dict) -> None:
     """
@@ -73,13 +86,13 @@ def load_data_tree(path: str, data_store: dict) -> None:
         path_to_namespace = f"{path}/{name}"
         if _is_valid_namespace(path_to_namespace, name):
             # init sub-dict
-            data_store[name] = {}
+            data_store[name.lower()] = {}
 
             # traverse projects
             for proj in os.listdir(path_to_namespace):
                 # build path to project
                 path_to_proj = f"{path_to_namespace}/{proj}"
                 if _is_valid_project(path_to_proj, proj):
-                    data_store[name][proj] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
+                    data_store[name.lower()][proj.lower()] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
 
     return data_store
