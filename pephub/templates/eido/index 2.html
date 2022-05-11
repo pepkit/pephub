@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-12" id="txt">
+            <p id="welcome" class="text-justify">
+                Welcome to webeido, a validation server for sample metadata. You POST your sample metadata here and we will validate it, letting you know which schemas you satisfy.
+            </p>
+        </div>
+    </div>
+</div>
+<hr class="featurette-divider">
+<div class="container">
+    <div>
+    <h1>File Upload</h1>
+        Drag and drop all parts of your PEP here. This includes metadata only, which is the config YAML file, any sample or subsample table CSV files, etc.
+        <div style="margin: 25px; padding:25px; border: 1px solid gray">
+            <form action="/validate/" enctype="multipart/form-data" method="post">
+            <input name="files" type="file" multiple>
+            <input type="submit" value="Validate">
+            </form>
+        </div>
+    </div>
+</div>
+<hr class="featurette-divider">
+<div class="container">
+    <div>
+    <h1>POST your data programatically</h1>
+        The preferred way to use webeido is to POST your PEP to the /validate endpoint. Here's how you do that. Just POST your files following this format. Files can be named whatever you want.
+
+        <div style="margin: 25px; padding:25px; border: 1px solid gray">
+        <code><pre> 
+            { 
+                files: [
+                    "project_config.yaml",
+                    "sample_table.csv"
+                ]
+            }</pre></code>
+        </div>
+
+        Return looks like: 
+<code><pre> 
+{
+    "name": "uploads/project_config.yaml",
+    "filenames": [
+        "project_config.yaml",
+        "sample_table.csv"
+    ],
+    "validations": [
+        {
+            "name": "Generic PEP",
+            "schema": "http://schema.databio.org/pep/2.0.0.yaml",
+            "result": "None"
+        },
+        {
+            "name": "PEPPRO",
+            "schema": "http://schema.databio.org/pipelines/ProseqPEP.yaml",
+            "result": "'read1' is a required property"
+        },
+        {
+            "name": "PEPATAC",
+            "schema": "http://schema.databio.org/pipelines/pepatac.yaml",
+            "result": "'read1' is a required property"
+        },
+        {
+            "name": "bedmaker",
+            "schema": "http://schema.databio.org/pipelines/bedmaker.yaml",
+            "result": "'input_file_path' is a required property"
+        },
+        {
+            "name": "refgenie",
+            "schema": "http://schema.databio.org/refgenie/refgenie_build.yaml",
+            "result": "'asset' is a required property"
+        },
+        {
+            "name": "bulker",
+            "schema": "http://schema.databio.org/bulker/manifest.yaml",
+            "result": "None"
+        }
+    ]
+}
+</pre></code>
+    </div>
+</div>
+</body>
+{% endblock %}
