@@ -4,8 +4,11 @@ import os
 
 from .main import _PEP_STORES
 
+from .route_examples import example_namespace
+
+
 # verify namespace
-def verify_namespace(namespace: str) -> None:
+def verify_namespace(namespace: str = example_namespace) -> None:
     if namespace.lower() not in _PEP_STORES:
         raise HTTPException(status_code=404, detail=f"namespace '{namespace}' not found.")
 
