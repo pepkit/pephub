@@ -1,3 +1,4 @@
+from typing import Union
 from ubiquerg import VersionInHelpParser
 
 from os.path import exists

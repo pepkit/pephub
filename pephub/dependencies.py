@@ -36,7 +36,7 @@ def validate_pep(namespace: str, pep_id: str):
             status_code=404,
             detail=f"Configuration file '{config_path}' was not found. Ensure \
                     that you have included it in your pep directory and that \
-                    your .pephub.yaml file is correct",
+                    your .pep.yaml file is correct",
         )
     try:
         yield peppy.Project(config_path)

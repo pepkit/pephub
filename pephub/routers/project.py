@@ -3,22 +3,10 @@ from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 from typing import Optional
 
-# eido
 import eido
-
-# import the pep storage
-from ..main import _PEP_STORAGE_PATH
-
-# peppy
 import peppy
-
-# fetch peps
-from ..main import _PEP_STORES
-
-# load dependencies
+from ..main import _PEP_STORAGE_PATH, _PEP_STORES
 from ..dependencies import *
-
-# route examples
 from ..route_examples import *
 
 router = APIRouter(
@@ -63,7 +51,8 @@ async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
 # fetch samples for project
 @router.get("/samples")
 async def get_samples(proj: peppy.Project = Depends(validate_pep)):
-    return proj.samples
+    # remove "private attributes"
+    return JSONResponse([s.to_dict() for s in proj.samples])
 
 
 # fetch specific sample for project
@@ -84,7 +73,7 @@ async def get_sample(
         sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
         return FileResponse(sample_file_path)
     else:
-        return proj.get_sample(sample_name)
+        return proj.get_sample(sample_name).to_dict()
 
 
 # fetch all subsamples inside a pep
