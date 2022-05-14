@@ -9,7 +9,7 @@ client = TestClient(app)
 
 # fetch namespace summary
 def test_base():
-    res = client.get("v1/demo")
+    res = client.get("/pep/demo")
     assert res.status_code == 200
 
     # verify amount of projects inside demo
@@ -18,5 +18,5 @@ def test_base():
 # attempt to fetch a namespace that does not exist
 def test_namespace_dne():
     DNE_NAME = "alpine-porcupine"
-    res = client.get(f"/v1/{DNE_NAME}")
+    res = client.get(f"/{DNE_NAME}")
     assert res.status_code == 404

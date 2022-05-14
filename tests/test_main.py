@@ -9,5 +9,5 @@ client = TestClient(app)
 
 # fetch base route
 def test_base():
-    res = client.get("/v1")
+    res = client.get("/")
     assert res.status_code == 200
