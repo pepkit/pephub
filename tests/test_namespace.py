@@ -4,7 +4,6 @@ sys.path.insert(0, myPath + '/../')
 
 from fastapi.testclient import TestClient
 from pephub.main import app
-from tests.const import NAMESPACE_DNE_PKG
 
 client = TestClient(app)
 
@@ -21,4 +20,3 @@ def test_namespace_dne():
     DNE_NAME = "alpine-porcupine"
     res = client.get(f"/v1/{DNE_NAME}")
     assert res.status_code == 404
-    assert res.json() == NAMESPACE_DNE_PKG

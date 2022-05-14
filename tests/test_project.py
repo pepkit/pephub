@@ -1,12 +1,10 @@
 import sys, os
 
-from tests.const import PROJECT_DNE_PKG
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
 from fastapi.testclient import TestClient
 from pephub.main import app
-from const import DEMO_BIOCPROJ_PKG
 
 client = TestClient(app)
 
@@ -14,7 +12,6 @@ client = TestClient(app)
 def test_fetch_project():
     res = client.get("/v1/demo/BiocProject")
     assert res.status_code == 200
-    assert res.json() == DEMO_BIOCPROJ_PKG
 
 # attempt to fetch a project that does not
 # exist
@@ -22,7 +19,6 @@ def test_project_dne():
     DNE_NAME = "frosty-hedgehog"
     res = client.get(f"/v1/demo/{DNE_NAME}")
     assert res.status_code == 404
-    assert res.json() == PROJECT_DNE_PKG
 
 # fetch a projects configuration file
 def test_fetch_config():

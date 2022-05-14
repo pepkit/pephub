@@ -1,4 +1,0 @@
-WELCOME_PKG = {"message": "welcome to the pepserver"}
-DEMO_BIOCPROJ_PKG = {"pep":{"_config_file":"/app/pephub/data/demo/BiocProject/project_config.yaml","_config":{"pep_version":"2.0.0","sample_table":"/app/pephub/data/demo/BiocProject/sample_table.csv","bioconductor":{"readFunName":"readBedFiles","readFunPath":"readBedFiles.R"}},"st_index":"sample_name","sst_index":["sample_name","subsample_name"],"name":"BiocProject","description":None,"_subsample_df":None}}
-NAMESPACE_DNE_PKG = {"detail":"namespace 'alpine-porcupine' not found."}
-PROJECT_DNE_PKG = {"detail":"pep_id 'frosty-hedgehog' not found in namespace demo"}
