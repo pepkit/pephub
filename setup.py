@@ -22,7 +22,7 @@ extra = {"install_requires": DEPENDENCIES}
 with open("{}/_version.py".format(PACKAGE), "r") as versionfile:
     version = versionfile.readline().split()[-1].strip("\"'\n")
 
-with open('README.md') as f:
+with open("README.md") as f:
     long_description = f.read()
 
 setup(
@@ -43,7 +43,7 @@ setup(
     ],
     keywords="project, bioinformatics, sequencing, ngs, workflow, GUI, genomes, server",
     url="https://pep.databio.org/",
-    author=u"Michal Stolarczyk, Nathan LeRoy, Nathan Sheffield",
+    author="Michal Stolarczyk, Nathan LeRoy, Nathan Sheffield",
     license="BSD2",
     entry_points={
         "console_scripts": [

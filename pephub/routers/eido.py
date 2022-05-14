@@ -1,16 +1,16 @@
 import eido
 import jinja2
-import os 
+import os
 import peppy
 import shutil
 
-from fastapi import  File, UploadFile
+from fastapi import File, UploadFile
 from fastapi import APIRouter, Depends
 from peppy import __version__ as peppy_version
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 from starlette.responses import JSONResponse
-from starlette.responses import FileResponse 
+from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from typing import List
@@ -28,6 +28,7 @@ try:
     schemas_to_test = load_yaml(path_to_schemas)
 except Exception as e:
     print(e, flush=True)
+
 
 def vwrap(p, schema):
     """
@@ -47,15 +48,14 @@ def vwrap(p, schema):
     return x
 
 
-router = APIRouter(
-    prefix="/eido",
-    tags=["eido"]
-)
+router = APIRouter(prefix="/eido", tags=["eido"])
+
 
 @router.get("/filters")
 async def list_filters():
     """Return all available filters for eido conversion"""
     return JSONResponse(eido.get_available_pep_filters())
+
 
 @router.get("/status")
 async def status():
@@ -68,7 +68,10 @@ async def status():
 
 
 @router.get("/validate_fromhub/{namespace}/{pep_id}")
-async def validate_fromhub(namespace: str, pep_id: str,):
+async def validate_fromhub(
+    namespace: str,
+    pep_id: str,
+):
     proj = peppy.Project(_PEP_STORES[namespace][pep_id])
     vals = {
         "name": pep_id,
@@ -90,7 +93,11 @@ async def validate_fromhub(namespace: str, pep_id: str,):
 
 
 @router.post("/validate")
-async def validate_pep(request: Request, files: List[UploadFile] = File(...), schemas_to_test = schemas_to_test):
+async def validate_pep(
+    request: Request,
+    files: List[UploadFile] = File(...),
+    schemas_to_test=schemas_to_test,
+):
     ufiles = []
     upload_folder = "uploads"
     for file in files:
@@ -138,8 +145,8 @@ async def validate_pep(request: Request, files: List[UploadFile] = File(...), sc
 #     print(je.list_templates())
 #     return HTMLResponse(je.get_template("index.html").render())
 
+
 @router.get("/validator")
 async def main():
     print(je.list_templates())
     return FileResponse(os.path.join(STATICS_PATH, "index.html"))
-

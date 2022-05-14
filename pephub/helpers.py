@@ -52,8 +52,6 @@ def build_parser():
             help="Set logger verbosity to debug",
         )
 
-
-
     sps["serve"].add_argument(
         "-p",
         "--port",
@@ -68,16 +66,15 @@ def build_parser():
         "--reload",
         action="store_true",
         default=False,
-        help="Live reloading with uvicorn"
+        help="Live reloading with uvicorn",
     )
-
 
     return parser
 
+
 def read_server_configuration(path: str) -> dict:
-    """ Read in a server configuration file at a specified path"""
+    """Read in a server configuration file at a specified path"""
     if not exists(path):
         raise FileNotFoundError(f"Configuration file at {path} could not be found.")
     with open(path, "r") as f:
         return safe_load(f)
-

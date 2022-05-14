@@ -24,21 +24,28 @@ from ..route_examples import *
 router = APIRouter(
     prefix="/pep/{namespace}/{pep_id}",
     dependencies=[
-        Depends(verify_namespace), 
-        Depends(verify_project), 
-        Depends(validate_pep)
+        Depends(verify_namespace),
+        Depends(verify_project),
+        Depends(validate_pep),
     ],
-    tags=["project"]
+    tags=["project"],
 )
 
-@router.get("/", summary="Fetch a PEP",)
-async def get_pep(namespace: str = example_namespace, pep_id: str = example_pep_id, proj: peppy.Project = Depends(validate_pep)):
+
+@router.get(
+    "/",
+    summary="Fetch a PEP",
+)
+async def get_pep(
+    namespace: str = example_namespace,
+    pep_id: str = example_pep_id,
+    proj: peppy.Project = Depends(validate_pep),
+):
     """
     Fetch a PEP from a certain namespace
     """
-    return {
-        "pep": proj
-    }
+    return {"pep": proj}
+
 
 # @router.get("/zip")
 # async def zip_pep(namespace: str, pep_id: str, proj: peppy.Project = Depends(validate_pep)):
@@ -52,18 +59,26 @@ async def get_pep(namespace: str = example_namespace, pep_id: str = example_pep_
 async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
     return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()])
 
+
 # fetch samples for project
 @router.get("/samples")
 async def get_samples(proj: peppy.Project = Depends(validate_pep)):
     return proj.samples
 
+
 # fetch specific sample for project
 @router.get("/samples/{sample_name}")
-async def get_sample(namespace: str, pep_id: str, sample_name: str, download: bool = False, proj: peppy.Project = Depends(validate_pep)):
+async def get_sample(
+    namespace: str,
+    pep_id: str,
+    sample_name: str,
+    download: bool = False,
+    proj: peppy.Project = Depends(validate_pep),
+):
     # check that the sample exists
     # by mapping the list of sample objects
     # to a list of sample names
-    if sample_name not in map(lambda s: s['sample_name'], proj.samples):
+    if sample_name not in map(lambda s: s["sample_name"], proj.samples):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     if download:
         sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
@@ -71,9 +86,15 @@ async def get_sample(namespace: str, pep_id: str, sample_name: str, download: bo
     else:
         return proj.get_sample(sample_name)
 
+
 # fetch all subsamples inside a pep
 @router.get("/subsamples")
-async def get_subsamples(namespace: str, pep_id: str, download: bool = False, proj: peppy.Project = Depends(validate_pep)):
+async def get_subsamples(
+    namespace: str,
+    pep_id: str,
+    download: bool = False,
+    proj: peppy.Project = Depends(validate_pep),
+):
     subsamples = proj.subsample_table
     # check if subsamples exist
     if subsamples is not None:
@@ -84,8 +105,11 @@ async def get_subsamples(namespace: str, pep_id: str, download: bool = False, pr
     else:
         return f"Project '{namespace.lower()}/{pep_id.lower()}' does not have any subsamples."
 
+
 @router.get("/convert")
-async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: Optional[str] = "basic"):
+async def convert_pep(
+    proj: peppy.Project = Depends(validate_pep), filter: Optional[str] = "basic"
+):
     """
     Convert a PEP to a specific format, f. For a list of available formats/filters,
     see /eido/filters.
@@ -95,23 +119,16 @@ async def convert_pep(proj: peppy.Project = Depends(validate_pep), filter: Optio
     """
     # default to basic
     if filter is None:
-        filter = "basic" # default to basic
+        filter = "basic"  # default to basic
 
     # validate filter exists
     filter_list = eido.get_available_pep_filters()
     if filter not in filter_list:
         raise HTTPException(
-            400, 
-            f"Unknown filter '{filter}'. Available filterss: {filter_list}"
+            400, f"Unknown filter '{filter}'. Available filterss: {filter_list}"
         )
 
     # generate result
-    conv_result = eido.run_filter(
-        proj, 
-        filter,
-        verbose=False
-    )
+    conv_result = eido.run_filter(proj, filter, verbose=False)
 
-    return JSONResponse({
-        "result": conv_result
-    })
+    return JSONResponse({"result": conv_result})

@@ -18,28 +18,20 @@ BASE_TEMPLATES_PATH = os.path.join(
 )
 
 STATICS_DIRNAME = "static"
-STATICS_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), STATICS_DIRNAME
-)
+STATICS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), STATICS_DIRNAME)
 
 EIDO_DIRNAME = "eido_validator"
-EIDO_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), EIDO_DIRNAME
-)
-
+EIDO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), EIDO_DIRNAME)
 
 
 TAGS_METADATA = [
-    {
-        "name": "root",
-        "description": "Base route for API."
-    },
+    {"name": "root", "description": "Base route for API."},
     {
         "name": "namespace",
-        "description": "Manage and obtain information about a particular namespace"
+        "description": "Manage and obtain information about a particular namespace",
     },
     {
         "name": "project",
-        "description": "Manage and obtain information about a particular project or PEP."
-    }
+        "description": "Manage and obtain information about a particular project or PEP.",
+    },
 ]

@@ -8,12 +8,14 @@ from starlette.staticfiles import StaticFiles
 
 from pephub.exceptions import PepHubException
 
-try: from pephub.db import load_data_tree
-except: from .db import load_data_tree
+try:
+    from pephub.db import load_data_tree
+except:
+    from .db import load_data_tree
 
 # set up global pep storage
-global _PEP_STORES # the object in memory to read from
-global _PEP_STORAGE_PATH # the actual file path to the peps
+global _PEP_STORES  # the object in memory to read from
+global _PEP_STORAGE_PATH  # the actual file path to the peps
 _PEP_STORES = {}
 _PEP_STORAGE_PATH = ""
 
@@ -28,7 +30,7 @@ app = FastAPI(
     title=PKG_NAME,
     description="A web interface and RESTful API for PEPs",
     version=server_v,
-    tags=TAGS_METADATA
+    tags=TAGS_METADATA,
 )
 
 # CORS is required for the validation HTML SPA to work externally
@@ -46,15 +48,9 @@ app.include_router(
     version1.router,
 )
 
-app.include_router(
-    namespace.router
-)
-app.include_router(
-    project.router
-)
-app.include_router(
-    eido.router
-)
+app.include_router(namespace.router)
+app.include_router(project.router)
+app.include_router(eido.router)
 
 # mount the landing html/assets
 app.mount(
@@ -65,13 +61,9 @@ app.mount(
 
 # The eido validator is an SPA that can be served as a static HTML
 # file. These can only be added on the main app, not on a router
-app.mount(
-    "/eido/validator", 
-    StaticFiles(directory=EIDO_PATH), 
-    name="eido_validator"
-)
+app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
 
-# 
+#
 
 # populate config
 # read in the configration file
@@ -81,6 +73,7 @@ cfg = read_server_configuration("config.yaml")
 _PEP_STORAGE_PATH = cfg["data"]["path"]
 load_data_tree(_PEP_STORAGE_PATH, _PEP_STORES)
 
+
 def main():
     # set up the logger
     global _LOGGER
@@ -89,8 +82,7 @@ def main():
 
     if args.config is None:
         raise PepHubException(
-            "Configuration file required! " + \
-            "Please specify with '--config' flag."
+            "Configuration file required! " + "Please specify with '--config' flag."
         )
 
     # populate config
@@ -113,7 +105,9 @@ def main():
     _LOGGER = logmuse.setup_logger(**logger_args)
 
     if args.command == "serve":
-        uvicorn.run(app, host="0.0.0.0", port=args.port, debug=args.debug, reload=args.reload)
+        uvicorn.run(
+            app, host="0.0.0.0", port=args.port, debug=args.debug, reload=args.reload
+        )
 
     else:
         _LOGGER.error(f"unknown command: {args.command}")

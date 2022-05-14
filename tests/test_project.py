@@ -1,7 +1,7 @@
 import sys, os
 
 myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + '/../')
+sys.path.insert(0, myPath + "/../")
 
 from fastapi.testclient import TestClient
 from pephub.main import app
@@ -13,6 +13,7 @@ def test_fetch_project():
     res = client.get("/pep/demo/BiocProject")
     assert res.status_code == 200
 
+
 # attempt to fetch a project that does not
 # exist
 def test_project_dne():
@@ -20,10 +21,12 @@ def test_project_dne():
     res = client.get(f"/pep/demo/{DNE_NAME}")
     assert res.status_code == 404
 
+
 # fetch a projects configuration file
 def test_fetch_config():
     res = client.get("/pep/demo/BiocProject/config")
     assert res.status_code == 200
+
 
 # fetch a projects list of samples
 def test_fetch_samples():
@@ -32,6 +35,7 @@ def test_fetch_samples():
 
     # verify two sample files in project
     assert len(res.json()) == 2
+
 
 # fetch a specific sample/file in a project
 def test_fetch_sample():

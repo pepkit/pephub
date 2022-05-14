@@ -5,6 +5,7 @@ from .const import PKG_NAME
 
 _LOGGER = getLogger(PKG_NAME)
 
+
 def _is_valid_namespace(path: str, name: str) -> bool:
     """
     Check if a given path is a valid namespace directory. Function
@@ -12,11 +13,9 @@ def _is_valid_namespace(path: str, name: str) -> bool:
         1. Is a folder
         2. Is not a "dot" file (e.g. .git)
     """
-    criteria = [
-        os.path.isdir(path),
-        not name.startswith(".")
-    ]
+    criteria = [os.path.isdir(path), not name.startswith(".")]
     return all(criteria)
+
 
 # attentive programmers will notice that this is identical
 # to the function above. I am keeping them separate as in
@@ -30,11 +29,9 @@ def _is_valid_project(path: str, name: str) -> bool:
         1. Is a folder
         2. Is not a "dot" file (e.g. .git)
     """
-    criteria = [
-        os.path.isdir(path),
-        not name.startswith(".")
-    ]
+    criteria = [os.path.isdir(path), not name.startswith(".")]
     return all(criteria)
+
 
 def _extract_project_file_name(path_to_proj: str) -> str:
     """
@@ -55,7 +52,7 @@ def _extract_project_file_name(path_to_proj: str) -> str:
             _pephub_yaml = yaml.safe_load(stream)
 
         # check for config_file attribute
-        if "config_file" in _pephub_yaml: 
+        if "config_file" in _pephub_yaml:
             # check that the config file exists
             if not os.path.exists(f"{path_to_proj}/{_pephub_yaml['config_file']}"):
                 _LOGGER.warn(
@@ -73,13 +70,14 @@ def _extract_project_file_name(path_to_proj: str) -> str:
             )
         return "project_config.yaml"
 
+
 def load_data_tree(path: str, data_store: dict) -> None:
     """
     Load the storage tree into memory by traversing
     the folder structure and storing locations to
     configuration files into the dictonary
     """
-    
+
     # traverse directory
     for name in os.listdir(path):
         # build a path to the namespace
@@ -93,6 +91,8 @@ def load_data_tree(path: str, data_store: dict) -> None:
                 # build path to project
                 path_to_proj = f"{path_to_namespace}/{proj}"
                 if _is_valid_project(path_to_proj, proj):
-                    data_store[name.lower()][proj.lower()] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
+                    data_store[name.lower()][
+                        proj.lower()
+                    ] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
 
     return data_store

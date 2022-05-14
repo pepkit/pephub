@@ -1,6 +1,7 @@
 import sys, os
+
 myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + '/../')
+sys.path.insert(0, myPath + "/../")
 
 from fastapi.testclient import TestClient
 from pephub.main import app
@@ -14,6 +15,7 @@ def test_base():
 
     # verify amount of projects inside demo
     assert len(res.json()) == 26
+
 
 # attempt to fetch a namespace that does not exist
 def test_namespace_dne():
