@@ -32,7 +32,7 @@ async def get_pep(
     """
     Fetch a PEP from a certain namespace
     """
-    return {"pep": proj}
+    return {"pep": proj.to_dict()}
 
 
 # @router.get("/zip")
