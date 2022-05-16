@@ -19,7 +19,7 @@ uvicorn pephub.main:app --reload --port 3001
 
 ### Running container for development:
 
-You can run it directly after installing with `pip install`, like this:
+You can run it directly after installing with `pip install -e .`, like this:
 
 ```
 pephub serve -p 5000

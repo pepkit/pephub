@@ -8,9 +8,7 @@ from ..main import _PEP_STORES
 from ..dependencies import *
 
 # examples
-from ..route_examples import (
-    example_namespace
-)
+from ..route_examples import example_namespace
 
 router = APIRouter(
     prefix="/pep/{namespace}",
@@ -18,7 +16,8 @@ router = APIRouter(
     tags=["namespace"],
 )
 
+
 @router.get("/", summary="Fetch details about a particular namespace.")
-async def get_namespace(namespace: str = example_namespace):
+async def get_namespace(namespace):
     """Fetch namespace. Returns a JSON representation of the namespace and the projects inside it."""
-    return JSONResponse(content=_PEP_STORES[namespace])
+    return JSONResponse(content=_PEP_STORES[namespace.lower()])

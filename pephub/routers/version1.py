@@ -24,10 +24,12 @@ ALL_VERSIONS = {
     "python_version": python_version(),
 }
 
+
 @router.get("/")
 async def main(request: Request):
     templ_vars = {"request": request}
     return templates.TemplateResponse("index.html", dict(templ_vars, **ALL_VERSIONS))
+
 
 @router.get("/pep-list")
 async def pep_list():

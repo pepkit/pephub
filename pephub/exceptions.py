@@ -1,0 +1,2 @@
+class PepHubException(Exception):
+    pass

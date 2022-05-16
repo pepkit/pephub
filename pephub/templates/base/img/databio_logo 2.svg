@@ -26,8 +26,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8"
-     inkscape:cx="104.85325"
-     inkscape:cy="19.697612"
+     inkscape:cx="171.10325"
+     inkscape:cy="21.126183"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -48,7 +48,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -57,44 +57,28 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-107.88835,-68.261876)">
-    <g
-       aria-label="DATA"
+    <text
+       id="text5241"
+       y="80.359879"
+       x="131.34048"
        style="font-style:normal;font-weight:normal;font-size:12.37311554px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#2c89a0;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       id="text5241">
-      <path
-         d="m 138.55401,76.239631 c 0,-1.237311 -0.4578,-2.363265 -1.41053,-3.167518 -0.90324,-0.75476 -1.89309,-0.965103 -3.04379,-0.965103 h -1.68274 v 8.252869 h 1.67037 c 1.16307,0 2.10343,-0.185597 3.01904,-0.95273 0.97747,-0.816626 1.44765,-1.90546 1.44765,-3.167518 z m -0.92798,0 c 0,0.965103 -0.38357,1.880714 -1.12596,2.511743 -0.68052,0.581536 -1.48477,0.75476 -2.36326,0.75476 h -0.80425 v -6.533005 h 0.80425 c 2.00444,0 3.48922,1.187819 3.48922,3.266502 z"
+       xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, ';fill:#2c89a0;fill-opacity:1;stroke-width:0.26458332"
-         id="path834" />
-      <path
-         d="m 146.41091,80.359879 -3.69956,-8.648808 -3.79855,8.648808 h 1.00222 l 0.98985,-2.338519 h 3.52634 l 0.9651,2.338519 z m -2.33852,-3.192264 h -2.79632 l 1.41053,-3.303622 z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, ';fill:#2c89a0;fill-opacity:1;stroke-width:0.26458332"
-         id="path836" />
-      <path
-         d="M 151.08792,72.973129 V 72.10701 h -4.9245 v 0.866119 h 2.00445 v 7.38675 h 0.91561 v -7.38675 z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, ';fill:#2c89a0;fill-opacity:1;stroke-width:0.26458332"
-         id="path838" />
-      <path
-         d="m 158.33856,80.359879 -3.69957,-8.648808 -3.79854,8.648808 h 1.00222 l 0.98985,-2.338519 h 3.52634 l 0.9651,2.338519 z m -2.33852,-3.192264 h -2.79633 l 1.41054,-3.303622 z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, ';fill:#2c89a0;fill-opacity:1;stroke-width:0.26458332"
-         id="path840" />
-    </g>
-    <g
-       aria-label="BIO"
+         y="80.359879"
+         x="131.34048"
+         id="tspan5239"
+         sodipodi:role="line">DATA</tspan></text>
+    <text
+       id="text5245"
+       y="80.580841"
+       x="169.65295"
        style="font-style:normal;font-weight:normal;font-size:12.37311554px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#2ca05a;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       id="text5245">
-      <path
-         d="m 175.59205,78.254695 c 0,-1.014595 -0.58154,-1.806475 -1.55901,-2.078683 0.54441,-0.39594 0.81662,-0.940357 0.81662,-1.608505 0,-0.643402 -0.25983,-1.299177 -0.76713,-1.719863 -0.51967,-0.433059 -1.21257,-0.519671 -1.86834,-0.519671 h -1.48477 v 8.252868 h 2.05393 c 0.74239,0 1.38579,-0.08661 1.9797,-0.569163 0.53204,-0.433059 0.829,-1.064088 0.829,-1.756983 z m -1.64562,-3.674815 c 0,0.39594 -0.12374,0.816626 -0.43306,1.076461 -0.34645,0.296955 -0.75476,0.309328 -1.17545,0.309328 h -0.69289 v -2.771578 h 0.71764 c 0.94035,0 1.58376,0.35882 1.58376,1.385789 z m 0.73001,3.650069 c 0,0.433059 -0.1856,0.866118 -0.53204,1.138327 -0.39594,0.321701 -0.85375,0.35882 -1.34867,0.35882 h -1.1507 v -2.969548 h 0.94035 c 0.45781,0 0.98985,0.01237 1.39816,0.247463 0.43306,0.247462 0.6929,0.730013 0.6929,1.224938 z"
+       xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, ';fill:#2ca05a;stroke-width:0.26458332"
-         id="path843" />
-      <path
-         d="m 178.20276,80.580841 v -8.252868 h -0.91561 v 8.252868 z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, ';fill:#2ca05a;stroke-width:0.26458332"
-         id="path845" />
-      <path
-         d="m 188.48481,76.460594 c 0,-2.338519 -1.94258,-4.268725 -4.2811,-4.268725 -2.36326,0 -4.30584,1.930206 -4.30584,4.293471 0,2.350892 1.95495,4.243978 4.29347,4.243978 2.33852,0 4.29347,-1.917832 4.29347,-4.268724 z m -0.92798,0 c 0,1.855967 -1.49715,3.402606 -3.36549,3.402606 -1.84359,0 -3.36549,-1.534266 -3.36549,-3.37786 0,-1.880714 1.48478,-3.427353 3.37786,-3.427353 1.86834,0 3.35312,1.546639 3.35312,3.402607 z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, ';fill:#2ca05a;stroke-width:0.26458332"
-         id="path847" />
-    </g>
+         y="80.580841"
+         x="169.65295"
+         id="tspan5243"
+         sodipodi:role="line">BIO</tspan></text>
     <path
        id="path5247"
        d="m 166.86512,75.330071 h -1.81958 v -1.819572 c 0,-0.454891 -0.36391,-0.909793 -0.90978,-0.909793 -0.54588,0 -0.90979,0.363922 -0.90979,0.909793 v 1.819572 h -1.81958 c -0.45488,0 -0.90979,0.363922 -0.90979,0.909792 0,0.545872 0.36392,0.909782 0.90979,0.909782 h 1.81958 v 1.819584 c 0,0.545871 0.36391,0.909781 0.90979,0.909781 0.54587,0 0.90978,-0.36391 0.90978,-0.909781 v -1.819584 h 1.81958 c 0.54587,0 0.90978,-0.36391 0.90978,-0.909782 0,-0.54587 -0.36391,-0.909792 -0.90978,-0.909792 z"
@@ -160,64 +144,28 @@
        id="g834"
        transform="matrix(1.3323242,0,0,1.3323242,1.3174542,-50.39858)"
        style="stroke-width:0.75056803">
-      <g
-         aria-label="SHEFFIELD"
+      <text
+         id="text829"
+         y="104.66048"
+         x="98.046318"
          style="font-style:normal;font-weight:normal;font-size:12.26865864px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#2ca05a;fill-opacity:1;stroke:none;stroke-width:0.19858779"
-         id="text829">
-        <path
-           d="m 101.34126,103.29875 c 0,-1.51694 -2.173109,-1.23472 -2.173109,-2.20838 0,-0.43039 0.366889,-0.71967 0.783167,-0.71967 0.395112,0 0.613832,0.1905 0.804332,0.51505 l 0.41628,-0.27516 c -0.26811,-0.46567 -0.67028,-0.73378 -1.213556,-0.73378 -0.705556,0 -1.319389,0.47978 -1.319389,1.21356 0,1.38288 2.173115,1.12183 2.173115,2.22955 0,0.52917 -0.42334,0.93133 -0.945449,0.93133 -0.536222,0 -0.860777,-0.35983 -0.959555,-0.86077 l -0.508,0.14111 c 0.169333,0.73378 0.684389,1.21355 1.453444,1.21355 0.81844,0 1.48872,-0.61383 1.48872,-1.44639 z"
+         xml:space="preserve"><tspan
            style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path850" />
-        <path
-           d="m 105.76508,104.66048 v -4.706059 h -0.52916 v 1.919109 h -2.40595 v -1.919109 h -0.52211 v 4.706059 h 0.52211 v -2.30011 h 2.40595 v 2.30011 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path852" />
-        <path
-           d="m 109.41985,104.66048 v -0.48684 h -1.91206 v -1.8415 h 1.86267 v -0.48683 h -1.86267 v -1.397 h 1.91206 v -0.493889 h -2.43417 v 4.706059 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path854" />
-        <path
-           d="m 112.52428,100.44831 v -0.493889 h -2.13783 v 4.706059 h 0.52211 v -2.32834 h 1.56633 v -0.48683 h -1.56633 v -1.397 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path856" />
-        <path
-           d="m 115.57933,100.44831 v -0.493889 h -2.13784 v 4.706059 h 0.52212 v -2.32834 h 1.56633 v -0.48683 h -1.56633 v -1.397 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path858" />
-        <path
-           d="m 117.01865,104.66048 v -4.706059 h -0.52211 v 4.706059 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path860" />
-        <path
-           d="m 120.68048,104.66048 v -0.48684 h -1.91205 v -1.8415 h 1.86266 v -0.48683 h -1.86266 v -1.397 h 1.91205 v -0.493889 h -2.43417 v 4.706059 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path862" />
-        <path
-           d="m 123.46741,104.66048 v -0.48684 h -1.29822 v -4.219219 h -0.52211 v 4.706059 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path864" />
-        <path
-           d="m 127.67252,102.31098 c 0,-0.70556 -0.26105,-1.34761 -0.80433,-1.80623 -0.51506,-0.43038 -1.0795,-0.550329 -1.73567,-0.550329 h -0.95955 v 4.706059 h 0.9525 c 0.66322,0 1.19944,-0.10584 1.72155,-0.54328 0.55739,-0.46567 0.8255,-1.08656 0.8255,-1.80622 z m -0.52916,0 c 0,0.55033 -0.21873,1.07244 -0.64206,1.43227 -0.38806,0.33162 -0.84667,0.43039 -1.34761,0.43039 h -0.45861 v -3.72533 h 0.45861 c 1.143,0 1.98967,0.67733 1.98967,1.86267 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2ca05a;fill-opacity:1;stroke-width:0.19858779"
-           id="path866" />
-      </g>
-      <g
-         aria-label="LAB"
+           y="104.66048"
+           x="98.046318"
+           id="tspan827"
+           sodipodi:role="line">SHEFFIELD</tspan></text>
+      <text
+         xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:7.05555534px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#2c89a0;fill-opacity:1;stroke:none;stroke-width:0.19858779"
-         id="text849">
-        <path
-           d="m 132.34681,104.74514 v -0.48683 h -1.29822 v -4.21923 h -0.52211 v 4.70606 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2c89a0;fill-opacity:1;stroke-width:0.19858779"
-           id="path869" />
-        <path
-           d="m 137.0458,104.74514 -2.10961,-4.931833 -2.16606,4.931833 h 0.5715 l 0.56445,-1.3335 h 2.01083 l 0.55034,1.3335 z m -1.3335,-1.82033 h -1.59455 l 0.80433,-1.88384 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2c89a0;fill-opacity:1;stroke-width:0.19858779"
-           id="path871" />
-        <path
-           d="m 140.48185,103.4187 c 0,-0.57856 -0.33161,-1.03012 -0.889,-1.18534 0.31044,-0.22578 0.46567,-0.53622 0.46567,-0.91722 0,-0.36689 -0.14817,-0.74083 -0.43745,-0.98072 -0.29633,-0.24695 -0.69144,-0.29634 -1.06539,-0.29634 h -0.84666 v 4.70606 h 1.17122 c 0.42333,0 0.79022,-0.0494 1.12889,-0.32456 0.30339,-0.24694 0.47272,-0.60677 0.47272,-1.00188 z m -0.93839,-2.0955 c 0,0.22577 -0.0705,0.46566 -0.24694,0.61383 -0.19756,0.16933 -0.43039,0.17639 -0.67028,0.17639 h -0.39511 v -1.58045 h 0.40922 c 0.53622,0 0.90311,0.20461 0.90311,0.79023 z m 0.41628,2.08138 c 0,0.24695 -0.10583,0.49389 -0.30339,0.64912 -0.22578,0.18344 -0.48683,0.20461 -0.76906,0.20461 h -0.65616 v -1.69334 h 0.53622 c 0.26106,0 0.56444,0.007 0.79728,0.14111 0.24694,0.14112 0.39511,0.41628 0.39511,0.6985 z"
-           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2c89a0;fill-opacity:1;stroke-width:0.19858779"
-           id="path873" />
-      </g>
+         x="129.91264"
+         y="104.74514"
+         id="text849"><tspan
+           sodipodi:role="line"
+           id="tspan847"
+           x="129.91264"
+           y="104.74514"
+           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:7.05555534px;font-family:'FuturaEF Book';-inkscape-font-specification:'FuturaEF Book, Medium';fill:#2c89a0;fill-opacity:1;stroke-width:0.19858779">LAB</tspan></text>
     </g>
   </g>
 </svg>

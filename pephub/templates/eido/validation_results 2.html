@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Validation Results{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row align-items-center">
+      <div class="col-12" id="genome-asset">
+      Results for {{ name }}
+      Files included: {{ filenames }}
+      <table>
+        <thead>
+          <tr>
+            <th>Schema name</th>
+            <th>Valid?</th>
+          </tr>
+        </thead>
+        <tbody>
+      {% for item in validations %}
+          <tr>
+            <td><a href="{{item.schema}}">{{ item.name }}</a></td>
+            <td>{% if item.result == "None" %}<img src="/static/yes.png" alt="YES" width="25">{% else %}<img src="/static/no.png" alt="NO"  width="25"> {{ item.result }}{% endif %}</td>
+          </tr>
+      {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
