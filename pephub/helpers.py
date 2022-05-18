@@ -79,3 +79,6 @@ def read_server_configuration(path: str) -> dict:
         raise FileNotFoundError(f"Configuration file at {path} could not be found.")
     with open(path, "r") as f:
         return safe_load(f)
+
+def zipfiles(file_list):
+    pass
