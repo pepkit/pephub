@@ -45,7 +45,7 @@ async def get_pep(
 # fetch configuration file
 @router.get("/config")
 async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
-    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()])
+    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()]['cfg'])
 
 
 # fetch samples for project
@@ -120,4 +120,4 @@ async def convert_pep(
     # generate result
     conv_result = eido.run_filter(proj, filter, verbose=False)
 
-    return JSONResponse({"result": conv_result})
+    return FileResponse

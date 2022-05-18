@@ -21,5 +21,4 @@ router = APIRouter(
 async def get_namespace(namespace):
     """Fetch namespace. Returns a JSON representation of the namespace and the projects inside it."""
     projects = _PEP_STORES[namespace.lower()]
-    
-    return JSONResponse(content=)
+    return JSONResponse(content=projects)

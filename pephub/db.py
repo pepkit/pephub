@@ -1,6 +1,8 @@
 from logging import getLogger
+import peppy
 import yaml
 import os
+from tqdm import tqdm
 from .const import PKG_NAME
 
 _LOGGER = getLogger(PKG_NAME)
@@ -77,9 +79,10 @@ def load_data_tree(path: str, data_store: dict) -> None:
     the folder structure and storing locations to
     configuration files into the dictonary
     """
+    _LOGGER.info(f"Indexing PEPs in {path}")
 
     # traverse directory
-    for name in os.listdir(path):
+    for name in tqdm(os.listdir(path), desc='Progress', position=0):
         # build a path to the namespace
         path_to_namespace = f"{path}/{name}"
         if _is_valid_namespace(path_to_namespace, name):
@@ -87,12 +90,24 @@ def load_data_tree(path: str, data_store: dict) -> None:
             data_store[name.lower()] = {}
 
             # traverse projects
-            for proj in os.listdir(path_to_namespace):
+            for proj in tqdm(os.listdir(path_to_namespace), desc=f"{name}", position=1, leave=False):
                 # build path to project
                 path_to_proj = f"{path_to_namespace}/{proj}"
                 if _is_valid_project(path_to_proj, proj):
+                    # populate project data
+                    # store path to config
                     data_store[name.lower()][
                         proj.lower()
-                    ] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
+                    ] = {
+                        'name': proj,
+                        'cfg': f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
+                    }
+
+                    # store number of samples in project by loading project into memory
+                    p = peppy.Project(data_store[name.lower()][proj.lower()]['cfg'])
+                    data_store[name.lower()][proj.lower()]['n_samples'] = len(p.samples)
+
+                    # store href
+                    data_store[name.lower()][proj.lower()]['href'] = f"/pep/{name.lower()}/{proj.lower()}"
 
     return data_store
