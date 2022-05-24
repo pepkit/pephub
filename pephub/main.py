@@ -22,7 +22,7 @@ _PEP_STORAGE_PATH = ""
 from ._version import __version__ as server_v
 from .const import LOG_FORMAT, PKG_NAME, TAGS_METADATA
 from .helpers import build_parser, read_server_configuration
-from .routers import version1, namespace, project, eido
+from .routers import version1, namespace, project, eido, pep
 from .const import STATICS_PATH, EIDO_PATH
 
 # build server
@@ -51,6 +51,7 @@ app.include_router(
 app.include_router(namespace.router)
 app.include_router(project.router)
 app.include_router(eido.router)
+app.include_router(pep.router)
 
 # mount the landing html/assets
 app.mount(
@@ -62,8 +63,6 @@ app.mount(
 # The eido validator is an SPA that can be served as a static HTML
 # file. These can only be added on the main app, not on a router
 app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
-
-#
 
 # populate config
 # read in the configration file

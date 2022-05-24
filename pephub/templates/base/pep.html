@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <h1>Available Namespaces:</h1>
+    <div class="my-2">
+        {% for namespace in namespaces %}
+            <h3>{{ namespace }}</h3>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

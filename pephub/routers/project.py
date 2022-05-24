@@ -120,4 +120,4 @@ async def convert_pep(
     # generate result
     conv_result = eido.run_filter(proj, filter, verbose=False)
 
-    return FileResponse
+    return conv_result
