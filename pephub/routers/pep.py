@@ -21,5 +21,5 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 @router.get("/view", summary="View a visual summary of the peps on the server", response_class=HTMLResponse)
 async def pep_view(request: Request):
     """Returns HTML response with a visual summary of thhe peps on the server"""
-    namespaces = [n for n in _PEP_STORES]
-    return templates.TemplateResponse("pep.html", {'namespaces': namespaces, 'request': request})
+    
+    return templates.TemplateResponse("pep.html", {'pep_stores': _PEP_STORES, 'request': request})

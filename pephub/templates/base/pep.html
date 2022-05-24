@@ -3,8 +3,16 @@
 <div>
     <h1>Available Namespaces:</h1>
     <div class="my-2">
-        {% for namespace in namespaces %}
-            <h3>{{ namespace }}</h3>
+        {% for nspace in pep_stores %}
+        <h2> 
+          <span class="mr-1">
+            <img src="/static/img/link.png" height="25px" alt="link icon"/>
+          </span>
+          {{ nspace }}
+        </h2>
+          {% for proj in pep_stores[nspace] %}
+            <p class="mx-4"> {{ proj }}</p>
+          {% endfor %}
         {% endfor %}
 
     </div>
