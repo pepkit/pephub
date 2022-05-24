@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from pephub.const import BASE_TEMPLATES_PATH
+from peppy import __version__ as peppy_version
+from platform import python_version
 
 # fetch peps
 from ..main import _PEP_STORES
@@ -24,25 +26,31 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 @router.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(namespace: str):
     """Fetch namespace. Returns a JSON representation of the namespace and the projects inside it."""
+    nspace = _PEP_STORES[namespace.lower()]
     projects = [
     {
-        'name': _PEP_STORES[namespace.lower()][p]['name'],
-        'n_samples': _PEP_STORES[namespace.lower()][p]['n_samples'],
-        'href': _PEP_STORES[namespace.lower()][p]['href']
+        'name': nspace[p]['name'],
+        'n_samples': nspace[p]['n_samples'],
+        'href': nspace[p]['href']
         # skip the 'cfg' attribute
-    }   for p in _PEP_STORES[namespace.lower()]
+    }   for p in nspace
     ]
     return JSONResponse(content=projects)
 
 @router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
 async def namespace_view(request: Request, namespace: str):
     """Returns HTML response with a visual summary of the namespace."""
+    nspace = _PEP_STORES[namespace.lower()]
     projects = [
     {
-        'name': _PEP_STORES[namespace.lower()][p]['name'],
-        'n_samples': _PEP_STORES[namespace.lower()][p]['n_samples'],
-        'href': _PEP_STORES[namespace.lower()][p]['href']
-        # skip the 'cfg' attribute
-    }   for p in _PEP_STORES[namespace.lower()]
+        'name': nspace[p]['name'],
+        'n_samples': nspace[p]['n_samples'],
+    }   for p in nspace
     ]
-    return templates.TemplateResponse("namespace.html", {'namespace': namespace, 'request': request})
+    return templates.TemplateResponse("namespace.html", {
+        'namespace': namespace, 
+        'request': request,
+        'projects': projects,
+        'peppy_version': peppy_version,
+        'python_version': python_version()
+    })
