@@ -41,12 +41,13 @@ async def get_namespace(namespace: str):
 async def namespace_view(request: Request, namespace: str):
     """Returns HTML response with a visual summary of the namespace."""
     nspace = _PEP_STORES[namespace.lower()]
-    projects = [
-    {
+    projects = sorted([{
         'name': nspace[p]['name'],
         'n_samples': nspace[p]['n_samples'],
-    }   for p in nspace
-    ]
+        }   for p in nspace],
+        # sort alphabetically
+        key=lambda proj: proj['name'].lower()
+    )
     return templates.TemplateResponse("namespace.html", {
         'namespace': namespace, 
         'request': request,
