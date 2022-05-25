@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from pephub.const import BASE_TEMPLATES_PATH
+from pephub.const import BASE_TEMPLATES_PATH, INFO_KEY
 from peppy import __version__ as peppy_version
 from platform import python_version
 
@@ -26,8 +26,8 @@ async def pep_view(request: Request):
     pep_data = sorted([{
         'namespace': n,
         'n_projects': len(_PEP_STORES[n].keys()),
-        'total_samples': sum(_PEP_STORES[n][p]['n_samples'] for p in _PEP_STORES[n])
-    } for n in _PEP_STORES],
+        'total_samples': sum(_PEP_STORES[n][p]['n_samples'] for p in _PEP_STORES[n] if p is not INFO_KEY)
+    } for n in _PEP_STORES if n is not INFO_KEY],
     key=lambda nspace: nspace['namespace'].lower()
     )
     return templates.TemplateResponse("pep.html", {

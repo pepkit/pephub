@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from pephub.const import BASE_TEMPLATES_PATH
+from pephub.const import BASE_TEMPLATES_PATH, INFO_KEY
 from peppy import __version__ as peppy_version
 from platform import python_version
 
@@ -27,15 +27,7 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 async def get_namespace(namespace: str):
     """Fetch namespace. Returns a JSON representation of the namespace and the projects inside it."""
     nspace = _PEP_STORES[namespace.lower()]
-    projects = [
-    {
-        'name': nspace[p]['name'],
-        'n_samples': nspace[p]['n_samples'],
-        'href': nspace[p]['href']
-        # skip the 'cfg' attribute
-    }   for p in nspace
-    ]
-    return JSONResponse(content=projects)
+    return JSONResponse(content=nspace)
 
 @router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
 async def namespace_view(request: Request, namespace: str):
@@ -44,7 +36,7 @@ async def namespace_view(request: Request, namespace: str):
     projects = sorted([{
         'name': nspace[p]['name'],
         'n_samples': nspace[p]['n_samples'],
-        }   for p in nspace],
+        }   for p in nspace if p is not INFO_KEY],
         # sort alphabetically
         key=lambda proj: proj['name'].lower()
     )
