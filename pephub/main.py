@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from pephub.exceptions import PepHubException
+from pepstat import PEPIndexer
 
 try:
     from pephub.db import load_data_tree
@@ -16,7 +17,7 @@ except:
 # set up global pep storage
 global _PEP_STORES  # the object in memory to read from
 global _PEP_STORAGE_PATH  # the actual file path to the peps
-_PEP_STORES = {}
+_PEP_STORES = PEPIndexer()
 _PEP_STORAGE_PATH = ""
 
 from ._version import __version__ as server_v
@@ -88,9 +89,13 @@ def main():
     # read in the configration file
     cfg = read_server_configuration(args.config)
 
-    # read in files
-    _PEP_STORAGE_PATH = cfg["data"]["path"]
-    load_data_tree(_PEP_STORAGE_PATH, _PEP_STORES)
+    # create or load index
+    if "index" in cfg["data"]:
+        _PEP_STORES.load_index(cfg["data"]["index"])
+    else:
+        if "path" not in cfg["data"]:
+            raise PepHubException(f"Path to PEPs not specified in configuration file.")
+        _PEP_STORES.index(cfg["data"]["path"])
 
     if not args.command:
         parser.print_help()
