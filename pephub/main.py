@@ -1,4 +1,5 @@
 import sys
+import os
 import logmuse
 import uvicorn
 
@@ -6,8 +7,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from pephub.exceptions import PepHubException
 from pepstat import PEPIndexer
+from pephub.exceptions import PepHubException
 
 try:
     from pephub.db import load_data_tree
@@ -69,10 +70,17 @@ app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_valida
 # read in the configration file
 cfg = read_server_configuration("config.yaml")
 
-# read in files
+# read in PEPs
 _PEP_STORAGE_PATH = cfg["data"]["path"]
-load_data_tree(_PEP_STORAGE_PATH, _PEP_STORES)
+_INDEX_FILE = cfg["data"]["index"]
 
+if _INDEX_FILE is None:
+    _PEP_STORES.index(_PEP_STORAGE_PATH, "index.yaml")
+else:
+    if not os.path.exists(_INDEX_FILE):
+        _PEP_STORES.index(_PEP_STORAGE_PATH)
+    else:
+        _PEP_STORES.load_index(_INDEX_FILE)
 
 def main():
     # set up the logger
@@ -89,13 +97,9 @@ def main():
     # read in the configration file
     cfg = read_server_configuration(args.config)
 
-    # create or load index
-    if "index" in cfg["data"]:
-        _PEP_STORES.load_index(cfg["data"]["index"])
-    else:
-        if "path" not in cfg["data"]:
-            raise PepHubException(f"Path to PEPs not specified in configuration file.")
-        _PEP_STORES.index(cfg["data"]["path"])
+    # read in files
+    _PEP_STORAGE_PATH = cfg["data"]["path"]
+    load_data_tree(_PEP_STORAGE_PATH, _PEP_STORES)
 
     if not args.command:
         parser.print_help()
