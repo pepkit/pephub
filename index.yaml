@@ -1,0 +1,717 @@
+changlab:
+  _info:
+    description: A repository containing the PEP files used for analyzing the TCGA
+      bulk ATAC-seq data
+  projects:
+    pep_1:
+      cfg: tests/data/ChangLab/PEP_1/TCGA_AllSamples_FinalBamList_config.yaml
+      n_samples: 0
+      name: pep_1
+    pep_2:
+      cfg: tests/data/ChangLab/PEP_2/TCGA_AllSamples_FinalBamList_config.yaml
+      n_samples: 796
+      name: pep_2
+demo:
+  _info:
+    description: Demonstration PEPs used in the peppy package.
+  projects:
+    amendments1:
+      cfg: tests/data/demo/amendments1/project_config.yaml
+      n_samples: 4
+      name: amendments1
+    amendments2:
+      cfg: tests/data/demo/amendments2/project_config.yaml
+      n_samples: 6
+      name: amendments2
+    append:
+      cfg: tests/data/demo/append/project_config.yaml
+      n_samples: 4
+      name: append
+    automerge:
+      cfg: tests/data/demo/automerge/project_config.yaml
+      n_samples: 3
+      name: automerge
+    basic:
+      cfg: tests/data/demo/basic/project_config.yaml
+      n_samples: 2
+      name: basic
+    biocproject:
+      cfg: tests/data/demo/BiocProject/project_config.yaml
+      n_samples: 2
+      name: biocproject
+    biocproject_exceptions:
+      cfg: tests/data/demo/BiocProject_exceptions/project_config.yaml
+      n_samples: 2
+      name: biocproject_exceptions
+    biocproject_remote:
+      cfg: tests/data/demo/BiocProject_remote/project_config.yaml
+      n_samples: 1
+      name: biocproject_remote
+    custom_index:
+      cfg: tests/data/demo/custom_index/project_config.yaml
+      n_samples: 2
+      name: custom_index
+    derive:
+      cfg: tests/data/demo/derive/project_config.yaml
+      n_samples: 4
+      name: derive
+    derive_imply:
+      cfg: tests/data/demo/derive_imply/project_config.yaml
+      n_samples: 4
+      name: derive_imply
+    duplicate:
+      cfg: tests/data/demo/duplicate/project_config.yaml
+      n_samples: 4
+      name: duplicate
+    imply:
+      cfg: tests/data/demo/imply/project_config.yaml
+      n_samples: 6
+      name: imply
+    imports:
+      cfg: tests/data/demo/imports/project_config.yaml
+      n_samples: 2
+      name: imports
+    node_alias:
+      cfg: tests/data/demo/node_alias/project_config.yaml
+      n_samples: 2
+      name: node_alias
+    noname:
+      cfg: tests/data/demo/noname/project_config.yaml
+      n_samples: 4
+      name: noname
+    piface:
+      cfg: tests/data/demo/piface/project_config.yaml
+      n_samples: 3
+      name: piface
+    remove:
+      cfg: tests/data/demo/remove/project_config.yaml
+      n_samples: 4
+      name: remove
+    subtable1:
+      cfg: tests/data/demo/subtable1/project_config.yaml
+      n_samples: 3
+      name: subtable1
+    subtable2:
+      cfg: tests/data/demo/subtable2/project_config.yaml
+      n_samples: 4
+      name: subtable2
+    subtable3:
+      cfg: tests/data/demo/subtable3/project_config.yaml
+      n_samples: 4
+      name: subtable3
+    subtable4:
+      cfg: tests/data/demo/subtable4/project_config.yaml
+      n_samples: 4
+      name: subtable4
+    subtable5:
+      cfg: tests/data/demo/subtable5/project_config.yaml
+      n_samples: 4
+      name: subtable5
+    subtables:
+      cfg: tests/data/demo/subtables/project_config.yaml
+      n_samples: 3
+      name: subtables
+geo:
+  _info:
+    description: PEPs pulled from the Gene Expression Omnibus using geofetch.
+  projects:
+    gse100494:
+      cfg: tests/data/geo/GSE100494/GSE100494_samples.yaml
+      n_samples: 2
+      name: gse100494
+    gse100750:
+      cfg: tests/data/geo/GSE100750/GSE100750_samples.yaml
+      n_samples: 18
+      name: gse100750
+    gse101426:
+      cfg: tests/data/geo/GSE101426/GSE101426_samples.yaml
+      n_samples: 8
+      name: gse101426
+    gse101512:
+      cfg: tests/data/geo/GSE101512/GSE101512_samples.yaml
+      n_samples: 12
+      name: gse101512
+    gse101516:
+      cfg: tests/data/geo/GSE101516/GSE101516_samples.yaml
+      n_samples: 18
+      name: gse101516
+    gse101966:
+      cfg: tests/data/geo/GSE101966/GSE101966_samples.yaml
+      n_samples: 40
+      name: gse101966
+    gse101974:
+      cfg: tests/data/geo/GSE101974/GSE101974_samples.yaml
+      n_samples: 16
+      name: gse101974
+    gse102803:
+      cfg: tests/data/geo/GSE102803/GSE102803_samples.yaml
+      n_samples: 6
+      name: gse102803
+    gse102804:
+      cfg: tests/data/geo/GSE102804/GSE102804_samples.yaml
+      n_samples: 15
+      name: gse102804
+    gse102805:
+      cfg: tests/data/geo/GSE102805/GSE102805_samples.yaml
+      n_samples: 3
+      name: gse102805
+    gse104545:
+      cfg: tests/data/geo/GSE104545/GSE104545_samples.yaml
+      n_samples: 36
+      name: gse104545
+    gse107017:
+      cfg: tests/data/geo/GSE107017/GSE107017_samples.yaml
+      n_samples: 4
+      name: gse107017
+    gse107176:
+      cfg: tests/data/geo/GSE107176/GSE107176_samples.yaml
+      n_samples: 53
+      name: gse107176
+    gse109398:
+      cfg: tests/data/geo/GSE109398/GSE109398_samples.yaml
+      n_samples: 43
+      name: gse109398
+    gse109411:
+      cfg: tests/data/geo/GSE109411/GSE109411_samples.yaml
+      n_samples: 12
+      name: gse109411
+    gse109785:
+      cfg: tests/data/geo/GSE109785/GSE109785_samples.yaml
+      n_samples: 3
+      name: gse109785
+    gse109890:
+      cfg: tests/data/geo/GSE109890/GSE109890_samples.yaml
+      n_samples: 4
+      name: gse109890
+    gse109891:
+      cfg: tests/data/geo/GSE109891/GSE109891_samples.yaml
+      n_samples: 8
+      name: gse109891
+    gse110630:
+      cfg: tests/data/geo/GSE110630/GSE110630_samples.yaml
+      n_samples: 1
+      name: gse110630
+    gse110631:
+      cfg: tests/data/geo/GSE110631/GSE110631_samples.yaml
+      n_samples: 2
+      name: gse110631
+    gse110632:
+      cfg: tests/data/geo/GSE110632/GSE110632_samples.yaml
+      n_samples: 9
+      name: gse110632
+    gse110633:
+      cfg: tests/data/geo/GSE110633/GSE110633_samples.yaml
+      n_samples: 60
+      name: gse110633
+    gse110634:
+      cfg: tests/data/geo/GSE110634/GSE110634_samples.yaml
+      n_samples: 6
+      name: gse110634
+    gse110635:
+      cfg: tests/data/geo/GSE110635/GSE110635_samples.yaml
+      n_samples: 9
+      name: gse110635
+    gse110636:
+      cfg: tests/data/geo/GSE110636/GSE110636_samples.yaml
+      n_samples: 25
+      name: gse110636
+    gse111013:
+      cfg: tests/data/geo/GSE111013/GSE111013_samples.yaml
+      n_samples: 176
+      name: gse111013
+    gse111015:
+      cfg: tests/data/geo/GSE111015/GSE111015_samples.yaml
+      n_samples: 176
+      name: gse111015
+    gse112852:
+      cfg: tests/data/geo/GSE112852/GSE112852_samples.yaml
+      n_samples: 47
+      name: gse112852
+    gse114397:
+      cfg: tests/data/geo/GSE114397/GSE114397_samples.yaml
+      n_samples: 2
+      name: gse114397
+    gse114964:
+      cfg: tests/data/geo/GSE114964/GSE114964_samples.yaml
+      n_samples: 24
+      name: gse114964
+    gse115617:
+      cfg: tests/data/geo/GSE115617/GSE115617_samples.yaml
+      n_samples: 2
+      name: gse115617
+    gse118092:
+      cfg: tests/data/geo/GSE118092/GSE118092_samples.yaml
+      n_samples: 6
+      name: gse118092
+    gse118204:
+      cfg: tests/data/geo/GSE118204/GSE118204_samples.yaml
+      n_samples: 32
+      name: gse118204
+    gse118207:
+      cfg: tests/data/geo/GSE118207/GSE118207_samples.yaml
+      n_samples: 74
+      name: gse118207
+    gse121351:
+      cfg: tests/data/geo/GSE121351/GSE121351_samples.yaml
+      n_samples: 36
+      name: gse121351
+    gse121755:
+      cfg: tests/data/geo/GSE121755/GSE121755_samples.yaml
+      n_samples: 14
+      name: gse121755
+    gse122236:
+      cfg: tests/data/geo/GSE122236/GSE122236_samples.yaml
+      n_samples: 6
+      name: gse122236
+    gse122237:
+      cfg: tests/data/geo/GSE122237/GSE122237_samples.yaml
+      n_samples: 18
+      name: gse122237
+    gse124224:
+      cfg: tests/data/geo/GSE124224/GSE124224_samples.yaml
+      n_samples: 20
+      name: gse124224
+    gse124228:
+      cfg: tests/data/geo/GSE124228/GSE124228_samples.yaml
+      n_samples: 46
+      name: gse124228
+    gse124229:
+      cfg: tests/data/geo/GSE124229/GSE124229_samples.yaml
+      n_samples: 80
+      name: gse124229
+    gse124409:
+      cfg: tests/data/geo/GSE124409/GSE124409_samples.yaml
+      n_samples: 6
+      name: gse124409
+    gse124864:
+      cfg: tests/data/geo/GSE124864/GSE124864_samples.yaml
+      n_samples: 64
+      name: gse124864
+    gse126918:
+      cfg: tests/data/geo/GSE126918/GSE126918_samples.yaml
+      n_samples: 79
+      name: gse126918
+    gse127241:
+      cfg: tests/data/geo/GSE127241/GSE127241_samples.yaml
+      n_samples: 15
+      name: gse127241
+    gse127511:
+      cfg: tests/data/geo/GSE127511/GSE127511_samples.yaml
+      n_samples: 8
+      name: gse127511
+    gse127514:
+      cfg: tests/data/geo/GSE127514/GSE127514_samples.yaml
+      n_samples: 15
+      name: gse127514
+    gse127957:
+      cfg: tests/data/geo/GSE127957/GSE127957_samples.yaml
+      n_samples: 64
+      name: gse127957
+    gse128100:
+      cfg: tests/data/geo/GSE128100/GSE128100_samples.yaml
+      n_samples: 8
+      name: gse128100
+    gse128271:
+      cfg: tests/data/geo/GSE128271/GSE128271_samples.yaml
+      n_samples: 10
+      name: gse128271
+    gse128272:
+      cfg: tests/data/geo/GSE128272/GSE128272_samples.yaml
+      n_samples: 20
+      name: gse128272
+    gse128444:
+      cfg: tests/data/geo/GSE128444/GSE128444_samples.yaml
+      n_samples: 10
+      name: gse128444
+    gse128744:
+      cfg: tests/data/geo/GSE128744/GSE128744_samples.yaml
+      n_samples: 12
+      name: gse128744
+    gse129802:
+      cfg: tests/data/geo/GSE129802/GSE129802_samples.yaml
+      n_samples: 6
+      name: gse129802
+    gse129805:
+      cfg: tests/data/geo/GSE129805/GSE129805_samples.yaml
+      n_samples: 24
+      name: gse129805
+    gse130140:
+      cfg: tests/data/geo/GSE130140/GSE130140_samples.yaml
+      n_samples: 74
+      name: gse130140
+    gse130205:
+      cfg: tests/data/geo/GSE130205/GSE130205_samples.yaml
+      n_samples: 2
+      name: gse130205
+    gse130408:
+      cfg: tests/data/geo/GSE130408/GSE130408_samples.yaml
+      n_samples: 249
+      name: gse130408
+    gse131026:
+      cfg: tests/data/geo/GSE131026/GSE131026_samples.yaml
+      n_samples: 16
+      name: gse131026
+    gse131257:
+      cfg: tests/data/geo/GSE131257/GSE131257_samples.yaml
+      n_samples: 19
+      name: gse131257
+    gse131604:
+      cfg: tests/data/geo/GSE131604/GSE131604_samples.yaml
+      n_samples: 32
+      name: gse131604
+    gse131687:
+      cfg: tests/data/geo/GSE131687/GSE131687_samples.yaml
+      n_samples: 27
+      name: gse131687
+    gse131915:
+      cfg: tests/data/geo/GSE131915/GSE131915_samples.yaml
+      n_samples: 8
+      name: gse131915
+    gse131956:
+      cfg: tests/data/geo/GSE131956/GSE131956_samples.yaml
+      n_samples: 20
+      name: gse131956
+    gse132046:
+      cfg: tests/data/geo/GSE132046/GSE132046_samples.yaml
+      n_samples: 4
+      name: gse132046
+    gse132209:
+      cfg: tests/data/geo/GSE132209/GSE132209_samples.yaml
+      n_samples: 1
+      name: gse132209
+    gse132424:
+      cfg: tests/data/geo/GSE132424/GSE132424_samples.yaml
+      n_samples: 20
+      name: gse132424
+    gse132430:
+      cfg: tests/data/geo/GSE132430/GSE132430_samples.yaml
+      n_samples: 40
+      name: gse132430
+    gse132434:
+      cfg: tests/data/geo/GSE132434/GSE132434_samples.yaml
+      n_samples: 2
+      name: gse132434
+    gse132749:
+      cfg: tests/data/geo/GSE132749/GSE132749_samples.yaml
+      n_samples: 19
+      name: gse132749
+    gse133327:
+      cfg: tests/data/geo/GSE133327/GSE133327_samples.yaml
+      n_samples: 11
+      name: gse133327
+    gse133785:
+      cfg: tests/data/geo/GSE133785/GSE133785_samples.yaml
+      n_samples: 6
+      name: gse133785
+    gse134654:
+      cfg: tests/data/geo/GSE134654/GSE134654_samples.yaml
+      n_samples: 36
+      name: gse134654
+    gse134655:
+      cfg: tests/data/geo/GSE134655/GSE134655_samples.yaml
+      n_samples: 36
+      name: gse134655
+    gse134656:
+      cfg: tests/data/geo/GSE134656/GSE134656_samples.yaml
+      n_samples: 54
+      name: gse134656
+    gse134657:
+      cfg: tests/data/geo/GSE134657/GSE134657_samples.yaml
+      n_samples: 138
+      name: gse134657
+    gse134744:
+      cfg: tests/data/geo/GSE134744/GSE134744_samples.yaml
+      n_samples: 44
+      name: gse134744
+    gse134745:
+      cfg: tests/data/geo/GSE134745/GSE134745_samples.yaml
+      n_samples: 126
+      name: gse134745
+    gse134864:
+      cfg: tests/data/geo/GSE134864/GSE134864_samples.yaml
+      n_samples: 25
+      name: gse134864
+    gse135025:
+      cfg: tests/data/geo/GSE135025/GSE135025_samples.yaml
+      n_samples: 2
+      name: gse135025
+    gse135026:
+      cfg: tests/data/geo/GSE135026/GSE135026_samples.yaml
+      n_samples: 14
+      name: gse135026
+    gse136016:
+      cfg: tests/data/geo/GSE136016/GSE136016_samples.yaml
+      n_samples: 53
+      name: gse136016
+    gse136796:
+      cfg: tests/data/geo/GSE136796/GSE136796_samples.yaml
+      n_samples: 20
+      name: gse136796
+    gse137397:
+      cfg: tests/data/geo/GSE137397/GSE137397_samples.yaml
+      n_samples: 9
+      name: gse137397
+    gse137579:
+      cfg: tests/data/geo/GSE137579/GSE137579_samples.yaml
+      n_samples: 85
+      name: gse137579
+    gse137647:
+      cfg: tests/data/geo/GSE137647/GSE137647_samples.yaml
+      n_samples: 5
+      name: gse137647
+    gse137775:
+      cfg: tests/data/geo/GSE137775/GSE137775_samples.yaml
+      n_samples: 20
+      name: gse137775
+    gse138315:
+      cfg: tests/data/geo/GSE138315/GSE138315_samples.yaml
+      n_samples: 55
+      name: gse138315
+    gse138460:
+      cfg: tests/data/geo/GSE138460/GSE138460_samples.yaml
+      n_samples: 40
+      name: gse138460
+    gse138571:
+      cfg: tests/data/geo/GSE138571/GSE138571_samples.yaml
+      n_samples: 10
+      name: gse138571
+    gse138656:
+      cfg: tests/data/geo/GSE138656/GSE138656_samples.yaml
+      n_samples: 2
+      name: gse138656
+    gse138657:
+      cfg: tests/data/geo/GSE138657/GSE138657_samples.yaml
+      n_samples: 14
+      name: gse138657
+    gse138698:
+      cfg: tests/data/geo/GSE138698/GSE138698_samples.yaml
+      n_samples: 71
+      name: gse138698
+    gse138794:
+      cfg: tests/data/geo/GSE138794/GSE138794_samples.yaml
+      n_samples: 28
+      name: gse138794
+    gse139099:
+      cfg: tests/data/geo/GSE139099/GSE139099_samples.yaml
+      n_samples: 36
+      name: gse139099
+    gse139190:
+      cfg: tests/data/geo/GSE139190/GSE139190_samples.yaml
+      n_samples: 28
+      name: gse139190
+    gse140251:
+      cfg: tests/data/geo/GSE140251/GSE140251_samples.yaml
+      n_samples: 4
+      name: gse140251
+    gse140505:
+      cfg: tests/data/geo/GSE140505/GSE140505_samples.yaml
+      n_samples: 8
+      name: gse140505
+    gse140940:
+      cfg: tests/data/geo/GSE140940/GSE140940_samples.yaml
+      n_samples: 32
+      name: gse140940
+    gse141060:
+      cfg: tests/data/geo/GSE141060/GSE141060_samples.yaml
+      n_samples: 6
+      name: gse141060
+    gse141350:
+      cfg: tests/data/geo/GSE141350/GSE141350_samples.yaml
+      n_samples: 16
+      name: gse141350
+    gse141351:
+      cfg: tests/data/geo/GSE141351/GSE141351_samples.yaml
+      n_samples: 16
+      name: gse141351
+    gse141354:
+      cfg: tests/data/geo/GSE141354/GSE141354_samples.yaml
+      n_samples: 20
+      name: gse141354
+    gse142031:
+      cfg: tests/data/geo/GSE142031/GSE142031_samples.yaml
+      n_samples: 8
+      name: gse142031
+    gse142604:
+      cfg: tests/data/geo/GSE142604/GSE142604_samples.yaml
+      n_samples: 32
+      name: gse142604
+    gse143145:
+      cfg: tests/data/geo/GSE143145/GSE143145_samples.yaml
+      n_samples: 22
+      name: gse143145
+    gse143256:
+      cfg: tests/data/geo/GSE143256/GSE143256_samples.yaml
+      n_samples: 19
+      name: gse143256
+    gse143563:
+      cfg: tests/data/geo/GSE143563/GSE143563_samples.yaml
+      n_samples: 6
+      name: gse143563
+    gse143684:
+      cfg: tests/data/geo/GSE143684/GSE143684_samples.yaml
+      n_samples: 12
+      name: gse143684
+    gse144580:
+      cfg: tests/data/geo/GSE144580/GSE144580_samples.yaml
+      n_samples: 9
+      name: gse144580
+    gse144833:
+      cfg: tests/data/geo/GSE144833/GSE144833_samples.yaml
+      n_samples: 6
+      name: gse144833
+    gse144840:
+      cfg: tests/data/geo/GSE144840/GSE144840_samples.yaml
+      n_samples: 48
+      name: gse144840
+    gse144844:
+      cfg: tests/data/geo/GSE144844/GSE144844_samples.yaml
+      n_samples: 77
+      name: gse144844
+    gse144925:
+      cfg: tests/data/geo/GSE144925/GSE144925_samples.yaml
+      n_samples: 2
+      name: gse144925
+    gse144926:
+      cfg: tests/data/geo/GSE144926/GSE144926_samples.yaml
+      n_samples: 2
+      name: gse144926
+    gse145182:
+      cfg: tests/data/geo/GSE145182/GSE145182_samples.yaml
+      n_samples: 6
+      name: gse145182
+    gse145245:
+      cfg: tests/data/geo/GSE145245/GSE145245_samples.yaml
+      n_samples: 21
+      name: gse145245
+    gse145409:
+      cfg: tests/data/geo/GSE145409/GSE145409_samples.yaml
+      n_samples: 2
+      name: gse145409
+    gse145663:
+      cfg: tests/data/geo/GSE145663/GSE145663_samples.yaml
+      n_samples: 8
+      name: gse145663
+    gse146537:
+      cfg: tests/data/geo/GSE146537/GSE146537_samples.yaml
+      n_samples: 6
+      name: gse146537
+    gse146539:
+      cfg: tests/data/geo/GSE146539/GSE146539_samples.yaml
+      n_samples: 24
+      name: gse146539
+    gse146583:
+      cfg: tests/data/geo/GSE146583/GSE146583_samples.yaml
+      n_samples: 42
+      name: gse146583
+    gse146617:
+      cfg: tests/data/geo/GSE146617/GSE146617_samples.yaml
+      n_samples: 15
+      name: gse146617
+    gse148278:
+      cfg: tests/data/geo/GSE148278/GSE148278_samples.yaml
+      n_samples: 26
+      name: gse148278
+    gse148695:
+      cfg: tests/data/geo/GSE148695/GSE148695_samples.yaml
+      n_samples: 17
+      name: gse148695
+    gse69143:
+      cfg: tests/data/geo/GSE69143/GSE69143_samples.yaml
+      n_samples: 12
+      name: gse69143
+    gse73874:
+      cfg: tests/data/geo/GSE73874/GSE73874_samples.yaml
+      n_samples: 3
+      name: gse73874
+    gse74180:
+      cfg: tests/data/geo/GSE74180/GSE74180_samples.yaml
+      n_samples: 29
+      name: gse74180
+    gse76224:
+      cfg: tests/data/geo/GSE76224/GSE76224_samples.yaml
+      n_samples: 12
+      name: gse76224
+    gse80152:
+      cfg: tests/data/geo/GSE80152/GSE80152_samples.yaml
+      n_samples: 5
+      name: gse80152
+    gse80154:
+      cfg: tests/data/geo/GSE80154/GSE80154_samples.yaml
+      n_samples: 87
+      name: gse80154
+    gse81274:
+      cfg: tests/data/geo/GSE81274/GSE81274_samples.yaml
+      n_samples: 138
+      name: gse81274
+    gse82330:
+      cfg: tests/data/geo/GSE82330/GSE82330_samples.yaml
+      n_samples: 2
+      name: gse82330
+    gse83345:
+      cfg: tests/data/geo/GSE83345/GSE83345_samples.yaml
+      n_samples: 16
+      name: gse83345
+    gse83968:
+      cfg: tests/data/geo/GSE83968/GSE83968_samples.yaml
+      n_samples: 39
+      name: gse83968
+    gse84515:
+      cfg: tests/data/geo/GSE84515/GSE84515_samples.yaml
+      n_samples: 4
+      name: gse84515
+    gse89668:
+      cfg: tests/data/geo/GSE89668/GSE89668_samples.yaml
+      n_samples: 14
+      name: gse89668
+    gse94272:
+      cfg: tests/data/geo/GSE94272/GSE94272_samples.yaml
+      n_samples: 13
+      name: gse94272
+    gse94278:
+      cfg: tests/data/geo/GSE94278/GSE94278_samples.yaml
+      n_samples: 56
+      name: gse94278
+    gse96088:
+      cfg: tests/data/geo/GSE96088/GSE96088_samples.yaml
+      n_samples: 11
+      name: gse96088
+    gse97003:
+      cfg: tests/data/geo/GSE97003/GSE97003_samples.yaml
+      n_samples: 11
+      name: gse97003
+    gse97008:
+      cfg: tests/data/geo/GSE97008/GSE97008_samples.yaml
+      n_samples: 2
+      name: gse97008
+    gse97014:
+      cfg: tests/data/geo/GSE97014/GSE97014_samples.yaml
+      n_samples: 2
+      name: gse97014
+    gse97410:
+      cfg: tests/data/geo/GSE97410/GSE97410_samples.yaml
+      n_samples: 9
+      name: gse97410
+    gse97680:
+      cfg: tests/data/geo/GSE97680/GSE97680_samples.yaml
+      n_samples: 17
+      name: gse97680
+    gse97889:
+      cfg: tests/data/geo/GSE97889/GSE97889_samples.yaml
+      n_samples: 14
+      name: gse97889
+    gse99311:
+      cfg: tests/data/geo/GSE99311/GSE99311_samples.yaml
+      n_samples: 96
+      name: gse99311
+    gse99378:
+      cfg: tests/data/geo/GSE99378/GSE99378_samples.yaml
+      n_samples: 4
+      name: gse99378
+    gse99542:
+      cfg: tests/data/geo/GSE99542/GSE99542_samples.yaml
+      n_samples: 2
+      name: gse99542
+    gse99544:
+      cfg: tests/data/geo/GSE99544/GSE99544_samples.yaml
+      n_samples: 28
+      name: gse99544
