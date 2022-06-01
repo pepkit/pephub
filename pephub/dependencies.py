@@ -9,7 +9,7 @@ from .route_examples import example_namespace
 
 # verify namespace
 def verify_namespace(namespace: str = example_namespace) -> None:
-    if namespace.lower() not in _PEP_STORES:
+    if _PEP_STORES.get_namespace(namespace.lower()) is None:
         raise HTTPException(
             status_code=404, detail=f"namespace '{namespace}' not found."
         )

@@ -20,20 +20,12 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
-@router.get("/", summary="View a visual summary of the peps on the server", response_class=HTMLResponse)
-async def pep_view(request: Request):
-    """Returns HTML response with a visual summary of thhe peps on the server"""
-    pep_data = _PEP_STORES.get_namespaces()
-    return JSONResponse({
-        'namespaces': pep_data
-    })
-
 @router.get("/view", summary="View a visual summary of the peps on the server", response_class=HTMLResponse)
 async def pep_view(request: Request):
     """Returns HTML response with a visual summary of thhe peps on the server"""
-    pep_data = _PEP_STORES.get_namespaces()
+    nspaces = _PEP_STORES.get_namespaces(names_only=False)
     return templates.TemplateResponse("pep.html", {
-        'pep_data': pep_data, 
+        'nspaces': nspaces, 
         'request': request,
         'peppy_version': peppy_version,
         'python_version': python_version()

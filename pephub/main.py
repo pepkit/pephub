@@ -46,10 +46,7 @@ app.add_middleware(
 )
 
 # build routes
-app.include_router(
-    version1.router,
-)
-
+app.include_router(version1.router)
 app.include_router(namespace.router)
 app.include_router(project.router)
 app.include_router(eido.router)
@@ -64,7 +61,11 @@ app.mount(
 
 # The eido validator is an SPA that can be served as a static HTML
 # file. These can only be added on the main app, not on a router
-app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
+app.mount(
+    "/eido/validator", 
+    StaticFiles(directory=EIDO_PATH), 
+    name="eido_validator"
+)
 
 # populate config
 # read in the configration file
@@ -75,11 +76,14 @@ _PEP_STORAGE_PATH = cfg["data"]["path"]
 _INDEX_FILE = cfg["data"]["index"]
 
 if _INDEX_FILE is None:
+    print("No index file found. Indexing PEPs to 'index.yaml'")
     _PEP_STORES.index(_PEP_STORAGE_PATH, "index.yaml")
 else:
     if not os.path.exists(_INDEX_FILE):
-        _PEP_STORES.index(_PEP_STORAGE_PATH)
+        print(f"Specified index file '{_INDEX_FILE}' does not exist. Creating index there.")
+        _PEP_STORES.index(_PEP_STORAGE_PATH, _INDEX_FILE)
     else:
+        print(f"Loading index file: {_INDEX_FILE}")
         _PEP_STORES.load_index(_INDEX_FILE)
 
 def main():

@@ -26,24 +26,16 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 @router.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(namespace: str):
     """Fetch namespace. Returns a JSON representation of the namespace and the projects inside it."""
-    nspace = _PEP_STORES[namespace.lower()]
+    nspace = _PEP_STORES.get_namespace(namespace.lower())
     return JSONResponse(content=nspace)
 
 @router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
 async def namespace_view(request: Request, namespace: str):
     """Returns HTML response with a visual summary of the namespace."""
-    nspace = _PEP_STORES[namespace.lower()]
-    projects = sorted([{
-        'name': nspace[p]['name'],
-        'n_samples': nspace[p]['n_samples'],
-        }   for p in nspace if p is not INFO_KEY],
-        # sort alphabetically
-        key=lambda proj: proj['name'].lower()
-    )
+    nspace = _PEP_STORES.get_namespace(namespace)
     return templates.TemplateResponse("namespace.html", {
-        'namespace': namespace, 
+        'namespace': nspace,
         'request': request,
-        'projects': projects,
         'peppy_version': peppy_version,
         'python_version': python_version()
     })

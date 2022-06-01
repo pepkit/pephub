@@ -3,24 +3,25 @@
 <div>
     <h1 class="border-bottom border-secondary">Available Namespaces:</h1>
     <div class="my-2">
-        {% for nspace in pep_data %}
+        {% for nspace in nspaces %}
         <div class="card my-2">
         <div class="card-header">
           <h2 class="m-0"> 
-            {{ nspace.namespace }}
+            {{ nspace.name }}
           </h2>
         </div>
         <div class="p-2">
           <div class="my-1">
               <span class="badge bg-primary">GET</span>
-              <code>/pep/{{ nspace.namespace }}</code>
+              <code>/pep/{{ nspace.name }}</code>
           </div>
           <div class="mb-2">
-            <p class="mb-0"><span class="fw-bold">No. of Projects:</span> {{ nspace.n_projects }}</p>
-            <p class="mb-0"><span class="fw-bold">No. of Samples:</span> {{ nspace.total_samples }}</p>
+            <p class="mb-0">{{ nspace.info.description }}</p>
+            <p class="mb-0"><span class="fw-bold">No. of Projects:</span> {{ nspace.info.n_projects }}</p>
+            <p class="mb-0"><span class="fw-bold">No. of Samples:</span> {{ nspace.info.n_samples }}</p>
           </div>
           <div>
-              <a href="/pep/{{ nspace.namespace}}/view">
+              <a href="/pep/{{ nspace.name}}/view">
                 <button class="btn btn-sm btn-primary">View Namespace</button>
               </a>
           </div>
