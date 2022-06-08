@@ -1,9 +1,7 @@
 from logging import getLogger
-import peppy
 import yaml
 import os
-from tqdm import tqdm
-from .const import INFO_KEY, PKG_NAME
+from .const import PKG_NAME
 
 _LOGGER = getLogger(PKG_NAME)
 
@@ -33,22 +31,6 @@ def _is_valid_project(path: str, name: str) -> bool:
     """
     criteria = [os.path.isdir(path), not name.startswith(".")]
     return all(criteria)
-
-def _extract_namespace_info(path_to_namespace: str) -> dict:
-    """
-    Take a given path to a namespace and attempt to extract any
-    info found. It attempts to find a .pep.yaml file and returns
-    the contents of the file as a dict.
-
-    :param str path_to_namespace - path to the namespace to look
-    :return dict - dictionary of info
-    """
-    try:
-        with open(f"{path_to_namespace}/.pep.yaml", 'r') as stream:
-            _pephub_yaml = yaml.safe_load(stream)
-        return _pephub_yaml
-    except FileNotFoundError:
-        return {}
 
 
 def _extract_project_file_name(path_to_proj: str) -> str:
@@ -95,38 +77,22 @@ def load_data_tree(path: str, data_store: dict) -> None:
     the folder structure and storing locations to
     configuration files into the dictonary
     """
-    _LOGGER.info(f"Indexing PEPs in {path}")
 
     # traverse directory
-    for name in tqdm(os.listdir(path), desc='Progress', position=0):
+    for name in os.listdir(path):
         # build a path to the namespace
         path_to_namespace = f"{path}/{name}"
-        name = name.lower()
-
         if _is_valid_namespace(path_to_namespace, name):
             # init sub-dict
-            data_store[name] = {}
-            data_store[name][INFO_KEY] = _extract_namespace_info(path_to_namespace)
+            data_store[name.lower()] = {}
 
             # traverse projects
-            for proj in tqdm(os.listdir(path_to_namespace), desc=f"{name}", position=1, leave=False):
+            for proj in os.listdir(path_to_namespace):
                 # build path to project
                 path_to_proj = f"{path_to_namespace}/{proj}"
                 if _is_valid_project(path_to_proj, proj):
-                    # populate project data
-                    # store path to config
-                    data_store[name][
+                    data_store[name.lower()][
                         proj.lower()
-                    ] = {
-                        'name': proj,
-                        'cfg': f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
-                    }
-
-                    # store number of samples in project by loading project into memory
-                    p = peppy.Project(data_store[name][proj.lower()]['cfg'])
-                    data_store[name][proj.lower()]['n_samples'] = len(p.samples)
-
-                    # store href
-                    data_store[name][proj.lower()]['href'] = f"/pep/{name}/{proj.lower()}"
+                    ] = f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
 
     return data_store

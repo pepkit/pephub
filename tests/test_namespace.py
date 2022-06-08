@@ -16,6 +16,7 @@ def test_base():
     # verify amount of projects inside demo
     assert len(res.json()) == 26
 
+
 # attempt to fetch a namespace that does not exist
 def test_namespace_dne():
     DNE_NAME = "alpine-porcupine"
