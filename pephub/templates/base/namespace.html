@@ -14,9 +14,9 @@
                 <code>/pep/{{ namespace.name }}/{{ proj.name }}</code>
             </div>
             <div>
-                <p><span class="fw-bold">No. of Samples:</span> {{ proj.n_samples }}</p>
+                <p><span class="fw-bold">No. of Samples:</span> {{ namespace.projects[proj].n_samples }}</p>
             </div>
-            <a href="/pep/{{ namespace }}/{{ proj.name }}/view">
+            <a href="/pep/{{ namespace.name }}/{{ namespace.projects[proj].name }}/view">
               <button class="btn btn-sm btn-primary">View Project</button>
             </a>
         </div>

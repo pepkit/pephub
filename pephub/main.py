@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from pepstat import PEPIndexer
+from .pepstat import PEPIndexer
 from pephub.exceptions import PepHubException
 
 try:
@@ -100,10 +100,6 @@ def main():
     # populate config
     # read in the configration file
     cfg = read_server_configuration(args.config)
-
-    # read in files
-    _PEP_STORAGE_PATH = cfg["data"]["path"]
-    load_data_tree(_PEP_STORAGE_PATH, _PEP_STORES)
 
     if not args.command:
         parser.print_help()
