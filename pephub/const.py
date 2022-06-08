@@ -35,5 +35,3 @@ TAGS_METADATA = [
         "description": "Manage and obtain information about a particular project or PEP.",
     },
 ]
-
-INFO_KEY = ".info"

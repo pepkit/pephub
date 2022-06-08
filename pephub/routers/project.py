@@ -1,12 +1,7 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
-from starlette.responses import JSONResponse, HTMLResponse
+from starlette.responses import JSONResponse
 from typing import Optional
-from fastapi.templating import Jinja2Templates
-
-from pephub.const import BASE_TEMPLATES_PATH, INFO_KEY
-from peppy import __version__ as peppy_version
-from platform import python_version
 
 import eido
 import peppy
@@ -24,7 +19,6 @@ router = APIRouter(
     tags=["project"],
 )
 
-templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
 @router.get(
     "/",
@@ -51,7 +45,7 @@ async def get_pep(
 # fetch configuration file
 @router.get("/config")
 async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
-    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()]['cfg'])
+    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()])
 
 
 # fetch samples for project
@@ -126,21 +120,4 @@ async def convert_pep(
     # generate result
     conv_result = eido.run_filter(proj, filter, verbose=False)
 
-    return conv_result
-
-@router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
-async def project_view(request: Request, namespace: str, pep_id: str):
-    """Returns HTML response with a visual summary of the namespace."""
-    proj = _PEP_STORES.get_project(namespace, pep_id)
-    peppy_obj = peppy.Project(proj['cfg'])
-    samples = [s.to_dict() for s in peppy_obj.samples]
-    return templates.TemplateResponse("project.html", {
-        'project': proj,
-        'pep_version': peppy_obj.pep_version,
-        'sample_table_columns': peppy_obj.sample_table.columns.to_list(),
-        'samples': samples,
-        'n_samples': len(samples),
-        'request': request,
-        'peppy_version': peppy_version,
-        'python_version': python_version()
-    })
+    return JSONResponse({"result": conv_result})
