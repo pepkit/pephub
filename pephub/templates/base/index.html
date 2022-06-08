@@ -4,44 +4,47 @@
     <h1>PEPhub API Demo</h1>
     <p id="welcome" class="text-justify">
     Welcome to the PEPhub API. This server provides consumable sample tables through the <a href="https://github.com/pepkit/pephub">the PEPhub API for PEP sample metadata sharing</a>.</p>
-
-    <h2>Sample metadata endpoints</h2>
-
-    <p>PEPhub uses <code>{namespace}/{projectid}</code> registry paths, similar to a Dockerhub or GitHub repository. The <code>demo</code> namespace provides several example PEPs so you can see the API in action. View the <a href="/docs">Swagger API docs</a> or try these examples:</p>
     
+    <a href="/pep/view">
+      <button class="btn btn-primary mb-2">View PEPs in this server</button>
+    </a>
+    <div class="border-bottom border-secondary my-1"></div>
+    <h2>Sample metadata endpoints</h2>
+    <p>PEPhub uses <code>{namespace}/{projectid}</code> registry paths, similar to a Dockerhub or GitHub repository. The <code>demo</code> namespace provides several example PEPs so you can see the API in action. View the <a href="/docs">Swagger API docs</a> or try these examples:</p>
+    <div class="border-bottom border-secondary my-1"></div>
     <h3>View info about a namespace:</h3>
     <span class="d-flex flex-row align-items-center my-2">
-      <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
-      <a href="/pep/demo" class="fs-4"><code>/pep/demo</code></a>
+      <span class="badge bg-primary mr-2">GET</span>
+      <a href="/pep/demo" class="fs-4 mx-2"><code>/pep/demo</code></a>
     </span>
     <p>
       Get a list of all the PEPs in a particular namespace (<code>demo</code> in this case). A path to the configuration file is also given.
     </p>
     <h3>View a project's configuration file:</h3>
     <span class="d-flex flex-row align-items-center my-2">
-      <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
-      <a href="/pep/demo/BiocProject" class="fs-4"><code>/pep/demo/BiocProject</code></a>
+      <span class="badge bg-primary mr-2">GET</span>
+      <a href="/pep/demo/BiocProject" class="fs-4 mx-2"><code>/pep/demo/BiocProject</code></a>
     </span>
     <p>
       Retrieves a JSON representation of a particular PEP's configuration file for a given project and namespace (<code>demo</code> and <code>BiocProject</code> in this case.)
     </p>
     <h3>View samples inside a project:</h3>
     <span class="d-flex flex-row align-items-center my-2">
-      <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
-      <a href="/pep/demo/BiocProject/samples" class="fs-4"><code>/pep/demo/BiocProject/samples</code></a>
+      <span class="badge bg-primary mr-2">GET</span>
+      <a href="/pep/demo/BiocProject/samples" class="fs-4 mx-2"><code>/pep/demo/BiocProject/samples</code></a>
     </span>
     <p>
       Retrieves a list of all samples in the PEP.
     </p>
     <h3>Retrieve a specific sample inside a PEP:</h3>
     <span class="d-flex flex-row align-items-center my-2">
-      <div class="fs-5 p-1 rounded bg-primary text-light me-2">GET</div>
-      <a href="/pep/demo/BiocProject/samples/vistaEnhancers" class="fs-4"><code>/pep/demo/BiocProject/samples/vistaEnhancers</code></a>
+      <span class="badge bg-primary mr-2">GET</span>
+      <a href="/pep/demo/BiocProject/samples/vistaEnhancers" class="fs-4 mx-2"><code>/pep/demo/BiocProject/samples/vistaEnhancers</code></a>
     </span>
     <p>
       Fetches the specific sample (<code>vistaEnhancers</code>) in a projects sample list.
     </p>
-
+    <div class="border-bottom border-secondary my-1"></div>
     <h2>Validation endpoints</h2>
 
     In addition to serving metadata, PEPhub also provides a validation service. You can provide  `<namespace>/<projectid>` and identify relevant schemas that this metadata satisfies. You can also `POST` your own PEP to the service to validate it. You can learn more about this at the <a href="/eido/validator/index.html">/eido/validator/index.html</a> and in the API docs.

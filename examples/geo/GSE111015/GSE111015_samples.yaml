@@ -1,0 +1,12 @@
+pep_version: 2.1.0
+project_name: GSE111015
+sample_table: GSE111015_samples.csv
+
+sample_modifiers:
+  append:
+    output_file_path: FILES
+  derive:
+    attributes: [output_file_path]
+    sources:
+      FILES: /{GSE}/{file}
+
