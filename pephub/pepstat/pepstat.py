@@ -223,12 +223,14 @@ class PEPIndexer(PathExAttMap):
 
         :param str namespace - namespace to get projects for (Optional.)
         """
+        # get one specific
         if namespace is not None:
             if namespace not in self[INDEX_STORE_KEY]:
                 raise NamespaceNotFoundError(
                     f"Namespace '{namespace}' not found in index."
                 )
             return self[INDEX_STORE_KEY][namespace][PROJECTS_KEY]
+        # get all
         else:
             return list(
                 chain(

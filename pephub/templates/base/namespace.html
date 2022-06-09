@@ -4,6 +4,7 @@
     <h1>Available Projects:</h1>
     <div class="my-1 border-bottom border-secondary"></div>
     {% for proj in namespace.projects %}
+      {% set proj =  namespace.projects[proj] %}
       <div class="card my-2">
         <div class="card-header">
             <h4 class="m-0">{{ proj.name }}</h2>
@@ -14,9 +15,9 @@
                 <code>/pep/{{ namespace.name }}/{{ proj.name }}</code>
             </div>
             <div>
-                <p><span class="fw-bold">No. of Samples:</span> {{ namespace.projects[proj].n_samples }}</p>
+                <p><span class="fw-bold">No. of Samples:</span> {{ proj._info.n_samples }}</p>
             </div>
-            <a href="/pep/{{ namespace.name }}/{{ namespace.projects[proj].name }}/view">
+            <a href="/pep/{{ namespace.name }}/{{ proj.name }}/view">
               <button class="btn btn-sm btn-primary">View Project</button>
             </a>
         </div>
