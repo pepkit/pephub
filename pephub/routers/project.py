@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request
+import json
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse, HTMLResponse
 from typing import Optional
@@ -7,6 +8,8 @@ from fastapi.templating import Jinja2Templates
 from pephub.const import BASE_TEMPLATES_PATH, INFO_KEY
 from peppy import __version__ as peppy_version
 from platform import python_version
+
+from pephub.helpers import zip_conv_result
 from .._version import __version__ as pephub_version
 
 import eido
@@ -127,7 +130,7 @@ async def convert_pep(
     # generate result
     conv_result = eido.run_filter(proj, filter, verbose=False)
 
-    return conv_result
+    return zip_conv_result(conv_result)
 
 @router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
 async def project_view(request: Request, namespace: str, pep_id: str, peppy_obj: peppy.Project = Depends(validate_pep)):

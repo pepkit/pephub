@@ -26,20 +26,20 @@
       </p>
       <p>
         <span class="badge bg-primary">GET</span>
-        <span class="fw-bold">Convert Project:</span>
+        <span class="fw-bold">Convert Project To CSV:</span>
         <a href="/pep/{{ project.namespace }}/{{ project.name }}/convert"><code>/pep/{{ project.namespace }}/{{ project.name }}/convert</code></a>
       </p>
       <p>
         <span class="badge bg-primary">GET</span>
-        <span class="fw-bold">Available filters:</span>
-        <a href="/eido/filters"><code>/eido/filters</code></a>
+        <span class="fw-bold">Convert Project To YAML...:</span>
+        <a href="/pep/{{ project.namespace }}/{{ project.name }}/convert"><code>/pep/{{ project.namespace }}/{{ project.name }}/convert</code></a>
       </p>
     <div class="border-bottom border-secondary my-2"></div>
     <div class="my-2">
         </div>
         <h3>PEP Version: {{ pep_version }} </h3>
         <h3>Sample Table:</h3>
-        <table class="table table-sm table-striped">
+        <table class="table table-sm table-striped" id="project-table">
             <thead>
                 {% for col in sample_table_columns %}
                     <th>{{ col }}</th>
@@ -60,4 +60,10 @@
         </div>
     </div>
 </div>
+  <!-- DataTabes-->
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+  <!--assign to table -->
+  <script>
+        const table = new simpleDatatables.DataTable("#project-table")
+  </script>
 {% endblock %}

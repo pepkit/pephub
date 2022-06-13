@@ -5,7 +5,7 @@
     <p>This namespace has {{namespace.projects|length}} total projects. You can view the information about all namespaces using the API endpoint or by navigating the table below:</p>
     <p><code class="fs-4"><a href="/pep/{{namespace.name}}/"><span class="badge bg-primary">GET</span> /pep/{{namespace.name}}/</a></code></p>
     <div class="my-1 border-bottom border-secondary"></div>
-    <table class="table table-sm table-striped">
+    <table class="table table-sm table-striped" id="namespace-table">
       <thead>
         <tr>
           <th>Project</th>
@@ -27,4 +27,10 @@
       </tbody>
     </table>
 </div>
+  <!-- DataTabes-->
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+  <!--assign to table -->
+  <script>
+        const table = new simpleDatatables.DataTable("#namespace-table")
+  </script>
 {% endblock %}
