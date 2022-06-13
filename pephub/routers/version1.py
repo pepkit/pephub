@@ -44,5 +44,8 @@ async def main(request: Request):
 async def pep_list():
     namespaces = _PEP_STORES.get_namespaces()
     return [
-        namespaces
+        dict(
+            **n, 
+            projects=_PEP_STORES.get_projects(n['name'])) 
+            for n in namespaces
     ]
