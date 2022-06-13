@@ -43,4 +43,4 @@ async def main(request: Request):
 
 @router.get("/pep-list")
 async def pep_list():
-    return _PEP_STORES
+    return _PEP_STORES.get_namespaces()
