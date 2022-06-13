@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from pephub.const import BASE_TEMPLATES_PATH, INFO_KEY
 from peppy import __version__ as peppy_version
 from platform import python_version
+from .._version import __version__ as pephub_version
 
 # fetch peps
 from ..main import _PEP_STORES
@@ -37,5 +38,6 @@ async def namespace_view(request: Request, namespace: str):
         'namespace': nspace,
         'request': request,
         'peppy_version': peppy_version,
-        'python_version': python_version()
+        'python_version': python_version(),
+        'pephub_version': pephub_version
     })

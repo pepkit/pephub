@@ -4,7 +4,7 @@ from platform import python_version
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 
-from .._version import __version__
+from .._version import __version__ as pephub_version
 from ..const import BASE_TEMPLATES_PATH
 from ..main import _PEP_STORES
 
@@ -21,7 +21,7 @@ router = APIRouter(
 )
 
 ALL_VERSIONS = {
-    "pephub_version": __version__,
+    "pephub_version": pephub_version,
     "peppy_version": peppy.__version__,
     "python_version": python_version(),
 }
@@ -36,7 +36,7 @@ async def main(request: Request):
         dict(
             templ_vars, 
             **ALL_VERSIONS,
-            namespaces=namespaces
+            namespaces=namespaces,
         )
     )
 

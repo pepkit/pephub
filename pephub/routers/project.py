@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from pephub.const import BASE_TEMPLATES_PATH, INFO_KEY
 from peppy import __version__ as peppy_version
 from platform import python_version
+from .._version import __version__ as pephub_version
 
 import eido
 import peppy
@@ -141,5 +142,6 @@ async def project_view(request: Request, namespace: str, pep_id: str, peppy_obj:
         'n_samples': len(samples),
         'request': request,
         'peppy_version': peppy_version,
-        'python_version': python_version()
+        'python_version': python_version(),
+        'pephub_version': pephub_version
     })
