@@ -129,10 +129,9 @@ async def convert_pep(
     return conv_result
 
 @router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
-async def project_view(request: Request, namespace: str, pep_id: str):
+async def project_view(request: Request, namespace: str, pep_id: str, peppy_obj: peppy.Project = Depends(validate_pep)):
     """Returns HTML response with a visual summary of the namespace."""
     proj = _PEP_STORES.get_project(namespace, pep_id)
-    peppy_obj = peppy.Project(proj['cfg'])
     samples = [s.to_dict() for s in peppy_obj.samples]
     return templates.TemplateResponse("project.html", {
         'project': proj,
