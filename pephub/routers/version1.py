@@ -40,7 +40,9 @@ async def main(request: Request):
         )
     )
 
-
 @router.get("/pep-list")
 async def pep_list():
-    return _PEP_STORES.get_namespaces()
+    namespaces = _PEP_STORES.get_namespaces()
+    return [
+        namespaces
+    ]
