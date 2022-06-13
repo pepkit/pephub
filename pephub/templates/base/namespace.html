@@ -1,27 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
 <div>
-    <h1>Available Projects:</h1>
+    <h1>Available projects in {{namespace.name}}:</h1>
+    <p>This namespace has {{namespace.projects|length}} total projects. You can view the information about all namespaces using the API endpoint or by navigating the table below:</p>
+    <p><code class="fs-4"><a href="/pep/{{namespace.name}}/"><span class="badge bg-primary">GET</span> /pep/{{namespace.name}}/</a></code></p>
     <div class="my-1 border-bottom border-secondary"></div>
-    {% for proj in namespace.projects %}
-      {% set proj =  namespace.projects[proj] %}
-      <div class="card my-2">
-        <div class="card-header">
-            <h4 class="m-0">{{ proj.name }}</h2>
-        </div>
-        <div class="p-2">
-            <div class="my-1">
-                <span class="badge bg-primary">GET</span>
-                <code>/pep/{{ namespace.name }}/{{ proj.name }}</code>
-            </div>
-            <div>
-                <p><span class="fw-bold">No. of Samples:</span> {{ proj._info.n_samples }}</p>
-            </div>
-            <a href="/pep/{{ namespace.name }}/{{ proj.name }}/view">
-              <button class="btn btn-sm btn-primary">View Project</button>
-            </a>
-        </div>
-      </div>
-    {% endfor %}
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>No. of Samples</th>
+          <th>API Endpoint</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for proj in namespace.projects %}
+        {% set project = namespace.projects[proj] %}
+        <tr>
+          <td><a href="/pep/{{namespace.name}}/{{project.name}}/view">{{project.name}}</a></td>
+          <td>{{project._info.n_samples}}</td>
+          <td>
+            <code><a href="/pep/{{namespace.name}}/{{project.name}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.name}}/{{project.name}}</a></code>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 </div>
 {% endblock %}
