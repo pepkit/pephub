@@ -103,12 +103,12 @@ def zip_conv_result(conv_result: dict):
     mf = io.BytesIO()
 
     with zipfile.ZipFile(mf, mode="w",compression=zipfile.ZIP_DEFLATED) as zf:
-        for name, res in enumerate(conv_result):
+        for name, res in conv_result.items():
             # Add file, at correct path
             zf.writestr(name, str.encode(res))
 
     # Grab ZIP file from in-memory, make response with correct MIME-type
-    resp = Response(zf.getvalue(), media_type="application/x-zip-compressed", headers={
+    resp = Response(mf.getvalue(), media_type="application/x-zip-compressed", headers={
         'Content-Disposition': f'attachment;filename={zip_filename}'
     })
 

@@ -24,37 +24,35 @@
         <span class="fw-bold">Subsamples:</span>
         <a href="/pep/{{ project.namespace }}/{{ project.name }}/subsamples"><code>/pep/{{ project.namespace }}/{{ project.name }}/subsamples</code></a>
       </p>
+      {% for f in filters %}
       <p>
         <span class="badge bg-primary">GET</span>
-        <span class="fw-bold">Convert Project To CSV:</span>
-        <a href="/pep/{{ project.namespace }}/{{ project.name }}/convert"><code>/pep/{{ project.namespace }}/{{ project.name }}/convert</code></a>
+        <span class="fw-bold">Convert project to {{f}}</span>
+        <a href="/pep/{{ project.namespace }}/{{ project.name }}/convert?filter={{f}}"><code>/pep/{{ project.namespace }}/{{ project.name }}/convert?filter={{f}}</code></a>
       </p>
-      <p>
-        <span class="badge bg-primary">GET</span>
-        <span class="fw-bold">Convert Project To YAML...:</span>
-        <a href="/pep/{{ project.namespace }}/{{ project.name }}/convert"><code>/pep/{{ project.namespace }}/{{ project.name }}/convert</code></a>
-      </p>
+      {% endfor %}
     <div class="border-bottom border-secondary my-2"></div>
     <div class="my-2">
-        </div>
+            <table class="table table-sm table-striped text-truncate" id="project-table">
+                <thead>
+                    {% for col in sample_table_columns %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
+                </thead>
+                <tbody class="small">
+                    {% for s in samples %}
+                        <tr>
+                            {% for col in sample_table_columns %}
+                                <td>{{s[col]}}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+      </div>
+      
         <h3>PEP Version: {{ pep_version }} </h3>
         <h3>Sample Table:</h3>
-        <table class="table table-sm table-striped" id="project-table">
-            <thead>
-                {% for col in sample_table_columns %}
-                    <th>{{ col }}</th>
-                {% endfor %}
-            </thead>
-            <tbody class="small">
-                {% for s in samples %}
-                    <tr>
-                        {% for col in sample_table_columns %}
-                            <td>{{s[col]}}</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
         <div>
             <span class="fw-bold">Total Samples:</span> {{ n_samples }}
         </div>
@@ -64,6 +62,6 @@
   <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
   <!--assign to table -->
   <script>
-        const table = new simpleDatatables.DataTable("#project-table")
+    const table = new simpleDatatables.DataTable("#project-table")
   </script>
 {% endblock %}

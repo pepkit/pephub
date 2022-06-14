@@ -146,5 +146,6 @@ async def project_view(request: Request, namespace: str, pep_id: str, peppy_obj:
         'request': request,
         'peppy_version': peppy_version,
         'python_version': python_version(),
-        'pephub_version': pephub_version
+        'pephub_version': pephub_version,
+        'filters': eido.get_available_pep_filters()
     })
