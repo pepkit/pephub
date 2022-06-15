@@ -161,10 +161,7 @@ async def convert_pep(
         )
     
     if format == "plain":
-        if len(conv_result.keys()) == 1:
-            return_str = conv_result[list(conv_result.keys())[0]]
-        else:
-            return_str = "\n".join([conv_result[k] for k in conv_result])
+        return_str = "\n".join([conv_result[k] for k in conv_result])
         resp_obj = PlainTextResponse(return_str)
     else:
         resp_obj = zip_conv_result(conv_result) # returns zip file in Response() object
@@ -179,7 +176,7 @@ async def project_view(request: Request, namespace: str, pep_id: str, peppy_obj:
     try:
         pep_version = peppy_obj.pep_version
     except Exception: 
-        pep_version = "Unknown version"
+        pep_version = "2.1.0"
     return templates.TemplateResponse("project.html", {
         'project': proj,
         'project_dict': peppy_obj.to_dict(),

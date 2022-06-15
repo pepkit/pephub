@@ -34,9 +34,11 @@ async def get_namespace(namespace: str):
 async def namespace_view(request: Request, namespace: str):
     """Returns HTML response with a visual summary of the namespace."""
     nspace = _PEP_STORES.get_namespace(namespace)
+    tot_samples = sum([nspace['projects'][p]['_info']['n_samples'] for p in nspace['projects'] ])
     return templates.TemplateResponse("namespace.html", {
         'namespace': nspace,
         'request': request,
+        'tot_samples': tot_samples,
         'peppy_version': peppy_version,
         'python_version': python_version(),
         'pephub_version': pephub_version

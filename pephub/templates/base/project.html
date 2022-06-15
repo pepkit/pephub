@@ -2,8 +2,12 @@
 {% block content %}
 <div>
     <h1>{{ project.namespace }}/{{ project.name }}</h1>
-    <h5>PEP Version: {{ pep_version }} </h5>
-    <h5>Total Samples: {{ n_samples }}</h5>
+    <p class="mb-0">
+      <span class="fw-bold">PEP Version:</span> {{ pep_version }} 
+    </p>
+    <p class="mb-0">
+      <span class="fw-bold">Total Samples:</span> {{ n_samples }}
+    </p>
     {% if project.info['description'] %}
         {{ project.info['description'] }}
     {% endif %}
