@@ -13,34 +13,39 @@
     {% endif %}
     <div class="border-bottom border-secondary my-2"></div>
     <h3>API Endpoints:</h3>
-      <p>
+      <p class="mb-2">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Project:</span>
         <a href="/pep/{{ project.namespace }}/{{ project.name }}"><code>/pep/{{ project.namespace }}/{{ project.name }}</code></a>
      </p>
-     <p>
+     <p class="mb-2">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Samples:</span>
         <a href="/pep/{{ project.namespace }}/{{ project.name }}/samples"><code>/pep/{{ project.namespace }}/{{ project.name }}/samples</code></a>
       </p>
-      <p>
+      <p class="mb-2 sample-endpoint">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Specific Sample:</span>
-        <a href="/pep/{{ project.namespace }}/{{ project.name }}/samples/{sample_name}"><code>/pep/{{ project.namespace }}/{{ project.name }}/samples/{sample_name}</code></a>
+        <code>
+          <a class="m-0" href="/pep/{{ project.namespace }}/{{ project.name }}/samples/{{samples[0]['sample_name']}}" id="sample-name-link">/pep/{{ project.namespace }}/{{ project.name }}/samples/</a><select class="text-primary" name="Sample name" id="sample-name" onchange="toggleSampleName(this)">
+            {% for s in samples %}
+              <option>{{s['sample_name']}}</option>
+            {% endfor %}
+          </select>
+        </code>
       </p>
-      <p>
+      <p class="mb-2">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Subsamples:</span>
         <a href="/pep/{{ project.namespace }}/{{ project.name }}/subsamples"><code>/pep/{{ project.namespace }}/{{ project.name }}/subsamples</code></a>
       </p>
       {% for f in filters %}
-      <p>
+      <p class="mb-2">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Convert project to {{f}}</span>
         <a href="/pep/{{ project.namespace }}/{{ project.name }}/convert?filter={{f}}"><code>/pep/{{ project.namespace }}/{{ project.name }}/convert?filter={{f}}</code></a>
       </p>
       {% endfor %}
-    <div class="border-bottom border-secondary my-2"></div>
     <!-- <div>
         <pre id="project-config"></pre>
     </div> -->
@@ -78,6 +83,12 @@
   <!--assign to table -->
   <script>
     const table = new simpleDatatables.DataTable("#project-table")
+  </script>
+  <script type="text/javascript">
+    function toggleSampleName(sel) {
+      const link = document.getElementById("sample-name-link")
+      link.href=`/pep/{{ project.namespace }}/{{ project.name }}/samples/${sel.value}`
+    }
   </script>
   <!-- <script type="text/javascript">
     const data = JSON.parse('{{ project_dict|tojson }}')
