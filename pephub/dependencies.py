@@ -31,7 +31,7 @@ def validate_pep(namespace: str, pep_id: str):
     namespace = namespace.lower()
     pep_id = pep_id.lower()
     proj = _PEP_STORES.get_project(namespace, pep_id)
-    config_path = proj['cfg']
+    config_path = proj['cfg_path']
     if not os.path.exists(config_path):
         raise HTTPException(
             status_code=404,

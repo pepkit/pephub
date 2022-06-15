@@ -7,7 +7,7 @@
     <p class="mb-0"><span class="fw-bold">Total samples:</span> {{tot_samples}}</p>
     <div class="border-bottom border-secondary my-2"></div>
     <h3>API Endpoints:</h3>
-    <p>
+    <p class="mb-2">
       <span class="badge bg-primary">GET</span>
       <span class="fw-bold">Namespace:</span>
       <code>
@@ -15,6 +15,15 @@
           /pep/{{namespace.name}}/
         </a>
       </code>
+   </p>
+   <p class="mb-2">
+    <span class="badge bg-primary">GET</span>
+    <span class="fw-bold">Namespace:</span>
+    <code>
+      <a href="/pep/{{namespace.name}}/projects">
+        /pep/{{namespace.name}}/projects
+      </a>
+    </code>
    </p>
     <div class="border-bottom border-secondary my-2"></div>
     <table class="table table-sm table-striped" id="namespace-table">
@@ -30,7 +39,7 @@
         {% set project = namespace.projects[proj] %}
         <tr>
           <td><a href="/pep/{{namespace.name}}/{{project.name}}/view">{{project.name}}</a></td>
-          <td>{{project._info.n_samples}}</td>
+          <td>{{project.info.n_samples}}</td>
           <td>
             <code><a href="/pep/{{namespace.name}}/{{project.name}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.name}}/{{project.name}}</a></code>
           </td>

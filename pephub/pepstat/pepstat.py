@@ -145,14 +145,16 @@ class PEPIndexer(PathExAttMap):
                         # init project
                         self[INDEX_STORE_KEY][name][PROJECTS_KEY][proj] = {
                             "name": proj,
-                            "cfg": f"{path_to_proj}/{self._extract_project_file_name(path_to_proj)}",
+                            "cfg_path": f"{path_to_proj}/{self._extract_project_file_name(path_to_proj)}",
                         }
                         self[INDEX_STORE_KEY][name][PROJECTS_KEY][proj][INFO_KEY] = {}
 
                         # store number of samples in project by loading project into memory
-                        p = peppy.Project(self[INDEX_STORE_KEY][name][PROJECTS_KEY][proj]["cfg"])
+                        p = peppy.Project(self[INDEX_STORE_KEY][name][PROJECTS_KEY][proj]["cfg_path"])
 
                         self[INDEX_STORE_KEY][name][PROJECTS_KEY][proj][INFO_KEY][N_SAMPLES_KEY] = len(p.samples)
+                        self[INDEX_STORE_KEY][name][PROJECTS_KEY][proj]["config"] = p.to_dict()
+
                 
                 self[INDEX_STORE_KEY][name][INFO_KEY][N_PROJECTS_KEY] = len(
                     self[INDEX_STORE_KEY][name][PROJECTS_KEY]
@@ -167,7 +169,7 @@ class PEPIndexer(PathExAttMap):
 
         return self[INDEX_STORE_KEY]
     
-    def get_namespace(self, namespace: str) -> dict:
+    def get_namespace(self, namespace: str, ignore_projects: bool = False) -> dict:
         """
         Get a particular namespace's info/meta-data
 
@@ -176,11 +178,14 @@ class PEPIndexer(PathExAttMap):
         if namespace not in self[INDEX_STORE_KEY]:
             return None
         else:
-            return {
+            d = {
                 'name': namespace,
+                'info': self[INDEX_STORE_KEY][namespace][INFO_KEY],
                 'projects': self.get_projects(namespace),
-                'info': self[INDEX_STORE_KEY][namespace][INFO_KEY]
             }
+            if ignore_projects:
+                del d['projects']
+            return d
     
     def get_namespaces(self, names_only=False) -> List[Union[str, dict]]:
         """
@@ -211,7 +216,7 @@ class PEPIndexer(PathExAttMap):
             return {
                 'name': project,
                 'namespace': namespace,
-                'cfg': self[INDEX_STORE_KEY][namespace][PROJECTS_KEY][project]['cfg'],
+                'cfg_path': self[INDEX_STORE_KEY][namespace][PROJECTS_KEY][project]['cfg_path'],
                 'project': self[INDEX_STORE_KEY][namespace][PROJECTS_KEY][project],
                 'info': self[INDEX_STORE_KEY][namespace][PROJECTS_KEY][project][INFO_KEY]
             }
@@ -253,4 +258,4 @@ class PEPIndexer(PathExAttMap):
         :param str path - path to the file.
         """
         with open(path, "r") as fh:
-            self[INDEX_STORE_KEY] = yaml.safe_load(fh)
+            self[INDEX_STORE_KEY] = yaml.load(fh, Loader=yaml.CSafeLoader)

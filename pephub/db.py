@@ -119,11 +119,11 @@ def load_data_tree(path: str, data_store: dict) -> None:
                         proj.lower()
                     ] = {
                         'name': proj,
-                        'cfg': f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
+                        'cfg_path': f"{path_to_proj}/{_extract_project_file_name(path_to_proj)}"
                     }
 
                     # store number of samples in project by loading project into memory
-                    p = peppy.Project(data_store[name][proj.lower()]['cfg'])
+                    p = peppy.Project(data_store[name][proj.lower()]['cfg_path'])
                     data_store[name][proj.lower()]['n_samples'] = len(p.samples)
 
                     # store href

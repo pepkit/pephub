@@ -36,4 +36,4 @@ TAGS_METADATA = [
     },
 ]
 
-INFO_KEY = ".info"
+INFO_KEY = "info"

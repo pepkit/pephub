@@ -56,7 +56,7 @@ async def get_pep(
 # fetch configuration file
 @router.get("/config")
 async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
-    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()]['cfg'])
+    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()]['cfg_path'])
 
 
 # fetch samples for project
