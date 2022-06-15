@@ -157,7 +157,7 @@ async def convert_pep(
     # generate result
     conv_result = eido.run_filter(proj, filter, verbose=False)
 
-    format_list = ["plain", "zip"]
+    format_list = ["plain", "zip", "json"]
     if format not in format_list:
         raise HTTPException(
             400, f"Unknown format '{format}'. Availble formats: {format_list}"
@@ -166,6 +166,8 @@ async def convert_pep(
     if format == "plain":
         return_str = "\n".join([conv_result[k] for k in conv_result])
         resp_obj = PlainTextResponse(return_str)
+    elif format == "json":
+        resp_obj = JSONResponse(conv_result)
     else:
         resp_obj = zip_conv_result(conv_result) # returns zip file in Response() object
 

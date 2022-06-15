@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div>
+    <a href="/pep/{{project.namespace}}/view">← back to {{ project.namespace }}</a>
     <h1>{{ project.namespace }}/{{ project.name }}</h1>
     <p class="mb-0">
       <span class="fw-bold">PEP Version:</span> {{ pep_version }} 
