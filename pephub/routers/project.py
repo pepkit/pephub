@@ -104,7 +104,10 @@ async def get_sample_view(
         'attrs': attrs,
         'request': request,
         'namespace': namespace,
-        'project_name': pep_id
+        'project_name': pep_id,
+        'peppy_version': peppy_version,
+        'python_version': python_version(),
+        'pephub_version': pephub_version,
     })
 
 
