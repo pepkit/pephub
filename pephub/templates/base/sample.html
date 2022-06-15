@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <h2>{{namespace}}/{{project_name}}/samples/{{sample.sample_name}}</h2>
+    <div class="border-bottom border-secondary"></div>
+    <div class="my-2">
+        <h3>Sample Attributes:</h3>
+        {% for a in attrs %}
+            <p>
+                <span class="fw-bold">{{a}}: </span>
+                <span>{{ sample[a] }} </span>
+            </p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

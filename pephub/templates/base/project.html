@@ -2,6 +2,11 @@
 {% block content %}
 <div>
     <h1>{{ project.namespace }}/{{ project.name }}</h1>
+    <h5>PEP Version: {{ pep_version }} </h5>
+    <h5>Total Samples: {{ n_samples }}</h5>
+    {% if project.info['description'] %}
+        {{ project.info['description'] }}
+    {% endif %}
     <div class="border-bottom border-secondary my-2"></div>
     <h3>API Endpoints:</h3>
       <p>
@@ -32,9 +37,14 @@
       </p>
       {% endfor %}
     <div class="border-bottom border-secondary my-2"></div>
-    <div class="my-2">
-            <table class="table table-sm table-striped text-truncate" id="project-table">
+    <!-- <div>
+        <pre id="project-config"></pre>
+    </div> -->
+    <div class="border-bottom border-secondary my-2"></div>
+    <div class="my-2 overflow-auto">
+            <table class="table table-sm table-striped" id="project-table">
                 <thead>
+                    <th>View</th>
                     {% for col in sample_table_columns %}
                         <th>{{ col }}</th>
                     {% endfor %}
@@ -42,6 +52,11 @@
                 <tbody class="small">
                     {% for s in samples %}
                         <tr>
+                            <td>
+                                <a href="/pep/{{ project.namespace }}/{{ project.name }}/samples/{{s.sample_name}}/view">
+                                    /pep/{{ project.namespace }}/{{ project.name }}/samples/{{s.sample_name}}/view
+                                </a>
+                            </td>
                             {% for col in sample_table_columns %}
                                 <td>{{s[col]}}</td>
                             {% endfor %}
@@ -50,18 +65,18 @@
                 </tbody>
             </table>
       </div>
-      
-        <h3>PEP Version: {{ pep_version }} </h3>
-        <h3>Sample Table:</h3>
-        <div>
-            <span class="fw-bold">Total Samples:</span> {{ n_samples }}
-        </div>
+      <div class="my-2">
+
+      </div>
     </div>
-</div>
   <!-- DataTabes-->
   <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
   <!--assign to table -->
   <script>
     const table = new simpleDatatables.DataTable("#project-table")
   </script>
+  <!-- <script type="text/javascript">
+    const data = JSON.parse('{{ project_dict|tojson }}')
+    document.getElementById("project-config").textContent = JSON.stringify(data, null, 2)
+  </script> -->
 {% endblock %}

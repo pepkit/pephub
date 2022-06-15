@@ -880,6 +880,26 @@ geo:
     description: PEPs pulled from the Gene Expression Omnibus using geofetch.
     n_projects: 150
     n_samples: 4152
+nfcore:
+  projects:
+    demo_rna:
+      name: demo_rna
+      cfg: examples/nfcore/demo_rna/samplesheet.csv
+      _info:
+        n_samples: 5
+    demo_rna_pep:
+      name: demo_rna_pep
+      cfg: examples/nfcore/demo_rna_pep/project_config.yaml
+      _info:
+        n_samples: 5
+    demo_rna_derived:
+      name: demo_rna_derived
+      cfg: examples/nfcore/demo_rna_derived/project_config.yaml
+      _info:
+        n_samples: 5
+  _info:
+    n_projects: 3
+    n_samples: 15
 changlab:
   projects:
     pep_2:

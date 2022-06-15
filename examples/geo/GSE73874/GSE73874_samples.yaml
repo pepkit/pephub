@@ -9,4 +9,3 @@ sample_modifiers:
     attributes: [output_file_path]
     sources:
       FILES: /{GSE}/{file}
-
