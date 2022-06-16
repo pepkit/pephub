@@ -10,11 +10,6 @@ from starlette.staticfiles import StaticFiles
 from .pepstat import PEPIndexer
 from pephub.exceptions import PepHubException
 
-try:
-    from pephub.db import load_data_tree
-except:
-    from .db import load_data_tree
-
 # set up global pep storage
 global _PEP_STORES  # the object in memory to read from
 global _PEP_STORAGE_PATH  # the actual file path to the peps
