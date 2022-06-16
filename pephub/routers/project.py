@@ -125,7 +125,7 @@ async def get_subsamples(
         if download:
             return proj.subsample_table.to_csv()
         else:
-            return proj.subsample_table.to_json()
+            return proj.subsample_table.to_dict()
     else:
         return f"Project '{namespace.lower()}/{pep_id.lower()}' does not have any subsamples."
 
