@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <a href="/pep/{{namespace}}/{{project_name}}/view">← back to {{ project_name }}</a>
+    <h1>{{namespace}}/{{project_name}}/samples/{{sample.sample_name}}</h1>
+    <div class="border-bottom border-secondary"></div>
+    <div class="my-2">
+        <h3>Sample Attributes:</h3>
+        <ul>
+        {% for a in attrs %}
+            <li class="mb-2">
+                <span class="fw-bold">{{a}}: </span>
+                <span class="text-primary">{{ sample[a] }} </span>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -1,7 +1,17 @@
-from fastapi import APIRouter, Depends
+from enum import Enum
+import json
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import FileResponse
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from typing import Optional
+from fastapi.templating import Jinja2Templates
+
+from pephub.const import BASE_TEMPLATES_PATH, INFO_KEY
+from peppy import __version__ as peppy_version
+from platform import python_version
+
+from pephub.helpers import zip_conv_result
+from .._version import __version__ as pephub_version
 
 import eido
 import peppy
@@ -19,6 +29,7 @@ router = APIRouter(
     tags=["project"],
 )
 
+templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
 @router.get(
     "/",
@@ -45,7 +56,7 @@ async def get_pep(
 # fetch configuration file
 @router.get("/config")
 async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
-    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()])
+    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()]['cfg_path'])
 
 
 # fetch samples for project
@@ -75,6 +86,30 @@ async def get_sample(
     else:
         return proj.get_sample(sample_name).to_dict()
 
+# display a view for a specific sample
+@router.get("/samples/{sample_name}/view")
+async def get_sample_view(
+    namespace: str,
+    pep_id: str,
+    request: Request,
+    sample_name: str,
+    proj: peppy.Project = Depends(validate_pep),
+):
+    """Returns HTML response with a visual summary of the sample."""
+    sample = proj.get_sample(sample_name)
+    attrs = sample._attributes
+    return templates.TemplateResponse("sample.html", {
+        'project': proj,
+        'sample': sample,
+        'attrs': attrs,
+        'request': request,
+        'namespace': namespace,
+        'project_name': pep_id,
+        'peppy_version': peppy_version,
+        'python_version': python_version(),
+        'pephub_version': pephub_version,
+    })
+
 
 # fetch all subsamples inside a pep
 @router.get("/subsamples")
@@ -90,14 +125,16 @@ async def get_subsamples(
         if download:
             return proj.subsample_table.to_csv()
         else:
-            return str(proj.subsample_table.to_dict())
+            return proj.subsample_table.to_dict()
     else:
         return f"Project '{namespace.lower()}/{pep_id.lower()}' does not have any subsamples."
 
 
 @router.get("/convert")
 async def convert_pep(
-    proj: peppy.Project = Depends(validate_pep), filter: Optional[str] = "basic"
+    proj: peppy.Project = Depends(validate_pep), 
+    filter: Optional[str] = "basic",
+    format: Optional[str] = "plain"
 ):
     """
     Convert a PEP to a specific format, f. For a list of available formats/filters,
@@ -114,10 +151,47 @@ async def convert_pep(
     filter_list = eido.get_available_pep_filters()
     if filter not in filter_list:
         raise HTTPException(
-            400, f"Unknown filter '{filter}'. Available filterss: {filter_list}"
+            400, f"Unknown filter '{filter}'. Available filters: {filter_list}"
         )
 
     # generate result
     conv_result = eido.run_filter(proj, filter, verbose=False)
 
-    return JSONResponse({"result": conv_result})
+    format_list = ["plain", "zip", "json"]
+    if format not in format_list:
+        raise HTTPException(
+            400, f"Unknown format '{format}'. Availble formats: {format_list}"
+        )
+    
+    if format == "plain":
+        return_str = "\n".join([conv_result[k] for k in conv_result])
+        resp_obj = PlainTextResponse(return_str)
+    elif format == "json":
+        resp_obj = JSONResponse(conv_result)
+    else:
+        resp_obj = zip_conv_result(conv_result) # returns zip file in Response() object
+
+    return resp_obj
+
+@router.get("/view", summary="View a visual summary of a particular project.", response_class=HTMLResponse)
+async def project_view(request: Request, namespace: str, pep_id: str, peppy_obj: peppy.Project = Depends(validate_pep)):
+    """Returns HTML response with a visual summary of the project."""
+    proj = _PEP_STORES.get_project(namespace, pep_id)
+    samples = [s.to_dict() for s in peppy_obj.samples]
+    try:
+        pep_version = peppy_obj.pep_version
+    except Exception: 
+        pep_version = "2.1.0"
+    return templates.TemplateResponse("project.html", {
+        'project': proj,
+        'project_dict': peppy_obj.to_dict(),
+        'pep_version': pep_version,
+        'sample_table_columns': peppy_obj.sample_table.columns.to_list(),
+        'samples': samples,
+        'n_samples': len(samples),
+        'request': request,
+        'peppy_version': peppy_version,
+        'python_version': python_version(),
+        'pephub_version': pephub_version,
+        'filters': eido.get_available_pep_filters()
+    })

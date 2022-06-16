@@ -1,5 +1,6 @@
 data:
   path: examples
+  index: index.yaml
 
 server:
   host: 0.0.0.0

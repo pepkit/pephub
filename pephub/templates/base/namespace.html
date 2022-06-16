@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <a href="/">← back home</a>
+    <h1>{{namespace.name}}</h1>
+    <p class="mb-0"><span class="fw-bold">Total projects:</span> {{namespace.projects|length}}</p>
+    <p class="mb-0"><span class="fw-bold">Total samples:</span> {{tot_samples}}</p>
+    <div class="border-bottom border-secondary my-2"></div>
+    <h3>API Endpoints:</h3>
+    <p class="mb-2">
+      <span class="badge bg-primary">GET</span>
+      <span class="fw-bold">Namespace:</span>
+      <code>
+        <a href="/pep/{{namespace.name}}/">
+          /pep/{{namespace.name}}/
+        </a>
+      </code>
+   </p>
+   <p class="mb-2">
+    <span class="badge bg-primary">GET</span>
+    <span class="fw-bold">Namespace:</span>
+    <code>
+      <a href="/pep/{{namespace.name}}/projects">
+        /pep/{{namespace.name}}/projects
+      </a>
+    </code>
+   </p>
+    <div class="border-bottom border-secondary my-2"></div>
+    <table class="table table-sm table-striped" id="namespace-table">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>No. of Samples</th>
+          <th>API Endpoint</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for proj in namespace.projects %}
+        {% set project = namespace.projects[proj] %}
+        <tr>
+          <td><a href="/pep/{{namespace.name}}/{{project.name}}/view">{{project.name}}</a></td>
+          <td>{{project.info.n_samples}}</td>
+          <td>
+            <code><a href="/pep/{{namespace.name}}/{{project.name}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.name}}/{{project.name}}</a></code>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+  <!-- DataTabes-->
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+  <!--assign to table -->
+  <script>
+        const table = new simpleDatatables.DataTable("#namespace-table")
+  </script>
+{% endblock %}

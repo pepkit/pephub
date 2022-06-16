@@ -1,8 +1,14 @@
 from typing import Union
+from fastapi import Response
 from ubiquerg import VersionInHelpParser
 
 from os.path import exists
 from yaml import safe_load
+import os
+import zipfile
+import io
+
+from pephub.exceptions import PepHubException
 
 from ._version import __version__ as v
 from .const import DEFAULT_PORT, PKG_NAME
@@ -78,4 +84,32 @@ def read_server_configuration(path: str) -> dict:
     if not exists(path):
         raise FileNotFoundError(f"Configuration file at {path} could not be found.")
     with open(path, "r") as f:
-        return safe_load(f)
+        cfg = safe_load(f)
+        if cfg.get("data") is None:
+            raise PepHubException("'data' section is required in the configuration file.")
+        if cfg["data"].get("path") is None:
+            raise PepHubException("No path to PEPs was specified in the configuration file.")
+
+        return {
+            'data': {
+                'path': cfg['data']['path'],
+                'index': cfg['data'].get('index')
+            }
+        }
+
+def zip_conv_result(conv_result: dict):
+    zip_filename = "conversion_result.zip"
+    
+    mf = io.BytesIO()
+
+    with zipfile.ZipFile(mf, mode="w",compression=zipfile.ZIP_DEFLATED) as zf:
+        for name, res in conv_result.items():
+            # Add file, at correct path
+            zf.writestr(name, str.encode(res))
+
+    # Grab ZIP file from in-memory, make response with correct MIME-type
+    resp = Response(mf.getvalue(), media_type="application/x-zip-compressed", headers={
+        'Content-Disposition': f'attachment;filename={zip_filename}'
+    })
+
+    return resp

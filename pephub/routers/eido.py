@@ -72,7 +72,7 @@ async def validate_fromhub(
     namespace: str,
     pep_id: str,
 ):
-    proj = peppy.Project(_PEP_STORES[namespace][pep_id])
+    proj = peppy.Project(_PEP_STORES[namespace][pep_id]['cfg_path'])
     vals = {
         "name": pep_id,
         "filenames": "not provided",

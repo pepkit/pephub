@@ -2,6 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.2.0] - 2022-05-16
+### Added
+- Better `/view` endpoints (switch from cards to tables)
+- More namespace endpoints
+- Sample view endpoints
+
+### Fixed
+- Poor output of `/pep-list`
+- filters wrapped in `json`
+- `pephub` version missing
+
 ## [0.1.0] - 2022-05-16
 ### Added
 - Endpoints for converting stored PEPs using filters.
