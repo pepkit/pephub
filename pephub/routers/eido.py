@@ -103,7 +103,7 @@ async def validate_pep(
     for file in files:
         print(f"File: '{file}'")
         file_object = file.file
-        full_path = os.path.join(upload_folder, file.filename)
+        full_path = os.path.join(file.filename)
         # if not os.path.isfile(full_path):
         #     print(f"failed isfile test: {full_path}")
         #     return JSONResponse(content={ "error": "No files provided."})
