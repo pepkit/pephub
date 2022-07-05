@@ -7,3 +7,4 @@ yacman>=0.8.4
 python-multipart>=0.0.5
 tqdm
 git+https://github.com/pepkit/pephub_db.git#egg=pepagent 
+git+https://github.com/pepkit/peppy.git@dev_alex#egg=peppy
