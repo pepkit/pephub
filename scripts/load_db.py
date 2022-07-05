@@ -1,5 +1,6 @@
 import argparse
 import os
+from time import sleep
 from tqdm import tqdm
 from pepagent import PepAgent
 import peppy
@@ -94,7 +95,7 @@ pagent = PepAgent(
 FILE_PATH = args.files
 
 # traverse directory
-for name in tqdm(os.listdir(FILE_PATH), desc="Indexing repository", leave=True):
+for name in tqdm(os.listdir(FILE_PATH), desc="Uploading repository", leave=True):
     # build a path to the namespace
     path_to_namespace = f"{FILE_PATH}/{name}"
     name = name.lower()
@@ -102,8 +103,8 @@ for name in tqdm(os.listdir(FILE_PATH), desc="Indexing repository", leave=True):
     if is_valid_namespace(path_to_namespace):
         # traverse projects
         for proj in tqdm(
-            os.listdir(path_to_namespace), desc=f"Indexing {name}", leave=True
-        ):
+            os.listdir(path_to_namespace), desc=f"Uploading {name}", leave=True
+        ):  
             # build path to project
             path_to_proj = f"{path_to_namespace}/{proj}"
             proj = proj.lower()
