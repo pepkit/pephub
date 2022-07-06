@@ -6,7 +6,6 @@ from starlette.templating import Jinja2Templates
 
 from .._version import __version__ as pephub_version
 from ..const import BASE_TEMPLATES_PATH
-from ..main import _PEP_STORES
 
 import peppy
 
@@ -26,26 +25,31 @@ ALL_VERSIONS = {
     "python_version": python_version(),
 }
 
-
 @router.get("/")
-async def main(request: Request):
-    templ_vars = {"request": request}
-    namespaces = _PEP_STORES.get_namespaces()
-    return templates.TemplateResponse(
-        "index.html", 
-        dict(
-            templ_vars, 
-            **ALL_VERSIONS,
-            namespaces=namespaces,
-        )
-    )
+async def main():
+    return {
+        "message": "hello"
+    }
 
-@router.get("/pep-list")
-async def pep_list():
-    namespaces = _PEP_STORES.get_namespaces()
-    return [
-        dict(
-            **n, 
-            projects=_PEP_STORES.get_projects(n['name'])) 
-            for n in namespaces
-    ]
+# @router.get("/")
+# async def main(request: Request):
+#     templ_vars = {"request": request}
+#     namespaces = _PEP_STORES.get_namespaces()
+#     return templates.TemplateResponse(
+#         "index.html", 
+#         dict(
+#             templ_vars, 
+#             **ALL_VERSIONS,
+#             namespaces=namespaces,
+#         )
+#     )
+
+# @router.get("/pep-list")
+# async def pep_list():
+#     namespaces = _PEP_STORES.get_namespaces()
+#     return [
+#         dict(
+#             **n, 
+#             projects=_PEP_STORES.get_projects(n['name'])) 
+#             for n in namespaces
+#     ]

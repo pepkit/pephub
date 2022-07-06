@@ -18,7 +18,6 @@ from yacman import load_yaml
 
 from ..const import EIDO_TEMPLATES_PATH, STATICS_PATH
 from ..dependencies import *
-from ..main import _PEP_STORES
 
 templates = Jinja2Templates(directory=EIDO_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(EIDO_TEMPLATES_PATH))
@@ -67,29 +66,29 @@ async def status():
     return JSONResponse(schemas_to_test)
 
 
-@router.get("/validate_fromhub/{namespace}/{pep_id}")
-async def validate_fromhub(
-    namespace: str,
-    pep_id: str,
-):
-    proj = peppy.Project(_PEP_STORES[namespace][pep_id]['cfg_path'])
-    vals = {
-        "name": pep_id,
-        "filenames": "not provided",
-        "peppy_version": peppy_version,
-        "validations": [],
-    }
-    for schema_id, schema_data in schemas_to_test.items():
-        vals["validations"].append(
-            {
-                "id": schema_id,
-                "name": schema_data["name"],
-                "docs": schema_data["docs"],
-                "schema": schema_data["schema"],
-                "result": vwrap(proj, schema_data["schema"]),
-            }
-        )
-    return JSONResponse(content=vals)
+# @router.get("/validate_fromhub/{namespace}/{pep_id}")
+# async def validate_fromhub(
+#     namespace: str,
+#     pep_id: str,
+# ):
+#     proj = peppy.Project(_PEP_STORES[namespace][pep_id]['cfg_path'])
+#     vals = {
+#         "name": pep_id,
+#         "filenames": "not provided",
+#         "peppy_version": peppy_version,
+#         "validations": [],
+#     }
+#     for schema_id, schema_data in schemas_to_test.items():
+#         vals["validations"].append(
+#             {
+#                 "id": schema_id,
+#                 "name": schema_data["name"],
+#                 "docs": schema_data["docs"],
+#                 "schema": schema_data["schema"],
+#                 "result": vwrap(proj, schema_data["schema"]),
+#             }
+#         )
+#     return JSONResponse(content=vals)
 
 
 @router.post("/validate")

@@ -33,7 +33,7 @@ def build_argparser() -> argparse.ArgumentParser:
         '--password',
         dest='password',
         type=str,
-        default='admin',
+        default='docker',
         help='Password for postgresql instance'
     )
     parser.add_argument(
@@ -51,10 +51,10 @@ def build_argparser() -> argparse.ArgumentParser:
         help='Hostname of postgresql instance'
     )
     parser.add_argument(
-        '-n',
-        '--name',
+        '-b',
+        '--database',
         dest='name',
-        default='postgres',
+        default='pep-base-sql',
         help="Database name"
     )
     parser.add_argument(
