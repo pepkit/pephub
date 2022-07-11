@@ -19,7 +19,7 @@ services:
       context: ./postgres
       dockerfile: Dockerfile
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=docker
@@ -27,4 +27,4 @@ services:
     ports:
       - 5432:5432
 volumes:
-    postgres_data:
+    postgres:

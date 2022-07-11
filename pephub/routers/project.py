@@ -47,10 +47,11 @@ async def get_a_pep(
 # #         tmp.write(proj.to_yaml())
 # #         return FileResponse(tmp.name, filename=f"{namespace}_{pep_id}.yaml")
 
-# # fetch configuration file
+# fetch configuration file
 # @router.get("/config")
-# async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
-#     return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()]['cfg_path'])
+# async def get_config(namespace: str, pep_id: str, db: PepAgent = Depends(get_db)):
+#     proj = get_pep(db, namespace, pep_id)
+#     return proj.config_file
 
 
 # fetch samples for project
@@ -68,24 +69,24 @@ async def get_pep_samples(
 
 
 # # fetch specific sample for project
-# @router.get("/samples/{sample_name}")
-# async def get_sample(
-#     namespace: str,
-#     pep_id: str,
-#     sample_name: str,
-#     download: bool = False,
-#     proj: peppy.Project = Depends(validate_pep),
-# ):
-#     # check that the sample exists
-#     # by mapping the list of sample objects
-#     # to a list of sample names
-#     if sample_name not in map(lambda s: s["sample_name"], proj.samples):
-#         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
-#     if download:
-#         sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
-#         return FileResponse(sample_file_path)
-#     else:
-#         return proj.get_sample(sample_name).to_dict()
+@router.get("/samples/{sample_name}")
+async def get_sample(
+    sample_name: str, 
+    db: PepAgent = Depends(get_db),
+    namespace: str = example_namespace,
+    pep_id: str = example_pep_id,
+):
+    proj = get_pep(db, namespace, pep_id)
+    # check that the sample exists
+    # by mapping the list of sample objects
+    # to a list of sample names
+    if sample_name not in map(lambda s: s["sample_name"], proj.samples):
+        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
+    # if download:
+    #     sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
+    #     return FileResponse(sample_file_path)
+    else:
+        return proj.get_sample(sample_name).to_dict()
 
 # # display a view for a specific sample
 # @router.get("/samples/{sample_name}/view")

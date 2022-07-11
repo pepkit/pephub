@@ -28,7 +28,8 @@ ALL_VERSIONS = {
 @router.get("/")
 async def main():
     return {
-        "message": "hello"
+        "message": "Welcome to the pephub server.",
+        "versions": ALL_VERSIONS
     }
 
 # @router.get("/")
