@@ -9,7 +9,8 @@ def get_db():
     # create database
     pepdb = PepAgent(
         user=os.environ.get("POSTGRES_USER"),
-        password=os.environ.get("POSTGRES_PASSWORD")
+        password=os.environ.get("POSTGRES_PASSWORD"),
+        host=os.environ.get("POSTGRES_HOST") or "0.0.0.0"
     )
     try:
         yield pepdb

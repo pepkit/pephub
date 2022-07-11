@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  db:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    volumes:
+      - ./postgres-data/:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=pep-base-sql
+    ports:
+      - 5432:5432
+    networks:
+      - pephub
   server:
     build:
       context: ./
@@ -14,17 +28,12 @@ services:
       - 8000:8000
     depends_on:
       - db
-  db:
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
-    volumes:
-      - postgres:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=pep-base-sql
-    ports:
-      - 5432:5432
+    networks:
+      - pephub
+
 volumes:
-    postgres:
+  postgres-data:
+
+networks:
+  pephub:
+    driver: bridge

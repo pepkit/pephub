@@ -1,40 +1,20 @@
 # pephub
 [TODO]
 
-## How to `serve`
+### Running development server:
 
-### Building container
+The server has been Dockerized and packaged with a [postgres](https://hub.docker.com/_/postgres) image to be run with [`docker compose`](https://docs.docker.com/compose/). This lets you run everything at once and develop without having to manage database instances. The `docker-compose.yml` file is written such that it mounts the database storage info to a folder called `postgres-data` at the root of the repository. This lets you load the database once and have it persist its state after restarting the container.
 
-In the same directory as the `Dockerfile`:
+To run:
 
-```
-docker build -t databio/pephub .
-```
-
-### Running natively for development:
-
-```
-uvicorn pephub.main:app --reload --port 3001
+```console
+docker compose up --build
 ```
 
-### Running container for development:
+`pephub` now runs/listens on http://localhost:8000  
+`postgres` now runs/listens on http://localhost:5432
 
-You can run it directly after installing with `pip install -e .`, like this:
-
-```
-pephub serve -p 5000
-```
-
-Better, though, is to use the container. Mount the source code directory:
-
-```
-docker run -p 5000:80 \
--e MODULE_NAME="pephub.main" \
--v $(pwd)/pephub:/app/pephub \
-databio/pephub /start-reload.sh
-```
-
-Your development server with hot-reloading will be served at http://localhost:5000
+On subsequent startups, you may ignore the `--build` flag if nothing on the Dockerfile or dependency list has changed.
 
 ### Running container for production:
 Build the container:
