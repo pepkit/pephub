@@ -22,6 +22,7 @@ example_filter = Query(
     example="basic",
 )
 
+
 class ValidationRequest(BaseModel):
     namespace: str
     project: str

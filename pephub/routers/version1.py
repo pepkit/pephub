@@ -25,21 +25,20 @@ ALL_VERSIONS = {
     "python_version": python_version(),
 }
 
+
 @router.get("/")
 async def main():
-    return {
-        "message": "Welcome to the pephub server.",
-        "versions": ALL_VERSIONS
-    }
+    return {"message": "Welcome to the pephub server.", "versions": ALL_VERSIONS}
+
 
 # @router.get("/")
 # async def main(request: Request):
 #     templ_vars = {"request": request}
 #     namespaces = _PEP_STORES.get_namespaces()
 #     return templates.TemplateResponse(
-#         "index.html", 
+#         "index.html",
 #         dict(
-#             templ_vars, 
+#             templ_vars,
 #             **ALL_VERSIONS,
 #             namespaces=namespaces,
 #         )
@@ -50,7 +49,7 @@ async def main():
 #     namespaces = _PEP_STORES.get_namespaces()
 #     return [
 #         dict(
-#             **n, 
-#             projects=_PEP_STORES.get_projects(n['name'])) 
+#             **n,
+#             projects=_PEP_STORES.get_projects(n['name']))
 #             for n in namespaces
 #     ]

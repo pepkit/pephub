@@ -48,15 +48,12 @@ app.mount(
 
 # The eido validator is an SPA that can be served as a static HTML
 # file. These can only be added on the main app, not on a router
-app.mount(
-    "/eido/validator", 
-    StaticFiles(directory=EIDO_PATH), 
-    name="eido_validator"
-)
+app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
 
 # populate config
 # read in the configration file
 cfg = read_server_configuration("config.yaml")
+
 
 def main():
     # set up the logger

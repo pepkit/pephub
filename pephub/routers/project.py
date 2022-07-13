@@ -24,6 +24,7 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
+
 @router.get(
     "/",
     summary="Fetch a PEP",
@@ -63,15 +64,13 @@ async def get_pep_samples(
 ):
     # remove "private attributes"
     proj = get_pep(db, namespace, pep_id)
-    return {
-        "samples": proj.samples
-    }
+    return {"samples": proj.samples}
 
 
 # # fetch specific sample for project
 @router.get("/samples/{sample_name}")
 async def get_sample(
-    sample_name: str, 
+    sample_name: str,
     db: PepAgent = Depends(get_db),
     namespace: str = example_namespace,
     pep_id: str = example_pep_id,
@@ -88,6 +87,7 @@ async def get_sample(
     else:
         return proj.get_sample(sample_name).to_dict()
 
+
 # display a view for a specific sample
 @router.get("/samples/{sample_name}/view")
 async def get_sample_view(
@@ -103,17 +103,20 @@ async def get_sample_view(
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     sample = proj.get_sample(sample_name)
     attrs = sample._attributes
-    return templates.TemplateResponse("sample.html", {
-        'project': proj,
-        'sample': sample,
-        'attrs': attrs,
-        'request': request,
-        'namespace': namespace,
-        'project_name': pep_id,
-        'peppy_version': peppy_version,
-        'python_version': python_version(),
-        'pephub_version': pephub_version,
-    })
+    return templates.TemplateResponse(
+        "sample.html",
+        {
+            "project": proj,
+            "sample": sample,
+            "attrs": attrs,
+            "request": request,
+            "namespace": namespace,
+            "project_name": pep_id,
+            "peppy_version": peppy_version,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+        },
+    )
 
 
 # fetch all subsamples inside a pep
@@ -140,9 +143,9 @@ async def get_subsamples(
 async def convert_pep(
     namespace: str,
     pep_id: str,
-    db: PepAgent = Depends(get_db), 
+    db: PepAgent = Depends(get_db),
     filter: Optional[str] = "basic",
-    format: Optional[str] = "plain"
+    format: Optional[str] = "plain",
 ):
     """
     Convert a PEP to a specific format, f. For a list of available formats/filters,
@@ -171,42 +174,47 @@ async def convert_pep(
         raise HTTPException(
             400, f"Unknown format '{format}'. Availble formats: {format_list}"
         )
-    
+
     if format == "plain":
         return_str = "\n".join([conv_result[k] for k in conv_result])
         resp_obj = PlainTextResponse(return_str)
     elif format == "json":
         resp_obj = JSONResponse(conv_result)
     else:
-        resp_obj = zip_conv_result(conv_result) # returns zip file in Response() object
+        resp_obj = zip_conv_result(conv_result)  # returns zip file in Response() object
 
     return resp_obj
 
-@router.get("/view", summary="View a visual summary of a particular project.", response_class=HTMLResponse)
+
+@router.get(
+    "/view",
+    summary="View a visual summary of a particular project.",
+    response_class=HTMLResponse,
+)
 async def project_view(
-    request: Request, 
-    namespace: str, 
-    pep_id: str, 
-    db: PepAgent = Depends(get_db)
+    request: Request, namespace: str, pep_id: str, db: PepAgent = Depends(get_db)
 ):
     """Returns HTML response with a visual summary of the project."""
     proj = get_pep(db, namespace, pep_id)
     samples = [s.to_dict() for s in proj.samples]
     try:
         pep_version = proj.pep_version
-    except Exception: 
+    except Exception:
         pep_version = "2.1.0"
-    return templates.TemplateResponse("project.html", {
-        'namespace': namespace,
-        'project': proj,
-        'project_dict': proj.to_dict(),
-        'pep_version': pep_version,
-        'sample_table_columns': proj.sample_table.columns.to_list(),
-        'samples': samples,
-        'n_samples': len(samples),
-        'request': request,
-        'peppy_version': peppy_version,
-        'python_version': python_version(),
-        'pephub_version': pephub_version,
-        'filters': eido.get_available_pep_filters()
-    })
+    return templates.TemplateResponse(
+        "project.html",
+        {
+            "namespace": namespace,
+            "project": proj,
+            "project_dict": proj.to_dict(),
+            "pep_version": pep_version,
+            "sample_table_columns": proj.sample_table.columns.to_list(),
+            "samples": samples,
+            "n_samples": len(samples),
+            "request": request,
+            "peppy_version": peppy_version,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+            "filters": eido.get_available_pep_filters(),
+        },
+    )

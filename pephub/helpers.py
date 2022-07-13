@@ -86,30 +86,34 @@ def read_server_configuration(path: str) -> dict:
     with open(path, "r") as f:
         cfg = safe_load(f)
         if cfg.get("data") is None:
-            raise PepHubException("'data' section is required in the configuration file.")
+            raise PepHubException(
+                "'data' section is required in the configuration file."
+            )
         if cfg["data"].get("path") is None:
-            raise PepHubException("No path to PEPs was specified in the configuration file.")
+            raise PepHubException(
+                "No path to PEPs was specified in the configuration file."
+            )
 
         return {
-            'data': {
-                'path': cfg['data']['path'],
-                'index': cfg['data'].get('index')
-            }
+            "data": {"path": cfg["data"]["path"], "index": cfg["data"].get("index")}
         }
+
 
 def zip_conv_result(conv_result: dict):
     zip_filename = "conversion_result.zip"
-    
+
     mf = io.BytesIO()
 
-    with zipfile.ZipFile(mf, mode="w",compression=zipfile.ZIP_DEFLATED) as zf:
+    with zipfile.ZipFile(mf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         for name, res in conv_result.items():
             # Add file, at correct path
             zf.writestr(name, str.encode(res))
 
     # Grab ZIP file from in-memory, make response with correct MIME-type
-    resp = Response(mf.getvalue(), media_type="application/x-zip-compressed", headers={
-        'Content-Disposition': f'attachment;filename={zip_filename}'
-    })
+    resp = Response(
+        mf.getvalue(),
+        media_type="application/x-zip-compressed",
+        headers={"Content-Disposition": f"attachment;filename={zip_filename}"},
+    )
 
     return resp
