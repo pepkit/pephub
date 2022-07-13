@@ -17,13 +17,15 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
-# @router.get("/view", summary="View a visual summary of the peps on the server", response_class=HTMLResponse)
-# async def pep_view(request: Request):
-#     """Returns HTML response with a visual summary of thhe peps on the server"""
-#     nspaces = _PEP_STORES.get_namespaces(names_only=False)
-#     return templates.TemplateResponse("pep.html", {
-#         'nspaces': nspaces, 
-#         'request': request,
-#         'peppy_version': peppy_version,
-#         'python_version': python_version()
-#     })
+@router.get("/view", summary="View a visual summary of the peps on the server", response_class=HTMLResponse)
+async def pep_view(request: Request, db = Depends(get_db)):
+    """Returns HTML response with a visual summary of thhe peps on the server"""
+    nspaces = {
+        n: db.get_anno(namespace=n) for n in db.get_namespaces()
+    }
+    return templates.TemplateResponse("pep.html", {
+        'nspaces': nspaces, 
+        'request': request,
+        'peppy_version': peppy_version,
+        'python_version': python_version()
+    })

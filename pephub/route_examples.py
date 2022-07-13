@@ -1,4 +1,5 @@
 from fastapi import Path, Query
+from pydantic import BaseModel
 
 # example for /pep/{namespace}
 example_namespace = Path(
@@ -20,3 +21,7 @@ example_filter = Query(
     description="A valid eido conversion filter type. See /eido/filters for a list of valid filters.",
     example="basic",
 )
+
+class ValidationRequest(BaseModel):
+    namespace: str
+    project: str

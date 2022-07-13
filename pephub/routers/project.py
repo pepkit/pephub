@@ -88,112 +88,125 @@ async def get_sample(
     else:
         return proj.get_sample(sample_name).to_dict()
 
-# # display a view for a specific sample
-# @router.get("/samples/{sample_name}/view")
-# async def get_sample_view(
-#     namespace: str,
-#     pep_id: str,
-#     request: Request,
-#     sample_name: str,
-#     proj: peppy.Project = Depends(validate_pep),
-# ):
-#     """Returns HTML response with a visual summary of the sample."""
-#     sample = proj.get_sample(sample_name)
-#     attrs = sample._attributes
-#     return templates.TemplateResponse("sample.html", {
-#         'project': proj,
-#         'sample': sample,
-#         'attrs': attrs,
-#         'request': request,
-#         'namespace': namespace,
-#         'project_name': pep_id,
-#         'peppy_version': peppy_version,
-#         'python_version': python_version(),
-#         'pephub_version': pephub_version,
-#     })
+# display a view for a specific sample
+@router.get("/samples/{sample_name}/view")
+async def get_sample_view(
+    namespace: str,
+    pep_id: str,
+    request: Request,
+    sample_name: str,
+    db: PepAgent = Depends(get_db),
+):
+    """Returns HTML response with a visual summary of the sample."""
+    proj = get_pep(db, namespace, pep_id)
+    if sample_name not in map(lambda s: s["sample_name"], proj.samples):
+        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
+    sample = proj.get_sample(sample_name)
+    attrs = sample._attributes
+    return templates.TemplateResponse("sample.html", {
+        'project': proj,
+        'sample': sample,
+        'attrs': attrs,
+        'request': request,
+        'namespace': namespace,
+        'project_name': pep_id,
+        'peppy_version': peppy_version,
+        'python_version': python_version(),
+        'pephub_version': pephub_version,
+    })
 
 
-# # fetch all subsamples inside a pep
-# @router.get("/subsamples")
-# async def get_subsamples(
-#     namespace: str,
-#     pep_id: str,
-#     download: bool = False,
-#     proj: peppy.Project = Depends(validate_pep),
-# ):
-#     subsamples = proj.subsample_table
-#     # check if subsamples exist
-#     if subsamples is not None:
-#         if download:
-#             return proj.subsample_table.to_csv()
-#         else:
-#             return proj.subsample_table.to_dict()
-#     else:
-#         return f"Project '{namespace.lower()}/{pep_id.lower()}' does not have any subsamples."
+# fetch all subsamples inside a pep
+@router.get("/subsamples")
+async def get_subsamples(
+    namespace: str,
+    pep_id: str,
+    db: PepAgent = Depends(get_db),
+    download: bool = False,
+):
+    proj = get_pep(db, namespace, pep_id)
+    subsamples = proj.subsample_table
+    # check if subsamples exist
+    if subsamples is not None:
+        if download:
+            return proj.subsample_table.to_csv()
+        else:
+            return proj.subsample_table.to_dict()
+    else:
+        return f"Project '{namespace.lower()}/{pep_id.lower()}' does not have any subsamples."
 
 
-# @router.get("/convert")
-# async def convert_pep(
-#     proj: peppy.Project = Depends(validate_pep), 
-#     filter: Optional[str] = "basic",
-#     format: Optional[str] = "plain"
-# ):
-#     """
-#     Convert a PEP to a specific format, f. For a list of available formats/filters,
-#     see /eido/filters.
+@router.get("/convert")
+async def convert_pep(
+    namespace: str,
+    pep_id: str,
+    db: PepAgent = Depends(get_db), 
+    filter: Optional[str] = "basic",
+    format: Optional[str] = "plain"
+):
+    """
+    Convert a PEP to a specific format, f. For a list of available formats/filters,
+    see /eido/filters.
 
-#     See, http://eido.databio.org/en/latest/filters/#convert-a-pep-into-an-alternative-format-with-a-filter
-#     for more information.
-#     """
-#     # default to basic
-#     if filter is None:
-#         filter = "basic"  # default to basic
+    See, http://eido.databio.org/en/latest/filters/#convert-a-pep-into-an-alternative-format-with-a-filter
+    for more information.
+    """
+    proj = get_pep(db, namespace, pep_id)
+    # default to basic
+    if filter is None:
+        filter = "basic"  # default to basic
 
-#     # validate filter exists
-#     filter_list = eido.get_available_pep_filters()
-#     if filter not in filter_list:
-#         raise HTTPException(
-#             400, f"Unknown filter '{filter}'. Available filters: {filter_list}"
-#         )
+    # validate filter exists
+    filter_list = eido.get_available_pep_filters()
+    if filter not in filter_list:
+        raise HTTPException(
+            400, f"Unknown filter '{filter}'. Available filters: {filter_list}"
+        )
 
-#     # generate result
-#     conv_result = eido.run_filter(proj, filter, verbose=False)
+    # generate result
+    conv_result = eido.run_filter(proj, filter, verbose=False)
 
-#     format_list = ["plain", "zip", "json"]
-#     if format not in format_list:
-#         raise HTTPException(
-#             400, f"Unknown format '{format}'. Availble formats: {format_list}"
-#         )
+    format_list = ["plain", "zip", "json"]
+    if format not in format_list:
+        raise HTTPException(
+            400, f"Unknown format '{format}'. Availble formats: {format_list}"
+        )
     
-#     if format == "plain":
-#         return_str = "\n".join([conv_result[k] for k in conv_result])
-#         resp_obj = PlainTextResponse(return_str)
-#     elif format == "json":
-#         resp_obj = JSONResponse(conv_result)
-#     else:
-#         resp_obj = zip_conv_result(conv_result) # returns zip file in Response() object
+    if format == "plain":
+        return_str = "\n".join([conv_result[k] for k in conv_result])
+        resp_obj = PlainTextResponse(return_str)
+    elif format == "json":
+        resp_obj = JSONResponse(conv_result)
+    else:
+        resp_obj = zip_conv_result(conv_result) # returns zip file in Response() object
 
-#     return resp_obj
+    return resp_obj
 
-# @router.get("/view", summary="View a visual summary of a particular project.", response_class=HTMLResponse)
-# async def project_view(request: Request, namespace: str, pep_id: str, peppy_obj: peppy.Project = Depends(validate_pep)):
-#     """Returns HTML response with a visual summary of the project."""
-#     proj = _PEP_STORES.get_project(namespace, pep_id)
-#     samples = [s.to_dict() for s in peppy_obj.samples]
-#     try:
-#         pep_version = peppy_obj.pep_version
-#     except Exception: 
-#         pep_version = "2.1.0"
-#     return templates.TemplateResponse("project.html", {
-#         'project': proj,
-#         'project_dict': peppy_obj.to_dict(),
-#         'pep_version': pep_version,
-#         'sample_table_columns': peppy_obj.sample_table.columns.to_list(),
-#         'samples': samples,
-#         'n_samples': len(samples),
-#         'request': request,
-#         'peppy_version': peppy_version,
-#         'python_version': python_version(),
-#         'pephub_version': pephub_version,
-#         'filters': eido.get_available_pep_filters()
-#     })
+@router.get("/view", summary="View a visual summary of a particular project.", response_class=HTMLResponse)
+async def project_view(
+    request: Request, 
+    namespace: str, 
+    pep_id: str, 
+    db: PepAgent = Depends(get_db)
+):
+    """Returns HTML response with a visual summary of the project."""
+    proj = get_pep(db, namespace, pep_id)
+    samples = [s.to_dict() for s in proj.samples]
+    try:
+        pep_version = proj.pep_version
+    except Exception: 
+        pep_version = "2.1.0"
+    return templates.TemplateResponse("project.html", {
+        'namespace': namespace,
+        'project': proj,
+        'project_dict': proj.to_dict(),
+        'pep_version': pep_version,
+        'sample_table_columns': proj.sample_table.columns.to_list(),
+        'samples': samples,
+        'n_samples': len(samples),
+        'request': request,
+        'peppy_version': peppy_version,
+        'python_version': python_version(),
+        'pephub_version': pephub_version,
+        'filters': eido.get_available_pep_filters()
+    })

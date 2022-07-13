@@ -2,7 +2,8 @@ from fastapi import HTTPException
 import os
 from pepagent import PepAgent
 from dotenv import load_dotenv
-
+from pepagent import PepAgent
+    
 load_dotenv()
 
 def get_db():
