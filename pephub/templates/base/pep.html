@@ -7,18 +7,18 @@
         <div class="card my-2">
         <div class="card-header">
           <h2 class="m-0"> 
-            {{ nspace.name }}
+            {{ nspace.namespace }}
           </h2>
         </div>
         <div class="p-2">
           <div class="my-1">
               <span class="badge bg-primary">GET</span>
-              <code>/pep/{{ nspace.name }}</code>
+              <code>/pep/{{ nspace.namespace }}</code>
           </div>
           <div class="mb-2">
-            <!-- <p class="mb-0">{{ nspace.info.description }}</p> -->
-            <!-- <p class="mb-0"><span class="fw-bold">No. of Projects:</span> {{ nspace.info.n_projects }}</p> -->
-            <!-- <p class="mb-0"><span class="fw-bold">No. of Samples:</span> {{ nspace.info.n_samples }}</p> -->
+            <p class="mb-0">{{ nspace.description }}</p>
+            <p class="mb-0"><span class="fw-bold">No. of Projects:</span> {{ nspace.n_projects}}</p>
+            <p class="mb-0"><span class="fw-bold">No. of Samples:</span> {{ nspace.n_samples }}</p>
           </div>
           <div>
               <a href="/pep/{{ nspace.name}}/view">

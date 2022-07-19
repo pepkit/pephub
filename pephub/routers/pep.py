@@ -23,9 +23,9 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
     summary="View a visual summary of the peps on the server",
     response_class=HTMLResponse,
 )
-async def pep_view(request: Request, db=Depends(get_db)):
+async def pep_view(request: Request, db:PepAgent = Depends(get_db)):
     """Returns HTML response with a visual summary of thhe peps on the server"""
-    nspaces = {n: db.get_anno(namespace=n) for n in db.get_namespaces()}
+    nspaces = db.get_namespaces()
     return templates.TemplateResponse(
         "pep.html",
         {

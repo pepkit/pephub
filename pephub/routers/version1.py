@@ -1,5 +1,5 @@
 import jinja2
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from platform import python_version
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
@@ -25,24 +25,18 @@ ALL_VERSIONS = {
     "python_version": python_version(),
 }
 
-
 @router.get("/")
-async def main():
-    return {"message": "Welcome to the pephub server.", "versions": ALL_VERSIONS}
-
-
-# @router.get("/")
-# async def main(request: Request):
-#     templ_vars = {"request": request}
-#     namespaces = _PEP_STORES.get_namespaces()
-#     return templates.TemplateResponse(
-#         "index.html",
-#         dict(
-#             templ_vars,
-#             **ALL_VERSIONS,
-#             namespaces=namespaces,
-#         )
-#     )
+async def main(request: Request, db: PepAgent = Depends(get_db)):
+    templ_vars = {"request": request}
+    namespaces = db.get_namespaces()
+    return templates.TemplateResponse(
+        "index.html",
+        dict(
+            templ_vars,
+            **ALL_VERSIONS,
+            namespaces=namespaces,
+        )
+    )
 
 # @router.get("/pep-list")
 # async def pep_list():

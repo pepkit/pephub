@@ -32,25 +32,23 @@ async def get_namespace(
     return JSONResponse(content=nspace)
 
 
-# @router.get("/projects", summary="Fetch all projects inside a particular namespace.")
-# async def get_namespace_projects(namespace: str, limit: int = 100):
-#     """Fetch the projects for a particular namespace"""
-#     projects = _PEP_STORES.get_projects(namespace)
-#     if limit:
-#         return JSONResponse(content={k: projects[k] for k in list(projects.keys())[:limit]})
-#     else:
-#         return JSONResponse(content=projects)
+@router.get("/projects", summary="Fetch all projects inside a particular namespace.")
+async def get_namespace_projects(namespace: str, db: PepAgent = Depends(get_db), limit: int = 100):
+    """Fetch the projects for a particular namespace"""
+    projects = db.get_projects(namespace)
+    if limit:
+        return JSONResponse(content={k: projects[k] for k in list(projects.keys())[:limit]})
+    else:
+        return JSONResponse(content=projects)
 
-# @router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
-# async def namespace_view(request: Request, namespace: str):
-#     """Returns HTML response with a visual summary of the namespace."""
-#     nspace = _PEP_STORES.get_namespace(namespace)
-#     tot_samples = sum([nspace[PROJECTS_KEY][p][INFO_KEY][N_SAMPLES_KEY] for p in nspace['projects'] ])
-#     return templates.TemplateResponse("namespace.html", {
-#         'namespace': nspace,
-#         'request': request,
-#         'tot_samples': tot_samples,
-#         'peppy_version': peppy_version,
-#         'python_version': python_version(),
-#         'pephub_version': pephub_version
-#     })
+@router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
+async def namespace_view(request: Request, namespace: str, db: PepAgent = Depends(get_db)):
+    """Returns HTML response with a visual summary of the namespace."""
+    nspace = db.get_namespace(namespace)
+    return templates.TemplateResponse("namespace.html", {
+        'namespace': nspace,
+        'request': request,
+        'peppy_version': peppy_version,
+        'python_version': python_version(),
+        'pephub_version': pephub_version
+    })

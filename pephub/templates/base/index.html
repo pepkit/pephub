@@ -17,11 +17,11 @@
       <tbody>
         {% for namespace in namespaces %}
           <tr>
-            <td><a href="/pep/{{namespace.name}}/view">{{ namespace.name }}</a></td>
-            <td>{{ namespace.info.n_projects }}</td>
-            <td>{{ namespace.info.n_samples }}</td>
+            <td><a href="/pep/{{namespace.namespace}}/view">{{ namespace.namespace }}</a></td>
+            <td>{{ namespace.n_projects }}</td>
+            <td>{{ namespace.n_samples }}</td>
             <td>
-              <code><a href="/pep/{{namespace.name}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.name}}/</a></code>
+              <code><a href="/pep/{{namespace.namespace}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.namespace}}/</a></code>
             </td>
           </tr>
         {% endfor %}
