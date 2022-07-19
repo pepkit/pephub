@@ -38,7 +38,10 @@ async def get_a_pep(
     Fetch a PEP from a certain namespace
     """
     proj = get_pep(db, namespace, pep_id)
-    return {"pep": proj.to_dict()}
+    if proj is not None:
+        return {"pep": proj.to_dict()}
+    else:
+        raise HTTPException(404, f"Project '{namespace}/{pep_id}' not found in database.")
 
 
 # # @router.get("/zip")
