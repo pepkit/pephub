@@ -35,9 +35,9 @@ async def get_namespace(
 @router.get("/projects", summary="Fetch all projects inside a particular namespace.")
 async def get_namespace_projects(namespace: str, db: PepAgent = Depends(get_db), limit: int = 100):
     """Fetch the projects for a particular namespace"""
-    projects = db.get_projects(namespace)
+    projects = db.get_projects(namespace=namespace)
     if limit:
-        return JSONResponse(content={k: projects[k] for k in list(projects.keys())[:limit]})
+        return JSONResponse(content={p.name: p.to_dict() for p in projects[:limit]})
     else:
         return JSONResponse(content=projects)
 
