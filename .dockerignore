@@ -1,5 +1,10 @@
 .env/
+.venv/
+env/
+venv/
 .github/
 .vscode/
+.pytest_cache/
+
+docs/
 tests/
-.pytest_cache
