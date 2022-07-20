@@ -1,16 +1,14 @@
 import sys
-import os
 import logmuse
 import uvicorn
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
-from pephub.exceptions import PepHubException
 
 from ._version import __version__ as server_v
 from .const import LOG_FORMAT, PKG_NAME, TAGS_METADATA
-from .helpers import build_parser, read_server_configuration
+from .helpers import build_parser
 from .routers import version1, namespace, project, eido, pep
 from .const import STATICS_PATH, EIDO_PATH
 
@@ -50,21 +48,11 @@ app.mount(
 # file. These can only be added on the main app, not on a router
 app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
 
-# populate config
-# read in the configration file
-cfg = read_server_configuration("config.yaml")
-
-
 def main():
     # set up the logger
     global _LOGGER
     parser = build_parser()
     args = parser.parse_args()
-
-    if args.config is None:
-        raise PepHubException(
-            "Configuration file required! " + "Please specify with '--config' flag."
-        )
 
     if not args.command:
         parser.print_help()

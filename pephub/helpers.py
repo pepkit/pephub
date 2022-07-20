@@ -50,13 +50,6 @@ def build_parser():
             required=False,
             dest="config",
             help=f"A path to the pepserver config file",
-        ),
-        sps[cmd].add_argument(
-            "-d",
-            "--dbg",
-            action="store_true",
-            dest="debug",
-            help="Set logger verbosity to debug",
         )
 
     sps["serve"].add_argument(
@@ -67,13 +60,21 @@ def build_parser():
         help="The port the webserver should be run on.",
         default=DEFAULT_PORT,
     )
-
+    sps["serve"].add_argument(
+        '-d',
+        '--debug',
+        dest="debug",
+        help="Run the server with debug mode on",
+        type=bool,
+        default=False
+    )
     sps["serve"].add_argument(
         "-r",
         "--reload",
-        action="store_true",
-        default=False,
-        help="Live reloading with uvicorn",
+        dest="reload",
+        type=bool,
+        help="Run the server in reload configuration",
+        default=False
     )
 
     return parser
