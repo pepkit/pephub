@@ -6,7 +6,7 @@ DATA_REPO = "https://github.com/pepkit/data.pephub.git"
 LOG_FORMAT = "%(levelname)s in %(funcName)s: %(message)s"
 
 DEFAULT_PORT = "80"
-DEFAULT_POSTGRES_HOST = "localhost"
+DEFAULT_POSTGRES_HOST = "0.0.0.0"
 DEFAULT_POSTGRES_USER = "postgres"
 DEFAULT_POSTGRES_PASSWORD = "docker"
 DEFAULT_POSTGRES_PORT = 5432
