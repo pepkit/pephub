@@ -8,5 +8,5 @@ python-multipart>=0.0.5
 tqdm
 uvicorn
 python-dotenv
-pepagent @ git+https://github.com/pepkit/pephub_db.gitegg=pepagent
+pepagent @ git+https://github.com/pepkit/pephub_db.git#egg=pepagent
 peppy @ git+https://github.com/pepkit/peppy.git@dev#egg=peppy
