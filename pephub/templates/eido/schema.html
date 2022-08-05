@@ -33,37 +33,6 @@
         </div>
     </script>
     {% endraw %}
-
-    <script>
-        const server = '/eido'
-        var source = document.getElementById("entry-template").innerHTML;
-        var template = Handlebars.compile(source);
-
-        const validate = async (e, form) => {
-            e.preventDefault()
-            let formdata = new FormData(form);
-
-            const res = await fetch(server + '/validate/pep', {
-                method: 'POST',
-                mode: 'cors',
-                body: formData,
-            }).then((res) => res.json()).then((res) => {
-                showResults(res, template)
-            }).catch(e => {
-                console.log(e)
-                showResults(e.toString())
-            })
-        }
-
-        function showResults(data, template=null) {
-            if (template) {
-                var html = template(data)
-            } else {
-                var html = data
-            }
-            document.getElementById('results').innerHTML = html
-        }
-    </script>
     </head>
     <body>
         <div class="container">
@@ -86,11 +55,11 @@
             <div class="card mt-3">
                 <h5 class="card-header">File upload</h5>
                 <div class="card-body">
-                    <form action="/eido/validate/pep/" enctype="multipart/form-data" method="post">
+                    <form action="#" enctype="multipart/form-data" method="post" onsubmit="validate(event,this);">
                         <input name="peps" type="file" multiple>
                         <input type="hidden" value="{{ namespace }}" name="namespace">
                         <input type="hidden" value="{{ project }}" name="project">
-                        <input type="submit">
+                        <button class="btn btn-primary" type="submit">Submit Query</button>
                     </form> 
                     
                 </div>
@@ -116,4 +85,35 @@
             </div>
         </div>
     </body>
+    <script>
+        const server = '/eido'
+        var source = document.getElementById("entry-template").innerHTML;
+        var template = Handlebars.compile(source);
+
+        async function validate(e, form) {
+            e.preventDefault()
+            let formData = new FormData(form);
+
+            const res = await fetch(server + '/validate/pep', {
+                method: 'POST',
+                mode: 'cors',
+                body: formData,
+            }).then((res) => res.json()).then((res) => {
+                console.log(res)
+                showResults(res, template)
+            }).catch(e => {
+                console.log(e)
+                showResults(e.toString())
+            })
+        }
+
+        function showResults(data, template=null) {
+            if (template) {
+                var html = template(data)
+            } else {
+                var html = data
+            }
+            document.getElementById('results').innerHTML = html
+        }
+    </script>
 </html>
