@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, Request
+import shutil
+from typing import List
+from fastapi import APIRouter, Depends, Request, UploadFile, File
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
+import tempfile
 
 from pephub.const import BASE_TEMPLATES_PATH
-from peppy import __version__ as peppy_version
+from peppy import __version__ as peppy_version, Project
 from platform import python_version
 
 from .._version import __version__ as pephub_version
@@ -40,6 +43,29 @@ async def get_namespace_projects(namespace: str, db: PepAgent = Depends(get_db),
         return JSONResponse(content={p.name: p.to_dict() for p in projects[:limit]})
     else:
         return JSONResponse(content=projects)
+
+@router.post("/submit", summary="Submit a PEP to the current namespace")
+async def submit_pep(namespace: str, config_file: UploadFile = File(...), other_files: List[UploadFile] = File(...)):
+    # create temp dir that gets deleted 
+    # after endpoint execution ends
+    with tempfile.TemporaryDirectory() as dirpath:
+        # save config file in tmpdir
+        with open(f"{dirpath}/{config_file.filename}", "wb") as cfg_fh:
+            shutil.copyfileobj(config_file.file, cfg_fh)
+        
+        # save any other files the user might have supplied
+        for upload_file in other_files:
+            # open new file inside the tmpdir
+            with open(f"{dirpath}/{upload_file.filename}", "wb") as local_tmpf:
+                shutil.copyfileobj(upload_file.file, local_tmpf)
+
+        p = Project(f"{dirpath}/{config_file.filename}")
+        return {
+            "namespace": namespace,
+            "proj": p.to_dict(),
+            "config_file": config_file.filename,
+            "other_files": [f.filename for f in other_files]
+        }
 
 @router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
 async def namespace_view(request: Request, namespace: str, db: PepAgent = Depends(get_db)):

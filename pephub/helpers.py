@@ -1,10 +1,8 @@
-from typing import Union
 from fastapi import Response
 from ubiquerg import VersionInHelpParser
 
 from os.path import exists
 from yaml import safe_load
-import os
 import zipfile
 import io
 

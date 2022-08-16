@@ -9,4 +9,6 @@ tqdm
 uvicorn
 python-dotenv
 pepagent @ git+https://github.com/pepkit/pephub_db.git#egg=pepagent
-peppy @ git+https://github.com/pepkit/peppy.git@dev#egg=peppy
+peppy
+requests
+aiofiles
