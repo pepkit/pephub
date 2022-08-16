@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, UploadFile, File
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
+import yaml
 
 from pephub.const import BASE_TEMPLATES_PATH
 from peppy import __version__ as peppy_version
@@ -40,6 +41,12 @@ async def get_namespace_projects(namespace: str, db: PepAgent = Depends(get_db),
         return JSONResponse(content={p.name: p.to_dict() for p in projects[:limit]})
     else:
         return JSONResponse(content=projects)
+
+@router.post("/submit", summary="Submit a new PEP to a give namespace.")
+async def submit_pep(file: UploadFile = File(...)):
+    return {
+        "filename": file.filename
+    }
 
 @router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
 async def namespace_view(request: Request, namespace: str, db: PepAgent = Depends(get_db)):
