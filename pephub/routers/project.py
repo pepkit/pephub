@@ -1,9 +1,11 @@
 import json
+import tempfile
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from typing import Optional
 from fastapi.templating import Jinja2Templates
+import tempfile
 
 import eido
 import peppy
@@ -38,18 +40,38 @@ async def get_a_pep(
     Fetch a PEP from a certain namespace
     """
     proj = get_pep(db, namespace, pep_id)
+
     if proj is not None:
-        return {"pep": proj.to_dict()}
+        samples = [s.to_dict() for s in proj.samples]
+        sample_table_indx = proj.sample_table_index
+
+        # this assumes the first sample's attributes
+        # is representative of all samples attributes
+        # -- is this the case?
+        sample_attributes = proj._samples[0]._attributes
+        try:
+            pep_version = proj.pep_version
+        except Exception:
+            pep_version = "2.1.0"
+        return {
+            "pep": proj.to_dict(),
+            "pep_version": pep_version,
+            "samples": samples,
+            "sample_table_indx": sample_table_indx,
+            "sample_attributes": sample_attributes
+        }
     else:
-        raise HTTPException(404, f"Project '{namespace}/{pep_id}' not found in database.")
+        raise HTTPException(
+            404, {
+                "message": f"Project '{namespace}/{pep_id}' not found in database."
+            }
+        )
 
 
-# # @router.get("/zip")
-# # async def zip_pep(namespace: str, pep_id: str, proj: peppy.Project = Depends(validate_pep)):
-# #     """Zip a pep"""
-# #     with TemporaryFile('w') as tmp:
-# #         tmp.write(proj.to_yaml())
-# #         return FileResponse(tmp.name, filename=f"{namespace}_{pep_id}.yaml")
+@router.get("/zip")
+async def zip_pep(namespace: str, pep_id: str, db: PepAgent = Depends(get_db)):
+    """Zip a pep"""
+    proj = get_pep(db, namespace, pep_id)
 
 # fetch configuration file
 # @router.get("/config")

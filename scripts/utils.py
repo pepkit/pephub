@@ -2,6 +2,7 @@ import os
 import yaml
 import pathlib
 
+
 def is_valid_namespace(path: str) -> bool:
     """
     Check if a given path is a valid namespace directory. Function
@@ -14,6 +15,7 @@ def is_valid_namespace(path: str) -> bool:
     name = pathlib.Path(path).name
     criteria = [os.path.isdir(path), not name.startswith(".")]
     return all(criteria)
+
 
 def is_valid_project(path: str) -> bool:
     """
@@ -28,6 +30,7 @@ def is_valid_project(path: str) -> bool:
     name = pathlib.Path(path).name
     criteria = [os.path.isdir(path), not name.startswith(".")]
     return all(criteria)
+
 
 def extract_namespace_info(path_to_namespace: str) -> dict:
     """
@@ -44,6 +47,7 @@ def extract_namespace_info(path_to_namespace: str) -> dict:
         return _pephub_yaml
     except FileNotFoundError:
         return {}
+
 
 def extract_project_file_name(path_to_proj: str) -> str:
     """

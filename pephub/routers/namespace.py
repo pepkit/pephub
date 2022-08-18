@@ -1,6 +1,6 @@
 import shutil
 from typing import List
-from fastapi import APIRouter, Depends, Request, UploadFile, File
+from fastapi import APIRouter, Depends, Request, UploadFile, File, Form
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 import tempfile
@@ -36,7 +36,9 @@ async def get_namespace(
 
 
 @router.get("/projects", summary="Fetch all projects inside a particular namespace.")
-async def get_namespace_projects(namespace: str, db: PepAgent = Depends(get_db), limit: int = 100):
+async def get_namespace_projects(
+    namespace: str, db: PepAgent = Depends(get_db), limit: int = 100
+):
     """Fetch the projects for a particular namespace"""
     projects = db.get_projects(namespace=namespace)
     if limit:
@@ -44,15 +46,22 @@ async def get_namespace_projects(namespace: str, db: PepAgent = Depends(get_db),
     else:
         return JSONResponse(content=projects)
 
+
 @router.post("/submit", summary="Submit a PEP to the current namespace")
-async def submit_pep(namespace: str, config_file: UploadFile = File(...), other_files: List[UploadFile] = File(...)):
-    # create temp dir that gets deleted 
+async def submit_pep(
+    namespace: str,
+    project_name: str = Form(),
+    config_file: UploadFile = File(...),
+    other_files: List[UploadFile] = File(...),
+    db: PepAgent = Depends(get_db),
+):
+    # create temp dir that gets deleted
     # after endpoint execution ends
     with tempfile.TemporaryDirectory() as dirpath:
         # save config file in tmpdir
         with open(f"{dirpath}/{config_file.filename}", "wb") as cfg_fh:
             shutil.copyfileobj(config_file.file, cfg_fh)
-        
+
         # save any other files the user might have supplied
         for upload_file in other_files:
             # open new file inside the tmpdir
@@ -60,21 +69,33 @@ async def submit_pep(namespace: str, config_file: UploadFile = File(...), other_
                 shutil.copyfileobj(upload_file.file, local_tmpf)
 
         p = Project(f"{dirpath}/{config_file.filename}")
+        db.upload_project(p, namespace, project_name)
         return {
             "namespace": namespace,
+            "project_name": project_name,
             "proj": p.to_dict(),
             "config_file": config_file.filename,
-            "other_files": [f.filename for f in other_files]
+            "other_files": [f.filename for f in other_files],
         }
 
-@router.get("/view", summary="View a visual summary of a particular namespace.", response_class=HTMLResponse)
-async def namespace_view(request: Request, namespace: str, db: PepAgent = Depends(get_db)):
+
+@router.get(
+    "/view",
+    summary="View a visual summary of a particular namespace.",
+    response_class=HTMLResponse,
+)
+async def namespace_view(
+    request: Request, namespace: str, db: PepAgent = Depends(get_db)
+):
     """Returns HTML response with a visual summary of the namespace."""
     nspace = db.get_namespace(namespace)
-    return templates.TemplateResponse("namespace.html", {
-        'namespace': nspace,
-        'request': request,
-        'peppy_version': peppy_version,
-        'python_version': python_version(),
-        'pephub_version': pephub_version
-    })
+    return templates.TemplateResponse(
+        "namespace.html",
+        {
+            "namespace": nspace,
+            "request": request,
+            "peppy_version": peppy_version,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+        },
+    )

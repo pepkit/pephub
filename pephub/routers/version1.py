@@ -25,6 +25,7 @@ ALL_VERSIONS = {
     "python_version": python_version(),
 }
 
+
 @router.get("/")
 async def main(request: Request, db: PepAgent = Depends(get_db)):
     templ_vars = {"request": request}
@@ -35,8 +36,9 @@ async def main(request: Request, db: PepAgent = Depends(get_db)):
             templ_vars,
             **ALL_VERSIONS,
             namespaces=namespaces,
-        )
+        ),
     )
+
 
 # @router.get("/pep-list")
 # async def pep_list():

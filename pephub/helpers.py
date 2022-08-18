@@ -1,10 +1,13 @@
+from tempfile import TemporaryDirectory
 from fastapi import Response
 from ubiquerg import VersionInHelpParser
 
-from os.path import exists
+from os.path import exists, basename
 from yaml import safe_load
 import zipfile
 import io
+
+import peppy
 
 from pephub.exceptions import PepHubException
 
@@ -59,12 +62,12 @@ def build_parser():
         default=DEFAULT_PORT,
     )
     sps["serve"].add_argument(
-        '-d',
-        '--debug',
+        "-d",
+        "--debug",
         dest="debug",
         help="Run the server with debug mode on",
         type=bool,
-        default=False
+        default=False,
     )
     sps["serve"].add_argument(
         "-r",
@@ -72,7 +75,7 @@ def build_parser():
         dest="reload",
         type=bool,
         help="Run the server in reload configuration",
-        default=False
+        default=False,
     )
 
     return parser
@@ -97,7 +100,29 @@ def read_server_configuration(path: str) -> dict:
             "data": {"path": cfg["data"]["path"], "index": cfg["data"].get("index")}
         }
 
-
+def zip_pep(project: peppy.Project) -> Response:
+    """Zip a project up to download"""
+    mf = io.BytesIO()
+    with TemporaryDirectory() as dirpath:
+        # convert project to files on disk
+        files = []
+        if project.config:
+            cfg_filename = basename(project.config_file)
+            files.append(cfg_filename)
+            with open(f"{dirpath}/{cfg_filename}", 'w') as cfg_fh:
+                cfg_fh.write(project.to_yaml())
+        if project.sample_table:
+            sample_table_filename = project.to_dict().get('sample_table', "sample_table.csv")
+            files.append(sample_table_filename)
+            with open(f"{dirpath}/{sample_table_filename}", 'w') as stable_fh:
+                stable_fh.write(project.sample_table.to_csv())
+        if project.subsample_table:
+            subsample_table_filename = project.to_dict().get('subsample_table', "subsample_table.csv")
+            files.append(subsample_table_filename)
+            with open(f"{dirpath}/{subsample_table_filename}", 'w') as subtable_fh:
+                subtable_fh.write(project.subsample_table.to_csv())
+        
+        
 def zip_conv_result(conv_result: dict):
     zip_filename = "conversion_result.zip"
 

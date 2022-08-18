@@ -4,13 +4,14 @@ from pepagent import PepAgent
 from dotenv import load_dotenv
 from pepagent import PepAgent
 
-from .const import ( 
-    DEFAULT_POSTGRES_HOST, 
-    DEFAULT_POSTGRES_PASSWORD, 
-    DEFAULT_POSTGRES_USER
+from .const import (
+    DEFAULT_POSTGRES_HOST,
+    DEFAULT_POSTGRES_PASSWORD,
+    DEFAULT_POSTGRES_USER,
 )
 
 load_dotenv()
+
 
 def get_db():
     # create database
