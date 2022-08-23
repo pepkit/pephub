@@ -1,4 +1,4 @@
-from tempfile import TemporaryDirectory
+from datetime import date
 from fastapi import Response
 from ubiquerg import VersionInHelpParser
 
@@ -102,30 +102,32 @@ def read_server_configuration(path: str) -> dict:
 
 def zip_pep(project: peppy.Project) -> Response:
     """Zip a project up to download"""
-    mf = io.BytesIO()
-    with TemporaryDirectory() as dirpath:
-        # convert project to files on disk
-        files = []
-        if project.config:
-            cfg_filename = basename(project.config_file)
-            files.append(cfg_filename)
-            with open(f"{dirpath}/{cfg_filename}", 'w') as cfg_fh:
-                cfg_fh.write(project.to_yaml())
-        if project.sample_table:
-            sample_table_filename = project.to_dict().get('sample_table', "sample_table.csv")
-            files.append(sample_table_filename)
-            with open(f"{dirpath}/{sample_table_filename}", 'w') as stable_fh:
-                stable_fh.write(project.sample_table.to_csv())
-        if project.subsample_table:
-            subsample_table_filename = project.to_dict().get('subsample_table', "subsample_table.csv")
-            files.append(subsample_table_filename)
-            with open(f"{dirpath}/{subsample_table_filename}", 'w') as subtable_fh:
-                subtable_fh.write(project.subsample_table.to_csv())
-        
-        
-def zip_conv_result(conv_result: dict):
-    zip_filename = "conversion_result.zip"
+    content_to_zip = {}
 
+    if project.config:
+        cfg_filename = basename(project.config_file)
+        content_to_zip[cfg_filename] = project.config.to_yaml()
+    if project.sample_table is not None:
+        sample_table_filename = basename(project.to_dict().get('sample_table', "sample_table.csv"))
+        content_to_zip[sample_table_filename] = project.sample_table.to_csv()
+    if project.subsample_table is not None:
+        # sometimes the subsample table is a list. So change behavior
+        # based on this
+        if not isinstance(project.subsample_table, list):
+            subsample_table_filename = basename(project.to_dict().get('subsample_table', "subsample_table.csv"))
+            content_to_zip[subsample_table_filename] = project.subsample_table.to_csv()
+        else:
+            subsample_table_filenames = project.to_dict().get('subsample_table', "subsample_table.csv")
+            for sstable, sstable_filename in zip(project.subsample_table, subsample_table_filenames):
+                subsample_table_filename = basename(sstable_filename)
+                content_to_zip[subsample_table_filename] = sstable.to_csv()
+        
+        
+    
+    zip_filename = project.name or f"downloaded_pep_{date.today()}"
+    return zip_conv_result(content_to_zip, filename=(project.name or zip_filename))
+        
+def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
     mf = io.BytesIO()
 
     with zipfile.ZipFile(mf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
@@ -137,7 +139,7 @@ def zip_conv_result(conv_result: dict):
     resp = Response(
         mf.getvalue(),
         media_type="application/x-zip-compressed",
-        headers={"Content-Disposition": f"attachment;filename={zip_filename}"},
+        headers={"Content-Disposition": f"attachment;filename={filename}"},
     )
 
     return resp

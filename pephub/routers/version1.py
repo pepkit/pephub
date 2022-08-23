@@ -39,6 +39,9 @@ async def main(request: Request, db: PepAgent = Depends(get_db)):
         ),
     )
 
+@router.get("/_version")
+async def version():
+    return dict(**ALL_VERSIONS)
 
 # @router.get("/pep-list")
 # async def pep_list():

@@ -14,7 +14,7 @@ from pephub.const import BASE_TEMPLATES_PATH
 from peppy import __version__ as peppy_version
 from platform import python_version
 from ..crud import get_pep
-from ..helpers import zip_conv_result
+from ..helpers import zip_conv_result, zip_pep
 from .._version import __version__ as pephub_version
 from ..dependencies import *
 from ..route_examples import *
@@ -58,20 +58,22 @@ async def get_a_pep(
             "pep_version": pep_version,
             "samples": samples,
             "sample_table_indx": sample_table_indx,
-            "sample_attributes": sample_attributes
+            "sample_attributes": sample_attributes,
         }
     else:
         raise HTTPException(
-            404, {
-                "message": f"Project '{namespace}/{pep_id}' not found in database."
-            }
+            404, {"message": f"Project '{namespace}/{pep_id}' not found in database."}
         )
 
 
 @router.get("/zip")
-async def zip_pep(namespace: str, pep_id: str, db: PepAgent = Depends(get_db)):
+async def zip_pep_for_download(
+    namespace: str, pep_id: str, db: PepAgent = Depends(get_db)
+):
     """Zip a pep"""
     proj = get_pep(db, namespace, pep_id)
+    return zip_pep(proj)
+
 
 # fetch configuration file
 # @router.get("/config")
