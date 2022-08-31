@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from pephub.const import BASE_TEMPLATES_PATH
@@ -19,14 +19,14 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
 
 @router.get("/")
-async def get_all_namespaces(db: PepAgent = Depends(get_db)):
-    namespaces = db.get_namespaces()
+async def get_all_namespaces(db: Connection = Depends(get_db)):
+    namespaces = db.get_namespaces_info_by_list()
     return {"namespaces": [n["namespace"] for n in namespaces]}
 
 
 @router.get("/list")
-async def get_all_projects(db: PepAgent = Depends(get_db)):
-    namespaces = db.get_namespaces()
+async def get_all_projects(db: Connection = Depends(get_db)):
+    namespaces = db.get_namespaces_info_by_list()
     return {"namespaces": namespaces}
 
 
@@ -35,9 +35,9 @@ async def get_all_projects(db: PepAgent = Depends(get_db)):
     summary="View a visual summary of the peps on the server",
     response_class=HTMLResponse,
 )
-async def pep_view(request: Request, db: PepAgent = Depends(get_db)):
+async def pep_view(request: Request, db: Connection = Depends(get_db)):
     """Returns HTML response with a visual summary of thhe peps on the server"""
-    nspaces = db.get_namespaces()
+    nspaces = db.get_namespaces_info_by_list()
     return templates.TemplateResponse(
         "pep.html",
         {

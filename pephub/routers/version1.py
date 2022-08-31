@@ -27,9 +27,9 @@ ALL_VERSIONS = {
 
 
 @router.get("/")
-async def main(request: Request, db: PepAgent = Depends(get_db)):
+async def main(request: Request, db: Connection = Depends(get_db)):
     templ_vars = {"request": request}
-    namespaces = db.get_namespaces()
+    namespaces = db.get_namespaces_info_by_list()
     return templates.TemplateResponse(
         "index.html",
         dict(

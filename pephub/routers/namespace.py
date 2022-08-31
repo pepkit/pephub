@@ -28,19 +28,19 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 @router.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(
     namespace: str,
-    db: PepAgent = Depends(get_db),
+    db: Connection = Depends(get_db),
 ):
     """Fetch namespace. Returns a JSON representation of the namespace."""
-    nspace = db.get_namespace(namespace)
+    nspace = db.get_namespace_info(namespace)
     return JSONResponse(content=nspace)
 
 
 @router.get("/projects", summary="Fetch all projects inside a particular namespace.")
 async def get_namespace_projects(
-    namespace: str, db: PepAgent = Depends(get_db), limit: int = 100
+    namespace: str, db: Connection = Depends(get_db), limit: int = 100
 ):
     """Fetch the projects for a particular namespace"""
-    projects = db.get_projects(namespace=namespace)
+    projects = db.get_projects_in_namespace(namespace)
     if limit:
         return JSONResponse(content={p.name: p.to_dict() for p in projects[:limit]})
     else:
@@ -53,7 +53,7 @@ async def submit_pep(
     project_name: str = Form(),
     config_file: UploadFile = File(...),
     other_files: List[UploadFile] = File(...),
-    db: PepAgent = Depends(get_db),
+    db: Connection = Depends(get_db),
 ):
     # create temp dir that gets deleted
     # after endpoint execution ends
@@ -85,10 +85,10 @@ async def submit_pep(
     response_class=HTMLResponse,
 )
 async def namespace_view(
-    request: Request, namespace: str, db: PepAgent = Depends(get_db)
+    request: Request, namespace: str, db: Connection = Depends(get_db)
 ):
     """Returns HTML response with a visual summary of the namespace."""
-    nspace = db.get_namespace(namespace)
+    nspace = db.get_namespace_info(namespace)
     return templates.TemplateResponse(
         "namespace.html",
         {

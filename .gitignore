@@ -131,4 +131,4 @@ env/
 
 # pephub data
 pephub/data
-postgres-data
+postgres/volumes

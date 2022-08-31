@@ -32,14 +32,18 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
     summary="Fetch a PEP",
 )
 async def get_a_pep(
-    db: PepAgent = Depends(get_db),
+    db: Connection = Depends(get_db),
     namespace: str = example_namespace,
     pep_id: str = example_pep_id,
+    tag: str = None
 ):
     """
     Fetch a PEP from a certain namespace
     """
-    proj = get_pep(db, namespace, pep_id)
+    if tag is not None:
+        proj = db.get_project(namespace, pep_id, tag=tag)
+    else:
+        proj = db.get_project(namespace, pep_id)
 
     if proj is not None:
         samples = [s.to_dict() for s in proj.samples]
@@ -62,22 +66,25 @@ async def get_a_pep(
         }
     else:
         raise HTTPException(
-            404, {"message": f"Project '{namespace}/{pep_id}' not found in database."}
+            404, {"message": f"Project '{namespace}/{pep_id}:{tag}' not found in database."}
         )
 
 
 @router.get("/zip")
 async def zip_pep_for_download(
-    namespace: str, pep_id: str, db: PepAgent = Depends(get_db)
+    namespace: str, pep_id: str, tag: str = None, db: Connection = Depends(get_db)
 ):
     """Zip a pep"""
-    proj = get_pep(db, namespace, pep_id)
+    if tag is not None:
+        proj = db.get_project(namespace, pep_id, tag=tag)
+    else:
+        proj = db.get_project(namespace, pep_id)
     return zip_pep(proj)
 
 
 # fetch configuration file
 # @router.get("/config")
-# async def get_config(namespace: str, pep_id: str, db: PepAgent = Depends(get_db)):
+# async def get_config(namespace: str, pep_id: str, db: Connection = Depends(get_db)):
 #     proj = get_pep(db, namespace, pep_id)
 #     return proj.config_file
 
@@ -85,34 +92,48 @@ async def zip_pep_for_download(
 # fetch samples for project
 @router.get("/samples")
 async def get_pep_samples(
-    db: PepAgent = Depends(get_db),
+    db: Connection = Depends(get_db),
     namespace: str = example_namespace,
     pep_id: str = example_pep_id,
+    tag: str = None
 ):
     # remove "private attributes"
-    proj = get_pep(db, namespace, pep_id)
-    return {"samples": proj.samples}
+    if tag is not None:
+        proj = db.get_project(namespace, pep_id, tag=tag)
+    else:
+        proj = db.get_project(namespace, pep_id)
+    if proj is not None:
+        return {"samples": proj.samples}
+    else:
+        raise HTTPException(
+            404, {"message": f"Project '{namespace}/{pep_id}:{tag}' not found in database."}
+        )
 
 
 # # fetch specific sample for project
 @router.get("/samples/{sample_name}")
 async def get_sample(
     sample_name: str,
-    db: PepAgent = Depends(get_db),
+    db: Connection = Depends(get_db),
     namespace: str = example_namespace,
     pep_id: str = example_pep_id,
+    tag: str = None
 ):
     proj = get_pep(db, namespace, pep_id)
-    # check that the sample exists
-    # by mapping the list of sample objects
-    # to a list of sample names
-    if sample_name not in map(lambda s: s["sample_name"], proj.samples):
-        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
-    # if download:
-    #     sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
-    #     return FileResponse(sample_file_path)
+    if proj is not None:
+        # check that the sample exists
+        # by mapping the list of sample objects
+        # to a list of sample names
+        print(list(map(lambda s: s["sample_name"], proj.samples)))
+        if sample_name not in map(lambda s: s["sample_name"], proj.samples):
+            raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
+        # if download:
+        #     sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
+        #     return FileResponse(sample_file_path)
     else:
-        return proj.get_sample(sample_name).to_dict()
+        raise HTTPException(
+            404, {"message": f"Project '{namespace}/{pep_id}:{tag}' not found in database."}
+        )
 
 
 # display a view for a specific sample
@@ -122,7 +143,7 @@ async def get_sample_view(
     pep_id: str,
     request: Request,
     sample_name: str,
-    db: PepAgent = Depends(get_db),
+    db: Connection = Depends(get_db),
 ):
     """Returns HTML response with a visual summary of the sample."""
     proj = get_pep(db, namespace, pep_id)
@@ -151,7 +172,7 @@ async def get_sample_view(
 async def get_subsamples(
     namespace: str,
     pep_id: str,
-    db: PepAgent = Depends(get_db),
+    db: Connection = Depends(get_db),
     download: bool = False,
 ):
     proj = get_pep(db, namespace, pep_id)
@@ -170,7 +191,7 @@ async def get_subsamples(
 async def convert_pep(
     namespace: str,
     pep_id: str,
-    db: PepAgent = Depends(get_db),
+    db: Connection = Depends(get_db),
     filter: Optional[str] = "basic",
     format: Optional[str] = "plain",
 ):
@@ -219,10 +240,13 @@ async def convert_pep(
     response_class=HTMLResponse,
 )
 async def project_view(
-    request: Request, namespace: str, pep_id: str, db: PepAgent = Depends(get_db)
+    request: Request, namespace: str, pep_id: str, db: Connection = Depends(get_db), tag: str = None
 ):
     """Returns HTML response with a visual summary of the project."""
-    proj = get_pep(db, namespace, pep_id)
+    if tag is not None:
+        proj = db.get_project(namespace, pep_id, tag=tag)
+    else:
+        proj = db.get_project(namespace, pep_id)
     samples = [s.to_dict() for s in proj.samples]
     try:
         pep_version = proj.pep_version

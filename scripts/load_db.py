@@ -1,8 +1,7 @@
 import argparse
 import os
-from time import sleep
 from tqdm import tqdm
-from pepagent import PepAgent
+from pepdbagent import Connection
 import peppy
 
 from utils import is_valid_namespace, is_valid_project, extract_project_file_name
@@ -66,7 +65,7 @@ print(f"Connecting to {cnx_str_censored}")
 print(f"Uploading PEPs in: {args.files}")
 
 # init pep agent
-pagent = PepAgent(
+pagent = Connection(
     host=args.hostname,
     port=args.port,
     database=args.name,

@@ -6,11 +6,12 @@ SET client_encoding = 'LATIN1';
 
 
 CREATE TABLE projects (
-    id BIGSERIAL NOT NULL PRIMARY KEY,
+    id BIGSERIAL NOT NULL,
     namespace TEXT NOT NULL,
     name TEXT NOT NULL,
+    tag TEXT NOT NULL,
     digest TEXT NOT NULL,  -- shoud be changed to CHARACTER
-    project_value json NOT NULL,
-    anno_info json  -- annotation information
+    project_value jsonb NOT NULL,
+    anno_info jsonb,  -- annotation information
+    CONSTRAINT id PRIMARY KEY (namespace, name, tag)
 );
-
