@@ -97,11 +97,7 @@ async def get_pep_samples(
     pep_id: str = example_pep_id,
     tag: str = None
 ):
-    # remove "private attributes"
-    if tag is not None:
-        proj = db.get_project(namespace, pep_id, tag=tag)
-    else:
-        proj = db.get_project(namespace, pep_id)
+    proj = db.get_project(namespace, pep_id, tag)
     if proj is not None:
         return {"samples": proj.samples}
     else:
@@ -119,7 +115,7 @@ async def get_sample(
     pep_id: str = example_pep_id,
     tag: str = None
 ):
-    proj = get_pep(db, namespace, pep_id)
+    proj = db.get_project(namespace, pep_id, tag)
     if proj is not None:
         # check that the sample exists
         # by mapping the list of sample objects

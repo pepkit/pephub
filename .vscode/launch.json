@@ -26,7 +26,7 @@
       "module": "uvicorn",
       "args": ["pephub.main:app"],
       "jinja": true,
-      "justMyCode": true
+      "justMyCode": false
     }
   ]
 }
