@@ -1,3 +1,4 @@
+from json import load
 import shutil
 from typing import List
 from fastapi import APIRouter, Depends, Request, UploadFile, File, Form
@@ -16,6 +17,9 @@ from ..dependencies import *
 
 # examples
 from ..route_examples import example_namespace
+
+from dotenv import load_dotenv
+load_dotenv()
 
 router = APIRouter(
     prefix="/pep/{namespace}",
@@ -55,6 +59,9 @@ async def submit_pep(
     other_files: List[UploadFile] = File(...),
     db: Connection = Depends(get_db),
 ):
+    if os.getenv("SERVER_ENV") != "development":
+        raise HTTPException(403, "Submitting new PEPs is not presently an allowed feature.")
+
     # create temp dir that gets deleted
     # after endpoint execution ends
     with tempfile.TemporaryDirectory() as dirpath:
