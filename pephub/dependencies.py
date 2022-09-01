@@ -1,6 +1,7 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 import os
 from pepdbagent import Connection
+from pepdbagent.const import DEFAULT_TAG
 from dotenv import load_dotenv
 
 from .const import (
@@ -25,3 +26,16 @@ def get_db():
         yield pepdb
     finally:
         pepdb.close_connection()
+
+def get_project(
+    namespace: str,
+    pep_id: str,
+    tag: str = None,
+    db: Connection = Depends(get_db),
+):
+    proj = db.get_project(namespace, pep_id, tag)
+    if proj is not None:
+        yield proj
+    else:
+        used_tag = tag or DEFAULT_TAG
+        raise HTTPException(404, f"PEP '{namespace}/{pep_id}:{used_tag}' does not exist in database. Did you spell it correctly?")

@@ -1,4 +1,5 @@
 from datetime import date
+from typing import List
 from fastapi import Response
 from ubiquerg import VersionInHelpParser
 
@@ -99,6 +100,12 @@ def read_server_configuration(path: str) -> dict:
         return {
             "data": {"path": cfg["data"]["path"], "index": cfg["data"].get("index")}
         }
+
+def get_project_sample_names(proj: peppy.Project) -> List[str]:
+    """
+    Given a peppy.Project instance, return a list of it's sample names
+    """
+    return map(lambda s: s["sample_name"], proj.samples)
 
 def zip_pep(project: peppy.Project) -> Response:
     """Zip a project up to download"""

@@ -14,7 +14,7 @@ from pephub.const import BASE_TEMPLATES_PATH
 from peppy import __version__ as peppy_version
 from platform import python_version
 from ..crud import get_pep
-from ..helpers import zip_conv_result, zip_pep
+from ..helpers import get_project_sample_names, zip_conv_result, zip_pep
 from .._version import __version__ as pephub_version
 from ..dependencies import *
 from ..route_examples import *
@@ -32,53 +32,37 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
     summary="Fetch a PEP",
 )
 async def get_a_pep(
-    db: Connection = Depends(get_db),
-    namespace: str = example_namespace,
-    pep_id: str = example_pep_id,
-    tag: str = None
+    proj: peppy.Project = Depends(get_project)
 ):
     """
     Fetch a PEP from a certain namespace
     """
-    if tag is not None:
-        proj = db.get_project(namespace, pep_id, tag=tag)
-    else:
-        proj = db.get_project(namespace, pep_id)
 
-    if proj is not None:
-        samples = [s.to_dict() for s in proj.samples]
-        sample_table_indx = proj.sample_table_index
+    samples = [s.to_dict() for s in proj.samples]
+    sample_table_indx = proj.sample_table_index
 
-        # this assumes the first sample's attributes
-        # is representative of all samples attributes
-        # -- is this the case?
-        sample_attributes = proj._samples[0]._attributes
-        try:
-            pep_version = proj.pep_version
-        except Exception:
-            pep_version = "2.1.0"
-        return {
-            "pep": proj.to_dict(),
-            "pep_version": pep_version,
-            "samples": samples,
-            "sample_table_indx": sample_table_indx,
-            "sample_attributes": sample_attributes,
-        }
-    else:
-        raise HTTPException(
-            404, {"message": f"Project '{namespace}/{pep_id}:{tag}' not found in database."}
-        )
+    # this assumes the first sample's attributes
+    # is representative of all samples attributes
+    # -- is this the case?
+    sample_attributes = proj._samples[0]._attributes
+    try:
+        pep_version = proj.pep_version
+    except Exception:
+        pep_version = "2.1.0"
+    return {
+        "pep": proj.to_dict(),
+        "pep_version": pep_version,
+        "samples": samples,
+        "sample_table_indx": sample_table_indx,
+        "sample_attributes": sample_attributes,
+    }
 
 
 @router.get("/zip")
 async def zip_pep_for_download(
-    namespace: str, pep_id: str, tag: str = None, db: Connection = Depends(get_db)
+    proj: peppy.Project = Depends(get_project)
 ):
     """Zip a pep"""
-    if tag is not None:
-        proj = db.get_project(namespace, pep_id, tag=tag)
-    else:
-        proj = db.get_project(namespace, pep_id)
     return zip_pep(proj)
 
 
@@ -92,58 +76,38 @@ async def zip_pep_for_download(
 # fetch samples for project
 @router.get("/samples")
 async def get_pep_samples(
-    db: Connection = Depends(get_db),
-    namespace: str = example_namespace,
-    pep_id: str = example_pep_id,
-    tag: str = None
+    proj: peppy.Project = Depends(get_project)
 ):
-    proj = db.get_project(namespace, pep_id, tag)
-    if proj is not None:
-        return {"samples": proj.samples}
-    else:
-        raise HTTPException(
-            404, {"message": f"Project '{namespace}/{pep_id}:{tag}' not found in database."}
-        )
+    return {"samples": proj.samples}
 
 
 # # fetch specific sample for project
 @router.get("/samples/{sample_name}")
 async def get_sample(
     sample_name: str,
-    db: Connection = Depends(get_db),
-    namespace: str = example_namespace,
-    pep_id: str = example_pep_id,
-    tag: str = None
+    proj: peppy.Project = Depends(get_project)
 ):
-    proj = db.get_project(namespace, pep_id, tag)
-    if proj is not None:
-        # check that the sample exists
-        # by mapping the list of sample objects
-        # to a list of sample names
-        print(list(map(lambda s: s["sample_name"], proj.samples)))
-        if sample_name not in map(lambda s: s["sample_name"], proj.samples):
-            raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
-        # if download:
-        #     sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
-        #     return FileResponse(sample_file_path)
-    else:
-        raise HTTPException(
-            404, {"message": f"Project '{namespace}/{pep_id}:{tag}' not found in database."}
-        )
+    # check that the sample exists
+    # by mapping the list of sample objects
+    # to a list of sample names
+    if sample_name not in get_project_sample_names(proj):
+        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
+    # if download:
+    #     sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
+    #     return FileResponse(sample_file_path)
 
 
 # display a view for a specific sample
 @router.get("/samples/{sample_name}/view")
 async def get_sample_view(
+    request: Request,
     namespace: str,
     pep_id: str,
-    request: Request,
     sample_name: str,
-    db: Connection = Depends(get_db),
+    proj: peppy.Project = Depends(get_project)
 ):
     """Returns HTML response with a visual summary of the sample."""
-    proj = get_pep(db, namespace, pep_id)
-    if sample_name not in map(lambda s: s["sample_name"], proj.samples):
+    if sample_name not in get_project_sample_names(proj):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     sample = proj.get_sample(sample_name)
     attrs = sample._attributes
@@ -168,10 +132,9 @@ async def get_sample_view(
 async def get_subsamples(
     namespace: str,
     pep_id: str,
-    db: Connection = Depends(get_db),
+    proj: peppy.Project = Depends(get_project),
     download: bool = False,
 ):
-    proj = get_pep(db, namespace, pep_id)
     subsamples = proj.subsample_table
     # check if subsamples exist
     if subsamples is not None:
@@ -185,9 +148,7 @@ async def get_subsamples(
 
 @router.get("/convert")
 async def convert_pep(
-    namespace: str,
-    pep_id: str,
-    db: Connection = Depends(get_db),
+    proj: peppy.Project = Depends(get_project),
     filter: Optional[str] = "basic",
     format: Optional[str] = "plain",
 ):
@@ -198,7 +159,6 @@ async def convert_pep(
     See, http://eido.databio.org/en/latest/filters/#convert-a-pep-into-an-alternative-format-with-a-filter
     for more information.
     """
-    proj = get_pep(db, namespace, pep_id)
     # default to basic
     if filter is None:
         filter = "basic"  # default to basic
@@ -236,13 +196,12 @@ async def convert_pep(
     response_class=HTMLResponse,
 )
 async def project_view(
-    request: Request, namespace: str, pep_id: str, db: Connection = Depends(get_db), tag: str = None
+    request: Request, 
+    namespace: str,
+    proj: peppy.Project = Depends(get_project)
 ):
     """Returns HTML response with a visual summary of the project."""
-    if tag is not None:
-        proj = db.get_project(namespace, pep_id, tag=tag)
-    else:
-        proj = db.get_project(namespace, pep_id)
+    
     samples = [s.to_dict() for s in proj.samples]
     try:
         pep_version = proj.pep_version
