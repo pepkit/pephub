@@ -53,8 +53,10 @@ async def get_namespace_projects(
 
 @router.post("/submit", summary="Submit a PEP to the current namespace")
 async def submit_pep(
+    request: Request,
     namespace: str,
     project_name: str = Form(),
+    tag: str = Form(),
     config_file: UploadFile = File(...),
     other_files: List[UploadFile] = File(...),
     db: Connection = Depends(get_db),
@@ -76,15 +78,35 @@ async def submit_pep(
                 shutil.copyfileobj(upload_file.file, local_tmpf)
 
         p = Project(f"{dirpath}/{config_file.filename}")
-        db.upload_project(p, namespace, project_name)
-        return {
-            "namespace": namespace,
-            "project_name": project_name,
-            "proj": p.to_dict(),
-            "config_file": config_file.filename,
-            "other_files": [f.filename for f in other_files],
-        }
+        p.name = project_name
+        db.upload_project(p, namespace=namespace, name=project_name, tag=tag)
+        return templates.TemplateResponse(
+            "submission.html",
+            {
+                "request": request,
+                "namespace": namespace,
+                "project_name": project_name,
+                "proj": p.to_dict(),
+                "config_file": config_file.filename,
+                "other_files": [f.filename for f in other_files],
+            }
+        )
 
+@router.get("/submit", summary="Submit a PEP to the current namespace")
+async def submit_pep_form(
+    request: Request,
+    namespace: str,
+):
+    return templates.TemplateResponse(
+        "submit.html",
+        {
+            "namespace": namespace,
+            "request": request,
+            "peppy_version": peppy_version,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+        },
+    )
 
 @router.get(
     "/view",

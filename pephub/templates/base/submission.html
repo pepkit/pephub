@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <a href="/">← back home</a>
+    <h1>PEP <span class="fw-bold">{{namespace}}</span> submitted successfully</h1>
+    <div class="border-bottom border-secondary my-2"></div>
+    <div>
+        <div class="alert alert-success" role="alert">
+            <span class="fw-bold">{{namespace}}/{{project_name}}:{{tag}}</span> submitted successfully
+            <a href="/pep/{{namespace}}/{{project_name}}/view">View PEP</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
