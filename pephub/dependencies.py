@@ -14,7 +14,6 @@ from .const import (
 
 load_dotenv()
 
-
 def get_db():
     # create database
     pepdb = Connection(

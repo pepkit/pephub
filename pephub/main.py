@@ -1,6 +1,7 @@
 import sys
 import logmuse
 import uvicorn
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -47,7 +48,6 @@ app.mount(
 # The eido validator is an SPA that can be served as a static HTML
 # file. These can only be added on the main app, not on a router
 app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
-
 
 def main():
     # set up the logger
