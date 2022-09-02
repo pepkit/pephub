@@ -95,6 +95,8 @@ async def get_sample(
     # if download:
     #     sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
     #     return FileResponse(sample_file_path)
+    sample = proj.get_sample(sample_name)
+    return sample
 
 
 # display a view for a specific sample
@@ -198,6 +200,7 @@ async def convert_pep(
 async def project_view(
     request: Request, 
     namespace: str,
+    tag: str = None,
     proj: peppy.Project = Depends(get_project)
 ):
     """Returns HTML response with a visual summary of the project."""
@@ -212,6 +215,7 @@ async def project_view(
         {
             "namespace": namespace,
             "project": proj,
+            "tag": tag,
             "project_dict": proj.to_dict(),
             "pep_version": pep_version,
             "sample_table_columns": proj.sample_table.columns.to_list(),

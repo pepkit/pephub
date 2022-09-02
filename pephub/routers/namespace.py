@@ -55,8 +55,8 @@ async def get_namespace_projects(
 async def submit_pep(
     request: Request,
     namespace: str,
-    project_name: str = Form(),
-    tag: str = Form(),
+    project_name: str = Form(...),
+    tag: str = Form(...),
     config_file: UploadFile = File(...),
     other_files: List[UploadFile] = File(...),
     db: Connection = Depends(get_db),
