@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
 
     <title>Custom validator</title>
-
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
     <!-- showing results -->
     {% raw %}
     <script id="entry-template" type="text/x-handlebars-template">
@@ -91,6 +91,7 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <!-- schema description -->
     <div class="container">
         <div class="card mt-3">
@@ -103,6 +104,19 @@
                         {%endfor%}
                     </code> -->
                 <pre><code class="language-yaml">{{schema | pprint}}</code}</pre>
+=======
+        <div class="container">
+            <div class="card mt-3">
+                <h5 class="card-header">Description</h5>
+                <div class="card-body">
+                    <!-- I want to use json stringify for this schema data -->
+                    {% for s in schema %}
+                    <div>
+                        {{s|tojson}}
+                    </div>
+                    {%endfor%}
+                </div>
+>>>>>>> ded178730c2f2698245521855b8cc0b9983267a2
             </div>
         </div>
     </div>
