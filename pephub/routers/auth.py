@@ -16,29 +16,31 @@ load_dotenv()
 github_app_config = {
     "client_id": os.getenv("GH_CLIENT_ID", "dummy-client-id"),
     "client_secret": os.getenv("GH_CLIENT_SECRET", "dummy-secret"),
-    "redirect_uri": os.getenv("REDIRECT_URL", f"{Request.url._url}/auth/callback")
+    "redirect_uri": os.getenv("REDIRECT_URI")
 }
 
-auth = APIRouter(
+router = APIRouter(
     prefix="/auth",
     tags=["namespace"],
 )
 
-@auth.get("/login", response_class=RedirectResponse)
-def login():
+@router.get("/login", response_class=RedirectResponse)
+def login(request: Request):
     """
     Redirects to log user in to GitHub. GitHub will pass a code to the callback URL.
     """
+    q_params = request.query_params
     # Generate random state variable so we know the callback originated with us
     state = token_hex(16)
     return build_authorization_url(
         github_app_config["client_id"], 
-        github_app_config["redirect_uri"], 
-        state
+        github_app_config["redirect_uri"],
+        state,
+        **q_params
     )
 
-@auth.get("/callback", response_class=RedirectResponse)
-def callback(response: Response, code: Union[str, None] = None, state: Union[str, None] = None):
+@router.get("/callback", response_class=RedirectResponse)
+def callback(response: Response, request: Request, code: Union[str, None] = None, state: Union[str, None] = None):
     # TODO: We should check the provided state here to confirm that we generated it
 
     # Make a request to the following endpoint to receive an access token
@@ -77,17 +79,16 @@ def callback(response: Response, code: Union[str, None] = None, state: Union[str
             "user": u['login'],
             "orgs": [org['login'] for org in orgs]
         })
-    return "/profile"
+    return "/"
 
-@auth.get("/profile")
-async def view_profile(session_info: str = Depends(read_session_info)):
-    print(f"session_info: {session_info}")
+@router.get("/profile")
+async def view_profile(session_info: dict = Depends(read_session_info)):
     if session_info:
         return session_info
     else:
         return { "message": "Unauthorized user"}
 
-@auth.get("/logout")
+@router.get("/logout")
 def logout(response: RedirectResponse):
     response = RedirectResponse(url="/")
     response.delete_cookie("pephub_session")

@@ -151,9 +151,12 @@ def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
 
     return resp
 
-def build_authorization_url(client_id: str, redirect_uri: str, state: str) -> str:
+def build_authorization_url(client_id: str, redirect_uri: str, state: str, **kwargs: dict) -> str:
     """
     Helper function to build an authorization url
     for logging in with GitHub
     """
-    return f"https://github.com/login/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&state={state}"
+    auth_url = f"https://github.com/login/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&state={state}"
+    for key, value in kwargs.items():
+        auth_url += f"&{key}={value}"
+    return auth_url

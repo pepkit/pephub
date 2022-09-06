@@ -10,7 +10,7 @@ from starlette.staticfiles import StaticFiles
 from ._version import __version__ as server_v
 from .const import LOG_FORMAT, PKG_NAME, TAGS_METADATA
 from .helpers import build_parser
-from .routers import version1, namespace, project, eido, pep
+from .routers import version1, auth, namespace, project, eido, pep
 from .const import STATICS_PATH, EIDO_PATH
 
 # build server
@@ -33,6 +33,7 @@ app.add_middleware(
 
 # build routes
 app.include_router(version1.router)
+app.include_router(auth.router)
 app.include_router(namespace.router)
 app.include_router(project.router)
 app.include_router(eido.router)
