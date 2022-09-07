@@ -35,7 +35,7 @@ async def get_all_projects(db: Connection = Depends(get_db)):
     summary="View a visual summary of the peps on the server",
     response_class=HTMLResponse,
 )
-async def pep_view(request: Request, db: Connection = Depends(get_db)):
+async def pep_view(request: Request, db: Connection = Depends(get_db), session_info: dict = Depends(read_session_info)):
     """Returns HTML response with a visual summary of thhe peps on the server"""
     nspaces = db.get_namespaces_info_by_list()
     return templates.TemplateResponse(
@@ -45,5 +45,6 @@ async def pep_view(request: Request, db: Connection = Depends(get_db)):
             "request": request,
             "peppy_version": peppy_version,
             "python_version": python_version(),
+            "logged_in": session_info is not None
         },
     )

@@ -8,8 +8,8 @@ python-multipart>=0.0.5
 tqdm
 uvicorn
 python-dotenv
-pepdbagent @ git+https://github.com/pepkit/pepdbagent.git@dev#egg=pepagent
-peppy @ git+https://github.com/pepkit/peppy.git@dev#egg=peppy
+pepdbagent
+peppy
 requests
 aiofiles
 pyjwt[crypto]

@@ -106,7 +106,8 @@ async def get_sample_view(
     namespace: str,
     pep_id: str,
     sample_name: str,
-    proj: peppy.Project = Depends(get_project)
+    proj: peppy.Project = Depends(get_project),
+    session_info: dict = Depends(read_session_info)
 ):
     """Returns HTML response with a visual summary of the sample."""
     if sample_name not in get_project_sample_names(proj):
@@ -125,6 +126,7 @@ async def get_sample_view(
             "peppy_version": peppy_version,
             "python_version": python_version(),
             "pephub_version": pephub_version,
+            "logged_in": session_info is not None
         },
     )
 
@@ -201,7 +203,8 @@ async def project_view(
     request: Request, 
     namespace: str,
     tag: str = None,
-    proj: peppy.Project = Depends(get_project)
+    proj: peppy.Project = Depends(get_project),
+    session_info: dict = Depends(read_session_info)
 ):
     """Returns HTML response with a visual summary of the project."""
     
@@ -226,5 +229,6 @@ async def project_view(
             "python_version": python_version(),
             "pephub_version": pephub_version,
             "filters": eido.get_available_pep_filters(),
+            "logged_in": session_info is not None
         },
     )

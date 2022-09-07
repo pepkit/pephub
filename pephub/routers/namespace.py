@@ -56,7 +56,7 @@ async def get_namespace_projects(
     response_class=HTMLResponse,
 )
 async def namespace_view(
-    request: Request, namespace: str, db: Connection = Depends(get_db)
+    request: Request, namespace: str, db: Connection = Depends(get_db), session_info: dict = Depends(read_session_info)
 ):
     """Returns HTML response with a visual summary of the namespace."""
     nspace = db.get_namespace_info(namespace)
@@ -68,6 +68,7 @@ async def namespace_view(
             "peppy_version": peppy_version,
             "python_version": python_version(),
             "pephub_version": pephub_version,
+            "logged_in": session_info is not None
         },
     )
 
