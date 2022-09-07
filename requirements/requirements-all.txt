@@ -12,5 +12,4 @@ pepdbagent @ git+https://github.com/pepkit/pepdbagent.git@dev#egg=pepagent
 peppy @ git+https://github.com/pepkit/peppy.git@dev#egg=peppy
 requests
 aiofiles
-cryptography
-pyjwt
+pyjwt[crypto]
