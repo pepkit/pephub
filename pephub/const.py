@@ -6,6 +6,12 @@ DATA_REPO = "https://github.com/pepkit/data.pephub.git"
 LOG_FORMAT = "%(levelname)s in %(funcName)s: %(message)s"
 
 DEFAULT_PORT = "80"
+DEFAULT_POSTGRES_HOST = "0.0.0.0"
+DEFAULT_POSTGRES_USER = "postgres"
+DEFAULT_POSTGRES_PASSWORD = "docker"
+DEFAULT_POSTGRES_PORT = 5432
+DEFAULT_POSTGRES_DB = "pep-db"
+
 
 EIDO_TEMPLATES_DIRNAME = "templates/eido"
 EIDO_TEMPLATES_PATH = os.path.join(
@@ -35,5 +41,3 @@ TAGS_METADATA = [
         "description": "Manage and obtain information about a particular project or PEP.",
     },
 ]
-
-INFO_KEY = "info"

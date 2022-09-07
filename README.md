@@ -1,57 +1,68 @@
 # pephub
-[TODO]
+**pephub** is a server that allows you to view, store, and share a repository of [PEPs](https://pep.databio.org/en/latest/). It provides a simple user interface to navigate the PEP repository as well as a programmatic API to access and share PEPs.
 
-## How to `serve`
+## Setup
+pephub is backed by a [postgres](https://www.postgresql.org/) database to store PEPs. It utilizes a [special client](https://github.com/pepkit/pephub_db) to interface the database and read/write PEPs from the database through [peppy](https://github.com/pepkit/peppy).
 
-### Building container
+To begin, you will need a database of PEPs. You may follow instructions [here](https://github.com/pepkit/pephub_db/tree/master/pep_db) to get that running. Once you have a database with the proper schema, you may load your database. This repository is packaged with a [convenient script](./scripts) to load a local folder of PEPs into the database.
 
-In the same directory as the `Dockerfile`:
+After the database is loaded and running, you can now run the pephub server.
 
-```
-docker build -t databio/pephub .
-```
+## Installation and Running
+Simply install the pephub server:
 
-### Running natively for development:
-
-```
-uvicorn pephub.main:app --reload --port 3001
+```console
+pip install pephub
 ```
 
-### Running container for development:
+Provide the server with your database credentials through environment variables:
 
-You can run it directly after installing with `pip install -e .`, like this:
-
-```
-pephub serve -p 5000
-```
-
-Better, though, is to use the container. Mount the source code directory:
-
-```
-docker run -p 5000:80 \
--e MODULE_NAME="pephub.main" \
--v $(pwd)/pephub:/app/pephub \
-databio/pephub /start-reload.sh
+```console
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=...
+export POSTGRES_HOST=...
 ```
 
-Your development server with hot-reloading will be served at http://localhost:5000
+And run the server! (here we are running on port 8000):
 
-### Running container for production:
+```console
+pephub serve -p 8000
+```
+
+View your PEPs at http://localhost:8000
+
+## Running development server:
+
+The server has been Dockerized and packaged with a [postgres](https://hub.docker.com/_/postgres) image to be run with [`docker compose`](https://docs.docker.com/compose/). This lets you run everything at once and develop without having to manage database instances. The `docker-compose.yml` file is written such that it mounts the database storage info to a folder called `postgres-data` at the root of the repository. This lets you load the database once and have it persist its state after restarting the container.
+
+To run:
+
+```console
+docker compose up --build
+```
+
+`pephub` now runs/listens on http://localhost:8000  
+`postgres` now runs/listens on http://localhost:5432
+
+On subsequent startups, you may ignore the `--build` flag if nothing on the Dockerfile or dependency list has changed.
+
+## Running container for production:
 Build the container:
 
 ```
 docker build -t pephubserver .
 ```
 
-Run the container using the pephub `cli` as entrypoint:
+Run the container using the pephub `cli` as entrypoint. Ensure that you provide it with the necessary environment variables:
 
 ```
 docker run --rm -d -p 80:80 \
 --name pephubservercon \
+--env-file .env \
 pephubserver pephub serve
 ```
 
-### Running tests:
+## Running tests:
 Just as our development environment is identical to our production environment, we are going to run our tests in the same environment as well:
 
 Build our test container:

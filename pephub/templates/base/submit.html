@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <a href="/">← back home</a>
+    <h1>Submit new PEP to <span class="fw-bold">{{namespace}}</span></h1>
+    <div class="border-bottom border-secondary my-2"></div>
+    <div>
+        <form action="/pep/{{namespace}}/submit" class="form-control" method="post" enctype="multipart/form-data">
+          <label class="fs-4 fw-bold form-label">PEP name and Tag:</label>
+          <span class="fs-4 d-flex align-items-center">
+            <span class="mb-1">{{namespace}}</span>
+            <span class="mb-1 mx-1">/</span>
+            <input id="project-name" name="project_name" type="text" class="form-control" placeholder="name" />
+            <span class="mb-1 mx-1">:</span>
+            <input id="tag" name="tag" type="text" class="form-control" placeholder="default" />
+          </span>
+          <div class="d-flex flex-column align-items-start mt-2">
+            <label class="fs-4 fw-bold form-label">Select configuration file:</label>
+            <input type="file" id="config-file" name="config_file" />
+            <div class="my-1"></div>
+            <label class="fs-4 fw-bold form-label">Other files:</label>
+            <input type="file" id="other-files" name="other_files" multiple />
+            <button class="btn btn-primary mt-2" type="submit">Submit</button>
+          </div>
+        </form>
+    </div>
+</div>
+<!-- Set default tag value -->
+<script type="text/javascript">
+  document.getElementById('tag').value = 'default';
+  </script>
+{% endblock %}

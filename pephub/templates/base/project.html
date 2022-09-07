@@ -1,34 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
 <div>
-    <a href="/pep/{{project.namespace}}/view">← back to {{ project.namespace }}</a>
-    <h1>{{ project.namespace }}/{{ project.name }}</h1>
+    <a href="/pep/{{namespace}}/view">← back to {{ namespace }}</a>
+    <h1>{{ namespace }}/{{ project.name }}:{{tag}}</h1>
     <p class="mb-0">
       <span class="fw-bold">PEP Version:</span> {{ pep_version }} 
     </p>
     <p class="mb-0">
       <span class="fw-bold">Total Samples:</span> {{ n_samples }}
     </p>
-    {% if project.info['description'] %}
-        {{ project.info['description'] }}
-    {% endif %}
     <div class="border-bottom border-secondary my-2"></div>
     <h3>API Endpoints:</h3>
       <p class="mb-2">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Project:</span>
-        <a href="/pep/{{ project.namespace }}/{{ project.name }}"><code>/pep/{{ project.namespace }}/{{ project.name }}</code></a>
+        <a href="/pep/{{ namespace }}/{{ project.name }}"><code>/pep/{{ namespace }}/{{ project.name }}</code></a>
      </p>
      <p class="mb-2">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Samples:</span>
-        <a href="/pep/{{ project.namespace }}/{{ project.name }}/samples"><code>/pep/{{ project.namespace }}/{{ project.name }}/samples</code></a>
+        <a href="/pep/{{ namespace }}/{{ project.name }}/samples"><code>/pep/{{ namespace }}/{{ project.name }}/samples</code></a>
       </p>
       <p class="mb-2 sample-endpoint">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Specific Sample:</span>
         <code>
-          <a class="m-0" href="/pep/{{ project.namespace }}/{{ project.name }}/samples/{{samples[0]['sample_name']}}" id="sample-name-link">/pep/{{ project.namespace }}/{{ project.name }}/samples/</a><select class="text-primary" name="Sample name" id="sample-name" onchange="toggleSampleName(this)">
+          <a class="m-0" href="/pep/{{ namespace }}/{{ project.name }}/samples/{{samples[0]['sample_name']}}" id="sample-name-link">/pep/{{ namespace }}/{{ project.name }}/samples/</a><select class="text-primary" name="Sample name" id="sample-name" onchange="toggleSampleName(this)">
             {% for s in samples %}
               <option>{{s['sample_name']}}</option>
             {% endfor %}
@@ -38,13 +35,13 @@
       <p class="mb-2">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Subsamples:</span>
-        <a href="/pep/{{ project.namespace }}/{{ project.name }}/subsamples"><code>/pep/{{ project.namespace }}/{{ project.name }}/subsamples</code></a>
+        <a href="/pep/{{ namespace }}/{{ project.name }}/subsamples"><code>/pep/{{ namespace }}/{{ project.name }}/subsamples</code></a>
       </p>
       {% for f in filters %}
       <p class="mb-2">
         <span class="badge bg-primary">GET</span>
         <span class="fw-bold">Convert project to {{f}}</span>
-        <a href="/pep/{{ project.namespace }}/{{ project.name }}/convert?filter={{f}}"><code>/pep/{{ project.namespace }}/{{ project.name }}/convert?filter={{f}}</code></a>
+        <a href="/pep/{{ namespace }}/{{ project.name }}/convert?filter={{f}}"><code>/pep/{{ namespace }}/{{ project.name }}/convert?filter={{f}}</code></a>
       </p>
       {% endfor %}
     <!-- <div>
@@ -63,8 +60,8 @@
                     {% for s in samples %}
                         <tr>
                             <td>
-                                <a href="/pep/{{ project.namespace }}/{{ project.name }}/samples/{{s.sample_name}}/view">
-                                    /pep/{{ project.namespace }}/{{ project.name }}/samples/{{s.sample_name}}/view
+                                <a href="/pep/{{ namespace }}/{{ project.name }}/samples/{{s.sample_name}}/view">
+                                    /pep/{{ namespace }}/{{ project.name }}/samples/{{s.sample_name}}/view
                                 </a>
                             </td>
                             {% for col in sample_table_columns %}
@@ -88,7 +85,7 @@
   <script type="text/javascript">
     function toggleSampleName(sel) {
       const link = document.getElementById("sample-name-link")
-      link.href=`/pep/{{ project.namespace }}/{{ project.name }}/samples/${sel.value}`
+      link.href=`/pep/{{ namespace }}/{{ project.name }}/samples/${sel.value}`
     }
   </script>
   <!-- <script type="text/javascript">

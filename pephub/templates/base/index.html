@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
   <div>
-    <h1>PEPhub API</h1>
+    {% if logged_in == True %}
+    <div class="mb-3">
+      <h1>Logged in as, <span class="fw-bold mr-1">{{session_info['user']}}</span>👋</h1>
+      <a href="/submit"><button class="btn btn-lg btn-primary">Submit PEP</button></a>
+    </div>
+    {% else %}
+      <h1 class="mb-4">PEPhub API</h1>
+    {% endif %}
     <p id="welcome" class="text-justify">
     Welcome to the PEPhub API. This server provides consumable sample tables through the <a href="https://github.com/pepkit/pephub">the PEPhub API for PEP sample metadata sharing</a>. This server contains PEPs for {{ namespaces|length }} namespaces listed below:</p>
     <div class="border-bottom border-secondary my-1"></div> 
@@ -17,11 +24,11 @@
       <tbody>
         {% for namespace in namespaces %}
           <tr>
-            <td><a href="/pep/{{namespace.name}}/view">{{ namespace.name }}</a></td>
-            <td>{{ namespace.info.n_projects }}</td>
-            <td>{{ namespace.info.n_samples }}</td>
+            <td><a href="/pep/{{namespace.namespace}}/view">{{ namespace.namespace }}</a></td>
+            <td>{{ namespace.n_projects }}</td>
+            <td>{{ namespace.n_samples }}</td>
             <td>
-              <code><a href="/pep/{{namespace.name}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.name}}/</a></code>
+              <code><a href="/pep/{{namespace.namespace}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.namespace}}/</a></code>
             </td>
           </tr>
         {% endfor %}

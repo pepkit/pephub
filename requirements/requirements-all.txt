@@ -6,3 +6,10 @@ jinja2>=3.1.2
 yacman>=0.8.4
 python-multipart>=0.0.5
 tqdm
+uvicorn
+python-dotenv
+pepdbagent
+peppy
+requests
+aiofiles
+pyjwt[crypto]

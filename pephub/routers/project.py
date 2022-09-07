@@ -1,114 +1,134 @@
-from enum import Enum
 import json
-from fastapi import APIRouter, Depends, Request, Response
+import tempfile
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from typing import Optional
 from fastapi.templating import Jinja2Templates
-
-from pephub.const import BASE_TEMPLATES_PATH, INFO_KEY
-from peppy import __version__ as peppy_version
-from platform import python_version
-
-from pephub.helpers import zip_conv_result
-from .._version import __version__ as pephub_version
+import tempfile
 
 import eido
 import peppy
-from ..main import _PEP_STORAGE_PATH, _PEP_STORES
+
+from pephub.const import BASE_TEMPLATES_PATH
+from peppy import __version__ as peppy_version
+from platform import python_version
+from ..crud import get_pep
+from ..helpers import get_project_sample_names, zip_conv_result, zip_pep
+from .._version import __version__ as pephub_version
 from ..dependencies import *
 from ..route_examples import *
 
 router = APIRouter(
     prefix="/pep/{namespace}/{pep_id}",
-    dependencies=[
-        Depends(verify_namespace),
-        Depends(verify_project),
-        Depends(validate_pep),
-    ],
     tags=["project"],
 )
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
+
 @router.get(
     "/",
     summary="Fetch a PEP",
 )
-async def get_pep(
-    namespace: str = example_namespace,
-    pep_id: str = example_pep_id,
-    proj: peppy.Project = Depends(validate_pep),
+async def get_a_pep(
+    proj: peppy.Project = Depends(get_project)
 ):
     """
     Fetch a PEP from a certain namespace
     """
-    return {"pep": proj.to_dict()}
+
+    samples = [s.to_dict() for s in proj.samples]
+    sample_table_indx = proj.sample_table_index
+
+    # this assumes the first sample's attributes
+    # is representative of all samples attributes
+    # -- is this the case?
+    sample_attributes = proj._samples[0]._attributes
+    try:
+        pep_version = proj.pep_version
+    except Exception:
+        pep_version = "2.1.0"
+    return {
+        "pep": proj.to_dict(),
+        "pep_version": pep_version,
+        "samples": samples,
+        "sample_table_indx": sample_table_indx,
+        "sample_attributes": sample_attributes,
+    }
 
 
-# @router.get("/zip")
-# async def zip_pep(namespace: str, pep_id: str, proj: peppy.Project = Depends(validate_pep)):
-#     """Zip a pep"""
-#     with TemporaryFile('w') as tmp:
-#         tmp.write(proj.to_yaml())
-#         return FileResponse(tmp.name, filename=f"{namespace}_{pep_id}.yaml")
+@router.get("/zip")
+async def zip_pep_for_download(
+    proj: peppy.Project = Depends(get_project)
+):
+    """Zip a pep"""
+    return zip_pep(proj)
+
 
 # fetch configuration file
-@router.get("/config")
-async def get_config(namespace: str = "demo", pep_id: str = "BiocProject"):
-    return FileResponse(_PEP_STORES[namespace.lower()][pep_id.lower()]['cfg_path'])
+# @router.get("/config")
+# async def get_config(namespace: str, pep_id: str, db: Connection = Depends(get_db)):
+#     proj = get_pep(db, namespace, pep_id)
+#     return proj.config_file
 
 
 # fetch samples for project
 @router.get("/samples")
-async def get_samples(proj: peppy.Project = Depends(validate_pep)):
-    # remove "private attributes"
-    return JSONResponse([s.to_dict() for s in proj.samples])
+async def get_pep_samples(
+    proj: peppy.Project = Depends(get_project)
+):
+    return {"samples": proj.samples}
 
 
-# fetch specific sample for project
+# # fetch specific sample for project
 @router.get("/samples/{sample_name}")
 async def get_sample(
-    namespace: str,
-    pep_id: str,
     sample_name: str,
-    download: bool = False,
-    proj: peppy.Project = Depends(validate_pep),
+    proj: peppy.Project = Depends(get_project)
 ):
     # check that the sample exists
     # by mapping the list of sample objects
     # to a list of sample names
-    if sample_name not in map(lambda s: s["sample_name"], proj.samples):
+    if sample_name not in get_project_sample_names(proj):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
-    if download:
-        sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
-        return FileResponse(sample_file_path)
-    else:
-        return proj.get_sample(sample_name).to_dict()
+    # if download:
+    #     sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
+    #     return FileResponse(sample_file_path)
+    sample = proj.get_sample(sample_name)
+    return sample
+
 
 # display a view for a specific sample
 @router.get("/samples/{sample_name}/view")
 async def get_sample_view(
+    request: Request,
     namespace: str,
     pep_id: str,
-    request: Request,
     sample_name: str,
-    proj: peppy.Project = Depends(validate_pep),
+    proj: peppy.Project = Depends(get_project),
+    session_info: dict = Depends(read_session_info)
 ):
     """Returns HTML response with a visual summary of the sample."""
+    if sample_name not in get_project_sample_names(proj):
+        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     sample = proj.get_sample(sample_name)
     attrs = sample._attributes
-    return templates.TemplateResponse("sample.html", {
-        'project': proj,
-        'sample': sample,
-        'attrs': attrs,
-        'request': request,
-        'namespace': namespace,
-        'project_name': pep_id,
-        'peppy_version': peppy_version,
-        'python_version': python_version(),
-        'pephub_version': pephub_version,
-    })
+    return templates.TemplateResponse(
+        "sample.html",
+        {
+            "project": proj,
+            "sample": sample,
+            "attrs": attrs,
+            "request": request,
+            "namespace": namespace,
+            "project_name": pep_id,
+            "peppy_version": peppy_version,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+            "logged_in": session_info is not None
+        },
+    )
 
 
 # fetch all subsamples inside a pep
@@ -116,8 +136,8 @@ async def get_sample_view(
 async def get_subsamples(
     namespace: str,
     pep_id: str,
+    proj: peppy.Project = Depends(get_project),
     download: bool = False,
-    proj: peppy.Project = Depends(validate_pep),
 ):
     subsamples = proj.subsample_table
     # check if subsamples exist
@@ -132,9 +152,9 @@ async def get_subsamples(
 
 @router.get("/convert")
 async def convert_pep(
-    proj: peppy.Project = Depends(validate_pep), 
+    proj: peppy.Project = Depends(get_project),
     filter: Optional[str] = "basic",
-    format: Optional[str] = "plain"
+    format: Optional[str] = "plain",
 ):
     """
     Convert a PEP to a specific format, f. For a list of available formats/filters,
@@ -162,36 +182,53 @@ async def convert_pep(
         raise HTTPException(
             400, f"Unknown format '{format}'. Availble formats: {format_list}"
         )
-    
+
     if format == "plain":
         return_str = "\n".join([conv_result[k] for k in conv_result])
         resp_obj = PlainTextResponse(return_str)
     elif format == "json":
         resp_obj = JSONResponse(conv_result)
     else:
-        resp_obj = zip_conv_result(conv_result) # returns zip file in Response() object
+        resp_obj = zip_conv_result(conv_result)  # returns zip file in Response() object
 
     return resp_obj
 
-@router.get("/view", summary="View a visual summary of a particular project.", response_class=HTMLResponse)
-async def project_view(request: Request, namespace: str, pep_id: str, peppy_obj: peppy.Project = Depends(validate_pep)):
+
+@router.get(
+    "/view",
+    summary="View a visual summary of a particular project.",
+    response_class=HTMLResponse,
+)
+async def project_view(
+    request: Request, 
+    namespace: str,
+    tag: str = None,
+    proj: peppy.Project = Depends(get_project),
+    session_info: dict = Depends(read_session_info)
+):
     """Returns HTML response with a visual summary of the project."""
-    proj = _PEP_STORES.get_project(namespace, pep_id)
-    samples = [s.to_dict() for s in peppy_obj.samples]
+    
+    samples = [s.to_dict() for s in proj.samples]
     try:
-        pep_version = peppy_obj.pep_version
-    except Exception: 
+        pep_version = proj.pep_version
+    except Exception:
         pep_version = "2.1.0"
-    return templates.TemplateResponse("project.html", {
-        'project': proj,
-        'project_dict': peppy_obj.to_dict(),
-        'pep_version': pep_version,
-        'sample_table_columns': peppy_obj.sample_table.columns.to_list(),
-        'samples': samples,
-        'n_samples': len(samples),
-        'request': request,
-        'peppy_version': peppy_version,
-        'python_version': python_version(),
-        'pephub_version': pephub_version,
-        'filters': eido.get_available_pep_filters()
-    })
+    return templates.TemplateResponse(
+        "project.html",
+        {
+            "namespace": namespace,
+            "project": proj,
+            "tag": tag,
+            "project_dict": proj.to_dict(),
+            "pep_version": pep_version,
+            "sample_table_columns": proj.sample_table.columns.to_list(),
+            "samples": samples,
+            "n_samples": len(samples),
+            "request": request,
+            "peppy_version": peppy_version,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+            "filters": eido.get_available_pep_filters(),
+            "logged_in": session_info is not None
+        },
+    )
