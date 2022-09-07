@@ -1,6 +1,5 @@
 import jinja2
-import shutil
-import tempfile
+
 from typing import List
 from fastapi import APIRouter, Depends, Form, UploadFile, File
 from fastapi.responses import RedirectResponse
@@ -60,50 +59,6 @@ async def version():
 #             for n in namespaces
 #     ]
 
-@router.post("/submit", summary="Submit a PEP to the current namespace")
-async def submit_pep(
-    request: Request,
-    namespace: str,
-    session_info: dict = Depends(read_session_info),
-    project_name: str = Form(...),
-    tag: str = Form(...),
-    config_file: UploadFile = File(...),
-    other_files: List[UploadFile] = File(...),
-    db: Connection = Depends(get_db),
-):
-    if session_info is None:
-        raise HTTPException(403, "Please log in to submit a PEP.")
-        
-    if os.getenv("SERVER_ENV") != "development":
-        raise HTTPException(403, "Submitting new PEPs is not presently an allowed feature.")
-
-    # create temp dir that gets deleted
-    # after endpoint execution ends
-    with tempfile.TemporaryDirectory() as dirpath:
-        # save config file in tmpdir
-        with open(f"{dirpath}/{config_file.filename}", "wb") as cfg_fh:
-            shutil.copyfileobj(config_file.file, cfg_fh)
-
-        # save any other files the user might have supplied
-        for upload_file in other_files:
-            # open new file inside the tmpdir
-            with open(f"{dirpath}/{upload_file.filename}", "wb") as local_tmpf:
-                shutil.copyfileobj(upload_file.file, local_tmpf)
-
-        p = peppy.Project(f"{dirpath}/{config_file.filename}")
-        p.name = project_name
-        db.upload_project(p, namespace=namespace, name=project_name, tag=tag)
-        return templates.TemplateResponse(
-            "submission.html",
-            {
-                "request": request,
-                "namespace": namespace,
-                "project_name": project_name,
-                "proj": p.to_dict(),
-                "config_file": config_file.filename,
-                "other_files": [f.filename for f in other_files],
-            }
-        )
 
 @router.get("/submit", summary="Submit a PEP to the current namespace")
 async def submit_pep_form(
