@@ -103,6 +103,7 @@
         No results to display.
       </div>
     </div>
+<<<<<<< HEAD
   </div>
 
   <!-- schema description -->
@@ -121,6 +122,22 @@
         <p>Version: {{schema[0].version}}</p>
         <p>Properties: {{schema[0].properties}}</p>
       </div>
+=======
+
+        <div class="container">
+            <div class="card mt-3">
+                <h5 class="card-header">Description</h5>
+                <div class="card-body">
+                    <!-- I want to use json stringify for this schema data -->
+                    {% for s in schema %}
+                    <div>
+                        {{s|tojson}}
+                    </div>
+                    {%endfor%}
+                </div>
+            </div>
+        </div>
+>>>>>>> 54ecbb2844b4c22d66cd97a39c3779584e802072
     </div>
   </div>
 

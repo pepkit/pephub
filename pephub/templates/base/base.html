@@ -25,7 +25,18 @@
 		      </li>
 		      <li class="nav-item mx-2 my-0 h5">
 		      <a class="nav-link" href="https://github.com/pepkit/pephub" target="_blank"><i class="fa fa-2x fa-github" aria-hidden="true"></i>GitHub</a>
-		      <li>
+			  </li>
+			  <li class="nav-item mx-2 my-0 h5">
+				{% if logged_in == True %}
+				  <a href="/auth/logout">
+				  	<button class="btn btn-link">Logout</button>
+				  </a>
+				{% else %}
+				  <a href="/auth/login">
+				  	<button class="btn btn-primary"><i class="fa fa-github"></i>Login</button>
+				  </a>
+				{% endif %}
+				</li>
 		      </ul>
 		    </div>
 		  </div>

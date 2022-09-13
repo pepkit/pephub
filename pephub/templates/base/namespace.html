@@ -30,6 +30,7 @@
       <thead>
         <tr>
           <th>Project</th>
+          <th>Tag</th>
           <th>No. of Samples</th>
           <th>API Endpoint</th>
         </tr>
@@ -37,7 +38,8 @@
       <tbody>
         {% for proj in namespace.projects %}
         <tr>
-          <td><a href="/pep/{{namespace.namespace}}/{{proj.name}}/view">{{proj.name}}</a></td>
+          <td><a href="/pep/{{namespace.namespace}}/{{proj.name}}/view?tag={{proj.tag}}">{{proj.name}}</a></td>
+          <td>{{proj.tag}}</td>
           <td>{{proj.n_samples}}</td>
           <td>
             <code><a href="/pep/{{namespace.namespace}}/{{proj.name}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.namespace}}/{{proj.name}}</a></code>
