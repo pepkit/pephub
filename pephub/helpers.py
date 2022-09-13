@@ -1,12 +1,14 @@
-from typing import Union
+from datetime import date
+from typing import List
 from fastapi import Response
 from ubiquerg import VersionInHelpParser
 
-from os.path import exists
+from os.path import exists, basename
 from yaml import safe_load
-import os
 import zipfile
 import io
+
+import peppy
 
 from pephub.exceptions import PepHubException
 
@@ -61,12 +63,12 @@ def build_parser():
         default=DEFAULT_PORT,
     )
     sps["serve"].add_argument(
-        '-d',
-        '--debug',
+        "-d",
+        "--debug",
         dest="debug",
         help="Run the server with debug mode on",
         type=bool,
-        default=False
+        default=False,
     )
     sps["serve"].add_argument(
         "-r",
@@ -74,7 +76,7 @@ def build_parser():
         dest="reload",
         type=bool,
         help="Run the server in reload configuration",
-        default=False
+        default=False,
     )
 
     return parser
@@ -99,10 +101,40 @@ def read_server_configuration(path: str) -> dict:
             "data": {"path": cfg["data"]["path"], "index": cfg["data"].get("index")}
         }
 
+def get_project_sample_names(proj: peppy.Project) -> List[str]:
+    """
+    Given a peppy.Project instance, return a list of it's sample names
+    """
+    return map(lambda s: s["sample_name"], proj.samples)
 
-def zip_conv_result(conv_result: dict):
-    zip_filename = "conversion_result.zip"
+def zip_pep(project: peppy.Project) -> Response:
+    """Zip a project up to download"""
+    content_to_zip = {}
 
+    if project.config:
+        cfg_filename = basename(project.config_file)
+        content_to_zip[cfg_filename] = project.config.to_yaml()
+    if project.sample_table is not None:
+        sample_table_filename = basename(project.to_dict().get('sample_table', "sample_table.csv"))
+        content_to_zip[sample_table_filename] = project.sample_table.to_csv()
+    if project.subsample_table is not None:
+        # sometimes the subsample table is a list. So change behavior
+        # based on this
+        if not isinstance(project.subsample_table, list):
+            subsample_table_filename = basename(project.to_dict().get('subsample_table', "subsample_table.csv"))
+            content_to_zip[subsample_table_filename] = project.subsample_table.to_csv()
+        else:
+            subsample_table_filenames = project.to_dict().get('subsample_table', "subsample_table.csv")
+            for sstable, sstable_filename in zip(project.subsample_table, subsample_table_filenames):
+                subsample_table_filename = basename(sstable_filename)
+                content_to_zip[subsample_table_filename] = sstable.to_csv()
+        
+        
+    
+    zip_filename = project.name or f"downloaded_pep_{date.today()}"
+    return zip_conv_result(content_to_zip, filename=(project.name or zip_filename))
+        
+def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
     mf = io.BytesIO()
 
     with zipfile.ZipFile(mf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
@@ -114,7 +146,17 @@ def zip_conv_result(conv_result: dict):
     resp = Response(
         mf.getvalue(),
         media_type="application/x-zip-compressed",
-        headers={"Content-Disposition": f"attachment;filename={zip_filename}"},
+        headers={"Content-Disposition": f"attachment;filename={filename}"},
     )
 
     return resp
+
+def build_authorization_url(client_id: str, redirect_uri: str, state: str, **kwargs: dict) -> str:
+    """
+    Helper function to build an authorization url
+    for logging in with GitHub
+    """
+    auth_url = f"https://github.com/login/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&state={state}"
+    for key, value in kwargs.items():
+        auth_url += f"&{key}={value}"
+    return auth_url

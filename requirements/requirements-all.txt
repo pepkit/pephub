@@ -1,7 +1,6 @@
 peppy>=0.32
 fastapi>=0.72.0
-git+https://github.com/pepkit/eido@dev_alip#egg=eido
-# eido>=0.1.5
+ido
 logmuse>=0.2.7
 jinja2>=3.1.2
 yacman>=0.8.4
@@ -11,5 +10,8 @@ requests
 tqdm
 uvicorn
 python-dotenv
-pepagent @ git+https://github.com/pepkit/pephub_db.git#egg=pepagent
-peppy @ git+https://github.com/pepkit/peppy.git@dev#egg=peppy
+pepdbagent
+peppy
+requests
+aiofiles
+pyjwt[crypto]

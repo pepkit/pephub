@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
   <div>
-    <h1>PEPhub API</h1>
+    {% if logged_in == True %}
+    <div class="mb-3">
+      <h1>Logged in as, <span class="fw-bold mr-1">{{session_info['user']}}</span>👋</h1>
+      <a href="/submit"><button class="btn btn-lg btn-primary">Submit PEP</button></a>
+    </div>
+    {% else %}
+      <h1 class="mb-4">PEPhub API</h1>
+    {% endif %}
     <p id="welcome" class="text-justify">
     Welcome to the PEPhub API. This server provides consumable sample tables through the <a href="https://github.com/pepkit/pephub">the PEPhub API for PEP sample metadata sharing</a>. This server contains PEPs for {{ namespaces|length }} namespaces listed below:</p>
     <div class="border-bottom border-secondary my-1"></div> 

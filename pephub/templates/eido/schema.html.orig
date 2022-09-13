@@ -91,20 +91,6 @@
         </div>
     </div>
 
-<<<<<<< HEAD
-    <!-- schema description -->
-    <div class="container">
-        <div class="card mt-3">
-            <h5 class="card-header">Description</h5>
-            <div class="card-body">
-                <!-- I want to use json stringify for this schema data -->
-                <!-- <code>
-                        {% for s in schema %}
-                        <p>{{s.description}}</p>
-                        {%endfor%}
-                    </code> -->
-                <pre><code class="language-yaml">{{schema | pprint}}</code}</pre>
-=======
         <div class="container">
             <div class="card mt-3">
                 <h5 class="card-header">Description</h5>
@@ -116,7 +102,6 @@
                     </div>
                     {%endfor%}
                 </div>
->>>>>>> ded178730c2f2698245521855b8cc0b9983267a2
             </div>
         </div>
     </div>
