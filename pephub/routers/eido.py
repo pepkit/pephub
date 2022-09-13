@@ -8,7 +8,7 @@ import requests
 import tempfile
 
 from fastapi import File, UploadFile, Form
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from peppy import __version__ as peppy_version
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
@@ -16,7 +16,7 @@ from starlette.responses import JSONResponse
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
-from typing import List
+from typing import List, Union
 from yacman import load_yaml
 
 from ..const import EIDO_TEMPLATES_PATH, STATICS_PATH
@@ -146,7 +146,7 @@ async def pep_fromhub(namespace, project):
     return {
         "namespace": namespace,
         "project": project,
-        "response": response.json() 
+        "response": response.json()
     }
 
 @router.get("/schema/{namespace}/{project}", response_class=HTMLResponse)
@@ -169,7 +169,7 @@ async def get_schema(request: Request, namespace: str, project: str):
 
 @router.post("/validate/pep/")
 async def validate_pep(
-    namespace: str = Form(), project: str = Form(), peps: List[UploadFile] = File(...)):
+        namespace: str = Form(), project: str = Form(), peps: List[UploadFile] = File(...)):
     schema = f"http://schema.databio.org/{namespace}/{project}"
     vals = {
         "namespace": namespace,
@@ -184,22 +184,45 @@ async def validate_pep(
                 await f.write(contents)
             pep_project = peppy.Project(pep_path)
 
-            try:
-                response = eido.validate_project(pep_project, schema, exclude_case=True)
-            except Exception as e:
-                response = []
-                for error in e.errors:
-                    response.append(f"{error.json_path}: {error.message}")
-            # if response is None:
-            #     response = "valid"
+            responses = []
+            for i in range(len(pep_project.samples)):
+                required_errors = []
+                other_errors = []
+                try:
+                    eido.validate_sample(
+                        pep_project, i, schema, exclude_case=True)
+                except Exception as e:
+                    
+                    for error in e.errors:
+                        if "required" in error.message:
+                            required_errors.append(error.message.replace(
+                                ' is a required property', ''))
+                        else:
+                            other_errors.append(error.message)
+                responses.append(
+                    {
+                        "sample_name": pep_project.samples[i].sample_name,
+                        "required_errors": required_errors,
+                        "other_errors": other_errors
+                    }
+                )
+
             vals["validations"].append(
                 {
-                    "pep": pep.filename,
-                    "response": response
+                    "pep_name": pep.filename,
+                    "samples": responses
                 }
             )
+
     return JSONResponse(content=vals)
 
+@router.post("/validate/test")
+async def validate(pep: str = Form(), schema: str = Form()):
+# async def validate(pep: Union[str, List[UploadFile]] = [Form(), File(...)], schema: Union[str, List[UploadFile]] = [Form(), File(...)]): 
+    return {
+        "pep": pep,
+        "schema": schema
+    }
 
 
 # ! old /validate
