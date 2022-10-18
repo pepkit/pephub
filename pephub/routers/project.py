@@ -32,7 +32,7 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
     summary="Fetch a PEP",
 )
 async def get_a_pep(
-    proj: peppy.Project = Depends(get_project)
+    proj: peppy.Project = Depends(get_project),
 ):
     """
     Fetch a PEP from a certain namespace

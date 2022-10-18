@@ -1,5 +1,6 @@
 import os
 import jwt
+import peppy
 from fastapi import HTTPException, Depends, status
 from fastapi.responses import Response
 from fastapi.security import HTTPBearer
@@ -26,6 +27,7 @@ pephub_cookie = APIKeyCookie(name="pephub_session")
 pephub_cookie.auto_error = False
 pephub_jwt_secret = token_hex(16)
 
+
 def get_db():
     # create database
     pepdb = Connection(
@@ -40,18 +42,6 @@ def get_db():
     finally:
         pepdb.close_connection()
 
-def get_project(
-    namespace: str,
-    pep_id: str,
-    tag: str = None,
-    db: Connection = Depends(get_db),
-):
-    proj = db.get_project(namespace, pep_id, tag)
-    if proj is not None:
-        yield proj
-    else:
-        used_tag = tag or DEFAULT_TAG
-        raise HTTPException(404, f"PEP '{namespace}/{pep_id}:{used_tag}' does not exist in database. Did you spell it correctly?")
 
 def set_session_info(response: Response, session_info: dict):
     """
@@ -73,7 +63,6 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
     @param session_info_encoded: JWT provided via FastAPI injection from the API cookie.
     """
 
-    # print(f"session_info_encoded: {session_info_encoded}")
     try:
         session_info = jwt.decode(session_info_encoded, pephub_jwt_secret, algorithms="HS256")
     except jwt.exceptions.InvalidSignatureError as e:
@@ -86,12 +75,34 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
 
 
 def get_current_user(session_info: str = Depends(read_session_info)):
-    # print(f"session_info: {session_info}")
     try:
         user = session_info["user"]
         return user
     except Exception as e:
-        print(e.message)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid authentication"
         )
+
+
+def get_project(
+    namespace: str,
+    pep_id: str,
+    tag: str = None,
+    db: Connection = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    if proj := db.get_project(namespace, pep_id, tag):
+        _check_user_access(user, namespace, proj)
+        yield proj
+    else:
+        raise HTTPException(404, f"PEP '{namespace}/{pep_id}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?")
+
+
+def _check_user_access(user: str, namespace: str, project: peppy.Project):
+    if project.is_private:
+        if user == namespace:
+            return project
+        else:
+            raise HTTPException(403, f"The user {user} does not have permission to view or pull this project.")
+    else:
+        return project

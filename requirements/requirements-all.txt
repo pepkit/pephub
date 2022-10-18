@@ -1,4 +1,3 @@
-peppy>=0.32
 fastapi>=0.72.0
 eido>=0.1.5
 logmuse>=0.2.7

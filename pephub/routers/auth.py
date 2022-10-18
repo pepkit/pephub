@@ -19,10 +19,18 @@ github_app_config = {
     "redirect_uri": os.getenv("REDIRECT_URI")
 }
 
+
+github_app_config = {
+    "client_id": "20a452cc59b908235e50",
+    "client_secret": "09ca77d7dcc97e58a94bdcf7ceca8833bd29e75d",
+    "redirect_uri": "http://127.0.0.1:8000/auth/callback",
+}
+
 router = APIRouter(
     prefix="/auth",
     tags=["namespace"],
 )
+
 
 @router.get("/login", response_class=RedirectResponse)
 def login(request: Request):
@@ -38,6 +46,7 @@ def login(request: Request):
         state,
         **q_params
     )
+
 
 @router.get("/callback", response_class=RedirectResponse)
 def callback(response: Response, request: Request, code: Union[str, None] = None, state: Union[str, None] = None):
@@ -81,12 +90,14 @@ def callback(response: Response, request: Request, code: Union[str, None] = None
         })
     return "/"
 
+
 @router.get("/profile")
 async def view_profile(session_info: dict = Depends(read_session_info)):
     if session_info:
         return session_info
     else:
-        return { "message": "Unauthorized user"}
+        return {"message": "Unauthorized user"}
+
 
 @router.get("/logout")
 def logout(response: RedirectResponse):
