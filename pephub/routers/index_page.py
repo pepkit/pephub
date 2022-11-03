@@ -1,6 +1,6 @@
 import jinja2
 from typing import Union, List
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from platform import python_version
 from starlette.requests import Request
@@ -23,19 +23,18 @@ ALL_VERSIONS = {
 
 
 def get_namespaces(
-    db: Connection, user=Depends(get_user_from_namespace_info)
+    db: Connection = Depends(get_db), user: str = Depends(get_user_from_session_info), organizations: List[str] = Depends(get_organizations_from_session_info)
 ) -> List[NamespaceModel]:
-    return db.get_namespaces_info_by_list(user=user)
+    return db.get_namespaces_info_by_list(user=user, user_organizations=organizations)
 
 
 @router.get("/")
 async def main(
     request: Request,
     session_info: dict = Depends(read_session_info),
-    db: Connection = Depends(get_db),
+    namespaces: List[str] = Depends(get_namespaces)
 ):
     templ_vars = {"request": request}
-    namespaces = get_namespaces(db)
     return templates.TemplateResponse(
         "index.html",
         dict(
@@ -59,7 +58,7 @@ async def submit_pep_form(request: Request, session_info=Depends(read_session_in
         return templates.TemplateResponse(
             "submit.html",
             {
-                "namespace": session_info["user"],
+                "namespace": session_info["login"],
                 "session_info": session_info,
                 "logged_in": session_info is not None,
                 "request": request,

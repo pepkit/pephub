@@ -1,14 +1,13 @@
 import os
 from typing import Union
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, Header
 from fastapi.responses import RedirectResponse, Response
-from secrets import token_hex
-import requests
 from dotenv import load_dotenv
-
 from ..dependencies import read_session_info, set_session_info
-
+import requests
 from ..helpers import build_authorization_url
+from pephub.dependencies import JWT_SECRET, CLIAuthSystem
+
 
 load_dotenv()
 
@@ -31,7 +30,7 @@ def login(request: Request):
     return build_authorization_url(
         github_app_config["client_id"],
         github_app_config["redirect_uri"],
-        token_hex(16),
+        JWT_SECRET,
         **request.query_params,
     )
 
@@ -72,8 +71,15 @@ def callback(
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
 
+    organizations = requests.get(f"https://api.github.com/users/{u['login']}/orgs",
+                        headers={"Authorization": f"Bearer {x['access_token']}"}).json()
+
     set_session_info(
-        response, {"user": u["login"], "id": u["id"]}
+        response, {
+            "login": u["login"],
+            "id": u["id"],
+            "orgs": [org['login'] for org in organizations]
+        }
     )
     return "/"
 
@@ -91,3 +97,10 @@ def logout(response: RedirectResponse):
     response = RedirectResponse(url="/")
     response.delete_cookie("pephub_session")
     return response
+
+
+@router.post("/login_cli")
+def login_from_cli(access_token: Union[str, None] = Header(default=None)):
+    return {"jwt_token": CLIAuthSystem().get_jwt(access_token)}
+
+

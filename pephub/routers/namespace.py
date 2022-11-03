@@ -26,7 +26,7 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 async def get_namespace(
     namespace: str,
     db: Connection = Depends(get_db),
-    user=Depends(get_user_from_namespace_info),
+    user: str = Depends(get_user_from_session_info),
 ):
     """Fetch namespace. Returns a JSON representation of the namespace."""
     nspace = db.get_namespace_info(namespace, user)
@@ -38,7 +38,7 @@ async def get_namespace_projects(
     namespace: str,
     db: Connection = Depends(get_db),
     limit: int = 100,
-    user=Depends(get_user_from_namespace_info),
+    user=Depends(get_user_from_session_info),
 ):
     """Fetch the projects for a particular namespace"""
     projects = db.get_projects_in_namespace(user=user, namespace=namespace)
@@ -57,10 +57,11 @@ async def namespace_view(
     request: Request,
     namespace: str,
     db: Connection = Depends(get_db),
-    user=Depends(get_user_from_namespace_info),
+    user=Depends(get_user_from_session_info),
+    organizations=Depends(get_organizations_from_session_info)
 ):
     """Returns HTML response with a visual summary of the namespace."""
-    nspace = db.get_namespace_info(namespace, user)
+    nspace = db.get_namespace_info(namespace, user, organizations)
     return templates.TemplateResponse(
         "namespace.html",
         {
