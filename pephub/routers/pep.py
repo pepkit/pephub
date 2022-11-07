@@ -17,25 +17,6 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
-@router.get(
-    "/"
-)
-async def get_all_namespaces(db:PepAgent = Depends(get_db)):
-    namespaces = db.get_namespaces()
-    return {
-        'namespaces': [n['namespace'] for n in namespaces]
-    }
-
-@router.get(
-    "/list"
-)
-async def get_all_projects(db:PepAgent = Depends(get_db)):
-    namespaces = db.get_namespaces()
-    return {
-        'namespaces': namespaces
-    }
-
-
 @router.get("/")
 async def get_all_namespaces(db: Connection = Depends(get_db)):
     namespaces = db.get_namespaces_info_by_list()
