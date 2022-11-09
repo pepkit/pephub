@@ -58,7 +58,7 @@ async def namespace_view(
     namespace: str,
     db: Connection = Depends(get_db),
     user=Depends(get_user_from_session_info),
-    organizations=Depends(get_organizations_from_session_info)
+    organizations=Depends(get_organizations_from_session_info),
 ):
     """Returns HTML response with a visual summary of the namespace."""
     nspace = db.get_namespace_info(namespace, user, organizations)

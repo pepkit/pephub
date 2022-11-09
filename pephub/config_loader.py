@@ -11,7 +11,9 @@ class ConfigLoader(BaseSettings):
     JWT_SECRET: str = ""
 
     class Config:
-        env_file = os.environ.get("ENV_FILE", os.path.join(PROJECT_ROOT, "environment", "local.env"))
+        env_file = os.environ.get(
+            "ENV_FILE", os.path.join(PROJECT_ROOT, "environment", "local.env")
+        )
 
 
 config = ConfigLoader()

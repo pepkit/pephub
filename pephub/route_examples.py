@@ -7,7 +7,9 @@ example_namespace = Path(
 )
 
 example_pep_id = Path(
-    ..., description="A project name inside a particular namespace", example="BiocProject"
+    ...,
+    description="A project name inside a particular namespace",
+    example="BiocProject",
 )
 
 # example for /pep/{namespace}/{pep}/convert

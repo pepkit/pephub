@@ -22,17 +22,11 @@ ALL_VERSIONS = {
 }
 
 
-def get_namespaces(
-    db: Connection = Depends(get_db), user: str = Depends(get_user_from_session_info), organizations: List[str] = Depends(get_organizations_from_session_info)
-) -> List[NamespaceModel]:
-    return db.get_namespaces_info_by_list(user=user, user_organizations=organizations)
-
-
 @router.get("/")
 async def main(
     request: Request,
     session_info: dict = Depends(read_session_info),
-    namespaces: List[str] = Depends(get_namespaces)
+    namespaces: List[str] = Depends(get_namespaces),
 ):
     templ_vars = {"request": request}
     return templates.TemplateResponse(

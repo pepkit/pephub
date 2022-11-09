@@ -15,12 +15,16 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
 
 @router.get("/")
-async def get_all_namespaces(db: Connection = Depends(get_db), user=Depends(get_user_from_session_info)):
+async def get_all_namespaces(
+    db: Connection = Depends(get_db), user=Depends(get_user_from_session_info)
+):
     return {"namespaces": [n.namespace for n in db.get_namespaces_info_by_list(user)]}
 
 
 @router.get("/list")
-async def get_all_projects(db: Connection = Depends(get_db), user=Depends(get_user_from_session_info)):
+async def get_all_projects(
+    db: Connection = Depends(get_db), user=Depends(get_user_from_session_info)
+):
     return {"namespaces": db.get_namespaces_info_by_list(user)}
 
 

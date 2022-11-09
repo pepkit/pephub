@@ -8,8 +8,10 @@ from unittest.mock import Mock
 from fastapi.testclient import TestClient
 from pephub.main import app
 from pephub.dependencies import CLIAuthSystem
+
 client = TestClient(app)
 from fastapi.exceptions import HTTPException
+
 # fetch a project
 def test_fetch_project():
     res = client.get("/pep/demo/BiocProject")
@@ -50,7 +52,11 @@ def test_jwt_is_generated_correctly(mocker, test_access_token, test_user_data):
 
     jwt_token = CLIAuthSystem().get_jwt(test_access_token)
 
-    assert jwt.decode(jwt_token, options={"verify_signature": False}) == {'login': 'test_login', 'id': 12345, 'organizations': ['org1', 'org2']}
+    assert jwt.decode(jwt_token, options={"verify_signature": False}) == {
+        "login": "test_login",
+        "id": 12345,
+        "organizations": ["org1", "org2"],
+    }
 
 
 @pytest.mark.parametrize(
@@ -58,9 +64,11 @@ def test_jwt_is_generated_correctly(mocker, test_access_token, test_user_data):
     [
         b"",
         {"data": "some_data"},
-    ]
+    ],
 )
-def test_get_jwt_raises_correct_error(mocker, test_access_token, test_user_data, respose_content):
+def test_get_jwt_raises_correct_error(
+    mocker, test_access_token, test_user_data, respose_content
+):
     mocker.patch("requests.get", return_value=Mock(content=respose_content))
 
     with pytest.raises(HTTPException) as e:

@@ -71,15 +71,18 @@ def callback(
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
 
-    organizations = requests.get(f"https://api.github.com/users/{u['login']}/orgs",
-                        headers={"Authorization": f"Bearer {x['access_token']}"}).json()
+    organizations = requests.get(
+        f"https://api.github.com/users/{u['login']}/orgs",
+        headers={"Authorization": f"Bearer {x['access_token']}"},
+    ).json()
 
     set_session_info(
-        response, {
+        response,
+        {
             "login": u["login"],
             "id": u["id"],
-            "orgs": [org['login'] for org in organizations]
-        }
+            "orgs": [org["login"] for org in organizations],
+        },
     )
     return "/"
 
@@ -102,5 +105,3 @@ def logout(response: RedirectResponse):
 @router.post("/login_cli")
 def login_from_cli(access_token: Union[str, None] = Header(default=None)):
     return {"jwt_token": CLIAuthSystem().get_jwt(access_token)}
-
-

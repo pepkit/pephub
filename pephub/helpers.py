@@ -89,13 +89,17 @@ def read_server_configuration(path: str) -> dict:
     with open(path, "r") as f:
         cfg = safe_load(f)
         if cfg.get("data") is None:
-            raise PepHubException("'data' section is required in the configuration file.")
+            raise PepHubException(
+                "'data' section is required in the configuration file."
+            )
         if cfg["data"].get("path") is None:
             raise PepHubException(
                 "No path to PEPs was specified in the configuration file."
             )
 
-        return {"data": {"path": cfg["data"]["path"], "index": cfg["data"].get("index")}}
+        return {
+            "data": {"path": cfg["data"]["path"], "index": cfg["data"].get("index")}
+        }
 
 
 def get_project_sample_names(proj: peppy.Project) -> List[str]:

@@ -6,6 +6,7 @@ from fastapi.security import HTTPBearer
 from fastapi.security import APIKeyCookie
 from pepdbagent import Connection
 from pepdbagent.const import DEFAULT_TAG
+from pepdbagent.models import NamespaceModel
 from dotenv import load_dotenv
 from typing import Union
 from .const import (
@@ -13,7 +14,7 @@ from .const import (
     DEFAULT_POSTGRES_PASSWORD,
     DEFAULT_POSTGRES_PORT,
     DEFAULT_POSTGRES_USER,
-    DEFAULT_POSTGRES_DB
+    DEFAULT_POSTGRES_DB,
 )
 from datetime import datetime, timedelta
 import pydantic
@@ -64,8 +65,16 @@ class CLIAuthSystem:
         )
         try:
             return UserData(**json.loads(response.content.decode("utf-8")))
-        except (AttributeError, UnicodeDecodeError, json.JSONDecodeError, pydantic.ValidationError):
-            raise HTTPException(status_code=400, detail="Can't decode GitHub response. Please check it manually.")
+        except (
+            AttributeError,
+            UnicodeDecodeError,
+            json.JSONDecodeError,
+            pydantic.ValidationError,
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Can't decode GitHub response. Please check it manually.",
+            )
 
     @staticmethod
     def jwt_encode_user_data(user_data: dict) -> str:
@@ -80,7 +89,7 @@ def get_db():
         password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
         host=os.environ.get("POSTGRES_HOST") or DEFAULT_POSTGRES_HOST,
         database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
-        port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT
+        port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
     )
     try:
         yield pepdb
@@ -109,7 +118,9 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
     """
 
     try:
-        session_info = jwt.decode(session_info_encoded, JWT_SECRET, algorithms=["HS256"])
+        session_info = jwt.decode(
+            session_info_encoded, JWT_SECRET, algorithms=["HS256"]
+        )
     except jwt.exceptions.InvalidSignatureError as e:
         print(e)
         return None
@@ -121,14 +132,18 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
     return session_info
 
 
-def get_organizations_from_session_info(session_info: Union[dict, None] = Depends(read_session_info)) -> List:
+def get_organizations_from_session_info(
+    session_info: Union[dict, None] = Depends(read_session_info)
+) -> List:
     organizations = []
     if session_info:
         organizations = session_info.get("orgs")
     return organizations
 
 
-def get_user_from_session_info(session_info: Union[dict, None] = Depends(read_session_info)) -> str:
+def get_user_from_session_info(
+    session_info: Union[dict, None] = Depends(read_session_info)
+) -> str:
     user = None
     if session_info:
         user = session_info.get("login")
@@ -147,14 +162,28 @@ def get_project(
         _check_user_access(user, organizations, namespace, proj)
         yield proj
     else:
-        raise HTTPException(404, f"PEP '{namespace}/{pep_id}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?")
+        raise HTTPException(
+            404,
+            f"PEP '{namespace}/{pep_id}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+        )
+
+def get_namespaces(
+    db: Connection = Depends(get_db),
+    user: str = Depends(get_user_from_session_info),
+    organizations: List[str] = Depends(get_organizations_from_session_info),
+) -> List[NamespaceModel]:
+    yield db.get_namespaces_info_by_list(user=user, user_organizations=organizations)
 
 
-def _check_user_access(user: str, organizations: List, namespace: str, project: peppy.Project):
+def _check_user_access(
+    user: str, organizations: List, namespace: str, project: peppy.Project
+):
     if project.is_private:
         if user == namespace or namespace in organizations:
             return project
         else:
-            raise HTTPException(403, f"The user does not have permission to view or pull this project.")
+            raise HTTPException(
+                403, f"The user does not have permission to view or pull this project."
+            )
     else:
         return project
