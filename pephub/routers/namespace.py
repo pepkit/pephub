@@ -61,7 +61,7 @@ async def namespace_view(
     organizations=Depends(get_organizations_from_session_info),
 ):
     """Returns HTML response with a visual summary of the namespace."""
-    nspace = db.get_namespace_info(namespace, user, organizations)
+    nspace = db.get_namespace_info(namespace, user)
     return templates.TemplateResponse(
         "namespace.html",
         {

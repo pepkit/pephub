@@ -5,7 +5,6 @@ from fastapi.responses import RedirectResponse
 from platform import python_version
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
-from pepdbagent.models import NamespaceModel
 from .._version import __version__ as pephub_version
 from ..const import BASE_TEMPLATES_PATH
 from ..dependencies import *

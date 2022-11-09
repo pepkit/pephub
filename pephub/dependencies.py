@@ -172,7 +172,7 @@ def get_namespaces(
     user: str = Depends(get_user_from_session_info),
     organizations: List[str] = Depends(get_organizations_from_session_info),
 ) -> List[NamespaceModel]:
-    yield db.get_namespaces_info_by_list(user=user, user_organizations=organizations)
+    yield db.get_namespaces_info_by_list(user=user)
 
 
 def _check_user_access(
