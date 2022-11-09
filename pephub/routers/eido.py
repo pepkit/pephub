@@ -113,6 +113,9 @@ async def status():
 
 @router.post("/validate/pep_and_schema")
 async def validate_both(pep: UploadFile = File(...), schema: UploadFile = File(...)):
+    """
+    Takes a locally uploaded PEP and schema and returns a validation response
+    """
     with tempfile.TemporaryDirectory() as tmpdirname:
         pep_contents = await pep.read()
         pep_path = f"{tmpdirname}/{pep.filename}"
@@ -138,12 +141,20 @@ async def validate_both(pep: UploadFile = File(...), schema: UploadFile = File(.
 
 @router.get("/pep/{namespace}/{project}")
 async def pep_fromhub(namespace, project):
+    """
+    Takes namespace and project values for a PEPhub-hosted pep
+    and returns a JSON object.
+    """
     response = requests.get(f"http://pephub.databio.org/pep/{namespace}{project}")
     return {"namespace": namespace, "project": project, "response": response.json()}
 
 
 @router.get("/schema/{namespace}/{project}", response_class=HTMLResponse)
 async def get_schema(request: Request, namespace: str, project: str):
+    """
+    Takes namespace and project values for a schema endpoint
+    and returns a custom validator HTML page.
+    """
     # endpoint to schema.databio.org/...
     # like pipelines/ProseqPEP.yaml
 
@@ -164,6 +175,10 @@ async def get_schema(request: Request, namespace: str, project: str):
 async def validate_pep(
     namespace: str = Form(), project: str = Form(), peps: List[UploadFile] = File(...)
 ):
+    """
+    Takes in namespace and project values for a schema and one or more
+    local PEP files and returns a JSON object with validation results
+    """
     schema = f"http://schema.databio.org/{namespace}/{project}"
     vals = {
         "namespace": namespace,
