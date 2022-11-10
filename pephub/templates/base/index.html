@@ -3,7 +3,7 @@
   <div>
     {% if logged_in == True %}
     <div class="mb-3">
-      <h1>Logged in as, <span class="fw-bold mr-1">{{session_info['user']}}</span>👋</h1>
+      <h1>Logged in as, <span class="fw-bold mr-1">{{session_info['login']}}</span></h1>
       <a href="/submit"><button class="btn btn-lg btn-primary">Submit PEP</button></a>
     </div>
     {% else %}
@@ -25,8 +25,8 @@
         {% for namespace in namespaces %}
           <tr>
             <td><a href="/pep/{{namespace.namespace}}/view">{{ namespace.namespace }}</a></td>
-            <td>{{ namespace.n_projects }}</td>
-            <td>{{ namespace.n_samples }}</td>
+            <td>{{ namespace.number_of_projects }}</td>
+            <td>{{ namespace.number_of_samples }}</td>
             <td>
               <code><a href="/pep/{{namespace.namespace}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.namespace}}/</a></code>
             </td>
