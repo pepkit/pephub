@@ -35,6 +35,12 @@ View your PEPs at http://localhost:8000
 
 The server has been Dockerized and packaged with a [postgres](https://hub.docker.com/_/postgres) image to be run with [`docker compose`](https://docs.docker.com/compose/). This lets you run everything at once and develop without having to manage database instances. The `docker-compose.yml` file is written such that it mounts the database storage info to a folder called `postgres-data` at the root of the repository. This lets you load the database once and have it persist its state after restarting the container.
 
+Before running, setup the database directory using the included script:
+
+```console
+sh setup_dev.sh
+```
+
 To run:
 
 ```console
