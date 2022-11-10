@@ -1,6 +1,5 @@
-peppy>=0.32
 fastapi>=0.72.0
-eido>=0.1.5
+eido @ git+https://github.com/pepkit/eido@dev_alip#egg=eido
 logmuse>=0.2.7
 jinja2>=3.1.2
 yacman>=0.8.4
@@ -13,3 +12,4 @@ peppy
 requests
 aiofiles
 pyjwt[crypto]
+aiofiles

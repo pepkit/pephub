@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.4.0] - 2022-11-09
+### Added
+- Sort PEP's by authentication state (private PEPs)
+- New and improbed web validator (thanks Alip!)
+
+### Changed
+- Revamped `pepdbagent` with better stability and type safety
+
 ## [0.3.0] - 2022-09-07
 ### Added
 - User authentication to submit PEPs

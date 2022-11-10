@@ -10,7 +10,7 @@ from starlette.staticfiles import StaticFiles
 from ._version import __version__ as server_v
 from .const import LOG_FORMAT, PKG_NAME, TAGS_METADATA
 from .helpers import build_parser
-from .routers import version1, auth, namespace, project, eido, pep
+from .routers import index_page, auth, namespace, project, eido, pep
 from .const import STATICS_PATH, EIDO_PATH
 
 # build server
@@ -32,7 +32,7 @@ app.add_middleware(
 )
 
 # build routes
-app.include_router(version1.router)
+app.include_router(index_page.router)
 app.include_router(auth.router)
 app.include_router(namespace.router)
 app.include_router(project.router)
@@ -40,15 +40,12 @@ app.include_router(eido.router)
 app.include_router(pep.router)
 
 # mount the landing html/assets
-app.mount(
-    "/static",
-    StaticFiles(directory=STATICS_PATH),
-    name="root_static",
-)
+app.mount("/static", StaticFiles(directory=STATICS_PATH), name="root_static")
 
 # The eido validator is an SPA that can be served as a static HTML
 # file. These can only be added on the main app, not on a router
 app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
+
 
 def main():
     # set up the logger
