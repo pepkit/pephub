@@ -7,12 +7,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - User authentication to submit PEPs
 - More thorough out `/view` endpoints
 - More PEPs 🎉
+- Users can now specify a `?tag=` query parameter to fetch a PEP by its tag.
 
 ### Changed
 - PEPhub is now backed by a postgres database
 - Utilizes `pepgbagent` to interface with database
 
-## [0.2.0] - 2022-05-16
+## [0.2.0] - 2022-06-16
 ### Added
 - Better `/view` endpoints (switch from cards to tables)
 - More namespace endpoints
