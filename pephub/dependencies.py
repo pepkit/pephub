@@ -167,6 +167,7 @@ def get_project(
             f"PEP '{namespace}/{pep_id}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
 
+
 def get_namespaces(
     db: Connection = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
