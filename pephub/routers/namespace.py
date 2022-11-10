@@ -4,6 +4,8 @@ from typing import List
 from fastapi import APIRouter, Request, UploadFile, File, Form
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
+import yaml
+
 from pephub.const import BASE_TEMPLATES_PATH
 from peppy import __version__ as peppy_version, Project
 from platform import python_version

@@ -13,7 +13,6 @@ router = APIRouter(prefix="/pep", tags=["pep"])
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
-
 @router.get("/")
 async def get_all_namespaces(
     db: Connection = Depends(get_db), user=Depends(get_user_from_session_info)
