@@ -1,4 +1,3 @@
-peppy>=0.32
 fastapi>=0.72.0
 eido @ git+https://github.com/pepkit/eido@dev_alip#egg=eido
 logmuse>=0.2.7

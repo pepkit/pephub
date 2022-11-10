@@ -132,3 +132,6 @@ env/
 # pephub data
 pephub/data
 postgres
+.idea
+environment/local.env
+

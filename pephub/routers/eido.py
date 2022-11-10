@@ -1,7 +1,5 @@
 import eido
 import jinja2
-import os
-import peppy
 import shutil
 import aiofiles
 import requests
@@ -11,10 +9,8 @@ from fastapi import File, UploadFile, Form
 from fastapi import APIRouter
 from peppy import __version__ as peppy_version
 from starlette.requests import Request
-from starlette.responses import HTMLResponse
 from starlette.responses import JSONResponse
 from starlette.responses import FileResponse
-from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from typing import List, Union
 from yacman import load_yaml
@@ -238,15 +234,10 @@ async def validate_pep(
     files: List[UploadFile] = File(...),
     schemas_to_test=schemas_to_test,
 ):
-    ufiles = []
-    upload_folder = "uploads"
     for file in files:
         print(f"File: '{file}'")
         file_object = file.file
         full_path = os.path.join(file.filename)
-        # if not os.path.isfile(full_path):
-        #     print(f"failed isfile test: {full_path}")
-        #     return JSONResponse(content={ "error": "No files provided."})
         uploaded = open(full_path, "wb+")
         shutil.copyfileobj(file_object, uploaded)
         uploaded.close()
@@ -256,9 +247,7 @@ async def validate_pep(
         if ext == ".yaml" or ext == ".yml" or ext == ".csv":
             pconf = uploaded.name
             print("Got yaml:", pconf)
-    print(pconf)
     p = peppy.Project(pconf)
-    print(p)
 
     vals = {
         "name": pconf,

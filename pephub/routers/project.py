@@ -1,39 +1,24 @@
-import json
-import tempfile
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Request
 from starlette.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from typing import Optional
 from fastapi.templating import Jinja2Templates
-import tempfile
 
 import eido
-import peppy
 
 from pephub.const import BASE_TEMPLATES_PATH
 from peppy import __version__ as peppy_version
 from platform import python_version
-from ..crud import get_pep
 from ..helpers import get_project_sample_names, zip_conv_result, zip_pep
 from .._version import __version__ as pephub_version
 from ..dependencies import *
-from ..route_examples import *
 
-router = APIRouter(
-    prefix="/pep/{namespace}/{pep_id}",
-    tags=["project"],
-)
+router = APIRouter(prefix="/pep/{namespace}/{pep_id}", tags=["project"])
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
 
-@router.get(
-    "/",
-    summary="Fetch a PEP",
-)
-async def get_a_pep(
-    proj: peppy.Project = Depends(get_project)
-):
+@router.get("/", summary="Fetch a PEP")
+async def get_a_pep(proj: peppy.Project = Depends(get_project)):
     """
     Fetch a PEP from a certain namespace
     """
@@ -59,42 +44,25 @@ async def get_a_pep(
 
 
 @router.get("/zip")
-async def zip_pep_for_download(
-    proj: peppy.Project = Depends(get_project)
-):
+async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     """Zip a pep"""
     return zip_pep(proj)
 
 
-# fetch configuration file
-# @router.get("/config")
-# async def get_config(namespace: str, pep_id: str, db: Connection = Depends(get_db)):
-#     proj = get_pep(db, namespace, pep_id)
-#     return proj.config_file
-
-
 # fetch samples for project
 @router.get("/samples")
-async def get_pep_samples(
-    proj: peppy.Project = Depends(get_project)
-):
+async def get_pep_samples(proj: peppy.Project = Depends(get_project)):
     return {"samples": proj.samples}
 
 
 # # fetch specific sample for project
 @router.get("/samples/{sample_name}")
-async def get_sample(
-    sample_name: str,
-    proj: peppy.Project = Depends(get_project)
-):
+async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
     # check that the sample exists
     # by mapping the list of sample objects
     # to a list of sample names
     if sample_name not in get_project_sample_names(proj):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
-    # if download:
-    #     sample_file_path = f"{_PEP_STORAGE_PATH}/{namespace.lower()}/{pep_id.lower()}/{proj.get_sample(sample_name)['file_path']}"
-    #     return FileResponse(sample_file_path)
     sample = proj.get_sample(sample_name)
     return sample
 
@@ -107,7 +75,7 @@ async def get_sample_view(
     pep_id: str,
     sample_name: str,
     proj: peppy.Project = Depends(get_project),
-    session_info: dict = Depends(read_session_info)
+    session_info: dict = Depends(read_session_info),
 ):
     """Returns HTML response with a visual summary of the sample."""
     if sample_name not in get_project_sample_names(proj):
@@ -126,7 +94,7 @@ async def get_sample_view(
             "peppy_version": peppy_version,
             "python_version": python_version(),
             "pephub_version": pephub_version,
-            "logged_in": session_info is not None
+            "logged_in": session_info is not None,
         },
     )
 
@@ -200,14 +168,14 @@ async def convert_pep(
     response_class=HTMLResponse,
 )
 async def project_view(
-    request: Request, 
+    request: Request,
     namespace: str,
     tag: str = None,
     proj: peppy.Project = Depends(get_project),
-    session_info: dict = Depends(read_session_info)
+    session_info: dict = Depends(read_session_info),
 ):
     """Returns HTML response with a visual summary of the project."""
-    
+
     samples = [s.to_dict() for s in proj.samples]
     try:
         pep_version = proj.pep_version
@@ -229,6 +197,6 @@ async def project_view(
             "python_version": python_version(),
             "pephub_version": pephub_version,
             "filters": eido.get_available_pep_filters(),
-            "logged_in": session_info is not None
+            "logged_in": session_info is not None,
         },
     )

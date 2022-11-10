@@ -15,4 +15,3 @@ CREATE TABLE projects (
     anno_info jsonb,  -- annotation information
     CONSTRAINT id PRIMARY KEY (namespace, name, tag)
 );
-
