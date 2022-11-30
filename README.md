@@ -35,13 +35,14 @@ View your PEPs at http://localhost:8000
 
 The server has been Dockerized and packaged with a [postgres](https://hub.docker.com/_/postgres) image to be run with [`docker compose`](https://docs.docker.com/compose/). This lets you run everything at once and develop without having to manage database instances. The `docker-compose.yml` file is written such that it mounts the database storage info to a folder called `postgres-data` at the root of the repository. This lets you load the database once and have it persist its state after restarting the container.
 
-Before running, setup the database directory using the included script:
+You can start a development environment in three steps:
 
+**1. Obtain the latest database schema:**
 ```console
 sh setup_dev.sh
 ```
 
-To run:
+**2. Build and start the containers:**
 
 ```console
 docker compose up --build
@@ -50,7 +51,17 @@ docker compose up --build
 `pephub` now runs/listens on http://localhost:8000  
 `postgres` now runs/listens on http://localhost:5432
 
-On subsequent startups, you may ignore the `--build` flag if nothing on the Dockerfile or dependency list has changed.
+**3. Utilize the [`load_db`](scripts/load_db.py) script to populate the database with `examples/`:**
+```console
+cd scripts
+python load_db.py \
+--username docker \
+--password password \
+--database pephub
+../examples
+```
+
+**Note: If you wish to run the development environment with a pubic database, create a **new** `.env` file and alter your `docker-compose.yaml` file.**
 
 ## Running container for production:
 Build the container:
