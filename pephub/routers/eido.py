@@ -167,7 +167,7 @@ async def get_schema(request: Request, namespace: str, project: str):
     )
 
 
-@router.post("/validate/pep/")
+@router.post("/validate/pep")
 async def validate_pep(
     namespace: str = Form(), project: str = Form(), peps: List[UploadFile] = File(...)
 ):
@@ -185,6 +185,7 @@ async def validate_pep(
         for pep in peps:
             contents = await pep.read()
             pep_path = f"{tmpdirname}/{pep.filename}"
+            print(f"pep_path: '{pep_path}'")
             async with aiofiles.open(pep_path, mode="wb") as f:
                 await f.write(contents)
             pep_project = peppy.Project(pep_path)
