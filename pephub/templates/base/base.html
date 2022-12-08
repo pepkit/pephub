@@ -9,6 +9,11 @@
   	{% endblock %}
   </head>
   <body>
+	{% if is_landing_page %}
+		<div class="bg-primary" style="--bs-bg-opacity: 0.3">
+	{% else %}
+		<div>
+	{% endif %}
 		{% block nav %}
 		<nav class="navbar navbar-expand-md py-2 mb-4 border-bottom navbar-light" aria-label="navbar" style="background-color: #EFF3F6;">
 		  <div class="container">
@@ -26,17 +31,26 @@
 		      <li class="nav-item mx-2 my-0 h5">
 		      <a class="nav-link" href="https://github.com/pepkit/pephub" target="_blank"><i class="fa fa-2x fa-github" aria-hidden="true"></i>GitHub</a>
 			  </li>
+			  {% if logged_in == True %}
+			  <li class="nav-item dropdown mx-2 my-0 h5">
+        	    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        	      Profile
+        	    </a>
+			    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        	      <li><a class="dropdown-item" href="/pep/{{session_info['login']}}/view">View PEPs</a></li>
+        	      <li><a class="dropdown-item" href="#">Profile</a></li>
+        	      <li><hr class="dropdown-divider"></li>
+        	      <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+        	    </ul>
+        	  </li>
+			  <img class="rounded-circle border border-secondary" src="{{session_info['avatar_url']}}" alt="Avatar for {{session_info['login']}}" height="50"/>
+			  {% else %}
 			  <li class="nav-item mx-2 my-0 h5">
-				{% if logged_in == True %}
-				  <a href="/auth/logout">
-				  	<button class="btn btn-link">Logout</button>
-				  </a>
-				{% else %}
-				  <a href="/auth/login">
-				  	<button class="btn btn-primary"><i class="fa fa-github"></i>Login</button>
-				  </a>
-				{% endif %}
-				</li>
+			    <a href="/auth/login">
+			    	<button class="btn btn-primary"><i class="fa fa-github"></i>Login</button>
+			    </a>
+			  </li>
+			  {% endif %}
 		      </ul>
 		    </div>
 		  </div>
@@ -46,6 +60,7 @@
     {% block content %}
     No content
     {% endblock %}
+	</div>
 	</div>
 		{% block footer %}
 		<div class="container">
@@ -67,6 +82,7 @@
   </body>	
   	<!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="https://databio.org/css/databio.css">
 	<link rel="stylesheet" href="/static/css/custom.css">

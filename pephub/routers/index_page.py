@@ -35,7 +35,8 @@ async def main(
             **ALL_VERSIONS,
             namespaces=namespaces,
             session_info=session_info,
-            logged_in=session_info is not None
+            logged_in=session_info is not None,
+            is_landing_page=True,
         ),
     )
 

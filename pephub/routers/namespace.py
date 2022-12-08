@@ -60,6 +60,7 @@ async def namespace_view(
     namespace: str,
     db: Connection = Depends(get_db),
     user=Depends(get_user_from_session_info),
+    session_info=Depends(read_session_info),
     organizations=Depends(get_organizations_from_session_info),
 ):
     """Returns HTML response with a visual summary of the namespace."""
@@ -73,6 +74,7 @@ async def namespace_view(
             "python_version": python_version(),
             "pephub_version": pephub_version,
             "logged_in": user is not None,
+            "session_info": session_info
         },
     )
 
