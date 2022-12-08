@@ -1,42 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-  <div>
-    {% if logged_in == True %}
-    <div class="mb-3">
-      <h1>Logged in as, <span class="fw-bold mr-1">{{session_info['login']}}</span></h1>
-      <a href="/submit"><button class="btn btn-lg btn-primary">Submit PEP</button></a>
-    </div>
-    {% else %}
-      <h1 class="mb-4">PEPhub API</h1>
-    {% endif %}
-    <p id="welcome" class="text-justify">
-    Welcome to the PEPhub API. This server provides consumable sample tables through the <a href="https://github.com/pepkit/pephub">the PEPhub API for PEP sample metadata sharing</a>. This server contains PEPs for {{ namespaces|length }} namespaces listed below:</p>
-    <div class="border-bottom border-secondary my-1"></div> 
-    <table class="table table-sm table-striped">
-      <thead>
-        <tr>
-          <th>Namespace</th>
-          <th>No. of Projects</th>
-          <th>No. of Samples</th>
-          <th>API Endpoint</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for namespace in namespaces %}
-          <tr>
-            <td><a href="/pep/{{namespace.namespace}}/view">{{ namespace.namespace }}</a></td>
-            <td>{{ namespace.number_of_projects }}</td>
-            <td>{{ namespace.number_of_samples }}</td>
-            <td>
-              <code><a href="/pep/{{namespace.namespace}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.namespace}}/</a></code>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div class="border-bottom border-secondary my-1"></div>
-    <h2>Validation endpoints</h2>
-
-    In addition to serving metadata, PEPhub also provides a validation service. You can provide  `<namespace>/<projectid>` and identify relevant schemas that this metadata satisfies. You can also `POST` your own PEP to the service to validate it. You can learn more about this at the <a href="/eido/validator/index.html">/eido/validator/index.html</a> and in the API docs.
+  <div class="container" style="height: 80vh">
+    <div class="row h-100 align-items-center">
+      <div class="col-6">
+        <h1 class="fw-bolder">Easy management of sample metadata.</h1>
+        <p>PEPhub is a database, web interface, and API for sharing, retrieving, and validating sample metadata. PEPhub takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to let you store, edit, and access your PEPs in one convenient place.</p>
+        <p>To get started submitting your own sample metadata, you only need a GitHub account.</p>
+        <button class="btn btn-primary btn-lg">
+          Get started
+        </button>
+        <button class="btn btn-light btn-lg ms-2">
+          Validation
+        </button>
+      </div>
+      <div class="col-6 align-items-center">
+        <img class="ms-5" src="/static/img/landing_icon.png" alt="Landing icon" height="400">
+      </div>
+    </div>    
   </div>
 {% endblock %}

@@ -78,11 +78,10 @@ def callback(
 
     set_session_info(
         response,
-        {
-            "login": u["login"],
-            "id": u["id"],
-            "orgs": [org["login"] for org in organizations],
-        },
+        dict(
+            orgs = [org["login"] for org in organizations],
+            **u
+        ),
     )
     return "/"
 
