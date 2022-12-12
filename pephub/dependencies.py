@@ -79,7 +79,10 @@ class CLIAuthSystem:
     @staticmethod
     def jwt_encode_user_data(user_data: dict) -> str:
         exp = datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
-        return jwt.encode({**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256")
+        encoded_user_data =  jwt.encode({**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256")
+        if isinstance(encoded_user_data, bytes):
+            encoded_user_data = encoded_user_data.decode("utf-8")
+        return encoded_user_data
 
 
 def get_db():
@@ -116,7 +119,8 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
 
     @param session_info_encoded: JWT provided via FastAPI injection from the API cookie.
     """
-
+    if session_info_encoded is None:
+        return None
     try:
         session_info = jwt.decode(
             session_info_encoded, JWT_SECRET, algorithms=["HS256"]

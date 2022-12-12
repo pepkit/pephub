@@ -12,6 +12,31 @@ router = APIRouter(prefix="/profile", tags=["profile"])
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
+# return users data from session_info
+@router.get("/data")
+def profile_data(
+    request: Request,
+    session_info=Depends(read_session_info),
+    db: Connection = Depends(get_db),
+):
+    """
+    Return the user's profile data.
+    """
+    if session_info is None:
+        return RedirectResponse(url="/auth/login")
+    else:
+        peps = db.get_namespace_info(session_info['login'], user=session_info["login"])
+        return {
+            "request": request,
+            "session_info": session_info,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+            "logged_in": session_info is not None,
+            "peps": peps
+        }
+
+
+
 @router.get("/")
 def profile(
     request: Request,
