@@ -11,12 +11,20 @@
             <p>{{ session_info['bio'] }}</p>
           </div>
           </div>
+          <div>
           <a href="{{session_info['html_url']}}">
-            <button class="btn btn-sm btn-outline-secondary">
+            <button class="btn btn btn-outline-primary">
               <i class="bi bi-github"></i>
               View GitHub
             </button>
           </a>
+          <a href="/pep/{{session_info['login']}}/view">
+            <button class="btn btn btn-primary">
+              <i class="bi bi-box-arrow-right"></i>
+              View PEPs
+            </button>
+          </a>
+          </div>
         </div>
         <div>
             <p class="h5 fw-bold mb-1">Organizations</p>
@@ -28,6 +36,7 @@
             <p class="h6 fw-light"><em>You are not a member of any organizations.</em></p>
             {% endif %}
         </div>
+    </div>
     </div>
   </div>
 {% endblock %}

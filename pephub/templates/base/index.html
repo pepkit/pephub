@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="container" style="height: 80vh">
+  <div class="container" style="height: 70vh">
     <div class="row h-100 align-items-center">
       <div class="col-6">
         <h1 class="fw-bolder">Easy management of sample metadata.</h1>
         <p>PEPhub is a database, web interface, and API for sharing, retrieving, and validating sample metadata. PEPhub takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to let you store, edit, and access your PEPs in one convenient place.</p>
         <p>To get started submitting your own sample metadata, you only need a GitHub account.</p>
-        <button class="btn btn-primary btn-lg">
-          Get started
-        </button>
+        <a href="/auth/login">
+          <button class="btn btn-primary btn-lg">
+            <i class="bi bi-github"></i> Login with GitHub
+          </button>
+        </a>
         <button class="btn btn-light btn-lg ms-2">
-          Validation
+          <i class="bi bi-check2-circle me-1"></i>Validation
         </button>
       </div>
       <div class="col-6 align-items-center">

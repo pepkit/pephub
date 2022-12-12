@@ -198,5 +198,6 @@ async def project_view(
             "pephub_version": pephub_version,
             "filters": eido.get_available_pep_filters(),
             "logged_in": session_info is not None,
+            "session_info": session_info
         },
     )

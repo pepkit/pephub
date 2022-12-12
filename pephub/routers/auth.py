@@ -83,7 +83,7 @@ def callback(
             **u
         ),
     )
-    return "/"
+    return "/profile"
 
 
 @router.get("/profile")
