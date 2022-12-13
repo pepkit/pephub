@@ -26,6 +26,7 @@ from .const import STATICS_PATH, EIDO_PATH
 app = FastAPI(
     title=PKG_NAME,
     description="A web interface and RESTful API for PEPs",
+    docs_url="/api/v1/docs",
     version=server_v,
     tags=TAGS_METADATA,
 )

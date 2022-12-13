@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, __version__ as fastapi_version
 from peppy import __version__ as peppy_version
 from platform import python_version
 
@@ -14,6 +14,7 @@ ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy_version,
     "python_version": python_version(),
+    "fastapi_version": fastapi_version,
     "api_version": 1,
 }
 

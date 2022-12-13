@@ -27,12 +27,14 @@ namespace = APIRouter(prefix="/api/v1/{namespace}", tags=["api", "namespace", "v
 @namespace.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(
     namespace: str,
+    request: Request,
     db: Connection = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
 ):
     """Fetch namespace. Returns a JSON representation of the namespace."""
-    nspace = db.get_namespace_info(namespace, user)
-    return JSONResponse(content=nspace.dict())
+    nspace = db.get_namespace_annotation(namespace=namespace)
+    nspace['projects_endpoint'] = f"{str(request.url)[:-1]}/projects"
+    return JSONResponse(content=nspace)
 
 
 @namespace.get("/projects", summary="Fetch all projects inside a particular namespace.")
