@@ -1,5 +1,5 @@
 import eido
-from fastapi import APIRouter,  Depends
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import __version__ as peppy_version
 from peppy import Project
@@ -18,12 +18,11 @@ ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy_version,
     "python_version": python_version(),
-    "api_version": 1
+    "api_version": 1,
 }
 
 project = APIRouter(
-    prefix="/api/v1/{namespace}/{project}", 
-    tags=["api", "project", "v1"]
+    prefix="/api/v1/{namespace}/{project}", tags=["api", "project", "v1"]
 )
 
 
@@ -89,6 +88,7 @@ async def convert_pep(
 
     return resp_obj
 
+
 @project.get("/", summary="Fetch a PEP")
 async def get_a_pep(proj: peppy.Project = Depends(get_project)):
     """
@@ -114,6 +114,7 @@ async def get_a_pep(proj: peppy.Project = Depends(get_project)):
         "sample_attributes": sample_attributes,
     }
 
+
 # delete a PEP
 @project.delete("/", summary="Delete a PEP")
 async def delete_a_pep(
@@ -131,9 +132,8 @@ async def delete_a_pep(
         )
     # TODO - delete the PEP from the database
 
-    return {
-        "message": "PEP deleted"
-    }, 204
+    return {"message": "PEP deleted"}, 204
+
 
 @project.get("/zip")
 async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
@@ -144,15 +144,13 @@ async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
 # fetch samples for project
 @project.get("/samples")
 async def get_pep_samples(
-    limit: int = 100,
-    offset: int = 0,
-    proj: peppy.Project = Depends(get_project)
+    limit: int = 100, offset: int = 0, proj: peppy.Project = Depends(get_project)
 ):
     return {
         "limit": limit,
         "offset": offset,
         "count": len(proj.samples),
-        "items": proj.samples[offset:offset+limit]
+        "items": proj.samples[offset : offset + limit],
     }
 
 

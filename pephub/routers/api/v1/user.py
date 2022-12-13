@@ -7,10 +7,7 @@ from ...._version import __version__ as pephub_version
 from ....dependencies import *
 from ....const import BASE_TEMPLATES_PATH
 
-user = APIRouter(
-    prefix="/me", 
-    tags=["profile"]
-)
+user = APIRouter(prefix="/me", tags=["profile"])
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
@@ -28,12 +25,12 @@ def profile_data(
     if session_info is None:
         return RedirectResponse(url="/auth/login")
     else:
-        peps = db.get_namespace_info(session_info['login'], user=session_info["login"])
+        peps = db.get_namespace_info(session_info["login"], user=session_info["login"])
         return {
             "request": request,
             "session_info": session_info,
             "python_version": python_version(),
             "pephub_version": pephub_version,
             "logged_in": session_info is not None,
-            "peps": peps
+            "peps": peps,
         }

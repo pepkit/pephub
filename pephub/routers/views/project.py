@@ -22,13 +22,14 @@ ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy_version,
     "python_version": python_version(),
-    "api_version": 1
+    "api_version": 1,
 }
 
 project = APIRouter(
     prefix="/{namespace}/{project}",
-    tags=["views", "user interface", "interface", "projects", "PEP"]
+    tags=["views", "user interface", "interface", "projects", "PEP"],
 )
+
 
 @project.get(
     "/",
@@ -67,9 +68,10 @@ async def project_view(
             "pephub_version": pephub_version,
             "filters": eido.get_available_pep_filters(),
             "logged_in": session_info is not None,
-            "session_info": session_info
+            "session_info": session_info,
         },
     )
+
 
 # display a view for a specific sample
 @project.get("/samples/{sample_name}/")

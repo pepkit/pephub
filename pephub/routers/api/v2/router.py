@@ -15,13 +15,11 @@ ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy.__version__,
     "python_version": python_version(),
-    "api_version": 2
+    "api_version": 2,
 }
 
-api = APIRouter(
-    prefix="/api/v2", 
-    tags=["api", "base", "v2"]
-)
+api = APIRouter(prefix="/api/v2", tags=["api", "base", "v2"])
+
 
 @api.get("/")
 async def api_base():

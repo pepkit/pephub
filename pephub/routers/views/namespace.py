@@ -20,13 +20,13 @@ ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy_version,
     "python_version": python_version(),
-    "api_version": 1
+    "api_version": 1,
 }
 
 namespace = APIRouter(
-    prefix="/{namespace}",
-    tags=["views", "user interface", "interface"]
+    prefix="/{namespace}", tags=["views", "user interface", "interface"]
 )
+
 
 @namespace.get(
     "/",
@@ -52,6 +52,6 @@ async def namespace_view(
             "python_version": python_version(),
             "pephub_version": pephub_version,
             "logged_in": user is not None,
-            "session_info": session_info
+            "session_info": session_info,
         },
     )

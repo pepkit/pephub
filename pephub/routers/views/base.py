@@ -19,12 +19,11 @@ ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy_version,
     "python_version": python_version(),
-    "api_version": 1
+    "api_version": 1,
 }
 
-views = APIRouter( 
-    tags=["views", "user interface", "interface"]
-)
+views = APIRouter(tags=["views", "user interface", "interface"])
+
 
 @views.get("/")
 async def main(

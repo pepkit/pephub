@@ -14,13 +14,11 @@ ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy_version,
     "python_version": python_version(),
-    "api_version": 1
+    "api_version": 1,
 }
 
-api = APIRouter(
-    prefix="/api/v1", 
-    tags=["api", "base", "v1"]
-)
+api = APIRouter(prefix="/api/v1", tags=["api", "base", "v1"])
+
 
 @api.get("/")
 async def api_base():
@@ -31,6 +29,7 @@ async def api_base():
         **ALL_VERSIONS,
         "message": "Welcome to the PEPHub API.",
     }
+
 
 @api.get("/_version")
 async def version():

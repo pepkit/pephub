@@ -25,13 +25,11 @@ github_app_config = {
 ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy_version,
-    "python_version": python_version()
+    "python_version": python_version(),
 }
 
-auth = APIRouter(
-    prefix="/auth", 
-    tags=["auth", "users", "login", "authentication"]
-)
+auth = APIRouter(prefix="/auth", tags=["auth", "users", "login", "authentication"])
+
 
 @auth.get("/login", response_class=RedirectResponse)
 def login(request: Request):
@@ -44,6 +42,7 @@ def login(request: Request):
         JWT_SECRET,
         **request.query_params,
     )
+
 
 @auth.get("/callback", response_class=RedirectResponse)
 def callback(
@@ -88,12 +87,10 @@ def callback(
 
     set_session_info(
         response,
-        dict(
-            orgs = [org["login"] for org in organizations],
-            **u
-        ),
+        dict(orgs=[org["login"] for org in organizations], **u),
     )
     return "/profile"
+
 
 @auth.get("/profile")
 async def view_profile(session_info: dict = Depends(read_session_info)):

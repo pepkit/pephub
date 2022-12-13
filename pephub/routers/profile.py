@@ -25,16 +25,15 @@ def profile_data(
     if session_info is None:
         return RedirectResponse(url="/auth/login")
     else:
-        peps = db.get_namespace_info(session_info['login'], user=session_info["login"])
+        peps = db.get_namespace_info(session_info["login"], user=session_info["login"])
         return {
             "request": request,
             "session_info": session_info,
             "python_version": python_version(),
             "pephub_version": pephub_version,
             "logged_in": session_info is not None,
-            "peps": peps
+            "peps": peps,
         }
-
 
 
 @router.get("/")
@@ -49,7 +48,9 @@ def profile(
     if session_info is None:
         return RedirectResponse(url="/auth/login")
     else:
-        namespace_info = db.get_namespace_info(session_info['login'], user=session_info["login"])
+        namespace_info = db.get_namespace_info(
+            session_info["login"], user=session_info["login"]
+        )
         return templates.TemplateResponse(
             "profile.html",
             {

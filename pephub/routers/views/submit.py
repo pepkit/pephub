@@ -17,9 +17,9 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_TEMPLATES_PATH))
 
 submit = APIRouter(
-    prefix="/submit",
-    tags=["views", "user interface", "interface", "projects", "PEP"]
+    prefix="/submit", tags=["views", "user interface", "interface", "projects", "PEP"]
 )
+
 
 @submit.get("/", summary="Submit a PEP to the current namespace")
 async def submit_pep_form(request: Request, session_info=Depends(read_session_info)):

@@ -18,13 +18,11 @@ ALL_VERSIONS = {
     "pephub_version": pephub_version,
     "peppy_version": peppy_version,
     "python_version": python_version(),
-    "api_version": 1
+    "api_version": 1,
 }
 
-namespace = APIRouter(
-    prefix="/api/v1/{namespace}", 
-    tags=["api", "namespace", "v1"]
-)
+namespace = APIRouter(prefix="/api/v1/{namespace}", tags=["api", "namespace", "v1"])
+
 
 @namespace.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(
@@ -36,6 +34,7 @@ async def get_namespace(
     nspace = db.get_namespace_info(namespace, user)
     return JSONResponse(content=nspace.dict())
 
+
 @namespace.get("/projects", summary="Fetch all projects inside a particular namespace.")
 async def get_namespace_projects(
     namespace: str,
@@ -46,17 +45,17 @@ async def get_namespace_projects(
 ):
     """Fetch the projects for a particular namespace"""
     projects = db.get_projects_in_namespace(
-        user=user, 
-        namespace=namespace,
-        limit=limit,
-        offset=offset
+        user=user, namespace=namespace, limit=limit, offset=offset
     )
-    return JSONResponse(content={
-            'limit': limit,
-            'offset': offset,
-            'items': [p.to_dict() for p in projects],
-            'count': len(projects),
-        })
+    return JSONResponse(
+        content={
+            "limit": limit,
+            "offset": offset,
+            "items": [p.to_dict() for p in projects],
+            "count": len(projects),
+        }
+    )
+
 
 @namespace.post("/submit", summary="Submit a PEP to the current namespace")
 async def submit_pep(
@@ -89,11 +88,11 @@ async def submit_pep(
         p.name = project_name
         db.upload_project(p, namespace=namespace, name=project_name, tag=tag)
         return {
-                "request": request,
-                "namespace": namespace,
-                "project_name": project_name,
-                "proj": p.to_dict(),
-                "config_file": config_file.filename,
-                "other_files": [f.filename for f in other_files],
-                "tag": tag,
-            }, 202
+            "request": request,
+            "namespace": namespace,
+            "project_name": project_name,
+            "proj": p.to_dict(),
+            "config_file": config_file.filename,
+            "other_files": [f.filename for f in other_files],
+            "tag": tag,
+        }, 202
