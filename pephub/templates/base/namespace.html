@@ -2,34 +2,19 @@
 {% block content %}
 <div>
     <a href="/">← back home</a>
-    <h1>{{namespace.namespace}}</h1>
+    <div class="d-flex flex-row align-items-start justify-content-between">
+      <h1>{{namespace.namespace}}</h1>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#apiEndpoints">
+        <i class="bi bi-hdd-rack-fill"></i>
+        API Endpoints
+      </button>
+    </div>
     <p class="mb-0"><span class="fw-bold">Total projects:</span> {{namespace.projects|length}}</p>
     <p class="mb-0"><span class="fw-bold">Total samples:</span> {{namespace.n_samples}}</p>
-    <div class="border-bottom border-secondary my-2"></div>
-    <h3>API Endpoints:</h3>
-    <p class="mb-2">
-      <span class="badge bg-primary">GET</span>
-      <span class="fw-bold">Namespace:</span>
-      <code>
-        <a href="/pep/{{namespace.namespace}}/">
-          /pep/{{namespace.namespace}}/
-        </a>
-      </code>
-   </p>
-   <p class="mb-2">
-    <span class="badge bg-primary">GET</span>
-    <span class="fw-bold">Namespace:</span>
-    <code>
-      <a href="/pep/{{namespace.namespace}}/projects">
-        /pep/{{namespace.namespace}}/projects
-      </a>
-    </code>
-   </p>
     <div class="border-bottom border-secondary my-2"></div>
     <table class="table table-sm table-striped" id="namespace-table">
       <thead>
         <tr>
-          
           <th>Project</th>
           <th>Tag</th>
           <th>No. of Samples</th>
@@ -40,7 +25,6 @@
       <tbody>
         {% for proj in namespace.projects %}
         <tr>
-
           <td><a href="/pep/{{namespace.namespace}}/{{proj.name}}/view?tag={{proj.tag}}">{{proj.name}}</a></td>
           <td>{{proj.tag}}</td>
           <td>{{proj.n_samples}}</td>
@@ -48,20 +32,20 @@
             <code><a href="/pep/{{namespace.namespace}}/{{proj.name}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.namespace}}/{{proj.name}}</a></code>
           </td>
           <td>
-            <a href="/pep/{{namespace.namespace}}/{{proj.name}}/view?tag={{proj.tag}}">
-              <button class="btn btn-sm btn-primary">
-                <i class="bi bi-binoculars me-1"></i>
-                View
+            <div class="btn-group dropend">
+              <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Actions
               </button>
-            </a>
-            <button class="btn btn-sm btn-secondary">
-              <i class="bi bi-pencil"></i>
-              Edit
-            </button>
-            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletePEP">
-              <i class="bi bi-trash3"></i>
-              Delete
-            </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" hred="/pep/{{namespace.namespace}}/{{proj.name}}/view?tag={{proj.tag}}">Edit</a></li>
+                <li><a class="dropdown-item" href="/pep/{{namespace.namespace}}/{{proj.name}}/view?tag={{proj.tag}}">View</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li class="text-danger dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePEP">
+                  <i class="bi bi-trash3"></i> 
+                  Delete
+                </li>
+              </ul>
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -85,7 +69,37 @@
         </div>
       </div>
     </div>
-
+    <!-- API Endpoints Modal -->
+    <div class="modal fade" id="apiEndpoints" tabindex="-1" aria-labelledby="apiEndpointsModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="apiEndpointsModal">API Endpoints Available</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2">
+              <span class="badge bg-primary">GET</span>
+              <span class="fw-bold">Namespace:</span>
+              <code>
+                <a href="/pep/{{namespace.namespace}}/">
+                  /pep/{{namespace.namespace}}/
+                </a>
+              </code>
+          </p>
+          <p class="mb-2">
+            <span class="badge bg-primary">GET</span>
+            <span class="fw-bold">Namespace:</span>
+            <code>
+              <a href="/pep/{{namespace.namespace}}/projects">
+                /pep/{{namespace.namespace}}/projects
+              </a>
+            </code>
+          </p>
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
   <!-- DataTabes-->
   <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
