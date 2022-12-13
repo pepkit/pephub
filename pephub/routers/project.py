@@ -173,6 +173,7 @@ async def project_view(
     tag: str = None,
     proj: peppy.Project = Depends(get_project),
     session_info: dict = Depends(read_session_info),
+    edit: bool = False,
 ):
     """Returns HTML response with a visual summary of the project."""
 
