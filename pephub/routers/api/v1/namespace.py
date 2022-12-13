@@ -1,30 +1,32 @@
-import shutil
 import tempfile
-from typing import List
-from fastapi import APIRouter, Request, UploadFile, File, Form
-from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.templating import Jinja2Templates
-import yaml
-
-from pephub.const import BASE_TEMPLATES_PATH
-from peppy import __version__ as peppy_version, Project
+import shutil
+from fastapi import APIRouter, File, UploadFile, Request, Depends, Form
+from fastapi.responses import JSONResponse
+from peppy import __version__ as peppy_version
+from peppy import Project
 from platform import python_version
 
-from .._version import __version__ as pephub_version
-
-from ..dependencies import *
+from ...._version import __version__ as pephub_version
+from ....dependencies import *
 
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-router = APIRouter(prefix="/pep/{namespace}", tags=["namespace"])
+ALL_VERSIONS = {
+    "pephub_version": pephub_version,
+    "peppy_version": peppy_version,
+    "python_version": python_version(),
+    "api_version": 1
+}
 
-templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
+namespace = APIRouter(
+    prefix="/api/v1/{namespace}", 
+    tags=["api", "namespace", "v1"]
+)
 
-
-@router.get("/", summary="Fetch details about a particular namespace.")
+@namespace.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(
     namespace: str,
     db: Connection = Depends(get_db),
@@ -34,52 +36,29 @@ async def get_namespace(
     nspace = db.get_namespace_info(namespace, user)
     return JSONResponse(content=nspace.dict())
 
-
-@router.get("/projects", summary="Fetch all projects inside a particular namespace.")
+@namespace.get("/projects", summary="Fetch all projects inside a particular namespace.")
 async def get_namespace_projects(
     namespace: str,
     db: Connection = Depends(get_db),
     limit: int = 100,
+    offset: int = 0,
     user=Depends(get_user_from_session_info),
 ):
     """Fetch the projects for a particular namespace"""
-    projects = db.get_projects_in_namespace(user=user, namespace=namespace)
-    if limit:
-        return JSONResponse(content={p.name: p.to_dict() for p in projects[:limit]})
-    else:
-        return JSONResponse(content=projects)
-
-
-@router.get(
-    "/view",
-    summary="View a visual summary of a particular namespace.",
-    response_class=HTMLResponse,
-)
-async def namespace_view(
-    request: Request,
-    namespace: str,
-    db: Connection = Depends(get_db),
-    user=Depends(get_user_from_session_info),
-    session_info=Depends(read_session_info),
-    organizations=Depends(get_organizations_from_session_info),
-):
-    """Returns HTML response with a visual summary of the namespace."""
-    nspace = db.get_namespace_info(namespace, user)
-    return templates.TemplateResponse(
-        "namespace.html",
-        {
-            "namespace": nspace,
-            "request": request,
-            "peppy_version": peppy_version,
-            "python_version": python_version(),
-            "pephub_version": pephub_version,
-            "logged_in": user is not None,
-            "session_info": session_info
-        },
+    projects = db.get_projects_in_namespace(
+        user=user, 
+        namespace=namespace,
+        limit=limit,
+        offset=offset
     )
+    return JSONResponse(content={
+            'limit': limit,
+            'offset': offset,
+            'items': [p.to_dict() for p in projects],
+            'count': len(projects),
+        })
 
-
-@router.post("/submit", summary="Submit a PEP to the current namespace")
+@namespace.post("/submit", summary="Submit a PEP to the current namespace")
 async def submit_pep(
     request: Request,
     namespace: str,
@@ -109,9 +88,7 @@ async def submit_pep(
         p = Project(f"{dirpath}/{config_file.filename}")
         p.name = project_name
         db.upload_project(p, namespace=namespace, name=project_name, tag=tag)
-        return templates.TemplateResponse(
-            "submission.html",
-            {
+        return {
                 "request": request,
                 "namespace": namespace,
                 "project_name": project_name,
@@ -119,5 +96,4 @@ async def submit_pep(
                 "config_file": config_file.filename,
                 "other_files": [f.filename for f in other_files],
                 "tag": tag,
-            },
-        )
+            }, 202

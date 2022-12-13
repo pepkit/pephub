@@ -156,19 +156,19 @@ def get_user_from_session_info(
 
 def get_project(
     namespace: str,
-    pep_id: str,
+    project: str,
     tag: str = None,
     db: Connection = Depends(get_db),
     user=Depends(get_user_from_session_info),
     organizations=Depends(get_organizations_from_session_info),
 ):
-    if proj := db.get_project(namespace, pep_id, tag):
+    if proj := db.get_project(namespace, project, tag):
         _check_user_access(user, organizations, namespace, proj)
         yield proj
     else:
         raise HTTPException(
             404,
-            f"PEP '{namespace}/{pep_id}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
 
 

@@ -44,13 +44,17 @@
                 Actions
               </button>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" hred="/pep/{{namespace.namespace}}/{{proj.name}}/view?tag={{proj.tag}}">Edit</a></li>
+                {% if session_info['login'] == namespace.namespace %}
+                  <li><a class="dropdown-item" hred="/pep/{{namespace.namespace}}/{{proj.name}}/view?tag={{proj.tag}}">Edit</a></li>
+                {% endif %}
                 <li><a class="dropdown-item" href="/pep/{{namespace.namespace}}/{{proj.name}}/view?tag={{proj.tag}}">View</a></li>
+                {% if session_info['login'] == namespace.namespace %}
                 <li><hr class="dropdown-divider"></li>
                 <li onclick="setDeleteFormInputPlaceholder('{{ namespace.namespace}}/{{proj.name}}')" class="text-danger dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePEP">
                   <i class="bi bi-trash3"></i> 
                   Delete
                 </li>
+                {% endif %}
               </ul>
             </div>
           </td>
