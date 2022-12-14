@@ -26,7 +26,7 @@
 		    <div class="collapse navbar-collapse me-auto" id="navbarSupportedContent">
 		      <ul class="navbar-nav ms-auto mb-2 mb-sm-0">        
 		      <li class="nav-item mx-2 my-0 h5">
-		        <a class="nav-link" href="/docs">
+		        <a class="nav-link" href="/api/v1/docs">
 					<i class="bi bi-journal"></i>
 					API docs
 				</a>
@@ -43,7 +43,7 @@
         	      Profile
         	    </a>
 			    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-        	      <li><a class="dropdown-item" href="/pep/{{session_info['login']}}/view">View PEPs</a></li>
+        	      <li><a class="dropdown-item" href="/{{ session_info['login'] }}">View PEPs</a></li>
         	      <li><a class="dropdown-item" href="/profile">Profile</a></li>
         	      <li><hr class="dropdown-divider"></li>
         	      <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>

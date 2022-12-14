@@ -22,8 +22,79 @@ ALL_VERSIONS = {
 }
 
 project = APIRouter(
-    prefix="/api/v1/{namespace}/{project}", tags=["api", "project", "v1"]
+    prefix="/api/v1/projects/{namespace}/{project}", tags=["api", "project", "v1"]
 )
+
+
+@project.get("/", summary="Fetch a PEP")
+async def get_a_pep(proj: peppy.Project = Depends(get_project)):
+    """
+    Fetch a PEP from a certain namespace
+    """
+
+    samples = [s.to_dict() for s in proj.samples]
+    sample_table_indx = proj.sample_table_index
+
+    # this assumes the first sample's attributes
+    # is representative of all samples attributes
+    # -- is this the case?
+    sample_attributes = proj._samples[0]._attributes
+    try:
+        pep_version = proj.pep_version
+    except Exception:
+        pep_version = "2.1.0"
+    return {
+        "pep": proj.to_dict(),
+        "pep_version": pep_version,
+        "samples": samples,
+        "sample_table_indx": sample_table_indx,
+        "sample_attributes": sample_attributes,
+    }
+
+
+# delete a PEP
+@project.delete("/", summary="Delete a PEP")
+async def delete_a_pep(
+    namespace: str,
+    proj: peppy.Project = Depends(get_project),
+    db: Connection = Depends(get_db),
+    session_info: dict = Depends(read_session_info),
+):
+    """
+    Delete a PEP from a certain namespace
+    """
+    if namespace != session_info["login"]:
+        raise HTTPException(
+            status_code=403, detail="You are not authorized to delete this PEP"
+        )
+    # TODO - delete the PEP from the database
+
+    return {"message": "PEP deleted"}, 204
+
+
+# fetch samples for project
+@project.get("/samples")
+async def get_pep_samples(
+    limit: int = 100, offset: int = 0, proj: peppy.Project = Depends(get_project)
+):
+    return {
+        "limit": limit,
+        "offset": offset,
+        "count": len(proj.samples),
+        "items": proj.samples[offset : offset + limit],
+    }
+
+
+# # fetch specific sample for project
+@project.get("/samples/{sample_name}")
+async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
+    # check that the sample exists
+    # by mapping the list of sample objects
+    # to a list of sample names
+    if sample_name not in get_project_sample_names(proj):
+        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
+    sample = proj.get_sample(sample_name)
+    return sample
 
 
 # fetch all subsamples inside a pep
@@ -89,78 +160,7 @@ async def convert_pep(
     return resp_obj
 
 
-@project.get("/", summary="Fetch a PEP")
-async def get_a_pep(proj: peppy.Project = Depends(get_project)):
-    """
-    Fetch a PEP from a certain namespace
-    """
-
-    samples = [s.to_dict() for s in proj.samples]
-    sample_table_indx = proj.sample_table_index
-
-    # this assumes the first sample's attributes
-    # is representative of all samples attributes
-    # -- is this the case?
-    sample_attributes = proj._samples[0]._attributes
-    try:
-        pep_version = proj.pep_version
-    except Exception:
-        pep_version = "2.1.0"
-    return {
-        "pep": proj.to_dict(),
-        "pep_version": pep_version,
-        "samples": samples,
-        "sample_table_indx": sample_table_indx,
-        "sample_attributes": sample_attributes,
-    }
-
-
-# delete a PEP
-@project.delete("/", summary="Delete a PEP")
-async def delete_a_pep(
-    namespace: str,
-    proj: peppy.Project = Depends(get_project),
-    db: Connection = Depends(get_db),
-    session_info: dict = Depends(read_session_info),
-):
-    """
-    Delete a PEP from a certain namespace
-    """
-    if namespace != session_info["login"]:
-        raise HTTPException(
-            status_code=403, detail="You are not authorized to delete this PEP"
-        )
-    # TODO - delete the PEP from the database
-
-    return {"message": "PEP deleted"}, 204
-
-
 @project.get("/zip")
 async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     """Zip a pep"""
     return zip_pep(proj)
-
-
-# fetch samples for project
-@project.get("/samples")
-async def get_pep_samples(
-    limit: int = 100, offset: int = 0, proj: peppy.Project = Depends(get_project)
-):
-    return {
-        "limit": limit,
-        "offset": offset,
-        "count": len(proj.samples),
-        "items": proj.samples[offset : offset + limit],
-    }
-
-
-# # fetch specific sample for project
-@project.get("/samples/{sample_name}")
-async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
-    # check that the sample exists
-    # by mapping the list of sample objects
-    # to a list of sample names
-    if sample_name not in get_project_sample_names(proj):
-        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
-    sample = proj.get_sample(sample_name)
-    return sample

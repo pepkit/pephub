@@ -89,7 +89,7 @@ def callback(
         response,
         dict(orgs=[org["login"] for org in organizations], **u),
     )
-    return "/profile"
+    return f"/{u['login']}"
 
 
 @auth.get("/profile")

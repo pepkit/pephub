@@ -21,19 +21,30 @@ ALL_VERSIONS = {
     "api_version": 1,
 }
 
-namespace = APIRouter(prefix="/api/v1/{namespace}", tags=["api", "namespace", "v1"])
+namespace = APIRouter(
+    prefix="/api/v1/namespaces/{namespace}", tags=["api", "namespace", "v1"]
+)
 
 
 @namespace.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(
     namespace: str,
     request: Request,
+    limit: int = 100,
+    offset: int = 0,
     db: Connection = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
 ):
     """Fetch namespace. Returns a JSON representation of the namespace."""
-    nspace = db.get_namespace_annotation(namespace=namespace)
-    nspace['projects_endpoint'] = f"{str(request.url)[:-1]}/projects"
+    nspace = db.get_namespace_info(namespace=namespace, user=user)
+    nspace = nspace.dict()
+    # return namespace not found if no projects
+    if len(nspace["projects"]) == 0:
+        raise HTTPException(404, f"Namespace {namespace} not found.")
+
+    nspace["projects"]["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
+    nspace["projects"]["limit"] = limit
+    nspace["projects"]["offset"] = offset
     return JSONResponse(content=nspace)
 
 

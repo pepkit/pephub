@@ -174,6 +174,21 @@ def get_project(
         )
 
 
+def get_project_annotation(
+    namespace: str,
+    project: str,
+    tag: str = None,
+    db: Connection = Depends(get_db),
+):
+    if project_annotation := db.get_project_annotation(namespace, project, tag):
+        yield project_annotation
+    else:
+        raise HTTPException(
+            404,
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+        )
+
+
 def get_namespaces(
     db: Connection = Depends(get_db),
     user: str = Depends(get_user_from_session_info),

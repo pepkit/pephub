@@ -40,26 +40,27 @@ async def project_view(
     request: Request,
     namespace: str,
     tag: str = None,
-    proj: peppy.Project = Depends(get_project),
+    project: peppy.Project = Depends(get_project),
+    project_annoatation: dict = Depends(get_project_annotation),
     session_info: dict = Depends(read_session_info),
     edit: bool = False,
 ):
     """Returns HTML response with a visual summary of the project."""
 
-    samples = [s.to_dict() for s in proj.samples]
+    samples = [s.to_dict() for s in project.samples]
     try:
-        pep_version = proj.pep_version
+        pep_version = project.pep_version
     except Exception:
         pep_version = "2.1.0"
     return templates.TemplateResponse(
         "project.html",
         {
             "namespace": namespace,
-            "project": proj,
+            "project": project,
             "tag": tag,
-            "project_dict": proj.to_dict(),
+            "project_dict": project.to_dict(),
             "pep_version": pep_version,
-            "sample_table_columns": proj.sample_table.columns.to_list(),
+            "sample_table_columns": project.sample_table.columns.to_list(),
             "samples": samples,
             "n_samples": len(samples),
             "request": request,
@@ -68,7 +69,62 @@ async def project_view(
             "pephub_version": pephub_version,
             "filters": eido.get_available_pep_filters(),
             "logged_in": session_info is not None,
+            "is_editing": edit,
             "session_info": session_info,
+            "is_private": project_annoatation.is_private,
+            "description": project_annoatation.description,
+            "last_update": project_annoatation.last_update,
+        },
+    )
+
+
+@project.get(
+    "/edit",
+    summary="Enter the project editor page.",
+    response_class=HTMLResponse,
+)
+async def project_edit(
+    request: Request,
+    namespace: str,
+    tag: str = None,
+    project: peppy.Project = Depends(get_project),
+    project_annoatation: dict = Depends(get_project_annotation),
+    session_info: dict = Depends(read_session_info),
+    edit: bool = False,
+):
+    """
+    Returns page to let you edit a project.
+    """
+    if session_info is None or session_info["login"] != namespace:
+        return HTTPException(
+            status_code=403, detail="You are not allowed to edit this project."
+        )
+
+    samples = [s.to_dict() for s in project.samples]
+    try:
+        pep_version = project.pep_version
+    except Exception:
+        pep_version = "2.1.0"
+    return templates.TemplateResponse(
+        "edit_project.html",
+        {
+            "namespace": namespace,
+            "project": project,
+            "tag": tag,
+            "project_dict": project.to_dict(),
+            "pep_version": pep_version,
+            "sample_table_columns": project.sample_table.columns.to_list(),
+            "samples": samples,
+            "request": request,
+            "peppy_version": peppy_version,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+            "logged_in": session_info is not None,
+            "is_editing": edit,
+            "session_info": session_info,
+            "is_private": project_annoatation.is_private,
+            "description": project_annoatation.description,
+            "last_update": project_annoatation.last_update,
         },
     )
 
@@ -102,4 +158,23 @@ async def get_sample_view(
             "pephub_version": pephub_version,
             "logged_in": session_info is not None,
         },
+    )
+
+
+@project.get("/deleted")
+async def deleted_pep(
+    request: Request,
+    session_info: dict = Depends(read_session_info),
+    namespaces: List[str] = Depends(get_namespaces),
+):
+    templ_vars = {"request": request}
+    return templates.TemplateResponse(
+        "successful_delete.html",
+        dict(
+            templ_vars,
+            **ALL_VERSIONS,
+            namespaces=namespaces,
+            session_info=session_info,
+            logged_in=session_info is not None,
+        ),
     )

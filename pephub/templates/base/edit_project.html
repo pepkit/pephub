@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+  <div class="mb-3">
+    <a href="/{{ namespace }}/{{ project.name }}">
+      <button class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-arrow-bar-left"></i>
+        Back to project
+      </button>
+    </a>
+  </div>
+  <ul class="nav nav-tabs" id="editTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab" aria-controls="metadata" aria-selected="true">
+        Metadata
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button onclick="loadYAMLEditor()" class="nav-link" id="project-config-tab" data-bs-toggle="tab" data-bs-target="#project-config" type="button" role="tab" aria-controls="project-config" aria-selected="false">
+        Project Config
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button onclick="loadCSVEditor()" class="nav-link" id="samples-tab" data-bs-toggle="tab" data-bs-target="#samples" type="button" role="tab" aria-controls="samples" aria-selected="false">
+        Sample Table
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content border-start border-end border-bottom h-75" id="editTabsContent">
+    <div class="tab-pane fade show active" id="metadata" role="tabpanel" aria-labelledby="metadata-tab">
+      <div class="p-2">
+        <form>
+          <div class="form-check form-switch mb-3">
+            <label class="form-check-label" for="is-private-toggle">Private</label>
+            <input class="form-check-input" type="checkbox" role="switch" id="is-private-toggle">
+          </div>
+          <div class="mb-3">
+            <label for="project-name" class="form-label">Project Name</label>
+            <input placeholder="{{ project.name }}" type="text" class="form-control" id="project-name" aria-describedby="pep-name-help">
+          <div id="pep-name-help" class="form-text">Rename your PEP.</div>
+          </div>
+          <div class="mb-3">
+            <label for="project-description" class="form-label">Project Description</label>
+            <textarea placeholder="{{ description }}" class="form-control" id="pep-description" rows="3"></textarea>
+          </div>
+          <button disabled class="btn btn-outline-secondary">
+            Cancel
+          </button>
+          <button disabled class="btn btn-success">
+            Save
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="project-config" role="tabpanel" aria-labelledby="project-config-tab">
+      <div id="yamlComponent" class="p-2">
+        <div id="yamlEditorDiv"></div>
+      </div>
+    </div>
+    <div class="tab-pane fade" id="samples" role="tabpanel" aria-labelledby="samples-tab">
+      <div id="csvComponent" class="p-2">
+        <div id="csvEditorDiv">samples</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Editor things -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js" integrity="sha512-SGWgwwRA8xZgEoKiex3UubkSkV1zSE1BS6O4pXcaxcNtUlQsOmOmhVnDwIvqGRfEmuz83tIGL13cXMZn6upPyg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/loader.min.js"></script>
+<script>var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.nls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/basic-languages/yaml/yaml.js"></script>
+<script>
+  var hot, editor;
+  loadCSVEditor = () => {
+      document.getElementById("yamlComponent").style.display="none"
+      document.getElementById("csvComponent").style.display="block"
+      hot = loadHandsOnTable()
+  }
+
+  loadYAMLEditor = () => {
+      document.getElementById("yamlComponent").style.display="block"
+      document.getElementById("csvComponent").style.display="none"
+      editor = loadMonaco()
+  }
+
+  loadMonaco = () => {
+      if (editor) return editor
+      require.config({ paths: { vs: 'monaco-editor/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+      window.editor = monaco.editor.create(document.getElementById('yamlEditorDiv'), {
+          value: null,
+          language: 'yaml',
+          tabSize: 2,
+          insertSpaces: true
+      });
+      });
+      return window.editor
+  }
+  loadHandsOnTable = () => {
+    if (hot) return hot
+      const csvEditorDiv = document.querySelector('#csvEditorDiv');
+    hot = new Handsontable(csvEditorDiv, {
+      data: null,
+      rowHeaders: true,
+      colHeaders: true,
+      height: 'auto',
+      licenseKey: 'non-commercial-and-evaluation' // for non-commercial use only
+    });
+    return 
+  }
+</script>
+<!-- PEP Edit form functions -->
+<script>
+  function togglePrivate() {
+      // somehow toggle and keep track here...
+  }
+</script>
+{% endblock %}

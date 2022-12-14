@@ -53,5 +53,6 @@ async def namespace_view(
             "pephub_version": pephub_version,
             "logged_in": user is not None,
             "session_info": session_info,
+            "organizations": organizations,
         },
     )
