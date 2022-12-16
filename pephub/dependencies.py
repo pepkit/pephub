@@ -79,7 +79,12 @@ class CLIAuthSystem:
     @staticmethod
     def jwt_encode_user_data(user_data: dict) -> str:
         exp = datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
-        return jwt.encode({**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256")
+        encoded_user_data = jwt.encode(
+            {**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256"
+        )
+        if isinstance(encoded_user_data, bytes):
+            encoded_user_data = encoded_user_data.decode("utf-8")
+        return encoded_user_data
 
 
 def get_db():
@@ -116,7 +121,8 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
 
     @param session_info_encoded: JWT provided via FastAPI injection from the API cookie.
     """
-
+    if session_info_encoded is None:
+        return None
     try:
         session_info = jwt.decode(
             session_info_encoded, JWT_SECRET, algorithms=["HS256"]
@@ -152,19 +158,34 @@ def get_user_from_session_info(
 
 def get_project(
     namespace: str,
-    pep_id: str,
+    project: str,
     tag: str = None,
     db: Connection = Depends(get_db),
     user=Depends(get_user_from_session_info),
     organizations=Depends(get_organizations_from_session_info),
 ):
-    if proj := db.get_project(namespace, pep_id, tag):
+    if proj := db.get_project(namespace, project, tag):
         _check_user_access(user, organizations, namespace, proj)
         yield proj
     else:
         raise HTTPException(
             404,
-            f"PEP '{namespace}/{pep_id}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+        )
+
+
+def get_project_annotation(
+    namespace: str,
+    project: str,
+    tag: str = None,
+    db: Connection = Depends(get_db),
+):
+    if project_annotation := db.get_project_annotation(namespace, project, tag):
+        yield project_annotation
+    else:
+        raise HTTPException(
+            404,
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
 
 

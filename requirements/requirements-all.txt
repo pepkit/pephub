@@ -7,7 +7,7 @@ python-multipart>=0.0.5
 tqdm
 uvicorn
 python-dotenv
-pepdbagent
+pepdbagent @ git+https://github.com/pepkit/pepdbagent@dev#egg=pepdbagent
 peppy
 requests
 aiofiles

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="height: 70vh;">
+  <div class="d-flex flex-column h-100 align-items-center justify-content-center">
+    <h3 class="mb-3">
+        Successfully deleted 
+        <span id="heading-text" class="fw-bold">{{ namespace }}/{{ project }}</span>
+    </h3>
+    <a id="back-link" class="mb-3" href="/{{ namespace }}">
+        <button class="btn btn btn-outline-primary">
+          <i class="bi bi-arrow-bar-left"></i>
+          Back to namespace
+        </button>
+    </a>
+  </div>   
+</div>
+<script>
+    // get the query params to populate the html
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+        get: (searchParams, prop) => searchParams.get(prop),
+      });
+
+    const namespace = params.namespace
+    const project = params.project
+
+    // render HTML with the query params (REACT STYLE!!!)
+    const heading = document.getElementById('heading-text');
+    heading.innerHTML = ` ${namespace}/${project}`;
+    const link = document.getElementById('back-link');
+    link.href = `/${namespace}`;
+</script>
+{% endblock %}

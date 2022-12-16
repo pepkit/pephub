@@ -2,12 +2,16 @@ import os
 from typing import Union
 from fastapi import APIRouter, Request, Depends, Header
 from fastapi.responses import RedirectResponse, Response
+from peppy import __version__ as peppy_version
+from platform import python_version
 from dotenv import load_dotenv
-from ..dependencies import read_session_info, set_session_info
 import requests
-from ..helpers import build_authorization_url
+
 from pephub.dependencies import JWT_SECRET, CLIAuthSystem
 
+from ...helpers import build_authorization_url
+from ..._version import __version__ as pephub_version
+from ...dependencies import read_session_info, set_session_info
 
 load_dotenv()
 
@@ -18,11 +22,16 @@ github_app_config = {
     "redirect_uri": os.getenv("REDIRECT_URI"),
 }
 
+ALL_VERSIONS = {
+    "pephub_version": pephub_version,
+    "peppy_version": peppy_version,
+    "python_version": python_version(),
+}
 
-router = APIRouter(prefix="/auth", tags=["namespace"])
+auth = APIRouter(prefix="/auth", tags=["auth", "users", "login", "authentication"])
 
 
-@router.get("/login", response_class=RedirectResponse)
+@auth.get("/login", response_class=RedirectResponse)
 def login(request: Request):
     """
     Redirects to log user in to GitHub. GitHub will pass a code to the callback URL.
@@ -35,7 +44,7 @@ def login(request: Request):
     )
 
 
-@router.get("/callback", response_class=RedirectResponse)
+@auth.get("/callback", response_class=RedirectResponse)
 def callback(
     response: Response,
     request: Request,
@@ -78,16 +87,12 @@ def callback(
 
     set_session_info(
         response,
-        {
-            "login": u["login"],
-            "id": u["id"],
-            "orgs": [org["login"] for org in organizations],
-        },
+        dict(orgs=[org["login"] for org in organizations], **u),
     )
-    return "/"
+    return f"/{u['login']}"
 
 
-@router.get("/profile")
+@auth.get("/profile")
 async def view_profile(session_info: dict = Depends(read_session_info)):
     if session_info:
         return session_info
@@ -95,13 +100,13 @@ async def view_profile(session_info: dict = Depends(read_session_info)):
         return {"message": "Unauthorized user"}
 
 
-@router.get("/logout")
+@auth.get("/logout")
 def logout(response: RedirectResponse):
     response = RedirectResponse(url="/")
     response.delete_cookie("pephub_session")
     return response
 
 
-@router.post("/login_cli")
+@auth.post("/login_cli")
 def login_from_cli(access_token: Union[str, None] = Header(default=None)):
     return {"jwt_token": CLIAuthSystem().get_jwt(access_token)}
