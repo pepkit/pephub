@@ -52,6 +52,15 @@ async def get_a_pep(proj: peppy.Project = Depends(get_project)):
     }
 
 
+@project.patch("/", summary="Update a PEP")
+async def update_a_pep(proj: peppy.Project = Depends(get_project)):
+    """
+    Update a PEP from a certain namespace
+    """
+    # TODO - update the PEP in the database
+
+    return {"message": "PEP updated"}, 204
+
 # delete a PEP
 @project.delete("/", summary="Delete a PEP")
 async def delete_a_pep(

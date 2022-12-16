@@ -30,8 +30,6 @@ namespace = APIRouter(
 async def get_namespace(
     namespace: str,
     request: Request,
-    limit: int = 100,
-    offset: int = 0,
     db: Connection = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
 ):
@@ -42,9 +40,7 @@ async def get_namespace(
     if len(nspace["projects"]) == 0:
         raise HTTPException(404, f"Namespace {namespace} not found.")
 
-    nspace["projects"]["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
-    nspace["projects"]["limit"] = limit
-    nspace["projects"]["offset"] = offset
+    nspace["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
     return JSONResponse(content=nspace)
 
 
@@ -52,20 +48,30 @@ async def get_namespace(
 async def get_namespace_projects(
     namespace: str,
     db: Connection = Depends(get_db),
-    limit: int = 100,
+    limit: int = 10,
     offset: int = 0,
     user=Depends(get_user_from_session_info),
+    q: str = None
 ):
-    """Fetch the projects for a particular namespace"""
-    projects = db.get_projects_in_namespace(
-        user=user, namespace=namespace, limit=limit, offset=offset
+    """
+    Fetch the projects for a particular namespace
+    """
+
+    # get projects in namespace
+    search_result = db.search.project(
+        namespace=namespace, 
+        limit=limit, 
+        offset=offset,
+        admin=(user == namespace),
+        search_str=q or ""
     )
+
     return JSONResponse(
         content={
+            "count": search_result.number_of_results,
             "limit": limit,
             "offset": offset,
-            "items": [p.to_dict() for p in projects],
-            "count": len(projects),
+            "items": [p.dict() for p in search_result.results],
         }
     )
 

@@ -20,7 +20,6 @@ ALL_VERSIONS = {
 
 api = APIRouter(prefix="/api/v1", tags=["api", "base", "v1"])
 
-
 @api.get("/")
 async def api_base():
     """
