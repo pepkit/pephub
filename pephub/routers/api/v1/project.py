@@ -61,6 +61,7 @@ async def update_a_pep(proj: peppy.Project = Depends(get_project)):
 
     return {"message": "PEP updated"}, 204
 
+
 # delete a PEP
 @project.delete("/", summary="Delete a PEP")
 async def delete_a_pep(

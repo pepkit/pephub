@@ -51,7 +51,7 @@ async def get_namespace_projects(
     limit: int = 10,
     offset: int = 0,
     user=Depends(get_user_from_session_info),
-    q: str = None
+    q: str = None,
 ):
     """
     Fetch the projects for a particular namespace
@@ -59,11 +59,11 @@ async def get_namespace_projects(
 
     # get projects in namespace
     search_result = db.search.project(
-        namespace=namespace, 
-        limit=limit, 
+        namespace=namespace,
+        limit=limit,
         offset=offset,
         admin=(user == namespace),
-        search_str=q or ""
+        search_str=q or "",
     )
 
     return JSONResponse(
