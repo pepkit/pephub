@@ -1,4 +1,5 @@
 import eido
+import json
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import __version__ as peppy_version
@@ -64,30 +65,35 @@ async def update_a_pep(
     """
     Update a PEP from a certain namespace
     """
-    if peppy_project := db.get_project(namespace, project, tag=tag) is None:
-        raise HTTPException(status_code=404, detail=f"Project {namespace}/{project} not found")
-    
+    peppy_project = db.get_project(namespace, project, tag=tag)
     annotation = db.get_project_annotation(namespace, project, tag=tag)
+    if peppy_project is None:
+        raise HTTPException(status_code=404, detail=f"Project {namespace}/{project} not found")
 
-    # update the project with the new values
+    # update the project and annotation with the new values
     for key, value in updated_project.dict().items():
         if value is not None:
-            setattr(peppy_project, key, value)
+            if key in peppy_project:
+                setattr(peppy_project, key, value)
+            if key in annotation:
+                setattr(annotation, key, value)
     
     # set project in database
-    digest = db._create_digest(peppy_project.to_dict())
+    digest = db._create_digest(peppy_project.to_dict(extended=True))
     db._update_project(
-        peppy_project.to_dict(), 
+        json.dumps(peppy_project.to_dict()), 
         namespace, 
         project, 
         tag=tag, 
-        project_digest=digest)
+        project_digest=digest,
+        proj_annot=annotation
+    )
     
     return JSONResponse(content={
         "message": "PEP updated",
         "registry": f"{namespace}/{project}:{tag}",
         "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
-        "project": updated_project.to_dict()
+        "project": updated_project.dict()
     }), 204
 
 
@@ -103,7 +109,7 @@ async def delete_a_pep(
     """
     Delete a PEP from a certain namespace
     """
-    if namespace != session_info["login"]:
+    if session_info is None or namespace != session_info["login"]:
         raise HTTPException(
             status_code=403, 
             detail="You are not authorized to delete this PEP"
