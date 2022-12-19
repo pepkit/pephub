@@ -1,6 +1,6 @@
 {% for proj in items %}
   <!-- PEP information card-->
-  <div id="project-card-{{ namespace }}/{{ proj.name }}-{{ proj.tag }}" class="w-100 border border-secondary rounded shadow-sm p-2 mt-2">
+  <div id="project-card-{{ namespace }}/{{ proj.name }}:{{ proj.tag }}" class="w-100 border border-secondary rounded shadow-sm p-2 mt-2">
     <div class="d-flex flex-row align-items-start justify-content-between">
       <div class="d-flex flex-row align-items-center">
         <a class="fw-bold fs-4" href="/{{namespace}}/{{proj.name}}?tag={{proj.tag}}">
@@ -27,7 +27,7 @@
             <li><a class="dropdown-item" href="/{{namespace}}/{{proj.name}}?tag={{proj.tag}}">View</a></li>
             {% if session_info['login'] == namespace %}
             <li><hr class="dropdown-divider"></li>
-            <li onclick="setDeleteFormInputPlaceholder('{{ namespace}}/{{proj.name}}-{{proj.tag}}')" class="text-danger dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePEP">
+            <li onclick="setDeleteFormInputPlaceholder('{{ namespace}}/{{proj.name}}:{{proj.tag}}')" class="text-danger dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePEP">
               <i class="bi bi-trash3"></i> 
               Delete
             </li>

@@ -57,7 +57,7 @@
             <input onkeyup="handleDeleteInputChange()" id="delete-confirm-input" type="text" class="form-control">
           </div>
           <div class="modal-footer">
-            <button onclick="deleteProject()" type="button" class="btn btn-danger">Yes, delete</button>
+            <button disabled onclick="deleteProject()" type="button" class="btn btn-danger">Yes, delete</button>
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@
           </div>
           <div class="modal-body">
             <div>
-              <form action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="form-control border-0" method="post" enctype="multipart/form-data">
+              <form id="new-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="form-control border-0" method="post" enctype="multipart/form-data">
                 <label class="fs-4 fw-bold form-label">PEP name and Tag:</label>
                 <span class="fs-4 d-flex align-items-center">
                   <span class="mb-1">{{namespace.namespace}}</span>
@@ -118,13 +118,49 @@
                   <div class="my-1"></div>
                   <label class="fs-4 fw-bold form-label">Other files:</label>
                   <input type="file" id="other-files" name="other_files" multiple />
-                  <button class="btn btn-primary mt-3" type="submit">Submit</button>
+                  <button id="new-project-submit" class="btn btn-primary btn-lg mt-3" type="submit">Submit</button>
                 </div>
               </form>
             </div>
           </div>
         </div>
       </div>
+    </div>
+    <!-- Successful project creation toast-->
+    <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement">
+      <div id="new-project-success-toast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">Success!</strong>
+          <small>Just now</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          New project <span class="fw-bold" id="project-name-toast-success"></span>, created successfully!
+        </div>
+      </div>
+    <!-- Error during creation toast-->
+      <div id="new-project-error-toast" class="toast bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">Error!</strong>
+          <small>Just now</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          There was an error creating the project:
+          <div id="new-project-creation-error-message"></div>
+        </div>
+      </div>
+    <!-- Successful delete toast -->
+        <div id="project-delete-toast-success" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <strong class="me-auto">Success!</strong>
+            <small>Just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            Successfully deleted <span class="fw-bold" id="project-delete-name-toast-success"></span>
+          </div>
+        </div>
     </div>
 </div>
   <!-- DataTabes-->
@@ -138,6 +174,13 @@
   <!-- Custom JavaScript -->
   <script src="/static/js/namespace.js"></script>
 
+  <!-- Attach the event handler to the submission form -->
+  <script>
+    const form = document.getElementById("new-project-form")
+    form.addEventListener("submit", submitNewProject, true);
+  </script>
+
+  <!-- Fetch projects on page load. -->
   <script>
     fetchProjectsInNamespace("{{ namespace.namespace }}")
   </script>

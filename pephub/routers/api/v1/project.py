@@ -94,7 +94,7 @@ async def update_a_pep(
         "registry": f"{namespace}/{project}:{tag}",
         "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
         "project": updated_project.dict()
-    }), 204
+    }, status_code=202)
 
 
 # delete a PEP
@@ -127,7 +127,7 @@ async def delete_a_pep(
     return JSONResponse(content={
         "message": "PEP deleted",
         "registry": f"{namespace}/{project}:{tag}",
-    }), 204
+    }, status_code=202)
 
 
 # fetch samples for project
