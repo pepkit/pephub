@@ -16,7 +16,7 @@
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button onclick="loadYAMLEditor()" class="nav-link" id="project-config-tab" data-bs-toggle="tab" data-bs-target="#project-config" type="button" role="tab" aria-controls="project-config" aria-selected="false">
+      <button class="nav-link" id="project-config-tab" data-bs-toggle="tab" data-bs-target="#project-config" type="button" role="tab" aria-controls="project-config" aria-selected="false">
         Project Config
       </button>
     </li>
@@ -37,7 +37,7 @@
           <div class="mb-3">
             <label for="project-name" class="form-label">Project Name</label>
             <input onkeyup="detectMetadataChanges()" value="{{project.name}}" placeholder="{{ project.name }}" type="text" class="form-control" id="project-name" aria-describedby="pep-name-help">
-          <div id="pep-name-help" class="form-text">Rename your PEP.</div>
+            <div id="pep-name-help" class="form-text">Rename your PEP.</div>
           </div>
           <div class="mb-3">
             <label for="project-description" class="form-label">Project Description</label>
@@ -54,7 +54,7 @@
     </div>
     <div class="tab-pane" id="project-config" role="tabpanel" aria-labelledby="project-config-tab">
       <div id="yaml-component">
-        <div id="yaml-editor-div"></div>
+        <div id="yaml-editor-div" style="height:400px"></div>
       </div>
     </div>
     <div class="tab-pane" id="samples" role="tabpanel" aria-labelledby="samples-tab">
@@ -108,6 +108,10 @@
     </div>
   </div>
 </div>
+
+{% endblock %}
+
+{% block tail %}
 <!-- Custom JavaScript -->
 <script src="/static/js/edit_project.js"></script>
 
@@ -115,15 +119,15 @@
 <script>
   // store the original values of the project
   {% if is_private is sameas true %}
-      var originalIsPrivateValue = true
+  var originalIsPrivateValue = true
   {% elif is_private is sameas false %}
-      var originalIsPrivateValue = false
+  var originalIsPrivateValue = false
   {% endif %}
 
   {% if description is not none %}
-      var originalDesciriptionValue = "{{ description }}"
+  var originalDesciriptionValue = "{{ description }}"
   {% else %}
-      var originalDesciriptionValue = ""
+  var originalDesciriptionValue = ""
   {% endif %}
   
   var originalProjectNameValue = "{{ project.name }}"
@@ -147,8 +151,6 @@
   
 </script>
 
-<!-- editor stuff-->
-
 <!-- hands on table-->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" />
@@ -162,6 +164,11 @@
 ></script>
 
 <!-- monaco editor -->
+<script>var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/loader.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.nls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/basic-languages/yaml/yaml.js"></script>
 
 <!-- initialize things -->
 <script>
@@ -190,7 +197,7 @@
 
     if (handsOnTable) return handsOnTable
 
-    const csvEditorDiv = document.querySelector('#csv-editor-div');
+      const csvEditorDiv = document.querySelector('#csv-editor-div');
     handsOnTable = new Handsontable(csvEditorDiv, {
       data: Papa.parse(`{{ sample_table_csv}}`).data,
       rowHeaders: true,
@@ -236,16 +243,22 @@
 
   const loadMonaco = () => {
     if (editor) return editor
-    require.config({ paths: { vs: 'monaco-editor/min/vs' } });
+      require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } });
     require(['vs/editor/editor.main'], () => {
       editor = monaco.editor.create(document.getElementById('yaml-editor-div'), {
         value: null,
         language: 'yaml',
         tabSize: 2,
-        insertSpaces: true
+        insertSpaces: true,
+        automaticLayout: true
       });
     });
     return editor
   }
+
+  loadYAMLEditor()
+
 </script>
+
+
 {% endblock %}
