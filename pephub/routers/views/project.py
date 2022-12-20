@@ -96,7 +96,7 @@ async def project_edit(
     Returns page to let you edit a project.
     """
     if session_info is None or session_info["login"] != namespace:
-        return HTTPException(
+        raise HTTPException(
             status_code=403, detail="You are not allowed to edit this project."
         )
 
@@ -125,6 +125,7 @@ async def project_edit(
             "is_private": project_annoatation.is_private,
             "description": project_annoatation.description,
             "last_update": project_annoatation.last_update,
+            "sample_table_csv": project.sample_table.to_csv(),
         },
     )
 

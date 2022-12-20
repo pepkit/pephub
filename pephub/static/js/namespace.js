@@ -35,23 +35,48 @@ const deleteProject = () => {
       keyboard: false
     })
     
+    const deleteNameInput = document.getElementById("delete-confirm-input")
     const pepNameToDelete = document.getElementById("delete-pep-name").textContent
     const projectCard = document.getElementById("project-card-" + pepNameToDelete)
-    // send call to server to delete, simulate for now
-
+    const projectNameToastSpan = document.getElementById("project-delete-name-toast-success")
     const deleteButton = document.querySelector("#deletePEP .btn-danger")
+
+    // split pepNameToDelete into namespace and project name
+    const [namespace, projectName] = pepNameToDelete.split("/")
+    
+    // split project name into name and version
+    const [project, tag] = projectName.split(":")
+
+    projectNameToastSpan.textContent = pepNameToDelete
     deleteButton.disabled = true
     deleteButton.textContent = "Deleting..."
-    
-    setTimeout(() => {
-      deleteButton.disabled = false
+
+    fetch(`/api/v1/projects/${namespace}/${project}?tag=${tag}`, {
+      method: "DELETE"
+    })
+    .then(res => {
+      if(res.ok) {
+        return res.json()
+      } else {
+        throw res
+      }
+    })
+    .then(data => {
+      // show success toast
+      var toastEl = document.getElementById('project-delete-toast-success')
+      var toast = new bootstrap.Toast(toastEl)
+      toast.show()
+    })
+    .finally(() => {
+      // reset UI elements
+      deleteButton.textContent = "Delete"
       projectCard.remove()
+      deleteNameInput.value = ""
       modal.hide()
-    }, 1000)
+    })
 }
 
 const fetchProjectsInNamespace = async (namespace, options=null) => {
-    debugger;
     // get div for search results
     const searchResultDiv = document.getElementById("search-results")
 
@@ -141,3 +166,66 @@ const handleSearch = () => {
 }
 // create debounced version of handleSearch
 const handleSearchDebounced = debounce(handleSearch, 500)
+
+const submitNewProject = (event) => {
+  event.preventDefault()
+
+  var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('newProject'), {
+    keyboard: false
+  })
+
+  const submitButton = document.getElementById("new-project-submit")
+  const form = document.getElementById("new-project-form")
+
+  submitButton.disabled = true
+  submitButton.textContent = "Submitting..."
+
+  // submit 
+  fetch(form.action, {
+    method: form.method,
+    body: new FormData(form)
+  })
+  .then(res => {
+    if(res.ok) {
+      return res.json()
+    } else {
+      throw res
+    }
+  })
+  .then(data => {
+
+    // notify the user it was successful with a toast
+    const toastDiv = document.getElementById("new-project-success-toast")
+    const nameSpan = document.getElementById("project-name-toast-success")
+    
+    // set name
+    nameSpan.textContent = data.registry_path
+
+    // show toast
+    const bsToast = new bootstrap.Toast(toastDiv)
+    bsToast.show()
+    
+    // fetch the new project
+    fetchProjectsInNamespace(data.namespace)
+  })
+  .catch(err => {
+
+    // notify the user there was an error
+    const toastDiv = document.getElementById("new-project-error-toast")
+    const errorMessageDiv = document.getElementById("new-project-creation-error-message")
+    
+    // set name and error message
+    errorMessageDiv.textContent = JSON.stringify(err, null, 2)
+    
+    // show toast
+    const bsToast = new bootstrap.Toasy(toastDiv)
+    bsToast.show()
+  })
+  .finally(() => {
+    //auto hide the modal
+    modal.hide()
+    submitButton.disabled = false
+    submitButton.textContent = "Submit"
+  })
+
+}

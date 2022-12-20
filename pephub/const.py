@@ -41,3 +41,11 @@ TAGS_METADATA = [
         "description": "Manage and obtain information about a particular project or PEP.",
     },
 ]
+
+
+SAMPLE_CONVERSION_FUNCTIONS = {
+    "json": lambda x: x.to_json(),
+    "csv": lambda x: x.to_csv(),
+    "latex": lambda x: x.to_latex(),
+    "txt": lambda x: x.to_string(),
+}

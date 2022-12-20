@@ -1,13 +1,16 @@
 import eido
+import json
+from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import __version__ as peppy_version
-from peppy import Project
 from platform import python_version
 
 from ...._version import __version__ as pephub_version
+from ...models import ProjectOptional
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import *
+from ....const import SAMPLE_CONVERSION_FUNCTIONS
 
 
 from dotenv import load_dotenv
@@ -51,48 +54,104 @@ async def get_a_pep(proj: peppy.Project = Depends(get_project)):
         "sample_attributes": sample_attributes,
     }
 
-
+# https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository
+# update a project (pep)
 @project.patch("/", summary="Update a PEP")
-async def update_a_pep(proj: peppy.Project = Depends(get_project)):
+async def update_a_pep(
+    project: str, 
+    namespace: str, 
+    updated_project: ProjectOptional,
+    tag: Optional[str] = DEFAULT_TAG,
+    db: Connection = Depends(get_db),
+):
     """
     Update a PEP from a certain namespace
     """
-    # TODO - update the PEP in the database
+    peppy_project = db.get_project(namespace, project, tag=tag)
+    annotation = db.get_project_annotation(namespace, project, tag=tag)
+    if peppy_project is None:
+        raise HTTPException(status_code=404, detail=f"Project {namespace}/{project} not found")
 
-    return {"message": "PEP updated"}, 204
+    # update the project and annotation with the new values
+    for key, value in updated_project.dict().items():
+        if value is not None:
+            if key in peppy_project:
+                setattr(peppy_project, key, value)
+            if key in annotation:
+                setattr(annotation, key, value)
+    
+    # set project in database
+    digest = db._create_digest(peppy_project.to_dict(extended=True))
+    db._update_project(
+        json.dumps(peppy_project.to_dict()), 
+        namespace, 
+        project, 
+        tag=tag, 
+        project_digest=digest,
+        proj_annot=annotation
+    )
+    
+    return JSONResponse(content={
+        "message": "PEP updated",
+        "registry": f"{namespace}/{project}:{tag}",
+        "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
+        "project": updated_project.dict()
+    }, status_code=202)
 
 
 # delete a PEP
 @project.delete("/", summary="Delete a PEP")
 async def delete_a_pep(
     namespace: str,
-    proj: peppy.Project = Depends(get_project),
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
     db: Connection = Depends(get_db),
     session_info: dict = Depends(read_session_info),
 ):
     """
     Delete a PEP from a certain namespace
     """
-    if namespace != session_info["login"]:
+    if session_info is None or namespace != session_info["login"]:
         raise HTTPException(
-            status_code=403, detail="You are not authorized to delete this PEP"
+            status_code=403, 
+            detail="You are not authorized to delete this PEP"
         )
-    # TODO - delete the PEP from the database
+    proj = db.get_project(namespace, project, tag=tag)
 
-    return {"message": "PEP deleted"}, 204
+    if proj is None:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Project {namespace}/{project}:{tag} not found"
+        )
+
+    db.delete_project(namespace, project, tag=tag)
+
+    return JSONResponse(content={
+        "message": "PEP deleted",
+        "registry": f"{namespace}/{project}:{tag}",
+    }, status_code=202)
 
 
 # fetch samples for project
 @project.get("/samples")
 async def get_pep_samples(
-    limit: int = 100, offset: int = 0, proj: peppy.Project = Depends(get_project)
-):
-    return {
-        "limit": limit,
-        "offset": offset,
-        "count": len(proj.samples),
-        "items": proj.samples[offset : offset + limit],
-    }
+    proj: peppy.Project = Depends(get_project),
+    format: Optional[str] = None,
+):  
+    if format is not None:
+        conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
+        if conversion_func is not None:
+            return PlainTextResponse(content=conversion_func(proj.sample_table))
+        else:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid format '{format}'. Valid formats are: {list(SAMPLE_CONVERSION_FUNCTIONS.keys())}"
+            )
+    else:
+        return JSONResponse({
+            "count": len(proj.samples),
+            "items": [s.to_dict() for s in proj.samples],
+        })
 
 
 # # fetch specific sample for project

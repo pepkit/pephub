@@ -7,14 +7,14 @@
       Back to namespace
     </button>
   </a>
-    <div class="d-flex flex-row align-items-start justify-content-between">
-      <div class="d-flex flex-row align-items-center">
+    <div class="flex-row d-flex align-items-start justify-content-between">
+      <div class="flex-row d-flex align-items-center">
         <h1>
           {{ namespace }}/{{ project.name }}
         </h1>
         <span class="mx-2 fs-5 badge rounded-pill bg-dark">{{tag}}</span>
         {% if is_private %}
-          <span class="ms-2 badge rounded-pill border border-danger text-danger">Private</span>
+          <span class="border ms-2 badge rounded-pill border-danger text-danger">Private</span>
         {% endif %}
       </div>
       <div>
@@ -29,7 +29,7 @@
               Edit
             </button>
           </a>
-          <button id="delete-pep-btn" class="btn btn-outline-danger" onclick="setDeleteFormInputPlaceholder('{{ namespace }}/{{project.name}}')" data-bs-toggle="modal" data-bs-target="#deletePEP">
+          <button id="delete-pep-btn" class="btn btn-outline-danger" onclick="setDeleteFormInputPlaceholder('{{ namespace }}/{{project.name}}:{{tag}}')" data-bs-toggle="modal" data-bs-target="#deletePEP">
             <i class="bi bi-trash3"></i>
             Delete
           </button>
@@ -50,7 +50,7 @@
       <span class="fw-bold">Total Samples:</span> {{ n_samples }}
     </p>
     <div class="mt-3">
-      <div class="d-flex flex-row align-items-center text-muted">
+      <div class="flex-row d-flex align-items-center text-muted">
         <small>
           <span class="me-3">
             <i class="bi bi-calendar3"></i>
@@ -63,7 +63,7 @@
         </small>
       </div>
     </div>
-    <div class="border-bottom border-secondary my-2"></div>
+    <div class="my-2 border-bottom border-secondary"></div>
     <div class="my-2 overflow-auto">
       <table class="table table-sm table-striped" id="project-table">
           <thead>
@@ -162,9 +162,10 @@
   <script>
     const table = new simpleDatatables.DataTable("#project-table")
   </script>
-  <script type="text/javascript">
-    
-  </script>
+
+  <!-- Custom JavaScript -->
+  <script src="/static/js/project.js"></script>
+
   <script>
 
   </script>
