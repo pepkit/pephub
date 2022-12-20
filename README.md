@@ -28,13 +28,13 @@ export GH_CLIENT_SECRET=...
 ```
 
 The following environment variables are **required:**
-* POSTGRES_HOST
-* POSTGRES_DB
-* POSTGRES_USER
-* POSTGRES_PASSWORD
-* GH_CLIENT_ID
-* GH_CLIENT_SECRET
-* REDIRECT_URI
+* `POSTGRES_HOST`
+* `POSTGRES_DB`
+* `POSTGRES_USER`
+* `POSTGRES_PASSWORD`
+* `GH_CLIENT_ID`
+* `GH_CLIENT_SECRET`
+* `REDIRECT_URI`
 
 And run the server! (here we are running on port 8000):
 
