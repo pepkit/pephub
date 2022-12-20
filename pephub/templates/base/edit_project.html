@@ -21,15 +21,15 @@
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button onclick="loadCSVEditor()" class="nav-link" id="samples-tab" data-bs-toggle="tab" data-bs-target="#samples" type="button" role="tab" aria-controls="samples" aria-selected="false">
+      <button class="nav-link" id="samples-tab" data-bs-toggle="tab" data-bs-target="#samples" type="button" role="tab" aria-controls="samples" aria-selected="false">
         Sample Table
       </button>
     </li>
   </ul>
   <div class="tab-content border-start border-end border-bottom h-75" id="editTabsContent">
-    <div class="tab-pane fade show active" id="metadata" role="tabpanel" aria-labelledby="metadata-tab">
+    <div class="tab-pane show active" id="metadata" role="tabpanel" aria-labelledby="metadata-tab">
       <div class="p-2">
-        <form id="metadata-form">
+        <form id="metadata-form" action="/api/v1/projects/{{namespace}}/{{project}}" method="PATCH">
           <div class="form-check form-switch mb-3">
             <label class="form-check-label" for="is-private-toggle">Private</label>
             <input value="{{is_private}}" class="form-check-input" type="checkbox" role="switch" id="is-private-toggle">
@@ -46,24 +46,71 @@
           <button onclick="cancelChanges()" type="button" class="btn btn-outline-secondary">
             Cancel
           </button>
-          <button type="button" disabled class="btn btn-success">
+          <button disabled type="submit" disabled class="btn btn-success">
             Save
           </button>
         </form>
       </div>
     </div>
-    <div class="tab-pane fade" id="project-config" role="tabpanel" aria-labelledby="project-config-tab">
-      <div id="yamlComponent" class="p-2">
-        <div id="yamlEditorDiv"></div>
+    <div class="tab-pane" id="project-config" role="tabpanel" aria-labelledby="project-config-tab">
+      <div id="yaml-component">
+        <div id="yaml-editor-div"></div>
       </div>
     </div>
-    <div class="tab-pane fade" id="samples" role="tabpanel" aria-labelledby="samples-tab">
-      <div id="csvComponent" class="p-2">
-        <div id="csvEditorDiv">samples</div>
+    <div class="tab-pane" id="samples" role="tabpanel" aria-labelledby="samples-tab">
+      <div onkeyup="detectSampleTableChanges()" id="csv-component" class="p-1">
+        <div class="mb-1 d-flex flex-row align-items-center justify-content-between">
+          <div>
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                Edit
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li onclick="addRow()">
+                  <a class="dropdown-item text-success">
+                    <i class="bi bi-plus-circle"></i>
+                    Add row
+                  </a>
+                </li>
+                <li onclick="addCol()">
+                  <a class="dropdown-item text-success">
+                    <i class="bi bi-plus-circle"></i>
+                    Add column
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li onclick="removeRow()">
+                  <a class="dropdown-item text-danger">
+                    <i class="bi bi-dash-circle"></i>
+                    Remove Row
+                  </a>
+                </li>
+                <li onclick="removeCol()">
+                  <a class="dropdown-item text-danger">
+                    <i class="bi bi-dash-circle"></i>
+                    Remove Col
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <button onclick="getSampleTableFromDatabase()" type="button" class="btn btn-sm btn-outline-secondary">
+              Cancel
+            </button>
+            <button id="sample-table-save-btn" disabled type="button" class="btn btn-sm btn-success">
+              Save
+            </button>
+          </div>
+        </div>
+        <div id="csv-editor-div"></div>
       </div>
     </div>
   </div>
 </div>
+<!-- Custom JavaScript -->
+<script src="/static/js/edit_project.js"></script>
+
 <!-- state management -->
 <script>
   // store the original values of the project
@@ -80,6 +127,7 @@
   {% endif %}
   
   var originalProjectNameValue = "{{ project.name }}"
+  var originalSampleTableCsv = `{{ sample_table_csv }}` // needs to be stored as literal to preserve new lines
 
   // setters to reset the original values when the user saves
   const setOriginalIsPrivateValue = (val) => {
@@ -92,34 +140,112 @@
     originalProjectNameValue = val
   }
 
-  // detect changes to the form
-  const detectMetadataChanges = () => {
-    const isPrivateToggle = document.getElementById("is-private-toggle")
-    const projectDescription = document.getElementById("project-description")
-    const projectName = document.getElementById("project-name")
-
-    const saveButton = document.querySelector("button.btn-success")
-
-    const isPrivateChanged = isPrivateToggle.checked !== originalIsPrivateValue
-    const descriptionChanged = projectDescription.value !== originalDesciriptionValue
-    const nameChanged = projectName.value !== originalProjectNameValue
-
-    if (isPrivateChanged || descriptionChanged || nameChanged) {
-      saveButton.disabled = false
-    } else {
-      saveButton.disabled = true
-    }
-  }
-
-  // reset the values to the original values when the user cancels
-  const cancelChanges = () => {
-    document.getElementById("is-private-toggle").checked = originalIsPrivateValue
-    document.getElementById("project-description").value = originalDesciriptionValue
-    document.getElementById("project-name").value = originalProjectNameValue
-    detectMetadataChanges()
-  }
-
   const form = document.getElementById("metadata-form")
   form.addEventListener("change", detectMetadataChanges)
+  form.addEventListener("submit", handleMetadataSave, true)
+
+  
+</script>
+
+<!-- editor stuff-->
+
+<!-- hands on table-->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" />
+
+<!-- papa parse -->
+<script 
+  src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js" 
+  integrity="sha512-SGWgwwRA8xZgEoKiex3UubkSkV1zSE1BS6O4pXcaxcNtUlQsOmOmhVnDwIvqGRfEmuz83tIGL13cXMZn6upPyg==" 
+  crossorigin="anonymous" 
+  referrerpolicy="no-referrer"
+></script>
+
+<!-- monaco editor -->
+
+<!-- initialize things -->
+<script>
+  var handsOnTable;
+  var editor;
+
+  // detect any changes to the sample table
+  const detectSampleTableChanges = () => {
+
+    var currentSampleTableCsv = handsOnTable.getData().map(row => row.join(",")).join("\n")
+
+    // remove trailing commas from current
+    while (currentSampleTableCsv[currentSampleTableCsv.length - 1] === ",") {
+      currentSampleTableCsv = currentSampleTableCsv.slice(0, -1)
+    }
+    
+    // detect any changes
+    if (currentSampleTableCsv !== originalSampleTableCsv) {
+      document.getElementById("sample-table-save-btn").disabled = false
+    } else {
+      document.getElementById("sample-table-save-btn").disabled = true
+    }
+  }
+  
+  const loadHandsOnTable = (data) => {
+
+    if (handsOnTable) return handsOnTable
+
+    const csvEditorDiv = document.querySelector('#csv-editor-div');
+    handsOnTable = new Handsontable(csvEditorDiv, {
+      data: Papa.parse(`{{ sample_table_csv}}`).data,
+      rowHeaders: true,
+      colHeaders: true,
+      stretchH: 'all',
+      stretchW: 'all',
+      height: 'auto',
+      licenseKey: 'non-commercial-and-evaluation' // for non-commercial use only
+    });
+    handsOnTable.addHook("afterChange", detectSampleTableChanges)
+    return handsOnTable
+  }
+
+  loadHandsOnTable()
+
+  const getSampleTableFromDatabase = () => {
+    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}/samples?format=csv")
+    .then(response =>  response.text())
+    .then(data => {
+      if (!handsOnTable) {
+        handsOnTable = loadHandsOnTable()
+      }
+      handsOnTable.loadData(Papa.parse(data).data)
+    })
+  }
+
+  const addRow = () => {
+    handsOnTable.alter("insert_row_above", handsOnTable.countRows(), 1)
+  }
+  const addCol = () => { 
+    handsOnTable.alter("insert_col_start", handsOnTable.countCols(), 1)
+  }
+  const removeRow = () => {
+    handsOnTable.alter("remove_row", handsOnTable.countRows(), 1)
+  }
+  const removeCol = () => {
+    handsOnTable.alter("remove_col", handsOnTable.countCols(), 1)
+  }
+
+  const loadYAMLEditor = () => {
+    editor = loadMonaco()
+  }
+
+  const loadMonaco = () => {
+    if (editor) return editor
+    require.config({ paths: { vs: 'monaco-editor/min/vs' } });
+    require(['vs/editor/editor.main'], () => {
+      editor = monaco.editor.create(document.getElementById('yaml-editor-div'), {
+        value: null,
+        language: 'yaml',
+        tabSize: 2,
+        insertSpaces: true
+      });
+    });
+    return editor
+  }
 </script>
 {% endblock %}

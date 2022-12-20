@@ -1,5 +1,6 @@
 import eido
 import json
+from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import __version__ as peppy_version
@@ -9,6 +10,7 @@ from ...._version import __version__ as pephub_version
 from ...models import ProjectOptional
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import *
+from ....const import SAMPLE_CONVERSION_FUNCTIONS
 
 
 from dotenv import load_dotenv
@@ -133,14 +135,23 @@ async def delete_a_pep(
 # fetch samples for project
 @project.get("/samples")
 async def get_pep_samples(
-    limit: int = 100, offset: int = 0, proj: peppy.Project = Depends(get_project)
-):
-    return {
-        "limit": limit,
-        "offset": offset,
-        "count": len(proj.samples),
-        "items": proj.samples[offset : offset + limit],
-    }
+    proj: peppy.Project = Depends(get_project),
+    format: Optional[str] = None,
+):  
+    if format is not None:
+        conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
+        if conversion_func is not None:
+            return PlainTextResponse(content=conversion_func(proj.sample_table))
+        else:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid format '{format}'. Valid formats are: {list(SAMPLE_CONVERSION_FUNCTIONS.keys())}"
+            )
+    else:
+        return JSONResponse({
+            "count": len(proj.samples),
+            "items": [s.to_dict() for s in proj.samples],
+        })
 
 
 # # fetch specific sample for project
