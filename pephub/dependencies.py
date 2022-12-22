@@ -7,6 +7,10 @@ from fastapi.security import APIKeyCookie
 from pepdbagent import Connection
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.models import NamespaceModel
+from qdrant_client import QdrantClient
+from qdrant_client.http.exceptions import ResponseHandlingException
+from sentence_transformers import SentenceTransformer
+
 from dotenv import load_dotenv
 from typing import Union
 from .const import (
@@ -15,6 +19,8 @@ from .const import (
     DEFAULT_POSTGRES_PORT,
     DEFAULT_POSTGRES_USER,
     DEFAULT_POSTGRES_DB,
+    DEFAULT_QDRANT_HOST,
+    DEFAULT_QDRANT_PORT,
 )
 from datetime import datetime, timedelta
 import pydantic
@@ -209,3 +215,58 @@ def _check_user_access(
             )
     else:
         return project
+
+
+def parse_boolean_env_var(env_var: str) -> bool:
+    """
+    Helper function to parse a boolean environment variable
+    """
+    return env_var.lower() in ["true", "1", "t", "y", "yes"]
+
+
+def get_qdrant_enabled() -> bool:
+    """
+    Check if qdrant is enabled
+    """
+    return parse_boolean_env_var(os.environ.get("QDRANT_ENABLED", "false"))
+
+
+def get_qdrant(
+    qdrant_enabled: bool = Depends(get_qdrant_enabled),
+) -> Union[QdrantClient, None]:
+    """
+    Return connection to qdrant client
+    """
+    # return None if qdrant is not enabled
+    if not qdrant_enabled:
+        try:
+            yield None
+        finally:
+            pass
+    # else try to connect, test connectiona and return client if connection is successful.
+    qdrant = QdrantClient(
+        host=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
+        port=os.environ.get("QDRANT_PORT", DEFAULT_QDRANT_PORT),
+    )
+    try:
+        # test the connection first
+        qdrant.list_full_snapshots()
+        yield qdrant
+    except ResponseHandlingException as e:
+        print(f"Error getting qdrant client: {e}")
+        yield None
+    finally:
+        # no need to close the connection
+        pass
+
+
+def get_sentence_transformer() -> SentenceTransformer:
+    """
+    Return sentence transformer encoder
+    """
+    model = SentenceTransformer("all-MiniLM-L12-v2")
+    try:
+        yield model
+    finally:
+        # no need to do anything
+        pass

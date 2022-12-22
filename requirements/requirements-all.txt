@@ -9,6 +9,8 @@ uvicorn
 python-dotenv
 pepdbagent @ git+https://github.com/pepkit/pepdbagent@dev#egg=pepdbagent
 peppy
+sentence-transformers
+qdrant-client
 requests
 aiofiles
 pyjwt[crypto]

@@ -54,12 +54,13 @@ async def get_a_pep(proj: peppy.Project = Depends(get_project)):
         "sample_attributes": sample_attributes,
     }
 
+
 # https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository
 # update a project (pep)
 @project.patch("/", summary="Update a PEP")
 async def update_a_pep(
-    project: str, 
-    namespace: str, 
+    project: str,
+    namespace: str,
     updated_project: ProjectOptional,
     tag: Optional[str] = DEFAULT_TAG,
     db: Connection = Depends(get_db),
@@ -70,7 +71,9 @@ async def update_a_pep(
     peppy_project = db.get_project(namespace, project, tag=tag)
     annotation = db.get_project_annotation(namespace, project, tag=tag)
     if peppy_project is None:
-        raise HTTPException(status_code=404, detail=f"Project {namespace}/{project} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Project {namespace}/{project} not found"
+        )
 
     # update the project and annotation with the new values
     for key, value in updated_project.dict().items():
@@ -79,24 +82,27 @@ async def update_a_pep(
                 setattr(peppy_project, key, value)
             if key in annotation:
                 setattr(annotation, key, value)
-    
+
     # set project in database
     digest = db._create_digest(peppy_project.to_dict(extended=True))
     db._update_project(
-        json.dumps(peppy_project.to_dict()), 
-        namespace, 
-        project, 
-        tag=tag, 
+        json.dumps(peppy_project.to_dict()),
+        namespace,
+        project,
+        tag=tag,
         project_digest=digest,
-        proj_annot=annotation
+        proj_annot=annotation,
     )
-    
-    return JSONResponse(content={
-        "message": "PEP updated",
-        "registry": f"{namespace}/{project}:{tag}",
-        "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
-        "project": updated_project.dict()
-    }, status_code=202)
+
+    return JSONResponse(
+        content={
+            "message": "PEP updated",
+            "registry": f"{namespace}/{project}:{tag}",
+            "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
+            "project": updated_project.dict(),
+        },
+        status_code=202,
+    )
 
 
 # delete a PEP
@@ -113,23 +119,24 @@ async def delete_a_pep(
     """
     if session_info is None or namespace != session_info["login"]:
         raise HTTPException(
-            status_code=403, 
-            detail="You are not authorized to delete this PEP"
+            status_code=403, detail="You are not authorized to delete this PEP"
         )
     proj = db.get_project(namespace, project, tag=tag)
 
     if proj is None:
         raise HTTPException(
-            status_code=404, 
-            detail=f"Project {namespace}/{project}:{tag} not found"
+            status_code=404, detail=f"Project {namespace}/{project}:{tag} not found"
         )
 
     db.delete_project(namespace, project, tag=tag)
 
-    return JSONResponse(content={
-        "message": "PEP deleted",
-        "registry": f"{namespace}/{project}:{tag}",
-    }, status_code=202)
+    return JSONResponse(
+        content={
+            "message": "PEP deleted",
+            "registry": f"{namespace}/{project}:{tag}",
+        },
+        status_code=202,
+    )
 
 
 # fetch samples for project
@@ -137,21 +144,23 @@ async def delete_a_pep(
 async def get_pep_samples(
     proj: peppy.Project = Depends(get_project),
     format: Optional[str] = None,
-):  
+):
     if format is not None:
         conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
         if conversion_func is not None:
             return PlainTextResponse(content=conversion_func(proj.sample_table))
         else:
             raise HTTPException(
-                status_code=400, 
-                detail=f"Invalid format '{format}'. Valid formats are: {list(SAMPLE_CONVERSION_FUNCTIONS.keys())}"
+                status_code=400,
+                detail=f"Invalid format '{format}'. Valid formats are: {list(SAMPLE_CONVERSION_FUNCTIONS.keys())}",
             )
     else:
-        return JSONResponse({
-            "count": len(proj.samples),
-            "items": [s.to_dict() for s in proj.samples],
-        })
+        return JSONResponse(
+            {
+                "count": len(proj.samples),
+                "items": [s.to_dict() for s in proj.samples],
+            }
+        )
 
 
 # # fetch specific sample for project

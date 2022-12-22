@@ -12,6 +12,9 @@ DEFAULT_POSTGRES_PASSWORD = "docker"
 DEFAULT_POSTGRES_PORT = 5432
 DEFAULT_POSTGRES_DB = "pephub"
 
+DEFAULT_QDRANT_HOST = "localhost"
+DEFAULT_QDRANT_PORT = 6333
+DEFAULT_QDRANT_COLLECTION_NAME = "projects"
 
 EIDO_TEMPLATES_DIRNAME = "templates/eido"
 EIDO_TEMPLATES_PATH = os.path.join(
@@ -28,7 +31,6 @@ STATICS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), STATICS_
 
 EIDO_DIRNAME = "eido_validator"
 EIDO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), EIDO_DIRNAME)
-
 
 TAGS_METADATA = [
     {"name": "root", "description": "Base route for API."},
@@ -49,3 +51,8 @@ SAMPLE_CONVERSION_FUNCTIONS = {
     "latex": lambda x: x.to_latex(),
     "txt": lambda x: x.to_string(),
 }
+
+# https://arxiv.org/abs/2210.07316
+# figure 4
+# great speed to accuracy tradeoff
+DEFAULT_HF_MODEL = "sentence-transformers/all-MiniLM-L12-v2"

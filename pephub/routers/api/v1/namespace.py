@@ -54,7 +54,7 @@ async def get_namespace_projects(
     offset: int = 0,
     user=Depends(get_user_from_session_info),
     q: str = None,
-    session_info: dict = Depends(read_session_info)
+    session_info: dict = Depends(read_session_info),
 ):
     """
     Fetch the projects for a particular namespace
@@ -78,6 +78,7 @@ async def get_namespace_projects(
             "session_info": session_info,
         }
     )
+
 
 # url format based on:
 # * github: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user
@@ -113,12 +114,15 @@ async def submit_pep(
         p = Project(f"{dirpath}/{config_file.filename}")
         p.name = project_name
         db.upload_project(p, namespace=namespace, name=project_name, tag=tag)
-        return JSONResponse(content={
-            "namespace": namespace,
-            "project_name": project_name,
-            "proj": p.to_dict(),
-            "config_file": config_file.filename if config_file else None,
-            "other_files": [f.filename for f in other_files] if other_files else [],
-            "tag": tag,
-            "registry_path": f"{namespace}/{project_name}:{tag}",
-        }, status_code=202)
+        return JSONResponse(
+            content={
+                "namespace": namespace,
+                "project_name": project_name,
+                "proj": p.to_dict(),
+                "config_file": config_file.filename if config_file else None,
+                "other_files": [f.filename for f in other_files] if other_files else [],
+                "tag": tag,
+                "registry_path": f"{namespace}/{project_name}:{tag}",
+            },
+            status_code=202,
+        )

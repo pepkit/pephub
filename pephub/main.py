@@ -14,6 +14,7 @@ from .routers.api.v1.base import api as api_base
 from .routers.api.v1.namespace import namespace as api_namespace
 from .routers.api.v1.project import project as api_project
 from .routers.api.v1.user import user as api_user
+from .routers.api.v1.search import search as api_search
 from .routers.auth.base import auth as auth_router
 from .routers.views.base import views as views_base
 from .routers.views.namespace import namespace as views_namespace
@@ -46,6 +47,7 @@ app.include_router(api_base)
 app.include_router(api_user)
 app.include_router(api_namespace)
 app.include_router(api_project)
+app.include_router(api_search)
 app.include_router(auth_router)
 app.include_router(views_base)
 app.include_router(views_namespace)
