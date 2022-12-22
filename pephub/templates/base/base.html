@@ -24,7 +24,34 @@
 		      <span class="navbar-toggler-icon"></span>
 		    </button>
 		    <div class="collapse navbar-collapse me-auto" id="navbarSupportedContent">
-		      <ul class="navbar-nav ms-auto mb-2 mb-sm-0">        
+		      <ul class="navbar-nav ms-auto mb-2 mb-sm-0">  
+				<li>
+				  <div class="input-group mt-1">
+				    <input id="global-search-bar" type="text" class="form-control border-end-0" placeholder="Search pephub" aria-label="search" aria-describedby="search">
+					<span style="background-color:rgba(255, 255, 255, 255) !important;" class="input-group-text border-start-0">
+						<div class="rounded border border-secondary px-2">
+							/
+						</div>
+					</span>
+				  </div>
+				  <!-- searching dropdown -->
+				  <div class="dropdown">
+					<button id="search-dropdown-toggle" class="dropdown-toggle d-none" type="button" id="search-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+					  Search dropdown
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="search-dropdown">
+					  <li>
+						<span class="dropdown-item">
+						  Search pephub for <em><span id="search-dropdown-query"></span></em>
+						  <button onclick="submitSearchQuery()" class="btn btn-sm btn-outline-secondary ms-3">
+							Search
+							<i class="bi bi-arrow-return-left"></i>
+						  </button>
+						</span>
+					  </li>
+					</ul>
+				  </div>
+				</li>      
 		      <li class="nav-item mx-2 my-0 h5">
 		        <a class="nav-link" href="/api/v1/docs">
 					<i class="bi bi-journal"></i>
@@ -98,8 +125,24 @@
 			{ autoescape: true }
 		);
 	</script>
-	<!-- debouncing functions-->
-	<script src="/static/js/debounce.js"></script>
+
+	<!-- custom javascript-->
+	<script src="/static/js/base.js"></script>
+
+	<!-- global search-->
+	<script>
+		document.addEventListener("keydown", function (event) {
+			const searchBox	= document.getElementById("global-search-bar");
+			if (event.key === "/" && document.activeElement !== searchBox) {
+				event.preventDefault();
+				searchBox.focus();
+			}
+		})
+		var searchBar = document.getElementById("global-search-bar");
+		searchBar.addEventListener('keyup', toggleSearchDropdown)
+		searchBar.addEventListener('keydown', detectSearchSubmit)
+
+	</script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="https://databio.org/css/databio.css">
 	<link rel="stylesheet" href="/static/css/custom.css">

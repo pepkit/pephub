@@ -1,109 +1,36 @@
-{% for proj in items %}
-  <!-- PEP information card-->
-  <div id="project-card-{{ namespace }}/{{ proj.name }}:{{ proj.tag }}" class="w-100 border border-secondary rounded shadow-sm p-2 mt-2">
+<!-- namespace search results -->
+<h2 class="text-start w-100">Namespaces in pephub</h2>
+{% for namespace in namespace_hits %}
+<div class="w-100">
+  <a class="fw-bold text-start fs-4" href="/{{namespace}}">
+    {{namespace}}
+  </a>
+</div>  
+{% endfor %}
+<div class="my-2 border-bottom border-secondary"></div>
+<!-- Project search results -->
+<h2 class="text-start w-100">Projects in pephub</h2>
+{% for result in results %}
+<div id="project-result-{{result['payload']['registry']}}" class="w-100 border-top border-bottom border-secondary py-3 mt-2">
     <div class="d-flex flex-row align-items-start justify-content-between">
-      <div class="d-flex flex-row align-items-center">
-        <a class="fw-bold fs-4" href="/{{namespace}}/{{proj.name}}?tag={{proj.tag}}">
-          {{namespace}}/{{proj.name}}
-        </a>
-        <span class="ms-2 badge rounded-pill bg-dark">{{proj.tag}}</span>
-        {% if proj.is_private %}
-          <span class="ms-2 badge rounded-pill border border-danger text-danger">Private</span>
-        {% endif %}
-      </div>
-      <div>
-        <div class="btn-group dropend">
-          <button disabled type="button" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-star"></i>
-            Favorite
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-            <span class="visually-hidden">Toggle Dropdown</span>
-          </button>
-          <ul class="dropdown-menu">
-            {% if session_info['login'] == namespace %}
-              <li><a class="dropdown-item" href="/{{namespace}}/{{proj.name}}/edit?tag={{proj.tag}}">Edit</a></li>
-            {% endif %}
-            <li><a class="dropdown-item" href="/{{namespace}}/{{proj.name}}?tag={{proj.tag}}">View</a></li>
-            {% if session_info['login'] == namespace %}
-            <li><hr class="dropdown-divider"></li>
-            <li onclick="setDeleteFormInputPlaceholder('{{ namespace}}/{{proj.name}}:{{proj.tag}}')" class="text-danger dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePEP">
-              <i class="bi bi-trash3"></i> 
-              Delete
-            </li>
-            {% endif %}
-          </ul>
+        <div class="d-flex flex-row align-items-center">
+          <a class="fw-bold fs-4" href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
+            {{ result.payload.namespace }}/{{ result.payload.name }}
+          </a>
+          <span class="ms-2 badge rounded-pill bg-dark">{{result.payload.tag}}</span>
+        </div>
+        <div>
+          <a href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
+            <button class="btn btn-outline-primary">
+                View
+            </button>
+          </a>
         </div>
       </div>
-    </div>
-    <div>
-      <label class="fw-bold">No. of samples:</label>
-      <span class="mb-1">{{proj.number_of_samples}}</span>
-      <p class="mb-0">
-        {% if proj.description %}
-          {{proj.description}}
-        {% else %}
-          <em><span class="text-muted text-italic">No description</span></em>
-        {%endif%}
-      </p>
-    </div>
-    <div class="mt-3">
-      <div class="d-flex flex-row align-items-center text-muted">
-        <small>
-          <span class="me-3">
-            <i class="bi bi-calendar3"></i>
-            <span class="mx-1">Created:</span>
-            <span>August 27th, 2022 (this is temp)</span>
-          </span>
-          <span class="me-3">
-            {{ proj.digest }}
-          </span>
-        </small>
+      <div>
+        <p class="mt-2 mb-0 text-truncate text-secondary">
+            <em>{{result.payload.description}}</em>
+        </p>
       </div>
-    </div>
-  </div>
-{% endfor %}
-<!-- Serverside Pagination footer -->
-{% if count > limit %}
-<div class="d-flex flex-row align-items-center justify-content-center mt-2">
-  {% if offset == 0 %}
-    <button class="btn btn-link" disabled>
-      Beginning
-    </button>
-    <button class="btn btn-link ms-1" disabled>
-      <i class="bi bi-arrow-left"></i>
-      Previous
-    </button>
-  {% else %}
-  <button class="btn btn-link" onclick="fetchProjectsInNamespace('{{namespace}}', { offset: 0 })">
-    Beginning
-  </button>
-    <button class="btn btn-link ms-1" onclick="fetchProjectsInNamespace('{{namespace}}', { offset: {{offset}}-{{limit}} })">
-      <i class="bi bi-arrow-left"></i>
-      Previous
-    </button>
-  {% endif %}
-  {% if offset + limit >= count %}
-    <button class="btn btn-link me-1" disabled>
-      Next
-      <i class="bi bi-arrow-right"></i>
-    </button>
-    <button class="btn btn-link" disabled>
-      End
-    </button>
-  {% else %}
-    <button class="btn btn-link me-1" onclick="fetchProjectsInNamespace('{{namespace}}', { offset: {{offset}}+{{limit}} })">
-      Next
-      <i class="bi bi-arrow-right"></i>
-    </button>
-    <button class="btn btn-link" onclick="fetchProjectsInNamespace('{{namespace}}', { offset: {{count}} - {{limit}} })">
-      End
-    </button>
-  {% endif %}
 </div>
-<div class="d-flex flex-row align-items-center justify-content-center">
-  <span class="text-muted">
-    Showing {{offset+1}} to {{offset+limit}} of {{count}} projects
-  </span>
-</div>
-{% endif %}
+{% endfor%}

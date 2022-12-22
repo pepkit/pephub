@@ -17,10 +17,6 @@ from .routers.api.v1.user import user as api_user
 from .routers.api.v1.search import search as api_search
 from .routers.auth.base import auth as auth_router
 from .routers.views.base import views as views_base
-from .routers.views.namespace import namespace as views_namespace
-from .routers.views.project import project as views_project
-from .routers.views.submit import submit as views_submit
-from .routers.views.user import user as views_user
 from .const import STATICS_PATH, EIDO_PATH
 
 # build server
@@ -50,10 +46,6 @@ app.include_router(api_project)
 app.include_router(api_search)
 app.include_router(auth_router)
 app.include_router(views_base)
-app.include_router(views_namespace)
-app.include_router(views_project)
-app.include_router(views_submit)
-app.include_router(views_user)
 
 # mount the landing html/assets
 app.mount("/static", StaticFiles(directory=STATICS_PATH), name="root_static")

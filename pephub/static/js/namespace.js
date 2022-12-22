@@ -103,6 +103,8 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
       }
     }
 
+    debugger;
+
     // if options is not null build a query string
     if(options) {
       queryParamString = Object.keys(options).map(key => `${key}=${options[key]}`).join('&')
@@ -119,10 +121,10 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
             namespace: namespace,
             ...data
           }
-          searchResultDiv.innerHTML=nunjucks.render('search_results.html', dataWithNamespace)
+          searchResultDiv.innerHTML=nunjucks.render('namespace_search_results.html', dataWithNamespace)
         })
         .catch(err => {
-          searchResultDiv.innerHTML=nunjucks.render('search_error.html', {
+          searchResultDiv.innerHTML=nunjucks.render('namespace_search_error.html', {
             error_string: JSON.stringify(err, null, 2), query: options?.query || ""
           })
         })
@@ -140,10 +142,10 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
             namespace: namespace,
             ...data
           }
-          searchResultDiv.innerHTML=nunjucks.render('search_results.html', dataWithNamespace)
+          searchResultDiv.innerHTML=nunjucks.render('namespace_search_results.html', dataWithNamespace)
         })
         .catch(err => {
-          searchResultDiv.innerHTML=nunjucks.render('search_error.html', {
+          searchResultDiv.innerHTML=nunjucks.render('namespace_search_error.html', {
             error_string: JSON.stringify(err.json(), null, 2),
             error_code: err.status,
           })
