@@ -32,7 +32,6 @@ views = APIRouter(tags=["views", "user interface", "interface"])
 async def main(
     request: Request,
     session_info: dict = Depends(read_session_info),
-    namespaces: List[str] = Depends(get_namespaces),
 ):
     templ_vars = {"request": request}
     return templates.TemplateResponse(
@@ -40,7 +39,6 @@ async def main(
         dict(
             templ_vars,
             **ALL_VERSIONS,
-            namespaces=namespaces,
             session_info=session_info,
             logged_in=session_info is not None,
             is_landing_page=True,

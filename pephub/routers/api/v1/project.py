@@ -69,29 +69,17 @@ async def update_a_pep(
     Update a PEP from a certain namespace
     """
     peppy_project = db.get_project(namespace, project, tag=tag)
-    annotation = db.get_project_annotation(namespace, project, tag=tag)
     if peppy_project is None:
         raise HTTPException(
-            status_code=404, detail=f"Project {namespace}/{project} not found"
+            status_code=404, detail=f"PEP {namespace}/{project}:{tag} not found in the database"
         )
-
-    # update the project and annotation with the new values
-    for key, value in updated_project.dict().items():
-        if value is not None:
-            if key in peppy_project:
-                setattr(peppy_project, key, value)
-            if key in annotation:
-                setattr(annotation, key, value)
-
-    # set project in database
-    digest = db._create_digest(peppy_project.to_dict(extended=True))
-    db._update_project(
-        json.dumps(peppy_project.to_dict()),
+    
+    # update the project
+    db.update_item(
+        updated_project.dict(),
         namespace,
         project,
-        tag=tag,
-        project_digest=digest,
-        proj_annot=annotation,
+        tag
     )
 
     return JSONResponse(
