@@ -112,12 +112,13 @@
                   <span class="mb-1 mx-1">:</span>
                   <input id="tag" name="tag" type="text" class="form-control" placeholder="default" />
                 </span>
-                <div id="file-drop-zone" class="d-flex flex-column align-items-center justify-content-center p-5 border border-2 rounded mt-3">
-                  <div class="d-flex flex-row align-items-center text-secondary">
-                    <i class="bi bi-archive"></i>
-                    <span class="ms-1">Drag & Drop Files</span>
-                  </div>
-                  <button class="mt-2 btn btn-sm btn-link">...Or select files to upload</button>
+                <div class="d-flex flex-column align-items-start mt-2">
+                  <label class="fs-4 fw-bold form-label">Select configuration file:</label>
+                  <input type="file" id="config-file" name="config_file" />
+                  <div class="my-1"></div>
+                  <label class="fs-4 fw-bold form-label">Other files:</label>
+                  <input type="file" id="other-files" name="other_files" multiple />
+                  <button id="new-project-submit" class="btn btn-primary btn-lg mt-3" type="submit">Submit</button>
                 </div>
               </form>
             </div>
@@ -172,30 +173,6 @@
 
   <!-- Custom JavaScript -->
   <script src="/static/js/namespace.js"></script>
-
-  <!-- Hover effects - is there a better way to do this??? -->
-  <script>
-    const dropZone = document.getElementById("file-drop-zone")
-    dropZone.addEventListener("mouseenter", (e) => {
-      e.preventDefault();
-      dropZone.classList.add("bg-light")
-    })
-    dropZone.addEventListener("mouseleave", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("bg-light")
-    })
-
-    // alert the files when dropped
-    dropZone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("bg-light")
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        alert("You dropped " + files.length + " files.");
-      }
-    })
-    
-  </script>
 
   <!-- Attach the event handler to the submission form -->
   <script>
