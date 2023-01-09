@@ -51,7 +51,7 @@ async def search_view(
     request: Request,
     query: str = "",
     collection_name: str = DEFAULT_QDRANT_COLLECTION_NAME,
-    session_info = Depends(read_session_info),
+    session_info=Depends(read_session_info),
 ):
 
     return templates.TemplateResponse(
@@ -61,7 +61,7 @@ async def search_view(
             "query": query,
             "collection_name": collection_name,
             "session_info": session_info,
-            "logged_in": session_info is not None
+            "logged_in": session_info is not None,
         },
     )
 
@@ -152,7 +152,7 @@ async def namespace_view(
 async def project_view(
     request: Request,
     namespace: str,
-    tag: str = None,
+    tag: str = "default",
     project: peppy.Project = Depends(get_project),
     project_annoatation: dict = Depends(get_project_annotation),
     session_info: dict = Depends(read_session_info),
@@ -184,7 +184,7 @@ async def project_view(
             "logged_in": session_info is not None,
             "is_editing": edit,
             "session_info": session_info,
-            "is_private": project_annoatation.is_private,
+            "is_private": project.is_private,
             "description": project_annoatation.description,
             "last_update": project_annoatation.last_update,
         },
@@ -199,7 +199,7 @@ async def project_view(
 async def project_edit(
     request: Request,
     namespace: str,
-    tag: str = None,
+    tag: str = "default",
     project: peppy.Project = Depends(get_project),
     project_annoatation: dict = Depends(get_project_annotation),
     session_info: dict = Depends(read_session_info),
@@ -235,10 +235,11 @@ async def project_edit(
             "logged_in": session_info is not None,
             "is_editing": edit,
             "session_info": session_info,
-            "is_private": project_annoatation.is_private,
+            "is_private": project.is_private,
             "description": project_annoatation.description,
             "last_update": project_annoatation.last_update,
             "sample_table_csv": project.sample_table.to_csv(),
+            "project_config_yaml": project.config.to_yaml(),
         },
     )
 

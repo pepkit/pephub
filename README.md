@@ -55,6 +55,11 @@ uvicorn pephub.main:app --reload
 
 If you are using VSCode, we also have [pre-configured settings](.vscode/launch.json) for the `launch.json` file to attach a debugger.
 
+## Search Engine
+pephub is also a genomics metadata search engine. We leverage [qdrant](https://qdrant.tech/), a vector database to efficiently store and search through tens of thousands of text-embeddings generated from the PEP's metadata. PEPs were mined for any relevant text-based metadata, and sentence embeddings were computed using the [`all-MiniLM-L12-V2`](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2) sentence transformer, available on hugging face.
+
+We host qdrant on their cloud platform. If the service is down, for any reason, we fall back to the postgres database to perform PEP search and retrieval.
+
 ## Running development server with docker:
 
 The server has been Dockerized and packaged with a [postgres](https://hub.docker.com/_/postgres) image to be run with [`docker compose`](https://docs.docker.com/compose/). This lets you run everything at once and develop without having to manage database instances. The `docker-compose.yml` file is written such that it mounts the database storage info to a folder called `postgres-data` at the root of the repository. This lets you load the database once and have it persist its state after restarting the container.

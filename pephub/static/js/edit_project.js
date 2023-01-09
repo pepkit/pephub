@@ -1,12 +1,3 @@
-const handleMetadataSave = (e) => {
-    e.preventDefault()
-    alert(JSON.stringify({
-      isPrivate: document.getElementById("is-private-toggle").checked,
-      description: document.getElementById("project-description").value,
-      name: document.getElementById("project-name").value
-    }))
-}
-
 // detect changes to the form
 const detectMetadataChanges = () => {
     const isPrivateToggle = document.getElementById("is-private-toggle")

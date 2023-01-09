@@ -23,7 +23,7 @@
           API Endpoints
         </button>
         {% if namespace == session_info['login'] %}
-          <a href="/{{ namespace }}/{{ project.name }}/edit">
+          <a href="/{{ namespace }}/{{ project.name }}/edit?tag={{tag}}">
             <button id="edit-pep-btn" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPEP">
               <i class="bi bi-pencil"></i>
               Edit

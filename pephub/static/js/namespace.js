@@ -103,8 +103,6 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
       }
     }
 
-    debugger;
-
     // if options is not null build a query string
     if(options) {
       queryParamString = Object.keys(options).map(key => `${key}=${options[key]}`).join('&')

@@ -56,3 +56,9 @@ SAMPLE_CONVERSION_FUNCTIONS = {
 # figure 4
 # great speed to accuracy tradeoff
 DEFAULT_HF_MODEL = "sentence-transformers/all-MiniLM-L12-v2"
+
+VALID_UPDATE_KEYS = [
+    "name",
+    "private",
+    "tag"
+]

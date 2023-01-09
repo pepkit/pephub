@@ -47,31 +47,31 @@ async def search_for_pep(
                 query_vector=query_vec,
                 limit=limit,
             )
-            namespaces = db.get_namespaces_info_by_list()
-            namespace_hits = [
-                n.namespace
-                for n in namespaces
-                if query.query.lower() in n.namespace.lower()
-            ]
-            namespace_hits.extend(
-                [
-                    n
-                    for n in list(
-                        set(
-                            [
-                                r.dict()["payload"]["registry"].split("/")[0]
-                                for r in results
-                            ]
-                        )
-                    )
-                    if n not in namespace_hits
-                ]
-            )
+            # namespaces = db.get_namespaces_info_by_list()
+            # namespace_hits = [
+            #     n.namespace
+            #     for n in namespaces
+            #     if query.query.lower() in n.namespace.lower()
+            # ]
+            # namespace_hits.extend(
+            #     [
+            #         n
+            #         for n in list(
+            #             set(
+            #                 [
+            #                     r.dict()["payload"]["registry"].split("/")[0]
+            #                     for r in results
+            #                 ]
+            #             )
+            #         )
+            #         if n not in namespace_hits
+            #     ]
+            # )
             return JSONResponse(
                 content={
                     "query": query.query,
                     "results": [r.dict() for r in results],
-                    "namespace_hits": namespace_hits,
+                    # "namespace_hits": namespace_hits,
                 }
             )
         except Exception as e:
@@ -105,19 +105,16 @@ async def search_for_pep(
             for r in results
         ]
         namespace_hits = [
-                n.namespace
-                for n in namespaces
-                if query.query.lower() in n.namespace.lower()
-            ]
+            n.namespace
+            for n in namespaces
+            if query.query.lower() in n.namespace.lower()
+        ]
         namespace_hits.extend(
             [
                 n
                 for n in list(
                     set(
-                        [
-                            r["payload"]["registry"].split("/")[0]
-                            for r in parsed_results
-                        ]
+                        [r["payload"]["registry"].split("/")[0] for r in parsed_results]
                     )
                 )
                 if n not in namespace_hits
@@ -127,6 +124,6 @@ async def search_for_pep(
             content={
                 "query": query.query,
                 "results": parsed_results,
-                "namespace_hits": namespace_hits
+                "namespace_hits": namespace_hits,
             }
         )
