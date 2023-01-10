@@ -2,7 +2,7 @@
 {% block content %}
 <div>
   <div class="mb-3">
-    <a id="back-link" href="/{{ namespace }}/{{ project.name }}">
+    <a id="back-link" href="/{{ namespace }}/{{ project.name }}?tag={{ tag }}">
       <button class="btn btn-sm btn-outline-primary">
         <i class="bi bi-arrow-bar-left"></i>
         Back to project
@@ -165,7 +165,7 @@
     saveBtn.disabled = true
 
     // send request to server
-    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}", {
+    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}?tag={{ tag }}", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -320,7 +320,7 @@
     csv = removeTrailingCommas(csv)
 
     // send PATCH request to server
-    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}", {
+    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}?tag={{ tag }}", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
@@ -395,7 +395,7 @@
   setTimeout(() => editor.onKeyUp(detectYamlChanges), 1000)
 
   const getProjectConfigYamlFromDatabase = () => {
-    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}/convert?filter=yaml")
+    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}/convert?filter=yaml&tag={{ tag }}")
     .then(response =>  response.text())
     .then(data => {
       if (!editor) {
@@ -416,7 +416,7 @@
     const yaml = editor.getValue()
 
     // send PATCH request to the server/database
-    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}", {
+    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}?tag={{ tag }}", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
