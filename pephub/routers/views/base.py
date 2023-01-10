@@ -4,6 +4,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, HTMLResponse
 from starlette.templating import Jinja2Templates
 from peppy import __version__ as peppy_version
+from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY
 from platform import python_version
 from dotenv import load_dotenv
 
@@ -216,9 +217,10 @@ async def project_edit(
 
     samples = [s.to_dict() for s in project.samples]
     raw_prj = project.to_dict(extended=True)
-    project_pd = pd.DataFrame(raw_prj["_sample_dict"])
-    project_csv = project_pd.to_csv()
+    project_pd = pd.DataFrame(raw_prj[SAMPLE_RAW_DICT_KEY])
+    project_csv = project_pd.to_csv(index=False)
     project_col = list(project_pd.columns)
+    project_yaml = project[CONFIG_KEY].to_yaml()
 
     try:
         pep_version = project.pep_version
@@ -245,7 +247,7 @@ async def project_edit(
             "description": project_annoatation.description,
             "last_update": project_annoatation.last_update,
             "sample_table_csv": project_csv,
-            "project_config_yaml": project.to_dict(extended=True)["_config"],
+            "project_config_yaml": project_yaml,
         },
     )
 

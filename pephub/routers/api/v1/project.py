@@ -7,7 +7,8 @@ from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import __version__ as peppy_version
-from peppy import Sample, Project
+from peppy import Project
+from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY
 from platform import python_version
 
 from ...._version import __version__ as pephub_version
@@ -81,12 +82,12 @@ async def update_a_pep(
         sample_table_df = sample_table_df.dropna(axis=1, how="all")
         sample_table_df_json = sample_table_df.to_dict()
 
-        new_raw_project["_sample_dict"] = sample_table_df_json
+        new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
 
     if updated_project.project_config_yaml is not None:
 
         yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
-        new_raw_project["_config"] = yaml_dict
+        new_raw_project[CONFIG_KEY] = yaml_dict
 
     if any([updated_project.project_config_yaml is not None,
             updated_project.sample_table_csv is not None]):
@@ -116,7 +117,6 @@ async def update_a_pep(
             tag,
         )
     # update "meta meta data"
-    print(updated_project)
     for k, v in updated_project.dict(exclude_unset=True).items():
         # skip the sample table and project config
         if k not in ["project_config_yaml", "sample_table_csv"]:
