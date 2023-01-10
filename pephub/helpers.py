@@ -1,6 +1,7 @@
 from datetime import date
-from typing import List, Union
-from fastapi import Response, Depends
+from typing import List, Union, Tuple
+from fastapi import Response, Depends, UploadFile
+from fastapi.exceptions import HTTPException
 from ubiquerg import VersionInHelpParser
 
 from os.path import exists, basename
@@ -172,3 +173,60 @@ def build_authorization_url(
     for key, value in kwargs.items():
         auth_url += f"&{key}={value}"
     return auth_url
+
+def find_yaml_file_in_file_list(files: List[UploadFile]) -> Union[UploadFile, None]:
+    """
+    Given a list of files uploaded by a user, find the
+    file that ends with `.yaml` and return it. If no file
+    is found, return None
+    """
+    for file in files:
+        if file.filename.endswith(".yaml"):
+            return file
+    return None
+
+def find_csv_file_in_file_list(files: List[UploadFile]) -> Union[UploadFile, None]:
+    """
+    Given a list of files uploaded by a user, find the
+    file that ends with `.csv` and return it. If no file
+    is found, return None
+    """
+    for file in files:
+        if file.filename.endswith(".csv"):
+            return file
+    return None
+
+def parse_user_file_upload(files: List[UploadFile] ) -> UploadFile:
+    """
+    Parse through files upload by a user and return the UploadFile object
+    that should be used to instantiate a peppy.Project instance.
+
+    ```mermaid
+    graph TD;
+      A[User uploads files] --> B{Included `.yaml` file?}
+      B -- Yes --> C[Init project using `file.yaml`]
+      B -- No --> D{Included `.csv` file?}
+      D -- No --> E[Return `400`]
+      D -- Yes --> F[Init project from `csv`]
+    ```
+    """
+    yaml_file = find_yaml_file_in_file_list(files)
+    if yaml_file is not None:
+        return peppy.Project(yaml_file.file)
+    else:
+        csv_file = find_csv_file_in_file_list(files)
+        if csv_file is not None:
+            return peppy.Project(csv_file.file)
+        else:
+            raise HTTPException(
+                status_code=400, detail="No .yaml or .csv file was found in the upload."
+            )
+
+def split_upload_files_on_init_file(all_files: List[UploadFile], init_file: UploadFile) -> Tuple[UploadFile, List[UploadFile]]:
+    """
+    Given a list of files uploaded by a user and the file that should be used
+    to init a peppy project, split the files into two objects, one being
+    the init file and the other a list containing all other files.
+    """
+    other_files = [file for file in all_files if file.filename != init_file.filename]
+    return init_file, other_files
