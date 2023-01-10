@@ -59,6 +59,6 @@ DEFAULT_HF_MODEL = "sentence-transformers/all-MiniLM-L12-v2"
 
 VALID_UPDATE_KEYS = [
     "name",
-    "private",
+    "is_private",
     "tag"
 ]

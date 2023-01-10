@@ -12,6 +12,7 @@ from ...dependencies import *
 from ...helpers import get_project_sample_names
 from ...const import BASE_TEMPLATES_PATH, DEFAULT_QDRANT_COLLECTION_NAME
 
+import pandas as pd
 
 load_dotenv()
 
@@ -214,6 +215,11 @@ async def project_edit(
         )
 
     samples = [s.to_dict() for s in project.samples]
+    raw_prj = project.to_dict(extended=True)
+    project_pd = pd.DataFrame(raw_prj["_sample_dict"])
+    project_csv = project_pd.to_csv()
+    project_col = list(project_pd.columns)
+
     try:
         pep_version = project.pep_version
     except Exception:
@@ -224,9 +230,9 @@ async def project_edit(
             "namespace": namespace,
             "project": project,
             "tag": tag,
-            "project_dict": project.to_dict(),
+            "project_dict": project.to_dict(extended=True),
             "pep_version": pep_version,
-            "sample_table_columns": project.sample_table.columns.to_list(),
+            "sample_table_columns": project_col,
             "samples": samples,
             "request": request,
             "peppy_version": peppy_version,
@@ -235,11 +241,11 @@ async def project_edit(
             "logged_in": session_info is not None,
             "is_editing": edit,
             "session_info": session_info,
-            "is_private": project.is_private,
+            "is_private": project_annoatation.is_private,
             "description": project_annoatation.description,
             "last_update": project_annoatation.last_update,
-            "sample_table_csv": project.sample_table.to_csv(),
-            "project_config_yaml": project.config.to_yaml(),
+            "sample_table_csv": project_csv,
+            "project_config_yaml": project.to_dict(extended=True)["_config"],
         },
     )
 

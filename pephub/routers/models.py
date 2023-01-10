@@ -1,16 +1,16 @@
 from typing import Optional
 from pydantic import BaseModel
-from pepdbagent.models import ProjectModel
+import pydantic
+from pydantic import Extra
+from pepdbagent.models import UpdateItems
 
 
-class Project(ProjectModel):
-    pass
+class ProjectOptional(UpdateItems):
+    sample_table_csv: Optional[str]
+    project_config_yaml: Optional[str]
 
-
-class ProjectOptional(Project):
-    __annotations__ = {k: Optional[v] for k, v in Project.__annotations__.items()}
-    sample_table_csv: Optional[str] = None
-    project_config_yaml: Optional[str] = None
+    class Config:
+        allow_population_by_field_name = True
 
 
 class SearchQuery(BaseModel):
