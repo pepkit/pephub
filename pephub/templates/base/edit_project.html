@@ -40,6 +40,11 @@
             <div id="pep-name-help" class="form-text">Rename your PEP.</div>
           </div>
           <div class="mb-3">
+            <label for="project-tag" class="mb-2 fs-6 badge rounded-pill bg-dark">Project Tag</label>
+            <input onkeyup="detectMetadataChanges()" value="{{tag}}" placeholder="{{ tag }}" type="text" class="form-control" id="project-tag">
+            <div id="pep-name-help" class="form-text">Change project tag.</div>
+          </div>
+          <div class="mb-3">
             <label for="project-description" class="form-label">Project Description</label>
             <textarea onkeyup="detectMetadataChanges()" value="{{description}}" placeholder="{{ description }}" class="form-control" id="project-description" rows="3"></textarea>
           </div>
@@ -172,6 +177,7 @@
       },
       body: JSON.stringify({
         name: document.getElementById("project-name").value,
+        tag: document.getElementById("project-tag").value,
         description: document.getElementById("project-description").value,
         private: document.getElementById("is-private-toggle").checked,
       }),
@@ -180,6 +186,7 @@
         if (response.ok) {
           // update original values
           setOriginalProjectNameValue(document.getElementById("project-name").value)
+          setOriginalProjectNameValue(document.getElementById("project-tag").value)
           setOriginalDescriptionValue(document.getElementById("project-description").value)
           setOriginalIsPrivateValue(document.getElementById("is-private-toggle").checked)
 
