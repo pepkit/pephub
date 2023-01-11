@@ -93,7 +93,7 @@
         </div>
       </div>
     </div>
-    <!-- Submit PEP modal large -->
+    <!-- Submit PEP modal large 
     <div class="modal" id="newProject" tabindex="-1" aria-labelledby="newProjectModal" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -119,6 +119,81 @@
                   <label class="fs-4 fw-bold form-label">Other files:</label>
                   <input type="file" id="other-files" name="other_files" multiple />
                   <button id="new-project-submit" class="btn btn-primary btn-lg mt-3" type="submit">Submit</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    -->
+    <!-- Submit PEP modal large (DRAG-N-DROP) -->
+    <div class="modal" id="newProject" tabindex="-1" aria-labelledby="newProjectModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5">Submit a new PEP</h1> 
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div>
+              <form id="new-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="form-control border-0" method="post" enctype="multipart/form-data">
+                <span class="fs-4 d-flex align-items-center">
+                  <span class="mb-1">{{namespace.namespace}}</span>
+                  <span class="mb-1 mx-1">/</span>
+                  <input id="project-name" name="project_name" type="text" class="form-control" placeholder="name" />
+                  <span class="mb-1 mx-1">:</span>
+                  <input id="tag" name="tag" type="text" class="form-control" placeholder="default" />
+                </span>
+                <div 
+                  id="dnd-box"
+                  onclick="clickFileInput()"
+                  class="p-5 d-flex flex-column align-items-center justify-content-center border border-2 rounded-3 mt-3" 
+                  ondragover="allowDrop(event)" 
+                >
+                    <div class="d-flex flex-row align-items-center">
+                      <i class="bi bi-cloud-arrow-up"></i>
+                      <span class="text-secondary ms-2">Drag files here</span>
+                    </div>
+                    <span class="text-secondary my-1">or</span>
+                    <span class="text-secondary">click to browse</span>
+                </div>
+                <div 
+                  id="file-list-container" 
+                  style="border-style: dashed !important;" 
+                  class="d-none p-5 d-flex flex-column align-items-center justify-content-center border border-2 rounded-3 mt-3"
+                >
+                  <div id="file-list"></div>
+                  <div class="mt-3">
+                    <button type="button" onclick="clickFileInput()" class="btn btn-sm btn-outline-secondary">
+                      <i class="bi bi-archive"></i>
+                      Browse
+                    </button>
+                    <button type="button" onclick="clearFileInput()" class="btn btn-sm btn-outline-secondary">
+                      <i class="bi bi-x"></i>
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <input hidden multiple type="file" id="files" name="files"/>
+                <div class="mt-3">
+                  <button 
+                    id="new-project-submit-btn" 
+                    class="btn btn-success" 
+                    type="submit"
+                    disabled
+                  >
+                    <i class="bi bi-plus-circle"></i>
+                    Add
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                    onclick="resetForm()"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             </div>
@@ -166,6 +241,45 @@
   <!-- DataTabes-->
   <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
 
+  <!-- Drag n Drop files -->
+  <style>
+    #dnd-box {
+      border-style: dashed !important;
+    }
+    #dnd-box:hover {
+      cursor: pointer;
+    }
+  </style>
+
+  <script src="/static/js/project_upload.js"></script>
+  <script>
+
+    // hover effects for drag and drop box
+    const dragAndDrop = document.getElementById("dnd-box");
+    dragAndDrop.addEventListener("mouseenter", function() {
+      dragAndDrop.classList.add("bg-light");
+    });
+    dragAndDrop.addEventListener("mouseleave", function() {
+      dragAndDrop.classList.remove("bg-light");
+    });
+
+    // event listener for drag and drop
+    const dropZone = document.getElementById("dnd-box");
+    dropZone.addEventListener("drop", handleDrop);
+
+    // event listener to render file names on input change
+    fileInput = document.getElementById("files");
+
+    // mount handler
+    fileInput.addEventListener("change", onFileInputChange);
+
+    // submit button things
+    const submitButton = document.getElementById("new-project-submit-btn");
+    submitButton.addEventListener("click", submitNewProject);
+
+
+</script>
+
   <!--assign to table -->
   <script>
     const table = new simpleDatatables.DataTable("#namespace-table")
@@ -182,6 +296,8 @@
 
   <!-- Fetch projects on page load. -->
   <script>
-    fetchProjectsInNamespace("{{ namespace.namespace }}")
+    fetchProjectsInNamespace(
+      document.getElementById("namespace-header").innerText
+    )
   </script>
 {% endblock %}

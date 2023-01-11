@@ -27,26 +27,30 @@
   </div>
   {% endif %}
 </div>
+<div class="d-none" id="search-query-value">{{query}}</div>
+
 <!-- populate things on page load-->
 <script src="/static/js/search.js"></script>
 <script>
-    {% if query != "" %}
-       runSearchQuery("{{query}}", true);
-    {% endif %}
-    const searchBar = document.getElementById("search-bar");
-    const searchButton = document.getElementById("search-btn");
-    searchBar.addEventListener("keyup", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            runSearchQuery(searchBar.value);
-        }
-    });
-    searchBar.addEventListener("keyup", function(event) {
-        if (searchBar.value.length > 0) {
-            searchButton.disabled = false;
-        } else {
-            searchButton.disabled = true;
-        }
-    });
+  // run search on page load
+  var queryOnPageLoad = document.getElementById("search-query-value").innerText;
+  runSearchQuery(queryOnPageLoad, true);
+
+  // assign event listeners
+  const searchBar = document.getElementById("search-bar");
+  const searchButton = document.getElementById("search-btn");
+  searchBar.addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+          event.preventDefault();
+          runSearchQuery(searchBar.value);
+      }
+  });
+  searchBar.addEventListener("keyup", function(event) {
+      if (searchBar.value.length > 0) {
+          searchButton.disabled = false;
+      } else {
+          searchButton.disabled = true;
+      }
+  });
 </script>
 {% endblock %}

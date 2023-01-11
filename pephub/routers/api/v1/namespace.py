@@ -8,6 +8,7 @@ from platform import python_version
 
 from ...._version import __version__ as pephub_version
 from ....dependencies import *
+from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 
 
 from dotenv import load_dotenv
@@ -85,24 +86,24 @@ async def get_namespace_projects(
 # * spotify: https://developer.spotify.com/documentation/web-api/reference-beta/#endpoint-create-playlist
 @namespace.post("/projects", summary="Submit a PEP to the current namespace")
 async def submit_pep(
-    request: Request,
     namespace: str,
     session_info: dict = Depends(read_session_info),
     project_name: str = Form(...),
     tag: str = Form(DEFAULT_TAG),
-    config_file: UploadFile = File(...),
-    other_files: List[UploadFile] = File(None),
+    files: List[UploadFile] = File(...),
     db: Connection = Depends(get_db),
 ):
     if session_info is None:
         raise HTTPException(403, "Please log in to submit a PEP.")
+    
+    init_file = parse_user_file_upload(files)
+    init_file, other_files = split_upload_files_on_init_file(files, init_file)
 
-    # create temp dir that gets deleted
-    # after endpoint execution ends
+    # create temp dir that gets deleted when we're done
     with tempfile.TemporaryDirectory() as dirpath:
-        # save config file in tmpdir
-        with open(f"{dirpath}/{config_file.filename}", "wb") as cfg_fh:
-            shutil.copyfileobj(config_file.file, cfg_fh)
+        # save init file
+        with open(f"{dirpath}/{init_file.filename}", "wb") as cfg_fh:
+            shutil.copyfileobj(init_file.file, cfg_fh)
 
         # save any other files the user might have supplied
         if other_files is not None:
@@ -111,7 +112,7 @@ async def submit_pep(
                 with open(f"{dirpath}/{upload_file.filename}", "wb") as local_tmpf:
                     shutil.copyfileobj(upload_file.file, local_tmpf)
 
-        p = Project(f"{dirpath}/{config_file.filename}")
+        p = Project(f"{dirpath}/{init_file.filename}")
         p.name = project_name
         db.upload_project(p, namespace=namespace, name=project_name, tag=tag)
         return JSONResponse(
@@ -119,8 +120,7 @@ async def submit_pep(
                 "namespace": namespace,
                 "project_name": project_name,
                 "proj": p.to_dict(),
-                "config_file": config_file.filename if config_file else None,
-                "other_files": [f.filename for f in other_files] if other_files else [],
+                "init_file": init_file.filename,
                 "tag": tag,
                 "registry_path": f"{namespace}/{project_name}:{tag}",
             },

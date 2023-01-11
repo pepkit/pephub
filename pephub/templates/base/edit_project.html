@@ -51,7 +51,7 @@
           <button onclick="cancelChanges()" type="button" class="btn btn-outline-secondary">
             Cancel
           </button>
-          <button onclick="handleMetaMetaDataSubmit()" id="metadata-save-btn" disabled type="button" disabled class="btn btn-success">
+          <button onclick="handleMetaMetaDataSubmit('{{ namespace }}', '{{ project.name}}')" id="metadata-save-btn" disabled type="button" disabled class="btn btn-success">
             Save
           </button>
         </form>
@@ -132,32 +132,11 @@
 <!-- meta meta data helpers -->
 <script>
   // store the original values of the project
-  {% if is_private is sameas true %}
-  var originalIsPrivateValue = true
-  {% elif is_private is sameas false %}
-  var originalIsPrivateValue = false
-  {% endif %}
+  var originalIsPrivateValue = document.getElementById("is-private-toggle").value
+  var originalDesciriptionValue = document.getElementById("project-description").value
+  var originalProjectNameValue = document.getElementById("project-name").value
 
-  {% if description is not none %}
-  var originalDesciriptionValue = "{{ description }}"
-  {% else %}
-  var originalDesciriptionValue = ""
-  {% endif %}
-  
-  var originalProjectNameValue = "{{ project.name }}"
-  var originalSampleTableCsv = `{{ sample_table_csv }}` // needs to be stored as literal to preserve new lines
-
-  // setters to reset the original values when the user saves
-  const setOriginalIsPrivateValue = (val) => {
-    originalIsPrivateValue = val
-  }
-  const setOriginalDescriptionValue = (val) => {
-    originalDesciriptionValue = val
-  }
-  const setOriginalProjectNameValue = (val) => {
-    originalProjectNameValue = val
-  }
-
+  // attach event listener to meta meta data form
   const form = document.getElementById("metadata-form")
   form.addEventListener("change", detectMetadataChanges)
 
@@ -290,8 +269,8 @@
 
   loadHandsOnTable()
 
-  const getSampleTableFromDatabase = () => {
-    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}/samples?format=csv")
+  const getSampleTableFromDatabase = (namespace, project, tag) => {
+    fetch(`/api/v1/projects/${namespace}/${project}/samples?format=csv&tag=${tag}`)
     .then(response =>  response.text())
     .then(data => {
       if (!handsOnTable) {
@@ -336,12 +315,17 @@
         "sample_table_csv": csv
       }, null, 2)
     })
-    .then(() => {
-      createToast({
-        title: "Success",
-        body: "Sample table saved successfully",
-        type: "success",
-      })
+    .then((res) => {
+      // chech k ok response
+      if (!res.ok) {
+        throw new Error(res.statusText)
+      } else {
+        createToast({
+          title: "Success",
+          body: "Sample table saved successfully",
+          type: "success",
+        })
+      }
     })
     .catch((error) => {
       createToast({
