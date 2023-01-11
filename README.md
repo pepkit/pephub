@@ -1,64 +1,74 @@
+<img src="https://img.shields.io/badge/fastapi-109989?style=for-the-badge&logo=FASTAPI&logoColor=white" /> <img src="https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue" /> <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" />
+
 # pephub
-**pephub** is a server that allows you to view, store, and share a repository of [PEPs](https://pep.databio.org/en/latest/). It provides a simple user interface to navigate the PEP repository as well as a programmatic API to access and share PEPs.
+**pephub** is a biological metadata server that lets you to view, store, and share your [PEPs](https://pep.databio.org/en/latest/). It acts as a *database* to store PEPs, an API to programmatically read and write PEPs to this database, and it acts as a user interface to view and manage these PEPs in the database.
 
 ## Setup
-pephub is backed by a [postgres](https://www.postgresql.org/) database to store PEPs. It utilizes a [special client](https://github.com/pepkit/pephub_db) to interface the database and read/write PEPs from the database through [peppy](https://github.com/pepkit/peppy).
+Already have everything setup? Skip to [running](#running). Two things are required to run pephub: 1) A pephub database, and 2) The pephub server. See below for basic setup:
 
-To begin, you will need a database of PEPs. You may follow instructions [here](https://github.com/pepkit/pepdbagent/blob/master/docs/db_tutorial.md) to get that running. Once you have a database with the proper schema, you may load your database. This repository is packaged with a [convenient script](./scripts) to load a local folder of PEPs into the database.
+### 1. Database Setup
+*pephub* is backed by a [postgres](https://www.postgresql.org/) database to store PEPs. You can easily create a new pephub-compatible postgres instance locally:
 
-After the database is loaded and running, you can now run the pephub server.
-
-## Installation and Running
-Simply install the pephub server:
-
-```console
-pip install pephub
+```
+sh setup_db.sh
+docker pull postgres
+docker build -t pephub_db postgres/
+docker run -p 5432:54432 pephub_db
 ```
 
-Provide the server with your database credentials through environment variables. You can also provide a `.env` file which will auto-populate the environment. A template for that can be found [here](environment/template.env).
+You should now have a pephub-compatible posrgres instance running at http://localhost:5432
 
-```console
-export POSTGRES_USER=postgres
-export POSTGRES_PASSWORD=...
-export POSTGRES_HOST=...
-export POSTGRES_DATABASE=...
-export GH_CLIENT_ID=...
-export GH_CLIENT_SECRET=...
-...
+### 2. `pephub` Server Setup
+Install dependencies using `pep` (*We suggest using virtual environments*):
+
+```
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements/requirements.txt
 ```
 
-The following environment variables are **required:**
-* `POSTGRES_HOST`
-* `POSTGRES_DB`
-* `POSTGRES_USER`
-* `POSTGRES_PASSWORD`
-* `GH_CLIENT_ID`
-* `GH_CLIENT_SECRET`
-* `REDIRECT_URI`
+### 3. (*Optional*) GitHub Authentication Client Setup
+*pephub* uses GitHub for namespacing and authentication. As such, a GitHub application capable of logging in users is required. See the [GitHub instructions](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app) for information on setting up a new GitHub app.
 
-And run the server! (here we are running on port 8000):
+### 4. (*Optional*) Vector Database Setup
+We've added [semantic-search](https://huggingface.co/course/chapter5/6?fw=tf#using-embeddings-for-semantic-search) capabilities to pephub. Optionally, you may host an instance of the [qdrant](https://qdrant.tech/) **vector database** to store embeddings computed using a sentence transformer that mined and processed any relevant metadata from PEPs. If no database connection settings are supplied, pephub will default to SQL search. Read more [here](docs/semantic-search.md). To run qdrant locally, simply run the following:
 
-```console
-pephub serve -p 8000
+
+```
+docker pull qdrant/qdrant
+docker run -p 6333:6333 \
+    -v $(pwd)/qdrant_storage:/qdrant/storage \
+    qdrant/qdrant
 ```
 
-View your PEPs at http://localhost:8000
+## Running
+*pephub* is configured to be run many different ways. Regardless of how you run it, however, pephub requires many configuration parameters to function. These include the database connection credentials and the github authentication client secrets. Configuration settings are supplied to pephub through environment variables to allow for flexible development and deployment. The following settings are **required** to run pephub:
 
-## Running the development server:
-PEPhub is a [FastAPI](https://fastapi.tiangolo.com/) server. As such, the easiest way to run is with `uvicorn`. The server requires many parameters to function. Namely, the database and authentication secrets. These should be stored in an `.env` folder at the root of the repository. You may use the provided environment file [template](environment/template.env) in this repository. Remember you will need two things: 1) A postgres instance with PEPs and 2) A github application for authentication.
+- `POSTGRES_HOST`: The hostname of the pephub database server
+- `POSTGRES_DB`: The name of the database inside the postgres server
+- `POSTGRES_USER`: Username for the database
+- `POSTGRES_PASSWORD`: Password for the user
+- `POSTGRES_PORT`: Port for postgres database
+- `GH_CLIENT_ID`: Client ID for the github application that authenticates users
+- `GH_CLIENT_SECRET`: Client secret for the github application that authenticates users
+- `REDIRECT_URI`: A redirect URI that matches that of the GitHub application
 
-Once you have a proper environment, you can run the server with the following command:
+You must set these environment variables prior to running pephub. Alternatively, you may store them locally in a `.env` file. This file will get loaded and exported to your environment when the server starts up.
 
-```console
+You can read more about server settings and configuration [here](docs/server-settings.md).
+
+### Running For Development:
+
+**Ensure database is setup and running.**
+See [here](#1-database-setup) if you've not setup a database.
+
+**Start pephub.**
+You can run pephub natively using the following:
+
+```
 uvicorn pephub.main:app --reload
 ```
 
-If you are using VSCode, we also have [pre-configured settings](.vscode/launch.json) for the `launch.json` file to attach a debugger.
-
-## Search Engine
-pephub is also a genomics metadata search engine. We leverage [qdrant](https://qdrant.tech/), a vector database to efficiently store and search through tens of thousands of text-embeddings generated from the PEP's metadata. PEPs were mined for any relevant text-based metadata, and sentence embeddings were computed using the [`all-MiniLM-L12-V2`](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2) sentence transformer, available on hugging face.
-
-We host qdrant on their cloud platform. If the service is down, for any reason, we fall back to the postgres database to perform PEP search and retrieval.
+*pephub* should now be running at http://localhost:8000.
 
 ## Running development server with docker:
 
@@ -68,7 +78,7 @@ You can start a development environment in three steps:
 
 **1. Obtain the latest database schema:**
 ```console
-sh setup_dev.sh
+sh setup_db.sh
 ```
 
 **2. Build and start the containers:**
