@@ -121,7 +121,6 @@
     </div>
   </div>
 </div>
-
 {% endblock %}
 
 {% block tail %}
@@ -131,11 +130,6 @@
 
 <!-- meta meta data helpers -->
 <script>
-  // store the original values of the project
-  var originalIsPrivateValue = document.getElementById("is-private-toggle").value
-  var originalDesciriptionValue = document.getElementById("project-description").value
-  var originalProjectNameValue = document.getElementById("project-name").value
-
   // attach event listener to meta meta data form
   const form = document.getElementById("metadata-form")
   form.addEventListener("change", detectMetadataChanges)
@@ -220,53 +214,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/basic-languages/yaml/yaml.js"></script>
 
-<!-- hands on table helpers -->
 <script>
-  var handsOnTable;
-  var editor;
-
-  // remove trailing commas
-  const removeTrailingCommas = (s) => {
-    while (s[s.length - 1] === ",") {
-      s = s.slice(0, -1)
-    }
-    return s
-  }
-
-  // detect any changes to the sample table
-  const detectSampleTableChanges = () => {
-
-    var currentSampleTableCsv = handsOnTable.getData().map(row => row.join(",")).join("\n")
-
-    // remove trailing commas
-    currentSampleTableCsv = removeTrailingCommas(currentSampleTableCsv)
-    
-    // detect any changes
-    if (currentSampleTableCsv !== originalSampleTableCsv) {
-      document.getElementById("sample-table-save-btn").disabled = false
-    } else {
-      document.getElementById("sample-table-save-btn").disabled = true
-    }
-  }
   
-  const loadHandsOnTable = (data) => {
-
-    if (handsOnTable) return handsOnTable
-
-    const csvEditorDiv = document.querySelector('#csv-editor-div');
-    handsOnTable = new Handsontable(csvEditorDiv, {
-      data: Papa.parse(`{{ sample_table_csv}}`).data, // using serverside csv to initialize
-      rowHeaders: true,
-      colHeaders: true,
-      stretchH: 'all',
-      stretchW: 'all',
-      height: 'auto',
-      licenseKey: 'non-commercial-and-evaluation' // for non-commercial use only
-    });
-    handsOnTable.addHook("afterChange", detectSampleTableChanges)
-    return handsOnTable
-  }
-
   loadHandsOnTable()
 
   const getSampleTableFromDatabase = (namespace, project, tag) => {
@@ -396,12 +345,8 @@
     })
   }
   
-  // submit edited yaml to the server/database
-  const handleProjectConfigYamlSubmit = () => {
-    // update save button for UX and feedback
-    const yamlSaveBtn = document.getElementById("yaml-save-btn")
-    const yamlSaveBtnText = yamlSaveBtn.innerText = "Saving..."
-    yamlSaveBtn.disabled = true
+  // get project config yaml from database
+  getProjectConfigYamlFromDatabase()
 
     // fetch current state of the editor
     const yaml = editor.getValue()
@@ -437,8 +382,7 @@
       yamlSaveBtn.innerText = "Save"
     })
   }
-
+  // get meta meta data from database
+  getMetaMetaDataFromDatabase()
 </script>
-
-
 {% endblock %}

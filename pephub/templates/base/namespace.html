@@ -169,7 +169,7 @@
                       <i class="bi bi-archive"></i>
                       Browse
                     </button>
-                    <button type="button" onclick="clearFileInput()" class="btn btn-sm btn-outline-secondary">
+                    <button type="button" onclick="handleClearFileInput()" class="btn btn-sm btn-outline-secondary">
                       <i class="bi bi-x"></i>
                       Clear
                     </button>
@@ -238,6 +238,10 @@
         </div>
     </div>
 </div>
+  <!-- Custom JavaScript -->
+  <script src="/static/js/namespace.js"></script>
+  <script src="/static/js/project_upload.js"></script>
+
   <!-- DataTabes-->
   <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
 
@@ -250,9 +254,12 @@
       cursor: pointer;
     }
   </style>
-
-  <script src="/static/js/project_upload.js"></script>
   <script>
+
+    const handleClearFileInput = () => {
+      clearFileInput()
+      onFormChange()
+    }
 
     // hover effects for drag and drop box
     const dragAndDrop = document.getElementById("dnd-box");
@@ -272,6 +279,7 @@
 
     // mount handler
     fileInput.addEventListener("change", onFileInputChange);
+    fileInput.addEventListener("change", onFormChange);
 
     // submit button things
     const submitButton = document.getElementById("new-project-submit-btn");
@@ -285,13 +293,18 @@
     const table = new simpleDatatables.DataTable("#namespace-table")
   </script>
 
-  <!-- Custom JavaScript -->
-  <script src="/static/js/namespace.js"></script>
-
-  <!-- Attach the event handler to the submission form -->
+  <!-- Attach the event handlers to the submission form -->
   <script>
     const form = document.getElementById("new-project-form")
     form.addEventListener("submit", submitNewProject, true);
+
+    // on change handler for entire form to enable/disable submit button
+    form.addEventListener("change", onFormChange);
+
+    // attach same event handler to project-name input
+    const projectNameInput = document.getElementById("project-name");
+    projectNameInput.addEventListener("keyup", onFormChange);
+
   </script>
 
   <!-- Fetch projects on page load. -->

@@ -21,6 +21,7 @@ from .const import (
     DEFAULT_POSTGRES_DB,
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
+    DEFAULT_HF_MODEL
 )
 from datetime import datetime, timedelta
 import pydantic
@@ -247,6 +248,7 @@ def get_qdrant(
     qdrant = QdrantClient(
         host=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
         port=os.environ.get("QDRANT_PORT", DEFAULT_QDRANT_PORT),
+        api_key=os.environ.get("QDRANT_API_KEY", None),
     )
     try:
         # test the connection first
@@ -264,7 +266,7 @@ def get_sentence_transformer() -> SentenceTransformer:
     """
     Return sentence transformer encoder
     """
-    model = SentenceTransformer("all-MiniLM-L12-v2")
+    model = SentenceTransformer(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
     try:
         yield model
     finally:

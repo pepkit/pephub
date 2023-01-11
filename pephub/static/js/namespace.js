@@ -115,6 +115,17 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
           }
         })
         .then(data => {
+          // reformat all the dates in the data
+          data.items.forEach(project => {
+            try {
+              // format as Month Day, Year
+              project.submission_date = new Date(project.submission_date).toLocaleString(
+                'en-US', {month: 'long', day: 'numeric', year: 'numeric'}
+              )
+            } catch {
+              // do nothing
+            }
+          })
           const dataWithNamespace = {
             namespace: namespace,
             ...data
@@ -164,6 +175,7 @@ const handleSearch = () => {
 
     fetchProjectsInNamespace(namespace, {q: query})
 }
+
 // create debounced version of handleSearch
 const handleSearchDebounced = debounce(handleSearch, 500)
 
@@ -174,7 +186,7 @@ const submitNewProject = (event) => {
     keyboard: false
   })
 
-  const submitButton = document.getElementById("new-project-submit")
+  const submitButton = document.getElementById("new-project-submit-btn")
   const form = document.getElementById("new-project-form")
 
   submitButton.disabled = true
@@ -218,14 +230,33 @@ const submitNewProject = (event) => {
     errorMessageDiv.textContent = JSON.stringify(err, null, 2)
     
     // show toast
-    const bsToast = new bootstrap.Toasy(toastDiv)
+    const bsToast = new bootstrap.Toast(toastDiv)
     bsToast.show()
   })
   .finally(() => {
     //auto hide the modal
     modal.hide()
     submitButton.disabled = false
-    submitButton.textContent = "Submit"
+    submitButton.innerHTML = `
+      <i class="bi bi-plus-circle"></i>
+      Add
+    `
   })
 
+}
+
+const onFormChange = () => {
+
+  const submitButton = document.getElementById("new-project-submit-btn")
+
+  // check if files input has at least one file
+  // and that the name is not empty
+  files = document.getElementById("files")
+  projectName = document.getElementById("project-name")
+
+  if(files.files.length > 0 && projectName.value.length > 0) {
+    submitButton.disabled = false
+  } else {
+    submitButton.disabled = true
+  }
 }

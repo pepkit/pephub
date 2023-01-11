@@ -6,6 +6,7 @@ from io import StringIO
 from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
+from pepdbagent.models import Annotation
 from peppy import __version__ as peppy_version
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY
@@ -35,7 +36,10 @@ project = APIRouter(
 
 
 @project.get("/", summary="Fetch a PEP")
-async def get_a_pep(proj: peppy.Project = Depends(get_project)):
+async def get_a_pep(
+    proj: peppy.Project = Depends(get_project),
+    proj_annotation: Annotation = Depends(get_project_annotation)
+):
     """
     Fetch a PEP from a certain namespace
     """
@@ -51,13 +55,13 @@ async def get_a_pep(proj: peppy.Project = Depends(get_project)):
         pep_version = proj.pep_version
     except Exception:
         pep_version = "2.1.0"
-    return {
-        "pep": proj.to_dict(),
-        "pep_version": pep_version,
-        "samples": samples,
-        "sample_table_indx": sample_table_indx,
-        "sample_attributes": sample_attributes,
-    }
+    return dict(
+        **proj.to_dict(),
+        **proj_annotation.dict(),
+        samples = samples,
+        sample_table_indx = sample_table_indx,
+        sample_attributes = sample_attributes,
+    )
 
 
 # https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository

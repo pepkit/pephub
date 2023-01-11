@@ -212,11 +212,11 @@ def parse_user_file_upload(files: List[UploadFile] ) -> UploadFile:
     """
     yaml_file = find_yaml_file_in_file_list(files)
     if yaml_file is not None:
-        return peppy.Project(yaml_file.file)
+        return yaml_file
     else:
         csv_file = find_csv_file_in_file_list(files)
         if csv_file is not None:
-            return peppy.Project(csv_file.file)
+            return csv_file
         else:
             raise HTTPException(
                 status_code=400, detail="No .yaml or .csv file was found in the upload."
