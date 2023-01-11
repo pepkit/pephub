@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from ._version import __version__ as server_v
-from .const import LOG_FORMAT, PKG_NAME, TAGS_METADATA
+from .const import PKG_NAME, TAGS_METADATA
 from .helpers import build_parser
 from .routers.api.v1.base import api as api_base
 from .routers.api.v1.namespace import namespace as api_namespace
@@ -24,7 +24,7 @@ coloredlogs.install(
     logger=_LOGGER_PEPDBAGENT,
     level=logging.INFO,
     datefmt="%b %d %Y %H:%M:%S",
-    fmt=LOG_FORMAT,
+    fmt="[%(levelname)s] [%(asctime)s] [PEPDBAGENT] %(message)s",
 )
 
 _LOGGER_PEPPY = logging.getLogger("peppy")
@@ -32,7 +32,7 @@ coloredlogs.install(
     logger=_LOGGER_PEPPY,
     level=logging.ERROR,
     datefmt="%b %d %Y %H:%M:%S",
-    fmt=LOG_FORMAT,
+    fmt="[%(levelname)s] [%(asctime)s] [PEPPY] %(message)s",
 )
 
 _LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
@@ -40,7 +40,7 @@ coloredlogs.install(
     logger=_LOGGER_PEPHUB,
     level=logging.INFO,
     datefmt="%b %d %Y %H:%M:%S",
-    fmt=LOG_FORMAT,
+    fmt="[%(levelname)s] [%(asctime)s] [PEPHUB] %(message)s",
 )
 
 
