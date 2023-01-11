@@ -1,4 +1,5 @@
 import eido
+import peppy
 import yaml
 import pandas as pd
 from io import StringIO
@@ -7,7 +8,8 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pepdbagent.models import Annotation
 from peppy import __version__ as peppy_version
-from peppy import Sample, Project
+from peppy import Project
+from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY
 from platform import python_version
 
 from ...._version import __version__ as pephub_version
@@ -75,31 +77,31 @@ async def update_a_pep(
     """
     Update a PEP from a certain namespace
     """
-    # pull current project from database
-    peppy_project = db.get_project(namespace, project, tag=tag)
     raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
+    new_raw_project = raw_peppy_project.copy()
 
-    # update sample table
     if updated_project.sample_table_csv is not None:
-        # create pandas df from csv in memory
         sample_table_csv = StringIO(updated_project.sample_table_csv)
         sample_table_df = pd.read_csv(sample_table_csv)
-
-        # drop any empty columns
         sample_table_df = sample_table_df.dropna(axis=1, how="all")
+        sample_table_df_json = sample_table_df.to_dict()
 
-        # create a new project from the sample table
-        # populate with current project data
-        new_proj_from_new_samples = Project().from_pandas(sample_table_df)
-        new_proj_from_new_samples.name = project
-        new_proj_from_new_samples.description = peppy_project.description
+        new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
 
+    if updated_project.project_config_yaml is not None:
+
+        yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+        new_raw_project[CONFIG_KEY] = yaml_dict
+
+    if any([updated_project.project_config_yaml is not None,
+            updated_project.sample_table_csv is not None]):
+        new_project = Project().from_dict(new_raw_project)
         # validate each sample in the table according to the project
-        for s in new_proj_from_new_samples.samples:
+        for s in new_project.samples:
             sample_name: str = s.sample_name
             try:
                 eido.validate_sample(
-                    new_proj_from_new_samples,
+                    new_project,
                     sample_name,
                     "http://schema.databio.org/pep/2.0.0.yaml",  # just use the base PEP schema for now
                 )
@@ -112,65 +114,41 @@ async def update_a_pep(
         # if we get through all samples, then update project in the database
         db.update_item(
             {
-                "project": new_proj_from_new_samples,
+                "project": new_project,
             },
             namespace,
             project,
             tag,
         )
-
-    # update project config
-    if updated_project.project_config_yaml is not None:
-        # get project_dict from yaml
-        yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
-        new_raw_project_from_yaml = raw_peppy_project.copy()
-        new_raw_project_from_yaml["_config"] = yaml_dict
-        new_raw_project_from_yaml["description"] = peppy_project.description
-        new_raw_project_from_yaml["name"] = project
-        new_project = Project().from_dict(new_raw_project_from_yaml)
-
-        db.update_item(
-            {
-                "project": new_project,
-            },
-            namespace,
-            project,
-            tag=tag,
-        )
-    
     # update "meta meta data"
-    for k, v in updated_project.dict().items():
+    for k, v in updated_project.dict(exclude_unset=True).items():
         # skip the sample table and project config
         if k not in ["project_config_yaml", "sample_table_csv"]:
-            # this is here just to make it work...
-            if k == "is_private":
-                k = "private"
-            if v is not None:
-                if hasattr(peppy_project, k):
-                    setattr(peppy_project, k, v)
-                    db.update_item(
-                        {
-                            "project": peppy_project,
-                        },
-                        namespace,
-                        project,
-                        tag=tag,
-                    )
-                elif k in VALID_UPDATE_KEYS:
-                    db.update_item(
-                        {
-                            "project": peppy_project,
-                            k: v,
-                        },
-                        namespace,
-                        project,
-                        tag=tag,
-                    )
-                else:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Invalid update key: {k}",
-                    )
+            if k in new_raw_project:
+                new_raw_project[k] = v
+                db.update_item(
+                    {
+                        "project": peppy.Project().from_dict(new_raw_project),
+                    },
+                    namespace,
+                    project,
+                    tag=tag,
+                )
+            elif k in VALID_UPDATE_KEYS:
+                db.update_item(
+                    {
+                        "project": peppy.Project().from_dict(new_raw_project),
+                        k: v,
+                    },
+                    namespace,
+                    project,
+                    tag=tag,
+                )
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid update key: {k}",
+                )
 
     return JSONResponse(
         content={
