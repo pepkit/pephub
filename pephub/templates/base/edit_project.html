@@ -116,7 +116,6 @@
     </div>
   </div>
 </div>
-
 {% endblock %}
 
 {% block tail %}
@@ -126,11 +125,6 @@
 
 <!-- meta meta data helpers -->
 <script>
-  // store the original values of the project
-  var originalIsPrivateValue = document.getElementById("is-private-toggle").value
-  var originalDesciriptionValue = document.getElementById("project-description").value
-  var originalProjectNameValue = document.getElementById("project-name").value
-
   // attach event listener to meta meta data form
   const form = document.getElementById("metadata-form")
   form.addEventListener("change", detectMetadataChanges)
@@ -156,225 +150,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/basic-languages/yaml/yaml.js"></script>
 
-<!-- hands on table helpers -->
 <script>
-  var handsOnTable;
-  var editor;
-
-  // remove trailing commas
-  const removeTrailingCommas = (s) => {
-    while (s[s.length - 1] === ",") {
-      s = s.slice(0, -1)
-    }
-    return s
-  }
-
-  // detect any changes to the sample table
-  const detectSampleTableChanges = () => {
-
-    var currentSampleTableCsv = handsOnTable.getData().map(row => row.join(",")).join("\n")
-
-    // remove trailing commas
-    currentSampleTableCsv = removeTrailingCommas(currentSampleTableCsv)
-    
-    // detect any changes
-    if (currentSampleTableCsv !== originalSampleTableCsv) {
-      document.getElementById("sample-table-save-btn").disabled = false
-    } else {
-      document.getElementById("sample-table-save-btn").disabled = true
-    }
-  }
   
-  const loadHandsOnTable = (data) => {
-
-    if (handsOnTable) return handsOnTable
-
-    const csvEditorDiv = document.querySelector('#csv-editor-div');
-    handsOnTable = new Handsontable(csvEditorDiv, {
-      data: Papa.parse(`{{ sample_table_csv}}`).data, // using serverside csv to initialize
-      rowHeaders: true,
-      colHeaders: true,
-      stretchH: 'all',
-      stretchW: 'all',
-      height: 'auto',
-      licenseKey: 'non-commercial-and-evaluation' // for non-commercial use only
-    });
-    handsOnTable.addHook("afterChange", detectSampleTableChanges)
-    return handsOnTable
-  }
-
   loadHandsOnTable()
-
-  const getSampleTableFromDatabase = (namespace, project, tag) => {
-    fetch(`/api/v1/projects/${namespace}/${project}/samples?format=csv&tag=${tag}`)
-    .then(response =>  response.text())
-    .then(data => {
-      if (!handsOnTable) {
-        handsOnTable = loadHandsOnTable()
-      }
-      handsOnTable.loadData(Papa.parse(data).data)
-    })
-  }
-
-  const addRow = () => {
-    handsOnTable.alter("insert_row_above", handsOnTable.countRows(), 1)
-  }
-  const addCol = () => { 
-    handsOnTable.alter("insert_col_start", handsOnTable.countCols(), 1)
-  }
-  const removeRow = () => {
-    handsOnTable.alter("remove_row", handsOnTable.countRows(), 1)
-  }
-  const removeCol = () => {
-    handsOnTable.alter("remove_col", handsOnTable.countCols(), 1)
-  }
-
-  // submit edited sample table to the server/database
-  const handleSampleTableEditorSubmit = () => {
-
-    // update save btn for UX and feedback
-    const sampleTableSaveBtn = document.getElementById("sample-table-save-btn")
-    const sampleTableSaveBtnText = sampleTableSaveBtn.innerText = "Saving..."
-    sampleTableSaveBtn.disabled = true
-
-    // fetch current state of the table
-    let csv = handsOnTable.getData().map(row => row.join(",")).join("\n")
-    csv = removeTrailingCommas(csv)
-
-    // send PATCH request to server
-    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "sample_table_csv": csv
-      }, null, 2)
-    })
-    .then((res) => {
-      // chech k ok response
-      if (!res.ok) {
-        throw new Error(res.statusText)
-      } else {
-        createToast({
-          title: "Success",
-          body: "Sample table saved successfully",
-          type: "success",
-        })
-      }
-    })
-    .catch((error) => {
-      createToast({
-        type: "danger",
-        title: "Something went wrong...",
-        // gracefully display any errors
-        body: error.message || error,
-      })
-    })
-    .finally(() => {
-      // reset button state
-      sampleTableSaveBtn.innerText = "Save"
-    })
-  }
-
-</script>
-
-<!-- monaco editor helpers -->
-<script>
-
-  var originalProjectConfigYaml = `{{ project_config_yaml }}` // needs to be stored as literal to preserve new lines
-
-  const loadMonaco = () => {
-    if (editor) return editor
-    
-    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } });
-    require(['vs/editor/editor.main'], () => {
-      editor = monaco.editor.create(document.getElementById('yaml-editor-div'), {
-        value: `{{ project_config_yaml }}`, // initialize with serverside yaml
-        language: 'yaml',
-        tabSize: 2,
-        insertSpaces: true,
-        automaticLayout: true
-      });
-    });
-    return editor
-  }
-
-  const loadYAMLEditor = () => {
-    editor = loadMonaco()
-    return editor
-  }
-
-  editor = loadYAMLEditor()
-
-  // detect any changes to the yaml editor
-  const detectYamlChanges = () => {
-    if (editor.getValue() !== originalProjectConfigYaml) {
-      document.getElementById("yaml-save-btn").disabled = false
-    } else {
-      document.getElementById("yaml-save-btn").disabled = true
-    }
-  }
-
-  // TODO: CHANGE THIS!!!
-  // supply detector to a hook, it takes a second for it to load
-  // so I just run a setTimeout THIS IS BAD but easy
-  setTimeout(() => editor.onKeyUp(detectYamlChanges), 1000)
-
-  const getProjectConfigYamlFromDatabase = () => {
-    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}/convert?filter=yaml")
-    .then(response =>  response.text())
-    .then(data => {
-      if (!editor) {
-        editor = loadYAMLEditor()
-      }
-      editor.setValue(data)
-    })
-  }
+  loadYAMLEditor()
   
-  // submit edited yaml to the server/database
-  const handleProjectConfigYamlSubmit = () => {
-    // update save button for UX and feedback
-    const yamlSaveBtn = document.getElementById("yaml-save-btn")
-    const yamlSaveBtnText = yamlSaveBtn.innerText = "Saving..."
-    yamlSaveBtn.disabled = true
+  // get project config yaml from database
+  getProjectConfigYamlFromDatabase()
 
-    // fetch current state of the editor
-    const yaml = editor.getValue()
+  // get sample table from database
+  getSampleTableFromDatabase()
 
-    // send PATCH request to the server/database
-    fetch("/api/v1/projects/{{namespace}}/{{ project.name }}", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "project_config_yaml": yaml
-      }, null, 2)
-    })
-    .then(() => {
-      originalProjectConfigYaml = yaml
-      createToast({
-        title: "Success",
-        body: "Project config saved successfully",
-        type: "success",
-      })
-    })
-    .catch((error) => {
-      createToast({
-        type: "danger",
-        title: "Something went wrong...",
-        // gracefully display any errors
-        body: error.message || error,
-      })
-    })
-    .finally(() => {
-      // reset button state
-      yamlSaveBtn.innerText = "Save"
-    })
-  }
-
+  // get meta meta data from database
+  getMetaMetaDataFromDatabase()
 </script>
-
-
 {% endblock %}

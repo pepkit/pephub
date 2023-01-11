@@ -16,6 +16,8 @@ DEFAULT_QDRANT_HOST = "localhost"
 DEFAULT_QDRANT_PORT = 6333
 DEFAULT_QDRANT_COLLECTION_NAME = "projects"
 
+DEFAULT_HF_MODEL = "sentence-transformers/all-MiniLM-L12-v2"
+
 EIDO_TEMPLATES_DIRNAME = "templates/eido"
 EIDO_TEMPLATES_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), EIDO_TEMPLATES_DIRNAME

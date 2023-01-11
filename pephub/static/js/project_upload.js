@@ -20,7 +20,6 @@ function clickFileInput () {
 
 function clearFileInput () {
     document.getElementById("files").value = "";
-
     onFileInputChange();
 }
 
@@ -89,5 +88,9 @@ function removeFileFromList (i) {
 // reset form 
 function resetForm () {
     document.getElementById("new-project-form").reset();
+
+    // reset form submit button
+    document.getElementById("new-project-submit-btn").disabled=true;
+
     clearFileInput();
 }
