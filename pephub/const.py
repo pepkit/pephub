@@ -3,7 +3,7 @@ import os
 PKG_NAME = "pephub"
 DATA_REPO = "https://github.com/pepkit/data.pephub.git"
 
-LOG_FORMAT = "%(levelname)s in %(funcName)s: %(message)s"
+LOG_FORMAT = "[%(levelname)s] [%(asctime)s] [PEPDBAGENT] %(message)s"
 
 DEFAULT_PORT = "80"
 DEFAULT_POSTGRES_HOST = "0.0.0.0"

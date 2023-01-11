@@ -1,7 +1,7 @@
+import logging
 import sys
-import logmuse
 import uvicorn
-import os
+import coloredlogs
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +18,31 @@ from .routers.api.v1.search import search as api_search
 from .routers.auth.base import auth as auth_router
 from .routers.views.base import views as views_base
 from .const import STATICS_PATH, EIDO_PATH
+
+_LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
+coloredlogs.install(
+    logger=_LOGGER_PEPDBAGENT,
+    level=logging.INFO,
+    datefmt="%b %d %Y %H:%M:%S",
+    fmt=LOG_FORMAT,
+)
+
+_LOGGER_PEPPY = logging.getLogger("peppy")
+coloredlogs.install(
+    logger=_LOGGER_PEPPY,
+    level=logging.ERROR,
+    datefmt="%b %d %Y %H:%M:%S",
+    fmt=LOG_FORMAT,
+)
+
+_LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
+coloredlogs.install(
+    logger=_LOGGER_PEPHUB,
+    level=logging.INFO,
+    datefmt="%b %d %Y %H:%M:%S",
+    fmt=LOG_FORMAT,
+)
+
 
 # build server
 app = FastAPI(
@@ -54,7 +79,6 @@ app.mount("/static", StaticFiles(directory=STATICS_PATH), name="root_static")
 # file. These can only be added on the main app, not on a router
 app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
 
-
 def main():
     # set up the logger
     global _LOGGER
@@ -65,12 +89,6 @@ def main():
         parser.print_help()
         print("No subcommand given")
         sys.exit(1)
-    logger_args = (
-        dict(name=PKG_NAME, fmt=LOG_FORMAT, level=5)
-        if args.debug
-        else dict(name=PKG_NAME, fmt=LOG_FORMAT)
-    )
-    _LOGGER = logmuse.setup_logger(**logger_args)
 
     if args.command == "serve":
         uvicorn.run(
