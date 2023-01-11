@@ -188,7 +188,7 @@ async def project_view(
             "session_info": session_info,
             "is_private": project.is_private,
             "description": project_annoatation.description,
-            "last_update": project_annoatation.last_update,
+            "last_update": project_annoatation.last_update_date,
         },
     )
 
@@ -244,8 +244,8 @@ async def project_edit(
             "is_editing": edit,
             "session_info": session_info,
             "is_private": project_annoatation.is_private,
-            "description": project_annoatation.description,
-            "last_update": project_annoatation.last_update,
+            "description": project_annoatation.description or "",
+            "last_update": project_annoatation.last_update_date,
             "sample_table_csv": project_csv,
             "project_config_yaml": project_yaml,
         },

@@ -174,6 +174,7 @@ def build_authorization_url(
         auth_url += f"&{key}={value}"
     return auth_url
 
+
 def find_yaml_file_in_file_list(files: List[UploadFile]) -> Union[UploadFile, None]:
     """
     Given a list of files uploaded by a user, find the
@@ -184,6 +185,7 @@ def find_yaml_file_in_file_list(files: List[UploadFile]) -> Union[UploadFile, No
         if file.filename.endswith(".yaml"):
             return file
     return None
+
 
 def find_csv_file_in_file_list(files: List[UploadFile]) -> Union[UploadFile, None]:
     """
@@ -196,7 +198,8 @@ def find_csv_file_in_file_list(files: List[UploadFile]) -> Union[UploadFile, Non
             return file
     return None
 
-def parse_user_file_upload(files: List[UploadFile] ) -> UploadFile:
+
+def parse_user_file_upload(files: List[UploadFile]) -> UploadFile:
     """
     Parse through files upload by a user and return the UploadFile object
     that should be used to instantiate a peppy.Project instance.
@@ -222,7 +225,10 @@ def parse_user_file_upload(files: List[UploadFile] ) -> UploadFile:
                 status_code=400, detail="No .yaml or .csv file was found in the upload."
             )
 
-def split_upload_files_on_init_file(all_files: List[UploadFile], init_file: UploadFile) -> Tuple[UploadFile, List[UploadFile]]:
+
+def split_upload_files_on_init_file(
+    all_files: List[UploadFile], init_file: UploadFile
+) -> Tuple[UploadFile, List[UploadFile]]:
     """
     Given a list of files uploaded by a user and the file that should be used
     to init a peppy project, split the files into two objects, one being

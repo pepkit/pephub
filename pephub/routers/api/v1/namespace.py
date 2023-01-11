@@ -95,7 +95,7 @@ async def submit_pep(
 ):
     if session_info is None:
         raise HTTPException(403, "Please log in to submit a PEP.")
-    
+
     init_file = parse_user_file_upload(files)
     init_file, other_files = split_upload_files_on_init_file(files, init_file)
 

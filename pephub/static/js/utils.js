@@ -42,6 +42,6 @@ const createToast = (params) => {
       setTimeout(() => {
         toastContainer.removeChild(toast);
       }, 500);
-    }, 3000);
+    }, params.timeout || 3000);
 }
 

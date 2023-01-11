@@ -49,7 +49,7 @@ TAGS_METADATA = [
 
 SAMPLE_CONVERSION_FUNCTIONS = {
     "json": lambda x: x.to_json(),
-    "csv": lambda x: x.to_csv(),
+    "csv": lambda x: x.to_csv(index=False),
     "latex": lambda x: x.to_latex(),
     "txt": lambda x: x.to_string(),
 }
@@ -62,5 +62,7 @@ DEFAULT_HF_MODEL = "sentence-transformers/all-MiniLM-L12-v2"
 VALID_UPDATE_KEYS = [
     "name",
     "is_private",
-    "tag"
+    "tag",
+    "private",
+    "description",
 ]

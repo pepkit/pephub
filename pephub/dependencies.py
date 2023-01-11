@@ -21,7 +21,7 @@ from .const import (
     DEFAULT_POSTGRES_DB,
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
-    DEFAULT_HF_MODEL
+    DEFAULT_HF_MODEL,
 )
 from datetime import datetime, timedelta
 import pydantic

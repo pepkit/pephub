@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pepdbagent.models import Annotation
 from peppy import __version__ as peppy_version
 from peppy import Project
-from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY
+from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
 from platform import python_version
 
 from ...._version import __version__ as pephub_version
@@ -38,7 +38,7 @@ project = APIRouter(
 @project.get("/", summary="Fetch a PEP")
 async def get_a_pep(
     proj: peppy.Project = Depends(get_project),
-    proj_annotation: Annotation = Depends(get_project_annotation)
+    proj_annotation: Annotation = Depends(get_project_annotation),
 ):
     """
     Fetch a PEP from a certain namespace
@@ -51,16 +51,12 @@ async def get_a_pep(
     # is representative of all samples attributes
     # -- is this the case?
     sample_attributes = proj._samples[0]._attributes
-    try:
-        pep_version = proj.pep_version
-    except Exception:
-        pep_version = "2.1.0"
     return dict(
         **proj.to_dict(),
         **proj_annotation.dict(),
-        samples = samples,
-        sample_table_indx = sample_table_indx,
-        sample_attributes = sample_attributes,
+        samples=samples,
+        sample_table_indx=sample_table_indx,
+        sample_attributes=sample_attributes,
     )
 
 
@@ -77,9 +73,11 @@ async def update_a_pep(
     """
     Update a PEP from a certain namespace
     """
+    current_project = db.get_project(namespace, project, tag=tag)
     raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
     new_raw_project = raw_peppy_project.copy()
 
+    # sample table update
     if updated_project.sample_table_csv is not None:
         sample_table_csv = StringIO(updated_project.sample_table_csv)
         sample_table_df = pd.read_csv(sample_table_csv)
@@ -87,15 +85,27 @@ async def update_a_pep(
         sample_table_df_json = sample_table_df.to_dict()
 
         new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
+        new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
 
+    # project config update
     if updated_project.project_config_yaml is not None:
-
         yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
         new_raw_project[CONFIG_KEY] = yaml_dict
 
-    if any([updated_project.project_config_yaml is not None,
-            updated_project.sample_table_csv is not None]):
-        new_project = Project().from_dict(new_raw_project)
+    # run the validation if either the sample table or project config is updated
+    if any(
+        [
+            updated_project.project_config_yaml is not None,
+            updated_project.sample_table_csv is not None,
+        ]
+    ):  
+        try:
+            new_project = Project().from_dict(new_raw_project)
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not create PEP from provided yaml. Error: {e}",
+            )
         # validate each sample in the table according to the project
         for s in new_project.samples:
             sample_name: str = s.sample_name
@@ -120,39 +130,51 @@ async def update_a_pep(
             project,
             tag,
         )
+
+        # grab latest project and return to user
+        raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
+        return {
+            "project": raw_peppy_project,
+            "project_annotation": db.get_project_annotation(namespace, project, tag=tag),
+            "message": "Project updated successfully"
+        }
+
     # update "meta meta data"
+    update_dict = {} # dict used to pass to the `db.update_item` function
     for k, v in updated_project.dict(exclude_unset=True).items():
-        # skip the sample table and project config
-        if k not in ["project_config_yaml", "sample_table_csv"]:
-            if k in new_raw_project:
-                new_raw_project[k] = v
-                db.update_item(
-                    {
-                        "project": peppy.Project().from_dict(new_raw_project),
-                    },
-                    namespace,
-                    project,
-                    tag=tag,
-                )
-            elif k in VALID_UPDATE_KEYS:
-                db.update_item(
-                    {
-                        "project": peppy.Project().from_dict(new_raw_project),
-                        k: v,
-                    },
-                    namespace,
-                    project,
-                    tag=tag,
-                )
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid update key: {k}",
-                )
+        # is the value an attribute of the peppy project?
+        if k in new_raw_project:
+            new_raw_project[k] = v
+        # otherwise is it a valid update key?
+        elif k in VALID_UPDATE_KEYS:
+            update_dict[k] = v
+        else:
+            print(f"Invalid update key: {k}")
+            continue
+            # raising HTTPException causes problems downstream with web apps.
+            # raise HTTPException(
+            #     status_code=400,
+            #     detail=f"Invalid update key: {k}",
+            # )
+    
+    # update the project in the database
+    db.update_item(
+        dict(
+            project= Project().from_dict(new_raw_project),
+            **update_dict
+        ),
+        namespace,
+        project,
+        tag
+    )
+
+    # fetch latest project and return to user
+    raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
 
     return JSONResponse(
         content={
             "message": "PEP updated",
+            "project": raw_peppy_project,
             "registry": f"{namespace}/{project}:{tag}",
             "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
             "project": updated_project.dict(),
@@ -204,7 +226,7 @@ async def get_pep_samples(
     if format is not None:
         conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
         if conversion_func is not None:
-            return PlainTextResponse(content=conversion_func(proj.sample_table))
+            return PlainTextResponse(content=conversion_func(proj[SAMPLE_DF_KEY]))
         else:
             raise HTTPException(
                 status_code=400,
