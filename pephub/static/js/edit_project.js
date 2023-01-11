@@ -202,6 +202,8 @@ const removeCol = () => {
   // submit edited sample table to the server/database
   const handleSampleTableEditorSubmit = async () => {
 
+    // get the latest values
+    const tag = document.getElementById("project-tag").placeholder
     const namespace = document.getElementById("namespace-store").value
     const projectName = document.getElementById("project-name").placeholder
 
@@ -215,7 +217,7 @@ const removeCol = () => {
     csv = removeTrailingCommas(csv)
 
     // send PATCH request to server
-    fetch(`/api/v1/projects/${namespace}/${projectName}`, {
+    fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
