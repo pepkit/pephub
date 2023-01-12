@@ -5,12 +5,16 @@
     </h4>
   </div>
 {% else %}
+<div>
+  Found {{namespace_hits|length + results|length}} results for "{{query}}"
+</div>
   {% if namespace_hits|length > 0 %}
     <!-- namespace search results -->
-    <h2 class="text-start w-100 fw-bold">Namespaces</h2>
+    <h3 class="text-start w-100 fw-bold">Namespaces</h3>
     {% for namespace in namespace_hits %}
       <div class="w-100 border-top border-secondary p-2">
-        <a class="fw-bold text-start fs-4" href="/{{namespace}}">
+        <i class="bi bi-person-circle me-2 text-secondary"></i>
+        <a class="fw-bold text-start fs-5" href="/{{namespace}}">
           {{namespace}}
         </a>
       </div>
@@ -19,23 +23,24 @@
   {% if results|length > 0 %}
     <div class="my-2 border-bottom border-secondary"></div>
     <!-- Project search results -->
-    <h2 class="text-start w-100 fw-bold">Projects</h2>
+    <h3 class="text-start w-100 fw-bold">Projects</h3>
     {% for result in results %}
       <div id="project-result-{{result['payload']['registry']}}" class="w-100 border-top border-secondary py-3 mb-2">
           <div class="d-flex flex-row align-items-start justify-content-between">
               <div class="d-flex flex-row align-items-center">
-                <a class="fw-bold fs-4" href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
+                <i class="bi bi-table me-2 text-secondary"></i>
+                <a class="fw-bold fs-5" href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
                   {{ result.payload.namespace }}/{{ result.payload.name }}
                 </a>
-                <span class="ms-2 badge rounded-pill bg-dark fs-6">{{result.payload.tag}}</span>
+                <span class="ms-2 badge rounded-pill bg-dark">{{result.payload.tag}}</span>
               </div>
-              <div>
+              <!-- <div>
                 <a href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
                   <button class="btn btn-sm btn-outline-primary">
                       View
                   </button>
                 </a>
-              </div>
+              </div> -->
             </div>
             <div>
               <p class="mt-2 mb-0 text-truncate text-secondary">

@@ -13,8 +13,11 @@ DEFAULT_POSTGRES_DB = "pephub"
 
 DEFAULT_QDRANT_HOST = "localhost"
 DEFAULT_QDRANT_PORT = 6333
-DEFAULT_QDRANT_COLLECTION_NAME = "projects"
+DEFAULT_QDRANT_COLLECTION_NAME = "pephub"
 
+# https://arxiv.org/abs/2210.07316
+# figure 4
+# great speed to accuracy tradeoff
 DEFAULT_HF_MODEL = "sentence-transformers/all-MiniLM-L12-v2"
 
 EIDO_TEMPLATES_DIRNAME = "templates/eido"
@@ -52,11 +55,6 @@ SAMPLE_CONVERSION_FUNCTIONS = {
     "latex": lambda x: x.to_latex(),
     "txt": lambda x: x.to_string(),
 }
-
-# https://arxiv.org/abs/2210.07316
-# figure 4
-# great speed to accuracy tradeoff
-DEFAULT_HF_MODEL = "sentence-transformers/all-MiniLM-L12-v2"
 
 VALID_UPDATE_KEYS = [
     "name",

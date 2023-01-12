@@ -15,6 +15,13 @@ const runSearchQuery = (query=undefined, pageLoad=false) => {
         const searchResultDiv = document.getElementById('search-results');
         searchResultDiv.innerHTML = nunjucks.render('search_spinner.html', {});
     }
+
+    // // set query param in url
+    // const urlParams = new URLSearchParams(window.location.search);
+    // urlParams.set('q', searchQuery);
+
+    // // update url
+    // window.location.search = urlParams
     
 
     // run the query and populate using nunjucks.

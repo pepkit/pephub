@@ -96,4 +96,4 @@ Coming soon...
 ### `HF_MODEL`
 - Description: HuggingFace model name
 - Required: No
-- Default Value: "sentence-transformers/all-MiniLM12-v2"
+- Default Value: "sentence-transformers/all-MiniLM-L12-v2"
