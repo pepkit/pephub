@@ -1,5 +1,8 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8
-LABEL authors="Nathan LeRoy, Michal Stolarczyk, Nathan Sheffield"
+FROM tiangolo/uvicorn-gunicorn:python3.9-slim
+LABEL authors="Nathan LeRoy, Nathan Sheffield"
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends git
 
 EXPOSE 5432
 

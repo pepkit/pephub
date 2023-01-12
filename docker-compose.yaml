@@ -5,16 +5,12 @@ services:
     build:
       context: ./postgres
       dockerfile: Dockerfile
-    volumes:
-      - ./postgres/volumes/:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=pep-base-sql
     ports:
       - 5432:5432
     networks:
       - pephub
+    env_file:
+      - .env
   server:
     build:
       context: ./
@@ -22,14 +18,16 @@ services:
     volumes:
       - ./pephub/:/app/pephub/
     command: uvicorn pephub.main:app --reload --workers 4 --host 0.0.0.0 --port 8000
-    env_file:
-      - ./.env.example
     ports:
       - 8000:8000
     depends_on:
       - db
     networks:
       - pephub
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_HOST=db
 
 volumes:
   postgres-data:
