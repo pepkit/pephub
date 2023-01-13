@@ -35,7 +35,7 @@ flowchart LR
     E -- Yes--> G[201 Success]
     D -- Organization --> H{User belongs to org?}
     H -- No --> I[403 Forbidden]
-    H -- Yes --> J[201 uccess]
+    H -- Yes --> J[201 Success]
     
 ```
 
