@@ -12,7 +12,7 @@ Anyone can **read** all PEP's that are not marked as **private** without any aut
 flowchart LR
     A[GET project] --> B{Project is Private?}
     B -- No --> C[Return PEP]
-    B -- Yes --> D{User is authenticated and owns PEP?}
+    B -- Yes --> D{User is authenticated <br/> and owns PEP?}
     D -- No --> E[404 Not Found]
     D -- Yes --> F[Return PEP]
 ```
@@ -45,11 +45,20 @@ If a user wishes to **edit** an existing PEP, they must authenticate and satisfy
 ```mermaid
 flowchart LR
     A[PATCH Project] --> B{Project is private?}
-    B -- Yes --> C[404 Not Found]
-    C -- No --> D{Uer is authenticated?}
-    D -- No --> E[401 Unauthorized]
-    D -- Yes --> F{User owns PEP?}
-    F -- Yes --> G[201 success]
+    B -- Yes --> C{What is namespace type?}
+    C -- User --> D{User == namespace?}
+    D -- No --> E[404 Not Found]
+    D -- Yes --> F[204 Success]
+    C -- Organization --> G{User belongs to org?}
+    G -- No --> H[404 Not Found]
+    G -- Yes --> I[204 Success]
+    B -- No --> J{What is namespace type?}
+    J -- User --> K{User == Namespace?}
+    K -- No --> L[403 Aunauthorized]
+    K -- Yes --> M[204 Success]
+    J -- Organization --> N{User belongs to org?}
+    N -- No --> O[403 Unauthorized]
+    N -- Yes --> P[204 Success]
 ```
 
 
