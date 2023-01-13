@@ -104,8 +104,20 @@
           <div class="modal-body">
             <div>
               <form id="new-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="border-0 form-control" method="post" enctype="multipart/form-data">
+                <div class="mb-3 form-check form-switch">
+                  <input value="true" name="is_private" class="form-check-input" type="checkbox" role="switch" id="is-private-toggle"  />
+                  <label class="form-check-label" for="flexSwitchCheckDefault">
+                    <i class="bi bi-lock"></i>
+                    Private
+                  </label>
+                </div>
                 <span class="fs-4 d-flex align-items-center">
-                  <span class="mb-1">{{namespace.namespace}}</span>
+                  <select name="namespace" id="namespace-select" class="form-select w-75" aria-label="Namespace selection" class="mb-1">
+                    <option value="{{namespace.namespace}}">{{namespace.namespace}}</option>
+                    {% for org in orgs %}
+                      <option value="{{org}}">{{org}}</option>
+                    {% endfor %}
+                  </select>
                   <span class="mx-1 mb-1">/</span>
                   <input id="project-name" name="project_name" type="text" class="form-control" placeholder="name" />
                   <span class="mx-1 mb-1">:</span>

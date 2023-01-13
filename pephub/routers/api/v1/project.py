@@ -31,7 +31,7 @@ ALL_VERSIONS = {
 }
 
 project = APIRouter(
-    prefix="/api/v1/projects/{namespace}/{project}", tags=["api", "project", "v1"]
+    prefix="/api/v1/projects/{namespace}/{project}", tags=["api", "project", "v1"],
 )
 
 

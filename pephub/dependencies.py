@@ -166,13 +166,10 @@ def get_user_from_session_info(
 def get_project(
     namespace: str,
     project: str,
-    tag: str = None,
+    tag: Optional[str] = DEFAULT_TAG,
     db: Connection = Depends(get_db),
-    user=Depends(get_user_from_session_info),
-    organizations=Depends(get_organizations_from_session_info),
 ):
     if proj := db.get_project(namespace, project, tag):
-        _check_user_access(user, organizations, namespace, proj)
         yield proj
     else:
         raise HTTPException(
@@ -184,7 +181,7 @@ def get_project(
 def get_project_annotation(
     namespace: str,
     project: str,
-    tag: str = None,
+    tag: Optional[str] = DEFAULT_TAG,
     db: Connection = Depends(get_db),
 ):
     if project_annotation := db.get_project_annotation(namespace, project, tag):
@@ -199,23 +196,8 @@ def get_project_annotation(
 def get_namespaces(
     db: Connection = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-    organizations: List[str] = Depends(get_organizations_from_session_info),
 ) -> List[NamespaceModel]:
     yield db.get_namespaces_info_by_list(user=user)
-
-
-def _check_user_access(
-    user: str, organizations: List, namespace: str, project: peppy.Project
-):
-    if project.is_private:
-        if user == namespace or namespace in organizations:
-            return project
-        else:
-            raise HTTPException(
-                403, f"The user does not have permission to view or pull this project."
-            )
-    else:
-        return project
 
 
 def verify_user_can_write_namespace(
@@ -243,7 +225,7 @@ def verify_user_can_write_namespace(
 def verify_user_can_read_project(
     project: str,
     namespace: str,
-    tag: str,
+    tag: Optional[str] = DEFAULT_TAG,
     project_annotation: Annotation = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
@@ -254,10 +236,14 @@ def verify_user_can_read_project(
     See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#reading-peps
     """
     if project_annotation.is_private:
-        if any(
+        if session_info is None:
+            # raise 404 since we don't want to reveal that the project exists
+            raise HTTPException(
+                404, f"Project, '{namespace}/{project}:{tag}', not found."
+            )
+        elif any(
             [
-                session_info is None,  # user not logged in
-                session_info["login"] != namespace
+                session_info.get("login") != namespace
                 and namespace
                 not in orgs,  # user doesnt own namespace or is not member of organization
             ]
@@ -271,7 +257,7 @@ def verify_user_can_read_project(
 def verify_user_can_write_project(
     project: str,
     namespace: str,
-    tag: str,
+    tag: Optional[str] = DEFAULT_TAG,
     project_annotation: Annotation = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
@@ -282,9 +268,12 @@ def verify_user_can_write_project(
     See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#writing-peps
     """
     if project_annotation.is_private:
-        if any(
-            [
-                session_info is None,  # user not logged in
+        if session_info is None:  # user not logged in
+            # raise 404 since we don't want to reveal that the project exists
+            raise HTTPException(
+                404, f"Project, '{namespace}/{project}:{tag}', not found."
+            )
+        elif any([            
                 session_info["login"] != namespace
                 and namespace
                 not in orgs,  # user doesnt own namespace or is not member of organization

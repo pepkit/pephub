@@ -68,7 +68,7 @@ async def search_view(
     )
 
 
-@views.get("/submit")
+@views.get("/submit", dependencies=[Depends(verify_user_can_write_namespace)])
 async def submit_pep_form(request: Request, session_info=Depends(read_session_info)):
     if session_info is not None:
         return templates.TemplateResponse(
@@ -151,27 +151,20 @@ async def namespace_view(
     "/{namespace}/{project}",
     summary="View a visual summary of a particular project.",
     response_class=HTMLResponse,
+    dependencies=[Depends(verify_user_can_read_project)]
 )
 async def project_view(
     request: Request,
     namespace: str,
-    tag: str = "default",
+    tag: Optional[str] = DEFAULT_TAG,
     project: peppy.Project = Depends(get_project),
     project_annoatation: dict = Depends(get_project_annotation),
     session_info: dict = Depends(read_session_info),
-    orgs: List[str] = Depends(get_organizations_from_session_info),
     edit: bool = False,
 ):
     """
     Returns HTML response with a visual summary of the project.
     """
-    if project_annoatation.get("private"):
-        # Return 404's for unauthorized access - dont expost that project even exists
-        if session_info is None:
-            raise HTTPException(status_code=404, detail="Project not found")
-        if session_info["login"] != namespace and namespace not in orgs:
-            raise HTTPException(status_code=404, detail="Project not found")
-
     samples = [s.to_dict() for s in project.samples]
     try:
         pep_version = project.pep_version
@@ -207,11 +200,12 @@ async def project_view(
     "/{namespace}/{project}/edit",
     summary="Enter the project editor page.",
     response_class=HTMLResponse,
+    dependencies=[Depends(verify_user_can_write_project)]
 )
 async def project_edit(
     request: Request,
     namespace: str,
-    tag: str = "default",
+    tag: Optional[str] = DEFAULT_TAG,
     project: peppy.Project = Depends(get_project),
     project_annoatation: dict = Depends(get_project_annotation),
     session_info: dict = Depends(read_session_info),
@@ -220,12 +214,6 @@ async def project_edit(
     """
     Returns page to let you edit a project.
     """
-
-    if session_info is None or session_info["login"] != namespace:
-        raise HTTPException(
-            status_code=403, detail="You are not allowed to edit this project."
-        )
-
     samples = [s.to_dict() for s in project.samples]
     raw_prj = project.to_dict(extended=True)
     project_pd = pd.DataFrame(raw_prj[SAMPLE_RAW_DICT_KEY])

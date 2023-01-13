@@ -59,8 +59,6 @@ const handleMetaMetaDataSubmit = async () => {
   const projectToSubmit = document.getElementById("project-name").placeholder
   const tagToSubmit = document.getElementById("project-tag").placeholder
 
-  debugger
-
   // update save btn for UX and feedback
   const saveBtn = document.getElementById("metadata-save-btn")
   saveBtn.innerHTML = "Saving..."

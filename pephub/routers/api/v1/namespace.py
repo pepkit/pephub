@@ -93,6 +93,7 @@ async def get_namespace_projects(
 async def submit_pep(
     namespace: str,
     project_name: str = Form(...),
+    is_private: bool = Form(False),
     tag: str = Form(DEFAULT_TAG),
     files: List[UploadFile] = File(...),
     db: Connection = Depends(get_db),
@@ -115,7 +116,13 @@ async def submit_pep(
 
         p = Project(f"{dirpath}/{init_file.filename}")
         p.name = project_name
-        db.upload_project(p, namespace=namespace, name=project_name, tag=tag)
+        db.upload_project(
+            p, 
+            namespace=namespace, 
+            name=project_name, 
+            tag=tag,
+            is_private=is_private
+        )
         return JSONResponse(
             content={
                 "namespace": namespace,

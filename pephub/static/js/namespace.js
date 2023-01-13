@@ -102,7 +102,7 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
         q: ""
       }
     }
-    debugger
+
     // if options is not null build a query string
     if(options) {
       queryParamString = Object.keys(options).map(key => `${key}=${options[key]}`).join('&')
@@ -180,6 +180,7 @@ const handleSearch = () => {
 // create debounced version of handleSearch
 const handleSearchDebounced = debounce(handleSearch, 500)
 
+
 const submitNewProject = (event) => {
   event.preventDefault()
 
@@ -189,14 +190,16 @@ const submitNewProject = (event) => {
 
   const submitButton = document.getElementById("new-project-submit-btn")
   const form = document.getElementById("new-project-form")
+  const formData = new FormData(form)
+  const namespace = document.getElementById("namespace-select").value
 
   submitButton.disabled = true
   submitButton.textContent = "Submitting..."
 
   // submit 
-  fetch(form.action, {
+  fetch(`/api/v1/namespaces/${namespace}/projects`, {
     method: form.method,
-    body: new FormData(form)
+    body: formData
   })
   .then(res => {
     if(res.ok) {
