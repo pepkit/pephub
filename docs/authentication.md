@@ -12,7 +12,7 @@ Anyone can **read** all PEP's that are not marked as **private** without any aut
 flowchart LR
     A[GET project] --> B{Project is Private?}
     B -- No --> C[Return PEP]
-    B -- Yes --> D{User is authenticated <br/> and owns PEP?}
+    B -- Yes --> D{User is authenticated <br/> <b>and</b> <br/> owns PEP?}
     D -- No --> E[404 Not Found]
     D -- Yes --> F[Return PEP]
 ```
@@ -29,22 +29,21 @@ There are two scenerios for PEP submission: 1) A user submits to their namespace
 flowchart LR
     A[POST project] --> B{User is authenticated?}
     B -- No --> C[401 Unauthorized]
-    B -- Yes --> D{What is namespace type?}
-    D -- User --> E{User == namespace?}
-    E -- No --> F[403 Forbidden]
-    E -- Yes--> G[201 Success]
-    D -- Organization --> H{User belongs to org?}
-    H -- No --> I[403 Forbidden]
-    H -- Yes --> J[201 Success]
-    
+    B -- Yes --> D{User == namespace <br/><b>or</b><br/> User belongs to org?}
+    D -- No --> I[403 Forbidden]
+    D -- Yes --> J[201 Success] 
 ```
 
 ### Editing an existing PEP
-If a user wishes to **edit** an existing PEP, they must authenticate and satisfy one of two requirements: 1) The PEP belongs to their namespace, or 2) The PEP belongs to organization of which that user is a member. See the below flow chart:
+If a user wishes to **edit** an existing PEP, they must authenticate and satisfy one of two requirements: 1) The PEP belongs to their namespace, or 2) The PEP belongs to organization of which that user is a member.
+
+### Deleting a PEP
+If a user wishes to **delete** an existing PEP, they must authenticate and satisfy one of two requirements: 1) The PEP belongs to their namespace, or 2) The PEP belongs to organization of which that user is a member. See the below flow chart:
 
 ```mermaid
 flowchart LR
-    A[PATCH Project] --> Ab{Project exists?}
+    _A[PATCH Project] --> Ab{Project exists?}
+    A[DELETE Project] --> Ab
     Ab -- No --> Ac[404 Not Found]
     Ab -- Yes --> B{Project is private?}
     B -- Yes --> Bd{User is logged in?}
@@ -58,6 +57,3 @@ flowchart LR
     J -- No --> O[403 Unauthorized]
     J -- Yes --> P[204 Success]
 ```
-
-
-
