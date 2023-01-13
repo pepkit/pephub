@@ -44,21 +44,19 @@ If a user wishes to **edit** an existing PEP, they must authenticate and satisfy
 
 ```mermaid
 flowchart LR
-    A[PATCH Project] --> B{Project is private?}
-    B -- Yes --> C{What is namespace type?}
-    C -- User --> D{User == namespace?}
-    D -- No --> E[404 Not Found]
-    D -- Yes --> F[204 Success]
-    C -- Organization --> G{User belongs to org?}
-    G -- No --> H[404 Not Found]
-    G -- Yes --> I[204 Success]
-    B -- No --> J{What is namespace type?}
-    J -- User --> K{User == Namespace?}
-    K -- No --> L[403 Auauthorized]
-    K -- Yes --> M[204 Success]
-    J -- Organization --> N{User belongs to org?}
-    N -- No --> O[403 Unauthorized]
-    N -- Yes --> P[204 Success]
+    A[PATCH Project] --> Ab{Project exists?}
+    Ab -- No --> Ac[404 Not Found]
+    Ab -- Yes --> B{Project is private?}
+    B -- Yes --> Bd{User is logged in?}
+    Bd -- No --> Be[404 Not Found]
+    Bd -- Yes --> C{User == namespace <br/><b>or</b><br/> User belongs to org?}
+    C -- No --> H[404 Not Found]
+    C -- Yes --> I[204 Success]
+    B -- No --> Bb{User logged in?}
+    Bb -- No --> Bc[401 Unauthorized]
+    Bb -- Yes --> J{User == namespace <br/><b>or</b><br/> User belongs to org?}
+    J -- No --> O[403 Unauthorized]
+    J -- Yes --> P[204 Success]
 ```
 
 
