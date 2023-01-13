@@ -102,7 +102,7 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
         q: ""
       }
     }
-
+    debugger
     // if options is not null build a query string
     if(options) {
       queryParamString = Object.keys(options).map(key => `${key}=${options[key]}`).join('&')
@@ -130,6 +130,7 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
             namespace: namespace,
             ...data
           }
+          
           searchResultDiv.innerHTML=nunjucks.render('namespace_search_results.html', dataWithNamespace)
         })
         .catch(err => {

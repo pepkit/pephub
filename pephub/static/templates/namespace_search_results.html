@@ -21,11 +21,11 @@
             <span class="visually-hidden">Toggle Dropdown</span>
           </button>
           <ul class="dropdown-menu">
-            {% if session_info['login'] == namespace %}
+            {% if can_edit %}
               <li><a class="dropdown-item" href="/{{namespace}}/{{proj.name}}/edit?tag={{proj.tag}}">Edit</a></li>
             {% endif %}
             <li><a class="dropdown-item" href="/{{namespace}}/{{proj.name}}?tag={{proj.tag}}">View</a></li>
-            {% if session_info['login'] == namespace %}
+            {% if can_edit %}
             <li><hr class="dropdown-divider"></li>
             <li onclick="setDeleteFormInputPlaceholder('{{ namespace}}/{{proj.name}}:{{proj.tag}}')" class="text-danger dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePEP">
               <i class="bi bi-trash3"></i> 

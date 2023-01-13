@@ -62,7 +62,9 @@ async def get_a_pep(
 
 # https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository
 # update a project (pep)
-@project.patch("/", summary="Update a PEP")
+@project.patch(
+    "/", summary="Update a PEP", dependencies=[Depends(verify_user_can_edit_namespace)]
+)
 async def update_a_pep(
     project: str,
     namespace: str,
@@ -73,6 +75,7 @@ async def update_a_pep(
     """
     Update a PEP from a certain namespace
     """
+    # if not logged in, they cant update
     current_project = db.get_project(namespace, project, tag=tag)
     raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
     new_raw_project = raw_peppy_project.copy()
@@ -98,7 +101,7 @@ async def update_a_pep(
             updated_project.project_config_yaml is not None,
             updated_project.sample_table_csv is not None,
         ]
-    ):  
+    ):
         try:
             new_project = Project().from_dict(new_raw_project)
         except Exception as e:
@@ -135,12 +138,14 @@ async def update_a_pep(
         raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
         return {
             "project": raw_peppy_project,
-            "project_annotation": db.get_project_annotation(namespace, project, tag=tag),
-            "message": "Project updated successfully"
+            "project_annotation": db.get_project_annotation(
+                namespace, project, tag=tag
+            ),
+            "message": "Project updated successfully",
         }
 
     # update "meta meta data"
-    update_dict = {} # dict used to pass to the `db.update_item` function
+    update_dict = {}  # dict used to pass to the `db.update_item` function
     for k, v in updated_project.dict(exclude_unset=True).items():
         # is the value an attribute of the peppy project?
         if k in new_raw_project:
@@ -156,16 +161,13 @@ async def update_a_pep(
             #     status_code=400,
             #     detail=f"Invalid update key: {k}",
             # )
-    
+
     # update the project in the database
     db.update_item(
-        dict(
-            project= Project().from_dict(new_raw_project),
-            **update_dict
-        ),
+        dict(project=Project().from_dict(new_raw_project), **update_dict),
         namespace,
         project,
-        tag
+        tag,
     )
 
     # fetch latest project and return to user
@@ -197,7 +199,8 @@ async def delete_a_pep(
     """
     if session_info is None or namespace != session_info["login"]:
         raise HTTPException(
-            status_code=403, detail="You are not authorized to delete this PEP"
+            status_code=403,
+            detail="You are not authorized to delete this PEP. Please verifyu that you are authenitcated and you are the owner of this PEP.",
         )
     proj = db.get_project(namespace, project, tag=tag)
 

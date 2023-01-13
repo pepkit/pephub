@@ -8,7 +8,7 @@
           <i class="bi bi-hdd-rack"></i>
           API Endpoints
         </button>
-        {% if namespace.namespace == session_info['login'] %}
+        {% if can_edit %}
         <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#newProject">
           <i class="bi bi-plus-circle"></i>
           Add PEP
@@ -93,41 +93,7 @@
         </div>
       </div>
     </div>
-    <!-- Submit PEP modal large 
-    <div class="modal" id="newProject" tabindex="-1" aria-labelledby="newProjectModal" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5">Submit a new PEP</h1> 
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div>
-              <form id="new-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="border-0 form-control" method="post" enctype="multipart/form-data">
-                <label class="fs-4 fw-bold form-label">PEP name and Tag:</label>
-                <span class="fs-4 d-flex align-items-center">
-                  <span class="mb-1">{{namespace.namespace}}</span>
-                  <span class="mx-1 mb-1">/</span>
-                  <input id="project-name" name="project_name" type="text" class="form-control" placeholder="name" />
-                  <span class="mx-1 mb-1">:</span>
-                  <input id="tag" name="tag" type="text" class="form-control" placeholder="default" />
-                </span>
-                <div class="mt-2 d-flex flex-column align-items-start">
-                  <label class="fs-4 fw-bold form-label">Select configuration file:</label>
-                  <input type="file" id="config-file" name="config_file" />
-                  <div class="my-1"></div>
-                  <label class="fs-4 fw-bold form-label">Other files:</label>
-                  <input type="file" id="other-files" name="other_files" multiple />
-                  <button id="new-project-submit" class="mt-3 btn btn-primary btn-lg" type="submit">Submit</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    -->
-    <!-- Submit PEP modal large (DRAG-N-DROP) -->
+    <!-- Submit PEP modal (DRAG-N-DROP) -->
     <div class="modal" id="newProject" tabindex="-1" aria-labelledby="newProjectModal" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">

@@ -127,7 +127,7 @@ async def namespace_view(
     db: Connection = Depends(get_db),
     user=Depends(get_user_from_session_info),
     session_info=Depends(read_session_info),
-    organizations=Depends(get_organizations_from_session_info),
+    user_orgs=Depends(get_organizations_from_session_info),
 ):
     """Returns HTML response with a visual summary of the namespace."""
     nspace = db.get_namespace_info(namespace, user)
@@ -141,7 +141,8 @@ async def namespace_view(
             "pephub_version": pephub_version,
             "logged_in": user is not None,
             "session_info": session_info,
-            "organizations": organizations,
+            "orgs": user_orgs,
+            "can_edit": user == namespace or namespace in user_orgs,
         },
     )
 
@@ -158,9 +159,18 @@ async def project_view(
     project: peppy.Project = Depends(get_project),
     project_annoatation: dict = Depends(get_project_annotation),
     session_info: dict = Depends(read_session_info),
+    orgs: List[str] = Depends(get_organizations_from_session_info),
     edit: bool = False,
 ):
-    """Returns HTML response with a visual summary of the project."""
+    """
+    Returns HTML response with a visual summary of the project.
+    """
+    if project_annoatation.get("private"):
+        # Return 404's for unauthorized access - dont expost that project even exists
+        if session_info is None:
+            raise HTTPException(status_code=404, detail="Project not found")
+        if session_info["login"] != namespace and namespace not in orgs:
+            raise HTTPException(status_code=404, detail="Project not found")
 
     samples = [s.to_dict() for s in project.samples]
     try:
@@ -210,6 +220,7 @@ async def project_edit(
     """
     Returns page to let you edit a project.
     """
+    
     if session_info is None or session_info["login"] != namespace:
         raise HTTPException(
             status_code=403, detail="You are not allowed to edit this project."

@@ -33,16 +33,13 @@ async def get_namespace(
     request: Request,
     db: Connection = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
+    nspace: dict = Depends(get_namespace_info),
 ):
     """
     Fetch namespace. Returns a JSON representation of the namespace.
     """
     nspace = db.get_namespace_info(namespace=namespace, user=user)
     nspace = nspace.dict()
-    # return namespace not found if no projects
-    if len(nspace["projects"]) == 0:
-        raise HTTPException(404, f"Namespace {namespace} not found.")
-
     nspace["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
     return JSONResponse(content=nspace)
 
@@ -56,11 +53,14 @@ async def get_namespace_projects(
     user=Depends(get_user_from_session_info),
     q: str = None,
     session_info: dict = Depends(read_session_info),
+    user_orgs: List[str] = Depends(get_organizations_from_session_info)
 ):
     """
     Fetch the projects for a particular namespace
     """
 
+    # TODO, this API will change. Searching
+    # through a namespace for projects doesnt make sense
     # get projects in namespace
     search_result = db.search.project(
         namespace=namespace,
@@ -77,6 +77,7 @@ async def get_namespace_projects(
             "offset": offset,
             "items": [p.dict() for p in search_result.results],
             "session_info": session_info,
+            "can_edit": user == namespace or namespace in user_orgs
         }
     )
 
@@ -84,7 +85,11 @@ async def get_namespace_projects(
 # url format based on:
 # * github: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user
 # * spotify: https://developer.spotify.com/documentation/web-api/reference-beta/#endpoint-create-playlist
-@namespace.post("/projects", summary="Submit a PEP to the current namespace")
+@namespace.post(
+    "/projects",
+    summary="Submit a PEP to the current namespace",
+    dependencies=[Depends(verify_user_can_edit_namespace)],
+)
 async def submit_pep(
     namespace: str,
     session_info: dict = Depends(read_session_info),
@@ -92,9 +97,15 @@ async def submit_pep(
     tag: str = Form(DEFAULT_TAG),
     files: List[UploadFile] = File(...),
     db: Connection = Depends(get_db),
+    orgs: List[str] = Depends(get_organizations_from_session_info),
 ):
     if session_info is None:
         raise HTTPException(403, "Please log in to submit a PEP.")
+
+    if session_info["login"] != namespace or namespace not in orgs:
+        raise HTTPException(
+            403, "You are not authorized to submit a PEP to this namespace."
+        )
 
     init_file = parse_user_file_upload(files)
     init_file, other_files = split_upload_files_on_init_file(files, init_file)

@@ -218,6 +218,28 @@ def _check_user_access(
         return project
 
 
+def verify_user_can_edit_namespace(
+    namespace: str,
+    session_info: dict = Depends(read_session_info),
+    orgs: List = Depends(get_organizations_from_session_info),
+) -> None:
+    """
+    Verify that a user has access to edit a namespace. This includes:
+    - Editing namespace info,
+    - Editing namespace projects
+    - Deleting namespace projects
+    - Adding projects to namespace
+    """
+    # UNAUTHENTICATED - raise 401
+    if session_info is None:
+        raise HTTPException(401, "You must be logged in to edit a namespace.")
+
+    # UNAUTHORIZED - raise 403
+    # if the use is not the namespace owner or an organization member
+    if all([namespace != session_info.get("login"), namespace not in orgs]):
+        raise HTTPException(403, "You do not have permission to edit this namespace.")
+
+
 def parse_boolean_env_var(env_var: str) -> bool:
     """
     Helper function to parse a boolean environment variable
@@ -272,3 +294,26 @@ def get_sentence_transformer() -> SentenceTransformer:
     finally:
         # no need to do anything
         pass
+
+
+def get_namespace_info(namespace: str, db: Connection = Depends(get_db)):
+    """
+    Get the information on a namespace, if it exists.
+    """
+    if namespace_info := db.get_namespace_info(namespace):
+        yield namespace_info
+    else:
+        raise HTTPException(
+            404,
+            f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
+        )
+
+
+def verify_namespace_exists(namespace: str, db: Connection = Depends(get_db)):
+    if not db.namespace_exists(namespace):
+        raise HTTPException(
+            404,
+            f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
+        )
+    else:
+        yield namespace
