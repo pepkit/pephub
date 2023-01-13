@@ -54,7 +54,7 @@ flowchart LR
     G -- Yes --> I[204 Success]
     B -- No --> J{What is namespace type?}
     J -- User --> K{User == Namespace?}
-    K -- No --> L[403 Aunauthorized]
+    K -- No --> L[403 Auauthorized]
     K -- Yes --> M[204 Success]
     J -- Organization --> N{User belongs to org?}
     N -- No --> O[403 Unauthorized]
