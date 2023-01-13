@@ -53,7 +53,7 @@ async def get_namespace_projects(
     user=Depends(get_user_from_session_info),
     q: str = None,
     session_info: dict = Depends(read_session_info),
-    user_orgs: List[str] = Depends(get_organizations_from_session_info)
+    user_orgs: List[str] = Depends(get_organizations_from_session_info),
 ):
     """
     Fetch the projects for a particular namespace
@@ -77,7 +77,7 @@ async def get_namespace_projects(
             "offset": offset,
             "items": [p.dict() for p in search_result.results],
             "session_info": session_info,
-            "can_edit": user == namespace or namespace in user_orgs
+            "can_edit": user == namespace or namespace in user_orgs,
         }
     )
 
@@ -88,25 +88,15 @@ async def get_namespace_projects(
 @namespace.post(
     "/projects",
     summary="Submit a PEP to the current namespace",
-    dependencies=[Depends(verify_user_can_edit_namespace)],
+    dependencies=[Depends(verify_user_can_write_namespace)],
 )
 async def submit_pep(
     namespace: str,
-    session_info: dict = Depends(read_session_info),
     project_name: str = Form(...),
     tag: str = Form(DEFAULT_TAG),
     files: List[UploadFile] = File(...),
     db: Connection = Depends(get_db),
-    orgs: List[str] = Depends(get_organizations_from_session_info),
 ):
-    if session_info is None:
-        raise HTTPException(403, "Please log in to submit a PEP.")
-
-    if session_info["login"] != namespace or namespace not in orgs:
-        raise HTTPException(
-            403, "You are not authorized to submit a PEP to this namespace."
-        )
-
     init_file = parse_user_file_upload(files)
     init_file, other_files = split_upload_files_on_init_file(files, init_file)
 

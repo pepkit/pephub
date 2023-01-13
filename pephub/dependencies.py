@@ -6,7 +6,7 @@ from fastapi.security import HTTPBearer
 from fastapi.security import APIKeyCookie
 from pepdbagent import Connection
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import NamespaceModel
+from pepdbagent.models import NamespaceModel, Annotation
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
@@ -218,26 +218,95 @@ def _check_user_access(
         return project
 
 
-def verify_user_can_edit_namespace(
+def verify_user_can_write_namespace(
     namespace: str,
-    session_info: dict = Depends(read_session_info),
+    session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
-) -> None:
+):
     """
-    Verify that a user has access to edit a namespace. This includes:
-    - Editing namespace info,
-    - Editing namespace projects
-    - Deleting namespace projects
-    - Adding projects to namespace
-    """
-    # UNAUTHENTICATED - raise 401
-    if session_info is None:
-        raise HTTPException(401, "You must be logged in to edit a namespace.")
+    Authorization flow for writing to a namespace.
 
-    # UNAUTHORIZED - raise 403
-    # if the use is not the namespace owner or an organization member
-    if all([namespace != session_info.get("login"), namespace not in orgs]):
-        raise HTTPException(403, "You do not have permission to edit this namespace.")
+    See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#submiting-a-new-pep
+    """
+    if session_info is None:
+        raise HTTPException(
+            401,
+            f"User must be logged in to write to namespace: '{namespace}'.",
+        )
+    if session_info["login"] != namespace and namespace not in orgs:
+        raise HTTPException(
+            403,
+            f"User does not have permission to write to namespace: '{namespace}'.",
+        )
+
+
+def verify_user_can_read_project(
+    project: str,
+    namespace: str,
+    tag: str,
+    project_annotation: Annotation = Depends(get_project_annotation),
+    session_info: Union[dict, None] = Depends(read_session_info),
+    orgs: List = Depends(get_organizations_from_session_info),
+):
+    """
+    Authorization flow for reading a project from the database.
+
+    See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#reading-peps
+    """
+    if project_annotation.is_private:
+        if any(
+            [
+                session_info is None,  # user not logged in
+                session_info["login"] != namespace
+                and namespace
+                not in orgs,  # user doesnt own namespace or is not member of organization
+            ]
+        ):
+            # raise 404 since we don't want to reveal that the project exists
+            raise HTTPException(
+                404, f"Project, '{namespace}/{project}:{tag}', not found."
+            )
+
+
+def verify_user_can_write_project(
+    project: str,
+    namespace: str,
+    tag: str,
+    project_annotation: Annotation = Depends(get_project_annotation),
+    session_info: Union[dict, None] = Depends(read_session_info),
+    orgs: List = Depends(get_organizations_from_session_info),
+):
+    """
+    Authorization flow for writing a project to the database.
+
+    See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#writing-peps
+    """
+    if project_annotation.is_private:
+        if any(
+            [
+                session_info is None,  # user not logged in
+                session_info["login"] != namespace
+                and namespace
+                not in orgs,  # user doesnt own namespace or is not member of organization
+            ]
+        ):
+            # raise 404 since we don't want to reveal that the project exists
+            raise HTTPException(
+                404, f"Project, '{namespace}/{project}:{tag}', not found."
+            )
+    else:
+        # AUTHENTICATION REQUIRED
+        if session_info is None:
+            raise HTTPException(
+                401,
+                f"Please authenticate before editing project.",
+            )
+        # AUTHORIZATION REQUIRED
+        if session_info["login"] != namespace and namespace not in orgs:
+            raise HTTPException(
+                403,
+                f"The current authenticated user does not have permission to edit this project.",
+            )
 
 
 def parse_boolean_env_var(env_var: str) -> bool:

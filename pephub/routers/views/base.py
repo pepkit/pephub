@@ -220,7 +220,7 @@ async def project_edit(
     """
     Returns page to let you edit a project.
     """
-    
+
     if session_info is None or session_info["login"] != namespace:
         raise HTTPException(
             status_code=403, detail="You are not allowed to edit this project."

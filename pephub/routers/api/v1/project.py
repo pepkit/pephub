@@ -35,7 +35,9 @@ project = APIRouter(
 )
 
 
-@project.get("/", summary="Fetch a PEP")
+@project.get(
+    "/", summary="Fetch a PEP", dependencies=[Depends(verify_user_can_read_project)]
+)
 async def get_a_pep(
     proj: peppy.Project = Depends(get_project),
     proj_annotation: Annotation = Depends(get_project_annotation),
@@ -63,7 +65,7 @@ async def get_a_pep(
 # https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository
 # update a project (pep)
 @project.patch(
-    "/", summary="Update a PEP", dependencies=[Depends(verify_user_can_edit_namespace)]
+    "/", summary="Update a PEP", dependencies=[Depends(verify_user_can_write_project)]
 )
 async def update_a_pep(
     project: str,
@@ -186,7 +188,9 @@ async def update_a_pep(
 
 
 # delete a PEP
-@project.delete("/", summary="Delete a PEP")
+@project.delete(
+    "/", summary="Delete a PEP", dependencies=[Depends(verify_user_can_write_project)]
+)
 async def delete_a_pep(
     namespace: str,
     project: str,
