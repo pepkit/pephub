@@ -1,4 +1,5 @@
 # PEPhub Authentication
+*Nathan LeRoy, January 13th, 2023*
 ## Overview
 *pephub* supports authentication. We use [GitHub OAuth](https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps) as an authorization provider and user/namespace management system. There are two kinds of namespaces in *pephub*: **User namespaces** and **organization namespaces**. User namespaces are just that: namespaces that contain PEPs submitted by a user who has authenticated from GitHub. For example, my GitHub username/namespace is **nleroy917**. So, my *pephub* namespace (once I authenticate) is also **nleroy917**. Organization namespaces contain PEPs submitted by users who belong to that organization on GitHub. For example, I (**nleroy917**) belong to the **databio** organization on GitHub. As such, once authenticated I can read and write PEPs to this namespace on *pephub*.
 
@@ -8,9 +9,48 @@
 Anyone can **read** all PEP's that are not marked as **private** without any authentication. If a user wishes to **read** a PEP marked as **private**, they must 1) Authenticate, and 2) be the owner of that PEP **or** belong to the organization that owns that PEP. In the interest of privacy, any access to a PEP that is marked as **private** without prior authorization will result in a `404` response.
 
 ```mermaid
----
-title: PEP reading flow chart
----
-flowchart TD
-    A[`GET`]
+flowchart LR
+    A[GET project] --> B{Project is Private?}
+    B -- No --> C[Return PEP]
+    B -- Yes --> D{User is authenticated and owns PEP?}
+    D -- No --> E[404 Not Found]
+    D -- Yes --> F[Return PEP]
 ```
+
+This flow should be identical to the flow that GitHub uses to protect repositories.
+
+## Writing PEPs
+Authentication for writing PEPs is more complex. Provisions are made at both the namespace and the project level to protect unauthorized writing of PEPs to the database.
+
+### Submiting a new PEP
+There are two scenerios for PEP submission: 1) A user submits to their namespace, and 2) A user submits to an organization. Both cases must require authentication. A user may freely submit PEPs to their own namespace. However, only **members** of an organization may submit PEPs to that organization. See below chart:
+
+```mermaid
+flowchart LR
+    A[POST project] --> B{User is authenticated?}
+    B -- No --> C[401 Unauthorized]
+    B -- Yes --> D{What is namespace type?}
+    D -- User --> E{User == namespace?}
+    E -- No --> F[403 Forbidden]
+    E -- Yes--> G[201 Success]
+    D -- Organization --> H{User belongs to org?}
+    H -- No --> I[403 Forbidden]
+    H -- Yes --> J[201 uccess]
+    
+```
+
+### Editing an existing PEP
+If a user wishes to **edit** an existing PEP, they must authenticate and satisfy one of two requirements: 1) The PEP belongs to their namespace, or 2) The PEP belongs to organization of which that user is a member. See the below flow chart:
+
+```mermaid
+flowchart LR
+    A[PATCH Project] --> B{Project is private?}
+    B -- Yes --> C[404 Not Found]
+    C -- No --> D{Uer is authenticated?}
+    D -- No --> E[401 Unauthorized]
+    D -- Yes --> F{User owns PEP?}
+    F -- Yes --> G[201 success]
+```
+
+
+
