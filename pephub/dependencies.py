@@ -163,7 +163,7 @@ def get_organizations_from_session_info(
 
 def get_user_from_session_info(
     session_info: Union[dict, None] = Depends(read_session_info)
-) -> str:
+) -> Union[str, None]:
     user = None
     if session_info:
         user = session_info.get("login")

@@ -92,7 +92,8 @@ async def submit_pep_form(request: Request, session_info=Depends(read_session_in
 @views.get("/me")
 def me(
     request: Request,
-    session_info=Depends(read_session_info),
+    user: Union[str, None] = Depends(get_user_from_session_info),
+    session_info: dict = Depends(read_session_info),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
@@ -101,7 +102,8 @@ def me(
     if session_info is None:
         return RedirectResponse(url="/auth/login")
     else:
-        namespace_info = agent.namespace.get(admin=session_info["login"])
+        namespace_info = agent.namespace.get(query=user).results[0]
+        projects = agent.annotation.get(namespace=user).result
         return templates.TemplateResponse(
             "profile.html",
             {
@@ -111,7 +113,7 @@ def me(
                 "pephub_version": pephub_version,
                 "logged_in": session_info is not None,
                 "namespace_info": namespace_info,
-                "projects": namespace_info.projects,
+                "projects": projects,
             },
         )
 
