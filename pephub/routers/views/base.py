@@ -1,5 +1,7 @@
 import jinja2
 import eido
+import peppy
+
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, HTMLResponse
 from starlette.templating import Jinja2Templates
@@ -91,7 +93,7 @@ async def submit_pep_form(request: Request, session_info=Depends(read_session_in
 def me(
     request: Request,
     session_info=Depends(read_session_info),
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
     Display the user's profile page.
@@ -99,9 +101,7 @@ def me(
     if session_info is None:
         return RedirectResponse(url="/auth/login")
     else:
-        namespace_info = db.get_namespace_info(
-            session_info["login"], user=session_info["login"]
-        )
+        namespace_info = agent.namespace.get(admin=session_info["login"])
         return templates.TemplateResponse(
             "profile.html",
             {
@@ -124,17 +124,17 @@ def me(
 async def namespace_view(
     request: Request,
     namespace: str,
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
     user=Depends(get_user_from_session_info),
     session_info=Depends(read_session_info),
     user_orgs=Depends(get_organizations_from_session_info),
 ):
     """Returns HTML response with a visual summary of the namespace."""
-    nspace = db.get_namespace_info(namespace, user)
+    nspace = agent.namespace.get(query=user, admin=user).results
     return templates.TemplateResponse(
         "namespace.html",
         {
-            "namespace": nspace,
+            "namespace": nspace[0].dict(),
             "request": request,
             "peppy_version": peppy_version,
             "python_version": python_version(),

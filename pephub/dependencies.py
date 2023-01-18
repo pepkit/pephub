@@ -108,7 +108,7 @@ def get_db() -> PEPDatabaseAgent:
     try:
         yield agent
     finally:
-        agent.close_connection()
+        del agent
 
 
 def set_session_info(response: Response, session_info: dict):

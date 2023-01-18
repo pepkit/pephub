@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 from peppy import __version__ as peppy_version
 from platform import python_version
 from pepdbagent import PEPDatabaseAgent
-from pepdbagent.models import ProjectSearchResultModel
 
 from ...._version import __version__ as pephub_version
 from ....dependencies import *
