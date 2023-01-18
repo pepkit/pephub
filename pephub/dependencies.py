@@ -1,18 +1,30 @@
 import os
-import peppy
+import pydantic
+import jwt
+import json
+import requests
+
+from secrets import token_hex
+from dotenv import load_dotenv
+from typing import Union, List, Optional
+from datetime import datetime, timedelta
+
 from fastapi import Depends
 from fastapi.responses import Response
-from fastapi.security import HTTPBearer
-from fastapi.security import APIKeyCookie
-from pepdbagent import Connection
+from fastapi.exceptions import HTTPException
+from fastapi.security import HTTPBearer, APIKeyCookie
+from pydantic import BaseModel
+from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import NamespaceModel, Annotation
+from pepdbagent.models import (
+    AnnotationModel,
+    NamespaceReturnModel
+)
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
 
-from dotenv import load_dotenv
-from typing import Union
+
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -23,15 +35,7 @@ from .const import (
     DEFAULT_QDRANT_PORT,
     DEFAULT_HF_MODEL,
 )
-from datetime import datetime, timedelta
-import pydantic
-import jwt
-import json
-from fastapi.exceptions import HTTPException
-import requests
-from pydantic import BaseModel
-from typing import List, Optional
-from secrets import token_hex
+
 
 
 load_dotenv()
@@ -94,9 +98,11 @@ class CLIAuthSystem:
         return encoded_user_data
 
 
-def get_db():
-    # create database
-    pepdb = Connection(
+def get_db() -> PEPDatabaseAgent:
+    """
+    Grab a temporary connection to the database.
+    """
+    agent = PEPDatabaseAgent(
         user=os.environ.get("POSTGRES_USER") or DEFAULT_POSTGRES_USER,
         password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
         host=os.environ.get("POSTGRES_HOST") or DEFAULT_POSTGRES_HOST,
@@ -104,9 +110,9 @@ def get_db():
         port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
     )
     try:
-        yield pepdb
+        yield agent
     finally:
-        pepdb.close_connection()
+        agent.close_connection()
 
 
 def set_session_info(response: Response, session_info: dict):
@@ -167,9 +173,9 @@ def get_project(
     namespace: str,
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
-    if proj := db.get_project(namespace, project, tag):
+    if proj := agent.project.get(namespace, project, tag):
         yield proj
     else:
         raise HTTPException(
@@ -182,9 +188,9 @@ def get_project_annotation(
     namespace: str,
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
-    db: Connection = Depends(get_db),
-):
-    if project_annotation := db.get_project_annotation(namespace, project, tag):
+    agent: PEPDatabaseAgent = Depends(get_db),
+) -> AnnotationModel:
+    if project_annotation := agent.annotation.get(namespace, project, tag):
         yield project_annotation
     else:
         raise HTTPException(
@@ -192,12 +198,12 @@ def get_project_annotation(
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
 
-
+# TODO: This isn't used; do we still need it?
 def get_namespaces(
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-) -> List[NamespaceModel]:
-    yield db.get_namespaces_info_by_list(user=user)
+) -> List[NamespaceReturnModel]:
+    yield agent.namespace.get(admin=user)
 
 
 def verify_user_can_write_namespace(
@@ -226,7 +232,7 @@ def verify_user_can_read_project(
     project: str,
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
-    project_annotation: Annotation = Depends(get_project_annotation),
+    project_annotation: AnnotationModel = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
 ):
@@ -258,7 +264,7 @@ def verify_user_can_write_project(
     project: str,
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
-    project_annotation: Annotation = Depends(get_project_annotation),
+    project_annotation: AnnotationModel = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
 ):
@@ -354,11 +360,11 @@ def get_sentence_transformer() -> SentenceTransformer:
         pass
 
 
-def get_namespace_info(namespace: str, db: Connection = Depends(get_db)):
+def get_namespace_info(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
     """
     Get the information on a namespace, if it exists.
     """
-    if namespace_info := db.get_namespace_info(namespace):
+    if namespace_info := agent.namespace.get(query=namespace):
         yield namespace_info
     else:
         raise HTTPException(
@@ -367,8 +373,8 @@ def get_namespace_info(namespace: str, db: Connection = Depends(get_db)):
         )
 
 
-def verify_namespace_exists(namespace: str, db: Connection = Depends(get_db)):
-    if not db.namespace_exists(namespace):
+def verify_namespace_exists(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+    if not agent.namespace.get(query=namespace):
         raise HTTPException(
             404,
             f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
