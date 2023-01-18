@@ -16,7 +16,7 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 @user.get("/")
 def profile_data(
     session_info=Depends(read_session_info),
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
     Return the user's profile data.
@@ -24,7 +24,9 @@ def profile_data(
     if session_info is None:
         return RedirectResponse(url="/auth/login")
     else:
-        peps = db.get_namespace_info(session_info["login"], user=session_info["login"])
+        peps = agent.namespace.get(
+            namespace=session_info["login"], admin=session_info["login"]
+        )
         return JSONResponse(
             content={
                 "session_info": session_info,
