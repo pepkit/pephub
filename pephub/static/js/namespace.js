@@ -192,6 +192,7 @@ const submitNewProject = (event) => {
   const form = document.getElementById("new-project-form")
   const formData = new FormData(form)
   const namespace = document.getElementById("namespace-select").value
+  const user = document.getElementById("namespace-header").textContent
 
   submitButton.disabled = true
   submitButton.textContent = "Submitting..."
@@ -220,9 +221,19 @@ const submitNewProject = (event) => {
     // show toast
     const bsToast = new bootstrap.Toast(toastDiv)
     bsToast.show()
-    
-    // fetch the new project
-    fetchProjectsInNamespace(data.namespace)
+
+    debugger;
+
+    // if the user submitted to their own namespace, update the search results
+    // otherwise push them to the new project page
+    if (namespace === user) {
+      fetchProjectsInNamespace(namespace)
+    } else {
+      if (formData.get("tag") === "") {
+        formData.set("tag", "default")
+      }
+      window.location.href = `/${namespace}/${formData.get("project_name")}?tag=${formData.get("tag")}`
+    }
   })
   .catch(err => {
 

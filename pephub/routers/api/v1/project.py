@@ -201,11 +201,6 @@ async def delete_a_pep(
     """
     Delete a PEP from a certain namespace
     """
-    if session_info is None or namespace != session_info["login"]:
-        raise HTTPException(
-            status_code=403,
-            detail="You are not authorized to delete this PEP. Please verifyu that you are authenitcated and you are the owner of this PEP.",
-        )
     proj = db.get_project(namespace, project, tag=tag)
 
     if proj is None:
