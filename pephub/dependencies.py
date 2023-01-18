@@ -16,7 +16,7 @@ from fastapi.security import HTTPBearer, APIKeyCookie
 from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import AnnotationModel, NamespaceReturnModel
+from pepdbagent.models import AnnotationReturnModel, NamespaceReturnModel
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
@@ -185,9 +185,10 @@ def get_project_annotation(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> AnnotationModel:
+) -> AnnotationReturnModel:
+    # TODO: Is just grabbing the first annotation the right thing to do?
     if project_annotation := agent.annotation.get(namespace, project, tag):
-        yield project_annotation
+        yield project_annotation.result[0]
     else:
         raise HTTPException(
             404,
@@ -229,7 +230,7 @@ def verify_user_can_read_project(
     project: str,
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
-    project_annotation: AnnotationModel = Depends(get_project_annotation),
+    project_annotation: AnnotationReturnModel = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
 ):
@@ -261,7 +262,7 @@ def verify_user_can_write_project(
     project: str,
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
-    project_annotation: AnnotationModel = Depends(get_project_annotation),
+    project_annotation: AnnotationReturnModel = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
 ):

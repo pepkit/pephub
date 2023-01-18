@@ -130,10 +130,11 @@ async def namespace_view(
     user_orgs=Depends(get_organizations_from_session_info),
 ):
     """Returns HTML response with a visual summary of the namespace."""
-    nspace = agent.namespace.get(query=user, admin=user).results
+    nspace = agent.namespace.get(query=namespace, admin=user).results
     return templates.TemplateResponse(
         "namespace.html",
         {
+            # is this the right way to do this? Grab the first result?
             "namespace": nspace[0].dict(),
             "request": request,
             "peppy_version": peppy_version,
