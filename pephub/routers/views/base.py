@@ -124,18 +124,17 @@ def me(
 async def namespace_view(
     request: Request,
     namespace: str,
-    agent: PEPDatabaseAgent = Depends(get_db),
-    user=Depends(get_user_from_session_info),
-    session_info=Depends(read_session_info),
-    user_orgs=Depends(get_organizations_from_session_info),
+    user: str = Depends(get_user_from_session_info),
+    session_info: dict = Depends(read_session_info),
+    nspace: NamespaceResultModel = Depends(get_namespace_info),
+    user_orgs: List[str] = Depends(get_organizations_from_session_info),
 ):
     """Returns HTML response with a visual summary of the namespace."""
-    nspace = agent.namespace.get(query=namespace, admin=user).results
     return templates.TemplateResponse(
         "namespace.html",
         {
             # is this the right way to do this? Grab the first result?
-            "namespace": nspace[0].dict(),
+            "namespace": nspace,
             "request": request,
             "peppy_version": peppy_version,
             "python_version": python_version(),

@@ -16,7 +16,12 @@ from fastapi.security import HTTPBearer, APIKeyCookie
 from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import AnnotationReturnModel, NamespaceReturnModel
+from pepdbagent.models import (
+    NamespaceResultModel,
+    NamespaceReturnModel,
+    AnnotationModel,
+)
+from pepdbagent.exceptions import ProjectNotFoundError
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
@@ -188,9 +193,10 @@ def get_project(
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
-    if proj := agent.project.get(namespace, project, tag):
+    try:
+        proj = agent.project.get(namespace, project, tag)
         yield proj
-    else:
+    except ProjectNotFoundError:
         raise HTTPException(
             404,
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
@@ -203,13 +209,14 @@ def get_project_annotation(
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
-) -> AnnotationReturnModel:
+) -> AnnotationModel:
     # TODO: Is just grabbing the first annotation the right thing to do?
-    if project_annotation := agent.annotation.get(
-        namespace, project, tag, admin=namespace_access_list
-    ):
-        yield project_annotation.result[0]
-    else:
+    try:
+        anno = agent.annotation.get(
+            namespace, project, tag, admin=namespace_access_list
+        ).result[0]
+        yield anno
+    except ProjectNotFoundError:
         raise HTTPException(
             404,
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
@@ -250,7 +257,7 @@ def verify_user_can_read_project(
     project: str,
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
-    project_annotation: AnnotationReturnModel = Depends(get_project_annotation),
+    project_annotation: AnnotationModel = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
 ):
@@ -282,7 +289,7 @@ def verify_user_can_write_project(
     project: str,
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
-    project_annotation: AnnotationReturnModel = Depends(get_project_annotation),
+    project_annotation: AnnotationModel = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_session_info),
     orgs: List = Depends(get_organizations_from_session_info),
 ):
@@ -383,14 +390,14 @@ def get_namespace_info(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-) -> NamespaceReturnModel:
+) -> NamespaceResultModel:
     """
     Get the information on a namespace, if it exists.
     """
     # TODO: is this the best way to do this? By grabbing the first result?
-    if namespace_info := agent.namespace.get(query=namespace, admin=user):
-        yield namespace_info.results[0]
-    else:
+    try:
+        yield agent.namespace.get(query=namespace, admin=user).results[0]
+    except IndexError:
         raise HTTPException(
             404,
             f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
