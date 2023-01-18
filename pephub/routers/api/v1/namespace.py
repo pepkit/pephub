@@ -1,9 +1,11 @@
 import tempfile
 import shutil
+
 from fastapi import APIRouter, File, UploadFile, Request, Depends, Form
 from fastapi.responses import JSONResponse
 from peppy import __version__ as peppy_version
 from peppy import Project
+from pepdbagent.exceptions import ProjectUniqueNameError
 from platform import python_version
 
 from ...._version import __version__ as pephub_version
@@ -50,6 +52,7 @@ async def get_namespace_projects(
     q: str = None,
     session_info: dict = Depends(read_session_info),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
+    namespace_access: List[str] = Depends(get_namespace_access_list),
 ):
     """
     Fetch the projects for a particular namespace
@@ -59,7 +62,7 @@ async def get_namespace_projects(
     # through a namespace for projects doesnt make sense
     # get projects in namespace
     search_result = agent.annotation.get(
-        namespace=namespace, limit=limit, offset=offset, admin=[user].extend(user_orgs)
+        namespace=namespace, limit=limit, offset=offset, admin=namespace_access
     )
 
     return JSONResponse(
@@ -108,9 +111,23 @@ async def submit_pep(
 
         p = Project(f"{dirpath}/{init_file.filename}")
         p.name = project_name
-        agent.project.submit(
-            p, namespace=namespace, name=project_name, tag=tag, is_private=is_private
-        )
+        try:
+            agent.project.submit(
+                p,
+                namespace=namespace,
+                name=project_name,
+                tag=tag,
+                is_private=is_private,
+            )
+        except ProjectUniqueNameError as e:
+            return JSONResponse(
+                content={
+                    "message": f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
+                    "error": f"{e}",
+                    "status_code": 400,
+                },
+                status_code=400,
+            )
         return JSONResponse(
             content={
                 "namespace": namespace,

@@ -33,6 +33,7 @@ async def search_for_pep(
     agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
+    namespace_access: List[str] = Depends(get_namespace_access_list),
     limit: int = 10,
     offset: int = 0,
 ):
@@ -50,7 +51,7 @@ async def search_for_pep(
                 query_vector=query_vec,
                 limit=limit,
             )
-            namespaces = agent.namespace.get(admin=[user].extend(user_orgs))
+            namespaces = agent.namespace.get(admin=namespace_access)
             namespace_hits = [
                 n.namespace
                 for n in namespaces.results
@@ -83,7 +84,7 @@ async def search_for_pep(
             print("Qdrant search failed, falling back to SQL search. Reason: ", e)
     else:
         # fallback to SQL search
-        namespaces = agent.namespace.get(admin=[user].extend(user_orgs)).results
+        namespaces = agent.namespace.get(admin=namespace_access).results
         results = agent.annotation.get(
             query=query.query, limit=limit, offset=offset
         ).result

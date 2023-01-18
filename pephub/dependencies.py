@@ -149,7 +149,7 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
 
 def get_organizations_from_session_info(
     session_info: Union[dict, None] = Depends(read_session_info)
-) -> List:
+) -> List[str]:
     organizations = []
     if session_info:
         organizations = session_info.get("orgs")
@@ -163,6 +163,23 @@ def get_user_from_session_info(
     if session_info:
         user = session_info.get("login")
     return user
+
+
+def get_namespace_access_list(
+    user: str = Depends(get_user_from_session_info),
+    orgs: List[str] = Depends(get_organizations_from_session_info),
+) -> List[str]:
+    """
+    Return a list of namespaces that the current user has access to. Function
+    will return None if there is no logged in user
+    """
+    access_rights = []
+    if user:
+        access_rights.append(user)
+        access_rights.extend(orgs)
+        return access_rights
+    else:
+        return None
 
 
 def get_project(
@@ -185,9 +202,12 @@ def get_project_annotation(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
 ) -> AnnotationReturnModel:
     # TODO: Is just grabbing the first annotation the right thing to do?
-    if project_annotation := agent.annotation.get(namespace, project, tag):
+    if project_annotation := agent.annotation.get(
+        namespace, project, tag, admin=namespace_access_list
+    ):
         yield project_annotation.result[0]
     else:
         raise HTTPException(
@@ -367,8 +387,9 @@ def get_namespace_info(
     """
     Get the information on a namespace, if it exists.
     """
+    # TODO: is this the best way to do this? By grabbing the first result?
     if namespace_info := agent.namespace.get(query=namespace, admin=user):
-        yield namespace_info
+        yield namespace_info.results[0]
     else:
         raise HTTPException(
             404,
