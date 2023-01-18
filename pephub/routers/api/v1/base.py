@@ -1,6 +1,7 @@
 from fastapi import APIRouter, __version__ as fastapi_version
 from peppy import __version__ as peppy_version
 from platform import python_version
+from pepdbagent import __version__ as pepdbagent_version
 
 from ...._version import __version__ as pephub_version
 from ....dependencies import *
@@ -15,6 +16,7 @@ ALL_VERSIONS = {
     "peppy_version": peppy_version,
     "python_version": python_version(),
     "fastapi_version": fastapi_version,
+    "pepdbagent_version": pepdbagent_version,
     "api_version": 1,
 }
 

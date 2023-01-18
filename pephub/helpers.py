@@ -237,6 +237,7 @@ def split_upload_files_on_init_file(
     other_files = [file for file in all_files if file.filename != init_file.filename]
     return init_file, other_files
 
+
 def parse_upload_files_by_folder(files: List[UploadFile]):
     """
     Parsing list of directories into nested dictionary
@@ -245,6 +246,3 @@ def parse_upload_files_by_folder(files: List[UploadFile]):
     for file in files:
         file_dict[file.filename] = file.file.read()
     return file_dict
-
-
-

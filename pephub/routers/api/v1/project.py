@@ -6,7 +6,8 @@ from io import StringIO
 from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pepdbagent.models import Annotation
+from pepdbagent.models import AnnotationModel
+from pepdbagent import PEPDatabaseAgent
 from peppy import __version__ as peppy_version
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
@@ -31,7 +32,8 @@ ALL_VERSIONS = {
 }
 
 project = APIRouter(
-    prefix="/api/v1/projects/{namespace}/{project}", tags=["api", "project", "v1"],
+    prefix="/api/v1/projects/{namespace}/{project}",
+    tags=["api", "project", "v1"],
 )
 
 
@@ -40,7 +42,7 @@ project = APIRouter(
 )
 async def get_a_pep(
     proj: peppy.Project = Depends(get_project),
-    proj_annotation: Annotation = Depends(get_project_annotation),
+    proj_annotation: AnnotationModel = Depends(get_project_annotation),
 ):
     """
     Fetch a PEP from a certain namespace
@@ -72,14 +74,14 @@ async def update_a_pep(
     namespace: str,
     updated_project: ProjectOptional,
     tag: Optional[str] = DEFAULT_TAG,
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
     Update a PEP from a certain namespace
     """
     # if not logged in, they cant update
-    current_project = db.get_project(namespace, project, tag=tag)
-    raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
+    current_project = agent.project.get(namespace, project, tag=tag)
+    raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
     new_raw_project = raw_peppy_project.copy()
 
     # sample table update
@@ -127,7 +129,7 @@ async def update_a_pep(
                 )
 
         # if we get through all samples, then update project in the database
-        db.update_item(
+        agent.project.edit(
             {
                 "project": new_project,
             },
@@ -137,12 +139,10 @@ async def update_a_pep(
         )
 
         # grab latest project and return to user
-        raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
+        raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
         return {
             "project": raw_peppy_project,
-            "project_annotation": db.get_project_annotation(
-                namespace, project, tag=tag
-            ),
+            "project_annotation": agent.annotation.get(namespace, project, tag=tag),
             "message": "Project updated successfully",
         }
 
@@ -165,7 +165,7 @@ async def update_a_pep(
             # )
 
     # update the project in the database
-    db.update_item(
+    agent.project.edit(
         dict(project=Project().from_dict(new_raw_project), **update_dict),
         namespace,
         project,
@@ -173,7 +173,7 @@ async def update_a_pep(
     )
 
     # fetch latest project and return to user
-    raw_peppy_project = db.get_raw_project(namespace, project, tag=tag)
+    raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
 
     return JSONResponse(
         content={
@@ -195,20 +195,19 @@ async def delete_a_pep(
     namespace: str,
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
-    db: Connection = Depends(get_db),
-    session_info: dict = Depends(read_session_info),
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
     Delete a PEP from a certain namespace
     """
-    proj = db.get_project(namespace, project, tag=tag)
+    proj = agent.project.get(namespace, project, tag=tag)
 
     if proj is None:
         raise HTTPException(
             status_code=404, detail=f"Project {namespace}/{project}:{tag} not found"
         )
 
-    db.delete_project(namespace, project, tag=tag)
+    agent.project.delete(namespace, project, tag=tag)
 
     return JSONResponse(
         content={

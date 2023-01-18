@@ -29,16 +29,12 @@ namespace = APIRouter(
 
 @namespace.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(
-    namespace: str,
     request: Request,
-    db: Connection = Depends(get_db),
-    user: str = Depends(get_user_from_session_info),
-    nspace: dict = Depends(get_namespace_info),
+    nspace: NamespaceReturnModel = Depends(get_namespace_info),
 ):
     """
     Fetch namespace. Returns a JSON representation of the namespace.
     """
-    nspace = db.get_namespace_info(namespace=namespace, user=user)
     nspace = nspace.dict()
     nspace["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
     return JSONResponse(content=nspace)
@@ -47,7 +43,7 @@ async def get_namespace(
 @namespace.get("/projects", summary="Fetch all projects inside a particular namespace.")
 async def get_namespace_projects(
     namespace: str,
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
     limit: int = 10,
     offset: int = 0,
     user=Depends(get_user_from_session_info),
@@ -62,20 +58,16 @@ async def get_namespace_projects(
     # TODO, this API will change. Searching
     # through a namespace for projects doesnt make sense
     # get projects in namespace
-    search_result = db.search.project(
-        namespace=namespace,
-        limit=limit,
-        offset=offset,
-        admin=(user == namespace),
-        search_str=q or "",
+    search_result = agent.annotation.get(
+        namespace=namespace, limit=limit, offset=offset, admin=[user].extend(user_orgs)
     )
 
     return JSONResponse(
         content={
-            "count": search_result.number_of_results,
+            "count": search_result.count,
             "limit": limit,
             "offset": offset,
-            "items": [p.dict() for p in search_result.results],
+            "items": [p.dict() for p in search_result.result],
             "session_info": session_info,
             "can_edit": user == namespace or namespace in user_orgs,
         }
@@ -96,7 +88,7 @@ async def submit_pep(
     is_private: bool = Form(False),
     tag: str = Form(DEFAULT_TAG),
     files: List[UploadFile] = File(...),
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
     init_file = parse_user_file_upload(files)
     init_file, other_files = split_upload_files_on_init_file(files, init_file)
@@ -116,12 +108,8 @@ async def submit_pep(
 
         p = Project(f"{dirpath}/{init_file.filename}")
         p.name = project_name
-        db.upload_project(
-            p, 
-            namespace=namespace, 
-            name=project_name, 
-            tag=tag,
-            is_private=is_private
+        agent.project.submit(
+            p, namespace=namespace, name=project_name, tag=tag, is_private=is_private
         )
         return JSONResponse(
             content={

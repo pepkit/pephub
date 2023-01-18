@@ -2,6 +2,7 @@ from fastapi import APIRouter, __version__ as fastapi_version
 from fastapi.responses import JSONResponse
 from peppy import __version__ as peppy_version
 from platform import python_version
+from pepdbagent import PEPDatabaseAgent
 from pepdbagent.models import ProjectSearchResultModel
 
 from ...._version import __version__ as pephub_version
@@ -30,8 +31,11 @@ async def search_for_pep(
     query: SearchQuery,
     qdrant: QdrantClient = Depends(get_qdrant),
     model: SentenceTransformer = Depends(get_sentence_transformer),
-    db: Connection = Depends(get_db),
-    limit: int = 8,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    user: str = Depends(get_user_from_session_info),
+    user_orgs: List[str] = Depends(get_organizations_from_session_info),
+    limit: int = 10,
+    offset: int = 0,
 ):
     """
     Perform a search for PEPs. This can be done using qdrant (semantic search),
@@ -47,12 +51,13 @@ async def search_for_pep(
                 query_vector=query_vec,
                 limit=limit,
             )
-            namespaces = db.get_namespaces_info_by_list()
+            namespaces = agent.namespace.get(admin=[user].extend(user_orgs))
             namespace_hits = [
                 n.namespace
-                for n in namespaces
+                for n in namespaces.results
                 if query.query.lower() in n.namespace.lower()
             ]
+            # TODO: make this a helper function
             namespace_hits.extend(
                 [
                     n
@@ -75,19 +80,14 @@ async def search_for_pep(
                 }
             )
         except Exception as e:
+            # TODO: this isnt proper error handling. Also we need to use a logger
             print("Qdrant search failed, falling back to SQL search. Reason: ", e)
     else:
-        # fallback to SQL search on GEO projects
-        namespaces = db.get_namespaces_info_by_list()
-        results: List[ProjectSearchResultModel] = []
-        for namespace in namespaces:
-            try:
-                res = db.search.project(
-                    namespace=namespace.namespace, search_str=query.query, limit=limit
-                )
-                results.extend(res.results)
-            except:
-                results.extend([])
+        # fallback to SQL search
+        namespaces = agent.namespace.get(admin=[user].extend(user_orgs)).results
+        results = agent.annotation.get(
+            query=query.query, limit=limit, offset=offset
+        ).result
 
         # emulate qdrant response from the SQL search
         # for frontend compatibility
@@ -104,6 +104,7 @@ async def search_for_pep(
             }
             for r in results
         ]
+
         namespace_hits = [
             n.namespace
             for n in namespaces

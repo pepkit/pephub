@@ -97,7 +97,7 @@ async def view_profile(session_info: dict = Depends(read_session_info)):
     if session_info:
         return session_info
     else:
-        return {"message": "Unauthorized user"}
+        return {"message": "Unauthenticated user"}
 
 
 @auth.get("/logout")

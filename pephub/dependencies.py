@@ -16,10 +16,7 @@ from fastapi.security import HTTPBearer, APIKeyCookie
 from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import (
-    AnnotationModel,
-    NamespaceReturnModel
-)
+from pepdbagent.models import AnnotationModel, NamespaceReturnModel
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
@@ -35,7 +32,6 @@ from .const import (
     DEFAULT_QDRANT_PORT,
     DEFAULT_HF_MODEL,
 )
-
 
 
 load_dotenv()
@@ -198,6 +194,7 @@ def get_project_annotation(
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
 
+
 # TODO: This isn't used; do we still need it?
 def get_namespaces(
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -279,7 +276,8 @@ def verify_user_can_write_project(
             raise HTTPException(
                 404, f"Project, '{namespace}/{project}:{tag}', not found."
             )
-        elif any([            
+        elif any(
+            [
                 session_info["login"] != namespace
                 and namespace
                 not in orgs,  # user doesnt own namespace or is not member of organization
@@ -360,11 +358,15 @@ def get_sentence_transformer() -> SentenceTransformer:
         pass
 
 
-def get_namespace_info(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+def get_namespace_info(
+    namespace: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    user: str = Depends(get_user_from_session_info),
+) -> NamespaceReturnModel:
     """
     Get the information on a namespace, if it exists.
     """
-    if namespace_info := agent.namespace.get(query=namespace):
+    if namespace_info := agent.namespace.get(query=namespace, admin=user):
         yield namespace_info
     else:
         raise HTTPException(

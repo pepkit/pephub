@@ -151,7 +151,7 @@ async def namespace_view(
     "/{namespace}/{project}",
     summary="View a visual summary of a particular project.",
     response_class=HTMLResponse,
-    dependencies=[Depends(verify_user_can_read_project)]
+    dependencies=[Depends(verify_user_can_read_project)],
 )
 async def project_view(
     request: Request,
@@ -200,7 +200,7 @@ async def project_view(
     "/{namespace}/{project}/edit",
     summary="Enter the project editor page.",
     response_class=HTMLResponse,
-    dependencies=[Depends(verify_user_can_write_project)]
+    dependencies=[Depends(verify_user_can_write_project)],
 )
 async def project_edit(
     request: Request,
