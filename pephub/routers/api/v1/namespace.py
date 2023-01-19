@@ -32,7 +32,7 @@ namespace = APIRouter(
 @namespace.get("/", summary="Fetch details about a particular namespace.")
 async def get_namespace(
     request: Request,
-    nspace: NamespaceReturnModel = Depends(get_namespace_info),
+    nspace: Namespace = Depends(get_namespace_info),
 ):
     """
     Fetch namespace. Returns a JSON representation of the namespace.
@@ -70,7 +70,7 @@ async def get_namespace_projects(
             "count": search_result.count,
             "limit": limit,
             "offset": offset,
-            "items": [p.dict() for p in search_result.result],
+            "items": [p.dict() for p in search_result.results],
             "session_info": session_info,
             "can_edit": user == namespace or namespace in user_orgs,
         }

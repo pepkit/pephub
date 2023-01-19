@@ -1,6 +1,5 @@
 from typing import Optional
 from pydantic import BaseModel
-import pydantic
 from pydantic import Extra
 from pepdbagent.models import UpdateItems
 

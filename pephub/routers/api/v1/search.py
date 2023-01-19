@@ -87,7 +87,7 @@ async def search_for_pep(
         namespaces = agent.namespace.get(admin=namespace_access).results
         results = agent.annotation.get(
             query=query.query, limit=limit, offset=offset
-        ).result
+        ).results
 
         # emulate qdrant response from the SQL search
         # for frontend compatibility

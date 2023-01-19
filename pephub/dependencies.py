@@ -17,8 +17,8 @@ from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.models import (
-    NamespaceResultModel,
-    NamespaceReturnModel,
+    Namespace,
+    NamespaceList,
     AnnotationModel,
 )
 from pepdbagent.exceptions import ProjectNotFoundError
@@ -214,7 +214,7 @@ def get_project_annotation(
     try:
         anno = agent.annotation.get(
             namespace, project, tag, admin=namespace_access_list
-        ).result[0]
+        ).results[0]
         yield anno
     except ProjectNotFoundError:
         raise HTTPException(
@@ -227,7 +227,7 @@ def get_project_annotation(
 def get_namespaces(
     agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-) -> List[NamespaceReturnModel]:
+) -> List[NamespaceList]:
     yield agent.namespace.get(admin=user)
 
 
@@ -390,7 +390,7 @@ def get_namespace_info(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-) -> NamespaceResultModel:
+) -> Namespace:
     """
     Get the information on a namespace, if it exists.
     """

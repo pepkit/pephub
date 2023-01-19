@@ -103,7 +103,7 @@ def me(
         return RedirectResponse(url="/auth/login")
     else:
         namespace_info = agent.namespace.get(query=user).results[0]
-        projects = agent.annotation.get(namespace=user).result
+        projects = agent.annotation.get(namespace=user).results
         return templates.TemplateResponse(
             "profile.html",
             {
