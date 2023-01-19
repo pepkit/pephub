@@ -61,9 +61,18 @@ async def get_namespace_projects(
     # TODO, this API will change. Searching
     # through a namespace for projects doesnt make sense
     # get projects in namespace
-    search_result = agent.annotation.get(
-        namespace=namespace, limit=limit, offset=offset, admin=namespace_access
-    )
+    if q is not None:
+        search_result = agent.annotation.get(
+            query=q,
+            namespace=namespace,
+            limit=limit,
+            offset=offset,
+            admin=namespace_access,
+        )
+    else:
+        search_result = agent.annotation.get(
+            namespace=namespace, limit=limit, offset=offset, admin=namespace_access
+        )
 
     return JSONResponse(
         content={

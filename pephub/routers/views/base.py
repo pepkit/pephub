@@ -206,6 +206,7 @@ async def project_view(
             "description": project_annotation.description,
             "last_update_date": project_annotation.last_update_date,
             "submission_date": project_annotation.submission_date,
+            "digest": project_annotation.digest,
             "can_edit": user == namespace or namespace in user_orgs,
         },
     )
