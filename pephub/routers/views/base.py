@@ -128,10 +128,19 @@ async def namespace_view(
     namespace: str,
     user: str = Depends(get_user_from_session_info),
     session_info: dict = Depends(read_session_info),
-    nspace: NamespaceResultModel = Depends(get_namespace_info),
+    agent: PEPDatabaseAgent = Depends(get_db),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
 ):
     """Returns HTML response with a visual summary of the namespace."""
+    try:
+        nspace = agent.namespace.get(query=namespace).results[0]
+    except IndexError:
+        nspace = {
+            "namespace": namespace,
+            "number_of_projects": 0,
+            "number_of_samples": 0,
+        }
+
     return templates.TemplateResponse(
         "namespace.html",
         {
