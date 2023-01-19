@@ -129,7 +129,7 @@ async def update_a_pep(
                 )
 
         # if we get through all samples, then update project in the database
-        agent.project.edit(
+        agent.project.update(
             {
                 "project": new_project,
             },
@@ -165,7 +165,7 @@ async def update_a_pep(
             # )
 
     # update the project in the database
-    agent.project.edit(
+    agent.project.update(
         dict(project=Project().from_dict(new_raw_project), **update_dict),
         namespace,
         project,
@@ -200,9 +200,9 @@ async def delete_a_pep(
     """
     Delete a PEP from a certain namespace
     """
-    proj = agent.project.get(namespace, project, tag=tag)
+    proj = agent.project.exists(namespace, project, tag=tag)
 
-    if proj is None:
+    if not proj:
         raise HTTPException(
             status_code=404, detail=f"Project {namespace}/{project}:{tag} not found"
         )

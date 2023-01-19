@@ -202,7 +202,8 @@ async def project_view(
             "session_info": session_info,
             "is_private": project.is_private,
             "description": project_annoatation.description,
-            "last_update": project_annoatation.last_update_date,
+            "last_update_date": project_annoatation.last_update_date,
+            "submission_date": project_annoatation.submission_date,
         },
     )
 

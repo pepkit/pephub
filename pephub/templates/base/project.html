@@ -55,10 +55,18 @@
           <span class="me-3">
             <i class="bi bi-calendar3"></i>
             <span class="mx-1">Created:</span>
-            <span>August 27th, 2022 (this is temp)</span>
+            <span>  {{ submission_date }}</span>
           </span>
-          <span class="me-3">
-            {{ project.digest }}
+        </small>
+      </div>
+    </div>
+    <div class="mt-1">
+      <div class="flex-row d-flex align-items-center text-muted">
+        <small>
+          <span class="me-1">
+            <i class="bi bi-calendar3"></i>
+            <span class="mx-1">Last update date:</span>
+            <span>{{ last_update_date }}</span>
           </span>
         </small>
       </div>

@@ -112,7 +112,7 @@ async def submit_pep(
         p = Project(f"{dirpath}/{init_file.filename}")
         p.name = project_name
         try:
-            agent.project.submit(
+            agent.project.create(
                 p,
                 namespace=namespace,
                 name=project_name,
