@@ -169,8 +169,10 @@ async def project_view(
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
     project: peppy.Project = Depends(get_project),
-    project_annoatation: dict = Depends(get_project_annotation),
+    project_annotation: AnnotationModel = Depends(get_project_annotation),
     session_info: dict = Depends(read_session_info),
+    user: str = Depends(get_user_from_session_info),
+    user_orgs: List[str] = Depends(get_organizations_from_session_info),
     edit: bool = False,
 ):
     """
@@ -201,9 +203,10 @@ async def project_view(
             "is_editing": edit,
             "session_info": session_info,
             "is_private": project.is_private,
-            "description": project_annoatation.description,
-            "last_update_date": project_annoatation.last_update_date,
-            "submission_date": project_annoatation.submission_date,
+            "description": project_annotation.description,
+            "last_update_date": project_annotation.last_update_date,
+            "submission_date": project_annotation.submission_date,
+            "can_edit": user == namespace or namespace in user_orgs,
         },
     )
 
