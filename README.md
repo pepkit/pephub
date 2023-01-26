@@ -25,7 +25,7 @@ Install dependencies using `pip` (*We suggest using virtual environments*):
 
 ```
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements/requirements.txt
+pip install -r requirements/requirements-all.txt
 ```
 
 ### 3. (*Optional*) GitHub Authentication Client Setup
