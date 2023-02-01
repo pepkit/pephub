@@ -98,23 +98,20 @@ class CLIAuthSystem:
             encoded_user_data = encoded_user_data.decode("utf-8")
         return encoded_user_data
 
+agent = PEPDatabaseAgent(
+    user=os.environ.get("POSTGRES_USER") or DEFAULT_POSTGRES_USER,
+    password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
+    host=os.environ.get("POSTGRES_HOST") or DEFAULT_POSTGRES_HOST,
+    database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
+    port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
+)
+
 
 def get_db() -> PEPDatabaseAgent:
     """
     Grab a temporary connection to the database.
     """
-    agent = PEPDatabaseAgent(
-        user=os.environ.get("POSTGRES_USER") or DEFAULT_POSTGRES_USER,
-        password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
-        host=os.environ.get("POSTGRES_HOST") or DEFAULT_POSTGRES_HOST,
-        database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
-        port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
-    )
-    try:
-        yield agent
-    finally:
-        del agent
-
+    return agent
 
 def set_session_info(response: Response, session_info: dict):
     """
@@ -138,6 +135,7 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
     if session_info_encoded is None:
         return None
     try:
+        # Python jwt.decode verifies content as well so this is safe.
         session_info = jwt.decode(
             session_info_encoded, JWT_SECRET, algorithms=["HS256"]
         )
