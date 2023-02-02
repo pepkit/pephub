@@ -91,7 +91,7 @@ async def get_namespace_projects(
 # * spotify: https://developer.spotify.com/documentation/web-api/reference-beta/#endpoint-create-playlist
 @namespace.post(
     "/projects",
-    summary="Submit a PEP to the current namespace",
+    summary="Create a PEP in the current namespace",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
 async def submit_pep(
