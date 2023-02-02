@@ -35,6 +35,16 @@
         {% endif %}
       </div>
     </div>
+    <div class="text-secondary mb-3 d-flex flex-row align-items-center">
+        <span class="fw-bold">UID:</span>
+        <span class="mx-2" id="project-uid-digest">
+          {{ digest }}
+        </span>
+      <button id="copy-digest-button" class="btn btn-sm btn-outline-secondary" onclick="copyDigestToClipboard('{{digest}}')">
+        <i id="copy-digest-icon" class="bi bi-clipboard"></i>
+        <span id="copy-btn-text">Copy</span>
+      </button>
+    </div>
     <div>
       {% if description %}
         <p>{{description}}</p>
@@ -62,13 +72,6 @@
             <i class="bi bi-calendar3"></i>
             <span class="mx-1">Last updated:</span>
             <span>{{ last_update_date }}</span>
-          </span>
-        </small>
-      </div>
-      <div>
-        <small>
-          <span class="me-1">
-            {{ digest }}
           </span>
         </small>
       </div>

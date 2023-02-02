@@ -56,3 +56,23 @@ const toggleSampleName = (sel) => {
   const link = document.getElementById("sample-name-link")
   link.href=`/api/v1/{{ namespace }}/{{ project.name }}/samples/${sel.value}`
 }
+// https://stackoverflow.com/a/30810322/13175187
+const copyDigestToClipboard = (digest) => {
+  const copyText = document.getElementById("project-uid-digest")
+
+  navigator.clipboard.writeText(copyText.value)
+
+  // update button + icon
+  const copyButtonText = document.getElementById("copy-btn-text")
+  const copyIcon = document.getElementById("copy-digest-icon")
+  copyButtonText.textContent = "Copied!"
+  copyIcon.classList.remove("bi-clipboard")
+  copyIcon.classList.add("bi-clipboard-check")
+
+  // update after 2 seconds
+  setTimeout(() => {
+    copyButtonText.textContent = "Copy"
+    copyIcon.classList.remove("bi-clipboard-check")
+    copyIcon.classList.add("bi-clipboard")
+  }, 2000)
+}
