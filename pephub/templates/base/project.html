@@ -89,8 +89,8 @@
             {% for s in samples %}
               <tr>
                 <td>
-                  <a href="/api/v1/{{ namespace }}/{{ project.name }}/samples/{{s.sample_name}}/view">
-                    /api/v1/{{ namespace }}/{{ project.name }}/samples/{{s.sample_name}}/view
+                  <a href="/{{ namespace }}/{{ project.name }}/samples/{{s.sample_name}}">
+                    /{{ namespace }}/{{ project.name }}/samples/{{s.sample_name}}
                   </a>
                 </td>
                 {% for col in sample_table_columns %}

@@ -17,6 +17,7 @@ from .routers.api.v1.user import user as api_user
 from .routers.api.v1.search import search as api_search
 from .routers.auth.base import auth as auth_router
 from .routers.views.base import views as views_base
+from .routers.eido import router as eido_router
 from .const import STATICS_PATH, EIDO_PATH
 
 _LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
@@ -71,6 +72,7 @@ app.include_router(api_project)
 app.include_router(api_search)
 app.include_router(auth_router)
 app.include_router(views_base)
+app.include_router(eido_router)
 
 # mount the landing html/assets
 app.mount("/static", StaticFiles(directory=STATICS_PATH), name="root_static")
