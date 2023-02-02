@@ -17,19 +17,12 @@ from ...._version import __version__ as pephub_version
 from ...models import ProjectOptional
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import *
-from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS
+from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS, ALL_VERSIONS
 
 
 from dotenv import load_dotenv
 
 load_dotenv()
-
-ALL_VERSIONS = {
-    "pephub_version": pephub_version,
-    "peppy_version": peppy_version,
-    "python_version": python_version(),
-    "api_version": 1,
-}
 
 project = APIRouter(
     prefix="/api/v1/projects/{namespace}/{project}",

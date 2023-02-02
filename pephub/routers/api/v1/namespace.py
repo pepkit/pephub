@@ -11,18 +11,11 @@ from platform import python_version
 from ...._version import __version__ as pephub_version
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
-
+from ....const import ALL_VERSIONS, DEFAULT_TAG
 
 from dotenv import load_dotenv
 
 load_dotenv()
-
-ALL_VERSIONS = {
-    "pephub_version": pephub_version,
-    "peppy_version": peppy_version,
-    "python_version": python_version(),
-    "api_version": 1,
-}
 
 namespace = APIRouter(
     prefix="/api/v1/namespaces/{namespace}", tags=["api", "namespace", "v1"]
@@ -94,7 +87,7 @@ async def get_namespace_projects(
     summary="Create a PEP in the current namespace",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
-async def submit_pep(
+async def create_pep(
     namespace: str,
     project_name: str = Form(...),
     is_private: bool = Form(False),

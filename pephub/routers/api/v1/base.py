@@ -5,20 +5,12 @@ from pepdbagent import __version__ as pepdbagent_version
 
 from ...._version import __version__ as pephub_version
 from ....dependencies import *
+from ....const import ALL_VERSIONS
 
 
 from dotenv import load_dotenv
 
 load_dotenv()
-
-ALL_VERSIONS = {
-    "pephub_version": pephub_version,
-    "peppy_version": peppy_version,
-    "python_version": python_version(),
-    "fastapi_version": fastapi_version,
-    "pepdbagent_version": pepdbagent_version,
-    "api_version": 1,
-}
 
 api = APIRouter(prefix="/api/v1", tags=["api", "base", "v1"])
 

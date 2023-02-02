@@ -7,20 +7,12 @@ from pepdbagent import PEPDatabaseAgent
 from ...._version import __version__ as pephub_version
 from ....dependencies import *
 from ...models import SearchQuery
-from ....const import DEFAULT_QDRANT_COLLECTION_NAME
+from ....const import DEFAULT_QDRANT_COLLECTION_NAME, ALL_VERSIONS
 
 
 from dotenv import load_dotenv
 
 load_dotenv()
-
-ALL_VERSIONS = {
-    "pephub_version": pephub_version,
-    "peppy_version": peppy_version,
-    "python_version": python_version(),
-    "fastapi_version": fastapi_version,
-    "api_version": 1,
-}
 
 search = APIRouter(prefix="/api/v1/search", tags=["api", "search", "v1"])
 

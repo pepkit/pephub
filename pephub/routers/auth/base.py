@@ -12,6 +12,7 @@ from pephub.dependencies import JWT_SECRET, CLIAuthSystem
 from ...helpers import build_authorization_url
 from ..._version import __version__ as pephub_version
 from ...dependencies import read_session_info, set_session_info
+from ...const import ALL_VERSIONS
 
 load_dotenv()
 
@@ -20,12 +21,6 @@ github_app_config = {
     "client_id": os.getenv("GH_CLIENT_ID", "dummy-client-id"),
     "client_secret": os.getenv("GH_CLIENT_SECRET", "dummy-secret"),
     "redirect_uri": os.getenv("REDIRECT_URI"),
-}
-
-ALL_VERSIONS = {
-    "pephub_version": pephub_version,
-    "peppy_version": peppy_version,
-    "python_version": python_version(),
 }
 
 auth = APIRouter(prefix="/auth", tags=["auth", "users", "login", "authentication"])
