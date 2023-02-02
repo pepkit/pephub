@@ -33,3 +33,28 @@ def profile_data(
                 "peps": [pep.dict() for pep in peps.projects],
             }
         )
+
+
+@user.get("/data")
+def profile_data(
+    request: Request,
+    session_info=Depends(read_session_info),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    """
+    Return the user's profile data.
+    """
+    if session_info is None:
+        return RedirectResponse(url="/auth/login")
+    else:
+        peps = agent.namespace.get(
+            namespace=session_info["login"], admin=session_info["login"]
+        )
+        return {
+            "request": request,
+            "session_info": session_info,
+            "python_version": python_version(),
+            "pephub_version": pephub_version,
+            "logged_in": session_info is not None,
+            "peps": peps,
+        }

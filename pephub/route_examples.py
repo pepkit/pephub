@@ -1,3 +1,5 @@
+# this file is for API documentation route examples.
+
 from fastapi import Path, Query
 from pydantic import BaseModel
 
