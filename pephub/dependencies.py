@@ -16,17 +16,12 @@ from fastapi.security import HTTPBearer, APIKeyCookie
 from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import (
-    Namespace,
-    NamespaceList,
-    AnnotationModel,
-)
 from pepdbagent.exceptions import ProjectNotFoundError
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
 
-
+from .routers.models import AnnotationModel, NamespaceList, Namespace
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -98,6 +93,7 @@ class CLIAuthSystem:
             encoded_user_data = encoded_user_data.decode("utf-8")
         return encoded_user_data
 
+
 agent = PEPDatabaseAgent(
     user=os.environ.get("POSTGRES_USER") or DEFAULT_POSTGRES_USER,
     password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
@@ -112,6 +108,7 @@ def get_db() -> PEPDatabaseAgent:
     Grab a temporary connection to the database.
     """
     return agent
+
 
 def set_session_info(response: Response, session_info: dict):
     """

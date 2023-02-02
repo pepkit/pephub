@@ -6,15 +6,11 @@ from io import StringIO
 from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pepdbagent.models import AnnotationModel
 from pepdbagent import PEPDatabaseAgent
-from peppy import __version__ as peppy_version
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
-from platform import python_version
 
-from ...._version import __version__ as pephub_version
-from ...models import ProjectOptional
+from ...models import ProjectOptional, AnnotationModel
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import *
 from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS, ALL_VERSIONS

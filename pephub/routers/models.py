@@ -1,7 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
-from pydantic import Extra
-from pepdbagent.models import UpdateItems
+from pepdbagent.models import *
 
 
 class ProjectOptional(UpdateItems):
