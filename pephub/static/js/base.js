@@ -2,9 +2,9 @@ const toggleSearchDropdown = () => {
 
     const dropdown = document.getElementById('search-dropdown-toggle');
     dropdownToggle = new bootstrap.Dropdown(dropdown);
-    const searchBar = document.getElementById('global-search-bar');
+    const searchBarNav = document.getElementById('global-search-bar');
     const searchQuerySpan = document.getElementById('search-dropdown-query');
-    searchQuery = searchBar.value;
+    searchQuery = searchBarNav.value;
     searchQuerySpan.innerText = `"${searchQuery}"`;
 
     if (searchQuery.length > 0) {
@@ -15,15 +15,15 @@ const toggleSearchDropdown = () => {
 }
 
 const detectSearchSubmit = (event) => {
-    const searchBar = document.getElementById('global-search-bar');
-    const searchQuery = searchBar.value;
+    const searchBarNav = document.getElementById('global-search-bar');
+    const searchQuery = searchBarNav.value;
     if (event.key === 'Enter' && searchQuery.length) {
         window.location.href = `/search/?query=${searchQuery}`;
     }
 }
 
 const submitSearchQuery = () => {
-    const searchBar = document.getElementById('global-search-bar');
-    const searchQuery = searchBar.value;
+    const searchBarNav = document.getElementById('global-search-bar');
+    const searchQuery = searchBarNav.value;
     window.location.href = `/search/?query=${searchQuery}`;
 }
