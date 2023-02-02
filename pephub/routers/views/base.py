@@ -295,6 +295,7 @@ async def get_sample_view(
             "python_version": python_version(),
             "pephub_version": pephub_version,
             "logged_in": session_info is not None,
+            "session_info": session_info,
         },
     )
 

@@ -10,9 +10,8 @@
     <div class="flex-row d-flex align-items-start justify-content-between">
       <div class="flex-row d-flex align-items-center">
         <h1>
-          {{ namespace }}/{{ project.name }}
+          {{ namespace }}/{{ project.name }}:{{tag}}
         </h1>
-        <span class="ms-2 badge rounded-pill bg-dark">{{tag}}</span>
         {% if is_private %}
           <span class="border ms-2 badge rounded-pill border-danger text-danger">Private</span>
         {% endif %}

@@ -4,9 +4,8 @@
     <div class="d-flex flex-row align-items-start justify-content-between">
       <div class="d-flex flex-row align-items-center">
         <a class="fw-bold fs-4" href="/{{namespace}}/{{proj.name}}?tag={{proj.tag}}">
-          {{namespace}}/{{proj.name}}
+          {{namespace}}/{{proj.name}}:{{proj.tag}}
         </a>
-        <span class="ms-2 badge rounded-pill bg-dark">{{proj.tag}}</span>
         {% if proj.is_private %}
           <span class="ms-2 badge rounded-pill border border-danger text-danger">Private</span>
         {% endif %}

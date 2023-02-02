@@ -30,9 +30,8 @@
               <div class="d-flex flex-row align-items-center">
                 <i class="bi bi-table me-2 text-secondary"></i>
                 <a class="fw-bold fs-5" href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
-                  {{ result.payload.namespace }}/{{ result.payload.name }}
+                  {{ result.payload.namespace }}/{{ result.payload.name }}:{{result.payload.tag}}
                 </a>
-                <span class="ms-2 badge rounded-pill bg-dark">{{result.payload.tag}}</span>
               </div>
               <!-- <div>
                 <a href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
