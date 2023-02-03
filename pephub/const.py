@@ -4,7 +4,7 @@ from peppy import __version__ as peppy_version
 from platform import python_version
 from fastapi import __version__ as fastapi_version
 from pepdbagent import __version__ as pepdbagent_version
-
+from pepdbagent.const import DEFAULT_TAG
 
 PKG_NAME = "pephub"
 DATA_REPO = "https://github.com/pepkit/data.pephub.git"
