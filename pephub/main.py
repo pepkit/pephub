@@ -27,7 +27,7 @@ from .const import STATICS_PATH, EIDO_PATH
 _LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
 coloredlogs.install(
     logger=_LOGGER_PEPDBAGENT,
-    level=logging.INFO,
+    level=logging.WARNING,
     datefmt="%b %d %Y %H:%M:%S",
     fmt="[%(levelname)s] [%(asctime)s] [PEPDBAGENT] %(message)s",
 )
@@ -35,7 +35,7 @@ coloredlogs.install(
 _LOGGER_PEPPY = logging.getLogger("peppy")
 coloredlogs.install(
     logger=_LOGGER_PEPPY,
-    level=logging.ERROR,
+    level=logging.WARNING,
     datefmt="%b %d %Y %H:%M:%S",
     fmt="[%(levelname)s] [%(asctime)s] [PEPPY] %(message)s",
 )
