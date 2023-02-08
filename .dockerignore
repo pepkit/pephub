@@ -2,6 +2,8 @@
 .venv/
 env/
 venv/
+.env
+.env.*
 .github/
 .vscode/
 .pytest_cache/

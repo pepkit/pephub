@@ -127,7 +127,9 @@ dmypy.json
 
 # Environment variables
 .env
+.env.*
 env/
+
 
 # pephub data
 pephub/data
