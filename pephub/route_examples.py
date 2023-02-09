@@ -1,3 +1,5 @@
+# this file is for API documentation route examples.
+
 from fastapi import Path, Query
 from pydantic import BaseModel
 
@@ -6,7 +8,7 @@ example_namespace = Path(
     ..., description="A namespace that holds projects.", regex=r"^\w+$", example="demo"
 )
 
-example_pep_id = Path(
+example_project = Path(
     ...,
     description="A project name inside a particular namespace",
     example="BiocProject",

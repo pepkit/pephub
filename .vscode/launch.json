@@ -5,21 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Load database",
-      "type": "python",
-      "request": "launch",
-      "program": "scripts/load_db.py",
-      "console": "integratedTerminal",
-      "justMyCode": false,
-      "args": [
-        "--user", "postgres",
-        "--password", "docker",
-        "--database", "pep-base-sql",
-        "--host", "localhost",
-        "/Users/nathanleroy/uva/lab/code/pephub/examples"
-      ]
-    },
-    {
       "name": "pephub",
       "type": "python",
       "request": "launch",

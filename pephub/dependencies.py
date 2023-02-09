@@ -1,30 +1,37 @@
 import os
-import peppy
+import pydantic
+import jwt
+import json
+import requests
+
+from secrets import token_hex
+from dotenv import load_dotenv
+from typing import Union, List, Optional
+from datetime import datetime, timedelta
+
 from fastapi import Depends
 from fastapi.responses import Response
-from fastapi.security import HTTPBearer
-from fastapi.security import APIKeyCookie
-from pepdbagent import Connection
+from fastapi.exceptions import HTTPException
+from fastapi.security import HTTPBearer, APIKeyCookie
+from pydantic import BaseModel
+from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import NamespaceModel
-from dotenv import load_dotenv
-from typing import Union
+from pepdbagent.exceptions import ProjectNotFoundError
+from qdrant_client import QdrantClient
+from qdrant_client.http.exceptions import ResponseHandlingException
+from sentence_transformers import SentenceTransformer
+
+from .routers.models import AnnotationModel, NamespaceList, Namespace
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
     DEFAULT_POSTGRES_PORT,
     DEFAULT_POSTGRES_USER,
     DEFAULT_POSTGRES_DB,
+    DEFAULT_QDRANT_HOST,
+    DEFAULT_QDRANT_PORT,
+    DEFAULT_HF_MODEL,
 )
-from datetime import datetime, timedelta
-import pydantic
-import jwt
-import json
-from fastapi.exceptions import HTTPException
-import requests
-from pydantic import BaseModel
-from typing import List, Optional
-from secrets import token_hex
 
 
 load_dotenv()
@@ -79,22 +86,28 @@ class CLIAuthSystem:
     @staticmethod
     def jwt_encode_user_data(user_data: dict) -> str:
         exp = datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
-        return jwt.encode({**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256")
+        encoded_user_data = jwt.encode(
+            {**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256"
+        )
+        if isinstance(encoded_user_data, bytes):
+            encoded_user_data = encoded_user_data.decode("utf-8")
+        return encoded_user_data
 
 
-def get_db():
-    # create database
-    pepdb = Connection(
-        user=os.environ.get("POSTGRES_USER") or DEFAULT_POSTGRES_USER,
-        password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
-        host=os.environ.get("POSTGRES_HOST") or DEFAULT_POSTGRES_HOST,
-        database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
-        port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
-    )
-    try:
-        yield pepdb
-    finally:
-        pepdb.close_connection()
+agent = PEPDatabaseAgent(
+    user=os.environ.get("POSTGRES_USER") or DEFAULT_POSTGRES_USER,
+    password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
+    host=os.environ.get("POSTGRES_HOST") or DEFAULT_POSTGRES_HOST,
+    database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
+    port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
+)
+
+
+def get_db() -> PEPDatabaseAgent:
+    """
+    Grab a temporary connection to the database.
+    """
+    return agent
 
 
 def set_session_info(response: Response, session_info: dict):
@@ -116,8 +129,10 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
 
     @param session_info_encoded: JWT provided via FastAPI injection from the API cookie.
     """
-
+    if session_info_encoded is None:
+        return None
     try:
+        # Python jwt.decode verifies content as well so this is safe.
         session_info = jwt.decode(
             session_info_encoded, JWT_SECRET, algorithms=["HS256"]
         )
@@ -134,7 +149,7 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
 
 def get_organizations_from_session_info(
     session_info: Union[dict, None] = Depends(read_session_info)
-) -> List:
+) -> List[str]:
     organizations = []
     if session_info:
         organizations = session_info.get("orgs")
@@ -143,48 +158,252 @@ def get_organizations_from_session_info(
 
 def get_user_from_session_info(
     session_info: Union[dict, None] = Depends(read_session_info)
-) -> str:
+) -> Union[str, None]:
     user = None
     if session_info:
         user = session_info.get("login")
     return user
 
 
+def get_namespace_access_list(
+    user: str = Depends(get_user_from_session_info),
+    orgs: List[str] = Depends(get_organizations_from_session_info),
+) -> List[str]:
+    """
+    Return a list of namespaces that the current user has access to. Function
+    will return None if there is no logged in user
+    """
+    access_rights = []
+    if user:
+        access_rights.append(user)
+        access_rights.extend(orgs)
+        return access_rights
+    else:
+        return None
+
+
 def get_project(
     namespace: str,
-    pep_id: str,
-    tag: str = None,
-    db: Connection = Depends(get_db),
-    user=Depends(get_user_from_session_info),
-    organizations=Depends(get_organizations_from_session_info),
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
-    if proj := db.get_project(namespace, pep_id, tag):
-        _check_user_access(user, organizations, namespace, proj)
+    try:
+        proj = agent.project.get(namespace, project, tag)
         yield proj
-    else:
+    except ProjectNotFoundError:
         raise HTTPException(
             404,
-            f"PEP '{namespace}/{pep_id}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
 
 
+def get_project_annotation(
+    namespace: str,
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+) -> AnnotationModel:
+    # TODO: Is just grabbing the first annotation the right thing to do?
+    try:
+        anno = agent.annotation.get(
+            namespace, project, tag, admin=namespace_access_list
+        ).results[0]
+        yield anno
+    except ProjectNotFoundError:
+        raise HTTPException(
+            404,
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+        )
+
+
+# TODO: This isn't used; do we still need it?
 def get_namespaces(
-    db: Connection = Depends(get_db),
+    agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-    organizations: List[str] = Depends(get_organizations_from_session_info),
-) -> List[NamespaceModel]:
-    yield db.get_namespaces_info_by_list(user=user)
+) -> List[NamespaceList]:
+    yield agent.namespace.get(admin=user)
 
 
-def _check_user_access(
-    user: str, organizations: List, namespace: str, project: peppy.Project
+def verify_user_can_write_namespace(
+    namespace: str,
+    session_info: Union[dict, None] = Depends(read_session_info),
+    orgs: List = Depends(get_organizations_from_session_info),
 ):
-    if project.is_private:
-        if user == namespace or namespace in organizations:
-            return project
-        else:
+    """
+    Authorization flow for writing to a namespace.
+
+    See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#submiting-a-new-pep
+    """
+    if session_info is None:
+        raise HTTPException(
+            401,
+            f"User must be logged in to write to namespace: '{namespace}'.",
+        )
+    if session_info["login"] != namespace and namespace not in orgs:
+        raise HTTPException(
+            403,
+            f"User does not have permission to write to namespace: '{namespace}'.",
+        )
+
+
+def verify_user_can_read_project(
+    project: str,
+    namespace: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    project_annotation: AnnotationModel = Depends(get_project_annotation),
+    session_info: Union[dict, None] = Depends(read_session_info),
+    orgs: List = Depends(get_organizations_from_session_info),
+):
+    """
+    Authorization flow for reading a project from the database.
+
+    See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#reading-peps
+    """
+    if project_annotation.is_private:
+        if session_info is None:
+            # raise 404 since we don't want to reveal that the project exists
             raise HTTPException(
-                403, f"The user does not have permission to view or pull this project."
+                404, f"Project, '{namespace}/{project}:{tag}', not found."
+            )
+        elif any(
+            [
+                session_info.get("login") != namespace
+                and namespace
+                not in orgs,  # user doesnt own namespace or is not member of organization
+            ]
+        ):
+            # raise 404 since we don't want to reveal that the project exists
+            raise HTTPException(
+                404, f"Project, '{namespace}/{project}:{tag}', not found."
+            )
+
+
+def verify_user_can_write_project(
+    project: str,
+    namespace: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    project_annotation: AnnotationModel = Depends(get_project_annotation),
+    session_info: Union[dict, None] = Depends(read_session_info),
+    orgs: List = Depends(get_organizations_from_session_info),
+):
+    """
+    Authorization flow for writing a project to the database.
+
+    See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#writing-peps
+    """
+    if project_annotation.is_private:
+        if session_info is None:  # user not logged in
+            # raise 404 since we don't want to reveal that the project exists
+            raise HTTPException(
+                404, f"Project, '{namespace}/{project}:{tag}', not found."
+            )
+        elif any(
+            [
+                session_info["login"] != namespace
+                and namespace
+                not in orgs,  # user doesnt own namespace or is not member of organization
+            ]
+        ):
+            # raise 404 since we don't want to reveal that the project exists
+            raise HTTPException(
+                404, f"Project, '{namespace}/{project}:{tag}', not found."
             )
     else:
-        return project
+        # AUTHENTICATION REQUIRED
+        if session_info is None:
+            raise HTTPException(
+                401,
+                f"Please authenticate before editing project.",
+            )
+        # AUTHORIZATION REQUIRED
+        if session_info["login"] != namespace and namespace not in orgs:
+            raise HTTPException(
+                403,
+                f"The current authenticated user does not have permission to edit this project.",
+            )
+
+
+def parse_boolean_env_var(env_var: str) -> bool:
+    """
+    Helper function to parse a boolean environment variable
+    """
+    return env_var.lower() in ["true", "1", "t", "y", "yes"]
+
+
+def get_qdrant_enabled() -> bool:
+    """
+    Check if qdrant is enabled
+    """
+    return parse_boolean_env_var(os.environ.get("QDRANT_ENABLED", "false"))
+
+
+def get_qdrant(
+    qdrant_enabled: bool = Depends(get_qdrant_enabled),
+) -> Union[QdrantClient, None]:
+    """
+    Return connection to qdrant client
+    """
+    # return None if qdrant is not enabled
+    if not qdrant_enabled:
+        try:
+            yield None
+        finally:
+            pass
+    # else try to connect, test connectiona and return client if connection is successful.
+    qdrant = QdrantClient(
+        host=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
+        port=os.environ.get("QDRANT_PORT", DEFAULT_QDRANT_PORT),
+        api_key=os.environ.get("QDRANT_API_KEY", None),
+    )
+    try:
+        # test the connection first
+        qdrant.list_full_snapshots()
+        yield qdrant
+    except ResponseHandlingException as e:
+        print(f"Error getting qdrant client: {e}")
+        yield None
+    finally:
+        # no need to close the connection
+        pass
+
+
+def get_sentence_transformer() -> SentenceTransformer:
+    """
+    Return sentence transformer encoder
+    """
+    model = SentenceTransformer(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
+    try:
+        yield model
+    finally:
+        # no need to do anything
+        pass
+
+
+def get_namespace_info(
+    namespace: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    user: str = Depends(get_user_from_session_info),
+) -> Namespace:
+    """
+    Get the information on a namespace, if it exists.
+    """
+    # TODO: is this the best way to do this? By grabbing the first result?
+    try:
+        yield agent.namespace.get(query=namespace, admin=user).results[0]
+    except IndexError:
+        raise HTTPException(
+            404,
+            f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
+        )
+
+
+def verify_namespace_exists(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+    if not agent.namespace.get(query=namespace):
+        raise HTTPException(
+            404,
+            f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
+        )
+    else:
+        yield namespace

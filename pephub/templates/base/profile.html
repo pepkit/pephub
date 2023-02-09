@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container">
+    <div class="w-100 pb-5 border-secondary border-bottom">
+        <div class="d-flex flex-row align-items-start justify-content-between mb-3">
+          <div class="d-flex flex-row align-items-center w-75">
+          <img src="{{ session_info['avatar_url'] }}" alt="Avatar" class="rounded-circle me-3 border border-secondary" height="125">
+          <div class="w-100">
+            <h1 class="fw-bold mb-0">{{ session_info['name'] }}</h1>
+            <p class="h5 fw-base mb-1">{{ session_info['login'] }}</p>
+            <p class=>{{ session_info['bio'] }}</p>
+          </div>
+          </div>
+          <div>
+          <a href="{{session_info['html_url']}}">
+            <button class="btn btn btn-outline-primary">
+              <i class="bi bi-github"></i>
+              View GitHub
+            </button>
+          </a>
+          <a href="/{{session_info['login']}}">
+            <button class="btn btn btn-primary">
+              <i class="bi bi-box-arrow-right"></i>
+              View PEPs
+            </button>
+          </a>
+          </div>
+        </div>
+        <div>
+            <p class="h5 fw-bold mb-2">Organizations:</p>
+            {% if session_info['orgs']|length > 0 %}
+              {% for org in session_info['orgs'] %}
+                <div class="d-flex flex-row align-items-center h6">
+                  <i class="bi bi-people-fill me-1"></i>
+                  <a href="/{{org}}">{{org}}</a>
+                </div>
+              {% endfor %}
+            {% else %}
+            <p class="h6 fw-light"><em>You are not a member of any organizations.</em></p>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,42 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
-  <div>
-    {% if logged_in == True %}
-    <div class="mb-3">
-      <h1>Logged in as, <span class="fw-bold mr-1">{{session_info['login']}}</span></h1>
-      <a href="/submit"><button class="btn btn-lg btn-primary">Submit PEP</button></a>
+<div class="container" style="height: 80vh" style="--bs-bg-opacity: 0.2">
+  <div class="d-flex flex-column h-100 align-items-center justify-content-center">
+    <div class="row align-items-center">
+      <div class="col-6">
+        <h1 class="fw-bolder">Easy management of sample metadata.</h1>
+        <p>PEPhub is a database, web interface, and API for sharing, retrieving, and validating sample metadata. PEPhub
+          takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to let you store,
+          edit, and access your PEPs in one convenient place.</p>
+        <p>To get started submitting your own sample metadata, you only need a GitHub account.</p>
+        <a href="/auth/login">
+          {% if logged_in %}
+          <a href="/{{ session_info['login'] }}">
+            <button class="btn btn-primary btn-lg">
+              <span class="d-flex flex-row align-items-center">
+                My PEPs
+                <img class="ms-1" src="/static/img/pep.svg" height="30px" />
+              </span>
+            </button>
+          </a>
+          {% else %}
+          <button class="btn btn-primary btn-lg">
+            <i class="bi bi-github"></i> Login with GitHub
+          </button>
+          {% endif %}
+        </a>
+        <a href="/eido/validator/index.html">
+          <button class="btn btn-light btn-lg ms-2">
+            <i class="bi bi-check2-circle me-1"></i>Validation
+          </button>
+        </a>
+      </div>
+      <div class="col-6 align-items-center">
+        <img class="ms-5" src="/static/img/landing_icon.png" alt="Landing icon" height="400">
+      </div>
     </div>
-    {% else %}
-      <h1 class="mb-4">PEPhub API</h1>
-    {% endif %}
-    <p id="welcome" class="text-justify">
-    Welcome to the PEPhub API. This server provides consumable sample tables through the <a href="https://github.com/pepkit/pephub">the PEPhub API for PEP sample metadata sharing</a>. This server contains PEPs for {{ namespaces|length }} namespaces listed below:</p>
-    <div class="border-bottom border-secondary my-1"></div> 
-    <table class="table table-sm table-striped">
-      <thead>
-        <tr>
-          <th>Namespace</th>
-          <th>No. of Projects</th>
-          <th>No. of Samples</th>
-          <th>API Endpoint</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for namespace in namespaces %}
-          <tr>
-            <td><a href="/pep/{{namespace.namespace}}/view">{{ namespace.namespace }}</a></td>
-            <td>{{ namespace.number_of_projects }}</td>
-            <td>{{ namespace.number_of_samples }}</td>
-            <td>
-              <code><a href="/pep/{{namespace.namespace}}"><span class="badge bg-primary">GET</span> /pep/{{namespace.namespace}}/</a></code>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div class="border-bottom border-secondary my-1"></div>
-    <h2>Validation endpoints</h2>
-
-    In addition to serving metadata, PEPhub also provides a validation service. You can provide  `<namespace>/<projectid>` and identify relevant schemas that this metadata satisfies. You can also `POST` your own PEP to the service to validate it. You can learn more about this at the <a href="/eido/validator/index.html">/eido/validator/index.html</a> and in the API docs.
+    <!-- Stats about pephub, commented out for now. -->
+    <!-- <div class="my-2 w-100">
+        <div class="d-flex flex-row align-items-center justify-content-start w-100">
+          <div class="me-3 p-3 border border-2 border-dark rounded rounded-3 shadow-sm">
+            <p class="mb-0 fs-3 fw-bolder">Total PEPs:</p>
+            <span class="text-primary fw-bold fs-5">10,203</span>
+          </div>
+          <div class="me-3 p-3 border border-2 border-dark rounded rounded-3 shadow-sm">
+            <p class="mb-0 fs-3 fw-bolder">Total Namespaces:</p>
+            <span class="text-primary fw-bold fs-5">104</span>
+          </div>
+        </div>
+      </div> -->
   </div>
+</div>
 {% endblock %}

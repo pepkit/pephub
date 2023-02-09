@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="search-page" class="h-100" style="min-height: 70vh;">
+  <div class="mb-3">
+    <div class="input-group">
+      <input value="{{query}}" type="text" class="form-control" id="search-bar" placeholder="Whats your favorite cell line?">
+      {% if query != "" %}
+      <button onclick="runSearchQuery()" class="btn btn-outline-primary" type="button" id="search-btn">Search</button>
+        {% else %}
+      <button disabled onclick="runSearchQuery()" class="btn btn-outline-primary" type="button" id="search-btn">Search</button>
+        {% endif %}
+    </div>
+  </div>
+  <div class="border-b border-secondary"></div>
+  <div id="search-results" class="d-flex flex-column align-items-center justify-content-center">
+  {% if query == "" %}
+      <span class="mt-5 text-secondary">Try searching for projects or namespaces!</span>
+  {% else %}
+    <div class="d-flex flex-row align-items-center justify-content-center mt-5">
+      <div class="spinner-border text-secondary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <span class="ms-3 text-secondary">
+        <em>Fetching PEPs</em>
+      </span>
+    </div>
+  </div>
+  {% endif %}
+</div>
+<div class="d-none" id="search-query-value">{{query}}</div>
+
+<!-- populate things on page load-->
+<script src="/static/js/search.js"></script>
+<script>
+  // run search on page load
+  var queryOnPageLoad = document.getElementById("search-query-value").innerText;
+  runSearchQuery(queryOnPageLoad, true);
+
+  // assign event listeners
+  const searchBar = document.getElementById("search-bar");
+  const searchButton = document.getElementById("search-btn");
+  searchBar.addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+          event.preventDefault();
+          runSearchQuery(searchBar.value);
+      }
+  });
+  searchBar.addEventListener("keyup", function(event) {
+      if (searchBar.value.length > 0) {
+          searchButton.disabled = false;
+      } else {
+          searchButton.disabled = true;
+      }
+  });
+</script>
+{% endblock %}

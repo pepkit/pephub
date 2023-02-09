@@ -1,22 +1,59 @@
+import logging
 import sys
-import logmuse
 import uvicorn
-import os
+import coloredlogs
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from ._version import __version__ as server_v
-from .const import LOG_FORMAT, PKG_NAME, TAGS_METADATA
+from .const import PKG_NAME, TAGS_METADATA
 from .helpers import build_parser
-from .routers import index_page, auth, namespace, project, eido, pep
+from .routers.api.v1.base import api as api_base
+from .routers.api.v1.namespace import namespace as api_namespace
+from .routers.api.v1.project import project as api_project
+from .routers.api.v1.user import user as api_user
+from .routers.api.v1.search import search as api_search
+from .routers.auth.base import auth as auth_router
+from .routers.views.base import views as views_base
+from .routers.views.search import search as views_search
+from .routers.views.project import project as views_project
+from .routers.views.namespace import namespace as views_namespace
+from .routers.views.user import user as views_user
+from .routers.eido import router as eido_router
 from .const import STATICS_PATH, EIDO_PATH
+
+_LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
+coloredlogs.install(
+    logger=_LOGGER_PEPDBAGENT,
+    level=logging.WARNING,
+    datefmt="%b %d %Y %H:%M:%S",
+    fmt="[%(levelname)s] [%(asctime)s] [PEPDBAGENT] %(message)s",
+)
+
+_LOGGER_PEPPY = logging.getLogger("peppy")
+coloredlogs.install(
+    logger=_LOGGER_PEPPY,
+    level=logging.WARNING,
+    datefmt="%b %d %Y %H:%M:%S",
+    fmt="[%(levelname)s] [%(asctime)s] [PEPPY] %(message)s",
+)
+
+_LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
+coloredlogs.install(
+    logger=_LOGGER_PEPHUB,
+    level=logging.INFO,
+    datefmt="%b %d %Y %H:%M:%S",
+    fmt="[%(levelname)s] [%(asctime)s] [PEPHUB] %(message)s",
+)
+
 
 # build server
 app = FastAPI(
     title=PKG_NAME,
     description="A web interface and RESTful API for PEPs",
+    docs_url="/api/v1/docs",
     version=server_v,
     tags=TAGS_METADATA,
 )
@@ -32,12 +69,18 @@ app.add_middleware(
 )
 
 # build routes
-app.include_router(index_page.router)
-app.include_router(auth.router)
-app.include_router(namespace.router)
-app.include_router(project.router)
-app.include_router(eido.router)
-app.include_router(pep.router)
+app.include_router(api_base)
+app.include_router(api_user)
+app.include_router(api_namespace)
+app.include_router(api_project)
+app.include_router(api_search)
+app.include_router(auth_router)
+app.include_router(views_base)
+app.include_router(views_user)
+app.include_router(views_search)
+app.include_router(views_project)
+app.include_router(views_namespace)
+app.include_router(eido_router)
 
 # mount the landing html/assets
 app.mount("/static", StaticFiles(directory=STATICS_PATH), name="root_static")
@@ -57,12 +100,6 @@ def main():
         parser.print_help()
         print("No subcommand given")
         sys.exit(1)
-    logger_args = (
-        dict(name=PKG_NAME, fmt=LOG_FORMAT, level=5)
-        if args.debug
-        else dict(name=PKG_NAME, fmt=LOG_FORMAT)
-    )
-    _LOGGER = logmuse.setup_logger(**logger_args)
 
     if args.command == "serve":
         uvicorn.run(

@@ -127,10 +127,13 @@ dmypy.json
 
 # Environment variables
 .env
+.env.*
 env/
+
 
 # pephub data
 pephub/data
 postgres/
 .idea
 environment/local.env
+qdrant_storage/

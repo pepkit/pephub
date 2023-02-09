@@ -4,6 +4,7 @@ import shutil
 import aiofiles
 import requests
 import tempfile
+import peppy
 
 from fastapi import File, UploadFile, Form, APIRouter
 from fastapi.responses import HTMLResponse
@@ -167,7 +168,7 @@ async def get_schema(request: Request, namespace: str, project: str):
     )
 
 
-@router.post("/validate/pep/")
+@router.post("/validate/pep")
 async def validate_pep(
     namespace: str = Form(), project: str = Form(), peps: List[UploadFile] = File(...)
 ):
@@ -185,6 +186,7 @@ async def validate_pep(
         for pep in peps:
             contents = await pep.read()
             pep_path = f"{tmpdirname}/{pep.filename}"
+            print(f"pep_path: '{pep_path}'")
             async with aiofiles.open(pep_path, mode="wb") as f:
                 await f.write(contents)
             pep_project = peppy.Project(pep_path)
@@ -196,7 +198,6 @@ async def validate_pep(
                 try:
                     eido.validate_sample(pep_project, i, schema, exclude_case=True)
                 except Exception as e:
-
                     for error in e.errors:
                         if "required" in error.message:
                             required_errors.append(
@@ -283,4 +284,4 @@ async def main():
 @router.get("/validator")
 async def main():
     print(je.list_templates())
-    return FileResponse(os.path.join(STATICS_PATH, "index2.html"))
+    return FileResponse(os.path.join(STATICS_PATH, "index.html"))

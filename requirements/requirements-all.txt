@@ -1,5 +1,5 @@
 fastapi>=0.72.0
-eido @ git+https://github.com/pepkit/eido@dev_alip#egg=eido
+eido
 logmuse>=0.2.7
 jinja2>=3.1.2
 yacman>=0.8.4
@@ -9,7 +9,9 @@ uvicorn
 python-dotenv
 pepdbagent
 peppy
+sentence-transformers
+qdrant-client
 requests
 aiofiles
 pyjwt[crypto]
-aiofiles
+coloredlogs

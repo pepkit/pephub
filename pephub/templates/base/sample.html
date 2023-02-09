@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 <div>
-    <a href="/pep/{{namespace}}/{{project_name}}/view">← back to {{ project_name }}</a>
+    <a class="mb-3" href="/{{ namespace }}/{{project_name}}">
+        <button class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-arrow-bar-left"></i>
+          Back to project
+        </button>
+      </a>
     <h1>{{namespace}}/{{project_name}}/samples/{{sample.sample_name}}</h1>
     <div class="border-bottom border-secondary"></div>
     <div class="my-2">
