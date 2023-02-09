@@ -102,9 +102,7 @@ def main():
         sys.exit(1)
 
     if args.command == "serve":
-        uvicorn.run(
-            app, host="0.0.0.0", port=args.port, debug=args.debug, reload=args.reload
-        )
+        uvicorn.run(app, host="0.0.0.0", port=args.port, reload=args.reload)
 
     else:
         _LOGGER.error(f"unknown command: {args.command}")

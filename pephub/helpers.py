@@ -63,14 +63,7 @@ def build_parser():
         help="The port the webserver should be run on.",
         default=DEFAULT_PORT,
     )
-    sps["serve"].add_argument(
-        "-d",
-        "--debug",
-        dest="debug",
-        help="Run the server with debug mode on",
-        type=bool,
-        default=False,
-    )
+
     sps["serve"].add_argument(
         "-r",
         "--reload",
