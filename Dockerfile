@@ -13,4 +13,4 @@ COPY . /app
 RUN python -m pip install --upgrade pip
 RUN pip install .
 
-CMD ["uvicorn", "pephub.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "pephub.main:app", "--host", "0.0.0.0", "--port", "80"]
