@@ -198,7 +198,6 @@ async def validate_pep(
                 try:
                     eido.validate_sample(pep_project, i, schema, exclude_case=True)
                 except Exception as e:
-
                     for error in e.errors:
                         if "required" in error.message:
                             required_errors.append(
@@ -285,4 +284,4 @@ async def main():
 @router.get("/validator")
 async def main():
     print(je.list_templates())
-    return FileResponse(os.path.join(STATICS_PATH, "index2.html"))
+    return FileResponse(os.path.join(STATICS_PATH, "index.html"))
