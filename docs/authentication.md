@@ -5,6 +5,16 @@
 
 *pephub* supports both **reading** and **writing** PEPs. Just like GitHub, all PEPs are by default available to view by all users. Users may choose to mark a PEP as **private** and any attempts to **read** or **write** to this PEP will require prior authorization. For example, if I submit a new PEP at `nleroy917/yeast-analysis:latest` and mark it as **private**. I must first authenticate, and then I will be able to **read** and **write** to this PEP.
 
+## Setting Up GitHub OAuth For Your Own Server
+If you wish to run your own *pephub* server, you will need to set up your own GitHub OAuth application. This is a simple process. First, you will need to create a new GitHub OAuth application. Detailed instructions can be found in the [GitHub documentation](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app). You will need to set the following fields:
+- Homepage URL: `http://localhost:8000`.
+- Authorization callback URL: `http://localhost:8000/auth/callback`.
+
+You do not need to enable device flow. Once you have created your application, you will be given a `Client ID` and can now generate a `Client secret`. Finally, you will need to set these values in your *pephub* server's environment variables. You can do this by manually exporting them with `export GH_CLIENT_ID=...` and `export GH_CLIENT_SECRET=...` or by curating your `.env` file with the following variables:
+- `GH_CLIENT_ID`: The client ID of your GitHub OAuth application.
+- `GH_CLIENT_SECRET`: The client secret of your GitHub OAuth application.
+- `REDIRECT_URI`: The redirect URI of your GitHub OAuth application.
+
 ## Reading PEPs
 Anyone can **read** all PEPs that are not marked as **private** without any authentication. If a user wishes to **read** a PEP marked as **private**, they must 1) Authenticate, and 2) be the owner of that PEP **or** belong to the organization that owns that PEP. In the interest of privacy, any access to a PEP that is marked as **private** without prior authorization will result in a `404` response.
 
