@@ -115,6 +115,12 @@ cp environment/template.env .env
 ```
 
 **3. Build and start the containers:**
+If you are running on an Apple M1 chip, you will need to set the following env variable prior to running `docker compose`:
+
+```console
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+```
+
 ```console
 docker compose up --build
 ```
