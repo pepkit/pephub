@@ -108,7 +108,11 @@ sh setup_db.sh
 ```
 
 **2. Curate your environment:**
-Since we are running in `docker`, we need to supply environment variables to the container. The `docker-compose.yaml` file is written such that you can supply a `.env` file at the root with your configurations. See the [example env file](environment/template.env) for reference. See [here](docs/server-settings.md) for a detailed explanation of all configurable server settings.
+Since we are running in `docker`, we need to supply environment variables to the container. The `docker-compose.yaml` file is written such that you can supply a `.env` file at the root with your configurations. See the [example env file](environment/template.env) for reference. See [here](docs/server-settings.md) for a detailed explanation of all configurable server settings. For now, you can simply copy the `env` file:
+
+```
+cp environment/template.env .env
+```
 
 **3. Build and start the containers:**
 ```console
