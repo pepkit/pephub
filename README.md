@@ -29,7 +29,7 @@ pip install -r requirements/requirements-all.txt
 ```
 
 ### 3. (*Optional*) GitHub Authentication Client Setup
-*pephub* uses GitHub for namespacing and authentication. As such, a GitHub application capable of logging in users is required. See the [GitHub instructions](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app) for information on setting up a new GitHub app.
+*pephub* uses GitHub for namespacing and authentication. As such, a GitHub application capable of logging in users is required. We've [included instructions](https://github.com/pepkit/pephub/blob/master/docs/authentication.md#setting-up-github-oauth-for-your-own-server) for setting this up locally using your own GitHub account. 
 
 ### 4. (*Optional*) Vector Database Setup
 We've added [semantic-search](https://huggingface.co/course/chapter5/6?fw=tf#using-embeddings-for-semantic-search) capabilities to pephub. Optionally, you may host an instance of the [qdrant](https://qdrant.tech/) **vector database** to store embeddings computed using a sentence transformer that has mined and processed any relevant metadata from PEPs. If no database connection settings are supplied, pephub will default to SQL search. Read more [here](docs/semantic-search.md). To run qdrant locally, simply run the following:
