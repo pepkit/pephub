@@ -73,6 +73,14 @@ def build_parser():
         default=False,
     )
 
+    sps["server"].add_argument(
+        "--log-level",
+        dest="log_level",
+        type=str,
+        help="The level of logging to use",
+        default="INFO",
+    )
+
     return parser
 
 

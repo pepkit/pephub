@@ -1,3 +1,4 @@
+import logging
 import os
 from ._version import __version__ as pephub_version
 from peppy import __version__ as peppy_version
@@ -78,3 +79,11 @@ VALID_UPDATE_KEYS = [
     "private",
     "description",
 ]
+
+LOG_LEVEL_MAP = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL,
+}
