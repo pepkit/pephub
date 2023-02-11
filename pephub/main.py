@@ -121,5 +121,5 @@ def main():
         )
 
     else:
-        _LOGGER.error(f"unknown command: {args.command}")
+        _LOGGER_PEPHUB.error(f"unknown command: {args.command}")
         sys.exit(1)
