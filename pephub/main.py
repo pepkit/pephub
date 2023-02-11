@@ -117,7 +117,7 @@ def main():
             host="0.0.0.0",
             port=args.port,
             reload=args.reload,
-            log_level=args.log_level.lower(),
+            log_level=args.uvicorn_log_level.lower(),
         )
 
     else:
