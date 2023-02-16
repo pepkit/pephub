@@ -39,7 +39,7 @@ load_dotenv()
 # Scheme for the Authorization header
 token_auth_scheme = HTTPBearer()
 JWT_SECRET = token_hex(32)
-JWT_EXPIRATION = 360  # minutes
+JWT_EXPIRATION = 4320  # minutes
 
 pephub_cookie = APIKeyCookie(name="pephub_session")
 pephub_cookie.auto_error = False
@@ -143,7 +143,8 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
         print(e)
         return None
     except jwt.exceptions.ExpiredSignatureError:
-        raise HTTPException(403, "The token has expired, please log in again.")
+        return None
+        # raise HTTPException(403, "The token has expired, please log in again.")
     return session_info
 
 
