@@ -27,14 +27,14 @@ async def search_for_pep(
     user: str = Depends(get_user_from_session_info),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
-    limit: int = 10,
-    offset: int = 0,
-    score_threshold: float = 0.4,
 ):
     """
     Perform a search for PEPs. This can be done using qdrant (semantic search),
     or with basic SQL string matches.
     """
+    limit = query.limit
+    offset = query.offset
+    score_threshold = query.score_threshold
     if qdrant is not None:
         try:
             query_vec = model.encode(query.query)
@@ -73,6 +73,8 @@ async def search_for_pep(
                     "query": query.query,
                     "results": [r.dict() for r in results],
                     "namespace_hits": namespace_hits,
+                    "limit": limit,
+                    "offset": offset,
                 }
             )
         except Exception as e:

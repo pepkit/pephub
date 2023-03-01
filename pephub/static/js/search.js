@@ -66,7 +66,10 @@ const runSearchQuery = (
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                query: searchQuery
+                query: searchQuery,
+                limit: limit,
+                offset: offset,
+                score_threshold: scoreThreshold
             })
         }
     )
