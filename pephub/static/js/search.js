@@ -1,17 +1,19 @@
 const runSearchQuery = (
     query=undefined, 
-    limit=undefined, 
-    offset=undefined, 
-    scoreThreshold=undefined, 
     pageLoad=false
 ) => {
+
+    const limit = document.getElementById('searchLimit').value;
+    const offset = document.getElementById('searchOffset').value;
+    const scoreThreshold = document.getElementById('scoreThreshold').value/100;
+
     // update the url with the search query
     if ('URLSearchParams' in window) {
         var searchParams = new URLSearchParams(window.location.search)
     } else {
         var searchParams = new URLSearchParams()
     }
-    if (query !== undefined) {
+    if (query !== undefined && query !== "" && query !== null) {
         searchParams.set("query", query);
     }
     if (limit !== undefined) {
@@ -24,8 +26,12 @@ const runSearchQuery = (
         searchParams.set("scoreThreshold", scoreThreshold);
     }
 
-    var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
-    history.pushState(null, '', newRelativePathQuery);
+    // only add search parmas if they are not empty and dont do it on pageload
+    if (searchParams.toString().length > 0 && !pageLoad) {
+        var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+        history.pushState(null, '', newRelativePathQuery);
+    }
+    
 
     // populate the search query.
     // we do not want to run a query if the search bar is empty ("").
@@ -101,4 +107,11 @@ const updateScoreThresholdDisplay = () => {
     const scoreThreshold = document.getElementById('scoreThreshold').value;
     const scoreThresholdDisplay = document.getElementById('scoreThresholdValue');
     scoreThresholdDisplay.innerHTML = scoreThreshold/100;
+}
+
+const resetAdvancedSettings = () => {
+    document.getElementById('searchLimit').value = 10;
+    document.getElementById('searchOffset').value = 0;
+    document.getElementById('scoreThreshold').value = 50;
+    updateScoreThresholdDisplay();
 }

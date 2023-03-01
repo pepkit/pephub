@@ -23,7 +23,9 @@
   {% if results|length > 0 %}
     <div class="my-2 border-bottom border-secondary"></div>
     <!-- Project search results -->
-    <h3 class="text-start w-100 fw-bold">Projects</h3>
+    <div class="d-flex flex-row align-items-center justify-content-between w-100">
+      <h3 class="text-start w-100 fw-bold">Projects</h3>
+    </div>
     {% for result in results %}
       <div id="project-result-{{result['payload']['registry']}}" class="w-100 border-top border-secondary py-3 mb-2">
           <div class="d-flex flex-row align-items-start justify-content-between">
@@ -34,7 +36,6 @@
               </a>
             </div>
             {% if result.score %}
-            <div class="w-100 d-flex flex-row align-items-center justify-content-end">
               <div class="progress w-25" style="height: 15px">
                 <div 
                   class="progress-bar bg-success"
@@ -47,10 +48,7 @@
                   {{(result.score * 100)|round(2, 'floor') }}%
                 </div>
               </div>
-              <button class="btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Score value for this found PEP.">
-                <i class="bi bi-info-circle"></i>
-              </button>
-            </div>
+  
             {% endif %}
           </div>
             <div>

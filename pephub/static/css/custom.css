@@ -1,0 +1,9 @@
+/* Bootstrap overrides */
+/* 
+  btn-outline-dark hover effect
+  I dont like the normal effect, so I made my own 🙂
+*/
+.btn-outline-dark:hover {
+    color: black;
+    background-color: #0000001e;
+  }

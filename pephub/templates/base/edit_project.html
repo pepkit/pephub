@@ -55,7 +55,7 @@
             <label for="project-description" class="form-label">Project Description</label>
             <textarea onkeyup="detectMetadataChanges()" placeholder="{{ description }}" class="form-control" id="project-description" rows="3">{{description}}</textarea>
           </div>
-          <button onclick="cancelChanges()" type="button" class="btn btn-outline-secondary">
+          <button onclick="cancelChanges()" type="button" class="btn btn-outline-dark">
             Cancel
           </button>
           <button onclick="handleMetaMetaDataSubmit()" id="metadata-save-btn" disabled type="button" disabled class="btn btn-success">
@@ -68,7 +68,7 @@
       <div class="p-2" id="yaml-component">
         <div id="yaml-editor-div" style="height:400px"></div>
         <div class="flex-row d-flex align-items-center justify-content-start">
-          <button onclick="getProjectConfigYamlFromDatabase()" class="btn btn-outline-secondary me-1">
+          <button onclick="getProjectConfigYamlFromDatabase()" class="btn btn-outline-dark me-1">
             Cancel
           </button>
           <button onclick="handleProjectConfigYamlSubmit()" id="yaml-save-btn" disabled class="btn btn-success me-1">
@@ -81,7 +81,7 @@
       <div onkeyup="detectSampleTableChanges()" id="csv-component" class="p-1">
         <div id="csv-editor-div"></div>
         <div class="mt-1">
-          <button onclick="getSampleTableFromDatabase()" type="button" class="btn btn-sm btn-outline-secondary">
+          <button onclick="getSampleTableFromDatabase()" type="button" class="btn btn-sm btn-outline-dark">
             Cancel
           </button>
           <button onclick="handleSampleTableEditorSubmit()" id="sample-table-save-btn" disabled type="button" class="btn btn-sm btn-success">

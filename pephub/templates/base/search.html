@@ -52,7 +52,7 @@
             </button>
           </label>
           <div class="d-flex flex-row align-items-center">
-            <input value="50" step="0.5" min="0" max="100" onchange="updateScoreThresholdDisplay()" type="range" class="form-range" id="scoreThreshold">
+            <input id="scoreThreshold" value="50" step="0.5" min="0" max="100" onchange="updateScoreThresholdDisplay()" type="range" class="form-range" id="scoreThreshold">
             <div class="ms-2 text-center" style="min-width: 4rem;">
               <span class="fw-bold px-2" id="scoreThresholdValue">0.5</span>
             </div>
@@ -96,8 +96,8 @@
         </select>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Search</button>
+        <button type="button" onclick="resetAdvancedSettings()" class="btn btn-outline-dark">Reset</button>
+        <button type="button" onclick="runSearchQuery()" class="btn btn-success" data-bs-dismiss="modal">Search</button>
       </div>
     </div>
   </div>
@@ -109,7 +109,7 @@
 <script>
   // run search on page load
   var queryOnPageLoad = document.getElementById("search-query-value").innerText;
-  runSearchQuery(queryOnPageLoad, undefined, undefined, undefined, true);
+  runSearchQuery(queryOnPageLoad, true);
 
   // assign event listeners
   const searchBar = document.getElementById("search-bar");
