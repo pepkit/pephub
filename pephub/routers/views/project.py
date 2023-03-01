@@ -35,8 +35,9 @@ project = APIRouter(tags=["project", "user interface", "interface"])
 async def project_view(
     request: Request,
     namespace: str,
+    project: str,
     tag: Optional[str] = DEFAULT_TAG,
-    project: peppy.Project = Depends(get_project),
+    peppy_project: peppy.Project = Depends(get_project),
     project_annotation: AnnotationModel = Depends(get_project_annotation),
     session_info: dict = Depends(read_session_info),
     user: str = Depends(get_user_from_session_info),
@@ -46,7 +47,7 @@ async def project_view(
     """
     Returns HTML response with a visual summary of the project.
     """
-    samples = [s.to_dict() for s in project.samples]
+    samples = [s.to_dict() for s in peppy_project.samples]
     try:
         pep_version = project.pep_version
     except Exception:
@@ -57,9 +58,9 @@ async def project_view(
             "namespace": namespace,
             "project": project,
             "tag": tag,
-            "project_dict": project.to_dict(),
+            "project_dict": peppy_project.to_dict(),
             "pep_version": pep_version,
-            "sample_table_columns": project.sample_table.columns.to_list(),
+            "sample_table_columns": peppy_project.sample_table.columns.to_list(),
             "samples": samples,
             "n_samples": len(samples),
             "request": request,
@@ -70,7 +71,7 @@ async def project_view(
             "logged_in": session_info is not None,
             "is_editing": edit,
             "session_info": session_info,
-            "is_private": project.is_private,
+            "is_private": peppy_project.is_private,
             "description": project_annotation.description,
             "last_update_date": project_annotation.last_update_date,
             "submission_date": project_annotation.submission_date,
@@ -142,6 +143,7 @@ async def get_sample_view(
     namespace: str,
     project: str,
     sample_name: str,
+    tag: Optional[str] = DEFAULT_TAG,
     proj: peppy.Project = Depends(get_project),
     session_info: dict = Depends(read_session_info),
 ):
@@ -155,6 +157,7 @@ async def get_sample_view(
         {
             "project": proj,
             "sample": sample,
+            "tag": tag,
             "attrs": attrs,
             "request": request,
             "namespace": namespace,

@@ -44,9 +44,17 @@ async def get_a_pep(
     # is representative of all samples attributes
     # -- is this the case?
     sample_attributes = proj._samples[0]._attributes
+
+    proj_dict = proj.to_dict()
+    proj_annotation_dict = proj_annotation.dict()
+
+    # default to name from annotation
+    if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
+        del proj_dict["name"]
+
     return dict(
-        **proj.to_dict(),
-        **proj_annotation.dict(),
+        **proj_dict,
+        **proj_annotation_dict,
         samples=samples,
         sample_table_indx=sample_table_indx,
         sample_attributes=sample_attributes,
