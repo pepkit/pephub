@@ -77,8 +77,10 @@ def callback(
 
     full_orgs = requests.get(
         "https://api.github.com/user/orgs",
-        headers={"Authorization": f"Bearer {x['access_token']}",
-                 "Accept": "application/vnd.github+json"}
+        headers={
+            "Authorization": f"Bearer {x['access_token']}",
+            "Accept": "application/vnd.github+json",
+        },
     ).json()
     organizations = requests.get(
         f"https://api.github.com/users/{u['login']}/orgs",

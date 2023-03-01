@@ -40,6 +40,7 @@ load_dotenv()
 token_auth_scheme = HTTPBearer()
 JWT_SECRET = token_hex(32)
 JWT_EXPIRATION = 4320  # minutes
+JWT_EXPIRATION_SECONDS = JWT_EXPIRATION * 60  # seconds
 
 pephub_cookie = APIKeyCookie(name="pephub_session")
 pephub_cookie.auto_error = False
@@ -110,7 +111,9 @@ def get_db() -> PEPDatabaseAgent:
     return agent
 
 
-def set_session_info(response: Response, session_info: dict):
+def set_session_info(
+    response: Response, session_info: dict, expires: int = JWT_EXPIRATION_SECONDS
+):
     """
     Encodes a dict in a JWT and stores it in a cookie. Read the results
     with the partner function, read_session_info.
@@ -119,7 +122,7 @@ def set_session_info(response: Response, session_info: dict):
     @param session_info: Dict of session variables to store in cookie
     """
     session_info_encoded = CLIAuthSystem.jwt_encode_user_data(session_info)
-    response.set_cookie("pephub_session", session_info_encoded)
+    response.set_cookie("pephub_session", session_info_encoded, expires=expires)
     return True
 
 
