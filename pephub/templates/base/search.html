@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div id="search-page" class="h-100" style="min-height: 70vh;">
-  <div class="mb-3">
+  <div class="mb-3 d-flex flex-row align-items-center">
     <div class="input-group">
       <input value="{{query}}" type="text" class="form-control" id="search-bar" placeholder="Whats your favorite cell line?">
       {% if query != "" %}
@@ -9,7 +9,10 @@
         {% else %}
       <button disabled onclick="runSearchQuery()" class="btn btn-outline-primary" type="button" id="search-btn">Search</button>
         {% endif %}
-    </div>
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#searchSettingsModal">
+          <i class="bi bi-sliders"></i>
+        </button>  
+    </div>  
   </div>
   <div class="border-b border-secondary"></div>
   <div id="search-results" class="d-flex flex-column align-items-center justify-content-center">
@@ -28,6 +31,39 @@
   {% endif %}
 </div>
 <div class="d-none" id="search-query-value">{{query}}</div>
+
+<!-- search settings modal -->
+<div class="modal" id="searchSettingsModal" tabindex="-1" aria-labelledby="searchSettingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Search Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <label class="d-flex flex-row align-items-center" for="scoreThreshold" class="form-label">
+            Score threshold
+            <button 
+              class="btn py-0 px-0 ms-1"
+              data-bs-toggle="tooltip" data-bs-placement="top" title="Specify a cutoff for the vector similarity score. Lower scores will return more results."
+            >
+              <i class="bi bi-info-circle"></i>
+            </button>
+          </label>
+          <div class="d-flex flex-row align-items-center">
+            <input value="50" step="0.5" min="0" max="100" onchange="updateScoreThresholdDisplay()" type="range" class="form-range" id="scoreThreshold">
+            <div class="ms-2 text-center" style="min-width: 4rem;">
+              <span class="fw-bold px-2" id="scoreThresholdValue">0.5</span>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- populate things on page load-->
 <script src="/static/js/search.js"></script>
@@ -52,5 +88,6 @@
           searchButton.disabled = true;
       }
   });
+
 </script>
 {% endblock %}

@@ -69,3 +69,9 @@ const runSearchQuery = (query=undefined, pageLoad=false) => {
     })
 
 }
+
+const updateScoreThresholdDisplay = () => {
+    const scoreThreshold = document.getElementById('scoreThreshold').value;
+    const scoreThresholdDisplay = document.getElementById('scoreThresholdValue');
+    scoreThresholdDisplay.innerHTML = scoreThreshold/100;
+}

@@ -147,7 +147,6 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
         return None
     except jwt.exceptions.ExpiredSignatureError:
         return None
-        # raise HTTPException(403, "The token has expired, please log in again.")
     return session_info
 
 

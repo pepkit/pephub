@@ -33,13 +33,20 @@
                   {{ result.payload.namespace }}/{{ result.payload.name }}:{{result.payload.tag}}
                 </a>
               </div>
-              <!-- <div>
-                <a href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
-                  <button class="btn btn-sm btn-outline-primary">
-                      View
-                  </button>
-                </a>
-              </div> -->
+              {% if result.score %}
+              <div class="progress w-25" style="height: 15px">
+                <div 
+                  class="progress-bar bg-success"
+                  role="progressbar"                  
+                  style="width: {{(result.score * 100)|round(2, 'floor')}}%"
+                  aria-valuenow="{{(result.score * 100)|round(2, 'floor')}}"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  {{(result.score * 100)|round(2, 'floor') }}%
+                </div>
+              </div>
+              {% endif %}
             </div>
             <div>
               <p class="mt-2 mb-0 text-truncate text-secondary">
