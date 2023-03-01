@@ -27,13 +27,14 @@
     {% for result in results %}
       <div id="project-result-{{result['payload']['registry']}}" class="w-100 border-top border-secondary py-3 mb-2">
           <div class="d-flex flex-row align-items-start justify-content-between">
-              <div class="d-flex flex-row align-items-center">
-                <i class="bi bi-table me-2 text-secondary"></i>
-                <a class="fw-bold fs-5" href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
-                  {{ result.payload.namespace }}/{{ result.payload.name }}:{{result.payload.tag}}
-                </a>
-              </div>
-              {% if result.score %}
+            <div class="d-flex flex-row align-items-center">
+              <i class="bi bi-table me-2 text-secondary"></i>
+              <a class="fw-bold fs-5" href="/{{result.payload.namespace}}/{{result.payload.name}}?tag={{result.payload.tag}}">
+                {{ result.payload.namespace }}/{{ result.payload.name }}:{{result.payload.tag}}
+              </a>
+            </div>
+            {% if result.score %}
+            <div class="w-100 d-flex flex-row align-items-center justify-content-end">
               <div class="progress w-25" style="height: 15px">
                 <div 
                   class="progress-bar bg-success"
@@ -46,8 +47,12 @@
                   {{(result.score * 100)|round(2, 'floor') }}%
                 </div>
               </div>
-              {% endif %}
+              <button class="btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Score value for this found PEP.">
+                <i class="bi bi-info-circle"></i>
+              </button>
             </div>
+            {% endif %}
+          </div>
             <div>
               <p class="mt-2 mb-0 text-truncate text-secondary">
                   <em>{{result.payload.description}}</em>

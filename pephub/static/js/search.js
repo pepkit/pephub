@@ -1,7 +1,34 @@
-const runSearchQuery = (query=undefined, pageLoad=false) => {
+const runSearchQuery = (
+    query=undefined, 
+    limit=undefined, 
+    offset=undefined, 
+    scoreThreshold=undefined, 
+    pageLoad=false
+) => {
+    // update the url with the search query
+    if ('URLSearchParams' in window) {
+        var searchParams = new URLSearchParams(window.location.search)
+    } else {
+        var searchParams = new URLSearchParams()
+    }
+    if (query !== undefined) {
+        searchParams.set("query", query);
+    }
+    if (limit !== undefined) {
+        searchParams.set("limit", limit);
+    }
+    if (offset !== undefined) {
+        searchParams.set("offset", offset);
+    }
+    if (scoreThreshold !== undefined) {
+        searchParams.set("scoreThreshold", scoreThreshold);
+    }
+
+    var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+    history.pushState(null, '', newRelativePathQuery);
+
     // populate the search query.
     // we do not want to run a query if the search bar is empty ("").
-
     var searchQuery = "";
     if (query === undefined) {
         searchQuery = document.getElementById('search-bar').value;

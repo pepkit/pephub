@@ -16,6 +16,7 @@ load_dotenv()
 
 search = APIRouter(prefix="/api/v1/search", tags=["api", "search", "v1"])
 
+
 # perform a search
 @search.post("/", summary="Search for a PEP")
 async def search_for_pep(
@@ -28,6 +29,7 @@ async def search_for_pep(
     namespace_access: List[str] = Depends(get_namespace_access_list),
     limit: int = 10,
     offset: int = 0,
+    score_threshold: float = 0.4,
 ):
     """
     Perform a search for PEPs. This can be done using qdrant (semantic search),
@@ -42,6 +44,8 @@ async def search_for_pep(
                 ),
                 query_vector=query_vec,
                 limit=limit,
+                offset=offset,
+                score_threshold=score_threshold,
             )
             namespaces = agent.namespace.get(admin=namespace_access)
             namespace_hits = [

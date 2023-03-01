@@ -14,9 +14,11 @@ async def search_view(
     request: Request,
     query: str = "",
     collection_name: str = DEFAULT_QDRANT_COLLECTION_NAME,
+    limit: int = 25,
+    offset: int = 0,
+    score_threshold: float = 0.4,
     session_info=Depends(read_session_info),
 ):
-
     return templates.TemplateResponse(
         "search.html",
         {
@@ -25,5 +27,8 @@ async def search_view(
             "collection_name": collection_name,
             "session_info": session_info,
             "logged_in": session_info is not None,
+            "limit": limit,
+            "offset": offset,
+            "score_threshold": score_threshold,
         },
     )

@@ -41,6 +41,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <!-- Score Threshold -->
           <label class="d-flex flex-row align-items-center" for="scoreThreshold" class="form-label">
             Score threshold
             <button 
@@ -56,9 +57,47 @@
               <span class="fw-bold px-2" id="scoreThresholdValue">0.5</span>
             </div>
         </div>
+        <!-- Limit -->
+        <label class="d-flex flex-row align-items-center mt-3" for="limit" class="form-label">
+          Limit
+          <button 
+            class="btn py-0 px-0 ms-1"
+            data-bs-toggle="tooltip" data-bs-placement="top" title="Specify a limit on the number of results returned. Higher limits will take longer to return results."
+          >
+            <i class="bi bi-info-circle"></i>
+          </button>
+        </label>
+        <select id="searchLimit" class="form-control form-select w-100">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="250">250</option>
+          <option value="500">500</option>
+        </select>
+        <!-- Offset -->
+        <label class="d-flex flex-row align-items-center mt-3" for="offset" class="form-label">
+          Offset
+          <button 
+            class="btn py-0 px-0 ms-1"
+            data-bs-toggle="tooltip" data-bs-placement="top" title="Specify an offset for the results returned. Useful for pagination."
+          >
+            <i class="bi bi-info-circle"></i>
+          </button>
+        </label>
+        <select id="searchOffset" class="form-control form-select w-100">
+          <option value="0">0</option>
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="250">250</option>
+          <option value="500">500</option>
+        </select>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Search</button>
       </div>
     </div>
   </div>
@@ -70,7 +109,7 @@
 <script>
   // run search on page load
   var queryOnPageLoad = document.getElementById("search-query-value").innerText;
-  runSearchQuery(queryOnPageLoad, true);
+  runSearchQuery(queryOnPageLoad, undefined, undefined, undefined, true);
 
   // assign event listeners
   const searchBar = document.getElementById("search-bar");
