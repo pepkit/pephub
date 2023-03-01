@@ -1,8 +1,11 @@
 {% if namespace_hits|length == 0 and results|length == 0 %}
   <div class="w-100 mt-5">
-    <h4 class="text-center w-100 text-secondary">
+    <h4 class="text-center w-100 text-secondary mb-2">
       <em>No results found :( </em>
     </h4>
+    <h5 class="fw-normal text-center w-100 text-secondary">
+      Consider lowering your score threshold or supplying a more specific query.
+    </h5>
   </div>
 {% else %}
 <div>

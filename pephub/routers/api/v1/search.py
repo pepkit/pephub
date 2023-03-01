@@ -38,6 +38,15 @@ async def search_for_pep(
     if qdrant is not None:
         try:
             query_vec = model.encode(query.query)
+            # count = len(qdrant.search(
+            #     collection_name=(
+            #         query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
+            #     ),
+            #     query_vector=query_vec,
+            #     limit=1e99, # get everything above the threshold
+            #     offset=offset,
+            #     score_threshold=score_threshold,
+            # ))
             results = qdrant.search(
                 collection_name=(
                     query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
