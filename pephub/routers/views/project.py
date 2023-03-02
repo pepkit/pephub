@@ -1,7 +1,7 @@
 import peppy
 import eido
 import pandas as pd
-from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY
+from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, PEP_LATEST_VERSION
 from typing import List, Optional
 from fastapi import APIRouter, Request, Depends, Response, HTTPException
 from fastapi.responses import HTMLResponse
@@ -51,7 +51,7 @@ async def project_view(
     try:
         pep_version = project.pep_version
     except Exception:
-        pep_version = "2.1.0"
+        pep_version = PEP_LATEST_VERSION
     return templates.TemplateResponse(
         "project.html",
         {
@@ -109,7 +109,7 @@ async def project_edit(
     try:
         pep_version = project.pep_version
     except Exception:
-        pep_version = "2.1.0"
+        pep_version = PEP_LATEST_VERSION
     return templates.TemplateResponse(
         "edit_project.html",
         {

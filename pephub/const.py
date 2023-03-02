@@ -1,6 +1,8 @@
 import os
+import pandas as pd
 from ._version import __version__ as pephub_version
 from peppy import __version__ as peppy_version
+from peppy.const import PEP_LATEST_VERSION
 from platform import python_version
 from fastapi import __version__ as fastapi_version
 from pepdbagent import __version__ as pepdbagent_version
@@ -29,6 +31,32 @@ DEFAULT_POSTGRES_DB = "pephub"
 DEFAULT_QDRANT_HOST = "localhost"
 DEFAULT_QDRANT_PORT = 6333
 DEFAULT_QDRANT_COLLECTION_NAME = "pephub"
+
+
+BLANK_PEP_CONFIG = {
+    "pep_version": PEP_LATEST_VERSION,
+    "sample_table": "sample_table.csv",
+}
+BLANK_PEP_SAMPLES = [
+    {
+        "sample_name": "sample1",
+        "fastq_1": "sample1_R1.fastq.gz",
+        "fastq_2": "sample1_R2.fastq.gz",
+    },
+    {
+        "sample_name": "sample2",
+        "fastq_1": "sample2_R1.fastq.gz",
+        "fastq_2": "sample2_R2.fastq.gz",
+    },
+    {
+        "sample_name": "sample3",
+        "fastq_1": "sample3_R1.fastq.gz",
+        "fastq_2": "sample3_R2.fastq.gz",
+    },
+]
+BLANK_PEP_SAMPLE_TABLE = pd.DataFrame(
+    BLANK_PEP_SAMPLES, columns=["sample_name", "fastq_1", "fastq_2"]
+).to_csv(index=False)
 
 # https://arxiv.org/abs/2210.07316
 # figure 4

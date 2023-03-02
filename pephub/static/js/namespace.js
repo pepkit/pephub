@@ -259,18 +259,80 @@ const submitNewProject = (event) => {
 }
 
 
-const submitBlankProject = () => {
-  const projectName = document.getElementById("blank-project-name").value;
-  const namespace = document.getElementById("namespace").value;
-  const tag = document.getElementById("blank-project-tag").value;
-  const description = document.getElementById("blank-project-description").value;
-  const formData = new FormData();
-  formData.append("project_name", projectName);
-  formData.append("tag", tag);
-  formData.append("description", description);
+const submitBlankProject = (event) => {
+  event.preventDefault()
 
-  // submit the form
-  submitForm(formData, namespace);
+  var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('newProject'), {
+    keyboard: false
+  })
+
+  const submitButton = document.getElementById("blank-project-submit-btn")
+  const form = document.getElementById("blank-project-form")
+  const formData = new FormData(form)
+  const namespace = document.getElementById("blank-namespace-select").value
+  const user = document.getElementById("namespace-header").textContent
+
+  submitButton.disabled = true
+  submitButton.textContent = "Submitting..."
+
+  // submit 
+  fetch(`/api/v1/namespaces/${namespace}/projects`, {
+    method: form.method,
+    body: formData
+  })
+  .then(res => {
+    if(res.ok) {
+      return res.json()
+    } else {
+      throw res
+    }
+  })
+  .then(data => {
+
+    // notify the user it was successful with a toast
+    const toastDiv = document.getElementById("new-project-success-toast")
+    const nameSpan = document.getElementById("project-name-toast-success")
+    
+    // set name
+    nameSpan.textContent = data.registry_path
+
+    // show toast
+    const bsToast = new bootstrap.Toast(toastDiv)
+    bsToast.show()
+
+    // if the user submitted to their own namespace, update the search results
+    // otherwise push them to the new project page
+    if (namespace === user) {
+      fetchProjectsInNamespace(namespace)
+    } else {
+      if (formData.get("tag") === "") {
+        formData.set("tag", "default")
+      }
+      window.location.href = `/${namespace}/${formData.get("project_name")}?tag=${formData.get("tag")}`
+    }
+  })
+  .catch(err => {
+
+    // notify the user there was an error
+    const toastDiv = document.getElementById("new-project-error-toast")
+    const errorMessageDiv = document.getElementById("new-project-creation-error-message")
+    
+    // set name and error message
+    errorMessageDiv.textContent = JSON.stringify(err, null, 2)
+    
+    // show toast
+    const bsToast = new bootstrap.Toast(toastDiv)
+    bsToast.show()
+  })
+  .finally(() => {
+    //auto hide the modal
+    modal.hide()
+    submitButton.disabled = false
+    submitButton.innerHTML = `
+      <i class="bi bi-plus-circle"></i>
+      Add
+    `
+  })
 }
 
 const onFormChange = () => {
