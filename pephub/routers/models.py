@@ -18,3 +18,8 @@ class SearchQuery(BaseModel):
     limit: Optional[int] = 10
     offset: Optional[int] = 0
     score_threshold: Optional[float] = 0.4
+
+
+class RawValidationQuery(BaseModel):
+    project_config: str
+    sample_table: Optional[str]
