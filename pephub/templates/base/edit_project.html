@@ -138,7 +138,7 @@
 <!-- monaco editor -->
 <script>var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/loader.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.nls.js"></script>
+<script id="monaco" async src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.nls.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/basic-languages/yaml/yaml.js"></script>
 
@@ -154,12 +154,18 @@
 
 <!-- monaco editor helpers -->
 <script>
-  <!-- this is bad, but it makes it so it works -->
-  setTimeout(() => {
-    loadYAMLEditor()
+  const script = document.getElementById("monaco")
+  script.addEventListener("load", () => {
+    editor = loadYAMLEditor()
+    editor.onKeyUp(detectYamlChanges)
     getProjectConfigYamlFromDatabase()
-  }, 2000)
+  })
+</script>
 
+<!-- Event handlers -->
+<script>
+  const form = document.getElementById("metadata-form")
+  form.addEventListener("change", detectMetadataChanges)
 </script>
 
 

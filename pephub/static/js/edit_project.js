@@ -1,5 +1,20 @@
 // validation hook
 const validateProject = () => {
+  const currentSampleTableCsv = handsOnTable.getData().map(row => row.join(",")).join("\n")
+  const currentProjectConfigYaml = editor.getValue()
+  // debugger;
+  // if either is empty, return. Again, most likely to occur on page load
+  if ( 
+    currentSampleTableCsv === undefined || 
+    currentProjectConfigYaml === undefined || 
+    !currentSampleTableCsv || 
+    !currentProjectConfigYaml ||
+    currentSampleTableCsv === "Fetching..." ||
+    currentProjectConfigYaml === "Fetching..."
+  ) {
+    return
+  }
+
   // set the save button to disabled by default
   const saveButton = document.querySelector("button.btn-success")
   saveButton.disabled = true
@@ -15,13 +30,22 @@ const validateProject = () => {
   validatingIndicator.classList.remove("d-none")
   validatingIndicator.classList.add("d-flex")
 
-
-  // simualte an API call and reset everything
-  setTimeout(() => {
-      validatingIndicator.classList.add("d-none")
-      validIndicator.classList.remove("d-none")
-      saveButton.disabled = true
-  }, 1000)
+  // call the validation endpoint
+  fetch("/api/v1/eido/validate/raw", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        project_config: currentProjectConfigYaml,
+        sample_table: currentSampleTableCsv
+    })
+  })
+  .finally(() => {
+    validatingIndicator.classList.add("d-none")
+    validIndicator.classList.remove("d-none")
+    saveButton.disabled = true
+  })
 
 }
 
@@ -286,117 +310,112 @@ const handleSampleTableEditorSubmit = async () => {
 }
 
 
-  var editor
-  var originalProjectConfigYaml = "Fetching..."
+var editor
+var originalProjectConfigYaml = "Fetching..."
 
-  const setOriginalConfigYaml = (val) => {
-    originalConfigYaml = val
-  }
+const setOriginalConfigYaml = (val) => {
+  originalConfigYaml = val
+}
 
-  const loadMonaco = () => {
-    if (editor) return editor
-    
-    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } });
-    require(['vs/editor/editor.main'], () => {
-      editor = monaco.editor.create(document.getElementById('yaml-editor-div'), {
-        value: originalProjectConfigYaml, // initialize with serverside yaml
-        language: 'yaml',
-        tabSize: 2,
-        insertSpaces: true,
-        automaticLayout: true
-      });
-    });
-    return editor
-  }
-
-  const loadYAMLEditor = () => {
-    editor = loadMonaco()
-    return editor
-  }
-
-  editor = loadYAMLEditor()
-
-  // detect any changes to the yaml editor
-  const detectYamlChanges = () => {
-    if (editor.getValue() !== originalProjectConfigYaml) {
-      document.getElementById("yaml-save-btn").disabled = false
-    } else {
-      // run validation here
-      validateProject()
-      document.getElementById("yaml-save-btn").disabled = true
-    }
-  }
-
-  // TODO: CHANGE THIS!!!
-  // supply detector to a hook, it takes a second for it to load
-  // so I just run a setTimeout THIS IS BAD but easy
-  setTimeout(() => editor.onKeyUp(detectYamlChanges), 1000)
-
-  const getProjectConfigYamlFromDatabase = () => {
-    // get the latest values
-    const namespace = document.getElementById("namespace-store").value
-    const projectName = document.getElementById("project-name").placeholder
-    const projectTag = document.getElementById("project-tag").placeholder
-
-    fetch(`/api/v1/projects/${namespace}/${projectName}/convert?tag=${projectTag}&filter=yaml`)
-    .then(response =>  response.text())
-    .then(data => {
-      if (!editor) {
-        editor = loadYAMLEditor()
-      }
-      setOriginalConfigYaml(data)
-      editor.setValue(data)
-    })
-  }
+const loadMonaco = () => {
+  if (editor) return editor
   
-  // submit edited yaml to the server/database
-  const handleProjectConfigYamlSubmit = async () => {
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } });
+  require(['vs/editor/editor.main'], () => {
+    editor = monaco.editor.create(document.getElementById('yaml-editor-div'), {
+      value: originalProjectConfigYaml, // initialize with serverside yaml
+      language: 'yaml',
+      tabSize: 2,
+      insertSpaces: true,
+      automaticLayout: true
+    });
+  });
+  return editor
+}
 
-    const namespace = document.getElementById("namespace-store").value
-    const projectName = document.getElementById("project-name").placeholder
-    const tag = document.getElementById("project-tag").placeholder
-    
-    // update save button for UX and feedback
-    const yamlSaveBtn = document.getElementById("yaml-save-btn")
-    yamlSaveBtn.innerText = "Saving..."
-    yamlSaveBtn.disabled = true
+const loadYAMLEditor = () => {
+  editor = loadMonaco()
+  return editor
+}
 
-    // fetch current state of the editor
-    const yaml = editor.getValue()
+editor = loadYAMLEditor()
 
-    // send PATCH request to the server/database
-    fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "project_config_yaml": yaml
-      }, null, 2)
-    })
-    .then(async (res) => {
-      if (res.ok) {
-        originalProjectConfigYaml = yaml
-        createToast({
-          title: "Success",
-          body: "Project config saved successfully",
-          type: "success",
-        })
-      } else {
-        const json = await res.json()
-        throw new Error(json.detail || res.statusText || res.status || "Something went wrong...")
-      }
-    })
-    .catch((error) => {
-      createToast({
-        type: "danger",
-        title: "Something went wrong...",
-        // gracefully display any errors
-        body: error.message || error,
-      })
-    })
-    .finally(() => {
-      // reset button state
-      yamlSaveBtn.innerText = "Save"
-    })
+// detect any changes to the yaml editor
+const detectYamlChanges = () => {
+  if (editor.getValue() !== originalProjectConfigYaml) {
+    document.getElementById("yaml-save-btn").disabled = false
+  } else {
+    // run validation here
+    validateProject()
+    document.getElementById("yaml-save-btn").disabled = true
   }
+}
+
+const getProjectConfigYamlFromDatabase = () => {
+  // get the latest values
+  const namespace = document.getElementById("namespace-store").value
+  const projectName = document.getElementById("project-name").placeholder
+  const projectTag = document.getElementById("project-tag").placeholder
+
+  fetch(`/api/v1/projects/${namespace}/${projectName}/convert?tag=${projectTag}&filter=yaml`)
+  .then(response =>  response.text())
+  .then(data => {
+    if (!editor) {
+      editor = loadYAMLEditor()
+    }
+    setOriginalConfigYaml(data)
+    editor.setValue(data)
+  })
+}
+  
+// submit edited yaml to the server/database
+const handleProjectConfigYamlSubmit = async () => {
+
+  const namespace = document.getElementById("namespace-store").value
+  const projectName = document.getElementById("project-name").placeholder
+  const tag = document.getElementById("project-tag").placeholder
+  
+  // update save button for UX and feedback
+  const yamlSaveBtn = document.getElementById("yaml-save-btn")
+  yamlSaveBtn.innerText = "Saving..."
+  yamlSaveBtn.disabled = true
+
+  // fetch current state of the editor
+  const yaml = editor.getValue()
+
+  // send PATCH request to the server/database
+  fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      "project_config_yaml": yaml
+    }, null, 2)
+  })
+  .then(async (res) => {
+    if (res.ok) {
+      originalProjectConfigYaml = yaml
+      createToast({
+        title: "Success",
+        body: "Project config saved successfully",
+        type: "success",
+      })
+    } else {
+      const json = await res.json()
+      throw new Error(json.detail || res.statusText || res.status || "Something went wrong...")
+    }
+  })
+  .catch((error) => {
+    createToast({
+      type: "danger",
+      title: "Something went wrong...",
+      // gracefully display any errors
+      body: error.message || error,
+    })
+  })
+  .finally(() => {
+    // reset button state
+    yamlSaveBtn.innerText = "Save"
+  })
+}

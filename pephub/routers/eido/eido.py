@@ -5,6 +5,7 @@ import aiofiles
 import requests
 import tempfile
 import peppy
+import yaml
 
 from fastapi import File, UploadFile, Form, APIRouter
 from fastapi.responses import HTMLResponse
@@ -228,46 +229,26 @@ async def validate_pep(
 #     }
 
 
-# ! old /validate
-@router.post("/validate")
-async def validate_pep(
-    request: Request,
-    files: List[UploadFile] = File(...),
-    schemas_to_test=schemas_to_test,
-):
-    for file in files:
-        print(f"File: '{file}'")
-        file_object = file.file
-        full_path = os.path.join(file.filename)
-        uploaded = open(full_path, "wb+")
-        shutil.copyfileobj(file_object, uploaded)
-        uploaded.close()
-        print(uploaded.name)
-        f, ext = os.path.splitext(file.filename)
-        print(ext)
-        if ext == ".yaml" or ext == ".yml" or ext == ".csv":
-            pconf = uploaded.name
-            print("Got yaml:", pconf)
-    p = peppy.Project(pconf)
+# validate
+@router.post("/validate/raw")
+async def validate_raw(project_config: str, sample_table: str):
+    # save project config and sample table to temp dir
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        project_path = f"{tmpdirname}/project_config.yaml"
+        async with aiofiles.open(project_path, mode="w") as f:
+            await f.write(project_config)
 
-    vals = {
-        "name": pconf,
-        "filenames": [file.filename for file in files],
-        "peppy_version": peppy_version,
-        "validations": [],
-    }
-    for schema_id, schema_data in schemas_to_test.items():
-        vals["validations"].append(
-            {
-                "id": schema_id,
-                "name": schema_data["name"],
-                "docs": schema_data["docs"],
-                "schema": schema_data["schema"],
-                "result": vwrap(p, schema_data["schema"]),
-            }
-        )
-    return JSONResponse(content=vals)
-    # return HTMLResponse(je.get_template("validation_results.html").render(**vals))
+        sample_path = f"{tmpdirname}/sample_table.csv"
+        async with aiofiles.open(sample_path, mode="w") as f:
+            await f.write(sample_table)
+
+        project = peppy.Project(project_path)
+
+    proj_response = eido.validate_project(project, exclude_case=True)
+    for sample in project.samples:
+        sample_response = eido.validate_sample(project, sample.name, exclude_case=True)
+
+    return True
 
 
 @router.get("/")
