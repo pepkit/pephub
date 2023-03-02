@@ -1,3 +1,30 @@
+// validation hook
+const validateProject = () => {
+  // set the save button to disabled by default
+  const saveButton = document.querySelector("button.btn-success")
+  saveButton.disabled = true
+
+  // set the valid and invalid indicators to d-none
+  const validIndicator = document.getElementById("valid-indicator")
+  const invalidIndicator = document.getElementById("invalid-indicator")
+  validIndicator.classList.add("d-none")
+  invalidIndicator.classList.add("d-none")
+
+  // set the is-validating indicator to d-flex
+  const validatingIndicator = document.getElementById("is-validating-indicator")
+  validatingIndicator.classList.remove("d-none")
+  validatingIndicator.classList.add("d-flex")
+
+
+  // simualte an API call and reset everything
+  setTimeout(() => {
+      validatingIndicator.classList.add("d-none")
+      validIndicator.classList.remove("d-none")
+      saveButton.disabled = true
+  }, 1000)
+
+}
+
 // detect changes to the form
 const detectMetadataChanges = () => {
   const isPrivateToggle = document.getElementById("is-private-toggle")
@@ -11,6 +38,8 @@ const detectMetadataChanges = () => {
   const nameChanged = projectName.value !== originalProjectNameValue
 
   if (isPrivateChanged || descriptionChanged || nameChanged) {
+      // run validation here
+      validateProject()
       saveButton.disabled = false
   } else {
       saveButton.disabled = true
@@ -144,6 +173,8 @@ const detectSampleTableChanges = () => {
   if (currentSampleTableCsv !== originalSampleTableCsv) {
     document.getElementById("sample-table-save-btn").disabled = false
   } else {
+    // run validation here
+    validateProject()
     document.getElementById("sample-table-save-btn").disabled = true
   }
 }
@@ -197,62 +228,62 @@ const removeCol = () => {
   handsOnTable.alter("remove_col", handsOnTable.countCols(), 1)
 }
 
-  // submit edited sample table to the server/database
-  const handleSampleTableEditorSubmit = async () => {
+// submit edited sample table to the server/database
+const handleSampleTableEditorSubmit = async () => {
 
-    // get the latest values
-    const tag = document.getElementById("project-tag").placeholder
-    const namespace = document.getElementById("namespace-store").value
-    const projectName = document.getElementById("project-name").placeholder
+  // get the latest values
+  const tag = document.getElementById("project-tag").placeholder
+  const namespace = document.getElementById("namespace-store").value
+  const projectName = document.getElementById("project-name").placeholder
 
-    // update save btn for UX and feedback
-    const sampleTableSaveBtn = document.getElementById("sample-table-save-btn")
-    sampleTableSaveBtn.innerText = "Saving..."
-    sampleTableSaveBtn.disabled = true
+  // update save btn for UX and feedback
+  const sampleTableSaveBtn = document.getElementById("sample-table-save-btn")
+  sampleTableSaveBtn.innerText = "Saving..."
+  sampleTableSaveBtn.disabled = true
 
-    // fetch current state of the table
-    let csv = handsOnTable.getData().map(row => row.join(",")).join("\n")
-    csv = removeTrailingCommas(csv)
+  // fetch current state of the table
+  let csv = handsOnTable.getData().map(row => row.join(",")).join("\n")
+  csv = removeTrailingCommas(csv)
 
-    // send PATCH request to server
-    fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "sample_table_csv": csv
-      }, null, 2)
-    })
-    .then(async (res) => {
-      if (res.ok) {
+  // send PATCH request to server
+  fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      "sample_table_csv": csv
+    }, null, 2)
+  })
+  .then(async (res) => {
+    if (res.ok) {
 
-        // update original values and placeholders
-        setOriginalSampleTableCsv(csv)
-        createToast({
-          title: "Success",
-          body: "Sample table saved successfully",
-          type: "success",
-        })
-      } else {
-        const json = await res.json()
-        throw new Error(json.detail || res.statusText || "Something went wrong...")
-      }
-    })
-    .catch((error) => {
+      // update original values and placeholders
+      setOriginalSampleTableCsv(csv)
       createToast({
-        type: "danger",
-        title: "Something went wrong...",
-        // gracefully display any errors
-        body: error.message || error,
-        timout: 3000
+        title: "Success",
+        body: "Sample table saved successfully",
+        type: "success",
       })
+    } else {
+      const json = await res.json()
+      throw new Error(json.detail || res.statusText || "Something went wrong...")
+    }
+  })
+  .catch((error) => {
+    createToast({
+      type: "danger",
+      title: "Something went wrong...",
+      // gracefully display any errors
+      body: error.message || error,
+      timout: 3000
     })
-    .finally(() => {
-      // reset button state
-      sampleTableSaveBtn.innerText = "Save"
-    })
-  }
+  })
+  .finally(() => {
+    // reset button state
+    sampleTableSaveBtn.innerText = "Save"
+  })
+}
 
 
   var editor
@@ -290,6 +321,8 @@ const removeCol = () => {
     if (editor.getValue() !== originalProjectConfigYaml) {
       document.getElementById("yaml-save-btn").disabled = false
     } else {
+      // run validation here
+      validateProject()
       document.getElementById("yaml-save-btn").disabled = true
     }
   }

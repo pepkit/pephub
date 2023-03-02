@@ -16,13 +16,13 @@ from starlette.templating import Jinja2Templates
 from typing import List, Union
 from yacman import load_yaml
 
-from ..const import EIDO_TEMPLATES_PATH, STATICS_PATH
-from ..dependencies import *
+from ...const import EIDO_TEMPLATES_PATH, STATICS_PATH
+from ...dependencies import *
 
 templates = Jinja2Templates(directory=EIDO_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(EIDO_TEMPLATES_PATH))
 
-path_to_schemas = f"{os.path.dirname(__file__)}/schemas.yaml"
+path_to_schemas = f"{os.path.dirname(__file__)}/../schemas.yaml"
 try:
     schemas_to_test = load_yaml(path_to_schemas)
 except Exception as e:
@@ -64,7 +64,7 @@ def temp_pep(file):
         return peppy.Project(file_path)
 
 
-router = APIRouter(prefix="/eido", tags=["eido"])
+router = APIRouter(prefix="/api/v1/eido", tags=["eido"])
 
 
 @router.get("/filters")

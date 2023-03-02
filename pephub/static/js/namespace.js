@@ -310,6 +310,8 @@ const submitBlankProject = (event) => {
       }
       window.location.href = `/${namespace}/${formData.get("project_name")}?tag=${formData.get("tag")}`
     }
+
+    // redirect to new project page
   })
   .catch(err => {
 

@@ -29,8 +29,33 @@
     </li>
   </ul>
   <div class="tab-content border-start border-end border-bottom h-75" id="editTabsContent">
+    <div id="validation-indicators" class="px-2 pt-1 d-flex flex-row justify-content-end align-items-center">
+      <span class="me-1 fw-bold">Validation Status:</span>
+      <div class="d-flex flex-row align-items-center">
+        <div id="is-validating-indicator" class="d-none flex-row align-items-center">
+          <span class="pulse me-1 badge bg-warning border border-light rounded-circle p-2"> 
+          </span>
+          <span class="me-1"><em>Validating</em></span>
+        </div>
+        <div id="invalid-indicator" class="d-none flex-row align-items-center">
+          <span class="me-1 badge bg-danger border border-light rounded-circle p-2">
+          </span>
+          <span class="me-1 d-flex flex-row align-items-center">
+            <em>Invalid</em> 
+            <button class="ms-1 btn btn-sm btn-link text-danger">
+              View Errors
+            </button>
+          </span>
+        </div>
+        <div id="valid-indicator" class="d-flex flex-row align-items-center">
+          <span class="me-1 badge bg-success border border-light rounded-circle p-2">
+          </span>
+          <span class="me-1"><em>Valid</em></span> 
+        </div>
+      </div>
+    </div>
     <div class="tab-pane show active" id="metadata" role="tabpanel" aria-labelledby="metadata-tab">
-      <div class="p-2">
+      <div class="p-2">        
         <form id="metadata-form" action="/api/v1/projects/{{namespace}}/{{project}}" method="PATCH">
           <div class="mb-3 form-check form-switch">
             <label class="form-check-label" for="is-private-toggle">Private</label>
@@ -55,14 +80,15 @@
             <label for="project-description" class="form-label">Project Description</label>
             <textarea onkeyup="detectMetadataChanges()" placeholder="{{ description }}" class="form-control" id="project-description" rows="3">{{description}}</textarea>
           </div>
-          <button onclick="cancelChanges()" type="button" class="btn btn-outline-dark">
+          <button onclick="cancelChanges()" type="button" class="btn btn-outline-dark me-1">
             Cancel
           </button>
-          <button onclick="handleMetaMetaDataSubmit()" id="metadata-save-btn" disabled type="button" disabled class="btn btn-success">
+          <button onclick="handleMetaMetaDataSubmit()" id="metadata-save-btn" disabled type="button" disabled class="btn btn-success me-1">
             Save
           </button>
+        </div>
+
         </form>
-      </div>
     </div>
     <div class="tab-pane" id="project-config" role="tabpanel" aria-labelledby="project-config-tab">
       <div class="p-2" id="yaml-component">
