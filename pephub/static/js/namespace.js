@@ -222,8 +222,6 @@ const submitNewProject = (event) => {
     const bsToast = new bootstrap.Toast(toastDiv)
     bsToast.show()
 
-    debugger;
-
     // if the user submitted to their own namespace, update the search results
     // otherwise push them to the new project page
     if (namespace === user) {
@@ -260,6 +258,21 @@ const submitNewProject = (event) => {
 
 }
 
+
+const submitBlankProject = () => {
+  const projectName = document.getElementById("blank-project-name").value;
+  const namespace = document.getElementById("namespace").value;
+  const tag = document.getElementById("blank-project-tag").value;
+  const description = document.getElementById("blank-project-description").value;
+  const formData = new FormData();
+  formData.append("project_name", projectName);
+  formData.append("tag", tag);
+  formData.append("description", description);
+
+  // submit the form
+  submitForm(formData, namespace);
+}
+
 const onFormChange = () => {
 
   const submitButton = document.getElementById("new-project-submit-btn")
@@ -275,3 +288,18 @@ const onFormChange = () => {
     submitButton.disabled = true
   }
 }
+
+const onBlankFormChange = () => {
+  
+    const submitButton = document.getElementById("blank-project-submit-btn")
+  
+    // check if files input has at least one file
+    // and that the name is not empty
+    projectName = document.getElementById("blank-project-name")
+  
+    if(projectName.value.length > 0) {
+      submitButton.disabled = false
+    } else {
+      submitButton.disabled = true
+    }
+  }
