@@ -39,7 +39,7 @@ def login(request: Request):
     )
 
 
-@auth.get("/callback", response_class=RedirectResponse)
+@auth.get("/callback")
 def callback(
     response: Response,
     request: Request,
@@ -80,11 +80,14 @@ def callback(
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
 
-    set_session_info(
+    token = set_session_info(
         response,
         dict(orgs=[org["login"] for org in organizations], **u),
     )
-    return f"/{u['login']}"
+    return {
+        "message": "Successfully logged in",
+        "jwt_token": token,
+    }
 
 
 @auth.get("/profile")

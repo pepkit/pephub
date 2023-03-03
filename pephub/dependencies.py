@@ -123,7 +123,7 @@ def set_session_info(
     """
     session_info_encoded = CLIAuthSystem.jwt_encode_user_data(session_info)
     response.set_cookie("pephub_session", session_info_encoded, expires=expires)
-    return True
+    return session_info_encoded
 
 
 def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):

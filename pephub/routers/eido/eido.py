@@ -234,9 +234,10 @@ async def validate_pep(
 # validate
 @router.post("/validate/raw")
 async def validate_raw(validation_query: RawValidationQuery):
+    error_key_name = "error"
     tmpdirname = "tmp"
     project_config = validation_query.project_config
-    sample_table = validation_query.sample_table
+    sample_table = validation_query.sample_table.rstrip(",")
 
     # convert to local objects of instantiation
     try:
@@ -247,9 +248,9 @@ async def validate_raw(validation_query: RawValidationQuery):
             project_config_dict["sample_table"] = "sample_table.csv"
             _ = pd.read_csv(StringIO(sample_table))
     except yaml.YAMLError as e:
-        return {"errors": [str(e)]}
+        return {error_key_name: [str(e)]}
     except pd.errors.ParserError as e:
-        return {"errors": [str(e)]}
+        return {error_key_name: [str(e)]}
 
     # cleanup any existing temp dir
     try:
@@ -276,21 +277,26 @@ async def validate_raw(validation_query: RawValidationQuery):
         # delete the temp dir
         shutil.rmtree(tmpdirname)
     try:
-        proj_response = eido.validate_project(
+        eido.validate_config(
             project,
             "http://schema.databio.org/pep/2.0.0.yaml",  # just use the base PEP schema for now
             exclude_case=True,
         )
     except Exception as e:
-        return {"errors": [str(e)]}
+        return {error_key_name: [str(e)]}
+
+    # validate samples if given
     if sample_table is not None:
         for sample in project.samples:
-            sample_response = eido.validate_sample(
-                project,
-                sample.name,
-                "http://schema.databio.org/pep/2.0.0.yaml",  # just use the base PEP schema for now
-                exclude_case=True,
-            )
+            try:
+                eido.validate_sample(
+                    project,
+                    sample.sample_name,
+                    "http://schema.databio.org/pep/2.0.0.yaml",  # just use the base PEP schema for now
+                    exclude_case=True,
+                )
+            except Exception as e:
+                return {error_key_name: [str(e)]}
 
     return True
 
