@@ -1,20 +1,24 @@
 import os
+import json
+import jinja2
 from typing import Union
 from fastapi import APIRouter, Request, Depends, Header
 from fastapi.responses import RedirectResponse, Response
-from peppy import __version__ as peppy_version
-from platform import python_version
+from fastapi.exceptions import HTTPException
+from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import requests
 
 from pephub.dependencies import JWT_SECRET, CLIAuthSystem
 
 from ...helpers import build_authorization_url
-from ..._version import __version__ as pephub_version
 from ...dependencies import read_session_info, set_session_info
-from ...const import ALL_VERSIONS
+from ...const import BASE_TEMPLATES_PATH
 
 load_dotenv()
+
+templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
+je = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_TEMPLATES_PATH))
 
 # Global config
 github_app_config = {
@@ -27,27 +31,35 @@ auth = APIRouter(prefix="/auth", tags=["auth", "users", "login", "authentication
 
 
 @auth.get("/login", response_class=RedirectResponse)
-def login(request: Request):
+def login(client_redirect_uri: Union[str, None] = None):
     """
     Redirects to log user in to GitHub. GitHub will pass a code to the callback URL.
     """
+    state = {
+        "client_redirect_uri": client_redirect_uri,
+        "secret": JWT_SECRET,
+    }
     return build_authorization_url(
-        github_app_config["client_id"],
-        github_app_config["redirect_uri"],
-        JWT_SECRET,
-        **request.query_params,
+        client_id=github_app_config["client_id"],
+        redirect_uri=github_app_config["redirect_uri"],
+        state=json.dumps(state),
     )
 
 
-@auth.get("/callback")
+@auth.get("/callback", response_class=RedirectResponse)
 def callback(
     response: Response,
-    request: Request,
     code: Union[str, None] = None,
     state: Union[str, None] = None,
 ):
-    # TODO: We should check the provided state here to confirm that we generated it
-
+    # We should check the provided state here to confirm that we generated it
+    state = json.loads(state)
+    if state["secret"] != JWT_SECRET:
+        raise HTTPException(
+            status_code=400,
+            detail="The provided state is invalid. Please try logging in again.",
+        )
+    client_redirect_uri = state["client_redirect_uri"]
     # Make a request to the following endpoint to receive an access token
     url = "https://github.com/login/oauth/access_token"
     headers = {
@@ -80,29 +92,24 @@ def callback(
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
 
-    token = set_session_info(
-        response,
-        dict(orgs=[org["login"] for org in organizations], **u),
+    # encode the token
+    token = CLIAuthSystem.jwt_encode_user_data(
+        dict(orgs=[org["login"] for org in organizations], **u)
     )
-    return {
-        "message": "Successfully logged in",
-        "jwt_token": token,
-    }
 
-
-@auth.get("/profile")
-async def view_profile(session_info: dict = Depends(read_session_info)):
-    if session_info:
-        return session_info
+    # return token either to client_redirect,
+    # or to a basic login success page.
+    # add token as query param
+    if client_redirect_uri:
+        send_to = client_redirect_uri + f"?token={token}"
     else:
-        return {"message": "Unauthenticated user"}
+        send_to = f"/auth/login/success?token={token}"
+    return send_to
 
 
-@auth.get("/logout")
-def logout(response: RedirectResponse):
-    response = RedirectResponse(url="/")
-    response.delete_cookie("pephub_session")
-    return response
+@auth.get("/login/success")
+def login_success(request: Request):
+    return templates.TemplateResponse("login_success.html", {"request": request})
 
 
 @auth.post("/login_cli")

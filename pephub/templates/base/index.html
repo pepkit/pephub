@@ -9,22 +9,22 @@
           takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to let you store,
           edit, and access your PEPs in one convenient place.</p>
         <p>To get started submitting your own sample metadata, you only need a GitHub account.</p>
-        <a href="/auth/login">
-          {% if logged_in %}
-          <a href="/{{ session_info['login'] }}">
-            <button class="btn btn-dark btn-lg">
-              <span class="d-flex flex-row align-items-center">
-                <img class="me-1" src="/static/img/pep.svg" height="30px" />
-                My PEPs
-              </span>
-            </button>
-          </a>
-          {% else %}
+        {% if logged_in %}
+        <a href="/{{ session_info['login'] }}">
+          <button class="btn btn-dark btn-lg">
+            <span class="d-flex flex-row align-items-center">
+              <img class="me-1" src="/static/img/pep.svg" height="30px" />
+              My PEPs
+            </span>
+          </button>
+        </a>
+        {% else %}
+        <a href="/auth/login?client_redirect_uri=/login_success">
           <button class="btn btn-dark btn-lg">
             <i class="bi bi-github"></i> Login with GitHub
           </button>
-          {% endif %}
         </a>
+        {% endif %}
         <a href="/eido/validator/index.html">
           <button class="btn btn-outline-dark btn-lg ms-2">
             <i class="bi bi-check2-circle me-1"></i>Validation

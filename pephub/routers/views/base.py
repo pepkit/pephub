@@ -48,3 +48,14 @@ async def main(
             is_landing_page=True,
         ),
     )
+
+
+@views.get("/login/success")
+async def sucessful_login(request: Request, token: str):
+    return templates.TemplateResponse(
+        "login_success.html",
+        {
+            "request": request,
+            "token": token,
+        },
+    )

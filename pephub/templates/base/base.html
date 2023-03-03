@@ -83,7 +83,7 @@
         	      <li><a class="dropdown-item" href="/{{ session_info['login'] }}">View PEPs</a></li>
         	      <li><a class="dropdown-item" href="/me">Profile</a></li>
         	      <li><hr class="dropdown-divider"></li>
-        	      <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+        	      <li><a class="dropdown-item" onclick="signOut()">Logout</a></li>
         	    </ul>
         	  </li>
 			  <img class="border rounded-circle border-secondary" src="{{session_info['avatar_url']}}" alt="Avatar for {{session_info['login']}}" height="50"/>
@@ -140,6 +140,7 @@
 
 	<!-- custom javascript-->
 	<script src="/static/js/base.js"></script>
+	<script src="/static/js/auth.js"></script>
 
 	<!-- global search-->
 	<script>

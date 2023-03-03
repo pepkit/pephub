@@ -1,5 +1,7 @@
 // validation hook
 const validateProject = () => {
+  // disabled for now
+  return 
   const currentSampleTableCsv = handsOnTable.getData().map(row => row.join(",")).join("\n")
   const currentProjectConfigYaml = editor.getValue()
   // debugger;
