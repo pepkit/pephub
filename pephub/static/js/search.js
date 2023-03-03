@@ -119,7 +119,11 @@ const pageRight = () => {
 const pageLeft = () => {
     const limit = document.getElementById('searchLimit').value;
     const offset = document.getElementById('searchOffset').value;
-    document.getElementById('searchOffset').value = parseInt(offset) - parseInt(limit);
+    let newOffset = parseInt(offset) - parseInt(limit);
+    if (newOffset < 0) {
+        newOffset = 0;
+    }
+    document.getElementById('searchOffset').value = newOffset;
     runSearchQuery();
 }
 
