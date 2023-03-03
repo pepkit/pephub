@@ -109,7 +109,9 @@ def callback(
 
 @auth.get("/login/success")
 def login_success(request: Request):
-    return templates.TemplateResponse("login_success.html", {"request": request})
+    return templates.TemplateResponse(
+        "login_success_default.html", {"request": request}
+    )
 
 
 @auth.post("/login_cli")

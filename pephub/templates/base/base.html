@@ -89,7 +89,7 @@
 			  <img class="border rounded-circle border-secondary" src="{{session_info['avatar_url']}}" alt="Avatar for {{session_info['login']}}" height="50"/>
 			  {% else %}
 			  <li class="mx-2 my-0 nav-item h5">
-			    <a href="/auth/login">
+			    <a href="/auth/login?client_redirect_uri=/login/success">
 			    	<button class="btn btn-dark"><i class="fa fa-github"></i>Login</button>
 			    </a>
 			  </li>
