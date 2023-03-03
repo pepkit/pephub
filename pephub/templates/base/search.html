@@ -52,9 +52,9 @@
             </button>
           </label>
           <div class="d-flex flex-row align-items-center">
-            <input id="scoreThreshold" value="50" step="0.5" min="0" max="100" onchange="updateScoreThresholdDisplay()" type="range" class="form-range" id="scoreThreshold">
+            <input id="scoreThreshold" value="30" step="0.5" min="0" max="100" onchange="updateScoreThresholdDisplay()" type="range" class="form-range" id="scoreThreshold">
             <div class="ms-2 text-center" style="min-width: 4rem;">
-              <span class="fw-bold px-2" id="scoreThresholdValue">0.5</span>
+              <span class="fw-bold px-2" id="scoreThresholdValue">0.3</span>
             </div>
         </div>
         <!-- Limit -->
@@ -68,10 +68,11 @@
           </button>
         </label>
         <select id="searchLimit" class="form-control form-select w-100">
+          <option value="5">5</option>
           <option value="10">10</option>
           <option value="25">25</option>
           <option value="50">50</option>
-          <option value="100">100</option>
+          <option selected value="100">100</option>
           <option value="250">250</option>
           <option value="500">500</option>
         </select>
@@ -85,15 +86,7 @@
             <i class="bi bi-info-circle"></i>
           </button>
         </label>
-        <select id="searchOffset" class="form-control form-select w-100">
-          <option value="0">0</option>
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-          <option value="250">250</option>
-          <option value="500">500</option>
-        </select>
+        <input value="0" id="searchOffset" class="form-control" />
       </div>
       <div class="modal-footer">
         <button type="button" onclick="resetAdvancedSettings()" class="btn btn-outline-dark">Reset</button>

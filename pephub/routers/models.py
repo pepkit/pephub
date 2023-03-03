@@ -15,9 +15,9 @@ class ProjectOptional(UpdateItems):
 class SearchQuery(BaseModel):
     query: str
     collection_name: Optional[str] = None
-    limit: Optional[int] = 10
+    limit: Optional[int] = 100
     offset: Optional[int] = 0
-    score_threshold: Optional[float] = 0.4
+    score_threshold: Optional[float] = 0.3
 
 
 class RawValidationQuery(BaseModel):

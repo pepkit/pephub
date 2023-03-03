@@ -106,6 +106,30 @@ const runSearchQuery = (
 
 }
 
+
+// update parameters and run search query
+const pageRight = () => {
+    const limit = document.getElementById('searchLimit').value;
+    const offset = document.getElementById('searchOffset').value;
+    document.getElementById('searchOffset').value = parseInt(offset) + parseInt(limit);
+    runSearchQuery();
+}
+
+// update parameters and run search query
+const pageLeft = () => {
+    const limit = document.getElementById('searchLimit').value;
+    const offset = document.getElementById('searchOffset').value;
+    document.getElementById('searchOffset').value = parseInt(offset) - parseInt(limit);
+    runSearchQuery();
+}
+
+// update parameters and run search query
+const pageReset = () => {
+    document.getElementById('searchLimit').value = 100;
+    document.getElementById('searchOffset').value = 0;
+    runSearchQuery();
+}
+
 const updateScoreThresholdDisplay = () => {
     const scoreThreshold = document.getElementById('scoreThreshold').value;
     const scoreThresholdDisplay = document.getElementById('scoreThresholdValue');
