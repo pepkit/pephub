@@ -76,15 +76,15 @@ uvicorn pephub.main:app --reload
 
 ### Option 1. Standalone `docker`:
 
-If you already have a public database instance running, you can choose to build and run the server container only. 
+If you already have a public database instance running, you can choose to build and run the server container only. **A note to Apple Silicon (M1/M2) users**: If you have issues running, try setting your default docker platform with `export DOCKER_DEFAULT_PLATFORM=linux/amd64` to get the container to build and run properly. See [this issue](https://github.com/pepkit/pephub/issues/87) for more information.
 
 **1. Environment:**  
-Ensure that you have your [environment](docs/server-settings.md) properly configured. Store your settings inside a `.env` file. You can inject these into the container using the `--env-file` flag.
+Ensure that you have your [environment](docs/server-settings.md) properly configured. To manage secrets in your environment, we leverage `pass` and curated [`.env` files](environment/production.env). You can use our `deploy_docker.sh` script to start your container with these `.env` files.
 
-**2. Start container:**
+**2. Build and start container:**
 ```
 docker build -t pephub .
-docker run -p 8000:8000 --env-file .env pephub
+./docker_deploy.sh
 ```
 
 Alternatively, you can inject your environmnet variables one-by-one:
@@ -94,6 +94,14 @@ docker run -p 8000:8000 \
   -e POSTGRES_HOST=localhost \
   -e POSTGRES_DB=pep-db \
   ...
+  pephub
+```
+
+Or, provide your own `.env` file:
+
+```
+docker run -p 8000:8000 \
+  --env-file path/to/.env \
   pephub
 ```
 
