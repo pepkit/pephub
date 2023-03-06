@@ -2,6 +2,19 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.5.0] - 2022-12-07
+### Added
+- New landing page
+- New namespace page
+- Ability to edit PEPs with the new project edit page
+- Vector search for PEPs
+
+### Changed
+- Moved api endpoints to `/api/v1`
+
+### Removed
+- Removed `/view` endpoints
+
 ## [0.4.0] - 2022-11-09
 ### Added
 - Sort PEP's by authentication state (private PEPs)
