@@ -29,7 +29,7 @@ pip install -r requirements/requirements-all.txt
 ```
 
 ### 3. (*Optional*) GitHub Authentication Client Setup
-*pephub* uses GitHub for namespacing and authentication. As such, a GitHub application capable of logging in users is required. See the [GitHub instructions](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app) for information on setting up a new GitHub app.
+*pephub* uses GitHub for namespacing and authentication. As such, a GitHub application capable of logging in users is required. We've [included instructions](https://github.com/pepkit/pephub/blob/master/docs/authentication.md#setting-up-github-oauth-for-your-own-server) for setting this up locally using your own GitHub account. 
 
 ### 4. (*Optional*) Vector Database Setup
 We've added [semantic-search](https://huggingface.co/course/chapter5/6?fw=tf#using-embeddings-for-semantic-search) capabilities to pephub. Optionally, you may host an instance of the [qdrant](https://qdrant.tech/) **vector database** to store embeddings computed using a sentence transformer that has mined and processed any relevant metadata from PEPs. If no database connection settings are supplied, pephub will default to SQL search. Read more [here](docs/semantic-search.md). To run qdrant locally, simply run the following:
@@ -116,9 +116,19 @@ sh setup_db.sh
 ```
 
 **2. Curate your environment:**
-Since we are running in `docker`, we need to supply environment variables to the container. The `docker-compose.yaml` file is written such that you can supply a `.env` file at the root with your configurations. See the [example env file](environment/template.env) for reference. See [here](docs/server-settings.md) for a detailed explanation of all configurable server settings.
+Since we are running in `docker`, we need to supply environment variables to the container. The `docker-compose.yaml` file is written such that you can supply a `.env` file at the root with your configurations. See the [example env file](environment/template.env) for reference. See [here](docs/server-settings.md) for a detailed explanation of all configurable server settings. For now, you can simply copy the `env` file:
+
+```
+cp environment/template.env .env
+```
 
 **3. Build and start the containers:**
+If you are running on an Apple M1 chip, you will need to set the following env variable prior to running `docker compose`:
+
+```console
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+```
+
 ```console
 docker compose up --build
 ```
