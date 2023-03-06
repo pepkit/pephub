@@ -7,13 +7,13 @@ from fastapi import APIRouter, Request, Depends, Response, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from ...dependencies import get_project, get_project_annotation
+from ...dependencies import get_project
 from ...view_dependencies import (
     read_session_cookie,
     get_user_from_session_info,
     get_organizations_from_session_info,
     verify_user_can_read_project,
-    verify_user_can_write_project,
+    get_project_annotation,
 )
 
 from ...helpers import get_project_sample_names
