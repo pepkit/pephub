@@ -40,7 +40,7 @@ async def get_namespace_projects(
     offset: int = 0,
     user=Depends(get_user_from_session_info),
     q: str = None,
-    session_info: dict = Depends(read_session_info),
+    session_info: dict = Depends(read_authorization_header),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
 ):

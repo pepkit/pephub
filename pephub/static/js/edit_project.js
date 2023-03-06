@@ -1,3 +1,20 @@
+const getCookie = (cname) => {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+      }
+  }
+  return "";
+}
+
+
 // validation hook
 const validateProject = () => {
   // disabled for now
@@ -36,7 +53,8 @@ const validateProject = () => {
   fetch("/api/v1/eido/validate/raw", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authoprization": `Bearer ${getCookie("pephub_session")}`
       },
       body: JSON.stringify({
         project_config: currentProjectConfigYaml,
@@ -56,14 +74,16 @@ const detectMetadataChanges = () => {
   const isPrivateToggle = document.getElementById("is-private-toggle")
   const projectDescription = document.getElementById("project-description")
   const projectName = document.getElementById("project-name")
+  const tag = document.getElementById("project-tag")
 
   const saveButton = document.querySelector("button.btn-success")
 
   const isPrivateChanged = isPrivateToggle.checked !== originalIsPrivateValue
   const descriptionChanged = projectDescription.value !== originalDesciriptionValue
   const nameChanged = projectName.value !== originalProjectNameValue
+  const tagChanged = tag.value !== originalProjectTagValue
 
-  if (isPrivateChanged || descriptionChanged || nameChanged) {
+  if (isPrivateChanged || descriptionChanged || nameChanged || tagChanged) {
       // run validation here
       validateProject()
       saveButton.disabled = false
@@ -124,6 +144,7 @@ const handleMetaMetaDataSubmit = async () => {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
     },
     body: JSON.stringify({
         name: document.getElementById("project-name").value,
@@ -230,7 +251,15 @@ const getSampleTableFromDatabase = () => {
   const projectName = document.getElementById("project-name").placeholder
   const projectTag = document.getElementById("project-tag").placeholder
 
-  fetch(`/api/v1/projects/${namespace}/${projectName}/samples?tag=${projectTag}&format=csv`)
+  fetch(
+    `/api/v1/projects/${namespace}/${projectName}/samples?tag=${projectTag}&format=csv`,
+    {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${getCookie("pephub_session")}`
+      }
+    }
+  )
   .then(response =>  response.text())
   .then(data => {
     if (!handsOnTable) {
@@ -275,7 +304,8 @@ const handleSampleTableEditorSubmit = async () => {
   fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
     method: "PATCH",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
     },
     body: JSON.stringify({
       "sample_table_csv": csv
@@ -359,7 +389,15 @@ const getProjectConfigYamlFromDatabase = () => {
   const projectName = document.getElementById("project-name").placeholder
   const projectTag = document.getElementById("project-tag").placeholder
 
-  fetch(`/api/v1/projects/${namespace}/${projectName}/convert?tag=${projectTag}&filter=yaml`)
+  fetch(
+    `/api/v1/projects/${namespace}/${projectName}/convert?tag=${projectTag}&filter=yaml`,
+   {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    },
+  })
   .then(response =>  response.text())
   .then(data => {
     if (!editor) {
@@ -386,10 +424,12 @@ const handleProjectConfigYamlSubmit = async () => {
   const yaml = editor.getValue()
 
   // send PATCH request to the server/database
-  fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
+  fetch(
+    `/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
     method: "PATCH",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
     },
     body: JSON.stringify({
       "project_config_yaml": yaml

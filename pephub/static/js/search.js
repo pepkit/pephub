@@ -1,3 +1,19 @@
+const getCookie = (cname) => {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+  }
+
 const runSearchQuery = (
     query=undefined, 
     pageLoad=false
@@ -63,7 +79,11 @@ const runSearchQuery = (
         {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${getCookie("access_token")}`
+                  },
             },
             body: JSON.stringify({
                 query: searchQuery,

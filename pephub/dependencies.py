@@ -3,16 +3,17 @@ import pydantic
 import jwt
 import json
 import requests
+import logging
 
 from secrets import token_hex
 from dotenv import load_dotenv
 from typing import Union, List, Optional
 from datetime import datetime, timedelta
 
-from fastapi import Depends
-from fastapi.responses import Response
+from fastapi import Depends, Header
 from fastapi.exceptions import HTTPException
-from fastapi.security import HTTPBearer, APIKeyCookie
+from fastapi.security import HTTPBearer
+from fastapi.security.api_key import APIKeyCookie
 from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
@@ -33,6 +34,7 @@ from .const import (
     DEFAULT_HF_MODEL,
 )
 
+_LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
 
 load_dotenv()
 
@@ -41,9 +43,6 @@ token_auth_scheme = HTTPBearer()
 JWT_SECRET = token_hex(32)
 JWT_EXPIRATION = 4320  # minutes
 JWT_EXPIRATION_SECONDS = JWT_EXPIRATION * 60  # seconds
-
-pephub_cookie = APIKeyCookie(name="pephub_session")
-pephub_cookie.auto_error = False
 
 
 class UserData(BaseModel):
@@ -111,39 +110,24 @@ def get_db() -> PEPDatabaseAgent:
     return agent
 
 
-def set_session_info(
-    response: Response, session_info: dict, expires: int = JWT_EXPIRATION_SECONDS
-):
-    """
-    Encodes a dict in a JWT and stores it in a cookie. Read the results
-    with the partner function, read_session_info.
-
-    @param response: Response object passed through from API endpoint
-    @param session_info: Dict of session variables to store in cookie
-    """
-    session_info_encoded = CLIAuthSystem.jwt_encode_user_data(session_info)
-    response.set_cookie("pephub_session", session_info_encoded, expires=expires)
-    return session_info_encoded
-
-
-def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
+def read_authorization_header(Authorization: str = Header(None)) -> Union[str, None]:
     """
     Reads and decodes a JWT, returning the decoded variables.
 
     @param session_info_encoded: JWT provided via FastAPI injection from the API cookie.
     """
-    if session_info_encoded is None:
+    if Authorization is None:
         return None
+    else:
+        Authorization = Authorization.replace("Bearer ", "")
     try:
         # Python jwt.decode verifies content as well so this is safe.
-        session_info = jwt.decode(
-            session_info_encoded, JWT_SECRET, algorithms=["HS256"]
-        )
+        session_info = jwt.decode(Authorization, JWT_SECRET, algorithms=["HS256"])
     except jwt.exceptions.InvalidSignatureError as e:
-        print(e)
+        _LOGGER_PEPHUB.error(e)
         return None
     except jwt.exceptions.DecodeError as e:
-        print(e)
+        _LOGGER_PEPHUB.error(e)
         return None
     except jwt.exceptions.ExpiredSignatureError:
         return None
@@ -151,7 +135,7 @@ def read_session_info(session_info_encoded: str = Depends(pephub_cookie)):
 
 
 def get_organizations_from_session_info(
-    session_info: Union[dict, None] = Depends(read_session_info)
+    session_info: Union[dict, None] = Depends(read_authorization_header)
 ) -> List[str]:
     organizations = []
     if session_info:
@@ -160,7 +144,7 @@ def get_organizations_from_session_info(
 
 
 def get_user_from_session_info(
-    session_info: Union[dict, None] = Depends(read_session_info)
+    session_info: Union[dict, None] = Depends(read_authorization_header)
 ) -> Union[str, None]:
     user = None
     if session_info:
@@ -231,7 +215,7 @@ def get_namespaces(
 
 def verify_user_can_write_namespace(
     namespace: str,
-    session_info: Union[dict, None] = Depends(read_session_info),
+    session_info: Union[dict, None] = Depends(read_authorization_header),
     orgs: List = Depends(get_organizations_from_session_info),
 ):
     """
@@ -256,7 +240,7 @@ def verify_user_can_read_project(
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
     project_annotation: AnnotationModel = Depends(get_project_annotation),
-    session_info: Union[dict, None] = Depends(read_session_info),
+    session_info: Union[dict, None] = Depends(read_authorization_header),
     orgs: List = Depends(get_organizations_from_session_info),
 ):
     """
@@ -288,7 +272,7 @@ def verify_user_can_write_project(
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
     project_annotation: AnnotationModel = Depends(get_project_annotation),
-    session_info: Union[dict, None] = Depends(read_session_info),
+    session_info: Union[dict, None] = Depends(read_authorization_header),
     orgs: List = Depends(get_organizations_from_session_info),
 ):
     """

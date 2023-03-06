@@ -11,7 +11,6 @@ import zipfile
 import io
 
 import peppy
-from pephub.dependencies import read_session_info
 from pephub.exceptions import PepHubException
 
 from ._version import __version__ as v

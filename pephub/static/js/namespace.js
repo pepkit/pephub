@@ -1,3 +1,19 @@
+const getCookie = (cname) => {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+      }
+  }
+  return "";
+}
+
 const debounce = (func, wait, immediate) => {
 	var timeout;
 	return function() {
@@ -52,7 +68,10 @@ const deleteProject = () => {
     deleteButton.textContent = "Deleting..."
 
     fetch(`/api/v1/projects/${namespace}/${project}?tag=${tag}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${getCookie("pephub_session")}`
+      }
     })
     .then(res => {
       if(res.ok) {
@@ -106,7 +125,14 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
     // if options is not null build a query string
     if(options) {
       queryParamString = Object.keys(options).map(key => `${key}=${options[key]}`).join('&')
-      return fetch(`/api/v1/namespaces/${namespace}/projects?${queryParamString}`)
+      return fetch(
+        `/api/v1/namespaces/${namespace}/projects?${queryParamString}`
+        , {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${getCookie("pephub_session")}`
+        }})
         .then(res => {
           if(res.ok) {
             return res.json()
@@ -139,7 +165,15 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
           })
         })
     } else {
-      return fetch(`/api/v1/namespaces/${namespace}/projects`)
+      return fetch(
+        `/api/v1/namespaces/${namespace}/projects`
+        , {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${getCookie("pephub_session")}`
+        }}
+        )
         .then(res => {
           if(res.ok) {
             return res.json()
@@ -193,14 +227,17 @@ const submitNewProject = (event) => {
   const formData = new FormData(form)
   const namespace = document.getElementById("namespace-select").value
   const user = document.getElementById("namespace-header").textContent
-
+  debugger;
   submitButton.disabled = true
   submitButton.textContent = "Submitting..."
 
   // submit 
   fetch(`/api/v1/namespaces/${namespace}/projects`, {
     method: form.method,
-    body: formData
+    body: formData,
+    headers: {
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    }
   })
   .then(res => {
     if(res.ok) {
@@ -278,7 +315,10 @@ const submitBlankProject = (event) => {
   // submit 
   fetch(`/api/v1/namespaces/${namespace}/projects`, {
     method: form.method,
-    body: formData
+    body: formData,
+    headers: {
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    }
   })
   .then(res => {
     if(res.ok) {

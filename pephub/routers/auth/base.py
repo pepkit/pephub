@@ -12,7 +12,6 @@ import requests
 from pephub.dependencies import JWT_SECRET, CLIAuthSystem
 
 from ...helpers import build_authorization_url
-from ...dependencies import read_session_info, set_session_info
 from ...const import BASE_TEMPLATES_PATH
 
 load_dotenv()

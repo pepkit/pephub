@@ -44,4 +44,3 @@ const createToast = (params) => {
       }, 500);
     }, params.timeout || 3000);
 }
-

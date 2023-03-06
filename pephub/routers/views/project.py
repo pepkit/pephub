@@ -7,16 +7,15 @@ from fastapi import APIRouter, Request, Depends, Response, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from ...dependencies import (
-    read_session_info,
-    get_namespaces,
+from ...dependencies import get_project, get_project_annotation
+from ...view_dependencies import (
+    read_session_cookie,
     get_user_from_session_info,
     get_organizations_from_session_info,
-    get_project,
-    get_project_annotation,
     verify_user_can_read_project,
     verify_user_can_write_project,
 )
+
 from ...helpers import get_project_sample_names
 from ...const import BASE_TEMPLATES_PATH, DEFAULT_TAG, ALL_VERSIONS
 from ..models import AnnotationModel
@@ -39,7 +38,7 @@ async def project_view(
     tag: Optional[str] = DEFAULT_TAG,
     peppy_project: peppy.Project = Depends(get_project),
     project_annotation: AnnotationModel = Depends(get_project_annotation),
-    session_info: dict = Depends(read_session_info),
+    session_info: dict = Depends(read_session_cookie),
     user: str = Depends(get_user_from_session_info),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     edit: bool = False,
@@ -85,15 +84,14 @@ async def project_view(
     "/{namespace}/{project}/edit",
     summary="Enter the project editor page.",
     response_class=HTMLResponse,
-    dependencies=[Depends(verify_user_can_write_project)],
 )
 async def project_edit(
     request: Request,
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
     project: peppy.Project = Depends(get_project),
-    project_annoatation: dict = Depends(get_project_annotation),
-    session_info: dict = Depends(read_session_info),
+    project_annoatation: AnnotationModel = Depends(get_project_annotation),
+    session_info: dict = Depends(read_session_cookie),
     edit: bool = False,
 ):
     """
@@ -145,7 +143,7 @@ async def get_sample_view(
     sample_name: str,
     tag: Optional[str] = DEFAULT_TAG,
     proj: peppy.Project = Depends(get_project),
-    session_info: dict = Depends(read_session_info),
+    session_info: dict = Depends(read_session_cookie),
 ):
     """Returns HTML response with a visual summary of the sample."""
     if sample_name not in get_project_sample_names(proj):
@@ -174,9 +172,9 @@ async def get_sample_view(
 @project.get("/{namespace}/{project}/deleted")
 async def deleted_pep(
     request: Request,
-    session_info: dict = Depends(read_session_info),
-    namespaces: List[str] = Depends(get_namespaces),
+    session_info: dict = Depends(read_session_cookie),
 ):
+    namespaces = session_info["orgs"] + [session_info["login"]]
     templ_vars = {"request": request}
     return templates.TemplateResponse(
         "successful_delete.html",

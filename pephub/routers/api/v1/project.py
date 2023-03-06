@@ -170,6 +170,9 @@ async def update_a_pep(
     )
 
     # fetch latest project and return to user
+    # update tag and project values
+    project = updated_project.name or project
+    tag = updated_project.tag or tag
     raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
 
     return JSONResponse(

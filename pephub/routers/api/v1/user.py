@@ -15,7 +15,7 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 # return users data from session_info
 @user.get("/")
 def profile_data(
-    session_info=Depends(read_session_info),
+    session_info=Depends(read_authorization_header),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
@@ -38,7 +38,7 @@ def profile_data(
 @user.get("/data")
 def profile_data(
     request: Request,
-    session_info=Depends(read_session_info),
+    session_info=Depends(read_authorization_header),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
