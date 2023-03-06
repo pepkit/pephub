@@ -2,7 +2,25 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
-## [0.5.0] - 2022-12-07
+## [0.6.0] - 2022-03-06
+### Fixed
+- Buffering configuration file
+- Saving failures in production
+- Renewed login bug
+
+### Added
+- Advanced searching features like score, offset, limit
+- Ability to add a "blank" PEP
+- Web-based metadata builder UI basics
+
+### Changed
+- Use `Authorization Bearer` headers to authenticate requests with the API
+- Include nunjucks through CDN
+- Switch `env` files to take advantage of `pass`
+
+
+
+## [0.5.0] - 2022-01-17
 ### Added
 - New landing page
 - New namespace page
