@@ -14,59 +14,97 @@ const getCookie = (cname) => {
   return "";
 }
 
+const validatingIndicator = document.getElementById("is-validating-indicator")
+const validIndicator = document.getElementById("valid-indicator")
+const invalidIndicator = document.getElementById("invalid-indicator")
 
-// validation hook
-const validateProject = () => {
-  // disabled for now
-  return 
-  const currentSampleTableCsv = handsOnTable.getData().map(row => row.join(",")).join("\n")
-  const currentProjectConfigYaml = editor.getValue()
-  // debugger;
-  // if either is empty, return. Again, most likely to occur on page load
-  if ( 
-    currentSampleTableCsv === undefined || 
-    currentProjectConfigYaml === undefined || 
-    !currentSampleTableCsv || 
-    !currentProjectConfigYaml ||
-    currentSampleTableCsv === "Fetching..." ||
-    currentProjectConfigYaml === "Fetching..."
-  ) {
-    return
-  }
-
-  // set the save button to disabled by default
-  const saveButton = document.querySelector("button.btn-success")
-  saveButton.disabled = true
-
-  // set the valid and invalid indicators to d-none
-  const validIndicator = document.getElementById("valid-indicator")
-  const invalidIndicator = document.getElementById("invalid-indicator")
+const showIsValidatingIndicator = () => {
   validIndicator.classList.add("d-none")
-  invalidIndicator.classList.add("d-none")
+  validIndicator.classList.remove("d-flex")
 
-  // set the is-validating indicator to d-flex
-  const validatingIndicator = document.getElementById("is-validating-indicator")
+
   validatingIndicator.classList.remove("d-none")
   validatingIndicator.classList.add("d-flex")
 
-  // call the validation endpoint
-  fetch("/api/v1/eido/validate/raw", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authoprization": `Bearer ${getCookie("pephub_session")}`
-      },
-      body: JSON.stringify({
-        project_config: currentProjectConfigYaml,
-        sample_table: currentSampleTableCsv
-    })
-  })
-  .finally(() => {
-    validatingIndicator.classList.add("d-none")
-    validIndicator.classList.remove("d-none")
-    saveButton.disabled = true
-  })
+  invalidIndicator.classList.add("d-none")
+  invalidIndicator.classList.remove("d-flex")
+}
 
+const showValidIndicator = () => {
+  validIndicator.classList.remove("d-none")
+  validIndicator.classList.add("d-flex")
+
+  validatingIndicator.classList.add("d-none")
+  validatingIndicator.classList.remove("d-flex")
+
+  invalidIndicator.classList.add("d-none")
+  invalidIndicator.classList.remove("d-flex")
+}
+
+const showInvalidIndicator = () => {
+  validIndicator.classList.add("d-none")
+  validIndicator.classList.remove("d-flex")
+  
+  validatingIndicator.classList.add("d-none")
+  validatingIndicator.classList.remove("d-flex")
+
+  invalidIndicator.classList.remove("d-none")
+  invalidIndicator.classList.add("d-flex")
+}
+
+// validation hook
+const validateProject = async () => {
+  // disabled for now
+  const currentSampleTableCsv = handsOnTable.getData().map(row => row.join(",")).join("\n")
+  const currentProjectConfigYaml = editor.getValue()
+  const validateButton = document.getElementById("validate-button")
+
+  // set the validate button to disabled by default
+  validateButton.disabled = true
+  validateButton.innerText = "Validating..."
+
+  showIsValidatingIndicator()
+
+  // call the validation endpoint
+  let res;
+  try {
+      res = await fetch("/api/v1/eido/validate/raw", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authoprization": `Bearer ${getCookie("pephub_session")}`
+        },
+        body: JSON.stringify({
+          project_config: currentProjectConfigYaml,
+          sample_table: currentSampleTableCsv
+      })
+    })
+    // validate the response
+    if (res.ok) {
+      showValidIndicator()
+      return res.json()
+    // if not ok (failed validation on server),
+    // update the validation indicators
+    } else {
+      showInvalidIndicator()
+      validateButton.disabled = false
+      validateButton.innerText = "Validate"
+      const json = await res.json()
+      const errorBox = document.getElementById("validation-error-box")
+      errorBox.innerText = JSON.stringify({
+        error: json.detail.error
+      }, null, 2)
+    }
+  } catch (err) {
+    showInvalidIndicator()
+    const errorBox = document.getElementById("validation-error-box")
+    errorBox.innerText = JSON.stringify({
+      error: json.detail.error
+    }, null, 2)
+  } finally {
+    validateButton.disabled = false
+    validateButton.innerText = "Validate"
+  }
 }
 
 // detect changes to the form
@@ -84,8 +122,6 @@ const detectMetadataChanges = () => {
   const tagChanged = tag.value !== originalProjectTagValue
 
   if (isPrivateChanged || descriptionChanged || nameChanged || tagChanged) {
-      // run validation here
-      validateProject()
       saveButton.disabled = false
   } else {
       saveButton.disabled = true
@@ -220,8 +256,6 @@ const detectSampleTableChanges = () => {
   if (currentSampleTableCsv !== originalSampleTableCsv) {
     document.getElementById("sample-table-save-btn").disabled = false
   } else {
-    // run validation here
-    validateProject()
     document.getElementById("sample-table-save-btn").disabled = true
   }
 }
@@ -377,8 +411,6 @@ const detectYamlChanges = () => {
   if (editor.getValue() !== originalProjectConfigYaml) {
     document.getElementById("yaml-save-btn").disabled = false
   } else {
-    // run validation here
-    validateProject()
     document.getElementById("yaml-save-btn").disabled = true
   }
 }

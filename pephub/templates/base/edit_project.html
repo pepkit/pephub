@@ -29,8 +29,7 @@
     </li>
   </ul>
   <div class="tab-content border-start border-end border-bottom h-75" id="editTabsContent">
-    <div id="validation-indicators" class="px-2 pt-1 d-flex flex-row justify-content-end align-items-center">
-      <span class="me-1 fw-bold">Validation Status:</span>
+    <div id="validation-indicators" class="px-2 py-1 d-flex flex-row justify-content-end align-items-center border-bottom">
       <div class="d-flex flex-row align-items-center">
         <div id="is-validating-indicator" class="d-none flex-row align-items-center">
           <span class="pulse me-1 badge bg-warning border border-light rounded-circle p-2"> 
@@ -40,9 +39,8 @@
         <div id="invalid-indicator" class="d-none flex-row align-items-center">
           <span class="me-1 badge bg-danger border border-light rounded-circle p-2">
           </span>
-          <span class="me-1 d-flex flex-row align-items-center">
-            <em>Invalid</em> 
-            <button class="ms-1 btn btn-sm btn-link text-danger">
+          <span class="d-flex flex-row align-items-center">
+            <button type="button" class="btn btn-link text-danger" data-bs-toggle="modal" data-bs-target="#validationErrors">
               View Errors
             </button>
           </span>
@@ -53,6 +51,7 @@
           <span class="me-1"><em>Valid</em></span> 
         </div>
       </div>
+      <button onclick="validateProject()" id="validate-button" class="ms-1 btn btn-sm btn-outline-dark">Validate PEP</button>
     </div>
     <div class="tab-pane show active" id="metadata" role="tabpanel" aria-labelledby="metadata-tab">
       <div class="p-2">        
@@ -87,8 +86,7 @@
             Save
           </button>
         </div>
-
-        </form>
+      </form>
     </div>
     <div class="tab-pane" id="project-config" role="tabpanel" aria-labelledby="project-config-tab">
       <div class="p-2" id="yaml-component">
@@ -118,6 +116,26 @@
     </div>
   </div>
 </div>
+<!-- validation error modal -->
+<div class="modal" id="validationErrors" tabindex="-1" aria-labelledby="validationErrorsLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content border border-danger">
+      <div class="modal-header text-danger bg-danger" style="--bs-bg-opacity: .2;">
+        <h5 class="modal-title" id="validationErrorsLabel">
+          <i class="bi bi-exclamation-circle"></i>
+          Validation Errors
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <code>
+        <pre id="validation-error-box" class="text-wrap"></pre>
+        </code>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
 

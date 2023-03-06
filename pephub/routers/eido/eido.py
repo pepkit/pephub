@@ -248,9 +248,9 @@ async def validate_raw(validation_query: RawValidationQuery):
             project_config_dict["sample_table"] = "sample_table.csv"
             _ = pd.read_csv(StringIO(sample_table))
     except yaml.YAMLError as e:
-        return {error_key_name: [str(e)]}
+        raise HTTPException(status_code=406, detail={error_key_name: str(e)})
     except pd.errors.ParserError as e:
-        return {error_key_name: [str(e)]}
+        raise HTTPException(status_code=406, detail={error_key_name: str(e)})
 
     # cleanup any existing temp dir
     try:
@@ -271,8 +271,10 @@ async def validate_raw(validation_query: RawValidationQuery):
             sample_path = f"{tmpdirname}/{project_config_dict['sample_table']}"
             with open(sample_path, mode="w") as f:
                 f.write(sample_table)
-
-        project = peppy.Project(f"{tmpdirname}/project_config.yaml")
+        try:
+            project = peppy.Project(f"{tmpdirname}/project_config.yaml")
+        except Exception as e:
+            raise HTTPException(status_code=406, detail={error_key_name: str(e)})
     finally:
         # delete the temp dir
         shutil.rmtree(tmpdirname)
@@ -283,7 +285,7 @@ async def validate_raw(validation_query: RawValidationQuery):
             exclude_case=True,
         )
     except Exception as e:
-        return {error_key_name: [str(e)]}
+        raise HTTPException(status_code=406, detail={error_key_name: str(e)})
 
     # validate samples if given
     if sample_table is not None:
@@ -296,7 +298,7 @@ async def validate_raw(validation_query: RawValidationQuery):
                     exclude_case=True,
                 )
             except Exception as e:
-                return {error_key_name: [str(e)]}
+                return HTTPException(status_code=406, detail={error_key_name: str(e)})
 
     return True
 
