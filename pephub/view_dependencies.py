@@ -16,11 +16,7 @@ from fastapi.security.api_key import APIKeyCookie
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectNotFoundError
 
-from .dependencies import (
-    JWT_SECRET,
-    get_db,
-    get_project_annotation,
-)
+from .dependencies import JWT_SECRET, get_db
 from .const import DEFAULT_TAG
 from .routers.models import AnnotationModel
 
@@ -73,6 +69,43 @@ def get_user_from_session_info(
     if session_info:
         user = session_info.get("login")
     return user
+
+
+def get_namespace_access_list(
+    user: str = Depends(get_user_from_session_info),
+    orgs: List[str] = Depends(get_organizations_from_session_info),
+) -> List[str]:
+    """
+    Return a list of namespaces that the current user has access to. Function
+    will return None if there is no logged in user
+    """
+    access_rights = []
+    if user:
+        access_rights.append(user)
+        access_rights.extend(orgs)
+        return access_rights
+    else:
+        return None
+
+
+def get_project_annotation(
+    namespace: str,
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+) -> AnnotationModel:
+    # TODO: Is just grabbing the first annotation the right thing to do?
+    try:
+        anno = agent.annotation.get(
+            namespace, project, tag, admin=namespace_access_list
+        ).results[0]
+        yield anno
+    except ProjectNotFoundError:
+        raise HTTPException(
+            404,
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+        )
 
 
 def verify_user_can_write_namespace(
@@ -172,40 +205,3 @@ def verify_user_can_write_project(
                 403,
                 f"The current authenticated user does not have permission to edit this project.",
             )
-
-
-def get_namespace_access_list(
-    user: str = Depends(get_user_from_session_info),
-    orgs: List[str] = Depends(get_organizations_from_session_info),
-) -> List[str]:
-    """
-    Return a list of namespaces that the current user has access to. Function
-    will return None if there is no logged in user
-    """
-    access_rights = []
-    if user:
-        access_rights.append(user)
-        access_rights.extend(orgs)
-        return access_rights
-    else:
-        return None
-
-
-def get_project_annotation(
-    namespace: str,
-    project: str,
-    tag: Optional[str] = DEFAULT_TAG,
-    agent: PEPDatabaseAgent = Depends(get_db),
-    namespace_access_list: List[str] = Depends(get_namespace_access_list),
-) -> AnnotationModel:
-    # TODO: Is just grabbing the first annotation the right thing to do?
-    try:
-        anno = agent.annotation.get(
-            namespace, project, tag, admin=namespace_access_list
-        ).results[0]
-        yield anno
-    except ProjectNotFoundError:
-        raise HTTPException(
-            404,
-            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
-        )

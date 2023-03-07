@@ -14,6 +14,7 @@ from ...view_dependencies import (
     get_organizations_from_session_info,
     verify_user_can_read_project,
     get_project_annotation,
+    verify_user_can_write_project,
 )
 
 from ...helpers import get_project_sample_names
@@ -84,6 +85,10 @@ async def project_view(
     "/{namespace}/{project}/edit",
     summary="Enter the project editor page.",
     response_class=HTMLResponse,
+    dependencies=[
+        Depends(verify_user_can_read_project),
+        Depends(verify_user_can_write_project),
+    ],
 )
 async def project_edit(
     request: Request,
