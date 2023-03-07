@@ -8,9 +8,10 @@
     </h5>
   </div>
 {% else %}
-<div>
+<!-- Commented out since it can be confusing -->
+<!-- <div>
   Found {{namespace_hits|length + results|length}} results for "{{query}}"
-</div>
+</div> -->
   {% if namespace_hits|length > 0 %}
     <!-- namespace search results -->
     <h3 class="text-start w-100 fw-bold">Namespaces</h3>

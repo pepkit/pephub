@@ -256,9 +256,9 @@ async def validate_raw(validation_query: RawValidationQuery):
     try:
         shutil.rmtree(tmpdirname)
     except FileExistsError:
-        pass
+        pass  # ignore if dir doesn't exist
     except FileNotFoundError:
-        pass
+        pass  # ignore if dir doesn't exist
     # save project config and sample table to temp dir
     try:
         os.mkdir(tmpdirname)
