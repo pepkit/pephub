@@ -73,6 +73,22 @@ def build_parser():
         default=False,
     )
 
+    sps["serve"].add_argument(
+        "--log-level",
+        dest="log_level",
+        type=str,
+        help="The level of logging to use",
+        default="INFO",
+    )
+
+    sps["serve"].add_argument(
+        "--uvicorn-log-level",
+        dest="uvicorn_log_level",
+        type=str,
+        help="The level of logging to use for uvicorn",
+        default="info",
+    )
+
     return parser
 
 

@@ -1,3 +1,4 @@
+import logging
 import os
 import pandas as pd
 from ._version import __version__ as pephub_version
@@ -108,6 +109,15 @@ VALID_UPDATE_KEYS = [
     "private",
     "description",
 ]
+
+
+LOG_LEVEL_MAP = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL,
+}
 
 JWT_SECRET = token_hex(32)
 JWT_EXPIRATION = 4320  # minutes
