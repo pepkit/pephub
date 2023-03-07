@@ -1,3 +1,19 @@
+const getCookie = (cname) => {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+      }
+  }
+  return "";
+}
+
 const debounce = (func, wait, immediate) => {
 	var timeout;
 	return function() {
@@ -52,7 +68,10 @@ const deleteProject = () => {
     deleteButton.textContent = "Deleting..."
 
     fetch(`/api/v1/projects/${namespace}/${project}?tag=${tag}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${getCookie("pephub_session")}`
+      }
     })
     .then(res => {
       if(res.ok) {
@@ -106,7 +125,14 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
     // if options is not null build a query string
     if(options) {
       queryParamString = Object.keys(options).map(key => `${key}=${options[key]}`).join('&')
-      return fetch(`/api/v1/namespaces/${namespace}/projects?${queryParamString}`)
+      return fetch(
+        `/api/v1/namespaces/${namespace}/projects?${queryParamString}`
+        , {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${getCookie("pephub_session")}`
+        }})
         .then(res => {
           if(res.ok) {
             return res.json()
@@ -139,7 +165,15 @@ const fetchProjectsInNamespace = async (namespace, options=null) => {
           })
         })
     } else {
-      return fetch(`/api/v1/namespaces/${namespace}/projects`)
+      return fetch(
+        `/api/v1/namespaces/${namespace}/projects`
+        , {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${getCookie("pephub_session")}`
+        }}
+        )
         .then(res => {
           if(res.ok) {
             return res.json()
@@ -193,14 +227,17 @@ const submitNewProject = (event) => {
   const formData = new FormData(form)
   const namespace = document.getElementById("namespace-select").value
   const user = document.getElementById("namespace-header").textContent
-
+  debugger;
   submitButton.disabled = true
   submitButton.textContent = "Submitting..."
 
   // submit 
   fetch(`/api/v1/namespaces/${namespace}/projects`, {
     method: form.method,
-    body: formData
+    body: formData,
+    headers: {
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    }
   })
   .then(res => {
     if(res.ok) {
@@ -221,8 +258,6 @@ const submitNewProject = (event) => {
     // show toast
     const bsToast = new bootstrap.Toast(toastDiv)
     bsToast.show()
-
-    debugger;
 
     // if the user submitted to their own namespace, update the search results
     // otherwise push them to the new project page
@@ -260,6 +295,88 @@ const submitNewProject = (event) => {
 
 }
 
+
+const submitBlankProject = (event) => {
+  event.preventDefault()
+
+  var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('newProject'), {
+    keyboard: false
+  })
+
+  const submitButton = document.getElementById("blank-project-submit-btn")
+  const form = document.getElementById("blank-project-form")
+  const formData = new FormData(form)
+  const namespace = document.getElementById("blank-namespace-select").value
+  const user = document.getElementById("namespace-header").textContent
+
+  submitButton.disabled = true
+  submitButton.textContent = "Submitting..."
+
+  // submit 
+  fetch(`/api/v1/namespaces/${namespace}/projects`, {
+    method: form.method,
+    body: formData,
+    headers: {
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    }
+  })
+  .then(res => {
+    if(res.ok) {
+      return res.json()
+    } else {
+      throw res
+    }
+  })
+  .then(data => {
+
+    // notify the user it was successful with a toast
+    const toastDiv = document.getElementById("new-project-success-toast")
+    const nameSpan = document.getElementById("project-name-toast-success")
+    
+    // set name
+    nameSpan.textContent = data.registry_path
+
+    // show toast
+    const bsToast = new bootstrap.Toast(toastDiv)
+    bsToast.show()
+
+    // if the user submitted to their own namespace, update the search results
+    // otherwise push them to the new project page
+    if (namespace === user) {
+      fetchProjectsInNamespace(namespace)
+    } else {
+      if (formData.get("tag") === "") {
+        formData.set("tag", "default")
+      }
+      window.location.href = `/${namespace}/${formData.get("project_name")}?tag=${formData.get("tag")}`
+    }
+
+    // redirect to new project page
+  })
+  .catch(err => {
+
+    // notify the user there was an error
+    const toastDiv = document.getElementById("new-project-error-toast")
+    const errorMessageDiv = document.getElementById("new-project-creation-error-message")
+    
+    // set name and error message
+    errorMessageDiv.textContent = JSON.stringify(err, null, 2)
+    
+    // show toast
+    const bsToast = new bootstrap.Toast(toastDiv)
+    bsToast.show()
+  })
+  .finally(() => {
+    //auto hide the modal
+    modal.hide()
+    submitButton.disabled = false
+    submitButton.innerHTML = `
+      <i class="bi bi-plus-circle"></i>
+      Add
+    `
+  })
+}
+
 const onFormChange = () => {
 
   const submitButton = document.getElementById("new-project-submit-btn")
@@ -275,3 +392,18 @@ const onFormChange = () => {
     submitButton.disabled = true
   }
 }
+
+const onBlankFormChange = () => {
+  
+    const submitButton = document.getElementById("blank-project-submit-btn")
+  
+    // check if files input has at least one file
+    // and that the name is not empty
+    projectName = document.getElementById("blank-project-name")
+  
+    if(projectName.value.length > 0) {
+      submitButton.disabled = false
+    } else {
+      submitButton.disabled = true
+    }
+  }

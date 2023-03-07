@@ -1,7 +1,56 @@
-const runSearchQuery = (query=undefined, pageLoad=false) => {
+const getCookie = (cname) => {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+  }
+
+const runSearchQuery = (
+    query=undefined, 
+    pageLoad=false
+) => {
+
+    const limit = document.getElementById('searchLimit').value;
+    const offset = document.getElementById('searchOffset').value;
+    const scoreThreshold = document.getElementById('scoreThreshold').value/100;
+
+    // update the url with the search query
+    if ('URLSearchParams' in window) {
+        var searchParams = new URLSearchParams(window.location.search)
+    } else {
+        var searchParams = new URLSearchParams()
+    }
+    if (query !== undefined && query !== "" && query !== null) {
+        searchParams.set("query", query);
+    }
+    if (limit !== undefined) {
+        searchParams.set("limit", limit);
+    }
+    if (offset !== undefined) {
+        searchParams.set("offset", offset);
+    }
+    if (scoreThreshold !== undefined) {
+        searchParams.set("scoreThreshold", scoreThreshold);
+    }
+
+    // only add search parmas if they are not empty and dont do it on pageload
+    if (searchParams.toString().length > 0 && !pageLoad) {
+        var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+        history.pushState(null, '', newRelativePathQuery);
+    }
+    
+
     // populate the search query.
     // we do not want to run a query if the search bar is empty ("").
-
     var searchQuery = "";
     if (query === undefined) {
         searchQuery = document.getElementById('search-bar').value;
@@ -30,10 +79,17 @@ const runSearchQuery = (query=undefined, pageLoad=false) => {
         {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${getCookie("access_token")}`
+                  },
             },
             body: JSON.stringify({
-                query: searchQuery
+                query: searchQuery,
+                limit: limit,
+                offset: offset,
+                score_threshold: scoreThreshold
             })
         }
     )
@@ -68,4 +124,45 @@ const runSearchQuery = (query=undefined, pageLoad=false) => {
         searchResultDiv.innerHTML = nunjucks.render('search_results.html', data_enriched);
     })
 
+}
+
+
+// update parameters and run search query
+const pageRight = () => {
+    const limit = document.getElementById('searchLimit').value;
+    const offset = document.getElementById('searchOffset').value;
+    document.getElementById('searchOffset').value = parseInt(offset) + parseInt(limit);
+    runSearchQuery();
+}
+
+// update parameters and run search query
+const pageLeft = () => {
+    const limit = document.getElementById('searchLimit').value;
+    const offset = document.getElementById('searchOffset').value;
+    let newOffset = parseInt(offset) - parseInt(limit);
+    if (newOffset < 0) {
+        newOffset = 0;
+    }
+    document.getElementById('searchOffset').value = newOffset;
+    runSearchQuery();
+}
+
+// update parameters and run search query
+const pageReset = () => {
+    document.getElementById('searchLimit').value = 100;
+    document.getElementById('searchOffset').value = 0;
+    runSearchQuery();
+}
+
+const updateScoreThresholdDisplay = () => {
+    const scoreThreshold = document.getElementById('scoreThreshold').value;
+    const scoreThresholdDisplay = document.getElementById('scoreThresholdValue');
+    scoreThresholdDisplay.innerHTML = scoreThreshold/100;
+}
+
+const resetAdvancedSettings = () => {
+    document.getElementById('searchLimit').value = 10;
+    document.getElementById('searchOffset').value = 0;
+    document.getElementById('scoreThreshold').value = 50;
+    updateScoreThresholdDisplay();
 }

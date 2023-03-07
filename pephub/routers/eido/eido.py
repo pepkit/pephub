@@ -1,28 +1,31 @@
 import eido
 import jinja2
-import shutil
 import aiofiles
 import requests
 import tempfile
 import peppy
+import yaml
+import shutil
+import pandas as pd
 
+from io import StringIO
 from fastapi import File, UploadFile, Form, APIRouter
 from fastapi.responses import HTMLResponse
-from peppy import __version__ as peppy_version
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.responses import FileResponse
 from starlette.templating import Jinja2Templates
-from typing import List, Union
+from typing import List
 from yacman import load_yaml
 
-from ..const import EIDO_TEMPLATES_PATH, STATICS_PATH
-from ..dependencies import *
+from ..models import RawValidationQuery
+from ...const import EIDO_TEMPLATES_PATH, STATICS_PATH
+from ...dependencies import *
 
 templates = Jinja2Templates(directory=EIDO_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(EIDO_TEMPLATES_PATH))
 
-path_to_schemas = f"{os.path.dirname(__file__)}/schemas.yaml"
+path_to_schemas = f"{os.path.dirname(__file__)}/../schemas.yaml"
 try:
     schemas_to_test = load_yaml(path_to_schemas)
 except Exception as e:
@@ -64,7 +67,7 @@ def temp_pep(file):
         return peppy.Project(file_path)
 
 
-router = APIRouter(prefix="/eido", tags=["eido"])
+router = APIRouter(prefix="/api/v1/eido", tags=["eido"])
 
 
 @router.get("/filters")
@@ -228,46 +231,76 @@ async def validate_pep(
 #     }
 
 
-# ! old /validate
-@router.post("/validate")
-async def validate_pep(
-    request: Request,
-    files: List[UploadFile] = File(...),
-    schemas_to_test=schemas_to_test,
-):
-    for file in files:
-        print(f"File: '{file}'")
-        file_object = file.file
-        full_path = os.path.join(file.filename)
-        uploaded = open(full_path, "wb+")
-        shutil.copyfileobj(file_object, uploaded)
-        uploaded.close()
-        print(uploaded.name)
-        f, ext = os.path.splitext(file.filename)
-        print(ext)
-        if ext == ".yaml" or ext == ".yml" or ext == ".csv":
-            pconf = uploaded.name
-            print("Got yaml:", pconf)
-    p = peppy.Project(pconf)
+# validate
+@router.post("/validate/raw")
+async def validate_raw(validation_query: RawValidationQuery):
+    error_key_name = "error"
+    tmpdirname = "tmp"
+    project_config = validation_query.project_config
+    sample_table = validation_query.sample_table.rstrip(",")
 
-    vals = {
-        "name": pconf,
-        "filenames": [file.filename for file in files],
-        "peppy_version": peppy_version,
-        "validations": [],
-    }
-    for schema_id, schema_data in schemas_to_test.items():
-        vals["validations"].append(
-            {
-                "id": schema_id,
-                "name": schema_data["name"],
-                "docs": schema_data["docs"],
-                "schema": schema_data["schema"],
-                "result": vwrap(p, schema_data["schema"]),
-            }
+    # convert to local objects of instantiation
+    try:
+        project_config_dict = yaml.safe_load(project_config)
+
+        if sample_table is not None:
+            # reset sample table path
+            project_config_dict["sample_table"] = "sample_table.csv"
+            _ = pd.read_csv(StringIO(sample_table))
+    except yaml.YAMLError as e:
+        raise HTTPException(status_code=406, detail={error_key_name: str(e)})
+    except pd.errors.ParserError as e:
+        raise HTTPException(status_code=406, detail={error_key_name: str(e)})
+
+    # cleanup any existing temp dir
+    try:
+        shutil.rmtree(tmpdirname)
+    except FileExistsError:
+        pass  # ignore if dir doesn't exist
+    except FileNotFoundError:
+        pass  # ignore if dir doesn't exist
+    # save project config and sample table to temp dir
+    try:
+        os.mkdir(tmpdirname)
+        project_path = f"{tmpdirname}/project_config.yaml"
+        with open(project_path, mode="w") as f:
+            f.write(json.dumps(project_config_dict))
+
+        # write sample table to temp dir if exists
+        if sample_table is not None:
+            sample_path = f"{tmpdirname}/{project_config_dict['sample_table']}"
+            with open(sample_path, mode="w") as f:
+                f.write(sample_table)
+        try:
+            project = peppy.Project(f"{tmpdirname}/project_config.yaml")
+        except Exception as e:
+            raise HTTPException(status_code=406, detail={error_key_name: str(e)})
+    finally:
+        # delete the temp dir
+        shutil.rmtree(tmpdirname)
+    try:
+        eido.validate_config(
+            project,
+            "http://schema.databio.org/pep/2.0.0.yaml",  # just use the base PEP schema for now
+            exclude_case=True,
         )
-    return JSONResponse(content=vals)
-    # return HTMLResponse(je.get_template("validation_results.html").render(**vals))
+    except Exception as e:
+        raise HTTPException(status_code=406, detail={error_key_name: str(e)})
+
+    # validate samples if given
+    if sample_table is not None:
+        for sample in project.samples:
+            try:
+                eido.validate_sample(
+                    project,
+                    sample.sample_name,
+                    "http://schema.databio.org/pep/2.0.0.yaml",  # just use the base PEP schema for now
+                    exclude_case=True,
+                )
+            except Exception as e:
+                return HTTPException(status_code=406, detail={error_key_name: str(e)})
+
+    return True
 
 
 @router.get("/")

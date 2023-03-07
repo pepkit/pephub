@@ -27,7 +27,7 @@ project = APIRouter(
 
 
 @project.get(
-    "/", summary="Fetch a PEP", dependencies=[Depends(verify_user_can_read_project)]
+    "", summary="Fetch a PEP", dependencies=[Depends(verify_user_can_read_project)]
 )
 async def get_a_pep(
     proj: peppy.Project = Depends(get_project),
@@ -44,9 +44,17 @@ async def get_a_pep(
     # is representative of all samples attributes
     # -- is this the case?
     sample_attributes = proj._samples[0]._attributes
+
+    proj_dict = proj.to_dict()
+    proj_annotation_dict = proj_annotation.dict()
+
+    # default to name from annotation
+    if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
+        del proj_dict["name"]
+
     return dict(
-        **proj.to_dict(),
-        **proj_annotation.dict(),
+        **proj_dict,
+        **proj_annotation_dict,
         samples=samples,
         sample_table_indx=sample_table_indx,
         sample_attributes=sample_attributes,
@@ -56,7 +64,7 @@ async def get_a_pep(
 # https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository
 # update a project (pep)
 @project.patch(
-    "/", summary="Update a PEP", dependencies=[Depends(verify_user_can_write_project)]
+    "", summary="Update a PEP", dependencies=[Depends(verify_user_can_write_project)]
 )
 async def update_a_pep(
     project: str,
@@ -162,6 +170,9 @@ async def update_a_pep(
     )
 
     # fetch latest project and return to user
+    # update tag and project values
+    project = updated_project.name or project
+    tag = updated_project.tag or tag
     raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
 
     return JSONResponse(
@@ -178,7 +189,7 @@ async def update_a_pep(
 
 # delete a PEP
 @project.delete(
-    "/", summary="Delete a PEP", dependencies=[Depends(verify_user_can_write_project)]
+    "", summary="Delete a PEP", dependencies=[Depends(verify_user_can_write_project)]
 )
 async def delete_a_pep(
     namespace: str,

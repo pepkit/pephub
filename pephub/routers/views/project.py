@@ -1,22 +1,22 @@
 import peppy
 import eido
 import pandas as pd
-from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY
+from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, PEP_LATEST_VERSION
 from typing import List, Optional
 from fastapi import APIRouter, Request, Depends, Response, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from ...dependencies import (
-    read_session_info,
-    get_namespaces,
+from ...dependencies import get_project
+from ...view_dependencies import (
+    read_session_cookie,
     get_user_from_session_info,
     get_organizations_from_session_info,
-    get_project,
-    get_project_annotation,
     verify_user_can_read_project,
+    get_project_annotation,
     verify_user_can_write_project,
 )
+
 from ...helpers import get_project_sample_names
 from ...const import BASE_TEMPLATES_PATH, DEFAULT_TAG, ALL_VERSIONS
 from ..models import AnnotationModel
@@ -35,10 +35,11 @@ project = APIRouter(tags=["project", "user interface", "interface"])
 async def project_view(
     request: Request,
     namespace: str,
+    project: str,
     tag: Optional[str] = DEFAULT_TAG,
-    project: peppy.Project = Depends(get_project),
+    peppy_project: peppy.Project = Depends(get_project),
     project_annotation: AnnotationModel = Depends(get_project_annotation),
-    session_info: dict = Depends(read_session_info),
+    session_info: dict = Depends(read_session_cookie),
     user: str = Depends(get_user_from_session_info),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     edit: bool = False,
@@ -46,20 +47,20 @@ async def project_view(
     """
     Returns HTML response with a visual summary of the project.
     """
-    samples = [s.to_dict() for s in project.samples]
+    samples = [s.to_dict() for s in peppy_project.samples]
     try:
         pep_version = project.pep_version
     except Exception:
-        pep_version = "2.1.0"
+        pep_version = PEP_LATEST_VERSION
     return templates.TemplateResponse(
         "project.html",
         {
             "namespace": namespace,
             "project": project,
             "tag": tag,
-            "project_dict": project.to_dict(),
+            "project_dict": peppy_project.to_dict(),
             "pep_version": pep_version,
-            "sample_table_columns": project.sample_table.columns.to_list(),
+            "sample_table_columns": peppy_project.sample_table.columns.to_list(),
             "samples": samples,
             "n_samples": len(samples),
             "request": request,
@@ -70,7 +71,7 @@ async def project_view(
             "logged_in": session_info is not None,
             "is_editing": edit,
             "session_info": session_info,
-            "is_private": project.is_private,
+            "is_private": peppy_project.is_private,
             "description": project_annotation.description,
             "last_update_date": project_annotation.last_update_date,
             "submission_date": project_annotation.submission_date,
@@ -84,15 +85,18 @@ async def project_view(
     "/{namespace}/{project}/edit",
     summary="Enter the project editor page.",
     response_class=HTMLResponse,
-    dependencies=[Depends(verify_user_can_write_project)],
+    dependencies=[
+        Depends(verify_user_can_read_project),
+        Depends(verify_user_can_write_project),
+    ],
 )
 async def project_edit(
     request: Request,
     namespace: str,
     tag: Optional[str] = DEFAULT_TAG,
     project: peppy.Project = Depends(get_project),
-    project_annoatation: dict = Depends(get_project_annotation),
-    session_info: dict = Depends(read_session_info),
+    project_annoatation: AnnotationModel = Depends(get_project_annotation),
+    session_info: dict = Depends(read_session_cookie),
     edit: bool = False,
 ):
     """
@@ -108,7 +112,7 @@ async def project_edit(
     try:
         pep_version = project.pep_version
     except Exception:
-        pep_version = "2.1.0"
+        pep_version = PEP_LATEST_VERSION
     return templates.TemplateResponse(
         "edit_project.html",
         {
@@ -142,8 +146,9 @@ async def get_sample_view(
     namespace: str,
     project: str,
     sample_name: str,
+    tag: Optional[str] = DEFAULT_TAG,
     proj: peppy.Project = Depends(get_project),
-    session_info: dict = Depends(read_session_info),
+    session_info: dict = Depends(read_session_cookie),
 ):
     """Returns HTML response with a visual summary of the sample."""
     if sample_name not in get_project_sample_names(proj):
@@ -155,6 +160,7 @@ async def get_sample_view(
         {
             "project": proj,
             "sample": sample,
+            "tag": tag,
             "attrs": attrs,
             "request": request,
             "namespace": namespace,
@@ -171,9 +177,9 @@ async def get_sample_view(
 @project.get("/{namespace}/{project}/deleted")
 async def deleted_pep(
     request: Request,
-    session_info: dict = Depends(read_session_info),
-    namespaces: List[str] = Depends(get_namespaces),
+    session_info: dict = Depends(read_session_cookie),
 ):
+    namespaces = session_info["orgs"] + [session_info["login"]]
     templ_vars = {"request": request}
     return templates.TemplateResponse(
         "successful_delete.html",

@@ -16,6 +16,7 @@ load_dotenv()
 
 search = APIRouter(prefix="/api/v1/search", tags=["api", "search", "v1"])
 
+
 # perform a search
 @search.post("/", summary="Search for a PEP")
 async def search_for_pep(
@@ -26,22 +27,34 @@ async def search_for_pep(
     user: str = Depends(get_user_from_session_info),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
-    limit: int = 10,
-    offset: int = 0,
 ):
     """
     Perform a search for PEPs. This can be done using qdrant (semantic search),
     or with basic SQL string matches.
     """
+    limit = query.limit
+    offset = query.offset
+    score_threshold = query.score_threshold
     if qdrant is not None:
         try:
             query_vec = model.encode(query.query)
+            # count = len(qdrant.search(
+            #     collection_name=(
+            #         query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
+            #     ),
+            #     query_vector=query_vec,
+            #     limit=1e99, # get everything above the threshold
+            #     offset=offset,
+            #     score_threshold=score_threshold,
+            # ))
             results = qdrant.search(
                 collection_name=(
                     query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
                 ),
                 query_vector=query_vec,
                 limit=limit,
+                offset=offset,
+                score_threshold=score_threshold,
             )
             namespaces = agent.namespace.get(admin=namespace_access)
             namespace_hits = [
@@ -69,6 +82,8 @@ async def search_for_pep(
                     "query": query.query,
                     "results": [r.dict() for r in results],
                     "namespace_hits": namespace_hits,
+                    "limit": limit,
+                    "offset": offset,
                 }
             )
         except Exception as e:

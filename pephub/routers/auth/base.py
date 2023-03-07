@@ -1,20 +1,28 @@
 import os
-from typing import Union
-from fastapi import APIRouter, Request, Depends, Header
-from fastapi.responses import RedirectResponse, Response
-from peppy import __version__ as peppy_version
-from platform import python_version
-from dotenv import load_dotenv
+import json
+import jinja2
 import requests
+import time
+from typing import Union
+from fastapi import APIRouter, Request, Header, BackgroundTasks
+from fastapi.responses import RedirectResponse, Response
+from fastapi.exceptions import HTTPException
+from fastapi.templating import Jinja2Templates
+from dotenv import load_dotenv
 
-from pephub.dependencies import JWT_SECRET, CLIAuthSystem
+
+from ...dependencies import CLIAuthSystem, generate_random_auth_code
 
 from ...helpers import build_authorization_url
-from ..._version import __version__ as pephub_version
-from ...dependencies import read_session_info, set_session_info
-from ...const import ALL_VERSIONS
+from ...const import BASE_TEMPLATES_PATH, JWT_SECRET, AUTH_CODE_EXPIRATION
+from ..models import TokenExchange
 
 load_dotenv()
+
+CODE_EXCHANGE = {}
+
+templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
+je = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_TEMPLATES_PATH))
 
 # Global config
 github_app_config = {
@@ -26,28 +34,44 @@ github_app_config = {
 auth = APIRouter(prefix="/auth", tags=["auth", "users", "login", "authentication"])
 
 
+def delete_auth_code_after(code: str, expiration: int = AUTH_CODE_EXPIRATION):
+    """
+    Deletes the auth code after a specified amount of time.
+    """
+    time.sleep(expiration)
+    CODE_EXCHANGE.pop(code, None)
+
+
 @auth.get("/login", response_class=RedirectResponse)
-def login(request: Request):
+def login(client_redirect_uri: Union[str, None] = None):
     """
     Redirects to log user in to GitHub. GitHub will pass a code to the callback URL.
     """
+    state = {
+        "client_redirect_uri": client_redirect_uri,
+        "secret": JWT_SECRET,
+    }
     return build_authorization_url(
-        github_app_config["client_id"],
-        github_app_config["redirect_uri"],
-        JWT_SECRET,
-        **request.query_params,
+        client_id=github_app_config["client_id"],
+        redirect_uri=github_app_config["redirect_uri"],
+        state=json.dumps(state),
     )
 
 
 @auth.get("/callback", response_class=RedirectResponse)
 def callback(
-    response: Response,
-    request: Request,
+    background_tasks: BackgroundTasks,
     code: Union[str, None] = None,
     state: Union[str, None] = None,
 ):
-    # TODO: We should check the provided state here to confirm that we generated it
-
+    # We should check the provided state here to confirm that we generated it
+    state = json.loads(state)
+    if state["secret"] != JWT_SECRET:
+        raise HTTPException(
+            status_code=400,
+            detail="The provided state is invalid. Please try logging in again.",
+        )
+    client_redirect_uri = state["client_redirect_uri"]
     # Make a request to the following endpoint to receive an access token
     url = "https://github.com/login/oauth/access_token"
     headers = {
@@ -76,30 +100,62 @@ def callback(
     ).json()
 
     organizations = requests.get(
-        f"https://api.github.com/users/{u['login']}/orgs",
+        u["organizations_url"],
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
 
-    set_session_info(
-        response,
-        dict(orgs=[org["login"] for org in organizations], **u),
+    # encode the token
+    token = CLIAuthSystem.jwt_encode_user_data(
+        dict(orgs=[org["login"] for org in organizations], **u)
     )
-    return f"/{u['login']}"
 
+    # create random auth code
+    auth_code = generate_random_auth_code()
 
-@auth.get("/profile")
-async def view_profile(session_info: dict = Depends(read_session_info)):
-    if session_info:
-        return session_info
+    # store the token in a global dict
+    CODE_EXCHANGE[auth_code] = {
+        "token": token,
+        "client_redirect_uri": client_redirect_uri if client_redirect_uri else None,
+    }
+
+    # add background task to delete the token after EXP time
+    background_tasks.add_task(delete_auth_code_after, auth_code, AUTH_CODE_EXPIRATION)
+
+    # return token either to client_redirect,
+    # or to a basic login success page.
+    # add token as query param
+    if client_redirect_uri:
+        send_to = client_redirect_uri + f"?code={auth_code}"
     else:
-        return {"message": "Unauthenticated user"}
+        send_to = f"/auth/login/success?code={auth_code}"
+    return send_to
 
 
-@auth.get("/logout")
-def logout(response: RedirectResponse):
-    response = RedirectResponse(url="/")
-    response.delete_cookie("pephub_session")
-    return response
+@auth.get("/login/success")
+def login_success(request: Request):
+    return templates.TemplateResponse(
+        "login_success_default.html", {"request": request}
+    )
+
+
+@auth.post("/token")
+def code_exchange(exchange_request: TokenExchange):
+    code = exchange_request.code
+    client_redirect_uri = exchange_request.client_redirect_uri
+    if code in CODE_EXCHANGE:
+        try:
+            # verify redirect_uri
+            if client_redirect_uri != CODE_EXCHANGE[code]["client_redirect_uri"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail="The provided client_redirect_uri is invalid. Please try logging in again.",
+                )
+            return CODE_EXCHANGE[code]
+        finally:
+            # always ensure a delete so it cant be used again
+            del CODE_EXCHANGE[code]
+    else:
+        raise HTTPException(status_code=400, detail="Invalid authorization code.")
 
 
 @auth.post("/login_cli")
