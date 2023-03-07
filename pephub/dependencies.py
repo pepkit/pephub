@@ -13,7 +13,6 @@ from datetime import datetime, timedelta
 from fastapi import Depends, Header
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
-from fastapi.security.api_key import APIKeyCookie
 from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
@@ -32,6 +31,9 @@ from .const import (
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
     DEFAULT_HF_MODEL,
+    JWT_EXPIRATION,
+    JWT_EXPIRATION_SECONDS,
+    JWT_SECRET,
 )
 
 _LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
@@ -40,9 +42,6 @@ load_dotenv()
 
 # Scheme for the Authorization header
 token_auth_scheme = HTTPBearer()
-JWT_SECRET = token_hex(32)
-JWT_EXPIRATION = 4320  # minutes
-JWT_EXPIRATION_SECONDS = JWT_EXPIRATION * 60  # seconds
 
 
 class UserData(BaseModel):
@@ -101,6 +100,14 @@ agent = PEPDatabaseAgent(
     database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
     port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
 )
+
+
+def generate_random_auth_code() -> str:
+    """
+    Generate a random 32-digit code.
+    """
+    n_bytes = int(32 / 2)
+    return token_hex(n_bytes)
 
 
 def get_db() -> PEPDatabaseAgent:

@@ -8,6 +8,8 @@ from fastapi import __version__ as fastapi_version
 from pepdbagent import __version__ as pepdbagent_version
 from pepdbagent.const import DEFAULT_TAG
 
+from secrets import token_hex
+
 PKG_NAME = "pephub"
 DATA_REPO = "https://github.com/pepkit/data.pephub.git"
 
@@ -106,3 +108,9 @@ VALID_UPDATE_KEYS = [
     "private",
     "description",
 ]
+
+JWT_SECRET = token_hex(32)
+JWT_EXPIRATION = 4320  # minutes
+JWT_EXPIRATION_SECONDS = JWT_EXPIRATION * 60  # seconds
+
+AUTH_CODE_EXPIRATION = 5 * 60  # seconds

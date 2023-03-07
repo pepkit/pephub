@@ -51,11 +51,11 @@ async def main(
 
 
 @views.get("/login/success")
-async def sucessful_login(request: Request, token: str):
+async def sucessful_login(request: Request, code: str):
     return templates.TemplateResponse(
         "login_success.html",
         {
             "request": request,
-            "token": token,
+            "code": code,
         },
     )

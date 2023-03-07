@@ -23,3 +23,8 @@ class SearchQuery(BaseModel):
 class RawValidationQuery(BaseModel):
     project_config: str
     sample_table: Optional[str]
+
+
+class TokenExchange(BaseModel):
+    code: str
+    client_redirect_uri: Optional[str] = None

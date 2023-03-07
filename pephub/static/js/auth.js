@@ -1,8 +1,4 @@
-const extractTokenFromUrl = () => {
-    // get token from url
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-
+const setToken = (token) => {
     // decode token
     // https://stackoverflow.com/a/38552302/13175187
     // 
@@ -24,6 +20,41 @@ const extractTokenFromUrl = () => {
 
     // redirect after set
     window.location.href = `/${payload.login}`
+}
+
+const extractCodeFromUrl = () => {
+    // get token from url
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+
+    // exchange code for token
+    if (code) {
+        fetch('/auth/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                code: code,
+                client_redirect_uri: '/login/success'
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.token) {
+                setToken(data.token)
+            } else {
+                alert('No token found in response')
+            }
+        })
+
+    } else {
+        alert('No code found in url. Did you end up here by accident?')
+    }
+
+ 
+
+    
 }
 
 const signOut = () => {
