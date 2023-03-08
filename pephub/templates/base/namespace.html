@@ -116,7 +116,7 @@
             </nav>
             <div class="tab-content" id="nav-tabContent">
               <!-- UPLOAD FORM -->
-              <div class="tab-pane show active" id="nav-upload" role="tabpanel" aria-labelledby="submit-modal-nav-upload-tab">
+              <div class="tab-pane" id="nav-upload" role="tabpanel" aria-labelledby="submit-modal-nav-upload-tab">
                 <div class="rounded-bottom border border-top-0">
                   <form id="new-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="border-0 form-control" method="post" enctype="multipart/form-data">
                     <div class="mb-3 form-check form-switch">
@@ -193,7 +193,7 @@
                 </div>
               </div>
               <!-- BLANK PEP -->
-              <div class="tab-pane" id="nav-blank" role="tabpanel" aria-labelledby="submit-modal-nav-blank-tab">
+              <div class="tab-panes show active" id="nav-blank" role="tabpanel" aria-labelledby="submit-modal-nav-blank-tab">
                 <div class="rounded-bottom border border-top-0">
                   <form id="blank-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="border-0 form-control" method="post" enctype="multipart/form-data">
                     <div class="mb-3 form-check form-switch">
