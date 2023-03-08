@@ -4,10 +4,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from pepdbagent import PEPDatabaseAgent
-from ...dependencies import (
-    read_session_info,
+from ...dependencies import get_db
+from ...view_dependencies import (
+    read_session_cookie,
     get_user_from_session_info,
-    get_db,
     get_organizations_from_session_info,
 )
 from ...const import BASE_TEMPLATES_PATH, ALL_VERSIONS
@@ -25,10 +25,10 @@ namespace = APIRouter(tags=["namespace", "user interface", "interface"])
 async def namespace_view(
     request: Request,
     namespace: str,
+    session_info: dict = Depends(read_session_cookie),
     user: str = Depends(get_user_from_session_info),
-    session_info: dict = Depends(read_session_info),
-    agent: PEPDatabaseAgent = Depends(get_db),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """Returns HTML response with a visual summary of the namespace."""
     try:

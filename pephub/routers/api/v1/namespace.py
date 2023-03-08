@@ -3,15 +3,12 @@ import shutil
 
 from fastapi import APIRouter, File, UploadFile, Request, Depends, Form
 from fastapi.responses import JSONResponse
-from peppy import __version__ as peppy_version
 from peppy import Project
 from pepdbagent.exceptions import ProjectUniqueNameError
-from platform import python_version
 
-from ...._version import __version__ as pephub_version
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
-from ....const import ALL_VERSIONS, DEFAULT_TAG
+from ....const import DEFAULT_TAG, BLANK_PEP_CONFIG, BLANK_PEP_SAMPLE_TABLE
 
 from dotenv import load_dotenv
 
@@ -43,7 +40,7 @@ async def get_namespace_projects(
     offset: int = 0,
     user=Depends(get_user_from_session_info),
     q: str = None,
-    session_info: dict = Depends(read_session_info),
+    session_info: dict = Depends(read_authorization_header),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
 ):
@@ -92,52 +89,101 @@ async def create_pep(
     project_name: str = Form(...),
     is_private: bool = Form(False),
     tag: str = Form(DEFAULT_TAG),
-    files: List[UploadFile] = File(...),
+    description: Union[str, None] = Form(None),
+    files: Optional[List[UploadFile]] = File(
+        None  # let the file upload be optional. dont sent a file? We instantiate with blank
+    ),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
-    init_file = parse_user_file_upload(files)
-    init_file, other_files = split_upload_files_on_init_file(files, init_file)
+    if files is not None:
+        init_file = parse_user_file_upload(files)
+        init_file, other_files = split_upload_files_on_init_file(files, init_file)
 
-    # create temp dir that gets deleted when we're done
-    with tempfile.TemporaryDirectory() as dirpath:
-        # save init file
-        with open(f"{dirpath}/{init_file.filename}", "wb") as cfg_fh:
-            shutil.copyfileobj(init_file.file, cfg_fh)
+        # create temp dir that gets deleted when we're done
+        with tempfile.TemporaryDirectory() as dirpath:
+            # save init file
+            with open(f"{dirpath}/{init_file.filename}", "wb") as cfg_fh:
+                shutil.copyfileobj(init_file.file, cfg_fh)
 
-        # save any other files the user might have supplied
-        if other_files is not None:
-            for upload_file in other_files:
-                # open new file inside the tmpdir
-                with open(f"{dirpath}/{upload_file.filename}", "wb") as local_tmpf:
-                    shutil.copyfileobj(upload_file.file, local_tmpf)
+            # save any other files the user might have supplied
+            if other_files is not None:
+                for upload_file in other_files:
+                    # open new file inside the tmpdir
+                    with open(f"{dirpath}/{upload_file.filename}", "wb") as local_tmpf:
+                        shutil.copyfileobj(upload_file.file, local_tmpf)
 
-        p = Project(f"{dirpath}/{init_file.filename}")
-        p.name = project_name
-        try:
-            agent.project.create(
-                p,
-                namespace=namespace,
-                name=project_name,
-                tag=tag,
-                is_private=is_private,
-            )
-        except ProjectUniqueNameError as e:
+            p = Project(f"{dirpath}/{init_file.filename}")
+            p.name = project_name
+            p.description = description
+            try:
+                agent.project.create(
+                    p,
+                    namespace=namespace,
+                    name=project_name,
+                    tag=tag,
+                    is_private=is_private,
+                )
+            except ProjectUniqueNameError as e:
+                return JSONResponse(
+                    content={
+                        "message": f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
+                        "error": f"{e}",
+                        "status_code": 400,
+                    },
+                    status_code=400,
+                )
             return JSONResponse(
                 content={
-                    "message": f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
-                    "error": f"{e}",
-                    "status_code": 400,
+                    "namespace": namespace,
+                    "project_name": project_name,
+                    "proj": p.to_dict(),
+                    "init_file": init_file.filename,
+                    "tag": tag,
+                    "registry_path": f"{namespace}/{project_name}:{tag}",
                 },
-                status_code=400,
+                status_code=202,
             )
-        return JSONResponse(
-            content={
-                "namespace": namespace,
-                "project_name": project_name,
-                "proj": p.to_dict(),
-                "init_file": init_file.filename,
-                "tag": tag,
-                "registry_path": f"{namespace}/{project_name}:{tag}",
-            },
-            status_code=202,
-        )
+    # create a blank peppy.Project object with fake files
+    else:
+        # create temp dir that gets deleted when we're done
+        with tempfile.TemporaryDirectory() as dirpath:
+            config_file_name = "project_config.yaml"
+            sample_table_name = BLANK_PEP_CONFIG["sample_table"]
+
+            # create 'empty' config and sample table files
+            with open(f"{dirpath}/{config_file_name}", "w") as cfg_fh:
+                cfg_fh.write(json.dumps(BLANK_PEP_CONFIG))
+            with open(f"{dirpath}/{sample_table_name}", "w") as cfg_fh:
+                cfg_fh.write(BLANK_PEP_SAMPLE_TABLE)
+
+            # init project
+            p = Project(f"{dirpath}/{config_file_name}")
+            p.name = project_name
+            p.description = description
+            try:
+                agent.project.create(
+                    p,
+                    namespace=namespace,
+                    name=project_name,
+                    tag=tag,
+                    is_private=is_private,
+                )
+            except ProjectUniqueNameError as e:
+                return JSONResponse(
+                    content={
+                        "message": f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
+                        "error": f"{e}",
+                        "status_code": 400,
+                    },
+                    status_code=400,
+                )
+            return JSONResponse(
+                content={
+                    "namespace": namespace,
+                    "project_name": project_name,
+                    "proj": p.to_dict(),
+                    "tag": tag,
+                    "registry_path": f"{namespace}/{project_name}:{tag}",
+                },
+                status_code=202,
+            )

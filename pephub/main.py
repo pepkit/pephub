@@ -21,8 +21,8 @@ from .routers.views.search import search as views_search
 from .routers.views.project import project as views_project
 from .routers.views.namespace import namespace as views_namespace
 from .routers.views.user import user as views_user
-from .routers.eido import router as eido_router
-from .const import STATICS_PATH, EIDO_PATH
+from .routers.eido.eido import router as eido_router
+from .const import STATICS_PATH, EIDO_PATH, LOG_LEVEL_MAP
 
 _LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
 coloredlogs.install(
@@ -96,14 +96,30 @@ def main():
     parser = build_parser()
     args = parser.parse_args()
 
+    # redefine log level if something
+    # other than INFO is passed
+    if args.log_level != "INFO":
+        coloredlogs.install(
+            logger=_LOGGER_PEPHUB,
+            level=LOG_LEVEL_MAP.get(args.log_level.upper(), logging.INFO),
+            datefmt="%b %d %Y %H:%M:%S",
+            fmt="[%(levelname)s] [%(asctime)s] [PEPHUB] %(message)s",
+        )
+
     if not args.command:
         parser.print_help()
         print("No subcommand given")
         sys.exit(1)
 
     if args.command == "serve":
-        uvicorn.run(app, host="0.0.0.0", port=args.port, reload=args.reload)
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=args.port,
+            reload=args.reload,
+            log_level=args.uvicorn_log_level.lower(),
+        )
 
     else:
-        _LOGGER.error(f"unknown command: {args.command}")
+        _LOGGER_PEPHUB.error(f"unknown command: {args.command}")
         sys.exit(1)

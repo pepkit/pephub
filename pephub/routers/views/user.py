@@ -4,7 +4,8 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from pepdbagent import PEPDatabaseAgent
-from ...dependencies import read_session_info, get_user_from_session_info, get_db
+from ...dependencies import get_db
+from ...view_dependencies import get_user_from_session_info, read_session_cookie
 from ...const import BASE_TEMPLATES_PATH, ALL_VERSIONS
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
@@ -16,7 +17,7 @@ user = APIRouter(tags=["user", "user interface", "interface"])
 def me(
     request: Request,
     user: Union[str, None] = Depends(get_user_from_session_info),
-    session_info: dict = Depends(read_session_info),
+    session_info: dict = Depends(read_session_cookie),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """

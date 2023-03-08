@@ -6,6 +6,7 @@ from platform import python_version
 from .._version import __version__ as pephub_version
 
 from ..dependencies import *
+from ..view_dependencies import *
 from ..const import BASE_TEMPLATES_PATH
 
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -16,7 +17,7 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 @router.get("/")
 def profile(
     request: Request,
-    session_info=Depends(read_session_info),
+    session_info=Depends(read_session_cookie),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """

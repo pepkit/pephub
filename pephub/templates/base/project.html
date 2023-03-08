@@ -10,7 +10,7 @@
     <div class="flex-row d-flex align-items-start justify-content-between">
       <div class="flex-row d-flex align-items-center">
         <h1>
-          {{ namespace }}/{{ project.name }}:{{tag}}
+          {{ namespace }}/{{ project }}:{{tag}}
         </h1>
         {% if is_private %}
           <span class="border ms-2 badge rounded-pill border-danger text-danger">Private</span>
@@ -22,13 +22,13 @@
           API Endpoints
         </button>
         {% if can_edit %}
-          <a href="/{{ namespace }}/{{ project.name }}/edit?tag={{tag}}">
+          <a href="/{{ namespace }}/{{ project }}/edit?tag={{tag}}">
             <button id="edit-pep-btn" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPEP">
               <i class="bi bi-pencil"></i>
               Edit
             </button>
           </a>
-          <button id="delete-pep-btn" class="btn btn-outline-danger" onclick="setDeleteFormInputPlaceholder('{{ namespace }}/{{project.name}}:{{tag}}')" data-bs-toggle="modal" data-bs-target="#deletePEP">
+          <button id="delete-pep-btn" class="btn btn-outline-danger" onclick="setDeleteFormInputPlaceholder('{{ namespace }}/{{project}}:{{tag}}')" data-bs-toggle="modal" data-bs-target="#deletePEP">
             <i class="bi bi-trash3"></i>
             Delete
           </button>
@@ -89,8 +89,8 @@
             {% for s in samples %}
               <tr>
                 <td>
-                  <a href="/{{ namespace }}/{{ project.name }}/samples/{{s.sample_name}}">
-                    /{{ namespace }}/{{ project.name }}/samples/{{s.sample_name}}
+                  <a href="/{{ namespace }}/{{ project }}/samples/{{s.sample_name}}?tag={{ tag }}">
+                    /{{ namespace }}/{{ project }}/samples/{{s.sample_name}}?tag={{ tag }}
                   </a>
                 </td>
                 {% for col in sample_table_columns %}
@@ -113,18 +113,18 @@
             <p class="mb-2">
               <span class="badge bg-primary">GET</span>
               <span class="fw-bold">Project:</span>
-              <a href="/api/v1/projects/{{ namespace }}/{{ project.name }}?tag={{ tag }}"><code>/api/v1/projects/{{ namespace }}/{{ project.name }}?tag={{ tag }}</code></a>
+              <a href="/api/v1/projects/{{ namespace }}/{{ project }}?tag={{ tag }}"><code>/api/v1/projects/{{ namespace }}/{{ project }}?tag={{ tag }}</code></a>
            </p>
            <p class="mb-2">
               <span class="badge bg-primary">GET</span>
               <span class="fw-bold">Samples:</span>
-              <a href="/api/v1/projects/{{ namespace }}/{{ project.name }}/samples?tag={{ tag }}"><code>/api/v1/projects/{{ namespace }}/{{ project.name }}/samples?tag={{ tag }}</code></a>
+              <a href="/api/v1/projects/{{ namespace }}/{{ project }}/samples?tag={{ tag }}"><code>/api/v1/projects/{{ namespace }}/{{ project }}/samples?tag={{ tag }}</code></a>
             </p>
             <p class="mb-2 sample-endpoint">
               <span class="badge bg-primary">GET</span>
               <span class="fw-bold">Specific Sample:</span>
               <code>
-                <a class="m-0" href="/api/v1/projects/{{ namespace }}/{{ project.name }}/samples/{{samples[0]['sample_name']}}?tag={{ tag }}" id="sample-name-link">/api/v1/projects/{{ namespace }}/{{ project.name }}/samples</a><select class="text-primary" name="Sample name" id="sample-name" onchange="toggleSampleName(this)"?tag={{ tag }}>
+                <a class="m-0" href="/api/v1/projects/{{ namespace }}/{{ project }}/samples/{{samples[0]['sample_name']}}?tag={{ tag }}" id="sample-name-link">/api/v1/projects/{{ namespace }}/{{ project }}/samples</a><select class="text-primary" name="Sample name" id="sample-name" onchange="toggleSampleName(this)"?tag={{ tag }}>
                   {% for s in samples %}
                     <option>{{s['sample_name']}}</option>
                   {% endfor %}
@@ -134,13 +134,13 @@
             <p class="mb-2">
               <span class="badge bg-primary">GET</span>
               <span class="fw-bold">Subsamples:</span>
-              <a href="/api/v1/projects/{{ namespace }}/{{ project.name }}/subsamples?tag={{ tag }}"><code>/api/v1/projects/{{ namespace }}/{{ project.name }}/subsamples?tag={{ tag }}</code></a>
+              <a href="/api/v1/projects/{{ namespace }}/{{ project }}/subsamples?tag={{ tag }}"><code>/api/v1/projects/{{ namespace }}/{{ project }}/subsamples?tag={{ tag }}</code></a>
             </p>
             {% for f in filters %}
             <p class="mb-2">
               <span class="badge bg-primary">GET</span>
               <span class="fw-bold">Convert project to {{f}}</span>
-              <a href="/api/v1/projects/{{ namespace }}/{{ project.name }}/convert?filter={{f}}&tag={{ tag }}"><code>/api/v1/projects/{{ namespace }}/{{ project.name }}/convert?filter={{f}}&tag={{ tag }}</code></a>
+              <a href="/api/v1/projects/{{ namespace }}/{{ project }}/convert?filter={{f}}&tag={{ tag }}"><code>/api/v1/projects/{{ namespace }}/{{ project }}/convert?filter={{f}}&tag={{ tag }}</code></a>
             </p>
             {% endfor %}
           </div>

@@ -15,3 +15,16 @@ class ProjectOptional(UpdateItems):
 class SearchQuery(BaseModel):
     query: str
     collection_name: Optional[str] = None
+    limit: Optional[int] = 100
+    offset: Optional[int] = 0
+    score_threshold: Optional[float] = 0.3
+
+
+class RawValidationQuery(BaseModel):
+    project_config: str
+    sample_table: Optional[str]
+
+
+class TokenExchange(BaseModel):
+    code: str
+    client_redirect_uri: Optional[str] = None

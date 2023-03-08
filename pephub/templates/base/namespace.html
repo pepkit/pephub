@@ -102,79 +102,143 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div>
-              <form id="new-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="border-0 form-control" method="post" enctype="multipart/form-data">
-                <div class="mb-3 form-check form-switch">
-                  <input value="true" name="is_private" class="form-check-input" type="checkbox" role="switch" id="is-private-toggle"  />
-                  <label class="form-check-label" for="flexSwitchCheckDefault">
-                    <i class="bi bi-lock"></i>
-                    Private
-                  </label>
-                </div>
-                <span class="fs-4 d-flex align-items-center">
-                  <select name="namespace" id="namespace-select" class="form-select w-75" aria-label="Namespace selection" class="mb-1">
-                    <option value="{{namespace.namespace}}">{{namespace.namespace}}</option>
-                    {% for org in orgs %}
-                      <option value="{{org}}">{{org}}</option>
-                    {% endfor %}
-                  </select>
-                  <span class="mx-1 mb-1">/</span>
-                  <input id="project-name" name="project_name" type="text" class="form-control" placeholder="name" />
-                  <span class="mx-1 mb-1">:</span>
-                  <input id="tag" name="tag" type="text" class="form-control" placeholder="default" />
-                </span>
-                <div 
-                  id="dnd-box"
-                  onclick="clickFileInput()"
-                  class="p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3" 
-                  ondragover="allowDrop(event)" 
-                >
-                    <div class="flex-row d-flex align-items-center">
-                      <i class="bi bi-cloud-arrow-up"></i>
-                      <span class="text-secondary ms-2">Drag files here</span>
+            <nav>
+              <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <button class="nav-link active" id="submit-modal-nav-blank-tab" data-bs-toggle="tab" data-bs-target="#nav-blank" type="button" role="tab" aria-controls="nav-blank" aria-selected="false">
+                  <i class="bi bi-pencil"></i>
+                  Create
+                </button>
+                <button class="nav-link" id="submit-modal-nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button" role="tab" aria-controls="nav-upload" aria-selected="true">
+                  <i class="bi bi-cloud-upload"></i>
+                  Upload
+                </button>
+              </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+              <!-- UPLOAD FORM -->
+              <div class="tab-pane" id="nav-upload" role="tabpanel" aria-labelledby="submit-modal-nav-upload-tab">
+                <div class="rounded-bottom border border-top-0">
+                  <form id="new-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="border-0 form-control" method="post" enctype="multipart/form-data">
+                    <div class="mb-3 form-check form-switch">
+                      <input value="true" name="is_private" class="form-check-input" type="checkbox" role="switch" id="is-private-toggle"  />
+                      <label class="form-check-label" for="flexSwitchCheckDefault">
+                        <i class="bi bi-lock"></i>
+                        Private
+                      </label>
                     </div>
-                    <span class="my-1 text-secondary">or</span>
-                    <span class="text-secondary">click to browse</span>
+                    <span class="fs-4 d-flex align-items-center">
+                      <select name="namespace" id="namespace-select" class="form-select w-75" aria-label="Namespace selection" class="mb-1">
+                        <option value="{{namespace.namespace}}">{{namespace.namespace}}</option>
+                        {% for org in orgs %}
+                          <option value="{{org}}">{{org}}</option>
+                        {% endfor %}
+                      </select>
+                      <span class="mx-1 mb-1">/</span>
+                      <input id="project-name" name="project_name" type="text" class="form-control" placeholder="name" />
+                      <span class="mx-1 mb-1">:</span>
+                      <input id="tag" name="tag" type="text" class="form-control" placeholder="default" />
+                    </span>
+                    <textarea id="description" name="description" class="form-control mt-3" rows="3" placeholder="Describe your PEP."></textarea>
+                    <div 
+                      id="dnd-box"
+                      onclick="clickFileInput()"
+                      class="p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3" 
+                      ondragover="allowDrop(event)" 
+                    >
+                        <div class="flex-row d-flex align-items-center">
+                          <i class="bi bi-cloud-arrow-up"></i>
+                          <span class="text-secondary ms-2">Drag files here</span>
+                        </div>
+                        <span class="my-1 text-secondary">or</span>
+                        <span class="text-secondary">click to browse</span>
+                    </div>
+                    <div 
+                      id="file-list-container" 
+                      style="border-style: dashed !important;" 
+                      class="p-5 mt-3 border border-2 d-none d-flex flex-column align-items-center justify-content-center rounded-3"
+                    >
+                      <div id="file-list"></div>
+                      <div class="mt-3">
+                        <button type="button" onclick="clickFileInput()" class="btn btn-sm btn-outline-dark">
+                          <i class="bi bi-archive"></i>
+                          Browse
+                        </button>
+                        <button type="button" onclick="handleClearFileInput()" class="btn btn-sm btn-outline-dark">
+                          <i class="bi bi-x"></i>
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                    <input hidden multiple type="file" id="files" name="files"/>
+                    <div class="mt-3">
+                      <button 
+                        id="new-project-submit-btn" 
+                        class="btn btn-success" 
+                        type="submit"
+                        disabled
+                      >
+                        <i class="bi bi-plus-circle"></i>
+                        Add
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-outline-dark"
+                        data-bs-dismiss="modal"
+                        onclick="resetForm()"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                <div 
-                  id="file-list-container" 
-                  style="border-style: dashed !important;" 
-                  class="p-5 mt-3 border border-2 d-none d-flex flex-column align-items-center justify-content-center rounded-3"
-                >
-                  <div id="file-list"></div>
-                  <div class="mt-3">
-                    <button type="button" onclick="clickFileInput()" class="btn btn-sm btn-outline-secondary">
-                      <i class="bi bi-archive"></i>
-                      Browse
-                    </button>
-                    <button type="button" onclick="handleClearFileInput()" class="btn btn-sm btn-outline-secondary">
-                      <i class="bi bi-x"></i>
-                      Clear
-                    </button>
-                  </div>
+              </div>
+              <!-- BLANK PEP -->
+              <div class="tab-panes show active" id="nav-blank" role="tabpanel" aria-labelledby="submit-modal-nav-blank-tab">
+                <div class="rounded-bottom border border-top-0">
+                  <form id="blank-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects" class="border-0 form-control" method="post" enctype="multipart/form-data">
+                    <div class="mb-3 form-check form-switch">
+                      <input value="true" name="is_private" class="form-check-input" type="checkbox" role="switch" id="blank-is-private-toggle"  />
+                      <label class="form-check-label" for="flexSwitchCheckDefault">
+                        <i class="bi bi-lock"></i>
+                        Private
+                      </label>
+                    </div>
+                    <span class="fs-4 d-flex align-items-center">
+                      <select name="namespace" id="blank-namespace-select" class="form-select w-75" aria-label="Namespace selection" class="mb-1">
+                        <option value="{{namespace.namespace}}">{{namespace.namespace}}</option>
+                        {% for org in orgs %}
+                          <option value="{{org}}">{{org}}</option>
+                        {% endfor %}
+                      </select>
+                      <span class="mx-1 mb-1">/</span>
+                      <input id="blank-project-name" name="project_name" type="text" class="form-control" placeholder="name" />
+                      <span class="mx-1 mb-1">:</span>
+                      <input id="blank_tag" name="tag" type="text" class="form-control" placeholder="default" />
+                    </span>
+                    <textarea id="blank_description" name="description" class="form-control mt-3" rows="3" placeholder="Describe your PEP."></textarea>
+                    <div class="mt-3">
+                      <button 
+                        id="blank-project-submit-btn" 
+                        class="btn btn-success" 
+                        type="submit"
+                        disabled
+                      >
+                        <i class="bi bi-plus-circle"></i>
+                        Add
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-outline-dark"
+                        data-bs-dismiss="modal"
+                        onclick="resetBlankForm()"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                <input hidden multiple type="file" id="files" name="files"/>
-                <div class="mt-3">
-                  <button 
-                    id="new-project-submit-btn" 
-                    class="btn btn-success" 
-                    type="submit"
-                    disabled
-                  >
-                    <i class="bi bi-plus-circle"></i>
-                    Add
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    data-bs-dismiss="modal"
-                    onclick="resetForm()"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+              </div>
+            </div>            
           </div>
         </div>
       </div>
@@ -266,29 +330,41 @@
 
 </script>
 
-  <!--assign to table -->
-  <script>
-    const table = new simpleDatatables.DataTable("#namespace-table")
-  </script>
+<!--assign to table -->
+<script>
+  const table = new simpleDatatables.DataTable("#namespace-table")
+</script>
 
-  <!-- Attach the event handlers to the submission form -->
-  <script>
-    const form = document.getElementById("new-project-form")
-    form.addEventListener("submit", submitNewProject, true);
+<!-- Attach the event handlers to the submission form -->
+<script>
+  // upload project submission
+  const form = document.getElementById("new-project-form")
+  form.addEventListener("submit", submitNewProject, true);
 
-    // on change handler for entire form to enable/disable submit button
-    form.addEventListener("change", onFormChange);
+  // blank project submission
+  const blankForm = document.getElementById("blank-project-form")
+  blankForm.addEventListener("submit", submitBlankProject, true);
+  
+  // on change handler for entire form to enable/disable submit button
+  form.addEventListener("change", onFormChange);
 
-    // attach same event handler to project-name input
-    const projectNameInput = document.getElementById("project-name");
-    projectNameInput.addEventListener("keyup", onFormChange);
+  // on change handler for the blank submission form
+  blankForm.addEventListener("change", onBlankFormChange);
 
-  </script>
+  // attach same event handler to project-name input
+  const projectNameInput = document.getElementById("project-name");
+  projectNameInput.addEventListener("keyup", onFormChange);
 
-  <!-- Fetch projects on page load. -->
-  <script>
-    fetchProjectsInNamespace(
-      document.getElementById("namespace-header").innerText
-    )
-  </script>
+  // attach same event handler to blank-project-name input
+  const blankProjectNameInput = document.getElementById("blank-project-name");
+  blankProjectNameInput.addEventListener("keyup", onBlankFormChange);
+
+</script>
+
+<!-- Fetch projects on page load. -->
+<script>
+  fetchProjectsInNamespace(
+    document.getElementById("namespace-header").innerText
+  )
+</script>
 {% endblock %}

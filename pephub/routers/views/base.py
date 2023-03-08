@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 
 from ..._version import __version__ as pephub_version
 from ...dependencies import *
-from ...helpers import get_project_sample_names
-from ...const import BASE_TEMPLATES_PATH, DEFAULT_QDRANT_COLLECTION_NAME
+from ...view_dependencies import *
+from ...const import BASE_TEMPLATES_PATH
 
 import pandas as pd
 
@@ -35,7 +35,7 @@ views = APIRouter(tags=["views", "user interface", "interface"])
 @views.get("/")
 async def main(
     request: Request,
-    session_info: dict = Depends(read_session_info),
+    session_info: dict = Depends(read_session_cookie),
 ):
     templ_vars = {"request": request}
     return templates.TemplateResponse(
@@ -47,4 +47,15 @@ async def main(
             logged_in=session_info is not None,
             is_landing_page=True,
         ),
+    )
+
+
+@views.get("/login/success")
+async def sucessful_login(request: Request, code: str):
+    return templates.TemplateResponse(
+        "login_success.html",
+        {
+            "request": request,
+            "code": code,
+        },
     )
