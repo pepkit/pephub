@@ -21,7 +21,7 @@ from .routers.views.search import search as views_search
 from .routers.views.project import project as views_project
 from .routers.views.namespace import namespace as views_namespace
 from .routers.views.user import user as views_user
-from .routers.eido import router as eido_router
+from .routers.eido.eido import router as eido_router
 from .const import STATICS_PATH, EIDO_PATH, LOG_LEVEL_MAP
 
 _LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
