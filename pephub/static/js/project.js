@@ -1,3 +1,19 @@
+const getCookie = (cname) => {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+      }
+  }
+  return "";
+}
+
 const setDeleteFormInputPlaceholder = (name) => {
   const deleteFormInput = document.getElementById("delete-confirm-input")
   const span = document.getElementById("delete-pep-name")
@@ -34,7 +50,11 @@ const deleteProject = () => {
   deleteButton.textContent = "Deleting..."
 
   fetch(`/api/v1/projects/${namespace}/${project}?tag=${tag}`, {
-    method: "DELETE"
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("access_token")}`
+    },
   })
   .then(res => {
     if(res.ok) {

@@ -1,16 +1,127 @@
+const getCookie = (cname) => {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+      }
+  }
+  return "";
+}
+
+const validatingIndicator = document.getElementById("is-validating-indicator")
+const validIndicator = document.getElementById("valid-indicator")
+const invalidIndicator = document.getElementById("invalid-indicator")
+
+const showIsValidatingIndicator = () => {
+  validIndicator.classList.add("d-none")
+  validIndicator.classList.remove("d-flex")
+
+
+  validatingIndicator.classList.remove("d-none")
+  validatingIndicator.classList.add("d-flex")
+
+  invalidIndicator.classList.add("d-none")
+  invalidIndicator.classList.remove("d-flex")
+}
+
+const showValidIndicator = () => {
+  validIndicator.classList.remove("d-none")
+  validIndicator.classList.add("d-flex")
+
+  validatingIndicator.classList.add("d-none")
+  validatingIndicator.classList.remove("d-flex")
+
+  invalidIndicator.classList.add("d-none")
+  invalidIndicator.classList.remove("d-flex")
+}
+
+const showInvalidIndicator = () => {
+  validIndicator.classList.add("d-none")
+  validIndicator.classList.remove("d-flex")
+  
+  validatingIndicator.classList.add("d-none")
+  validatingIndicator.classList.remove("d-flex")
+
+  invalidIndicator.classList.remove("d-none")
+  invalidIndicator.classList.add("d-flex")
+}
+
+// validation hook
+const validateProject = async () => {
+  // disabled for now
+  const currentSampleTableCsv = handsOnTable.getData().map(row => row.join(",")).join("\n")
+  const currentProjectConfigYaml = editor.getValue()
+  const validateButton = document.getElementById("validate-button")
+
+  // set the validate button to disabled by default
+  validateButton.disabled = true
+  validateButton.innerText = "Validating..."
+
+  showIsValidatingIndicator()
+
+  // call the validation endpoint
+  let res;
+  try {
+      res = await fetch("/api/v1/eido/validate/raw", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authoprization": `Bearer ${getCookie("pephub_session")}`
+        },
+        body: JSON.stringify({
+          project_config: currentProjectConfigYaml,
+          sample_table: currentSampleTableCsv
+      })
+    })
+    // validate the response
+    if (res.ok) {
+      showValidIndicator()
+      return res.json()
+    // if not ok (failed validation on server),
+    // update the validation indicators
+    } else {
+      showInvalidIndicator()
+      validateButton.disabled = false
+      validateButton.innerText = "Validate"
+      const json = await res.json()
+      const errorBox = document.getElementById("validation-error-box")
+      errorBox.innerText = JSON.stringify({
+        error: json.detail.error
+      }, null, 2)
+    }
+  } catch (err) {
+    showInvalidIndicator()
+    const errorBox = document.getElementById("validation-error-box")
+    errorBox.innerText = JSON.stringify({
+      error: json.detail.error
+    }, null, 2)
+  } finally {
+    validateButton.disabled = false
+    validateButton.innerText = "Validate"
+  }
+}
+
 // detect changes to the form
 const detectMetadataChanges = () => {
   const isPrivateToggle = document.getElementById("is-private-toggle")
   const projectDescription = document.getElementById("project-description")
   const projectName = document.getElementById("project-name")
+  const tag = document.getElementById("project-tag")
 
   const saveButton = document.querySelector("button.btn-success")
 
   const isPrivateChanged = isPrivateToggle.checked !== originalIsPrivateValue
   const descriptionChanged = projectDescription.value !== originalDesciriptionValue
   const nameChanged = projectName.value !== originalProjectNameValue
+  const tagChanged = tag.value !== originalProjectTagValue
 
-  if (isPrivateChanged || descriptionChanged || nameChanged) {
+  if (isPrivateChanged || descriptionChanged || nameChanged || tagChanged) {
       saveButton.disabled = false
   } else {
       saveButton.disabled = true
@@ -69,6 +180,7 @@ const handleMetaMetaDataSubmit = async () => {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
     },
     body: JSON.stringify({
         name: document.getElementById("project-name").value,
@@ -173,7 +285,15 @@ const getSampleTableFromDatabase = () => {
   const projectName = document.getElementById("project-name").placeholder
   const projectTag = document.getElementById("project-tag").placeholder
 
-  fetch(`/api/v1/projects/${namespace}/${projectName}/samples?tag=${projectTag}&format=csv`)
+  fetch(
+    `/api/v1/projects/${namespace}/${projectName}/samples?tag=${projectTag}&format=csv`,
+    {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${getCookie("pephub_session")}`
+      }
+    }
+  )
   .then(response =>  response.text())
   .then(data => {
     if (!handsOnTable) {
@@ -197,173 +317,179 @@ const removeCol = () => {
   handsOnTable.alter("remove_col", handsOnTable.countCols(), 1)
 }
 
-  // submit edited sample table to the server/database
-  const handleSampleTableEditorSubmit = async () => {
+// submit edited sample table to the server/database
+const handleSampleTableEditorSubmit = async () => {
 
-    // get the latest values
-    const tag = document.getElementById("project-tag").placeholder
-    const namespace = document.getElementById("namespace-store").value
-    const projectName = document.getElementById("project-name").placeholder
+  // get the latest values
+  const tag = document.getElementById("project-tag").placeholder
+  const namespace = document.getElementById("namespace-store").value
+  const projectName = document.getElementById("project-name").placeholder
 
-    // update save btn for UX and feedback
-    const sampleTableSaveBtn = document.getElementById("sample-table-save-btn")
-    sampleTableSaveBtn.innerText = "Saving..."
-    sampleTableSaveBtn.disabled = true
+  // update save btn for UX and feedback
+  const sampleTableSaveBtn = document.getElementById("sample-table-save-btn")
+  sampleTableSaveBtn.innerText = "Saving..."
+  sampleTableSaveBtn.disabled = true
 
-    // fetch current state of the table
-    let csv = handsOnTable.getData().map(row => row.join(",")).join("\n")
-    csv = removeTrailingCommas(csv)
+  // fetch current state of the table
+  let csv = handsOnTable.getData().map(row => row.join(",")).join("\n")
+  csv = removeTrailingCommas(csv)
 
-    // send PATCH request to server
-    fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "sample_table_csv": csv
-      }, null, 2)
-    })
-    .then(async (res) => {
-      if (res.ok) {
+  // send PATCH request to server
+  fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    },
+    body: JSON.stringify({
+      "sample_table_csv": csv
+    }, null, 2)
+  })
+  .then(async (res) => {
+    if (res.ok) {
 
-        // update original values and placeholders
-        setOriginalSampleTableCsv(csv)
-        createToast({
-          title: "Success",
-          body: "Sample table saved successfully",
-          type: "success",
-        })
-      } else {
-        const json = await res.json()
-        throw new Error(json.detail || res.statusText || "Something went wrong...")
-      }
-    })
-    .catch((error) => {
+      // update original values and placeholders
+      setOriginalSampleTableCsv(csv)
       createToast({
-        type: "danger",
-        title: "Something went wrong...",
-        // gracefully display any errors
-        body: error.message || error,
-        timout: 3000
+        title: "Success",
+        body: "Sample table saved successfully",
+        type: "success",
       })
-    })
-    .finally(() => {
-      // reset button state
-      sampleTableSaveBtn.innerText = "Save"
-    })
-  }
-
-
-  var editor
-  var originalProjectConfigYaml = "Fetching..."
-
-  const setOriginalConfigYaml = (val) => {
-    originalConfigYaml = val
-  }
-
-  const loadMonaco = () => {
-    if (editor) return editor
-    
-    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } });
-    require(['vs/editor/editor.main'], () => {
-      editor = monaco.editor.create(document.getElementById('yaml-editor-div'), {
-        value: originalProjectConfigYaml, // initialize with serverside yaml
-        language: 'yaml',
-        tabSize: 2,
-        insertSpaces: true,
-        automaticLayout: true
-      });
-    });
-    return editor
-  }
-
-  const loadYAMLEditor = () => {
-    editor = loadMonaco()
-    return editor
-  }
-
-  editor = loadYAMLEditor()
-
-  // detect any changes to the yaml editor
-  const detectYamlChanges = () => {
-    if (editor.getValue() !== originalProjectConfigYaml) {
-      document.getElementById("yaml-save-btn").disabled = false
     } else {
-      document.getElementById("yaml-save-btn").disabled = true
+      const json = await res.json()
+      throw new Error(json.detail || res.statusText || "Something went wrong...")
     }
-  }
-
-  // TODO: CHANGE THIS!!!
-  // supply detector to a hook, it takes a second for it to load
-  // so I just run a setTimeout THIS IS BAD but easy
-  setTimeout(() => editor.onKeyUp(detectYamlChanges), 1000)
-
-  const getProjectConfigYamlFromDatabase = () => {
-    // get the latest values
-    const namespace = document.getElementById("namespace-store").value
-    const projectName = document.getElementById("project-name").placeholder
-    const projectTag = document.getElementById("project-tag").placeholder
-
-    fetch(`/api/v1/projects/${namespace}/${projectName}/convert?tag=${projectTag}&filter=yaml`)
-    .then(response =>  response.text())
-    .then(data => {
-      if (!editor) {
-        editor = loadYAMLEditor()
-      }
-      setOriginalConfigYaml(data)
-      editor.setValue(data)
+  })
+  .catch((error) => {
+    createToast({
+      type: "danger",
+      title: "Something went wrong...",
+      // gracefully display any errors
+      body: error.message || error,
+      timout: 3000
     })
-  }
+  })
+  .finally(() => {
+    // reset button state
+    sampleTableSaveBtn.innerText = "Save"
+  })
+}
+
+
+var editor
+var originalProjectConfigYaml = "Fetching..."
+
+const setOriginalConfigYaml = (val) => {
+  originalConfigYaml = val
+}
+
+const loadMonaco = () => {
+  if (editor) return editor
   
-  // submit edited yaml to the server/database
-  const handleProjectConfigYamlSubmit = async () => {
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } });
+  require(['vs/editor/editor.main'], () => {
+    editor = monaco.editor.create(document.getElementById('yaml-editor-div'), {
+      value: originalProjectConfigYaml, // initialize with serverside yaml
+      language: 'yaml',
+      tabSize: 2,
+      insertSpaces: true,
+      automaticLayout: true
+    });
+  });
+  return editor
+}
 
-    const namespace = document.getElementById("namespace-store").value
-    const projectName = document.getElementById("project-name").placeholder
-    const tag = document.getElementById("project-tag").placeholder
-    
-    // update save button for UX and feedback
-    const yamlSaveBtn = document.getElementById("yaml-save-btn")
-    yamlSaveBtn.innerText = "Saving..."
-    yamlSaveBtn.disabled = true
+const loadYAMLEditor = () => {
+  editor = loadMonaco()
+  return editor
+}
 
-    // fetch current state of the editor
-    const yaml = editor.getValue()
+editor = loadYAMLEditor()
 
-    // send PATCH request to the server/database
-    fetch(`/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "project_config_yaml": yaml
-      }, null, 2)
-    })
-    .then(async (res) => {
-      if (res.ok) {
-        originalProjectConfigYaml = yaml
-        createToast({
-          title: "Success",
-          body: "Project config saved successfully",
-          type: "success",
-        })
-      } else {
-        const json = await res.json()
-        throw new Error(json.detail || res.statusText || res.status || "Something went wrong...")
-      }
-    })
-    .catch((error) => {
-      createToast({
-        type: "danger",
-        title: "Something went wrong...",
-        // gracefully display any errors
-        body: error.message || error,
-      })
-    })
-    .finally(() => {
-      // reset button state
-      yamlSaveBtn.innerText = "Save"
-    })
+// detect any changes to the yaml editor
+const detectYamlChanges = () => {
+  if (editor.getValue() !== originalProjectConfigYaml) {
+    document.getElementById("yaml-save-btn").disabled = false
+  } else {
+    document.getElementById("yaml-save-btn").disabled = true
   }
+}
+
+const getProjectConfigYamlFromDatabase = () => {
+  // get the latest values
+  const namespace = document.getElementById("namespace-store").value
+  const projectName = document.getElementById("project-name").value
+  const projectTag = document.getElementById("project-tag").value
+
+  fetch(
+    `/api/v1/projects/${namespace}/${projectName}/convert?tag=${projectTag}&filter=yaml`,
+   {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    },
+  })
+  .then(response =>  response.text())
+  .then(data => {
+    if (!editor) {
+      editor = loadYAMLEditor()
+    }
+    setOriginalConfigYaml(data)
+    editor.setValue(data)
+  })
+}
+  
+// submit edited yaml to the server/database
+const handleProjectConfigYamlSubmit = async () => {
+
+  const namespace = document.getElementById("namespace-store").value
+  const projectName = document.getElementById("project-name").placeholder
+  const tag = document.getElementById("project-tag").placeholder
+  
+  // update save button for UX and feedback
+  const yamlSaveBtn = document.getElementById("yaml-save-btn")
+  yamlSaveBtn.innerText = "Saving..."
+  yamlSaveBtn.disabled = true
+
+  // fetch current state of the editor
+  const yaml = editor.getValue()
+
+  // send PATCH request to the server/database
+  fetch(
+    `/api/v1/projects/${namespace}/${projectName}?tag=${tag}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    },
+    body: JSON.stringify({
+      "project_config_yaml": yaml
+    }, null, 2)
+  })
+  .then(async (res) => {
+    if (res.ok) {
+      originalProjectConfigYaml = yaml
+      createToast({
+        title: "Success",
+        body: "Project config saved successfully",
+        type: "success",
+      })
+    } else {
+      const json = await res.json()
+      throw new Error(json.detail || res.statusText || res.status || "Something went wrong...")
+    }
+  })
+  .catch((error) => {
+    createToast({
+      type: "danger",
+      title: "Something went wrong...",
+      // gracefully display any errors
+      body: error.message || error,
+    })
+  })
+  .finally(() => {
+    // reset button state
+    yamlSaveBtn.innerText = "Save"
+  })
+}

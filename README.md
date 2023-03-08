@@ -29,7 +29,7 @@ pip install -r requirements/requirements-all.txt
 ```
 
 ### 3. (*Optional*) GitHub Authentication Client Setup
-*pephub* uses GitHub for namespacing and authentication. As such, a GitHub application capable of logging in users is required. See the [GitHub instructions](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app) for information on setting up a new GitHub app.
+*pephub* uses GitHub for namespacing and authentication. As such, a GitHub application capable of logging in users is required. We've [included instructions](https://github.com/pepkit/pephub/blob/master/docs/authentication.md#setting-up-github-oauth-for-your-own-server) for setting this up locally using your own GitHub account. 
 
 ### 4. (*Optional*) Vector Database Setup
 We've added [semantic-search](https://huggingface.co/course/chapter5/6?fw=tf#using-embeddings-for-semantic-search) capabilities to pephub. Optionally, you may host an instance of the [qdrant](https://qdrant.tech/) **vector database** to store embeddings computed using a sentence transformer that has mined and processed any relevant metadata from PEPs. If no database connection settings are supplied, pephub will default to SQL search. Read more [here](docs/semantic-search.md). To run qdrant locally, simply run the following:
@@ -76,15 +76,15 @@ uvicorn pephub.main:app --reload
 
 ### Option 1. Standalone `docker`:
 
-If you already have a public database instance running, you can choose to build and run the server container only. 
+If you already have a public database instance running, you can choose to build and run the server container only. **A note to Apple Silicon (M1/M2) users**: If you have issues running, try setting your default docker platform with `export DOCKER_DEFAULT_PLATFORM=linux/amd64` to get the container to build and run properly. See [this issue](https://github.com/pepkit/pephub/issues/87) for more information.
 
 **1. Environment:**  
-Ensure that you have your [environment](docs/server-settings.md) properly configured. Store your settings inside a `.env` file. You can inject these into the container using the `--env-file` flag.
+Ensure that you have your [environment](docs/server-settings.md) properly configured. To manage secrets in your environment, we leverage `pass` and curated [`.env` files](environment/production.env). You can use our `deploy_docker.sh` script to start your container with these `.env` files.
 
-**2. Start container:**
+**2. Build and start container:**
 ```
 docker build -t pephub .
-docker run -p 8000:8000 --env-file .env pephub
+./docker_deploy.sh
 ```
 
 Alternatively, you can inject your environmnet variables one-by-one:
@@ -94,6 +94,14 @@ docker run -p 8000:8000 \
   -e POSTGRES_HOST=localhost \
   -e POSTGRES_DB=pep-db \
   ...
+  pephub
+```
+
+Or, provide your own `.env` file:
+
+```
+docker run -p 8000:8000 \
+  --env-file path/to/.env \
   pephub
 ```
 
@@ -108,9 +116,19 @@ sh setup_db.sh
 ```
 
 **2. Curate your environment:**
-Since we are running in `docker`, we need to supply environment variables to the container. The `docker-compose.yaml` file is written such that you can supply a `.env` file at the root with your configurations. See the [example env file](environment/template.env) for reference. See [here](docs/server-settings.md) for a detailed explanation of all configurable server settings.
+Since we are running in `docker`, we need to supply environment variables to the container. The `docker-compose.yaml` file is written such that you can supply a `.env` file at the root with your configurations. See the [example env file](environment/template.env) for reference. See [here](docs/server-settings.md) for a detailed explanation of all configurable server settings. For now, you can simply copy the `env` file:
+
+```
+cp environment/template.env .env
+```
 
 **3. Build and start the containers:**
+If you are running on an Apple M1 chip, you will need to set the following env variable prior to running `docker compose`:
+
+```console
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+```
+
 ```console
 docker compose up --build
 ```

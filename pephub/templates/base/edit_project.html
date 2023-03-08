@@ -29,8 +29,32 @@
     </li>
   </ul>
   <div class="tab-content border-start border-end border-bottom h-75" id="editTabsContent">
+    <div id="validation-indicators" class="px-2 py-1 d-flex flex-row justify-content-end align-items-center border-bottom">
+      <div class="d-flex flex-row align-items-center">
+        <div id="is-validating-indicator" class="d-none flex-row align-items-center">
+          <span class="pulse me-1 badge bg-warning border border-light rounded-circle p-2"> 
+          </span>
+          <span class="me-1"><em>Validating</em></span>
+        </div>
+        <div id="invalid-indicator" class="d-none flex-row align-items-center">
+          <span class="me-1 badge bg-danger border border-light rounded-circle p-2">
+          </span>
+          <span class="d-flex flex-row align-items-center">
+            <button type="button" class="btn btn-sm btn-link text-danger" data-bs-toggle="modal" data-bs-target="#validationErrors">
+              View Errors
+            </button>
+          </span>
+        </div>
+        <div id="valid-indicator" class="d-flex flex-row align-items-center">
+          <span class="me-1 badge bg-success border border-light rounded-circle p-2">
+          </span>
+          <span class="me-1"><em>Valid</em></span> 
+        </div>
+      </div>
+      <button onclick="validateProject()" id="validate-button" class="ms-1 btn btn-sm btn-outline-dark">Validate PEP</button>
+    </div>
     <div class="tab-pane show active" id="metadata" role="tabpanel" aria-labelledby="metadata-tab">
-      <div class="p-2">
+      <div class="p-2">        
         <form id="metadata-form" action="/api/v1/projects/{{namespace}}/{{project}}" method="PATCH">
           <div class="mb-3 form-check form-switch">
             <label class="form-check-label" for="is-private-toggle">Private</label>
@@ -55,20 +79,20 @@
             <label for="project-description" class="form-label">Project Description</label>
             <textarea onkeyup="detectMetadataChanges()" placeholder="{{ description }}" class="form-control" id="project-description" rows="3">{{description}}</textarea>
           </div>
-          <button onclick="cancelChanges()" type="button" class="btn btn-outline-secondary">
+          <button onclick="cancelChanges()" type="button" class="btn btn-outline-dark me-1">
             Cancel
           </button>
-          <button onclick="handleMetaMetaDataSubmit()" id="metadata-save-btn" disabled type="button" disabled class="btn btn-success">
+          <button onclick="handleMetaMetaDataSubmit()" id="metadata-save-btn" disabled type="button" disabled class="btn btn-success me-1">
             Save
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
     <div class="tab-pane" id="project-config" role="tabpanel" aria-labelledby="project-config-tab">
       <div class="p-2" id="yaml-component">
         <div id="yaml-editor-div" style="height:400px"></div>
         <div class="flex-row d-flex align-items-center justify-content-start">
-          <button onclick="getProjectConfigYamlFromDatabase()" class="btn btn-outline-secondary me-1">
+          <button onclick="getProjectConfigYamlFromDatabase()" class="btn btn-outline-dark me-1">
             Cancel
           </button>
           <button onclick="handleProjectConfigYamlSubmit()" id="yaml-save-btn" disabled class="btn btn-success me-1">
@@ -81,7 +105,7 @@
       <div onkeyup="detectSampleTableChanges()" id="csv-component" class="p-1">
         <div id="csv-editor-div"></div>
         <div class="mt-1">
-          <button onclick="getSampleTableFromDatabase()" type="button" class="btn btn-sm btn-outline-secondary">
+          <button onclick="getSampleTableFromDatabase()" type="button" class="btn btn-sm btn-outline-dark">
             Cancel
           </button>
           <button onclick="handleSampleTableEditorSubmit()" id="sample-table-save-btn" disabled type="button" class="btn btn-sm btn-success">
@@ -92,6 +116,26 @@
     </div>
   </div>
 </div>
+<!-- validation error modal -->
+<div class="modal" id="validationErrors" tabindex="-1" aria-labelledby="validationErrorsLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content border border-danger">
+      <div class="modal-header text-danger bg-danger" style="--bs-bg-opacity: .2;">
+        <h5 class="modal-title" id="validationErrorsLabel">
+          <i class="bi bi-exclamation-circle"></i>
+          Validation Errors
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <code>
+        <pre id="validation-error-box" class="text-wrap"></pre>
+        </code>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
 
@@ -112,7 +156,7 @@
 <!-- monaco editor -->
 <script>var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/loader.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.nls.js"></script>
+<script id="monaco" async src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.nls.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/basic-languages/yaml/yaml.js"></script>
 
@@ -128,13 +172,10 @@
 
 <!-- monaco editor helpers -->
 <script>
-  <!-- this is bad, but it makes it so it works -->
   setTimeout(() => {
-    loadYAMLEditor()
+    editor = loadYAMLEditor()
+    editor.onKeyUp(detectYamlChanges)
     getProjectConfigYamlFromDatabase()
-  }, 2000)
-
+  }, 500)
 </script>
-
-
 {% endblock %}

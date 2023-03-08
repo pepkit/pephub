@@ -1,3 +1,4 @@
+import json
 from datetime import date
 from typing import List, Union, Tuple
 from fastapi import Response, Depends, UploadFile
@@ -10,7 +11,6 @@ import zipfile
 import io
 
 import peppy
-from pephub.dependencies import read_session_info
 from pephub.exceptions import PepHubException
 
 from ._version import __version__ as v
@@ -63,14 +63,7 @@ def build_parser():
         help="The port the webserver should be run on.",
         default=DEFAULT_PORT,
     )
-    sps["serve"].add_argument(
-        "-d",
-        "--debug",
-        dest="debug",
-        help="Run the server with debug mode on",
-        type=bool,
-        default=False,
-    )
+
     sps["serve"].add_argument(
         "-r",
         "--reload",
@@ -78,6 +71,22 @@ def build_parser():
         type=bool,
         help="Run the server in reload configuration",
         default=False,
+    )
+
+    sps["serve"].add_argument(
+        "--log-level",
+        dest="log_level",
+        type=str,
+        help="The level of logging to use",
+        default="INFO",
+    )
+
+    sps["serve"].add_argument(
+        "--uvicorn-log-level",
+        dest="uvicorn_log_level",
+        type=str,
+        help="The level of logging to use for uvicorn",
+        default="info",
     )
 
     return parser
@@ -163,15 +172,15 @@ def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
 
 
 def build_authorization_url(
-    client_id: str, redirect_uri: str, state: str, **kwargs: dict
+    client_id: str,
+    redirect_uri: str,
+    state: str,
 ) -> str:
     """
     Helper function to build an authorization url
     for logging in with GitHub
     """
     auth_url = f"https://github.com/login/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&state={state}&scope=read:org"
-    for key, value in kwargs.items():
-        auth_url += f"&{key}={value}"
     return auth_url
 
 

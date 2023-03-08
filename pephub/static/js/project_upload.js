@@ -94,3 +94,11 @@ function resetForm () {
 
     clearFileInput();
 }
+
+// reset blank form
+function resetBlankForm () {
+    document.getElementById("blank-project-form").reset();
+
+    // reset form submit button
+    document.getElementById("blank-project-submit-btn").disabled=true;
+}
