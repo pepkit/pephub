@@ -87,7 +87,7 @@ docker build -t pephub .
 ./docker_deploy.sh
 ```
 
-Alternatively, you can inject your environmnet variables one-by-one:
+Alternatively, you can inject your environment variables one-by-one:
 
 ```
 docker run -p 8000:8000 \
