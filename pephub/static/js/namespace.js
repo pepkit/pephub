@@ -227,7 +227,6 @@ const submitNewProject = (event) => {
   const formData = new FormData(form)
   const namespace = document.getElementById("namespace-select").value
   const user = document.getElementById("namespace-header").textContent
-  debugger;
   submitButton.disabled = true
   submitButton.textContent = "Submitting..."
 

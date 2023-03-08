@@ -418,8 +418,8 @@ const detectYamlChanges = () => {
 const getProjectConfigYamlFromDatabase = () => {
   // get the latest values
   const namespace = document.getElementById("namespace-store").value
-  const projectName = document.getElementById("project-name").placeholder
-  const projectTag = document.getElementById("project-tag").placeholder
+  const projectName = document.getElementById("project-name").value
+  const projectTag = document.getElementById("project-tag").value
 
   fetch(
     `/api/v1/projects/${namespace}/${projectName}/convert?tag=${projectTag}&filter=yaml`,

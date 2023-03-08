@@ -174,9 +174,12 @@
 <script>
   const script = document.getElementById("monaco")
   script.addEventListener("load", () => {
-    editor = loadYAMLEditor()
-    editor.onKeyUp(detectYamlChanges)
-    getProjectConfigYamlFromDatabase()
+    setTimeout(() => {
+      editor = loadYAMLEditor()
+      editor.onKeyUp(detectYamlChanges)
+      getProjectConfigYamlFromDatabase()
+    }, 500)
+    
   })
 </script>
 {% endblock %}
