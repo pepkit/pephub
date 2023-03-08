@@ -172,14 +172,10 @@
 
 <!-- monaco editor helpers -->
 <script>
-  const script = document.getElementById("monaco")
-  script.addEventListener("load", () => {
-    setTimeout(() => {
-      editor = loadYAMLEditor()
-      editor.onKeyUp(detectYamlChanges)
-      getProjectConfigYamlFromDatabase()
-    }, 500)
-    
-  })
+  setTimeout(() => {
+    editor = loadYAMLEditor()
+    editor.onKeyUp(detectYamlChanges)
+    getProjectConfigYamlFromDatabase()
+  }, 500)
 </script>
 {% endblock %}
