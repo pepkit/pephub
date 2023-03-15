@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 
 
-from ...dependencies import CLIAuthSystem, generate_random_auth_code
+from ...dependencies import CLIAuthSystem, generate_random_auth_code, generate_random_device_code
 
 from ...helpers import build_authorization_url
 from ...const import BASE_TEMPLATES_PATH, JWT_SECRET, AUTH_CODE_EXPIRATION
@@ -20,6 +20,7 @@ from ..models import TokenExchange
 load_dotenv()
 
 CODE_EXCHANGE = {}
+DEVICE_CODES = {}
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_TEMPLATES_PATH))
@@ -40,6 +41,14 @@ def delete_auth_code_after(code: str, expiration: int = AUTH_CODE_EXPIRATION):
     """
     time.sleep(expiration)
     CODE_EXCHANGE.pop(code, None)
+
+
+def delete_device_code_after(code: str, expiration: int = AUTH_CODE_EXPIRATION):
+    """
+    Deletes the device code after a specified amount of time.
+    """
+    time.sleep(expiration)
+    DEVICE_CODES.pop(code, None)
 
 
 @auth.get("/login", response_class=RedirectResponse)
@@ -71,7 +80,7 @@ def callback(
             status_code=400,
             detail="The provided state is invalid. Please try logging in again.",
         )
-    client_redirect_uri = state["client_redirect_uri"]
+    client_redirect_uri = state.get("client_redirect_uri")
     # Make a request to the following endpoint to receive an access token
     url = "https://github.com/login/oauth/access_token"
     headers = {
@@ -89,11 +98,6 @@ def callback(
     # This contains the access token
 
     # Use the access token to get the username and organization memberships,
-    # which is all we need for this app.
-    # In a more complicated app, we could store the access token itself,
-    # encrypted in the session info, so we could continue to query GitHub
-    # on behalf of the logged in user. For PEPhub, all we really need is
-    # the username and available organizations.
     u = requests.get(
         "https://api.github.com/user",
         headers={"Authorization": f"Bearer {x['access_token']}"},
@@ -109,33 +113,31 @@ def callback(
         dict(orgs=[org["login"] for org in organizations], **u)
     )
 
-    # create random auth code
-    auth_code = generate_random_auth_code()
+    if state.get("device"):
+        DEVICE_CODES[state["device_code"]]["token"] = token
+        return "/auth/device/login_success"
 
-    # store the token in a global dict
-    CODE_EXCHANGE[auth_code] = {
-        "token": token,
-        "client_redirect_uri": client_redirect_uri if client_redirect_uri else None,
-    }
-
-    # add background task to delete the token after EXP time
-    background_tasks.add_task(delete_auth_code_after, auth_code, AUTH_CODE_EXPIRATION)
-
-    # return token either to client_redirect,
-    # or to a basic login success page.
-    # add token as query param
-    if client_redirect_uri:
-        send_to = client_redirect_uri + f"?code={auth_code}"
     else:
-        send_to = f"/auth/login/success?code={auth_code}"
-    return send_to
+        # create random auth code
+        auth_code = generate_random_auth_code()
 
+        # store the token in a global dict
+        CODE_EXCHANGE[auth_code] = {
+            "token": token,
+            "client_redirect_uri": client_redirect_uri if client_redirect_uri else None,
+        }
 
-@auth.get("/login/success")
-def login_success(request: Request):
-    return templates.TemplateResponse(
-        "login_success_default.html", {"request": request}
-    )
+        # add background task to delete the token after EXP time
+        background_tasks.add_task(delete_auth_code_after, auth_code, AUTH_CODE_EXPIRATION)
+
+        # return token either to client_redirect,
+        # or to a basic login success page.
+        # add token as query param
+        if client_redirect_uri:
+            send_to = client_redirect_uri + f"?code={auth_code}"
+        else:
+            send_to = f"/auth/login/success?code={auth_code}"
+        return send_to
 
 
 @auth.post("/token")
@@ -152,12 +154,84 @@ def code_exchange(exchange_request: TokenExchange):
                 )
             return CODE_EXCHANGE[code]
         finally:
-            # always ensure a delete so it cant be used again
             del CODE_EXCHANGE[code]
     else:
         raise HTTPException(status_code=400, detail="Invalid authorization code.")
 
 
-@auth.post("/login_cli")
-def login_from_cli(access_token: Union[str, None] = Header(default=None)):
-    return {"jwt_token": CLIAuthSystem().get_jwt(access_token)}
+@auth.post("/device/init")
+def init_device_code(
+        background_tasks: BackgroundTasks,
+        request: Request,
+):
+    """
+    Create random device code, so that device can exchange it later for token
+    """
+    device_code = generate_random_device_code()
+    background_tasks.add_task(delete_device_code_after, device_code, AUTH_CODE_EXPIRATION)
+    DEVICE_CODES[device_code] = {"token": None,
+                                 "client_host":  request.client.host}
+    # TODO: can we specify just path?
+    return {"device_code": device_code,
+            "auth_url": f"http://localhost:8000/auth/device/login/{device_code}"}
+
+
+@auth.get("/device/login/{device_code}", response_class=RedirectResponse)
+def login_device(device_code: str):
+    """
+    Redirects to log user in to GitHub. GitHub will pass a code to the callback URL
+        with state that was defined before redirecting to GitHub.
+    :param device_code: the code that is used to exchange for token
+    """
+    if device_code in DEVICE_CODES:
+        state = {
+            "secret": JWT_SECRET,
+            "device_code": device_code,
+            "device": True,
+        }
+        return build_authorization_url(
+            client_id=github_app_config["client_id"],
+            redirect_uri=github_app_config["redirect_uri"],
+            state=json.dumps(state),
+        )
+    else:
+        # TODO: create webpage saying that device code was never initialized
+        raise HTTPException(status_code=400, detail="Item not found")
+
+
+@auth.post("/device/token")
+def return_token(
+        request: Request,
+        device_code: Union[str, None] = Header(default=None),
+    ):
+    """
+    Request token from PEPhub by passing device code in Header.
+    """
+    client_host = request.client.host
+
+    if device_code in DEVICE_CODES.keys():
+        if DEVICE_CODES.get(device_code).get("token"):
+            if DEVICE_CODES[device_code].get("client_host") == client_host:
+                token = DEVICE_CODES[device_code].get("token")
+                DEVICE_CODES.pop(device_code)
+                return {"token": token}
+            else:
+                raise HTTPException(status_code=401, detail="Incorrect host")
+        else:
+            raise HTTPException(status_code=401, detail="User didn't log in")
+    else:
+        raise HTTPException(status_code=400, detail="Item not found")
+
+
+@auth.get("/device/login_success")
+def login_device_success(request: Request):
+    return templates.TemplateResponse(
+        "login_success_device.html", {"request": request}
+    )
+
+
+@auth.get("/login/success")
+def login_success(request: Request):
+    return templates.TemplateResponse(
+        "login_success_default.html", {"request": request}
+    )
