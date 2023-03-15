@@ -22,7 +22,7 @@ load_dotenv()
 
 project = APIRouter(
     prefix="/api/v1/projects/{namespace}/{project}",
-    tags=["api", "project", "v1"],
+    tags=["project"],
 )
 
 

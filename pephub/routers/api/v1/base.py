@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-api = APIRouter(prefix="/api/v1", tags=["api", "base", "v1"])
+api = APIRouter(prefix="/api/v1", tags=["base"])
 
 
 @api.get("/")

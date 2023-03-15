@@ -29,7 +29,7 @@ ALL_VERSIONS = {
     "api_version": 1,
 }
 
-views = APIRouter(tags=["views", "user interface", "interface"])
+views = APIRouter(tags=["views"])
 
 
 @views.get("/")

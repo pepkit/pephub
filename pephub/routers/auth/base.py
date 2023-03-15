@@ -31,7 +31,7 @@ github_app_config = {
     "redirect_uri": os.getenv("REDIRECT_URI"),
 }
 
-auth = APIRouter(prefix="/auth", tags=["auth", "users", "login", "authentication"])
+auth = APIRouter(prefix="/auth", tags=["authentication"])
 
 
 def delete_auth_code_after(code: str, expiration: int = AUTH_CODE_EXPIRATION):

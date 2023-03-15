@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 namespace = APIRouter(
-    prefix="/api/v1/namespaces/{namespace}", tags=["api", "namespace", "v1"]
+    prefix="/api/v1/namespaces/{namespace}", tags=["namespace"]
 )
 
 
