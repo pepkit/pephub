@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 from ...dependencies import CLIAuthSystem, generate_random_auth_code, generate_random_device_code
 
 from ...helpers import build_authorization_url
-from ...const import BASE_TEMPLATES_PATH, JWT_SECRET, AUTH_CODE_EXPIRATION
+from ...const import BASE_TEMPLATES_PATH, JWT_SECRET, AUTH_CODE_EXPIRATION, CALLBACK_ENDPOINT
 from ..models import TokenExchange
 
 load_dotenv()
@@ -29,7 +29,8 @@ je = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_TEMPLATES_PATH))
 github_app_config = {
     "client_id": os.getenv("GH_CLIENT_ID", "dummy-client-id"),
     "client_secret": os.getenv("GH_CLIENT_SECRET", "dummy-secret"),
-    "redirect_uri": os.getenv("REDIRECT_URI"),
+    "redirect_uri": f"{os.getenv('BASE_URI')}{CALLBACK_ENDPOINT}",
+    "base_uri": os.getenv('BASE_URI')
 }
 
 auth = APIRouter(prefix="/auth", tags=["authentication"])
@@ -173,7 +174,7 @@ def init_device_code(
                                  "client_host":  request.client.host}
     # TODO: can we specify just path?
     return {"device_code": device_code,
-            "auth_url": f"http://localhost:8000/auth/device/login/{device_code}"}
+            "auth_url": f"{github_app_config['base_uri']}/auth/device/login/{device_code}"}
 
 
 @auth.get("/device/login/{device_code}", response_class=RedirectResponse)
