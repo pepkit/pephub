@@ -28,3 +28,19 @@ class RawValidationQuery(BaseModel):
 class TokenExchange(BaseModel):
     code: str
     client_redirect_uri: Optional[str] = None
+
+
+class InitializeDeviceCodeResponse(BaseModel):
+    device_code: str
+    auth_url: str
+
+
+class GitHubAppConfig(BaseModel):
+    client_id: str
+    client_secret: str
+    base_uri: str
+    redirect_uri: str
+
+
+class JWTDeviceTokenResponse(BaseModel):
+    jwt_token: str

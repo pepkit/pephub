@@ -15,7 +15,7 @@ from ...dependencies import CLIAuthSystem, generate_random_auth_code, generate_r
 
 from ...helpers import build_authorization_url
 from ...const import BASE_TEMPLATES_PATH, JWT_SECRET, AUTH_CODE_EXPIRATION, CALLBACK_ENDPOINT
-from ..models import TokenExchange
+from ..models import TokenExchange, InitializeDeviceCodeResponse, GitHubAppConfig, JWTDeviceTokenResponse
 
 load_dotenv()
 
@@ -26,12 +26,12 @@ templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_TEMPLATES_PATH))
 
 # Global config
-github_app_config = {
-    "client_id": os.getenv("GH_CLIENT_ID", "dummy-client-id"),
-    "client_secret": os.getenv("GH_CLIENT_SECRET", "dummy-secret"),
-    "redirect_uri": f"{os.getenv('BASE_URI')}{CALLBACK_ENDPOINT}",
-    "base_uri": os.getenv('BASE_URI')
-}
+github_app_config = GitHubAppConfig(
+    client_id=os.getenv("GH_CLIENT_ID", "dummy-client-id"),
+    client_secret=os.getenv("GH_CLIENT_SECRET", "dummy-secret"),
+    redirect_uri=f"{os.getenv('BASE_URI')}{CALLBACK_ENDPOINT}",
+    base_uri=os.getenv('BASE_URI'),
+)
 
 auth = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -62,8 +62,8 @@ def login(client_redirect_uri: Union[str, None] = None):
         "secret": JWT_SECRET,
     }
     return build_authorization_url(
-        client_id=github_app_config["client_id"],
-        redirect_uri=github_app_config["redirect_uri"],
+        client_id=github_app_config.client_id,
+        redirect_uri=github_app_config.redirect_uri,
         state=json.dumps(state),
     )
 
@@ -89,9 +89,9 @@ def callback(
         "Accept": "application/json",  # specify we want json back, or else it gives a param string
     }
     github_acc_request_data = {
-        "client_id": github_app_config["client_id"],
-        "client_secret": github_app_config["client_secret"],
-        "redirect_uri": github_app_config["redirect_uri"],
+        "client_id": github_app_config.client_id,
+        "client_secret": github_app_config.client_secret,
+        "redirect_uri": github_app_config.redirect_uri,
         "code": code,
         "state": state,
     }
@@ -116,7 +116,7 @@ def callback(
 
     if state.get("device"):
         DEVICE_CODES[state["device_code"]]["token"] = token
-        return "/auth/device/login_success"
+        return f"/login/device/success"
 
     else:
         # create random auth code
@@ -131,9 +131,6 @@ def callback(
         # add background task to delete the token after EXP time
         background_tasks.add_task(delete_auth_code_after, auth_code, AUTH_CODE_EXPIRATION)
 
-        # return token either to client_redirect,
-        # or to a basic login success page.
-        # add token as query param
         if client_redirect_uri:
             send_to = client_redirect_uri + f"?code={auth_code}"
         else:
@@ -147,7 +144,6 @@ def code_exchange(exchange_request: TokenExchange):
     client_redirect_uri = exchange_request.client_redirect_uri
     if code in CODE_EXCHANGE:
         try:
-            # verify redirect_uri
             if client_redirect_uri != CODE_EXCHANGE[code]["client_redirect_uri"]:
                 raise HTTPException(
                     status_code=400,
@@ -172,9 +168,9 @@ def init_device_code(
     background_tasks.add_task(delete_device_code_after, device_code, AUTH_CODE_EXPIRATION)
     DEVICE_CODES[device_code] = {"token": None,
                                  "client_host":  request.client.host}
-    # TODO: can we specify just path?
-    return {"device_code": device_code,
-            "auth_url": f"{github_app_config['base_uri']}/auth/device/login/{device_code}"}
+
+    return InitializeDeviceCodeResponse(device_code=device_code,
+                                        auth_url=f"{github_app_config.base_uri}/auth/device/login/{device_code}")
 
 
 @auth.get("/device/login/{device_code}", response_class=RedirectResponse)
@@ -191,8 +187,8 @@ def login_device(device_code: str):
             "device": True,
         }
         return build_authorization_url(
-            client_id=github_app_config["client_id"],
-            redirect_uri=github_app_config["redirect_uri"],
+            client_id=github_app_config.client_id,
+            redirect_uri=github_app_config.redirect_uri,
             state=json.dumps(state),
         )
     else:
@@ -215,20 +211,13 @@ def return_token(
             if DEVICE_CODES[device_code].get("client_host") == client_host:
                 token = DEVICE_CODES[device_code].get("token")
                 DEVICE_CODES.pop(device_code)
-                return {"token": token}
+                return JWTDeviceTokenResponse(jwt_token=token)
             else:
                 raise HTTPException(status_code=401, detail="Incorrect host")
         else:
             raise HTTPException(status_code=401, detail="User didn't log in")
     else:
         raise HTTPException(status_code=400, detail="Item not found")
-
-
-@auth.get("/device/login_success")
-def login_device_success(request: Request):
-    return templates.TemplateResponse(
-        "login_success_device.html", {"request": request}
-    )
 
 
 @auth.get("/login/success")
