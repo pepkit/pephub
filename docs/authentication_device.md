@@ -20,5 +20,5 @@ Authorization Flows contains steps that are described in the figure below.
 8. The device sends a POST request to PEPhub with the device code. The server returns the JWT and deletes the temporarily stored information about it. 
 9. The device receives the JWT.
 
-![PEPhub authorization code flow](imgs/auth_device.svg)
+![PEPhub authorization code flow](imgs/auth_device.png)
 
