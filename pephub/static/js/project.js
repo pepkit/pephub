@@ -53,7 +53,7 @@ const deleteProject = () => {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${getCookie("access_token")}`
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
     },
   })
   .then(res => {

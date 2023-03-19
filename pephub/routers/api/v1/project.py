@@ -72,6 +72,7 @@ async def update_a_pep(
     updated_project: ProjectOptional,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
 ):
     """
     Update a PEP from a certain namespace
@@ -139,7 +140,7 @@ async def update_a_pep(
         raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
         return {
             "project": raw_peppy_project,
-            "project_annotation": agent.annotation.get(namespace, project, tag=tag),
+            "project_annotation": agent.annotation.get(namespace, project, tag=tag, admin=list_of_admins),
             "message": "Project updated successfully",
         }
 
@@ -178,7 +179,7 @@ async def update_a_pep(
     return JSONResponse(
         content={
             "message": "PEP updated",
-            "project": raw_peppy_project,
+            # "project": raw_peppy_project,
             "registry": f"{namespace}/{project}:{tag}",
             "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
             "project": updated_project.dict(),
