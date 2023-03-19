@@ -11,11 +11,25 @@ from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 
 
-from ...dependencies import CLIAuthSystem, generate_random_auth_code, generate_random_device_code
+from ...dependencies import (
+    CLIAuthSystem,
+    generate_random_auth_code,
+    generate_random_device_code,
+)
 
 from ...helpers import build_authorization_url
-from ...const import BASE_TEMPLATES_PATH, JWT_SECRET, AUTH_CODE_EXPIRATION, CALLBACK_ENDPOINT
-from ..models import TokenExchange, InitializeDeviceCodeResponse, GitHubAppConfig, JWTDeviceTokenResponse
+from ...const import (
+    BASE_TEMPLATES_PATH,
+    JWT_SECRET,
+    AUTH_CODE_EXPIRATION,
+    CALLBACK_ENDPOINT,
+)
+from ..models import (
+    TokenExchange,
+    InitializeDeviceCodeResponse,
+    GitHubAppConfig,
+    JWTDeviceTokenResponse,
+)
 
 load_dotenv()
 
@@ -30,7 +44,7 @@ github_app_config = GitHubAppConfig(
     client_id=os.getenv("GH_CLIENT_ID", "dummy-client-id"),
     client_secret=os.getenv("GH_CLIENT_SECRET", "dummy-secret"),
     redirect_uri=f"{os.getenv('BASE_URI')}{CALLBACK_ENDPOINT}",
-    base_uri=os.getenv('BASE_URI'),
+    base_uri=os.getenv("BASE_URI"),
 )
 
 auth = APIRouter(prefix="/auth", tags=["authentication"])
@@ -129,7 +143,9 @@ def callback(
         }
 
         # add background task to delete the token after EXP time
-        background_tasks.add_task(delete_auth_code_after, auth_code, AUTH_CODE_EXPIRATION)
+        background_tasks.add_task(
+            delete_auth_code_after, auth_code, AUTH_CODE_EXPIRATION
+        )
 
         if client_redirect_uri:
             send_to = client_redirect_uri + f"?code={auth_code}"
@@ -158,19 +174,22 @@ def code_exchange(exchange_request: TokenExchange):
 
 @auth.post("/device/init")
 def init_device_code(
-        background_tasks: BackgroundTasks,
-        request: Request,
+    background_tasks: BackgroundTasks,
+    request: Request,
 ):
     """
     Create random device code, so that device can exchange it later for token
     """
     device_code = generate_random_device_code()
-    background_tasks.add_task(delete_device_code_after, device_code, AUTH_CODE_EXPIRATION)
-    DEVICE_CODES[device_code] = {"token": None,
-                                 "client_host":  request.client.host}
+    background_tasks.add_task(
+        delete_device_code_after, device_code, AUTH_CODE_EXPIRATION
+    )
+    DEVICE_CODES[device_code] = {"token": None, "client_host": request.client.host}
 
-    return InitializeDeviceCodeResponse(device_code=device_code,
-                                        auth_url=f"{github_app_config.base_uri}/auth/device/login/{device_code}")
+    return InitializeDeviceCodeResponse(
+        device_code=device_code,
+        auth_url=f"{github_app_config.base_uri}/auth/device/login/{device_code}",
+    )
 
 
 @auth.get("/device/login/{device_code}", response_class=RedirectResponse)
@@ -198,9 +217,9 @@ def login_device(device_code: str):
 
 @auth.post("/device/token")
 def return_token(
-        request: Request,
-        device_code: Union[str, None] = Header(default=None),
-    ):
+    request: Request,
+    device_code: Union[str, None] = Header(default=None),
+):
     """
     Request token from PEPhub by passing device code in Header.
     """

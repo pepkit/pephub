@@ -22,12 +22,12 @@ load_dotenv()
 
 project = APIRouter(
     prefix="/api/v1/projects/{namespace}/{project}",
-    tags=["project"],
+    tags=["project"], dependencies=[Depends(verify_user_can_read_project)]
 )
 
 
 @project.get(
-    "", summary="Fetch a PEP", dependencies=[Depends(verify_user_can_read_project)]
+    "", summary="Fetch a PEP"
 )
 async def get_a_pep(
     proj: peppy.Project = Depends(get_project),
@@ -38,7 +38,7 @@ async def get_a_pep(
     """
 
     samples = [s.to_dict() for s in proj.samples]
-    sample_table_indx = proj.sample_table_index
+    sample_table_index = proj.sample_table_index
 
     # this assumes the first sample's attributes
     # is representative of all samples attributes
@@ -49,14 +49,14 @@ async def get_a_pep(
     proj_annotation_dict = proj_annotation.dict()
 
     # default to name from annotation
-    if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
-        del proj_dict["name"]
+    # if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
+    #     del proj_dict["name"]
 
     return dict(
         **proj_dict,
         **proj_annotation_dict,
         samples=samples,
-        sample_table_indx=sample_table_indx,
+        sample_table_indx=sample_table_index,
         sample_attributes=sample_attributes,
     )
 
@@ -64,7 +64,7 @@ async def get_a_pep(
 # https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository
 # update a project (pep)
 @project.patch(
-    "", summary="Update a PEP", dependencies=[Depends(verify_user_can_write_project)]
+    "", summary="Update a PEP",
 )
 async def update_a_pep(
     project: str,
@@ -189,8 +189,7 @@ async def update_a_pep(
 
 # delete a PEP
 @project.delete(
-    "", summary="Delete a PEP", dependencies=[Depends(verify_user_can_write_project)]
-)
+    "", summary="Delete a PEP")
 async def delete_a_pep(
     namespace: str,
     project: str,
@@ -244,7 +243,8 @@ async def get_pep_samples(
 
 # # fetch specific sample for project
 @project.get("/samples/{sample_name}")
-async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
+async def get_sample(sample_name: str,
+                     proj: peppy.Project = Depends(get_project)):
     # check that the sample exists
     # by mapping the list of sample objects
     # to a list of sample names
