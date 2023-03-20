@@ -14,6 +14,11 @@ const getCookie = (cname) => {
   return "";
 }
 const downloadZip = () => {
+  const completeName = document.getElementById("registry-header").innerText
+
+  const [namespace, projectName] = completeName.split("/")
+  const [project, tag] = projectName.split(":")
+
 
   fetch(`/api/v1/projects/${namespace}/${project}/zip?tag=${tag}`, {
     method: "GET",
@@ -23,8 +28,12 @@ const downloadZip = () => {
     },
   }).then( res => res.blob() )
   .then( blob => {
+    var a = document.createElement("a");
     var file = window.URL.createObjectURL(blob);
-    window.location.assign(file);
+    a.href = file;
+    a.download = completeName+".zip";
+    a.click();
+    window.URL.revokeObjectURL(file);
   })
 }
 

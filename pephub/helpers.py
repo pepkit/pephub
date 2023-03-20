@@ -154,7 +154,7 @@ def zip_pep(project: peppy.Project) -> Response:
                 content_to_zip[subsample_table_filename] = sstable.to_csv()
 
     zip_filename = project.name or f"downloaded_pep_{date.today()}"
-    return zip_conv_result(content_to_zip, filename=(project.name or zip_filename))
+    return zip_conv_result(content_to_zip, filename=zip_filename)
 
 
 def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
