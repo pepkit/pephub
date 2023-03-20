@@ -13,6 +13,20 @@ const getCookie = (cname) => {
   }
   return "";
 }
+const downloadZip = () => {
+
+  fetch(`/api/v1/projects/${namespace}/${project}/zip?tag=${tag}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    },
+  }).then( res => res.blob() )
+  .then( blob => {
+    var file = window.URL.createObjectURL(blob);
+    window.location.assign(file);
+  })
+}
 
 const setDeleteFormInputPlaceholder = (name) => {
   const deleteFormInput = document.getElementById("delete-confirm-input")
