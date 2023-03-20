@@ -130,14 +130,14 @@ def zip_pep(project: peppy.Project) -> Response:
         prj_cof_file = project.config_file or "config.yaml"
         cfg_filename_base = basename(prj_cof_file)
         content_to_zip[cfg_filename_base] = project.config.to_yaml()
+
     if project.sample_table is not None:
         sample_table_filename = basename(
             project.to_dict().get("sample_table", "sample_table.csv")
         )
         content_to_zip[sample_table_filename] = project.sample_table.to_csv()
+
     if project.subsample_table is not None:
-        # sometimes the subsample table is a list. So change behavior
-        # based on this
         if not isinstance(project.subsample_table, list):
             subsample_table_filename = basename(
                 project.to_dict().get("subsample_table", "subsample_table.csv")

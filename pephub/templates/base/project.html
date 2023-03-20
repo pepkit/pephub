@@ -21,6 +21,10 @@
           <i class="bi bi-hdd-rack"></i>
           API Endpoints
         </button>
+        <button onclick="downloadZip()" type="button" class="btn btn-outline-success" >
+          <i class="bi bi-file-earmark-zip"></i>
+          Download Zip
+        </button>
         {% if can_edit %}
           <a href="/{{ namespace }}/{{ project }}/edit?tag={{tag}}">
             <button id="edit-pep-btn" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPEP">
