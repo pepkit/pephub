@@ -6,7 +6,6 @@ from io import StringIO
 from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pepdbagent import PEPDatabaseAgent
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
 
@@ -60,8 +59,6 @@ async def get_a_pep(
     )
 
 
-# https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository
-# update a project (pep)
 @project.patch(
     "",
     summary="Update a PEP",
@@ -164,7 +161,6 @@ async def update_a_pep(
             #     detail=f"Invalid update key: {k}",
             # )
 
-    # update the project in the database
     agent.project.update(
         dict(project=Project().from_dict(new_raw_project), **update_dict),
         namespace,
@@ -190,7 +186,6 @@ async def update_a_pep(
     )
 
 
-# delete a PEP
 @project.delete("", summary="Delete a PEP")
 async def delete_a_pep(
     namespace: str,
@@ -219,7 +214,6 @@ async def delete_a_pep(
     )
 
 
-# fetch samples for project
 @project.get("/samples")
 async def get_pep_samples(
     proj: peppy.Project = Depends(get_project),
@@ -243,7 +237,6 @@ async def get_pep_samples(
         )
 
 
-# # fetch specific sample for project
 @project.get("/samples/{sample_name}")
 async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
     # check that the sample exists
@@ -255,7 +248,6 @@ async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project
     return sample
 
 
-# fetch all subsamples inside a pep
 @project.get("/subsamples")
 async def get_subsamples(
     namespace: str,
@@ -264,7 +256,7 @@ async def get_subsamples(
     download: bool = False,
 ):
     subsamples = proj.subsample_table
-    # check if subsamples exist
+
     if subsamples is not None:
         if download:
             return proj.subsample_table.to_csv()

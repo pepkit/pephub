@@ -120,12 +120,16 @@ def get_project_sample_names(proj: peppy.Project) -> List[str]:
 
 
 def zip_pep(project: peppy.Project) -> Response:
-    """Zip a project up to download"""
+    """
+    Zip a project up to download
+    :param project: peppy project to zip
+    """
     content_to_zip = {}
 
     if project.config:
-        cfg_filename = basename(project.config_file)
-        content_to_zip[cfg_filename] = project.config.to_yaml()
+        prj_cof_file = project.config_file or "config.yaml"
+        cfg_filename_base = basename(prj_cof_file)
+        content_to_zip[cfg_filename_base] = project.config.to_yaml()
     if project.sample_table is not None:
         sample_table_filename = basename(
             project.to_dict().get("sample_table", "sample_table.csv")
@@ -154,6 +158,9 @@ def zip_pep(project: peppy.Project) -> Response:
 
 
 def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
+    """
+
+    """
     mf = io.BytesIO()
 
     with zipfile.ZipFile(mf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
