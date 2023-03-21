@@ -62,9 +62,10 @@ async def successful_login(request: Request, code: str):
 
 
 @views.get("/login/device/success")
-def login_success(request: Request,
-                  session_info: dict = Depends(read_session_cookie),
-                  ):
+def login_success(
+    request: Request,
+    session_info: dict = Depends(read_session_cookie),
+):
     templ_vars = {"request": request}
     return templates.TemplateResponse(
         "login_success_device.html",

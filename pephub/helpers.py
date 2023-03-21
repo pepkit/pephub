@@ -158,9 +158,7 @@ def zip_pep(project: peppy.Project) -> Response:
 
 
 def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
-    """
-
-    """
+    """ """
     mf = io.BytesIO()
 
     with zipfile.ZipFile(mf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
