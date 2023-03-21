@@ -15,7 +15,7 @@ export const Nav: FC = () => {
 		      <ul className="mb-2 navbar-nav ms-auto mb-sm-0">  
 				<li>
 				  <div className="mt-1 input-group">
-				    <input id="global-search-bar" type="text" className="form-control border-end-0" placeholder="Search pephub" aria-label="search" aria-describedby="search" />
+				    <input disabled id="global-search-bar" type="text" className="form-control border-end-0" placeholder="Search pephub" aria-label="search" aria-describedby="search" />
 					<span style={{backgroundColor: 'rgba(255, 255, 255, 255) !important' }} className="input-group-text border-start-0">
 						<div className="px-2 border rounded border-secondary text-secondary">
 							/
