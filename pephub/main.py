@@ -76,6 +76,7 @@ app.include_router(auth_router)
 app.add_middleware(SPA)
 app.mount("/", StaticFiles(directory=SPA_PATH, html=True), name="spa")
 
+
 def main():
     # set up the logger
     global _LOGGER
