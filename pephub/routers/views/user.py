@@ -10,7 +10,7 @@ from ...const import BASE_TEMPLATES_PATH, ALL_VERSIONS
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
-user = APIRouter(tags=["user", "user interface", "interface"])
+user = APIRouter(tags=["interface"])
 
 
 @user.get("/me")

@@ -14,9 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-namespace = APIRouter(
-    prefix="/api/v1/namespaces/{namespace}", tags=["api", "namespace", "v1"]
-)
+namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"])
 
 
 @namespace.get("/", summary="Fetch details about a particular namespace.")

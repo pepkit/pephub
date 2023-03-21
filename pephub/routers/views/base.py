@@ -29,7 +29,7 @@ ALL_VERSIONS = {
     "api_version": 1,
 }
 
-views = APIRouter(tags=["views", "user interface", "interface"])
+views = APIRouter(tags=["views"])
 
 
 @views.get("/")
@@ -51,11 +51,29 @@ async def main(
 
 
 @views.get("/login/success")
-async def sucessful_login(request: Request, code: str):
+async def successful_login(request: Request, code: str):
     return templates.TemplateResponse(
         "login_success.html",
         {
             "request": request,
             "code": code,
         },
+    )
+
+
+@views.get("/login/device/success")
+def login_success(
+    request: Request,
+    session_info: dict = Depends(read_session_cookie),
+):
+    templ_vars = {"request": request}
+    return templates.TemplateResponse(
+        "login_success_device.html",
+        dict(
+            templ_vars,
+            **ALL_VERSIONS,
+            session_info=session_info,
+            logged_in=session_info is not None,
+            is_landing_page=True,
+        ),
     )

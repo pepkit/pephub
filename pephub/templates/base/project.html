@@ -9,7 +9,7 @@
   </a>
     <div class="flex-row d-flex align-items-start justify-content-between">
       <div class="flex-row d-flex align-items-center">
-        <h1>
+        <h1 id="registry-header">
           {{ namespace }}/{{ project }}:{{tag}}
         </h1>
         {% if is_private %}
@@ -20,6 +20,10 @@
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#apiEndpoints">
           <i class="bi bi-hdd-rack"></i>
           API Endpoints
+        </button>
+        <button onclick="downloadZip()" type="button" class="btn btn-outline-success" >
+          <i class="bi bi-file-earmark-zip"></i>
+          Download Zip
         </button>
         {% if can_edit %}
           <a href="/{{ namespace }}/{{ project }}/edit?tag={{tag}}">

@@ -8,6 +8,7 @@ from pephub.main import app
 
 client = TestClient(app)
 
+
 # fetch namespace summary
 def test_base():
     res = client.get("/api/v1/demo")

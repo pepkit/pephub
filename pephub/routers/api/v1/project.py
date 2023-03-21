@@ -6,7 +6,6 @@ from io import StringIO
 from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pepdbagent import PEPDatabaseAgent
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
 
@@ -22,13 +21,12 @@ load_dotenv()
 
 project = APIRouter(
     prefix="/api/v1/projects/{namespace}/{project}",
-    tags=["api", "project", "v1"],
+    tags=["project"],
+    dependencies=[Depends(verify_user_can_read_project)],
 )
 
 
-@project.get(
-    "", summary="Fetch a PEP", dependencies=[Depends(verify_user_can_read_project)]
-)
+@project.get("", summary="Fetch a PEP")
 async def get_a_pep(
     proj: peppy.Project = Depends(get_project),
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
@@ -38,7 +36,7 @@ async def get_a_pep(
     """
 
     samples = [s.to_dict() for s in proj.samples]
-    sample_table_indx = proj.sample_table_index
+    sample_table_index = proj.sample_table_index
 
     # this assumes the first sample's attributes
     # is representative of all samples attributes
@@ -49,22 +47,21 @@ async def get_a_pep(
     proj_annotation_dict = proj_annotation.dict()
 
     # default to name from annotation
-    if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
-        del proj_dict["name"]
+    # if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
+    #     del proj_dict["name"]
 
     return dict(
         **proj_dict,
         **proj_annotation_dict,
         samples=samples,
-        sample_table_indx=sample_table_indx,
+        sample_table_indx=sample_table_index,
         sample_attributes=sample_attributes,
     )
 
 
-# https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#update-a-repository
-# update a project (pep)
 @project.patch(
-    "", summary="Update a PEP", dependencies=[Depends(verify_user_can_write_project)]
+    "",
+    summary="Update a PEP",
 )
 async def update_a_pep(
     project: str,
@@ -72,6 +69,7 @@ async def update_a_pep(
     updated_project: ProjectOptional,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
 ):
     """
     Update a PEP from a certain namespace
@@ -139,7 +137,9 @@ async def update_a_pep(
         raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
         return {
             "project": raw_peppy_project,
-            "project_annotation": agent.annotation.get(namespace, project, tag=tag),
+            "project_annotation": agent.annotation.get(
+                namespace, project, tag=tag, admin=list_of_admins
+            ),
             "message": "Project updated successfully",
         }
 
@@ -161,7 +161,6 @@ async def update_a_pep(
             #     detail=f"Invalid update key: {k}",
             # )
 
-    # update the project in the database
     agent.project.update(
         dict(project=Project().from_dict(new_raw_project), **update_dict),
         namespace,
@@ -178,7 +177,7 @@ async def update_a_pep(
     return JSONResponse(
         content={
             "message": "PEP updated",
-            "project": raw_peppy_project,
+            # "project": raw_peppy_project,
             "registry": f"{namespace}/{project}:{tag}",
             "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
             "project": updated_project.dict(),
@@ -187,10 +186,7 @@ async def update_a_pep(
     )
 
 
-# delete a PEP
-@project.delete(
-    "", summary="Delete a PEP", dependencies=[Depends(verify_user_can_write_project)]
-)
+@project.delete("", summary="Delete a PEP")
 async def delete_a_pep(
     namespace: str,
     project: str,
@@ -218,7 +214,6 @@ async def delete_a_pep(
     )
 
 
-# fetch samples for project
 @project.get("/samples")
 async def get_pep_samples(
     proj: peppy.Project = Depends(get_project),
@@ -242,7 +237,6 @@ async def get_pep_samples(
         )
 
 
-# # fetch specific sample for project
 @project.get("/samples/{sample_name}")
 async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
     # check that the sample exists
@@ -254,7 +248,6 @@ async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project
     return sample
 
 
-# fetch all subsamples inside a pep
 @project.get("/subsamples")
 async def get_subsamples(
     namespace: str,
@@ -263,7 +256,7 @@ async def get_subsamples(
     download: bool = False,
 ):
     subsamples = proj.subsample_table
-    # check if subsamples exist
+
     if subsamples is not None:
         if download:
             return proj.subsample_table.to_csv()

@@ -6,7 +6,7 @@ from ...const import BASE_TEMPLATES_PATH, DEFAULT_QDRANT_COLLECTION_NAME
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
-search = APIRouter(tags=["search", "user interface", "interface"])
+search = APIRouter(tags=["interface"])
 
 
 @search.get("/search")

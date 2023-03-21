@@ -12,6 +12,7 @@ from pephub.dependencies import CLIAuthSystem
 client = TestClient(app)
 from fastapi.exceptions import HTTPException
 
+
 # fetch a project
 def test_fetch_project():
     res = client.get("/pep/demo/BiocProject")

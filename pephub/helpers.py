@@ -120,20 +120,24 @@ def get_project_sample_names(proj: peppy.Project) -> List[str]:
 
 
 def zip_pep(project: peppy.Project) -> Response:
-    """Zip a project up to download"""
+    """
+    Zip a project up to download
+    :param project: peppy project to zip
+    """
     content_to_zip = {}
 
     if project.config:
-        cfg_filename = basename(project.config_file)
-        content_to_zip[cfg_filename] = project.config.to_yaml()
+        prj_cof_file = project.config_file or "config.yaml"
+        cfg_filename_base = basename(prj_cof_file)
+        content_to_zip[cfg_filename_base] = project.config.to_yaml()
+
     if project.sample_table is not None:
         sample_table_filename = basename(
             project.to_dict().get("sample_table", "sample_table.csv")
         )
         content_to_zip[sample_table_filename] = project.sample_table.to_csv()
+
     if project.subsample_table is not None:
-        # sometimes the subsample table is a list. So change behavior
-        # based on this
         if not isinstance(project.subsample_table, list):
             subsample_table_filename = basename(
                 project.to_dict().get("subsample_table", "subsample_table.csv")
@@ -150,10 +154,11 @@ def zip_pep(project: peppy.Project) -> Response:
                 content_to_zip[subsample_table_filename] = sstable.to_csv()
 
     zip_filename = project.name or f"downloaded_pep_{date.today()}"
-    return zip_conv_result(content_to_zip, filename=(project.name or zip_filename))
+    return zip_conv_result(content_to_zip, filename=zip_filename)
 
 
 def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
+    """ """
     mf = io.BytesIO()
 
     with zipfile.ZipFile(mf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
