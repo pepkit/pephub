@@ -45,22 +45,22 @@ docker run -p 6333:6333 \
 ## Running
 *pephub* is configured to be run many different ways. Regardless of how you run it, however, pephub requires many configuration parameters to function. Configuration settings are supplied to pephub through environment variables to allow for flexible development and deployment. The following settings are **required** to run pephub. While pephub has built-in defaults for these settings, you should provide them youself to ensure compatability:
 
-- `POSTGRES_HOST`: The hostname of the pephub database server
+- `POSTGRES_HOST`: The hostname of the PEPhub database server
 - `POSTGRES_DB`: The name of the database inside the postgres server
 - `POSTGRES_USER`: Username for the database
 - `POSTGRES_PASSWORD`: Password for the user
 - `POSTGRES_PORT`: Port for postgres database
-- `GH_CLIENT_ID`: Client ID for the github application that authenticates users
-- `GH_CLIENT_SECRET`: Client secret for the github application that authenticates users
-- `REDIRECT_URI`: A redirect URI that matches that of the GitHub application
+- `GH_CLIENT_ID`: Client ID for the GitHub application that authenticates users
+- `GH_CLIENT_SECRET`: Client secret for the GitHub application that authenticates users
+- `BASE_URI`: A BASE URI of the PEPhub (e.g. localhost:8000)
 
-You must set these environment variables prior to running pephub. Alternatively, you may store them locally in a `.env` file. This file will get loaded and exported to your environment when the server starts up. We've included an [example](environment/template.env) `.env` file with this repository.
+You must set these environment variables prior to running PEPhub. Alternatively, you may store them locally in a `.env` file. This file will get loaded and exported to your environment when the server starts up. We've included an [example](environment/template.env) `.env` file with this repository.
 
 You can read more about server settings and configuration [here](docs/server-settings.md).
 
 ### Running For Development:
 
-**1. Ensure database is setup and running.**  
+**1. Ensure database is set up and running.**  
 See [here](#1-database-setup) if you've not setup a database.
 
 **2. Start pephub.**  

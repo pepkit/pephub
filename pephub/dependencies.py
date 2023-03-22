@@ -110,6 +110,14 @@ def generate_random_auth_code() -> str:
     return token_hex(n_bytes)
 
 
+def generate_random_device_code() -> str:
+    """
+    Generate a random 8-digit code
+    """
+    n_bytes = int(8 / 2)
+    return token_hex(n_bytes)
+
+
 def get_db() -> PEPDatabaseAgent:
     """
     Grab a temporary connection to the database.

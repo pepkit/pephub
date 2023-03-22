@@ -14,7 +14,7 @@ from ...const import BASE_TEMPLATES_PATH, ALL_VERSIONS
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
-namespace = APIRouter(tags=["namespace", "user interface", "interface"])
+namespace = APIRouter(tags=["interface"])
 
 
 @namespace.get(

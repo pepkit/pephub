@@ -23,7 +23,7 @@ from ..models import AnnotationModel
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 
-project = APIRouter(tags=["project", "user interface", "interface"])
+project = APIRouter(tags=["interface"])
 
 
 @project.get(
