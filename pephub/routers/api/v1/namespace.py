@@ -1,6 +1,7 @@
 import tempfile
 import shutil
 
+import peppy
 from fastapi import APIRouter, File, UploadFile, Request, Depends, Form
 from fastapi.responses import JSONResponse
 from peppy import Project
@@ -9,6 +10,7 @@ from pepdbagent.exceptions import ProjectUniqueNameError
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ....const import DEFAULT_TAG, BLANK_PEP_CONFIG, BLANK_PEP_SAMPLE_TABLE
+from typing import Annotated
 
 from dotenv import load_dotenv
 
@@ -185,3 +187,58 @@ async def create_pep(
                 },
                 status_code=202,
             )
+
+@namespace.post(
+    "/upload_raw",
+    summary="Upload raw project to database.",
+    dependencies=[Depends(verify_user_can_write_namespace)],
+)
+async def upload_raw_pep(
+    namespace: str,
+    project_name: str = Form(...),
+    is_private: bool = Form(False),
+    tag: str = Form(DEFAULT_TAG),
+    pep_dict: Annotated[dict, Form()] = Form(),
+    description: Union[str, None] = Form(None),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    try:
+        p = peppy.Project().from_dict(pep_dict)
+    except Exception as e:
+        return JSONResponse(
+            content={
+                "message": f"Incorrect raw project was provided. Couldn't initiate peppy object.",
+                "error": f"{e}",
+                "status_code": 417,
+            },
+            status_code=417,
+        )
+    try:
+        p.name = project_name
+        p.description = description
+        agent.project.create(
+            p,
+            namespace=namespace,
+            name=project_name,
+            tag=tag,
+            is_private=is_private,
+        )
+    except ProjectUniqueNameError as e:
+        return JSONResponse(
+            content={
+                "message": f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
+                "error": f"{e}",
+                "status_code": 400,
+            },
+            status_code=400,
+        )
+    return JSONResponse(
+        content={
+            "namespace": namespace,
+            "project_name": project_name,
+            "proj": p.to_dict(),
+            "tag": tag,
+            "registry_path": f"{namespace}/{project_name}:{tag}",
+        },
+        status_code=202,
+    )
