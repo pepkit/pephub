@@ -21,6 +21,7 @@ from .routers.views.search import search as views_search
 from .routers.views.project import project as views_project
 from .routers.views.namespace import namespace as views_namespace
 from .routers.views.user import user as views_user
+from .routers.views.eido import views as eido_views
 from .routers.eido.eido import router as eido_router
 from .const import STATICS_PATH, EIDO_PATH, LOG_LEVEL_MAP
 
@@ -76,6 +77,7 @@ app.include_router(api_project)
 app.include_router(api_search)
 app.include_router(auth_router)
 app.include_router(views_base)
+app.include_router(eido_views)
 app.include_router(views_user)
 app.include_router(views_search)
 app.include_router(views_project)
@@ -87,7 +89,7 @@ app.mount("/static", StaticFiles(directory=STATICS_PATH), name="root_static")
 
 # The eido validator is an SPA that can be served as a static HTML
 # file. These can only be added on the main app, not on a router
-app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH), name="eido_validator")
+app.mount("/eido/validator", StaticFiles(directory=EIDO_PATH, html=True), name="eido_validator")
 
 
 def main():
