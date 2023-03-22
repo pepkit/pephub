@@ -3,17 +3,18 @@ import peppy
 import yaml
 import pandas as pd
 from io import StringIO
-from typing import Callable
-from fastapi import APIRouter, Depends
+from typing import Callable, Annotated
+from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
 
-from ...models import ProjectOptional, AnnotationModel
+from ...models import ProjectOptional
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import *
 from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS, ALL_VERSIONS
 
+from pepdbagent.exceptions import ProjectUniqueNameError
 
 from dotenv import load_dotenv
 
@@ -308,3 +309,43 @@ async def convert_pep(
 async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     """Zip a pep"""
     return zip_pep(proj)
+
+
+@project.post("/forks",
+              summary="Fork project to user namespace.",
+              )
+async def fork_pep_to_namespace(
+    project: str,
+    fork_namespace: Annotated[str, Form()] = Form(),
+    tag: str = DEFAULT_TAG,
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+    proj: peppy.Project = Depends(get_project),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    if fork_namespace in (namespace_access_list or []):
+        try:
+            agent.project.create(project=proj, namespace=fork_namespace, name=project, tag=tag)
+        except ProjectUniqueNameError as e:
+            return JSONResponse(
+                content={
+                    "message": f"Project '{fork_namespace}/{project}:{tag}' already exists in namespace",
+                    "error": f"{e}",
+                    "status_code": 400,
+                },
+                status_code=400,
+            )
+
+        return JSONResponse(
+            content={
+                "namespace": fork_namespace,
+                "project_name": project,
+                "tag": tag,
+                "registry_path": f"{fork_namespace}/{project}:{tag}",
+            },
+            status_code=202,
+        )
+    else:
+        raise HTTPException(
+            401, f"Unauthorized for using {fork_namespace}"
+        )
+
