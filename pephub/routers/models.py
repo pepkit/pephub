@@ -44,3 +44,14 @@ class GitHubAppConfig(BaseModel):
 
 class JWTDeviceTokenResponse(BaseModel):
     jwt_token: str
+
+
+class ProjectRawModel(BaseModel):
+    description: Optional[str] = ""
+    config: dict
+    subsample_dict: Optional[dict] = None
+    name: str
+    sample_dict: dict
+
+    class Config:
+        extra = Extra.allow

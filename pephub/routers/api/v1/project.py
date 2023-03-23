@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
 
-from ...models import ProjectOptional
+from ...models import ProjectOptional, ProjectRawModel
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import *
 from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS, ALL_VERSIONS
@@ -31,11 +31,20 @@ project = APIRouter(
 async def get_a_pep(
     proj: peppy.Project = Depends(get_project),
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
+    raw: bool = False,
 ):
     """
     Fetch a PEP from a certain namespace
     """
-
+    if raw:
+        raw_project = proj.to_dict(extended=True)
+        try:
+            raw_project = ProjectRawModel(**raw_project)
+        except Exception as err:
+            raise HTTPException(
+                500, f"Unexpected project error: {err}"
+            )
+        return raw_project
     samples = [s.to_dict() for s in proj.samples]
     sample_table_index = proj.sample_table_index
 
