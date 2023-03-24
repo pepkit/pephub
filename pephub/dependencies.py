@@ -7,10 +7,10 @@ import logging
 
 from secrets import token_hex
 from dotenv import load_dotenv
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Annotated
 from datetime import datetime, timedelta
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Form
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
@@ -325,6 +325,16 @@ def verify_user_can_write_project(
                 403,
                 f"The current authenticated user does not have permission to edit this project.",
             )
+
+
+def verify_user_can_fork(
+        fork_namespace: Annotated[str, Form()] = Form(),
+        namespace_access_list: List[str] = Depends(get_namespace_access_list),
+    ) -> bool:
+    if fork_namespace in (namespace_access_list or []):
+        yield
+    else:
+        raise HTTPException(401, "Unauthorized to fork this repo")
 
 
 def parse_boolean_env_var(env_var: str) -> bool:

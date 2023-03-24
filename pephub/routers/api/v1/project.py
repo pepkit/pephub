@@ -322,39 +322,35 @@ async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
 
 @project.post("/forks",
               summary="Fork project to user namespace.",
+              dependencies=[Depends(verify_user_can_fork)]
               )
 async def fork_pep_to_namespace(
     project: str,
     fork_namespace: Annotated[str, Form()] = Form(),
     tag: str = DEFAULT_TAG,
-    namespace_access_list: List[str] = Depends(get_namespace_access_list),
     proj: peppy.Project = Depends(get_project),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
-    if fork_namespace in (namespace_access_list or []):
-        try:
-            agent.project.create(project=proj, namespace=fork_namespace, name=project, tag=tag)
-        except ProjectUniqueNameError as e:
-            return JSONResponse(
-                content={
-                    "message": f"Project '{fork_namespace}/{project}:{tag}' already exists in namespace",
-                    "error": f"{e}",
-                    "status_code": 400,
-                },
-                status_code=400,
-            )
-
+    try:
+        agent.project.create(project=proj, namespace=fork_namespace, name=project, tag=tag)
+    except ProjectUniqueNameError as e:
         return JSONResponse(
             content={
-                "namespace": fork_namespace,
-                "project_name": project,
-                "tag": tag,
-                "registry_path": f"{fork_namespace}/{project}:{tag}",
+                "message": f"Project '{fork_namespace}/{project}:{tag}' already exists in namespace",
+                "error": f"{e}",
+                "status_code": 400,
             },
-            status_code=202,
+            status_code=400,
         )
-    else:
-        raise HTTPException(
-            401, f"Unauthorized for using {fork_namespace}"
-        )
+
+    return JSONResponse(
+        content={
+            "namespace": fork_namespace,
+            "project_name": project,
+            "tag": tag,
+            "registry_path": f"{fork_namespace}/{project}:{tag}",
+        },
+        status_code=202,
+    )
+
 
