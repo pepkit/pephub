@@ -41,9 +41,7 @@ async def get_a_pep(
         try:
             raw_project = ProjectRawModel(**raw_project)
         except Exception as err:
-            raise HTTPException(
-                500, f"Unexpected project error: {err}"
-            )
+            raise HTTPException(500, f"Unexpected project error: {err}")
         return raw_project
     samples = [s.to_dict() for s in proj.samples]
     sample_table_index = proj.sample_table_index
@@ -320,10 +318,11 @@ async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     return zip_pep(proj)
 
 
-@project.post("/forks",
-              summary="Fork project to user namespace.",
-              dependencies=[Depends(verify_user_can_fork)]
-              )
+@project.post(
+    "/forks",
+    summary="Fork project to user namespace.",
+    dependencies=[Depends(verify_user_can_fork)],
+)
 async def fork_pep_to_namespace(
     project: str,
     fork_namespace: Annotated[str, Form()] = Form(),
@@ -332,7 +331,9 @@ async def fork_pep_to_namespace(
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     try:
-        agent.project.create(project=proj, namespace=fork_namespace, name=project, tag=tag)
+        agent.project.create(
+            project=proj, namespace=fork_namespace, name=project, tag=tag
+        )
     except ProjectUniqueNameError as e:
         return JSONResponse(
             content={
@@ -352,5 +353,3 @@ async def fork_pep_to_namespace(
         },
         status_code=202,
     )
-
-

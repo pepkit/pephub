@@ -328,9 +328,9 @@ def verify_user_can_write_project(
 
 
 def verify_user_can_fork(
-        fork_namespace: Annotated[str, Form()] = Form(),
-        namespace_access_list: List[str] = Depends(get_namespace_access_list),
-    ) -> bool:
+    fork_namespace: Annotated[str, Form()] = Form(),
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+) -> bool:
     if fork_namespace in (namespace_access_list or []):
         yield
     else:
