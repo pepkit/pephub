@@ -48,10 +48,7 @@ class JWTDeviceTokenResponse(BaseModel):
 
 class ProjectRawModel(BaseModel):
     description: Optional[str] = ""
-    config: dict
-    subsample_dict: Optional[dict] = None
+    config: dict = Field(alias="_config")
+    subsample_dict: Optional[dict] = Field(alias="_subsample_dict")
     name: str
-    sample_dict: dict
-
-    class Config:
-        extra = Extra.allow
+    sample_dict: dict = Field(alias="_sample_dict")
