@@ -22,6 +22,7 @@ from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
 
 from .routers.models import AnnotationModel, NamespaceList, Namespace
+from .routers.models import ForkRequest
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -32,7 +33,6 @@ from .const import (
     DEFAULT_QDRANT_PORT,
     DEFAULT_HF_MODEL,
     JWT_EXPIRATION,
-    JWT_EXPIRATION_SECONDS,
     JWT_SECRET,
 )
 
@@ -328,9 +328,10 @@ def verify_user_can_write_project(
 
 
 def verify_user_can_fork(
-    fork_namespace: Annotated[str, Form()] = Form(),
+    fork_request: ForkRequest,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
 ) -> bool:
+    fork_namespace = fork_request.fork_to
     if fork_namespace in (namespace_access_list or []):
         yield
     else:

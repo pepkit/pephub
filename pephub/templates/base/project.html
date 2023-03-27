@@ -34,11 +34,18 @@
               Download Zip
             </span>
           </li>
-          <li>
+          <li data-bs-toggle="modal" data-bs-target="#forkPEP">
+            {% if logged_in %}
             <span class="dropdown-item">
               <img height="20" src="/static/img/github-branch.svg" />
               Fork
             </span>
+            {% else %}
+            <span class="dropdown-item disabled cursor-not-allowed">
+              <img height="20" src="/static/img/github-branch.svg" />
+              Fork
+            </span>
+            {% endif %}
           </li>
           {% if can_edit %}
           <li><hr class="dropdown-divider"></li>
@@ -105,7 +112,7 @@
           <thead>
               <th>View</th>
               {% for col in sample_table_columns %}
-                  <th>{{ col }}</th>
+                <th>{{ col }}</th>
               {% endfor %}
           </thead>
           <tbody class="small">
@@ -191,7 +198,65 @@
         </div>
       </div>
     </div>
-</div>
+    <!-- Fork PEP modal -->
+    <div class="modal" id="forkPEP" tabindex="-1" aria-labelledby="forkPEPModal" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="forkPEPModal">Create a Fork</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-4 border-bottom">
+              <p class="mb-3 lh-sm">
+                <i class="bi bi-info-circle"></i>
+                A fork is a copy of a Project. Forking a project allows you to freely experiment with changes without affecting the original PEP. 
+              </p>
+            </div>
+            <div class="mb-3 form-check form-switch">
+              <input value="true" name="is_private" class="form-check-input" type="checkbox" role="switch" id="blank-is-private-toggle"  />
+              <label class="form-check-label" for="flexSwitchCheckDefault">
+                <i class="bi bi-lock"></i>
+                Private
+              </label>
+            </div>
+            <span class="fs-4 d-flex align-items-center">
+              <select name="namespace" id="fork-namespace-select" class="form-select w-75" aria-label="Namespace selection" class="mb-1">
+                <option value="{{ session_info['login'] }}">{{ session_info['login'] }}</option>
+                {% for org in orgs %}
+                  <option value="{{org}}">{{org}}</option>
+                {% endfor %}
+              </select>
+              <span class="mx-1 mb-1">/</span>
+              <input 
+                id="fork-project-name" 
+                name="project-name" 
+                type="text" 
+                class="form-control" 
+                placeholder="project name" 
+                value="{{ project }}" 
+              />
+              <span class="mx-1 mb-1">:</span>
+              <input 
+                id="fork-tag" 
+                name="fork-tag" 
+                type="text" 
+                class="form-control" 
+                placeholder="default"
+                value="{{ tag }}"
+              />
+            </span>
+            <p class="mt-1 lh-sm text-muted" style="font-size: 0.9rem; "> By default, forks are named the same as their original project. You can customize the name to distinguish it further. </p>
+            <textarea id="fork-description" name="description" class="form-control mt-3" rows="3" placeholder="Describe your PEP."></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+            <button id="fork-submit-btn" onclick="submitFork()" type="button" class="btn btn-success">Fork</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- DataTabes-->
   <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
   <!--assign to table -->

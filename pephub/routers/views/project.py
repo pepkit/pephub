@@ -76,6 +76,7 @@ async def project_view(
             "last_update_date": project_annotation.last_update_date,
             "submission_date": project_annotation.submission_date,
             "digest": project_annotation.digest,
+            "orgs": user_orgs,
             "can_edit": user == namespace or namespace in user_orgs,
         },
     )
@@ -178,15 +179,13 @@ async def get_sample_view(
 async def deleted_pep(
     request: Request,
     session_info: dict = Depends(read_session_cookie),
-):
-    namespaces = session_info["orgs"] + [session_info["login"]]
+):  
     templ_vars = {"request": request}
     return templates.TemplateResponse(
         "successful_delete.html",
         dict(
             templ_vars,
             **ALL_VERSIONS,
-            namespaces=namespaces,
             session_info=session_info,
             logged_in=session_info is not None,
         ),
