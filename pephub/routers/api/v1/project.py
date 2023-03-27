@@ -331,7 +331,9 @@ async def fork_pep_to_namespace(
     fork_tag = fork_request.fork_tag
     proj.description = fork_request.fork_description or ""
     try:
-        agent.project.create(project=proj, namespace=fork_to, name=fork_name, tag=fork_tag or DEFAULT_TAG)
+        agent.project.create(
+            project=proj, namespace=fork_to, name=fork_name, tag=fork_tag or DEFAULT_TAG
+        )
     except ProjectUniqueNameError as e:
         return JSONResponse(
             content={
