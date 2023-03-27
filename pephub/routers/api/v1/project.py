@@ -40,9 +40,7 @@ async def get_a_pep(
         try:
             raw_project = ProjectRawModel(**proj.to_dict(extended=True))
         except Exception:
-            raise HTTPException(
-                500, f"Unexpected project error!"
-            )
+            raise HTTPException(500, f"Unexpected project error!")
         return raw_project.dict(by_alias=False)
 
     samples = [s.to_dict() for s in proj.samples]
@@ -317,10 +315,11 @@ async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     return zip_pep(proj)
 
 
-@project.post("/forks",
-              summary="Fork project to user namespace.",
-              dependencies=[Depends(verify_user_can_fork)]
-              )
+@project.post(
+    "/forks",
+    summary="Fork project to user namespace.",
+    dependencies=[Depends(verify_user_can_fork)],
+)
 async def fork_pep_to_namespace(
     fork_request: ForkRequest,
     proj: peppy.Project = Depends(get_project),

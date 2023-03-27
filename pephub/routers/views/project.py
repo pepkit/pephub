@@ -179,7 +179,7 @@ async def get_sample_view(
 async def deleted_pep(
     request: Request,
     session_info: dict = Depends(read_session_cookie),
-):  
+):
     templ_vars = {"request": request}
     return templates.TemplateResponse(
         "successful_delete.html",
