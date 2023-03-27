@@ -37,12 +37,14 @@ async def get_a_pep(
     Fetch a PEP from a certain namespace
     """
     if raw:
-        raw_project = proj.to_dict(extended=True)
         try:
-            raw_project = ProjectRawModel(**raw_project)
-        except Exception as err:
-            raise HTTPException(500, f"Unexpected project error: {err}")
-        return raw_project
+            raw_project = ProjectRawModel(**proj.to_dict(extended=True))
+        except Exception:
+            raise HTTPException(
+                500, f"Unexpected project error!"
+            )
+        return raw_project.dict(by_alias=False)
+
     samples = [s.to_dict() for s in proj.samples]
     sample_table_index = proj.sample_table_index
 
@@ -247,9 +249,6 @@ async def get_pep_samples(
 
 @project.get("/samples/{sample_name}")
 async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
-    # check that the sample exists
-    # by mapping the list of sample objects
-    # to a list of sample names
     if sample_name not in get_project_sample_names(proj):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     sample = proj.get_sample(sample_name)
@@ -318,11 +317,10 @@ async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     return zip_pep(proj)
 
 
-@project.post(
-    "/forks",
-    summary="Fork project to user namespace.",
-    dependencies=[Depends(verify_user_can_fork)],
-)
+@project.post("/forks",
+              summary="Fork project to user namespace.",
+              dependencies=[Depends(verify_user_can_fork)]
+              )
 async def fork_pep_to_namespace(
     project: str,
     fork_namespace: Annotated[str, Form()] = Form(),
@@ -331,9 +329,7 @@ async def fork_pep_to_namespace(
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     try:
-        agent.project.create(
-            project=proj, namespace=fork_namespace, name=project, tag=tag
-        )
+        agent.project.create(project=proj, namespace=fork_namespace, name=project, tag=tag)
     except ProjectUniqueNameError as e:
         return JSONResponse(
             content={
