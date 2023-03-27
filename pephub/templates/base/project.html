@@ -16,27 +16,46 @@
           <span class="border ms-2 badge rounded-pill border-danger text-danger">Private</span>
         {% endif %}
       </div>
-      <div>
-        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#apiEndpoints">
-          <i class="bi bi-hdd-rack"></i>
-          API Endpoints
+      <!-- Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-outline-dark dropdown-toggle" type="button" id="projectActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          Actions
         </button>
-        <button onclick="downloadZip()" type="button" class="btn btn-outline-success" >
-          <i class="bi bi-file-earmark-zip"></i>
-          Download Zip
-        </button>
-        {% if can_edit %}
-          <a href="/{{ namespace }}/{{ project }}/edit?tag={{tag}}">
-            <button id="edit-pep-btn" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPEP">
+        <ul class="dropdown-menu cursor-pointer" aria-labelledby="projectActionsDropdown">
+          <li data-bs-toggle="modal" data-bs-target="#apiEndpoints">
+            <span class="dropdown-item">
+              <i class="bi bi-hdd-rack"></i>
+              API Endpoints
+            </span>
+          </li>
+          <li onclick="downloadZip()">
+            <span class="dropdown-item">
+              <i class="bi bi-file-earmark-zip"></i>
+              Download Zip
+            </span>
+          </li>
+          <li>
+            <span class="dropdown-item">
+              <img height="20" src="/static/img/github-branch.svg" />
+              Fork
+            </span>
+          </li>
+          {% if can_edit %}
+          <li><hr class="dropdown-divider"></li>
+          <li data-bs-toggle="modal" data-bs-target="#editPEP">
+            <a class="dropdown-item" href="/{{ namespace }}/{{ project }}/edit?tag={{tag}}">
               <i class="bi bi-pencil"></i>
               Edit
-            </button>
-          </a>
-          <button id="delete-pep-btn" class="btn btn-outline-danger" onclick="setDeleteFormInputPlaceholder('{{ namespace }}/{{project}}:{{tag}}')" data-bs-toggle="modal" data-bs-target="#deletePEP">
-            <i class="bi bi-trash3"></i>
-            Delete
-          </button>
+            </a>
+          </li>
+          <li data-bs-toggle="modal" data-bs-target="#deletePEP">
+            <span class="dropdown-item text-danger" onclick="setDeleteFormInputPlaceholder('{{ namespace }}/{{project}}:{{tag}}')">
+              <i class="bi bi-trash3"></i>
+              Delete
+            </span>
+          </li>
         {% endif %}
+        </ul>
       </div>
     </div>
     <div class="text-secondary mb-3 d-flex flex-row align-items-center">
