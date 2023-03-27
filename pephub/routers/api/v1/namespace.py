@@ -80,7 +80,7 @@ async def get_namespace_projects(
 # * github: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user
 # * spotify: https://developer.spotify.com/documentation/web-api/reference-beta/#endpoint-create-playlist
 @namespace.post(
-    "/projects",
+    "/projects/files",
     summary="Create a PEP in the current namespace",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
@@ -190,7 +190,7 @@ async def create_pep(
 
 
 @namespace.post(
-    "/upload_raw",
+    "/projects/json",
     summary="Upload raw project to database.",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
