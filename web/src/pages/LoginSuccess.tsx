@@ -8,20 +8,22 @@ export const LoginSuccessPage: FC = () => {
   const navigate = useNavigate();
   const { setJWT } = useSession();
   const [searchParams, _] = useSearchParams();
+  let authCode = searchParams.get('code');
 
   useEffect(() => {
-    let authCode = searchParams.get('auth');
+    debugger;
     if (authCode) {
       exchangeCodeForToken(authCode)
         .then((res) => res.data)
         .then((data) => {
           setJWT(data.token);
+          navigate('/');
         })
         .finally(() => {
           navigate('/');
         });
     }
-  }, [searchParams]);
+  }, [authCode, navigate, setJWT]);
 
   return (
     <>

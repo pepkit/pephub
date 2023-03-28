@@ -74,7 +74,7 @@ app.include_router(auth_router)
 
 # mount ui
 app.add_middleware(SPA)
-app.mount("/", StaticFiles(directory=SPA_PATH, html=True), name="spa")
+# app.mount("/", StaticFiles(directory=SPA_PATH, html=True), name="spa")
 
 
 def main():

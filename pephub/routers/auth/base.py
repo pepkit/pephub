@@ -58,7 +58,7 @@ def login(client_redirect_uri: Union[str, None] = None):
     )
 
 
-@auth.get("/callback", response_class=RedirectResponse)
+@auth.get("/callback")
 def callback(
     background_tasks: BackgroundTasks,
     code: Union[str, None] = None,
@@ -128,7 +128,7 @@ def callback(
         send_to = client_redirect_uri + f"?code={auth_code}"
     else:
         send_to = f"/auth/login/success?code={auth_code}"
-    return send_to
+    return RedirectResponse(url=send_to, status_code=302)
 
 
 @auth.get("/login/success")

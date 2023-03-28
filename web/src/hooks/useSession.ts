@@ -1,13 +1,12 @@
 import jwt_decode from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { buildClientRedirectUrl } from '../api/auth';
 
 const AUTH_BASE = import.meta.env.VITE_AUTH_BASE;
+const SESSION_COOKIE_NAME = import.meta.env.VITE_SESSION_COOKIE_NAME;
 
 export const useSession = () => {
-  const navigate = useNavigate();
-  const [cookies, setCookie, removeCookie] = useCookies(['session']);
+  const [cookies, setCookie, removeCookie] = useCookies([SESSION_COOKIE_NAME]);
   let decoded = null;
 
   const login = () => {
@@ -17,20 +16,20 @@ export const useSession = () => {
   };
 
   const logout = () => {
-    removeCookie('session');
+    removeCookie(SESSION_COOKIE_NAME);
   };
 
   const setJWT = (jwt: string, expires: number = 4320) => {
     // converts minutes to milliseconds
-    setCookie('session', jwt, { path: '/', expires: new Date(Date.now() + expires * 60 * 1000) });
+    setCookie(SESSION_COOKIE_NAME, jwt, { path: '/', expires: new Date(Date.now() + expires * 60 * 1000) });
   };
 
   // decode the session cookie
-  if (cookies.session) {
-    decoded = jwt_decode(cookies.session);
+  if (cookies[SESSION_COOKIE_NAME]) {
+    decoded = jwt_decode(cookies[SESSION_COOKIE_NAME]);
   }
   return {
-    jwt: cookies.session,
+    jwt: cookies[SESSION_COOKIE_NAME],
     user: decoded,
     login,
     logout,

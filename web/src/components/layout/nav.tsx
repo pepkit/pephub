@@ -3,7 +3,7 @@ import { useSession } from '../../hooks/useSession';
 
 // bootstrap nav bar
 export const Nav: FC = () => {
-  const { login } = useSession();
+  const { login, user, jwt, logout } = useSession();
   return (
     <nav
       className="py-2 mb-4 navbar navbar-expand-md border-bottom navbar-light"
@@ -84,9 +84,15 @@ export const Nav: FC = () => {
               </a>
             </li>
             <li className="mx-2 my-0 nav-item h5">
-              <button className="btn btn-dark" onClick={() => login()}>
-                <i className="fa fa-github"></i>Login
-              </button>
+              {user || jwt ? (
+                <button className="btn btn-outline-dark" onClick={() => logout()}>
+                  <i className="fa fa-github"></i>Logout
+                </button>
+              ) : (
+                <button className="btn btn-dark" onClick={() => login()}>
+                  <i className="fa fa-github"></i>Login
+                </button>
+              )}
             </li>
           </ul>
         </div>
