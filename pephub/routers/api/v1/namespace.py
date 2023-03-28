@@ -2,7 +2,7 @@ import tempfile
 import shutil
 
 import peppy
-from fastapi import APIRouter, File, UploadFile, Request, Depends, Form
+from fastapi import APIRouter, File, UploadFile, Request, Depends, Form, Body
 from fastapi.responses import JSONResponse
 from peppy import Project
 from pepdbagent.exceptions import ProjectUniqueNameError
@@ -11,6 +11,7 @@ from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ....const import DEFAULT_TAG, BLANK_PEP_CONFIG, BLANK_PEP_SAMPLE_TABLE
 from typing import Annotated
+from ...models import ProjectRawModel, ProjectJsonRequest
 
 from dotenv import load_dotenv
 
@@ -196,15 +197,18 @@ async def create_pep(
 )
 async def upload_raw_pep(
     namespace: str,
-    project_name: str = Form(...),
-    is_private: bool = Form(False),
-    tag: str = Form(DEFAULT_TAG),
-    pep_dict: Annotated[dict, Form()] = Form(),
-    description: Union[str, None] = Form(None),
+    project_from_json: ProjectJsonRequest,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     try:
-        p = peppy.Project().from_dict(pep_dict)
+        is_private = project_from_json.is_private
+        tag = project_from_json.tag
+        overwrite = project_from_json.overwrite
+
+        # This configurations needed due to Issue #124 Should be removed in the future
+        project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
+        p_project = peppy.Project().from_dict(project_dict.dict(by_alias=True))
+
     except Exception as e:
         return JSONResponse(
             content={
@@ -215,20 +219,19 @@ async def upload_raw_pep(
             status_code=417,
         )
     try:
-        p.name = project_name
-        p.description = description
         agent.project.create(
-            p,
+            p_project,
             namespace=namespace,
-            name=project_name,
+            name=p_project.name,
             tag=tag,
             is_private=is_private,
+            overwrite=overwrite,
         )
-    except ProjectUniqueNameError as e:
+    except ProjectUniqueNameError:
         return JSONResponse(
             content={
-                "message": f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
-                "error": f"{e}",
+                "message": f"Project '{namespace}/{p_project.name}:{tag}' already exists in namespace",
+                "error": f"Set overwrite=True to overwrite or update project.",
                 "status_code": 400,
             },
             status_code=400,
@@ -236,10 +239,9 @@ async def upload_raw_pep(
     return JSONResponse(
         content={
             "namespace": namespace,
-            "project_name": project_name,
-            "proj": p.to_dict(),
+            "project_name": p_project.name,
             "tag": tag,
-            "registry_path": f"{namespace}/{project_name}:{tag}",
+            "registry_path": f"{namespace}/{p_project.name}:{tag}",
         },
         status_code=202,
     )

@@ -1,6 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel
 from pepdbagent.models import *
+from pepdbagent.const import DEFAULT_TAG
 
 
 class ProjectOptional(UpdateItems):
@@ -59,3 +60,25 @@ class ProjectRawModel(BaseModel):
     subsample_dict: Optional[dict] = Field(alias="_subsample_dict")
     name: str
     sample_dict: dict = Field(alias="_sample_dict")
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class ProjectRawRequest(BaseModel):
+    description: Optional[str] = ""
+    config: dict
+    subsample_dict: Optional[dict]
+    name: str
+    sample_dict: dict
+
+    class Config:
+        allow_population_by_field_name = True
+        extra = Extra.allow
+
+
+class ProjectJsonRequest(BaseModel):
+    pep_dict: ProjectRawRequest
+    is_private: bool = False
+    tag: str = DEFAULT_TAG
+    overwrite: bool = False
