@@ -1,6 +1,6 @@
-import { User, ProjectAnnotation } from '../../types';
+import { User, ProjectAnnotation, Project } from '../../types';
 
-export const canEdit = (user: User | null, ProjectAnnotation: ProjectAnnotation) => {
+export const canEdit = (user: User | null, ProjectAnnotation: ProjectAnnotation | Project) => {
   if (!user) {
     return false;
   }

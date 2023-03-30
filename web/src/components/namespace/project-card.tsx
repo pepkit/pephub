@@ -17,7 +17,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
     >
       <div className="d-flex flex-row align-items-start justify-content-between">
         <div className="d-flex flex-row align-items-center">
-          <a className="fw-bold fs-4" href="/{{namespace}}/{{proj.name}}?tag={{proj.tag}}">
+          <a className="fw-bold fs-4" href={`${project.namespace}/${project.name}?tag=${project.tag}`}>
             {project.namespace}/{project.name}:{project.tag}
           </a>
           {project.is_private ? (
@@ -33,6 +33,11 @@ export const ProjectCard: FC<Props> = ({ project }) => {
               </button>
               <Dropdown.Toggle split size="sm" variant="outline-primary" id="dropdown-split-basic" />
               <Dropdown.Menu>
+                <li>
+                  <a className="dropdown-item" href={`/${project.namespace}/${project.name}?tag=${project.tag}`}>
+                    View
+                  </a>
+                </li>
                 {canEdit(user, project) ? (
                   <>
                     <li>
@@ -43,15 +48,6 @@ export const ProjectCard: FC<Props> = ({ project }) => {
                         Edit
                       </a>
                     </li>
-                  </>
-                ) : null}
-                <li>
-                  <a className="dropdown-item" href={`/${project.namespace}/${project.name}?tag=${project.tag}`}>
-                    View
-                  </a>
-                </li>
-                {canEdit(user, project) ? (
-                  <>
                     <li>
                       <hr className="dropdown-divider" />
                     </li>

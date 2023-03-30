@@ -27,8 +27,7 @@ const BlankProjectForm = () => {
     reset: resetForm,
     register,
     handleSubmit,
-    watch,
-    formState: { errors, isValid },
+    formState: { isValid },
   } = useForm<BlankProjectInputs>();
   const onSubmit: SubmitHandler<BlankProjectInputs> = (data) => alert(JSON.stringify(data, null, 2));
 

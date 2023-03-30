@@ -8,6 +8,7 @@ import { NamespaceInfoPlaceholder } from '../components/placeholders/namespace-i
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
 import { ProjectCard } from '../components/namespace/project-card';
 import { AddPEPModal } from '../components/modals/add-pep';
+import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 
 // data fetchers
 const namespaceFetcher = (namespace: string, jwt: string | null) => getNamespaceInfo(namespace, jwt);
@@ -30,6 +31,7 @@ export const NamespacePage: FC = () => {
 
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
+  const [showEndpointsModal, setShowEndpointsModal] = useState(false);
 
   return (
     <PageLayout title={namespace}>
@@ -38,7 +40,7 @@ export const NamespacePage: FC = () => {
           {namespace}
         </h1>
         <div>
-          <button className="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#apiEndpoints">
+          <button onClick={() => setShowEndpointsModal(true)} className="btn btn-outline-primary me-1">
             <i className="bi bi-hdd-rack"></i>
             API Endpoints
           </button>
@@ -79,6 +81,11 @@ export const NamespacePage: FC = () => {
         )}
       </div>
       <AddPEPModal show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
+      <NamespaceAPIEndpointsModal
+        namespace={namespace || ''}
+        show={showEndpointsModal}
+        onHide={() => setShowEndpointsModal(false)}
+      />
     </PageLayout>
   );
 };
