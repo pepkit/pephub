@@ -231,10 +231,10 @@ async def upload_raw_pep(
         return JSONResponse(
             content={
                 "message": f"Project '{namespace}/{p_project.name}:{tag}' already exists in namespace",
-                "error": f"Set overwrite=True to overwrite or update project.",
-                "status_code": 400,
+                "error": f"Set overwrite=True to overwrite or update project",
+                "status_code": 409,
             },
-            status_code=400,
+            status_code=409,
         )
     return JSONResponse(
         content={
