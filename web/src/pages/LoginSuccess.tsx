@@ -11,7 +11,6 @@ export const LoginSuccessPage: FC = () => {
   let authCode = searchParams.get('code');
 
   useEffect(() => {
-    debugger;
     if (authCode) {
       exchangeCodeForToken(authCode)
         .then((res) => res.data)
