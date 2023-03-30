@@ -1,7 +1,8 @@
 import tempfile
 import shutil
 
-from fastapi import APIRouter, File, UploadFile, Request, Depends, Form
+import peppy
+from fastapi import APIRouter, File, UploadFile, Request, Depends, Form, Body
 from fastapi.responses import JSONResponse
 from peppy import Project
 from pepdbagent.exceptions import ProjectUniqueNameError
@@ -9,6 +10,8 @@ from pepdbagent.exceptions import ProjectUniqueNameError
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ....const import DEFAULT_TAG, BLANK_PEP_CONFIG, BLANK_PEP_SAMPLE_TABLE
+from typing import Annotated
+from ...models import ProjectRawModel, ProjectJsonRequest
 
 from dotenv import load_dotenv
 
@@ -78,7 +81,7 @@ async def get_namespace_projects(
 # * github: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user
 # * spotify: https://developer.spotify.com/documentation/web-api/reference-beta/#endpoint-create-playlist
 @namespace.post(
-    "/projects",
+    "/projects/files",
     summary="Create a PEP in the current namespace",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
@@ -185,3 +188,60 @@ async def create_pep(
                 },
                 status_code=202,
             )
+
+
+@namespace.post(
+    "/projects/json",
+    summary="Upload raw project to database.",
+    dependencies=[Depends(verify_user_can_write_namespace)],
+)
+async def upload_raw_pep(
+    namespace: str,
+    project_from_json: ProjectJsonRequest,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    try:
+        is_private = project_from_json.is_private
+        tag = project_from_json.tag
+        overwrite = project_from_json.overwrite
+
+        # This configurations needed due to Issue #124 Should be removed in the future
+        project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
+        p_project = peppy.Project().from_dict(project_dict.dict(by_alias=True))
+
+    except Exception as e:
+        return JSONResponse(
+            content={
+                "message": f"Incorrect raw project was provided. Couldn't initiate peppy object.",
+                "error": f"{e}",
+                "status_code": 417,
+            },
+            status_code=417,
+        )
+    try:
+        agent.project.create(
+            p_project,
+            namespace=namespace,
+            name=p_project.name,
+            tag=tag,
+            is_private=is_private,
+            overwrite=overwrite,
+        )
+    except ProjectUniqueNameError:
+        return JSONResponse(
+            content={
+                "message": f"Project '{namespace}/{p_project.name}:{tag}' already exists in namespace",
+                "error": f"Set overwrite=True to overwrite or update project",
+                "status_code": 409,
+            },
+            status_code=409,
+        )
+    return JSONResponse(
+        content={
+            "namespace": namespace,
+            "project_name": p_project.name,
+            "tag": tag,
+            "registry_path": f"{namespace}/{p_project.name}:{tag}",
+        },
+        status_code=202,
+    )

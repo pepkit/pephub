@@ -90,7 +90,7 @@ const deleteProject = () => {
     // reset UI elements
     deleteButton.textContent = "Delete"
     deleteNameInput.value = ""
-    window.location.href = `/${projectName}/${namespace}/deleted?project=${projectName}&namespace=${namespace}`
+    window.location.href = `/${namespace}`
     modal.hide()
   })
 }
@@ -118,4 +118,54 @@ const copyDigestToClipboard = (digest) => {
     copyIcon.classList.remove("bi-clipboard-check")
     copyIcon.classList.add("bi-clipboard")
   }, 2000)
+}
+
+const submitFork = () => {
+  // get params for project we are forking
+  const [namespaceOfFork, projectAndTag] = document.getElementById("registry-header").innerText.split("/")
+  const [projectToFork, tagToFork] = projectAndTag.split(":")
+
+  // get params for new project
+  const forkNamespace = document.getElementById("fork-namespace-select").value
+  const forkProjectName = document.getElementById("fork-project-name").value
+  const forkTag = document.getElementById("fork-tag").value
+  const forkDescription = document.getElementById("fork-description").value
+
+  // submit btn for UX
+  const submitBtn = document.getElementById("fork-submit-btn")
+  submitBtn.disabled = true
+  submitBtn.textContent = "Forking..."
+
+  // make fork request
+  fetch(`/api/v1/projects/${namespaceOfFork}/${projectToFork}/forks?tag=${tagToFork}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getCookie("pephub_session")}`
+    },
+    body: JSON.stringify({
+      fork_to: forkNamespace,
+      fork_name: forkProjectName,
+      fork_tag: forkTag,
+      fork_description: forkDescription
+    })
+  })
+  .then(res => {
+    if(res.ok) {
+      return res.json()
+    } else {
+      throw res
+    }
+  })
+  .then(() => {
+    window.location.href = `/${forkNamespace}/${forkProjectName}?tag=${forkTag}`
+  })
+  .catch(err => {
+    console.log(err)
+    alert(JSON.stringify(err.json, null, 2))
+  })
+  .finally(() => {
+    submitBtn.disabled = false
+    submitBtn.textContent = "Fork"
+  })
 }

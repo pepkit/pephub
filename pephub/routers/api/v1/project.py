@@ -3,17 +3,18 @@ import peppy
 import yaml
 import pandas as pd
 from io import StringIO
-from typing import Callable
-from fastapi import APIRouter, Depends
+from typing import Callable, Annotated
+from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
 
-from ...models import ProjectOptional, AnnotationModel
+from ...models import ProjectOptional, ProjectRawModel, ForkRequest
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import *
 from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS, ALL_VERSIONS
 
+from pepdbagent.exceptions import ProjectUniqueNameError
 
 from dotenv import load_dotenv
 
@@ -30,10 +31,17 @@ project = APIRouter(
 async def get_a_pep(
     proj: peppy.Project = Depends(get_project),
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
+    raw: bool = False,
 ):
     """
     Fetch a PEP from a certain namespace
     """
+    if raw:
+        try:
+            raw_project = ProjectRawModel(**proj.to_dict(extended=True))
+        except Exception:
+            raise HTTPException(500, f"Unexpected project error!")
+        return raw_project.dict(by_alias=False)
 
     samples = [s.to_dict() for s in proj.samples]
     sample_table_index = proj.sample_table_index
@@ -239,9 +247,6 @@ async def get_pep_samples(
 
 @project.get("/samples/{sample_name}")
 async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
-    # check that the sample exists
-    # by mapping the list of sample objects
-    # to a list of sample names
     if sample_name not in get_project_sample_names(proj):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     sample = proj.get_sample(sample_name)
@@ -308,3 +313,42 @@ async def convert_pep(
 async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     """Zip a pep"""
     return zip_pep(proj)
+
+
+@project.post(
+    "/forks",
+    summary="Fork project to user namespace.",
+    dependencies=[Depends(verify_user_can_fork)],
+)
+async def fork_pep_to_namespace(
+    fork_request: ForkRequest,
+    proj: peppy.Project = Depends(get_project),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    fork_to = fork_request.fork_to
+    fork_name = fork_request.fork_name
+    fork_tag = fork_request.fork_tag
+    proj.description = fork_request.fork_description or ""
+    try:
+        agent.project.create(
+            project=proj, namespace=fork_to, name=fork_name, tag=fork_tag or DEFAULT_TAG
+        )
+    except ProjectUniqueNameError as e:
+        return JSONResponse(
+            content={
+                "message": f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",
+                "error": f"{e}",
+                "status_code": 400,
+            },
+            status_code=400,
+        )
+
+    return JSONResponse(
+        content={
+            "namespace": fork_to,
+            "project_name": fork_name,
+            "tag": fork_tag,
+            "registry_path": f"{fork_to}/{fork_name}:{fork_tag}",
+        },
+        status_code=202,
+    )

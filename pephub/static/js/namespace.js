@@ -231,7 +231,7 @@ const submitNewProject = (event) => {
   submitButton.textContent = "Submitting..."
 
   // submit 
-  fetch(`/api/v1/namespaces/${namespace}/projects`, {
+  fetch(`/api/v1/namespaces/${namespace}/projects/projects`, {
     method: form.method,
     body: formData,
     headers: {
@@ -312,7 +312,7 @@ const submitBlankProject = (event) => {
   submitButton.textContent = "Submitting..."
 
   // submit 
-  fetch(`/api/v1/namespaces/${namespace}/projects`, {
+  fetch(`/api/v1/namespaces/${namespace}/projects/json`, {
     method: form.method,
     body: formData,
     headers: {
