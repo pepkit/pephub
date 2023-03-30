@@ -1,7 +1,9 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useRef, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { useDropzone } from 'react-dropzone';
 import { Modal, Tab, Tabs } from 'react-bootstrap';
 import { useSession } from '../../hooks/useSession';
+import { popFileFromFileList } from '../../utils/dragndrop';
 
 interface Props {
   show: boolean;
@@ -109,33 +111,30 @@ const PEPUploadForm = () => {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isValid },
+    setValue,
+    formState: { isValid },
   } = useForm<FromFileInputs>();
 
+  const uploadFiles = watch('files');
+
+  // dnd stuff
+  const onDrop = useCallback((files: File[]) => {
+    // assign files to input value
+    const fileList = new DataTransfer();
+    for (let i = 0; i < files.length; i++) {
+      fileList.items.add(files[i]);
+    }
+    setValue('files', fileList.files);
+  }, []);
+
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const { ref: dropzoneInputRef, ...dropzoneProps } = getRootProps();
+
   // ref to file input element
+  const fileInput = useRef<HTMLInputElement | null>(dropzoneInputRef);
   const { ref: fileInputFormRef, ...fileInputProps } = register('files', { required: true });
-  const fileInput = useRef<HTMLInputElement | null>(null);
 
   const onSubmit: SubmitHandler<FromFileInputs> = (data) => alert(JSON.stringify(data, null, 2));
-
-  // functions for DnD
-  const allowDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const [dndBoxClass, setDndBoxClass] = useState(
-    'p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3',
-  );
-
-  const onMouseEnterDndBox = () => {
-    setDndBoxClass(
-      'p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3 bg-light',
-    );
-  };
-
-  const onMouseLeaveDndBox = () => {
-    setDndBoxClass('p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3');
-  };
 
   return (
     <form id="new-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>
@@ -184,43 +183,63 @@ const PEPUploadForm = () => {
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
-      <div
-        id="dnd-box"
-        draggable
-        onDragOver={(e) => {
-          onMouseEnterDndBox();
-          allowDrop(e);
-        }}
-        onClick={() => fileInput.current?.click()}
-        onMouseEnter={onMouseEnterDndBox}
-        onMouseLeave={onMouseLeaveDndBox}
-        className={dndBoxClass}
-        style={{ borderStyle: 'dashed !important' }}
-      >
-        <div className="flex-row d-flex align-items-center">
-          <i className="bi bi-cloud-arrow-up"></i>
-          <span className="text-secondary ms-2">Drag files here</span>
+      {uploadFiles ? (
+        <div
+          id="file-list-container"
+          className="dashed-border p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3"
+        >
+          <div className="d-flex flex-column align-items-center">
+            {Array.from(uploadFiles).map((file, i) => (
+              <div className="d-flex flex-row align-items-center">
+                <span key={file.name} className="mt-1 me-2">
+                  {file.name}
+                </span>
+                <button
+                  onClick={() => popFileFromFileList(uploadFiles, i, setValue)}
+                  className="btn btn-sm py-0 px-1 btn-outline-danger "
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              </div>
+            ))}
+            <div className="mt-3">
+              <button
+                onClick={() => fileInput.current?.click()}
+                type="button"
+                className="btn btn-sm btn-outline-dark me-1"
+              >
+                <i className="bi bi-archive me-1"></i>
+                Browse
+              </button>
+              <button
+                onClick={() => resetForm({ files: undefined })}
+                type="button"
+                className="btn btn-sm btn-outline-dark me-1"
+              >
+                <i className="bi bi-x me-1"></i>
+                Clear
+              </button>
+            </div>
+          </div>
         </div>
-        <span className="my-1 text-secondary">or</span>
-        <span className="text-secondary">click to browse</span>
-      </div>
-      <div
-        id="file-list-container"
-        style={{ borderStyle: 'dashed !important' }}
-        className="p-5 mt-3 border d-none d-flex flex-column align-items-center justify-content-center rounded-3"
-      >
-        <div id="file-list"></div>
-        <div className="mt-3">
-          <button type="button" className="btn btn-sm btn-outline-dark">
-            <i className="bi bi-archive"></i>
-            Browse
-          </button>
-          <button type="button" className="btn btn-sm btn-outline-dark">
-            <i className="bi bi-x"></i>
-            Clear
-          </button>
+      ) : (
+        <div
+          {...dropzoneProps}
+          id="dnd-box"
+          onClick={() => {
+            fileInput.current?.click();
+          }}
+          className="dnd-box p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3"
+        >
+          <div className="flex-row d-flex align-items-center">
+            <i className="bi bi-cloud-arrow-up"></i>
+            <span className="text-secondary ms-2">Drag files here</span>
+          </div>
+          <span className="my-1 text-secondary">or</span>
+          <span className="text-secondary">click to browse</span>
         </div>
-      </div>
+      )}
+      {/* hidden file input */}
       <input
         ref={(e) => {
           fileInputFormRef(e);
@@ -231,9 +250,10 @@ const PEPUploadForm = () => {
         type="file"
         id="files"
         {...fileInputProps}
+        {...getInputProps()}
       />
       <div className="mt-2">
-        <button id="new-project-submit-btn" className="btn btn-success me-1">
+        <button disabled={!isValid} type="submit" id="new-project-submit-btn" className="btn btn-success me-1">
           <i className="bi bi-plus-circle"></i>
           Add
         </button>
