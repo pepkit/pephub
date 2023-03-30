@@ -68,7 +68,7 @@ class ProjectRawModel(BaseModel):
 class ProjectRawRequest(BaseModel):
     description: Optional[str] = ""
     config: dict
-    subsample_dict: Optional[dict]
+    subsample_dict: Optional[list]
     name: str
     sample_dict: dict
 
