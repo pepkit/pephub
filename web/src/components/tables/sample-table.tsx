@@ -5,16 +5,17 @@ import { addClassesToRows } from './hooks-callbacks';
 interface Props {
   headers: string[];
   rows: any[][];
+  readOnly?: boolean;
 }
 
-export const SampleTable: FC<Props> = ({ headers, rows }) => {
+export const SampleTable: FC<Props> = ({ headers, rows, readOnly = false }) => {
   return (
     <div className="rounded rounded-2">
       <HotTable
         data={rows}
         stretchH="all"
         height={700}
-        readOnly
+        readOnly={readOnly}
         colHeaders={headers}
         dropdownMenu={true}
         hiddenColumns={{

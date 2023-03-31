@@ -55,3 +55,14 @@ export const deleteProject = (namespace: string, projectName: string, tag: strin
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
   return axios.delete<DeleteProjectResponse>(url, { headers: { Authorization: `Bearer ${token}` } });
 };
+
+export const editProjectMetadata = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null,
+  metadata: { [key: string]: any },
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
+  return axios.patch(url, metadata, { headers: { Authorization: `Bearer ${token}` } });
+};

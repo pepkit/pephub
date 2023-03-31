@@ -2,6 +2,9 @@ import { FC } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Modal } from 'react-bootstrap';
 import { useSession } from '../../hooks/useSession';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 interface Props {
   namespace: string;
@@ -21,12 +24,14 @@ interface ForkProjectInputs {
 
 export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide }) => {
   const { user } = useSession();
+  const navigate = useNavigate();
 
   // form stuff
   const {
     reset: resetForm,
     register,
     handleSubmit,
+    watch,
     formState: { isValid },
   } = useForm<ForkProjectInputs>({
     defaultValues: {
@@ -35,6 +40,25 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
       tag: tag || 'default',
     },
   });
+
+  const projectName = watch('project');
+  const projectNamespace = watch('namespace');
+  const projectTag = watch('tag');
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: () => handleSubmit(onSubmit)(),
+    onSuccess: () => {
+      toast.success('Project forked!');
+      queryClient.invalidateQueries([projectNamespace]);
+      navigate(`/${projectNamespace}/${projectName}?tag=${projectTag}`);
+    },
+    onError: (error) => {
+      toast.error(`An error occurred: ${error}`);
+    },
+  });
+
   const onSubmit: SubmitHandler<ForkProjectInputs> = (data) => alert(JSON.stringify(data, null, 2));
 
   return (
@@ -43,7 +67,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
         <h1 className="modal-title fs-5">Fork PEP</h1>
       </Modal.Header>
       <Modal.Body>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form>
           <div className="mb-4 border-bottom">
             <p className="mb-3 lh-sm">
               <i className="bi bi-info-circle me-1"></i>A fork is a copy of a Project. Forking a project allows you to
@@ -114,7 +138,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
           Cancel
         </button>
         <button
-          onClick={handleSubmit(onSubmit)}
+          onClick={() => mutation.mutate()}
           disabled={!isValid}
           id="fork-submit-btn"
           type="submit"

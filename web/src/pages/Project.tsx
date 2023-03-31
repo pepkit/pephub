@@ -169,7 +169,7 @@ export const ProjectPage: FC = () => {
           </>
         )}
       </div>
-      <Tabs defaultActiveKey="config">
+      <Tabs transition={false} defaultActiveKey="config">
         <Tab eventKey="config" title="Config">
           <div className="rounded-bottom border border-top-0  p-1 shadow-sm" style={{ minHeight: '50vh' }}>
             <ProjectConfigEditor readOnly={true} value={projectConfig || 'Loading.'} />
