@@ -2,17 +2,19 @@ import { FC, useState } from 'react';
 import useSWR, { Fetcher } from 'swr';
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '../components/layout/page-layout';
-import { getNamespaceInfo, getNamespaceProjects, NamespaceProjectsResponse, NamespaceResponse } from '../api/namespace';
+import { getNamespaceInfo, getNamespaceProjects, PaginationParams } from '../api/namespace';
 import { useSession } from '../hooks/useSession';
 import { NamespaceInfoPlaceholder } from '../components/placeholders/namespace-info';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
 import { ProjectCard } from '../components/namespace/project-card';
 import { AddPEPModal } from '../components/modals/add-pep';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
+import { useDebounce } from '../hooks/useDebounce';
 
 // data fetchers
 const namespaceFetcher = (namespace: string, jwt: string | null) => getNamespaceInfo(namespace, jwt);
-const projectsFetcher = (namespace: string, jwt: string | null) => getNamespaceProjects(namespace, jwt);
+const projectsFetcher = (namespace: string, jwt: string | null, params: PaginationParams) =>
+  getNamespaceProjects(namespace, jwt, params);
 
 export const NamespacePage: FC = () => {
   // get namespace from url
@@ -21,12 +23,25 @@ export const NamespacePage: FC = () => {
   // get session info
   const { user, jwt } = useSession();
 
+  // pagination
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
+  const [search, setSearch] = useState('');
+
+  const searchDebounced = useDebounce<string>(search, 500);
+
   // data fetching
   const { data: namespaceInfo, isLoading: namespaceInfoIsLoading } = useSWR([namespace, jwt], ([namespace, jwt]) =>
     namespaceFetcher(namespace || '', jwt),
   );
-  const { data: projects, isLoading: projectsIsLoading } = useSWR(namespace ? `${namespace}-projects` : null, () =>
-    projectsFetcher(namespace || '', jwt),
+  const { data: projects, isLoading: projectsIsLoading } = useSWR(
+    [namespace, jwt, { limit, offset, searchDebounced }],
+    () =>
+      projectsFetcher(namespace || '', jwt, {
+        limit,
+        offset,
+        search: searchDebounced,
+      }),
   );
 
   // state
@@ -41,7 +56,7 @@ export const NamespacePage: FC = () => {
         </h1>
         <div>
           <button onClick={() => setShowEndpointsModal(true)} className="btn btn-outline-primary me-1">
-            <i className="bi bi-hdd-rack"></i>
+            <i className="bi bi-hdd-rack me-1"></i>
             API Endpoints
           </button>
           {user?.login === namespace ? (
@@ -51,7 +66,7 @@ export const NamespacePage: FC = () => {
               data-bs-toggle="modal"
               data-bs-target="#newProject"
             >
-              <i className="bi bi-plus-circle"></i>
+              <i className="bi bi-plus-circle me-1"></i>
               Add PEP
             </button>
           ) : null}
@@ -72,6 +87,21 @@ export const NamespacePage: FC = () => {
       )}
       {/* Render projects  in namespace */}
       <div className="my-2 border-bottom border-secondary"></div>
+      <div className="flex-row d-flex align-items-center" style={{ position: 'relative' }}>
+        <div className="input-group">
+          <span id="search-bar-label" className="input-group-text">
+            Search
+          </span>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            id="search-bar"
+            type="text"
+            className="form-control"
+            placeholder={`Search for PEPs in ${namespace}`}
+          />
+        </div>
+      </div>
       <div className="my-2"></div>
       <div className="mt-3">
         {projectsIsLoading || projects === undefined ? (
@@ -79,6 +109,32 @@ export const NamespacePage: FC = () => {
         ) : (
           projects.items.map((project, i) => <ProjectCard key={i} project={project} />)
         )}
+        <>
+          {projects?.count && projects?.count > limit ? (
+            <div className="d-flex flex-row align-items-center justify-content-center mt-2">
+              <button className="btn btn-link" onClick={() => setOffset(offset - limit)} disabled={offset === 0}>
+                <i className="bi bi-chevron-left"></i>
+                Previous
+              </button>
+              <button
+                className="btn btn-link"
+                onClick={() => setOffset(offset + limit)}
+                disabled={offset + limit >= projects?.count}
+              >
+                Next
+                <i className="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          ) : null}
+        </>
+        {/* no projects exists */}
+        <div>
+          {projects?.items.length === 0 ? (
+            <div className="text-center">
+              <p className="text-muted">No projects found</p>
+            </div>
+          ) : null}
+        </div>
       </div>
       <AddPEPModal show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
       <NamespaceAPIEndpointsModal

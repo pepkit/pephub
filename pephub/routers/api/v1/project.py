@@ -50,7 +50,10 @@ async def get_a_pep(
 
     # default to name from annotation
     if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
-        del proj_dict["name"]
+        try:
+            del proj_dict["name"]
+        except KeyError:
+            pass
 
     return dict(
         **proj_dict,

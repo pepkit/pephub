@@ -9,6 +9,7 @@ import './globals.css';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
 import { LoginSuccessPage } from './pages/LoginSuccess';
+import { Toaster } from 'react-hot-toast';
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <HelmetProvider>
       <RouterProvider router={router} />
+      <Toaster position="top-right" reverseOrder={false} gutter={8} />
     </HelmetProvider>
   </React.StrictMode>,
 );

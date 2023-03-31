@@ -1,8 +1,9 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { ButtonGroup, Dropdown } from 'react-bootstrap';
 import { ProjectAnnotation } from '../../../types';
 import { useSession } from '../../hooks/useSession';
 import { canEdit } from '../../utils/permissions';
+import { DeletePEPModal } from '../modals/delete-pep';
 
 interface Props {
   project: ProjectAnnotation;
@@ -10,6 +11,10 @@ interface Props {
 
 export const ProjectCard: FC<Props> = ({ project }) => {
   const { user } = useSession();
+
+  // state
+  const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
+
   return (
     <div
       id={`project-card-${project.namespace}/${project.name}:${project.tag}`}
@@ -40,21 +45,14 @@ export const ProjectCard: FC<Props> = ({ project }) => {
                 </li>
                 {canEdit(user, project) ? (
                   <>
-                    <li>
-                      <a
-                        className="dropdown-item"
-                        href={`/${project.namespace}/${project.name}/edit?tag=${project.tag}`}
-                      >
-                        Edit
-                      </a>
-                    </li>
-                    <li>
-                      <hr className="dropdown-divider" />
-                    </li>
-                    <li className="text-danger dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePEP">
-                      <i className="bi bi-trash3"></i>
+                    <Dropdown.Item href={`/${project.namespace}/${project.name}/edit?tag=${project.tag}`}>
+                      Edit
+                    </Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={() => setShowDeletePEPModal(true)} className="text-danger dropdown-item">
+                      <i className="bi bi-trash3 me-1"></i>
                       Delete
-                    </li>
+                    </Dropdown.Item>
                   </>
                 ) : null}
               </Dropdown.Menu>
@@ -87,6 +85,13 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           </small>
         </div>
       </div>
+      <DeletePEPModal
+        show={showDeletePEPModal}
+        onHide={() => setShowDeletePEPModal(false)}
+        project={project.name}
+        namespace={project.namespace}
+        tag={project.tag}
+      />
     </div>
   );
 };

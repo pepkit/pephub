@@ -113,7 +113,13 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
         >
           Cancel
         </button>
-        <button disabled={!isValid} id="fork-submit-btn" type="submit" className="btn btn-success">
+        <button
+          onClick={handleSubmit(onSubmit)}
+          disabled={!isValid}
+          id="fork-submit-btn"
+          type="submit"
+          className="btn btn-success"
+        >
           Fork
         </button>
       </Modal.Footer>

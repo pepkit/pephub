@@ -42,7 +42,7 @@ export const ProjectPage: FC = () => {
         <>
           <a className="mb-3" href={`/${namespace}`}>
             <button className="btn btn-sm btn-outline-dark">
-              <i className="bi bi-arrow-bar-left"></i>
+              <i className="bi bi-arrow-bar-left me-1"></i>
               Back to namespace
             </button>
           </a>
@@ -147,6 +147,7 @@ export const ProjectPage: FC = () => {
         namespace={namespace || ''}
         project={project || ''}
         tag={tag}
+        redirect={`/${user?.login}`}
       />
       <ForkPEPModal
         show={showForkPEPModal}

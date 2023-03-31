@@ -29,6 +29,7 @@ const BlankProjectForm = () => {
     handleSubmit,
     formState: { isValid },
   } = useForm<BlankProjectInputs>();
+
   const onSubmit: SubmitHandler<BlankProjectInputs> = (data) => alert(JSON.stringify(data, null, 2));
 
   return (
@@ -79,8 +80,14 @@ const BlankProjectForm = () => {
         {...register('description')}
       ></textarea>
       <div className="mt-3">
-        <button disabled={!isValid} id="blank-project-submit-btn" className="btn btn-success me-1" type="submit">
-          <i className="bi bi-plus-circle"></i>
+        <button
+          disabled={!isValid}
+          id="blank-project-submit-btn"
+          className="btn btn-success me-1"
+          type="submit"
+          onClick={() => handleSubmit(onSubmit)}
+        >
+          <i className="bi bi-plus-circle me-1"></i>
           Add
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
@@ -253,7 +260,7 @@ const PEPUploadForm = () => {
       />
       <div className="mt-2">
         <button disabled={!isValid} type="submit" id="new-project-submit-btn" className="btn btn-success me-1">
-          <i className="bi bi-plus-circle"></i>
+          <i className="bi bi-plus-circle me-1"></i>
           Add
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
@@ -266,6 +273,7 @@ const PEPUploadForm = () => {
 
 export const AddPEPModal: FC<Props> = ({ show, onHide }) => {
   const { user } = useSession();
+
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
       <Modal.Header closeButton>
