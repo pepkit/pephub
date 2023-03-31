@@ -1,20 +1,17 @@
 import { FC, useState } from 'react';
-import useSWR, { Fetcher } from 'swr';
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '../components/layout/page-layout';
-import { getNamespaceInfo, getNamespaceProjects, PaginationParams } from '../api/namespace';
 import { useSession } from '../hooks/useSession';
 import { NamespaceInfoPlaceholder } from '../components/placeholders/namespace-info';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
-import { ProjectCard } from '../components/namespace/project-card';
+import { ProjectCard } from '../components/project/project-card';
 import { AddPEPModal } from '../components/modals/add-pep';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { useDebounce } from '../hooks/useDebounce';
-
-// data fetchers
-const namespaceFetcher = (namespace: string, jwt: string | null) => getNamespaceInfo(namespace, jwt);
-const projectsFetcher = (namespace: string, jwt: string | null, params: PaginationParams) =>
-  getNamespaceProjects(namespace, jwt, params);
+import { Pagination } from '../components/layout/pagination';
+import { NamespacePageSearchBar } from '../components/namespace/search-bar';
+import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
+import { useNamespaceInfo } from '../hooks/queries/useNamespaceInfo';
 
 export const NamespacePage: FC = () => {
   // get namespace from url
@@ -31,22 +28,33 @@ export const NamespacePage: FC = () => {
   const searchDebounced = useDebounce<string>(search, 500);
 
   // data fetching
-  const { data: namespaceInfo, isLoading: namespaceInfoIsLoading } = useSWR([namespace, jwt], ([namespace, jwt]) =>
-    namespaceFetcher(namespace || '', jwt),
-  );
-  const { data: projects, isLoading: projectsIsLoading } = useSWR(
-    [namespace, jwt, { limit, offset, searchDebounced }],
-    () =>
-      projectsFetcher(namespace || '', jwt, {
-        limit,
-        offset,
-        search: searchDebounced,
-      }),
-  );
+  const { data: namespaceInfo, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace, jwt);
+  const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, jwt, {
+    limit,
+    offset,
+    search: searchDebounced,
+  });
 
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
+
+  // fetcing error almost always means the namespace doesn't exist
+  if (error) {
+    return (
+      <PageLayout title={namespace}>
+        <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
+          <h1 className="fw-bold">Error 😫</h1>
+          <p className="text-muted fst-italic">An error occured fetching the namespace... Are you sure it exists?</p>
+          <div>
+            <a href="/">
+              <button className="btn btn-dark">Take me home</button>
+            </a>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout title={namespace}>
@@ -87,21 +95,13 @@ export const NamespacePage: FC = () => {
       )}
       {/* Render projects  in namespace */}
       <div className="my-2 border-bottom border-secondary"></div>
-      <div className="flex-row d-flex align-items-center" style={{ position: 'relative' }}>
-        <div className="input-group">
-          <span id="search-bar-label" className="input-group-text">
-            Search
-          </span>
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            id="search-bar"
-            type="text"
-            className="form-control"
-            placeholder={`Search for PEPs in ${namespace}`}
-          />
-        </div>
-      </div>
+      <NamespacePageSearchBar
+        namespace={namespace || ''}
+        search={search}
+        setSearch={setSearch}
+        limit={limit}
+        setLimit={setLimit}
+      />
       <div className="my-2"></div>
       <div className="mt-3">
         {projectsIsLoading || projects === undefined ? (
@@ -111,20 +111,7 @@ export const NamespacePage: FC = () => {
         )}
         <>
           {projects?.count && projects?.count > limit ? (
-            <div className="d-flex flex-row align-items-center justify-content-center mt-2">
-              <button className="btn btn-link" onClick={() => setOffset(offset - limit)} disabled={offset === 0}>
-                <i className="bi bi-chevron-left"></i>
-                Previous
-              </button>
-              <button
-                className="btn btn-link"
-                onClick={() => setOffset(offset + limit)}
-                disabled={offset + limit >= projects?.count}
-              >
-                Next
-                <i className="bi bi-chevron-right"></i>
-              </button>
-            </div>
+            <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
           ) : null}
         </>
         {/* no projects exists */}

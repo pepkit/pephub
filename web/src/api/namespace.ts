@@ -1,5 +1,4 @@
 import { ProjectAnnotation, Project } from '../../types';
-import { mutate } from 'swr';
 import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
@@ -31,6 +30,7 @@ export interface ProjectSubmissionResponse {
   init_file: string;
   tag: string;
   registry_path: string;
+  msg?: string;
 }
 
 export const getNamespaceInfo = (namespace: string, token: string | null = null) => {
@@ -71,13 +71,13 @@ export const getNamespaceProjects = (
 export const submitProject = (
   {
     namespace,
-    name,
+    project_name,
     tag,
     is_private,
     description,
   }: {
     namespace: string;
-    name: string;
+    project_name: string;
     tag?: string;
     is_private?: boolean;
     description?: string;
@@ -89,7 +89,7 @@ export const submitProject = (
     .post<ProjectSubmissionResponse>(
       url,
       {
-        project_name: name,
+        project_name: project_name,
         tag: tag || 'default',
         is_private: is_private || false,
         description: description || '',
@@ -97,11 +97,11 @@ export const submitProject = (
       {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
         },
       },
     )
     .then((res) => {
-      mutate(`${namespace}-projects`);
-      return res.data;
+      return res;
     });
 };

@@ -1,9 +1,7 @@
 import { FC } from 'react';
-import useSWR from 'swr';
-import { Fetcher } from 'swr';
-import { ApiBase, getApiBase } from '../../api/server';
 import { Nav } from './nav';
 import { SEO } from './seo';
+import { useApiBase } from '../../hooks/queries/useApiBase';
 
 interface Props {
   children: React.ReactNode;
@@ -12,10 +10,20 @@ interface Props {
   image?: string;
 }
 
-const apibaseFetcher: Fetcher<ApiBase> = () => getApiBase();
-
 export const PageLayout: FC<Props> = ({ children, title, description, image }) => {
-  const { data } = useSWR('apibase', apibaseFetcher);
+  const { data } = useApiBase();
+
+  // global search bar shortcut
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/') {
+      e.preventDefault();
+      const searchInput = document.getElementById('global-search-bar');
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }
+  });
+
   return (
     <>
       <SEO title={title} description={description} image={image} />

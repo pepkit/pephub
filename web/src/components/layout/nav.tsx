@@ -1,10 +1,18 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { useSession } from '../../hooks/useSession';
+import { useNavigate } from 'react-router-dom';
 
 // bootstrap nav bar
 export const Nav: FC = () => {
-  const { login, user, jwt, logout } = useSession();
+  const { login, user, logout } = useSession();
+  const navigate = useNavigate();
+  const [globalSearch, setGlobalSearch] = useState<string>('');
+
+  const navigateToSearch = () => {
+    navigate(`/search?query=${globalSearch}`);
+  };
+
   return (
     <nav
       className="py-2 mb-4 navbar navbar-expand-md border-bottom navbar-light"
@@ -31,7 +39,13 @@ export const Nav: FC = () => {
             <li>
               <div className="mt-1 input-group">
                 <input
-                  disabled
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      navigateToSearch();
+                    }
+                  }}
+                  value={globalSearch}
+                  onChange={(e) => setGlobalSearch(e.target.value)}
                   id="global-search-bar"
                   type="text"
                   className="form-control border-end-0"
@@ -39,38 +53,21 @@ export const Nav: FC = () => {
                   aria-label="search"
                   aria-describedby="search"
                 />
-                <span
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 255) !important' }}
-                  className="input-group-text border-start-0"
-                >
+                <span className="input-group-text border-start-0">
                   <div className="px-2 border rounded border-secondary text-secondary">/</div>
                 </span>
               </div>
-              <div className="dropdown">
-                <button
-                  id="search-dropdown-toggle"
-                  className="dropdown-toggle d-none"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Search dropdown
-                </button>
-                <ul className="dropdown-menu" aria-labelledby="search-dropdown">
-                  <li>
-                    <span className="dropdown-item">
-                      Search pephub for{' '}
-                      <em>
-                        <span id="search-dropdown-query"></span>
-                      </em>
-                      <button className="btn btn-sm btn-outline-secondary ms-3">
-                        Search
-                        <i className="bi bi-arrow-return-left"></i>
-                      </button>
-                    </span>
-                  </li>
-                </ul>
-              </div>
+              <Dropdown show={globalSearch.length > 0}>
+                <Dropdown.Menu>
+                  <div className="p-2">
+                    Search PEPhub for <span className="fst-italic">"{globalSearch}"</span>
+                    <button onClick={() => navigateToSearch()} className="ms-2 btn btn-sm btn-outline-dark">
+                      Go
+                      <i className="bi bi-arrow-return-left ms-1"></i>
+                    </button>
+                  </div>
+                </Dropdown.Menu>
+              </Dropdown>
             </li>
             <li className="mx-2 my-0 nav-item h5 pt-1">
               <a className="nav-link" href="/api/v1/docs">

@@ -76,3 +76,10 @@
 .dnd-box:-moz-drag-over {
   background-color: #9b9b9b1e !important;
 }
+
+/* tailwind truncate */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

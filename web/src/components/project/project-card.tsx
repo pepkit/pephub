@@ -4,6 +4,7 @@ import { ProjectAnnotation } from '../../../types';
 import { useSession } from '../../hooks/useSession';
 import { canEdit } from '../../utils/permissions';
 import { DeletePEPModal } from '../modals/delete-pep';
+import { dateStringToDateTime } from '../../utils/dates';
 
 interface Props {
   project: ProjectAnnotation;
@@ -18,7 +19,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
   return (
     <div
       id={`project-card-${project.namespace}/${project.name}:${project.tag}`}
-      className="w-100 border border-secondary rounded shadow-sm p-2 mt-2"
+      className="w-100 border border-dark border-2 rounded shadow-sm p-2 mt-2"
     >
       <div className="d-flex flex-row align-items-start justify-content-between">
         <div className="d-flex flex-row align-items-center">
@@ -79,7 +80,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             <span className="me-3">
               <i className="bi bi-calendar3"></i>
               <span className="mx-1">Created:</span>
-              <span id="project-submission-date">{project.submission_date}</span>
+              <span id="project-submission-date">{dateStringToDateTime(project.submission_date)}</span>
             </span>
             <span className="me-3">{project.digest}</span>
           </small>

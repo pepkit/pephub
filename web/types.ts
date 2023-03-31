@@ -67,3 +67,14 @@ export interface Project {
   sample_table_indx: string;
   sample_attributes: string[];
 }
+
+export interface SearchHit {
+  id: number;
+  version: number;
+  score: number;
+  payload: {
+    description: string;
+    registry: string;
+  };
+  vector: null;
+}

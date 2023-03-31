@@ -1,9 +1,11 @@
 import { FC, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Modal } from 'react-bootstrap';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '../../api/project';
 import { useSession } from '../../hooks/useSession';
+import { useMutation } from '@tanstack/react-query';
 
 interface Props {
   show: boolean;
@@ -18,30 +20,27 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
   const { jwt } = useSession();
   const navigate = useNavigate();
 
-  const [confirmText, setConfirmText] = useState('');
-  const [deleting, setDeleting] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleDelete = () => {
-    setDeleting(true);
-    deleteProject(namespace, project, tag, jwt || '')
-      .then((res) => {
-        if (res.status == 202) {
-          onHide();
-          toast.success(`Successfully deleted ${namespace}/${project}:${tag}`);
-        } else {
-          toast.error(`Failed to delete ${namespace}/${project}:${tag}. Please try again later.`);
-        }
-      })
-      .catch((err) => {
-        toast.error(err.message);
-      })
-      .finally(() => {
-        if (redirect) {
-          navigate(redirect);
-        }
-        setDeleting(false);
+  const [confirmText, setConfirmText] = useState('');
+
+  // function/object to handle deleting a project
+  const mutation = useMutation({
+    mutationFn: () => deleteProject(namespace, project, tag, jwt || ''),
+    onSuccess: () => {
+      toast.success('Project successfully deleted.');
+      queryClient.invalidateQueries({
+        queryKey: [namespace],
       });
-  };
+      onHide();
+      if (redirect) {
+        navigate(redirect);
+      }
+    },
+    onError: (err) => {
+      toast.error(`There was an error deleting the project: ${err}`);
+    },
+  });
 
   return (
     <Modal
@@ -76,12 +75,12 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
       </Modal.Body>
       <Modal.Footer>
         <button
-          onClick={() => handleDelete()}
-          disabled={confirmText !== `${namespace}/${project}:${tag}` || deleting}
+          onClick={() => mutation.mutate()}
+          disabled={confirmText !== `${namespace}/${project}:${tag}` || mutation.isLoading}
           type="button"
           className="btn btn-danger"
         >
-          {deleting ? 'Deleting...' : 'Yes, delete'}
+          {mutation.isLoading ? 'Deleting...' : 'Yes, delete'}
         </button>
       </Modal.Footer>
     </Modal>

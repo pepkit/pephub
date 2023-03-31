@@ -3,18 +3,42 @@ import ReactDOM from 'react-dom/client';
 import Home from './pages/Home';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import './globals.css';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { Toaster } from 'react-hot-toast';
 
+// react query stuff
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+// handsontable stuff
+import { registerAllModules } from 'handsontable/registry';
+registerAllModules();
+
+// css
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'handsontable/dist/handsontable.full.min.css';
+import './globals.css';
+import { SearchPage } from './pages/Search';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />,
+  },
+  {
+    path: '/search',
+    element: <SearchPage />,
   },
   {
     path: '/login/success',
@@ -33,8 +57,11 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <HelmetProvider>
-      <RouterProvider router={router} />
-      <Toaster position="top-right" reverseOrder={false} gutter={8} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster position="top-right" reverseOrder={false} gutter={8} toastOptions={{ duration: 3000 }} />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </HelmetProvider>
   </React.StrictMode>,
 );

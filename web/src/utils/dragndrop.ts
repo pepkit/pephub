@@ -1,13 +1,16 @@
-import { UseFormSetValue } from 'react-hook-form';
-
 // pass in react-hook-form setter
-export const popFileFromFileList = (fileList: FileList, index: number, setter: UseFormSetValue<any>) => {
+export const popFileFromFileList = (fileList: FileList, index: number, setter: (files: FileList) => void) => {
   const files = Array.from(fileList);
-  const file = files[index];
   files.splice(index, 1);
   if (files.length === 0) {
-    setter('files', undefined);
+    // create empty file list
+    setter(new DataTransfer().files);
   } else {
-    setter('files', files);
+    // convert back to FileList
+    const fileList = new DataTransfer();
+    for (let i = 0; i < files.length; i++) {
+      fileList.items.add(files[i]);
+    }
+    setter(fileList.files);
   }
 };

@@ -10,7 +10,10 @@
     "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
+    "@handsontable/react": "^12.3.3",
     "@popperjs/core": "^2.11.6",
+    "@tanstack/react-query": "^4.28.0",
+    "@tanstack/react-query-devtools": "^4.28.0",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "axios": "^1.3.4",
@@ -21,6 +24,7 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
+    "handsontable": "^12.3.3",
     "jwt-decode": "^3.1.2",
     "prettier": "^2.8.6",
     "react": "^18.2.0",
@@ -32,8 +36,7 @@
     "react-hook-form": "^7.43.8",
     "react-hot-toast": "^2.4.0",
     "react-router-dom": "^6.9.0",
-    "sass": "^1.59.3",
-    "swr": "^2.1.0"
+    "sass": "^1.59.3"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
