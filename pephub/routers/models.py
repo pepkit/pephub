@@ -28,3 +28,10 @@ class RawValidationQuery(BaseModel):
 class TokenExchange(BaseModel):
     code: str
     client_redirect_uri: Optional[str] = None
+
+
+class ForkRequest(BaseModel):
+    fork_to: str
+    fork_name: str
+    fork_tag: Optional[str] = None
+    fork_description: Optional[str] = None

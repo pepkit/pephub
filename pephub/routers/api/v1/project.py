@@ -7,6 +7,7 @@ from typing import Callable
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pepdbagent import PEPDatabaseAgent
+from pepdbagent.exceptions import ProjectUniqueNameError
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
 
@@ -318,3 +319,43 @@ async def convert_pep(
 async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     """Zip a pep"""
     return zip_pep(proj)
+
+
+@project.post(
+    "/forks",
+    summary="Fork project to user namespace.",
+    dependencies=[Depends(verify_user_can_fork)],
+)
+async def fork_pep_to_namespace(
+    fork_request: ForkRequest,
+    proj: peppy.Project = Depends(get_project),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    fork_to = fork_request.fork_to
+    fork_name = fork_request.fork_name
+    fork_tag = fork_request.fork_tag
+    proj.description = fork_request.fork_description or ""
+    try:
+        agent.project.create(
+            project=proj, namespace=fork_to, name=fork_name, tag=fork_tag or DEFAULT_TAG
+        )
+    except ProjectUniqueNameError as e:
+        return JSONResponse(
+            content={
+                "message": f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",
+                "error": f"{e}",
+                "status_code": 400,
+            },
+            status_code=400,
+        )
+
+    return JSONResponse(
+        content={
+            "namespace": fork_to,
+            "project_name": fork_name,
+            "tag": fork_tag,
+            "registry_path": f"{fork_to}/{fork_name}:{fork_tag}",
+        },
+        status_code=202,
+    )
+

@@ -15,6 +15,7 @@ import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { usePapaParse } from 'react-papaparse';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
+import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpoints';
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
@@ -41,6 +42,27 @@ export const ProjectPage: FC = () => {
   const [sampleTableData, setSampleTableData] = useState<any[][]>([[]]);
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
+  const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
+
+  const downloadZip = () => {
+    const completeName = `${namespace}-${project}-${tag}`;
+    fetch(`/api/v1/projects/${namespace}/${project}/zip?tag=${tag}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+      .then((res) => res.blob())
+      .then((blob) => {
+        var a = document.createElement('a');
+        var file = window.URL.createObjectURL(blob);
+        a.href = file;
+        a.download = completeName + '.zip';
+        a.click();
+        window.URL.revokeObjectURL(file);
+      });
+  };
 
   // parse sample table csv from server
   useEffect(() => {
@@ -89,11 +111,11 @@ export const ProjectPage: FC = () => {
                     Actions
                   </Dropdown.Toggle>
                   <Dropdown.Menu className="shadow-lg">
-                    <Dropdown.Item href={`/${namespace}/${project}/export?tag=${tag}`}>
+                    <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
                       <i className="bi bi-hdd-rack me-1"></i>
                       API Endpoints
                     </Dropdown.Item>
-                    <Dropdown.Item>
+                    <Dropdown.Item onClick={() => downloadZip()}>
                       <i className="bi bi-file-earmark-zip me-1"></i>
                       Download zip
                     </Dropdown.Item>
@@ -181,7 +203,13 @@ export const ProjectPage: FC = () => {
           </div>
         </Tab>
       </Tabs>
-
+      <ProjectAPIEndpointsModal
+        show={showAPIEndpointsModal}
+        onHide={() => setShowAPIEndpointsModal(false)}
+        namespace={namespace || ''}
+        project={project || ''}
+        tag={tag}
+      />
       <DeletePEPModal
         show={showDeletePEPModal}
         onHide={() => setShowDeletePEPModal(false)}

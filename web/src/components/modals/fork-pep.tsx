@@ -5,6 +5,7 @@ import { useSession } from '../../hooks/useSession';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { forkProject } from '../../api/project';
 
 interface Props {
   namespace: string;
@@ -23,7 +24,7 @@ interface ForkProjectInputs {
 }
 
 export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide }) => {
-  const { user } = useSession();
+  const { user, jwt } = useSession();
   const navigate = useNavigate();
 
   // form stuff
@@ -35,7 +36,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
     formState: { isValid },
   } = useForm<ForkProjectInputs>({
     defaultValues: {
-      namespace,
+      namespace: user?.login,
       project,
       tag: tag || 'default',
     },
@@ -47,19 +48,27 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
 
   const queryClient = useQueryClient();
 
+  const onSubmit: SubmitHandler<ForkProjectInputs> = (data) => {
+    return forkProject(namespace, project, tag, jwt, {
+      forkTo: data.namespace,
+      forkName: data.project,
+      forkTag: data.tag,
+      forkDescription: data.description,
+    });
+  };
+
   const mutation = useMutation({
     mutationFn: () => handleSubmit(onSubmit)(),
     onSuccess: () => {
-      toast.success('Project forked!');
+      toast.success('Project successully forked!');
       queryClient.invalidateQueries([projectNamespace]);
+      onHide();
       navigate(`/${projectNamespace}/${projectName}?tag=${projectTag}`);
     },
     onError: (error) => {
       toast.error(`An error occurred: ${error}`);
     },
   });
-
-  const onSubmit: SubmitHandler<ForkProjectInputs> = (data) => alert(JSON.stringify(data, null, 2));
 
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
@@ -139,12 +148,12 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
         </button>
         <button
           onClick={() => mutation.mutate()}
-          disabled={!isValid}
+          disabled={!isValid || mutation.isLoading}
           id="fork-submit-btn"
           type="submit"
           className="btn btn-success"
         >
-          Fork
+          {mutation.isLoading ? 'Forking...' : 'Fork'}
         </button>
       </Modal.Footer>
     </Modal>

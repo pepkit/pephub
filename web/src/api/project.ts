@@ -51,6 +51,49 @@ export const getProjectConfig = (
   }
 };
 
+export const forkProject = (
+  namespace: string | undefined,
+  projectName: string | undefined,
+  tag: string | undefined = 'default',
+  token: string | null = null,
+  {
+    forkTo,
+    forkName,
+    forkTag,
+    forkDescription,
+  }: {
+    forkTo: string;
+    forkName: string;
+    forkTag: string | undefined;
+    forkDescription: string | undefined;
+  },
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/forks?tag=${tag}`;
+  if (!token) {
+    return axios
+      .post(url, {
+        fork_to: forkTo,
+        fork_name: forkName,
+        fork_tag: forkTag || 'default',
+        fork_description: forkDescription || '',
+      })
+      .then((res) => res.data);
+  } else {
+    return axios
+      .post(
+        url,
+        {
+          fork_to: forkTo || namespace,
+          fork_name: forkName || projectName,
+          fork_tag: forkTag || 'default',
+          fork_description: forkDescription || '',
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
+      .then((res) => res.data);
+  }
+};
+
 export const deleteProject = (namespace: string, projectName: string, tag: string = 'default', token: string) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
   return axios.delete<DeleteProjectResponse>(url, { headers: { Authorization: `Bearer ${token}` } });
