@@ -13,6 +13,7 @@ export const SampleTable: FC<Props> = ({ headers, rows }) => {
       <HotTable
         data={rows}
         stretchH="all"
+        height={700}
         readOnly
         colHeaders={headers}
         dropdownMenu={true}

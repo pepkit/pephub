@@ -22,6 +22,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'handsontable/dist/handsontable.full.min.css';
 import './globals.css';
 import { SearchPage } from './pages/Search';
+import { EditProjectPage } from './pages/EditProject';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
   {
     path: '/:namespace/:project',
     element: <ProjectPage />,
+  },
+  {
+    path: '/:namespace/:project/edit',
+    element: <EditProjectPage />,
   },
 ]);
 

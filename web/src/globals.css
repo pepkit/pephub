@@ -83,3 +83,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.overflow-auto {
+  overflow: auto;
+}

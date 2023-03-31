@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { PageLayout } from '../components/layout/page-layout';
@@ -7,13 +7,18 @@ import { canEdit } from '../utils/permissions';
 import { dateStringToDate, dateStringToDateTime } from '../utils/dates';
 import { copyToClipboard } from '../utils/etc';
 import { DeletePEPModal } from '../components/modals/delete-pep';
-import { Dropdown } from 'react-bootstrap';
+import { Dropdown, Tab, Tabs } from 'react-bootstrap';
 import { ForkPEPModal } from '../components/modals/fork-pep';
 import { useProject } from '../hooks/queries/useProject';
 import { SampleTable } from '../components/tables/sample-table';
+import { useSampleTable } from '../hooks/queries/useSampleTable';
+import { usePapaParse } from 'react-papaparse';
+import { ProjectConfigEditor } from '../components/project/project-config';
+import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
+  const { readString } = usePapaParse();
 
   const { namespace, project } = useParams();
   let [searchParams] = useSearchParams();
@@ -21,21 +26,46 @@ export const ProjectPage: FC = () => {
   const tag = searchParams.get('tag') || 'default';
 
   const { data: projectInfo, isLoading: projectInfoIsLoading } = useProject(namespace, project || '', tag, jwt);
+  const { data: projectSamples, isLoading: projectSamplesIsLoading } = useSampleTable(namespace, project, tag, jwt);
+  const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
+    namespace,
+    project || '',
+    tag,
+    'yaml',
+    jwt,
+  );
 
   // state
   const [copied, setCopied] = useState(false);
+  const [sampleTableHeaders, setSampleTableHeaders] = useState<any[]>([]);
+  const [sampleTableData, setSampleTableData] = useState<any[][]>([[]]);
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
+
+  // parse sample table csv from server
+  useEffect(() => {
+    if (projectSamples) {
+      readString(projectSamples, {
+        worker: true,
+        complete: (results) => {
+          // ts-ignore
+          const data = results.data as any[][];
+          setSampleTableHeaders(data[0]);
+          setSampleTableData(data.slice(1));
+        },
+      });
+    }
+  }, [projectSamples]);
 
   return (
     <PageLayout title={`${namespace}/${project}`}>
       <a className="mb-3" href={`/${namespace}`}>
-        <button className="btn btn-sm btn-outline-dark border border-dark border-2">
+        <button className="btn btn-sm btn-outline-dark border border-dark">
           <i className="bi bi-arrow-bar-left me-1"></i>
           Back to namespace
         </button>
       </a>
-      <div className="border border-dark border-2 my-2 p-2 rounded shadow-sm">
+      <div className="border border-dark my-2 p-2 rounded shadow-sm">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
         ) : (
@@ -52,7 +82,7 @@ export const ProjectPage: FC = () => {
               <div>
                 <Dropdown>
                   <Dropdown.Toggle
-                    className="btn btn-outline-dark border border-dark border-2 shadow-sm"
+                    className="btn btn-outline-dark border border-dark shadow-sm"
                     id="dropdown-basic"
                     variant="outline-primary"
                   >
@@ -74,7 +104,7 @@ export const ProjectPage: FC = () => {
                     {canEdit(user, projectInfo) ? (
                       <>
                         <Dropdown.Divider />
-                        <Dropdown.Item>
+                        <Dropdown.Item href={`/${namespace}/${project}/edit?tag=${tag || 'default'}`}>
                           <i className="bi bi-pencil me-1"></i>
                           Edit
                         </Dropdown.Item>
@@ -139,17 +169,19 @@ export const ProjectPage: FC = () => {
           </>
         )}
       </div>
-      <div className="rounded border border-dark border-2 p-1 shadow-sm">
-        <SampleTable
-          headers={['one', 'two', 'three']}
-          rows={[
-            ['one', 'two', 'three'],
-            ['one', 'two', 'three'],
-            ['one', 'two', 'three'],
-            ['one', 'two', 'three'],
-          ]}
-        />
-      </div>
+      <Tabs defaultActiveKey="config">
+        <Tab eventKey="config" title="Config">
+          <div className="rounded-bottom border border-top-0  p-1 shadow-sm" style={{ minHeight: '50vh' }}>
+            <ProjectConfigEditor readOnly={true} value={projectConfig || 'Loading.'} />
+          </div>
+        </Tab>
+        <Tab eventKey="samples" title="Samples">
+          <div className="rounded-bottom border border-top-0  p-1 shadow-sm overflow-auto">
+            <SampleTable headers={sampleTableHeaders} rows={sampleTableData} />
+          </div>
+        </Tab>
+      </Tabs>
+
       <DeletePEPModal
         show={showDeletePEPModal}
         onHide={() => setShowDeletePEPModal(false)}

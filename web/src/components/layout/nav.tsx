@@ -90,7 +90,9 @@ export const Nav: FC = () => {
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                       <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
-                      <Dropdown.Item href="/me">Profile</Dropdown.Item>
+                      <Dropdown.Item disabled href="/me">
+                        Profile
+                      </Dropdown.Item>
                       <Dropdown.Divider />
                       <Dropdown.Item onClick={() => logout()}>Logout</Dropdown.Item>
                     </Dropdown.Menu>
