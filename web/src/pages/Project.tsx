@@ -38,8 +38,6 @@ export const ProjectPage: FC = () => {
 
   // state
   const [copied, setCopied] = useState(false);
-  const [sampleTableHeaders, setSampleTableHeaders] = useState<any[]>([]);
-  const [sampleTableData, setSampleTableData] = useState<any[][]>([[]]);
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
@@ -63,21 +61,6 @@ export const ProjectPage: FC = () => {
         window.URL.revokeObjectURL(file);
       });
   };
-
-  // parse sample table csv from server
-  useEffect(() => {
-    if (projectSamples) {
-      readString(projectSamples, {
-        worker: true,
-        complete: (results) => {
-          // ts-ignore
-          const data = results.data as any[][];
-          setSampleTableHeaders(data[0]);
-          setSampleTableData(data.slice(1));
-        },
-      });
-    }
-  }, [projectSamples]);
 
   return (
     <PageLayout title={`${namespace}/${project}`}>
@@ -199,7 +182,7 @@ export const ProjectPage: FC = () => {
         </Tab>
         <Tab eventKey="samples" title="Samples">
           <div className="rounded-bottom border border-top-0  p-1 shadow-sm overflow-auto">
-            <SampleTable headers={sampleTableHeaders} rows={sampleTableData} />
+            <SampleTable readOnly={true} data={projectSamples || ''} />
           </div>
         </Tab>
       </Tabs>

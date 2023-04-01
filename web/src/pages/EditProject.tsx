@@ -6,10 +6,10 @@ import { Tab, Tabs } from 'react-bootstrap';
 import { ProjectMetaEditForm } from '../components/forms/edit-project-meta';
 import { useProject } from '../hooks/queries/useProject';
 import { useSession } from '../hooks/useSession';
-import { ProjectConfigEditor } from '../components/project/project-config';
 import { SampleTable } from '../components/tables/sample-table';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
-import { useProjectConfig } from '../hooks/queries/useProjectConfig';
+import { ProjectConfigEditorForm } from '../components/forms/project-config-editor-form';
+import { SampleTableEditorForm } from '../components/forms/sample-table-editor-form';
 
 export const EditProjectPage = () => {
   const { jwt } = useSession();
@@ -19,52 +19,7 @@ export const EditProjectPage = () => {
 
   const tag = searchParams.get('tag') || 'default';
 
-  const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
-  const { data: projectConfig } = useProjectConfig(namespace, project, tag, 'yaml', jwt);
   const { data: projectData, isLoading } = useProject(namespace, project, tag, jwt);
-
-  const [sampleTableHeaders, setSampleTableHeaders] = useState<string[]>([]);
-  const [sampleTableData, setSampleTableData] = useState<any[][]>([]);
-
-  const [originalConfig, setOriginalConfig] = useState<string>('');
-  const [newProjectConfig, setNewProjectConfig] = useState<string>('');
-  const [originalSamples, setOriginalSamples] = useState<string>('');
-  const [newProjectSamples, setNewProjectSamples] = useState<string>('');
-
-  const resetProjectConfig = () => {
-    setNewProjectConfig(originalConfig);
-  };
-
-  const resetSampleTable = () => {
-    setNewProjectSamples(originalSamples);
-  };
-
-  // set original values for project config editor and sample table
-  useEffect(() => {
-    if (projectConfig) {
-      setOriginalConfig(projectConfig);
-      setNewProjectConfig(projectConfig);
-    }
-    if (projectSamples) {
-      setOriginalSamples(projectSamples);
-      setNewProjectSamples(projectSamples);
-    }
-  }, [projectConfig]);
-
-  // parse sample table csv from server
-  useEffect(() => {
-    if (projectSamples) {
-      readString(projectSamples, {
-        worker: true,
-        complete: (results) => {
-          // ts-ignore
-          const data = results.data as any[][];
-          setSampleTableHeaders(data[0]);
-          setSampleTableData(data.slice(1));
-        },
-      });
-    }
-  }, [projectSamples]);
 
   if (isLoading) {
     return (
@@ -97,28 +52,12 @@ export const EditProjectPage = () => {
           </Tab>
           <Tab eventKey="Config" title="Config">
             <div className="p-2 border border-top-0 rounded-bottom">
-              <ProjectConfigEditor setValue={(v) => setNewProjectConfig(v)} value={newProjectConfig || ''} />
-              <div>
-                <button className="btn btn-outline-dark me-1" onClick={() => resetProjectConfig()}>
-                  Reset
-                </button>
-                <button disabled={newProjectConfig === originalConfig} className="btn btn-success me-1">
-                  Save
-                </button>
-              </div>
+              <ProjectConfigEditorForm namespace={namespace || ''} project={project || ''} tag={tag || 'default'} />
             </div>
           </Tab>
           <Tab eventKey="samples" title="Sample Table">
             <div className="p-2 border border-top-0 rounded-bottom">
-              <SampleTable headers={sampleTableHeaders} rows={sampleTableData} />
-              <div>
-                <button className="btn btn-outline-dark me-1" onClick={() => resetSampleTable()}>
-                  Reset
-                </button>
-                <button disabled={newProjectConfig === originalConfig} className="btn btn-success me-1">
-                  Save
-                </button>
-              </div>
+              <SampleTableEditorForm namespace={namespace || ''} project={project || ''} tag={tag || 'default'} />
             </div>
           </Tab>
         </Tabs>

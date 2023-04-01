@@ -1,18 +1,65 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { HotTable, HotColumn } from '@handsontable/react';
 import { addClassesToRows } from './hooks-callbacks';
-import { read } from 'fs';
+import { readString } from 'react-papaparse';
+import { tableDataToCsvString } from '../../utils/sample-table';
+import { AddColumnModal } from '../modals/add-column-modal';
 
 interface Props {
-  headers: string[];
-  rows: any[][];
-  setRows?: (rows: any[][]) => void;
+  data: string;
+  onChange?: (rows: string) => void;
   readOnly?: boolean;
 }
+/**
+ * This table is meant to handle csv strings, so just pass in
+ * the csv string and it will handle the rest
+ */
+export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange }) => {
+  // internal state
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [rows, setRows] = useState<any[][]>([]);
 
-export const SampleTable: FC<Props> = ({ headers, rows, readOnly = false, setRows }) => {
+  const [showAddColumnModal, setShowAddColumnModal] = useState<boolean>(false);
+
+  // watch the data and update accordingly
+  // this is for changes outside of the table
+  useEffect(() => {
+    if (data) {
+      readString(data, {
+        worker: true,
+        complete: (results) => {
+          // ts-ignore
+          const data = results.data as any[][];
+          setHeaders(data[0]);
+          setRows(data.slice(1));
+        },
+      });
+    }
+  }, [data]);
+
+  // if the user makes a change to the table,
+  // we need to update the data if
+  // the onChange prop is passed in
+  useEffect(() => {
+    if (onChange) {
+      onChange(tableDataToCsvString(headers, rows));
+    }
+  }, [rows]);
+
   return (
     <div className="rounded rounded-2">
+      {!readOnly && (
+        <div className="p-1 border border-bottom-0 rounded-top">
+          <button onClick={() => setShowAddColumnModal(true)} className="btn btn-sm btn-dark">
+            <i className="bi bi-plus-circle me-1"></i>
+            Add Column
+          </button>
+          <button disabled className="btn btn-sm btn-dark ms-1">
+            <i className="bi bi-trash me-1"></i>
+            Remove Column
+          </button>
+        </div>
+      )}
       <HotTable
         data={rows}
         stretchH="all"
@@ -23,6 +70,7 @@ export const SampleTable: FC<Props> = ({ headers, rows, readOnly = false, setRow
         hiddenColumns={{
           indicators: true,
         }}
+        manualColumnMove
         contextMenu={true}
         multiColumnSorting={true}
         filters={true}
@@ -33,7 +81,13 @@ export const SampleTable: FC<Props> = ({ headers, rows, readOnly = false, setRow
         manualColumnResize
         afterChange={(changes) => {
           if (changes) {
-            !readOnly && setRows && setRows(rows.map((row, i) => (i === changes[0][0] ? changes[0][3] : row)));
+            // update data in state
+            const newRows = [...rows];
+            changes.forEach(([row, col, _, newValue]) => {
+              // @ts-ignore
+              newRows[row][col] = newValue;
+            });
+            setRows(newRows);
           }
         }}
       >
@@ -41,6 +95,20 @@ export const SampleTable: FC<Props> = ({ headers, rows, readOnly = false, setRow
           <HotColumn key={i} data={i} />
         ))}
       </HotTable>
+      <AddColumnModal
+        onAdd={(newColumnName) => {
+          // add a new column to the right
+          setRows((old: any[][]) => {
+            const newTable = old.map((row) => {
+              return [...row, ''];
+            });
+            return newTable;
+          });
+          setHeaders((old) => [...old, newColumnName]);
+        }}
+        show={showAddColumnModal}
+        onHide={() => setShowAddColumnModal(false)}
+      />
     </div>
   );
 };
