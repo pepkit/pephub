@@ -20,10 +20,13 @@ This will start the application at http://127.0.0.1:5173/. Ensure that yor `.env
 ```
 # .env
 VITE_API_BASE=http://localhost:8000/api/v1
+VITE_AUTH_BASE=http://localhost:8000/auth
+VITE_CLIENT_REDIRECT_URL=/login/success
+VITE_SESSION_COOKIE_NAME=pephub_session
 ```
 
 ## Deployment
-To deploy the client, simply run `npm run build` to build a production bundle. This will create a `dist` directory that can be served statically. In this example repository, PEPhub is configured to serve the `dist` directory at the root of the server.
+To deploy the client, simply run `npm run build` to build a production bundle. This will create a `dist` directory that can be served statically. In this example repository, PEPhub is configured to serve the `dist` directory at the root (`/`) of the server.
 
 ## Technical Details
 This application uses a lot of more modern features and react libraries. Below I outline some of the more important features:
@@ -78,7 +81,7 @@ const fetchUser = async (id: number): Promise<User> => {
 The `User` interface declares the types of the returned User JSON blob so that subsuquent calls to `fetchUser` get some nice type checking and auto-complete features. While TypeScript can be a bit daunting at first, it is well worth the effort and makes writing JavaScript much more enjoyable.
 
 ### `react-router`
-`react-router` is a library that allows us to declaratively define the routes of our application. Using `react-router`, we can define sroute like this:
+`react-router` is a library that allows us to declaratively define the routes of our application. Using `react-router`, we can define routes like this:
 
 ```typescript
 const router = createBrowserRouter([
@@ -95,10 +98,10 @@ const router = createBrowserRouter([
 
 Our application is a **single `html` file**. As such, when the user lands at `index.html`, `react-router` will capture the URL and render the appropriate component. This is a very powerful feature that allows us to build a single page application that can be hosted on a static file server. We are essentially using JavaScript to mimic the behavior of a server with defined routes.
 
-### `useSWR`
-`useSWR` is one of those libraries that makes the most sense once you actually use it. According to their documentation:
+### `react-query`
+`react-query` is one of those libraries that makes the most sense once you actually use it. According to their documentation:
 
-> The name “SWR” is derived from `stale-while-revalidate`, a HTTP cache invalidation strategy popularized by HTTP RFC 5861 (opens in a new tab). SWR is a strategy to first return the data from cache (stale), then send the fetch request (revalidate), and finally come with the up-to-date data.
+> Toss out that granular state management, manual refetching and endless bowls of async-spaghetti code. TanStack Query gives you declarative, always-up-to-date auto-managed queries and mutations that directly improve both your developer and user experiences.
 
 Essentially, this library creates very convenient wrappers around our data-fetching code. For example, say we want to fetch a user from the server:
 
@@ -110,22 +113,55 @@ const fetchUser = async (id: number): Promise<User> => {
 }
 ```
 
-We can wrap this function in `useSWR` like this:
+We can wrap this function in `useQuery` like this:
 
 ```typescript
-const { data: user, error, isLoading } = useSWR(`/api/users/${id}`, fetchUser)
+const query = useQuery(['user', id], () => fetchUser(id))
 ```
 
 And we get some really nice objects that can be used to render parts of our UI:
 
 ```typescript
-if (isLoading) {
+if (query.isLoading) {
   return <div>Loading...</div>
-} else if (error) {
+} else if (query.error) {
   return <div>Error: {error}</div>
 } else {
-  return <div>{user.name}</div>
+  return <div>{query.data.name}</div>
 }
 ```
 
-This makes it very easy to write code that is both performant and easy to read. `useSWR` removes a ton of the boilerplate that comes with fetching data from a server. Note that this library **caches** API calls. In the above example, `/api/users/${id}` is the **key** that is used to cache the API call. If we call `useSWR` with the same key, it will return the cached value. This is a very powerful feature that allows us to write performant code without having to worry about caching.
+This makes it very easy to write code that is both performant and easy to read. `react-query` removes a ton of the boilerplate that comes with fetching data from a server. Note that this library **caches** API calls. In the above example, `['users', id]` is the **key** that is used to cache the API call. If we call `useQuery` with the same key, it will return the cached value. This is a very powerful feature that allows us to write performant code without having to worry about caching.
+
+### `react-hook-form`
+React hook form makes it easy to write forms in native, semantic html without worrying about state, validation, etc. This is another library that just makes so much more sense when you use it.
+
+The following is an example form using `react-hook-form`:
+
+```jsx
+import { useForm } from "react-hook-form";
+
+export default function App() {
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const onSubmit = data => console.log(data);
+
+  console.log(watch("example")); // watch input value by passing the name of it
+
+  return (
+    /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* register your input into the hook by invoking the "register" function */}
+      <input defaultValue="test" {...register("example")} />
+      
+      {/* include validation with required or other standard HTML validation rules */}
+      <input {...register("exampleRequired", { required: true })} />
+      {/* errors will return when field validation fails  */}
+      {errors.exampleRequired && <span>This field is required</span>}
+      
+      <input type="submit" />
+    </form>
+  );
+}
+```
+
+It lets us focus on the logic and functionality rather than the details of state managment, etc
