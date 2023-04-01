@@ -26,6 +26,31 @@ export const EditProjectPage = () => {
   const [sampleTableHeaders, setSampleTableHeaders] = useState<string[]>([]);
   const [sampleTableData, setSampleTableData] = useState<any[][]>([]);
 
+  const [originalConfig, setOriginalConfig] = useState<string>('');
+  const [newProjectConfig, setNewProjectConfig] = useState<string>('');
+  const [originalSamples, setOriginalSamples] = useState<string>('');
+  const [newProjectSamples, setNewProjectSamples] = useState<string>('');
+
+  const resetProjectConfig = () => {
+    setNewProjectConfig(originalConfig);
+  };
+
+  const resetSampleTable = () => {
+    setNewProjectSamples(originalSamples);
+  };
+
+  // set original values for project config editor and sample table
+  useEffect(() => {
+    if (projectConfig) {
+      setOriginalConfig(projectConfig);
+      setNewProjectConfig(projectConfig);
+    }
+    if (projectSamples) {
+      setOriginalSamples(projectSamples);
+      setNewProjectSamples(projectSamples);
+    }
+  }, [projectConfig]);
+
   // parse sample table csv from server
   useEffect(() => {
     if (projectSamples) {
@@ -72,12 +97,28 @@ export const EditProjectPage = () => {
           </Tab>
           <Tab eventKey="Config" title="Config">
             <div className="p-2 border border-top-0 rounded-bottom">
-              <ProjectConfigEditor value={projectConfig || ''} />
+              <ProjectConfigEditor setValue={(v) => setNewProjectConfig(v)} value={newProjectConfig || ''} />
+              <div>
+                <button className="btn btn-outline-dark me-1" onClick={() => resetProjectConfig()}>
+                  Reset
+                </button>
+                <button disabled={newProjectConfig === originalConfig} className="btn btn-success me-1">
+                  Save
+                </button>
+              </div>
             </div>
           </Tab>
           <Tab eventKey="samples" title="Sample Table">
             <div className="p-2 border border-top-0 rounded-bottom">
               <SampleTable headers={sampleTableHeaders} rows={sampleTableData} />
+              <div>
+                <button className="btn btn-outline-dark me-1" onClick={() => resetSampleTable()}>
+                  Reset
+                </button>
+                <button disabled={newProjectConfig === originalConfig} className="btn btn-success me-1">
+                  Save
+                </button>
+              </div>
             </div>
           </Tab>
         </Tabs>

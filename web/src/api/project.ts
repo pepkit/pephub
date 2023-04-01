@@ -109,3 +109,31 @@ export const editProjectMetadata = (
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
   return axios.patch(url, metadata, { headers: { Authorization: `Bearer ${token}` } });
 };
+
+export const editProjectConfig = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null,
+  config: string,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
+  return axios.patch(url, { project_config_yaml: config }, { headers: { Authorization: `Bearer ${token}` } });
+};
+
+export const editProjectSampleTable = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null,
+  sampleTable: string,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}&format=csv`;
+  return axios.patch(
+    url,
+    {
+      sample_table_csv: sampleTable,
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+};
