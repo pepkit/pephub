@@ -82,7 +82,7 @@ def login(client_redirect_uri: Union[str, None] = None):
     )
 
 
-@auth.get("/callback", response_class=RedirectResponse)
+@auth.get("/callback")
 def callback(
     background_tasks: BackgroundTasks,
     code: Union[str, None] = None,
@@ -147,11 +147,14 @@ def callback(
             delete_auth_code_after, auth_code, AUTH_CODE_EXPIRATION
         )
 
-        if client_redirect_uri:
-            send_to = client_redirect_uri + f"?code={auth_code}"
-        else:
-            send_to = f"/auth/login/success?code={auth_code}"
-        return send_to
+    # return token either to client_redirect,
+    # or to a basic login success page.
+    # add token as query param
+    if client_redirect_uri:
+        send_to = client_redirect_uri + f"?code={auth_code}"
+    else:
+        send_to = f"/auth/login/success?code={auth_code}"
+    return RedirectResponse(url=send_to, status_code=302)
 
 
 @auth.post("/token")

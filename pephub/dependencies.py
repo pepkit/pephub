@@ -21,8 +21,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
 
-from .routers.models import AnnotationModel, NamespaceList, Namespace
-from .routers.models import ForkRequest
+from .routers.models import AnnotationModel, NamespaceList, Namespace, ForkRequest
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -326,7 +325,6 @@ def verify_user_can_write_project(
                 f"The current authenticated user does not have permission to edit this project.",
             )
 
-
 def verify_user_can_fork(
     fork_request: ForkRequest,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
@@ -336,7 +334,6 @@ def verify_user_can_fork(
         yield
     else:
         raise HTTPException(401, "Unauthorized to fork this repo")
-
 
 def parse_boolean_env_var(env_var: str) -> bool:
     """

@@ -6,6 +6,8 @@ from io import StringIO
 from typing import Callable, Annotated
 from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse, PlainTextResponse
+from pepdbagent import PEPDatabaseAgent
+from pepdbagent.exceptions import ProjectUniqueNameError
 from peppy import Project
 from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
 
@@ -55,8 +57,11 @@ async def get_a_pep(
     proj_annotation_dict = proj_annotation.dict()
 
     # default to name from annotation
-    # if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
-    #     del proj_dict["name"]
+    if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
+        try:
+            del proj_dict["name"]
+        except KeyError:
+            pass
 
     return dict(
         **proj_dict,
@@ -352,3 +357,4 @@ async def fork_pep_to_namespace(
         },
         status_code=202,
     )
+

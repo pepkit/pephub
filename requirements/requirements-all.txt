@@ -1,4 +1,5 @@
 fastapi>=0.72.0
+aiofiles
 eido
 logmuse>=0.2.7
 jinja2>=3.1.2
