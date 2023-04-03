@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-search = APIRouter(prefix="/api/v1/search", tags=["api", "search", "v1"])
+search = APIRouter(prefix="/api/v1/search", tags=["search"])
 
 
 # perform a search

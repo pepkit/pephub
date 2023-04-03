@@ -318,3 +318,8 @@ async def main():
 async def main():
     print(je.list_templates())
     return FileResponse(os.path.join(STATICS_PATH, "index.html"))
+
+@router.get("/validator")
+async def main():
+    print(je.list_templates())
+    return FileResponse(os.path.join(STATICS_PATH, "schemas.html"))

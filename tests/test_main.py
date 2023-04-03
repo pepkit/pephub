@@ -8,6 +8,7 @@ from pephub.main import app
 
 client = TestClient(app)
 
+
 # fetch base route
 def test_base():
     res = client.get("/")

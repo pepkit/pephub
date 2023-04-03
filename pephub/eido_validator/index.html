@@ -32,6 +32,7 @@
       </a>
 
       <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/eido/schemas" class="nav-link">Schema-specific pages</a></li>
         <li class="nav-item"><a href="/" class="nav-link">Back to pephub</a></li>
         <li class="nav-item"><a href="https://eido.databio.org" class="nav-link">Eido documentation</a></li>
         <li class="nav-item"><a href="https://pep.databio.org/en/latest/" class="nav-link">PEP documentation</a></li>
@@ -50,143 +51,189 @@
         <ul class="card-header nav nav-pills" id="pills-tab" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active" id="pills-pep-tab" data-bs-toggle="pill" data-bs-target="#pills-pep"
-              type="button" role="tab" aria-controls="pills-pep" aria-selected="true">Single PEP</button>
+              type="button" role="tab" aria-controls="pills-pep" aria-selected="true">Upload file</button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="pills-mpep-tab" data-bs-toggle="pill" data-bs-target="#pills-mpep"
-              type="button" role="tab" aria-controls="pills-mpep" aria-selected="false">Multiple PEPs</button>
+              type="button" role="tab" aria-controls="pills-mpep" aria-selected="false">Registry path</button>
           </li>
         </ul>
         <div class="tab-content card-body" id="pills-tabContent">
           <div class="tab-pane fade show active" id="pills-pep" role="tabpanel" aria-labelledby="pills-pep-tab">
-            <p>You can upload a single PEP here.</p>
-            <input type="file" name="pep" class="form-control mb-3" multiple>
-            <p>Or you can provide a registry path.</p>
-            <input type="text" name="pep" class="form-control">
+            <p>Please upload your PEP as a file.</p>
+            <!-- ! UPLOAD FORM -->
+            <div class="tab-pane" id="nav-upload" role="tabpanel" aria-labelledby="submit-modal-nav-upload-tab">
+              <div class="rounded-bottom border border-top-0">
+                <form id="new-project-form" action="/api/v1/namespaces/{{namespace.namespace}}/projects"
+                  class="border-0 form-control" method="post" enctype="multipart/form-data">
+                  <div id="dnd-box" onclick="clickFileInput()"
+                    class="p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3"
+                    ondragover="allowDrop(event)">
+                    <div class="flex-row d-flex align-items-center">
+                      <i class="bi bi-cloud-arrow-up"></i>
+                      <span class="text-secondary ms-2">Drag files here</span>
+                    </div>
+                    <span class="my-1 text-secondary">or</span>
+                    <span class="text-secondary">click to browse</span>
+                  </div>
+                  <div id="file-list-container" style="border-style: dashed !important;"
+                    class="p-5 mt-3 border border-2 d-none d-flex flex-column align-items-center justify-content-center rounded-3">
+                    <div id="file-list"></div>
+                    <div class="mt-3">
+                      <button type="button" onclick="clickFileInput()" class="btn btn-sm btn-outline-dark">
+                        <i class="bi bi-archive"></i>
+                        Browse
+                      </button>
+                      <button type="button" onclick="handleClearFileInput()" class="btn btn-sm btn-outline-dark">
+                        <i class="bi bi-x"></i>
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
           <div class="tab-pane fade" id="pills-mpep" role="tabpanel" aria-labelledby="pills-mpep-tab">
-            <p>You can upload multiple PEPs here.</p>
-            <input type="file" class="form-control mb-3" name="pep" multiple>
             <div>
               <p>Or you can provide a registry path.</p>
-              <input type="text" name="pep" class="form-control">
-            </div>
-          </div>
-        </div>
-      </div>
-      <label class="mt-3 mb-2 h5 fw-bolder">Step 2: Select Schema</label>
-      <div class="card">
-        <ul class="card-header nav nav-pills" id="pills-tab" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pills-schema-tab" data-bs-toggle="pill" data-bs-target="#pills-schema"
-              type="button" role="tab" aria-controls="pills-schema" aria-selected="true">Single Schema</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-mschema-tab" data-bs-toggle="pill" data-bs-target="#pills-mschema"
-              type="button" role="tab" aria-controls="pills-mschema" aria-selected="false">Multiple Schemas</button>
-          </li>
-        </ul>
-        <div class="tab-content card-body" id="pills-tabContent">
-          <div class="tab-pane fade show active" id="pills-schema" role="tabpanel" aria-labelledby="pills-schema-tab">
-            <p>You can upload a single schema here.</p>
-            <input name="schema" class="form-control mb-3" type="file" multiple>
-            <p>Or you can provide a registry path to your schemas.</p>
-            <input name="schema" class="form-control mb-3" type="text">
-            <button class="btn btn-success" type="submit" value="Validate" value="Validate">
-              Validate
-            </button>
-          </div>
-          <div class="tab-pane fade" id="pills-mschema" role="tabpanel" aria-labelledby="pills-mschema-tab">
-            <p>You can upload multiple schemas here.</p>
-            <!-- <form class="mb-3" enctype="multipart/form-data" method="post" onsubmit="validate(event, this);"
-                  action="/validate/multiple"> -->
-            <input name="schema" class="form-control mb-3" type="file" multiple>
-            <p>Or you can provide a registry path to your schemas.</p>
-            <input name="schema" class="form-control mb-3" type="text">
-            <button class="btn btn-success" type="submit" value="Validate" value="Validate">
-              Validate
-            </button>
-          </div>
-        </div>
-      </div>
+              <!-- ! text input -->
+              <span class="fs-4 d-flex align-items-center">
+                <select name="namespace" id="blank-namespace-select" class="form-select w-75"
+                  aria-label="Namespace selection" class="mb-1">
+                  <option value="aliparslan">aliparslan</option>
+
+                </select>
+                <span class="mx-1 mb-1">/</span>
+                <input id="blank-project-name" name="project_name" type="text" class="form-control"
+                  placeholder="name" />
+                <span class="mx-1 mb-1">:</span>
+                <input id="blank_tag" name="tag" type="text" class="form-control" placeholder="default" />
+              </span>
+
     </form>
+  </div>
+  </div>
+  <!-- UPLOAD FORM -->
+  <div class="tab-pane" id="nav-upload" role="tabpanel" aria-labelledby="submit-modal-nav-upload-tab">
+    <div class="rounded-bottom border border-top-0">
+      <form id="new-project-form" action="/api/v1/namespaces/aliparslan/projects" class="border-0 form-control"
+        method="post" enctype="multipart/form-data">
+        <div class="mb-3 form-check form-switch">
+          <input value="true" name="is_private" class="form-check-input" type="checkbox" role="switch"
+            id="is-private-toggle" />
+          <label class="form-check-label" for="flexSwitchCheckDefault">
+            <i class="bi bi-lock"></i>
+            Private
+          </label>
+        </div>
+        <span class="fs-4 d-flex align-items-center">
+          <select name="namespace" id="namespace-select" class="form-select w-75" aria-label="Namespace selection"
+            class="mb-1">
+            <option value="aliparslan">aliparslan</option>
 
-    <!-- form upload -->
-    <!-- <form enctype="multipart/form-data" method="post" onsubmit="validate(event, this);" action="#">
-      <div class="card mt-3">
-        <h5 class="card-header">File Upload</h5>
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <input name="files" type="file" multiple>
-            </div>
-            <div class="col">
-              <input type="submit" value="Validate" id="vbutton">
+          </select>
+          <span class="mx-1 mb-1">/</span>
+          <input id="project-name" name="project_name" type="text" class="form-control" placeholder="name" />
+          <span class="mx-1 mb-1">:</span>
+          <input id="tag" name="tag" type="text" class="form-control" placeholder="default" />
+        </span>
+        <!-- ! text input -->
+    </div>
+  </div>
+  </div>
+  </div>
+  <label class="mt-3 mb-2 h5 fw-bolder">Step 2: Select Schema</label>
+  <div class="card">
+    <ul class="card-header nav nav-pills" id="pills-tab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pills-schema-tab" data-bs-toggle="pill" data-bs-target="#pills-schema"
+          type="button" role="tab" aria-controls="pills-schema" aria-selected="true">Upload file</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-mschema-tab" data-bs-toggle="pill" data-bs-target="#pills-mschema"
+          type="button" role="tab" aria-controls="pills-mschema" aria-selected="false">Registry path</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-bschema-tab" data-bs-toggle="pill" data-bs-target="#pills-bschema"
+          type="button" role="tab" aria-controls="pills-bschema" aria-selected="false">Choose built-in</button>
+      </li>
+    </ul>
+    <div class="tab-content card-body" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="pills-schema" role="tabpanel" aria-labelledby="pills-schema-tab">
+        <p>Please upload your schema as a file.</p>
+        <input name="schema" class="form-control mb-3" type="file" multiple>
+      </div>
+      <div class="tab-pane fade" id="pills-mschema" role="tabpanel" aria-labelledby="pills-mschema-tab">
+        <form class="mb-3" enctype="multipart/form-data" method="post" onsubmit="validate(event, this);"
+          action="/validate/multiple">
+          <p>Or you can provide a registry path to your schema.</p>
+          <div class="input-group">
+            <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
+            <div class="input-group-append">
             </div>
           </div>
+      </div>
+      <div class="tab-pane fade show active" id="pills-bschema" role="tabpanel" aria-labelledby="pills-bschema-tab">
+        <p>Or you can choose from a built-in schema.</p>
+        <div class="d-flex flex-row align-items-center mb-3">
+          <select id="schema-dropdown" class="form-select w-25">
+            <option value=""><i>Select schema</i></option>
+            <option value="/eido/schema/bulker/cdid.yaml">bulker/cdid</option>
+            <option value="/eido/schema/bulker/cmdlist.yaml">bulker/cmdlist</option>
+            <option value="/eido/schema/bulker/importlist.yaml">bulker/importlist</option>
+            <option value="/eido/schema/bulker/manifest.yaml">bulker/manifest</option>
+            <option value="/eido/schema/pep/2.0.0.yaml">pep/2.0.0</option>
+            <option value="/eido/schema/pep/2.1.0.yaml">pep/2.1.0</option>
+            <option value="/eido/schema/pipelines/ProseqPEP.yaml">pipelines/ProseqPEP</option>
+            <option value="/eido/schema/pipelines/bedbuncher.yaml">pipelines/bedbuncher</option>
+            <option value="/eido/schema/pipelines/bedmaker.yaml">pipelines/bedmaker</option>
+            <option value="/eido/schema/pipelines/bedstat.yaml">pipelines/bedstat</option>
+            <option value="/eido/schema/pipelines/pepatac.yaml">pipelines/pepatac</option>
+            <option value="/eido/schema/pipelines/pipeline_interface.yaml">pipelines/pipeline_interface</option>
+            <option value="/eido/schema/refgenie/refgenie_build.yaml">refgenie/refgenie_build</option>
+            <option value="/eido/schema/refget/ACDList.yaml">refget/ACDList</option>
+            <option value="/eido/schema/refget/ASDList.yaml">refget/ASDList</option>
+            <option value="/eido/schema/refget/AnnotatedArrayedSequenceCollection.yaml">
+              refget/AnnotatedArrayedSequenceCollection</option>
+            <option value="/eido/schema/refget/AnnotatedSequenceList.yaml">refget/AnnotatedSequenceList</option>
+            <option value="/eido/schema/refget/ArrayedNestedSequenceCollection.yaml">
+              refget/ArrayedNestedSequenceCollection
+            </option>
+            <option value="/eido/schema/refget/ArrayedSequenceCollection.yaml">refget/ArrayedSequenceCollection</option>
+            <option value="/eido/schema/refget/CustomAnnotatedArrayedSequenceCollection.yaml">
+              refget/CustomAnnotatedArrayedSequenceCollection</option>
+            <option value="/eido/schema/refget/RawSeqCol.yaml">refget/RawSeqCol</option>
+            <option value="/eido/schema/refget/SeqColArraySet.yaml">refget/SeqColArraySet</option>
+            <option value="/eido/schema/refget/TASeqCol.yaml">refget/TASeqCol</option>
+            <option value="/eido/schema/refget/annotated_collection_digest.yaml">refget/annotated_collection_digest.yaml
+            </option>
+            <option value="/eido/schema/refget/annotated_sequence_digest.yaml">refget/annotated_sequence_digest.yaml
+            </option>
+            <option value="/eido/schema/refget/sequence.yaml">refget/sequence.yaml </option>
+          </select>
         </div>
       </div>
-    </form> -->
-
-
-    <!-- results -->
-    <div class="card mt-3 mb-3">
-      <h5 class="card-header">Results</h5>
-      <div class="card-body" id="results">
-        No results to display.
-      </div>
-    </div>
-
-
-    <p class="h5">
-      <strong>Or</strong>
-      Select one of our schemas already in the registry:
-    </p>
-    <div class="d-flex flex-row align-items-center mb-3">
-      <select id="schema-dropdown" class="form-select w-25">
-        <option value=""><i>Select schema</i></option>
-        <option value="/eido/schema/bulker/cdid.yaml">bulker/cdid</option>
-        <option value="/eido/schema/bulker/cmdlist.yaml">bulker/cmdlist</option>
-        <option value="/eido/schema/bulker/importlist.yaml">bulker/importlist</option>
-        <option value="/eido/schema/bulker/manifest.yaml">bulker/manifest</option>
-        <option value="/eido/schema/pep/2.0.0.yaml">pep/2.0.0</option>
-        <option value="/eido/schema/pep/2.1.0.yaml">pep/2.1.0</option>
-        <option value="/eido/schema/pipelines/ProseqPEP.yaml">pipelines/ProseqPEP</option>
-        <option value="/eido/schema/pipelines/bedbuncher.yaml">pipelines/bedbuncher</option>
-        <option value="/eido/schema/pipelines/bedmaker.yaml">pipelines/bedmaker</option>
-        <option value="/eido/schema/pipelines/bedstat.yaml">pipelines/bedstat</option>
-        <option value="/eido/schema/pipelines/pepatac.yaml">pipelines/pepatac</option>
-        <option value="/eido/schema/pipelines/pipeline_interface.yaml">pipelines/pipeline_interface</option>
-        <option value="/eido/schema/refgenie/refgenie_build.yaml">refgenie/refgenie_build</option>
-        <option value="/eido/schema/refget/ACDList.yaml">refget/ACDList</option>
-        <option value="/eido/schema/refget/ASDList.yaml">refget/ASDList</option>
-        <option value="/eido/schema/refget/AnnotatedArrayedSequenceCollection.yaml">
-          refget/AnnotatedArrayedSequenceCollection</option>
-        <option value="/eido/schema/refget/AnnotatedSequenceList.yaml">refget/AnnotatedSequenceList</option>
-        <option value="/eido/schema/refget/ArrayedNestedSequenceCollection.yaml">refget/ArrayedNestedSequenceCollection
-        </option>
-        <option value="/eido/schema/refget/ArrayedSequenceCollection.yaml">refget/ArrayedSequenceCollection</option>
-        <option value="/eido/schema/refget/CustomAnnotatedArrayedSequenceCollection.yaml">
-          refget/CustomAnnotatedArrayedSequenceCollection</option>
-        <option value="/eido/schema/refget/RawSeqCol.yaml">refget/RawSeqCol</option>
-        <option value="/eido/schema/refget/SeqColArraySet.yaml">refget/SeqColArraySet</option>
-        <option value="/eido/schema/refget/TASeqCol.yaml">refget/TASeqCol</option>
-        <option value="/eido/schema/refget/annotated_collection_digest.yaml">refget/annotated_collection_digest.yaml
-        </option>
-        <option value="/eido/schema/refget/annotated_sequence_digest.yaml">refget/annotated_sequence_digest.yaml
-        </option>
-        <option value="/eido/schema/refget/sequence.yaml">refget/sequence.yaml </option>
-      </select>
-      <button class="btn btn-success" onclick="navigateToSchema()">
+      <button class="btn btn-success mt-3 mb-2" type="button" value="Validate" value="Validate">
         Validate
       </button>
     </div>
+  </div>
+  </form>
 
-    <!-- footer -->
-    <p class="mb-0 text-muted mt-3 border-top pt-3">Want API access? This tool is a static, client-hosted form that
-      accesses an API
-      validator service based on <a href="https://peppy.databio.org">peppy</a>. You can also access this service
-      programatically if you want to validate sample metadata as part of a pipeline or other tool.</p>
+  <!-- results -->
+  <div class="card mt-3 mb-3">
+    <h5 class="card-header">Results</h5>
+    <div class="card-body" id="results">
+      No results to display.
+    </div>
+  </div>
+
+  <!-- footer -->
+  <p class="mb-0 text-muted mt-3 border-top pt-3">Want API access? This tool is a static, client-hosted form that
+    accesses an API
+    validator service based on <a href="https://peppy.databio.org">peppy</a>. You can also access this service
+    programatically if you want to validate sample metadata as part of a pipeline or other tool.</p>
 </body>
 
 <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
@@ -197,6 +244,7 @@
 </footer>
 </div> <!-- container -->
 </div>
+<script src="/static/js/project_upload.js"></script>
 <script>
   const navigateToSchema = () => {
     const link = document.getElementById('schema-dropdown').value;
@@ -205,5 +253,48 @@
 
   }
 </script>
+<style>
+  #dnd-box {
+    border-style: dashed !important;
+  }
+
+  #dnd-box:hover {
+    cursor: pointer;
+  }
+</style>
+<script>
+
+  const handleClearFileInput = () => {
+    clearFileInput()
+    onFormChange()
+  }
+
+  // hover effects for drag and drop box
+  const dragAndDrop = document.getElementById("dnd-box");
+  dragAndDrop.addEventListener("mouseenter", function () {
+    dragAndDrop.classList.add("bg-light");
+  });
+  dragAndDrop.addEventListener("mouseleave", function () {
+    dragAndDrop.classList.remove("bg-light");
+  });
+
+  // event listener for drag and drop
+  const dropZone = document.getElementById("dnd-box");
+  dropZone.addEventListener("drop", handleDrop);
+
+  // event listener to render file names on input change
+  fileInput = document.getElementById("files");
+
+  // mount handler
+  fileInput.addEventListener("change", onFileInputChange);
+  fileInput.addEventListener("change", onFormChange);
+
+  // submit button things
+  const submitButton = document.getElementById("new-project-submit-btn");
+  submitButton.addEventListener("click", submitNewProject);
+
+
+</script>
+
 
 </html>

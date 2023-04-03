@@ -126,3 +126,5 @@ JWT_EXPIRATION = 4320  # minutes
 JWT_EXPIRATION_SECONDS = JWT_EXPIRATION * 60  # seconds
 
 AUTH_CODE_EXPIRATION = 5 * 60  # seconds
+
+CALLBACK_ENDPOINT = "/auth/callback"

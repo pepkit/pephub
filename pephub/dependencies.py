@@ -7,10 +7,10 @@ import logging
 
 from secrets import token_hex
 from dotenv import load_dotenv
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Annotated
 from datetime import datetime, timedelta
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Form
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
@@ -32,7 +32,6 @@ from .const import (
     DEFAULT_QDRANT_PORT,
     DEFAULT_HF_MODEL,
     JWT_EXPIRATION,
-    JWT_EXPIRATION_SECONDS,
     JWT_SECRET,
 )
 
@@ -107,6 +106,14 @@ def generate_random_auth_code() -> str:
     Generate a random 32-digit code.
     """
     n_bytes = int(32 / 2)
+    return token_hex(n_bytes)
+
+
+def generate_random_device_code() -> str:
+    """
+    Generate a random 8-digit code
+    """
+    n_bytes = int(8 / 2)
     return token_hex(n_bytes)
 
 

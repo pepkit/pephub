@@ -2,7 +2,7 @@
 
 source environment/production.env
 
-docker run -p 8000:8000 \
+docker run -p 80:80 \
     --env POSTGRES_HOST=$POSTGRES_HOST \
     --env POSTGRES_DB=$POSTGRES_DB \
     --env POSTGRES_USER=$POSTGRES_USER \
@@ -16,4 +16,4 @@ docker run -p 8000:8000 \
     --env GH_CLIENT_SECRET=$GH_CLIENT_SECRET \
     --env REDIRECT_URI=$REDIRECT_URI \
     --env SERVER_ENV=$SERVER_ENV \
-    pephub
+    databio/pephub
