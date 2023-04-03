@@ -30,6 +30,7 @@ ALL_VERSIONS = {
 
 views = APIRouter(prefix="/eido", tags=["views", "user interface", "interface"])
 
+
 @views.get("/schema/{namespace}/{project}", response_class=HTMLResponse)
 async def get_schema(request: Request, namespace: str, project: str):
     """
@@ -50,7 +51,6 @@ async def get_schema(request: Request, namespace: str, project: str):
             "schema": schema,
         },
     )
-
 
 
 @views.get("/schemas")

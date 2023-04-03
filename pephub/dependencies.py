@@ -144,7 +144,7 @@ def read_authorization_header(Authorization: str = Header(None)) -> Union[str, N
         _LOGGER_PEPHUB.error(e)
         return None
     except jwt.exceptions.ExpiredSignatureError:
-        return None
+        return HTTPException(status_code=401, detail="JWT has expired")
     return session_info
 
 
@@ -325,6 +325,7 @@ def verify_user_can_write_project(
                 f"The current authenticated user does not have permission to edit this project.",
             )
 
+
 def verify_user_can_fork(
     fork_request: ForkRequest,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
@@ -334,6 +335,7 @@ def verify_user_can_fork(
         yield
     else:
         raise HTTPException(401, "Unauthorized to fork this repo")
+
 
 def parse_boolean_env_var(env_var: str) -> bool:
     """
