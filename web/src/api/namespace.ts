@@ -68,23 +68,25 @@ export const getNamespaceProjects = (
   }
 };
 
-export const submitProject = (
+export const submitProjectFiles = (
   {
     namespace,
     project_name,
     tag,
     is_private,
     description,
+    files,
   }: {
     namespace: string;
     project_name: string;
     tag?: string;
     is_private?: boolean;
     description?: string;
+    files: FileList;
   },
   token: string,
 ) => {
-  const url = `${API_BASE}/namespaces/${namespace}/projects`;
+  const url = `${API_BASE}/namespaces/${namespace}/projects/files`;
   return axios
     .post<ProjectSubmissionResponse>(
       url,
@@ -93,11 +95,57 @@ export const submitProject = (
         tag: tag || 'default',
         is_private: is_private || false,
         description: description || '',
+        files: files,
       },
       {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
+        },
+      },
+    )
+    .then((res) => {
+      return res.data;
+    });
+};
+
+export const submitProjectJSON = (
+  {
+    namespace,
+    project_name,
+    tag,
+    is_private,
+    description,
+    sample_table,
+    config,
+  }: {
+    namespace: string;
+    project_name: string;
+    tag?: string;
+    is_private?: boolean;
+    description?: string;
+    sample_table: string;
+    config: string;
+  },
+  token: string,
+) => {
+  const url = `${API_BASE}/namespaces/${namespace}/projects/json`;
+  return axios
+    .post<ProjectSubmissionResponse>(
+      url,
+      {
+        pep_dict: {
+          name: project_name,
+          description: description || '',
+          config: config,
+        },
+        is_private: is_private || false,
+        tag: tag || 'default',
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       },
     )

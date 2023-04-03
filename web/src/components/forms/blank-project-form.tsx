@@ -1,9 +1,13 @@
 import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useSession } from '../../hooks/useSession';
-import { submitProject } from '../../api/namespace';
+import { submitProjectJSON } from '../../api/namespace';
 import { toast } from 'react-hot-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ErrorMessage } from '@hookform/error-message';
+import { SampleTable } from '../tables/sample-table';
+import { Tabs, Tab } from 'react-bootstrap';
+import { ProjectConfigEditor } from '../project/project-config';
 
 interface BlankProjectInputs {
   is_private: boolean;
@@ -11,6 +15,8 @@ interface BlankProjectInputs {
   project_name: string;
   tag: string;
   description: string;
+  sample_table: string;
+  config: string;
 }
 
 interface Props {
@@ -29,17 +35,36 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
     register,
     handleSubmit,
     watch,
-    formState: { isValid },
-  } = useForm<BlankProjectInputs>();
+    setValue,
+    formState: { isValid, errors },
+  } = useForm<BlankProjectInputs>({
+    defaultValues: {
+      is_private: false,
+      namespace: user?.login || '',
+      project_name: 'new-project',
+      sample_table: `sample_name,genome,fastq_1,fastq_2
+      sample1,GRCh38,fastq_1.fastq.gz,fastq_2.fastq.gz
+      sample2,GRCh38,fastq_1.fastq.gz,fastq_2.fastq.gz
+      `,
+      config: `pep_version: 2.1.0
+sample_table: samples.csv
+      `,
+    },
+  });
+
+  const sampleTableCSV = watch('sample_table');
+  const configYAML = watch('config');
 
   const onSubmit: SubmitHandler<BlankProjectInputs> = (data) => {
-    return submitProject(
+    return submitProjectJSON(
       {
         is_private: data.is_private,
         namespace: data.namespace,
         project_name: data.project_name,
         tag: data.tag || 'default',
         description: data.description || '',
+        sample_table: data.sample_table,
+        config: data.config,
       },
       jwt || '',
     );
@@ -92,7 +117,14 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
         </select>
         <span className="mx-1 mb-1">/</span>
         <input
-          {...register('project_name', { required: true })}
+          // dont allow any whitespace
+          {...register('project_name', {
+            required: true,
+            pattern: {
+              value: /^\S+$/,
+              message: 'No spaces allowed.',
+            },
+          })}
           id="blank-project-name"
           type="text"
           className="form-control"
@@ -101,6 +133,7 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
         <span className="mx-1 mb-1">:</span>
         <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
       </span>
+      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="blank_description"
         className="form-control mt-3"
@@ -108,6 +141,29 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
+      <Tabs defaultActiveKey="samples" id="blank-project-tabs" className="mt-3">
+        <Tab eventKey="samples" title="Samples">
+          <div className="p-1 border border-top-0">
+            <SampleTable
+              height={300}
+              data={sampleTableCSV}
+              onChange={(data) => {
+                setValue('sample_table', data);
+              }}
+            />
+          </div>
+        </Tab>
+        <Tab eventKey="config" title="Config">
+          <div className="p-1 border border-top-0">
+            <ProjectConfigEditor
+              value={configYAML}
+              setValue={(data) => {
+                setValue('config', data);
+              }}
+            />
+          </div>
+        </Tab>
+      </Tabs>
       <div className="mt-3">
         <button
           disabled={!isValid || mutation.isLoading}

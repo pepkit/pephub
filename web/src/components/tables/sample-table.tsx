@@ -9,12 +9,13 @@ interface Props {
   data: string;
   onChange?: (rows: string) => void;
   readOnly?: boolean;
+  height?: number;
 }
 /**
  * This table is meant to handle csv strings, so just pass in
  * the csv string and it will handle the rest
  */
-export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange }) => {
+export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height }) => {
   // internal state
   const [headers, setHeaders] = useState<string[]>([]);
   const [rows, setRows] = useState<any[][]>([]);
@@ -63,7 +64,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange }) => 
       <HotTable
         data={rows}
         stretchH="all"
-        height={700}
+        height={height || 700}
         readOnly={readOnly}
         colHeaders={headers}
         dropdownMenu={true}
