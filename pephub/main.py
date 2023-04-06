@@ -17,7 +17,7 @@ from .routers.api.v1.project import project as api_project
 from .routers.api.v1.user import user as api_user
 from .routers.api.v1.search import search as api_search
 from .routers.auth.base import auth as auth_router
-from .spa import SPA
+from .middleware import SPA, EnvironmentMiddleware
 from .const import LOG_LEVEL_MAP
 
 _LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
@@ -74,6 +74,7 @@ app.include_router(auth_router)
 
 # mount ui
 app.add_middleware(SPA)
+app.add_middleware(EnvironmentMiddleware)
 app.mount("/", StaticFiles(directory=SPA_PATH, html=True), name="spa")
 
 
