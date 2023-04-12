@@ -12,3 +12,16 @@ docs/
 tests/
 examples/
 scripts/
+
+**/node_modules/
+**/dist
+**/dist-ssr
+
+**/logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/lerna-debug.log*
+**/.env.local

@@ -4,8 +4,9 @@ import jwt_decode from 'jwt-decode';
 import { useCookies } from 'react-cookie';
 import { buildClientRedirectUrl } from '../api/auth';
 
-const AUTH_BASE = import.meta.env.VITE_AUTH_BASE;
-const SESSION_COOKIE_NAME = import.meta.env.VITE_SESSION_COOKIE_NAME;
+const VITE_API_HOST = import.meta.env.VITE_API_HOST || '';
+const AUTH_BASE = `${VITE_API_HOST}/auth`;
+const SESSION_COOKIE_NAME = 'pephub_session';
 
 export const useSession = () => {
   const [cookies, setCookie, removeCookie] = useCookies([SESSION_COOKIE_NAME]);

@@ -7,7 +7,7 @@ interface Props {
   onHide: () => void;
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_API_HOST || '';
 
 export const NamespaceAPIEndpointsModal: FC<Props> = ({ namespace, show, onHide }) => (
   <Modal size="lg" centered animation={false} show={show} onHide={onHide}>

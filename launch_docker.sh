@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source environment/production.env
-
 docker run -p 80:80 \
     --env POSTGRES_HOST=$POSTGRES_HOST \
     --env POSTGRES_DB=$POSTGRES_DB \
@@ -14,6 +12,5 @@ docker run -p 80:80 \
     --env HF_MODEL=$HF_MODEL \
     --env GH_CLIENT_ID=$GH_CLIENT_ID \
     --env GH_CLIENT_SECRET=$GH_CLIENT_SECRET \
-    --env REDIRECT_URI=$REDIRECT_URI \
-    --env SERVER_ENV=$SERVER_ENV \
-    databio/pephub
+    --env BASE_URI=$BASE_URI \
+    pephub

@@ -75,11 +75,12 @@ def login(client_redirect_uri: Union[str, None] = None):
         "client_redirect_uri": client_redirect_uri,
         "secret": JWT_SECRET,
     }
-    return build_authorization_url(
+    authorization_url = build_authorization_url(
         client_id=github_app_config.client_id,
         redirect_uri=github_app_config.redirect_uri,
         state=json.dumps(state),
     )
+    return authorization_url
 
 
 @auth.get("/callback")

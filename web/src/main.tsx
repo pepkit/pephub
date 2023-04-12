@@ -1,11 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Home from './pages/Home';
+
+// routing
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
 import { LoginSuccessPage } from './pages/LoginSuccess';
+import { SearchPage } from './pages/Search';
+import { EditProjectPage } from './pages/EditProject';
+
+// notifications
 import { Toaster } from 'react-hot-toast';
 
 // react query stuff
@@ -21,8 +27,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'handsontable/dist/handsontable.full.min.css';
 import './globals.css';
-import { SearchPage } from './pages/Search';
-import { EditProjectPage } from './pages/EditProject';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,14 +63,20 @@ const router = createBrowserRouter([
   },
 ]);
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <Toaster position="top-right" reverseOrder={false} gutter={8} toastOptions={{ duration: 3000 }} />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </HelmetProvider>
-  </React.StrictMode>,
-);
+const API_HOST = import.meta.env.VITE_API_HOST;
+
+const App: React.FC = () => {
+  return (
+    <React.StrictMode>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+          <Toaster position="top-right" reverseOrder={false} gutter={8} toastOptions={{ duration: 3000 }} />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </HelmetProvider>
+    </React.StrictMode>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />);

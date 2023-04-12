@@ -8,7 +8,7 @@ python-multipart>=0.0.5
 tqdm
 uvicorn
 python-dotenv
-pepdbagent
+pepdbagent @ git+https://github.com/pepkit/pepdbagent.git@master_no_binary#egg=pepdbagent
 peppy
 sentence-transformers
 qdrant-client

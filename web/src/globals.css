@@ -6,9 +6,14 @@
   height: 100vh;
 }
 
+/* edit buttons, since I like mine better than bootstrap :) */
 .btn-outline-dark:hover {
   color: black;
   background-color: #0000001e;
+}
+
+.btn {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 
 .pulse {

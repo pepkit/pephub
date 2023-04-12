@@ -10,7 +10,8 @@ export interface ApiBase {
   message: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+const API_BASE = `${API_HOST}/api/v1`;
 
 export const getApiBase = () => {
   const url = `${API_BASE}/`;

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Project } from '../../types';
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+const API_BASE = `${API_HOST}/api/v1`;
 
 export interface DeleteProjectResponse {
   message: string;

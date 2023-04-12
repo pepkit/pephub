@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const AUTH_BASE = import.meta.env.VITE_AUTH_BASE;
-const CLIENT_REDIRECT_URL = import.meta.env.VITE_CLIENT_REDIRECT_URL;
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+const AUTH_BASE = `${API_HOST}/auth`;
+const CLIENT_REDIRECT_URL = '/login/success';
 
 export const buildClientRedirectUrl = (): string => {
   const scheme = window.location.protocol;
