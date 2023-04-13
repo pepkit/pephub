@@ -80,11 +80,17 @@ export interface SearchHit {
 }
 
 export interface Schema {
-  name: string;
-  docs: string;
-  schema: string;
+  description: string;
+  type: string;
+  properties: object;
+  required?: string[];
 }
 
 export interface SchemaResults {
   registry: Schema;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: string;
 }

@@ -14,7 +14,7 @@ class SPA(BaseHTTPMiddleware):
         # make sure the api doesnt get redirected
         response = await call_next(request)
 
-        # If the response is a 404 and the path doesn't start with `/api` or `/auth`, 
+        # If the response is a 404 and the path doesn't start with `/api` or `/auth`,
         # serve the index.html file
         if (
             response.status_code == 404
@@ -26,6 +26,7 @@ class SPA(BaseHTTPMiddleware):
 
         return response
 
+
 class EnvironmentMiddleware(BaseHTTPMiddleware):
     """
     This middleware will temporarily set any environment variables
@@ -33,6 +34,7 @@ class EnvironmentMiddleware(BaseHTTPMiddleware):
 
     These can be semi-colon separated key-value pairs or a JSON object.
     """
+
     async def dispatch(self, request: Request, call_next: Send) -> Response:
         # set the environment variables
         env = request.query_params.get("env")
@@ -40,6 +42,7 @@ class EnvironmentMiddleware(BaseHTTPMiddleware):
             self.env = {}
             if env.startswith("{"):
                 import json
+
                 self.env = json.loads(env)
             else:
                 for pair in env.split(";"):
@@ -48,7 +51,6 @@ class EnvironmentMiddleware(BaseHTTPMiddleware):
 
             for key, value in self.env.items():
                 os.environ[key] = value
-        
 
         response = await call_next(request)
 

@@ -17,6 +17,7 @@ load_dotenv()
 
 search = APIRouter(prefix="/api/v1/search", tags=["search"])
 
+
 # perform a search
 @search.post("/", summary="Search for a PEP")
 async def search_for_pep(
