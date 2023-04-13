@@ -7,7 +7,7 @@ import logging
 
 from secrets import token_hex
 from dotenv import load_dotenv
-from typing import Union, List, Optional, Annotated
+from typing import Union, List, Optional
 from datetime import datetime, timedelta
 
 from fastapi import Depends, Header, Form
