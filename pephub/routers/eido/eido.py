@@ -365,18 +365,18 @@ async def validate(
 
             p = peppy.Project(f"{dirpath}/{init_file.filename}")
 
-        # save schema to disk and read in with tempdir
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as schema_fh:
-            schema_fh.write(schema)
-            schema_path = schema_fh.name
+    # save schema to disk and read in with tempdir
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as schema_fh:
+        schema_fh.write(schema)
+        schema_path = schema_fh.name
 
-            # load with eido
-            try:
-                schema = eido.read_schema(schema_path)
-            except eido.exceptions.EidoSchemaInvalidError as e:
-                raise HTTPException(
-                    status_code=406, detail={"error": f"Schema is invalid: {str(e)}"}
-            )
+        # load with eido
+        try:
+            schema = eido.read_schema(schema_path)
+        except eido.exceptions.EidoSchemaInvalidError as e:
+            raise HTTPException(
+                status_code=406, detail={"error": f"Schema is invalid: {str(e)}"}
+        )
 
     # validate
     try:

@@ -10,8 +10,8 @@ const fetchSchema = async (registry: string) => {
   return data;
 };
 
-export const useSchema = (registry: string) => {
-  return useQuery(['schema', registry], () => fetchSchema(registry), {
+export const useSchema = (registry: string | undefined) => {
+  return useQuery(['schema', registry], () => fetchSchema(registry || ''), {
     enabled: registry !== undefined && registry.length > 0,
     refetchOnWindowFocus: false,
   });

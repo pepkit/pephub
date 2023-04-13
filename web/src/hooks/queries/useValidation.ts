@@ -9,7 +9,7 @@ const runValidation = async (pepFiles: FileList | string | undefined, schema: st
   const { data: result } = await axios.post<ValidationResult>(
     `${API_BASE}/eido/validate`,
     {
-      pepFiles: pepFiles,
+      pep: pepFiles,
       schema: schema,
     },
     {

@@ -41,12 +41,13 @@ export const ValidatorForm: FC = () => {
   const [useExistingSchema, setUseExistingSchema] = useState(true);
   const [schemaString, setSchemaString] = useState<string | undefined>(undefined);
 
+  // watch the form data so we can use it
   const pepFiles = watch('pepFiles');
   const pepRegistryPath = watch('pepRegistryPath');
   const schemaFiles = watch('schemaFiles');
   const schemaRegistryPath = watch('schemaRegistryPath');
 
-  const { data: schema } = useSchema(schemaRegistryPath?.value || '');
+  const { data: schema } = useSchema(schemaRegistryPath?.value);
 
   const {
     data: result,
@@ -57,6 +58,7 @@ export const ValidatorForm: FC = () => {
 
   useEffect(() => {
     // when these change, we need to parse either to a string
+    debugger;
     if (useExistingSchema) {
       setSchemaString(JSON.stringify(schema));
     } else {
