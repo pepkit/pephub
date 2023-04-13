@@ -17,6 +17,7 @@ from .routers.api.v1.project import project as api_project
 from .routers.api.v1.user import user as api_user
 from .routers.api.v1.search import search as api_search
 from .routers.auth.base import auth as auth_router
+from .routers.eido.eido import router as eido_router
 from .middleware import SPA, EnvironmentMiddleware
 from .const import LOG_LEVEL_MAP
 
@@ -71,6 +72,7 @@ app.include_router(api_namespace)
 app.include_router(api_project)
 app.include_router(api_search)
 app.include_router(auth_router)
+app.include_router(eido_router)
 
 # mount ui
 app.add_middleware(SPA)

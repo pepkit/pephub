@@ -78,3 +78,13 @@ export interface SearchHit {
   };
   vector: null;
 }
+
+export interface Schema {
+  name: string;
+  docs: string;
+  schema: string;
+}
+
+export interface SchemaResults {
+  registry: Schema;
+}
