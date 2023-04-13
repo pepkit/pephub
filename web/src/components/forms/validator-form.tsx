@@ -52,26 +52,26 @@ export const ValidatorForm: FC = () => {
   const {
     data: result,
     error,
-    isFetching,
+    isFetching: isValidating,
     refetch,
   } = useValidation(useExistingPEP ? pepRegistryPath?.value : pepFiles, schemaString);
 
+  // handle schema changes to update the schema string
   useEffect(() => {
     // when these change, we need to parse either to a string
-    debugger;
     if (useExistingSchema) {
       setSchemaString(JSON.stringify(schema));
     } else {
       // read contents from file
       if (schemaFiles) {
         const reader = new FileReader();
-        reader.readAsText(schemaFiles[0]);
         reader.onload = () => {
           setSchemaString(reader.result as string);
         };
+        reader.readAsText(schemaFiles[0]);
       }
     }
-  }, [schemaRegistryPath?.value, schemaFiles]);
+  }, [schemaRegistryPath?.value, schemaFiles, schema]);
 
   const runValidation = () => {
     refetch();
@@ -208,21 +208,36 @@ export const ValidatorForm: FC = () => {
           </div>
         </div>
       </form>
-      <div>
-        {isFetching ? (
-          <div className="d-flex justify-content-center">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
+      <div className="my-3">
+        {isValidating ? (
+          <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '300px' }}>
+            <img className="bounce" src="/pep-dark.svg" alt="loading" width="50" height="50" />
+            <p className="text-muted">Validating...</p>
           </div>
         ) : error ? (
           <div className="alert alert-danger" role="alert">
-            "error"
+            <pre>
+              <code>{JSON.stringify(error, null, 2)}</code>
+            </pre>
           </div>
         ) : result ? (
-          <div className="alert alert-success" role="alert">
-            "result"
-          </div>
+          <>
+            {result.valid ? (
+              <div className="alert alert-success" role="alert">
+                <p className="mb-0">PEP is valid!</p>
+              </div>
+            ) : (
+              <>
+                <div className="alert alert-danger" role="alert">
+                  <p className="mb-0">PEP is invalid!</p>
+                  <p className="mb-0">Errors:</p>
+                  <pre>
+                    <code>{result.errors}</code>
+                  </pre>
+                </div>
+              </>
+            )}
+          </>
         ) : null}
       </div>
     </>

@@ -160,7 +160,9 @@ async def get_schema(request: Request, namespace: str, project: str):
     # like pipelines/ProseqPEP.yaml
 
     try:
-        schema = eido.read_schema(f"http://schema.databio.org/{namespace}/{project}.yaml")[0]
+        schema = eido.read_schema(
+            f"http://schema.databio.org/{namespace}/{project}.yaml"
+        )[0]
     except IndexError:
         raise HTTPException(status_code=404, detail="Schema not found")
 
@@ -325,7 +327,11 @@ async def main():
 # NEW STUFF FOR REACT FRONTEND
 @router.post("/validate")
 async def validate(
-    pep: Union[str, List[UploadFile]] = [Form(), File(...)], schema: str = Form(), agent: PEPDatabaseAgent = Depends(get_db),
+    # accept both pep_registry and pep_files, both should be optional
+    pep_registry: Optional[str] = Form(None),
+    pep_files: Optional[List[UploadFile]] = None,
+    schema: str = Form(),
+    agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
     This endpoint validates a PEP against a schema. That is, one PEP, and one schema.
@@ -341,14 +347,23 @@ async def validate(
     If at any point the PEP or schema cannot be validated, an error is raised and the validation process is
     halted. We also should return errors for when the PEP or Schema can't be loaded or found for some reason.
     """
-    if isinstance(pep, str):
+    # check they sent at least pep_registry or pep_files
+    if pep_registry is None and pep_files is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "Must supply either a registry path or a list of files to validate."
+            },
+        )
+
+    if pep_registry is not None:
         # split into namespace, name, tag
-        namespace, name_tag = pep.split("/")
+        namespace, name_tag = pep_registry.split("/")
         name, tag = name_tag.split(":")
         p = agent.project.get(namespace, name, tag)
     else:
-        init_file = parse_user_file_upload(pep)
-        init_file, other_files = split_upload_files_on_init_file(pep, init_file)
+        init_file = parse_user_file_upload(pep_files)
+        init_file, other_files = split_upload_files_on_init_file(pep_files, init_file)
 
         # create temp dir that gets deleted when we're done
         with tempfile.TemporaryDirectory() as dirpath:
@@ -365,29 +380,28 @@ async def validate(
 
             p = peppy.Project(f"{dirpath}/{init_file.filename}")
 
-    # save schema to disk and read in with tempdir
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as schema_fh:
-        schema_fh.write(schema)
-        schema_path = schema_fh.name
-
-        # load with eido
+    # save schema string to temp file, then read in with eido
+    with tempfile.NamedTemporaryFile(mode="w") as schema_file:
+        schema_file.write(schema)
+        schema_file.flush()
         try:
-            schema = eido.read_schema(schema_path)
+            schema_dict = eido.read_schema(schema_file.name)[0]
         except eido.exceptions.EidoSchemaInvalidError as e:
             raise HTTPException(
-                status_code=406, detail={"error": f"Schema is invalid: {str(e)}"}
-        )
+                status_code=406,
+                detail={"error": f"Schema is invalid: {str(e)}"},
+            )
 
     # validate
     try:
-        eido.validate_config(p, schema, exclude_case=True)
+        eido.validate_project(
+            p,
+            schema_dict,
+        )
     # while we catch this, its still a 200 response since we want to
     # return the validation errors
     except eido.exceptions.EidoValidationError as e:
-        return {
-            "valid": False,
-            "errors": str(e)
-        }
+        return {"valid": False, "errors": str(e)}
     except Exception as e:
         raise HTTPException(
             status_code=406,
@@ -396,7 +410,4 @@ async def validate(
     # everything passed, return valid
     finally:
         # return project is valid
-        return {
-            "valid": True,
-            "errors": None
-        }
+        return {"valid": True, "errors": None}
