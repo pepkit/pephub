@@ -3,7 +3,7 @@ import peppy
 import yaml
 import pandas as pd
 from io import StringIO
-from typing import Callable, Annotated
+from typing import Callable
 from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pepdbagent import PEPDatabaseAgent
