@@ -405,9 +405,11 @@ def get_namespace_info(
     try:
         yield agent.namespace.get(query=namespace, admin=user).results[0]
     except IndexError:
-        raise HTTPException(
-            404,
-            f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
+        # namespace doesnt exist in database, so we must return a blank namespace
+        yield Namespace(
+            namespace=namespace,
+            number_of_projects=0,
+            number_of_samples=0,
         )
 
 
