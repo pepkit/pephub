@@ -10,7 +10,6 @@ from pepdbagent.exceptions import ProjectUniqueNameError
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ....const import DEFAULT_TAG, BLANK_PEP_CONFIG, BLANK_PEP_SAMPLE_TABLE
-from typing import Annotated
 from ...models import ProjectRawModel, ProjectJsonRequest
 
 from dotenv import load_dotenv
