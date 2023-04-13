@@ -365,7 +365,7 @@ def get_qdrant(
             pass
     # else try to connect, test connectiona and return client if connection is successful.
     qdrant = QdrantClient(
-        host=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
+        url=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
         port=os.environ.get("QDRANT_PORT", DEFAULT_QDRANT_PORT),
         api_key=os.environ.get("QDRANT_API_KEY", None),
     )
