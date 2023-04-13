@@ -4,7 +4,7 @@
 
 _The following assumes you have already setup a database. If you have not, please see [here](#1-database-setup)._
 
-There are two components to PEPhub: a FatsAPI backend, and a React frontend. As such, when developing, you will need to run both the backend and frontend development servers.
+There are two components to PEPhub: a FastAPI backend, and a React frontend. As such, when developing, you will need to run both the backend and frontend development servers.
 
 ## Backend development
 
