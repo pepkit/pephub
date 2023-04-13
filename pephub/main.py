@@ -77,7 +77,7 @@ app.add_middleware(SPA)
 # app.add_middleware(EnvironmentMiddleware)
 app.mount("/", StaticFiles(directory=SPA_PATH, html=True), name="spa")
 
-
+# TODO: remove this when we are sure its not needed anymore
 def main():
     # set up the logger
     global _LOGGER

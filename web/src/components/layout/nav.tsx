@@ -35,7 +35,7 @@ export const Nav: FC = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse me-auto" id="navbarSupportedContent">
-          <ul className="mb-2 navbar-nav ms-auto mb-sm-0">
+          <ul className="mb-2 navbar-nav ms-auto d-flex flex-row align-items-center">
             <li>
               <div className="mt-1 input-group">
                 <input
@@ -48,12 +48,12 @@ export const Nav: FC = () => {
                   onChange={(e) => setGlobalSearch(e.target.value)}
                   id="global-search-bar"
                   type="text"
-                  className="form-control border-end-0"
+                  className="form-control border-end-0 shadow-sm"
                   placeholder="Search pephub"
                   aria-label="search"
                   aria-describedby="search"
                 />
-                <span className="input-group-text border-start-0">
+                <span className="input-group-text border-start-0 shadow-sm">
                   <div className="px-2 border rounded border-secondary text-secondary">/</div>
                 </span>
               </div>
@@ -69,13 +69,13 @@ export const Nav: FC = () => {
                 </Dropdown.Menu>
               </Dropdown>
             </li>
-            <li className="mx-2 my-0 nav-item h5 pt-1">
+            <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               <a className="nav-link" href="/api/v1/docs">
                 <i className="me-1 bi bi-journal"></i>
                 API docs
               </a>
             </li>
-            <li className="mx-2 my-0 nav-item h5 pt-1">
+            <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               <a className="nav-link" href="https://github.com/pepkit/pephub" target="_blank">
                 <i className="me-1 bi bi-github"></i>
                 GitHub

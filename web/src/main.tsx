@@ -10,6 +10,7 @@ import { ProjectPage } from './pages/Project';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { SearchPage } from './pages/Search';
 import { EditProjectPage } from './pages/EditProject';
+import { EidoValidator } from './pages/Validator';
 
 // notifications
 import { Toaster } from 'react-hot-toast';
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
   {
     path: '/search',
     element: <SearchPage />,
+  },
+  {
+    path: '/validate',
+    element: <EidoValidator />,
   },
   {
     path: '/login/success',

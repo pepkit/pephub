@@ -30,8 +30,8 @@ function Home() {
                   <i className="bi bi-github"></i> Login with GitHub
                 </button>
               )}
-              <a href="/eido/validator/index.html">
-                <button className="btn btn-outline-dark btn-lg ms-2" disabled>
+              <a href="/validate">
+                <button className="btn btn-outline-dark btn-lg ms-2">
                   <i className="bi bi-check2-circle me-1"></i>Validation
                 </button>
               </a>
