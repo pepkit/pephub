@@ -6,7 +6,7 @@ FROM node:16 as build
 WORKDIR /src
 
 COPY web/package.json ./
-COPY web/* .
+COPY web/* ./
 
 # remove any .env files that made it in somehow...
 RUN rm -f .env
