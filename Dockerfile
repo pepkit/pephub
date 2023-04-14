@@ -34,10 +34,6 @@ EXPOSE 80
 WORKDIR /app
 COPY . /app
 
-# remove anything in web/ since all we need 
-# is the dist folder from the frontend build
-RUN rm -rf web/*
-
 COPY --from=build /src/dist web/dist/
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements/requirements-all.txt
