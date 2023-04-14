@@ -6,8 +6,6 @@ FROM node:16 as build
 WORKDIR /src
 
 COPY web/package.json ./
-COPY web/*-lock.json ./
-
 COPY web/* .
 
 # remove any .env files that made it in somehow...
