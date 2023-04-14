@@ -1,3 +1,4 @@
+from enum import Enum
 from fastapi import APIRouter, __version__ as fastapi_version
 from fastapi.responses import JSONResponse
 from peppy import __version__ as peppy_version
@@ -14,7 +15,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-search = APIRouter(prefix="/api/v1/search", tags=["api", "search", "v1"])
+search = APIRouter(prefix="/api/v1/search", tags=["search"])
 
 
 # perform a search
@@ -24,8 +25,6 @@ async def search_for_pep(
     qdrant: QdrantClient = Depends(get_qdrant),
     model: SentenceTransformer = Depends(get_sentence_transformer),
     agent: PEPDatabaseAgent = Depends(get_db),
-    user: str = Depends(get_user_from_session_info),
-    user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
 ):
     """

@@ -20,6 +20,7 @@ from yacman import load_yaml
 
 from ..models import RawValidationQuery
 from ...const import EIDO_TEMPLATES_PATH, STATICS_PATH
+from ...helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...dependencies import *
 
 templates = Jinja2Templates(directory=EIDO_TEMPLATES_PATH)
@@ -149,7 +150,7 @@ async def pep_fromhub(namespace, project):
     return {"namespace": namespace, "project": project, "response": response.json()}
 
 
-@router.get("/schema/{namespace}/{project}", response_class=HTMLResponse)
+@router.get("/schemas/{namespace}/{project}")
 async def get_schema(request: Request, namespace: str, project: str):
     """
     Takes namespace and project values for a schema endpoint
@@ -158,17 +159,14 @@ async def get_schema(request: Request, namespace: str, project: str):
     # endpoint to schema.databio.org/...
     # like pipelines/ProseqPEP.yaml
 
-    schema = eido.read_schema(f"http://schema.databio.org/{namespace}/{project}")
+    try:
+        schema = eido.read_schema(
+            f"http://schema.databio.org/{namespace}/{project}.yaml"
+        )[0]
+    except IndexError:
+        raise HTTPException(status_code=404, detail="Schema not found")
 
-    return templates.TemplateResponse(
-        "schema.html",
-        {
-            "request": request,
-            "namespace": namespace,
-            "project": project,
-            "schema": schema,
-        },
-    )
+    return schema
 
 
 @router.post("/validate/pep")
@@ -318,3 +316,98 @@ async def main():
 async def main():
     print(je.list_templates())
     return FileResponse(os.path.join(STATICS_PATH, "index.html"))
+
+
+@router.get("/validator")
+async def main():
+    print(je.list_templates())
+    return FileResponse(os.path.join(STATICS_PATH, "schemas.html"))
+
+
+# NEW STUFF FOR REACT FRONTEND
+@router.post("/validate")
+async def validate(
+    # accept both pep_registry and pep_files, both should be optional
+    pep_registry: Optional[str] = Form(None),
+    pep_files: Optional[List[UploadFile]] = None,
+    schema: str = Form(),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    """
+    This endpoint validates a PEP against a schema. That is, one PEP, and one schema.
+
+    The PEP is one of two options: A list of UploadFiles that constitute the PEP, or a string
+    which is then assumed to be the registry path to the PEP inside PEPhub. The schema, on the other hand,
+    is always a string to a JSON-stringified version of the schema (which is a JSON Schema yaml file).
+
+    The validation happens in three steps: First, the PEP is saved to disk and loaded into memory. Second, the
+    the schema is saved to disk and loaded into memory. Finally, the PEP is validated against the schema using
+    eido. The validation results are then returned as a JSON object.
+
+    If at any point the PEP or schema cannot be validated, an error is raised and the validation process is
+    halted. We also should return errors for when the PEP or Schema can't be loaded or found for some reason.
+    """
+    # check they sent at least pep_registry or pep_files
+    if pep_registry is None and pep_files is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "Must supply either a registry path or a list of files to validate."
+            },
+        )
+
+    if pep_registry is not None:
+        # split into namespace, name, tag
+        namespace, name_tag = pep_registry.split("/")
+        name, tag = name_tag.split(":")
+        p = agent.project.get(namespace, name, tag)
+    else:
+        init_file = parse_user_file_upload(pep_files)
+        init_file, other_files = split_upload_files_on_init_file(pep_files, init_file)
+
+        # create temp dir that gets deleted when we're done
+        with tempfile.TemporaryDirectory() as dirpath:
+            # save init file
+            with open(f"{dirpath}/{init_file.filename}", "wb") as cfg_fh:
+                shutil.copyfileobj(init_file.file, cfg_fh)
+
+            # save any other files the user might have supplied
+            if other_files is not None:
+                for upload_file in other_files:
+                    # open new file inside the tmpdir
+                    with open(f"{dirpath}/{upload_file.filename}", "wb") as local_tmpf:
+                        shutil.copyfileobj(upload_file.file, local_tmpf)
+
+            p = peppy.Project(f"{dirpath}/{init_file.filename}")
+
+    # save schema string to temp file, then read in with eido
+    with tempfile.NamedTemporaryFile(mode="w") as schema_file:
+        schema_file.write(schema)
+        schema_file.flush()
+        try:
+            schema_dict = eido.read_schema(schema_file.name)[0]
+        except eido.exceptions.EidoSchemaInvalidError as e:
+            raise HTTPException(
+                status_code=406,
+                detail={"error": f"Schema is invalid: {str(e)}"},
+            )
+
+    # validate
+    try:
+        eido.validate_project(
+            p,
+            schema_dict,
+        )
+    # while we catch this, its still a 200 response since we want to
+    # return the validation errors
+    except eido.exceptions.EidoValidationError as e:
+        return {"valid": False, "errors": str(e)}
+    except Exception as e:
+        raise HTTPException(
+            status_code=406,
+            detail={"error": f"Unknown error while validating: {str(e)}"},
+        )
+    # everything passed, return valid
+    finally:
+        # return project is valid
+        return {"valid": True, "errors": None}

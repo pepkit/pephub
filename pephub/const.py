@@ -82,6 +82,8 @@ STATICS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), STATICS_
 EIDO_DIRNAME = "eido_validator"
 EIDO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), EIDO_DIRNAME)
 
+SPA_PATH = "web/dist"
+
 TAGS_METADATA = [
     {"name": "root", "description": "Base route for API."},
     {
@@ -124,3 +126,5 @@ JWT_EXPIRATION = 4320  # minutes
 JWT_EXPIRATION_SECONDS = JWT_EXPIRATION * 60  # seconds
 
 AUTH_CODE_EXPIRATION = 5 * 60  # seconds
+
+CALLBACK_ENDPOINT = "/auth/callback"

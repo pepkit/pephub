@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from typing import Union, List, Optional
 from datetime import datetime, timedelta
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Form
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
@@ -21,7 +21,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
 
-from .routers.models import AnnotationModel, NamespaceList, Namespace
+from .routers.models import AnnotationModel, NamespaceList, Namespace, ForkRequest
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -32,7 +32,6 @@ from .const import (
     DEFAULT_QDRANT_PORT,
     DEFAULT_HF_MODEL,
     JWT_EXPIRATION,
-    JWT_EXPIRATION_SECONDS,
     JWT_SECRET,
 )
 
@@ -110,6 +109,14 @@ def generate_random_auth_code() -> str:
     return token_hex(n_bytes)
 
 
+def generate_random_device_code() -> str:
+    """
+    Generate a random 8-digit code
+    """
+    n_bytes = int(8 / 2)
+    return token_hex(n_bytes)
+
+
 def get_db() -> PEPDatabaseAgent:
     """
     Grab a temporary connection to the database.
@@ -137,7 +144,7 @@ def read_authorization_header(Authorization: str = Header(None)) -> Union[str, N
         _LOGGER_PEPHUB.error(e)
         return None
     except jwt.exceptions.ExpiredSignatureError:
-        return None
+        return HTTPException(status_code=401, detail="JWT has expired")
     return session_info
 
 
@@ -319,6 +326,17 @@ def verify_user_can_write_project(
             )
 
 
+def verify_user_can_fork(
+    fork_request: ForkRequest,
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+) -> bool:
+    fork_namespace = fork_request.fork_to
+    if fork_namespace in (namespace_access_list or []):
+        yield
+    else:
+        raise HTTPException(401, "Unauthorized to fork this repo")
+
+
 def parse_boolean_env_var(env_var: str) -> bool:
     """
     Helper function to parse a boolean environment variable
@@ -347,7 +365,7 @@ def get_qdrant(
             pass
     # else try to connect, test connectiona and return client if connection is successful.
     qdrant = QdrantClient(
-        host=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
+        url=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
         port=os.environ.get("QDRANT_PORT", DEFAULT_QDRANT_PORT),
         api_key=os.environ.get("QDRANT_API_KEY", None),
     )
@@ -387,9 +405,11 @@ def get_namespace_info(
     try:
         yield agent.namespace.get(query=namespace, admin=user).results[0]
     except IndexError:
-        raise HTTPException(
-            404,
-            f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
+        # namespace doesnt exist in database, so we must return a blank namespace
+        yield Namespace(
+            namespace=namespace,
+            number_of_projects=0,
+            number_of_samples=0,
         )
 
 

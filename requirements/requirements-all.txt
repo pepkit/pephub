@@ -1,4 +1,5 @@
 fastapi>=0.72.0
+aiofiles
 eido
 logmuse>=0.2.7
 jinja2>=3.1.2
@@ -7,7 +8,7 @@ python-multipart>=0.0.5
 tqdm
 uvicorn
 python-dotenv
-pepdbagent
+pepdbagent @ git+https://github.com/pepkit/pepdbagent.git@master_no_binary#egg=pepdbagent
 peppy
 sentence-transformers
 qdrant-client

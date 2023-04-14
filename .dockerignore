@@ -12,3 +12,6 @@ docs/
 tests/
 examples/
 scripts/
+
+# build files
+node_modules/

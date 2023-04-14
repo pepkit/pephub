@@ -130,6 +130,8 @@ dmypy.json
 .env.*
 env/
 
+# web stuff
+.vite
 
 # pephub data
 pephub/data
