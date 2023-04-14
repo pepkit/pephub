@@ -2,6 +2,21 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.7.0] - 2022-04-14
+### Fixed
+- Private projects were viewable to those not logged in
+- Some projects were causing 500 server errors
+
+### Added
+- Device authentication flow
+- Ability to "fork" a PEP
+- Web interface lets you download a zip file of a PEP
+- New submission flow for JSON representation of a PEP
+
+### Changed
+- Reimplemented web interface in React.js
+- New deploymnet strategy that uses `uvicorn` instead of `pip install .`
+
 ## [0.6.0] - 2022-03-06
 ### Fixed
 - Buffering configuration file
