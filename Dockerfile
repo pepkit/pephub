@@ -21,7 +21,7 @@ RUN npm run build
 # -------------
 # BUILD BACKEND
 # -------------
-FROM python:3.10
+FROM python:3.10-slim
 LABEL authors="Nathan LeRoy, Nathan Sheffield"
 
 RUN apt-get update
@@ -33,9 +33,13 @@ EXPOSE 80
 
 WORKDIR /app
 COPY . /app
+
+# remove anything in web/ since all we need 
+# is the dist folder from the frontend build
+RUN rm -rf web/*
+
 COPY --from=build /src/dist web/dist/
 RUN python -m pip install --upgrade pip
-RUN python -m pip install --upgrade setuptools
-RUN pip install .
+RUN pip install -r requirements/requirements-all.txt
 
 CMD ["uvicorn", "pephub.main:app", "--host", "0.0.0.0", "--port", "80"]

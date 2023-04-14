@@ -8,11 +8,13 @@ python-multipart>=0.0.5
 tqdm
 uvicorn
 python-dotenv
-pepdbagent @ git+https://github.com/pepkit/pepdbagent.git@master_no_binary#egg=pepdbagent
+pepdbagent
 peppy
-sentence-transformers
 qdrant-client
 requests
 aiofiles
 pyjwt[crypto]
 coloredlogs
+-f https://download.pytorch.org/whl/torch_stable.html
+torch>=1.6.0+cpu
+sentence-transformers
