@@ -2,7 +2,20 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
-## [0.7.0] - 2022-04-14
+## [0.7.3] - 2022-04-15
+
+### Changed
+
+- Fixed dependencies to _actually_ install the `cpu` only version of `torch`
+- Added new macOS dependencies to support native development/deployment
+
+## [0.7.2] - 2022-04-14
+
+### Changed
+
+- Fix bug that was deleting images from the frontend
+
+## [0.7.1] - 2022-04-14
 
 ### Changed
 

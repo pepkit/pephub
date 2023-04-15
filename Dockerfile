@@ -36,6 +36,6 @@ COPY . /app
 
 COPY --from=build /src/dist web/dist/
 RUN python -m pip install --upgrade pip
-RUN pip install -r requirements/requirements-all.txt
+RUN pip install -r requirements/requirements-all.txt --no-cache-dir
 
 CMD ["uvicorn", "pephub.main:app", "--host", "0.0.0.0", "--port", "80"]
