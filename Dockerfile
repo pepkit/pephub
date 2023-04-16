@@ -7,6 +7,7 @@ WORKDIR /src
 
 COPY web/package.json ./
 COPY web/* ./
+COPY web/public ./public
 
 # remove any .env files that made it in somehow...
 RUN rm -f .env
