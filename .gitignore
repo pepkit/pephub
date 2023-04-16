@@ -132,6 +132,7 @@ env/
 
 # web stuff
 .vite
+package-lock.json
 
 # pephub data
 pephub/data
