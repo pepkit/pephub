@@ -16,6 +16,7 @@ import { usePapaParse } from 'react-papaparse';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpoints';
+import { CompatibilityModal } from '../components/modals/compatibility-modal';
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
@@ -41,6 +42,7 @@ export const ProjectPage: FC = () => {
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
+  const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
 
   const downloadZip = () => {
     const completeName = `${namespace}-${project}-${tag}`;
@@ -102,10 +104,21 @@ export const ProjectPage: FC = () => {
                       <i className="bi bi-file-earmark-zip me-1"></i>
                       Download zip
                     </Dropdown.Item>
-                    <Dropdown.Item onClick={() => setShowForkPEPModal(true)}>
-                      <img src="/github-branch.svg" height="20" alt="Fork an endpoint" />
-                      Fork
+                    <Dropdown.Item onClick={() => setShowCompatibilityModal(true)}>
+                      <i className="me-1 bi bi-intersect"></i>
+                      Compatibility
                     </Dropdown.Item>
+                    {user ? (
+                      <Dropdown.Item onClick={() => setShowForkPEPModal(true)}>
+                        <i className="me-1 bi bi-bezier2"></i>
+                        Fork
+                      </Dropdown.Item>
+                    ) : (
+                      <Dropdown.Item disabled onClick={() => setShowForkPEPModal(true)}>
+                        <i className="me-1 bi bi-bezier2"></i>
+                        Fork
+                      </Dropdown.Item>
+                    )}
                     {canEdit(user, projectInfo) ? (
                       <>
                         <Dropdown.Divider />
@@ -207,6 +220,13 @@ export const ProjectPage: FC = () => {
         namespace={namespace || ''}
         project={project || ''}
         tag={tag}
+      />
+      <CompatibilityModal
+        namespace={namespace || ''}
+        project={project || ''}
+        tag={tag}
+        show={showCompatibilityModal}
+        onHide={() => setShowCompatibilityModal(false)}
       />
     </PageLayout>
   );

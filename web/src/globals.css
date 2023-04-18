@@ -16,6 +16,7 @@
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 
+/* tailwind pulse */
 .pulse {
   overflow: visible;
   position: relative;
@@ -49,6 +50,7 @@
   }
 }
 
+/* tailwind bounce */
 .bounce {
   animation: bounce 1s infinite;
 }
@@ -61,6 +63,19 @@
   50% {
     transform: translateY(0);
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* tailwin spin */
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
