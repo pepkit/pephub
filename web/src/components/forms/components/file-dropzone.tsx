@@ -38,6 +38,7 @@ const Dropzone: FC<DropzoneProps> = ({ multiple = true, onChange, innerRef }) =>
 
   innerRef.current = open;
 
+  // when files are accepted, update the form
   useEffect(() => {
     if (acceptedFiles.length > 0) {
       // convert to FileList
