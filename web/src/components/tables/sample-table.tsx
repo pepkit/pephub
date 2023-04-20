@@ -64,7 +64,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
       <HotTable
         data={rows}
         stretchH="all"
-        height={height || 500}
+        height={height || 700}
         readOnly={readOnly}
         colHeaders={headers}
         dropdownMenu={true}

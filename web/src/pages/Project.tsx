@@ -232,7 +232,7 @@ export const ProjectPage: FC = () => {
         )}
       </div>
       {/* two columns. one is 2/3 of page then the other is 1/3 of page */}
-      <div className="row h-100 gx-2 my-2">
+      <div className="row h-100 gx-2 my-2" style={{ minHeight: '100%' }}>
         <div className="col-9">
           <div>
             {projectView === 'samples' ? (
@@ -240,7 +240,7 @@ export const ProjectPage: FC = () => {
                 <SampleTable readOnly={true} data={projectSamples || ''} />
               </div>
             ) : (
-              <div className="p-1 rounded border border-dark shadow-sm" style={{ minHeight: '50vh' }}>
+              <div className="p-1 rounded border border-dark shadow-sm">
                 <ProjectConfigEditor readOnly={true} value={projectConfig || 'Loading.'} />
               </div>
             )}
