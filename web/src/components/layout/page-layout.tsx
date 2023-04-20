@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { Nav } from './nav';
 import { SEO } from './seo';
 import { useApiBase } from '../../hooks/queries/useApiBase';
+import { getOS } from '../../utils/etc';
 
 interface Props {
   children: React.ReactNode;
@@ -12,17 +13,36 @@ interface Props {
 
 export const PageLayout: FC<Props> = ({ children, title, description, image }) => {
   const { data } = useApiBase();
+  const os = getOS();
+  const searchInput = document.getElementById('global-search-bar');
 
-  // global search bar shortcut
-  window.addEventListener('keydown', (e) => {
-    if (e.key === '/') {
-      e.preventDefault();
-      const searchInput = document.getElementById('global-search-bar');
-      if (searchInput) {
-        searchInput.focus();
+  // add macOS keybinding
+  if (os === 'Mac OS') {
+    // global search bar shortcut
+    window.addEventListener('keydown', (e) => {
+      // detect ctrl + k key press
+      if (e.metaKey && e.key === 'k') {
+        e.preventDefault();
+        // make sure no other elements are focused
+        if (searchInput) {
+          searchInput.focus();
+        }
       }
-    }
-  });
+    });
+    // add windows/linux keybinding
+  } else {
+    // global search bar shortcut
+    window.addEventListener('keydown', (e) => {
+      // detect ctrl + k key press
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        // make sure no other elements are focused
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+    });
+  }
 
   return (
     <>

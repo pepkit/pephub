@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { useSession } from '../../hooks/useSession';
 import { useNavigate } from 'react-router-dom';
+import { getOS } from '../../utils/etc';
 
 // bootstrap nav bar
 export const Nav: FC = () => {
@@ -12,6 +13,8 @@ export const Nav: FC = () => {
   const navigateToSearch = () => {
     navigate(`/search?query=${globalSearch}`);
   };
+
+  const os = getOS();
 
   return (
     <nav
@@ -54,7 +57,10 @@ export const Nav: FC = () => {
                   aria-describedby="search"
                 />
                 <span className="input-group-text border-start-0 shadow-sm">
-                  <div className="px-2 border rounded border-secondary text-secondary">/</div>
+                  <div className="px-1 border rounded border-secondary text-secondary text-sm">
+                    {os === 'Mac OS' ? <i className="bi bi-command"></i> : <kbd>ctrl</kbd>}
+                  </div>
+                  <div className="ms-1 px-1 border rounded border-secondary text-secondary text-sm">K</div>
                 </span>
               </div>
               <Dropdown show={globalSearch.length > 0}>
