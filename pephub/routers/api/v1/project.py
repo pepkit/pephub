@@ -94,6 +94,8 @@ async def update_a_pep(
 
     # sample table update
     if updated_project.sample_table_csv is not None:
+        # clean it be remove any trailing commas
+        updated_project.sample_table_csv = updated_project.sample_table_csv.rstrip(",")
         sample_table_csv = StringIO(updated_project.sample_table_csv)
         sample_table_df = pd.read_csv(sample_table_csv)
         sample_table_df = sample_table_df.dropna(axis=1, how="all")

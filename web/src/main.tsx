@@ -68,8 +68,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-const API_HOST = import.meta.env.VITE_API_HOST;
-
 const App: React.FC = () => {
   return (
     <React.StrictMode>
