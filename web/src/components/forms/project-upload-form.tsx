@@ -1,7 +1,7 @@
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useSession } from '../../hooks/useSession';
 import { FileDropZone } from './components/file-dropzone';
-import { useRef } from 'react';
+import { FC, useRef } from 'react';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { submitProjectFiles } from '../../api/namespace';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,7 +17,11 @@ interface FromFileInputs {
   files: FileList;
 }
 
-export const ProjectUploadForm = () => {
+interface Props {
+  onHide: () => void;
+}
+
+export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
   // get user info
   const { user, jwt } = useSession();
 
@@ -58,6 +62,7 @@ export const ProjectUploadForm = () => {
     onSuccess: () => {
       queryClient.invalidateQueries([namespaceToUpload]);
       toast.success('Project successully uploaded!');
+      onHide();
     },
     onError: (err) => {
       toast.error(`Error uploading project! ${err}`);

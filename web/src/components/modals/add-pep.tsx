@@ -39,7 +39,7 @@ export const AddPEPModal: FC<Props> = ({ show, onHide }) => {
             }
           >
             <div className="border border-top-0">
-              <ProjectUploadForm />
+              <ProjectUploadForm onHide={onHide} />
             </div>
           </Tab>
         </Tabs>
