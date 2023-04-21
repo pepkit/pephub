@@ -88,6 +88,14 @@ async def update_a_pep(
     Update a PEP from a certain namespace
     """
     # if not logged in, they cant update
+    if namespace not in (list_of_admins or []):
+        return JSONResponse(
+            content={
+                "message": "Unothorized for updating projects.",
+            },
+            status_code=401,
+        )
+
     current_project = agent.project.get(namespace, project, tag=tag)
     raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
     new_raw_project = raw_peppy_project.copy()
