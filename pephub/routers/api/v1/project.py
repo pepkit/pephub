@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectUniqueNameError
 from peppy import Project
-from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
+from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY, SUBSAMPLE_RAW_DICT_KEY
 
 from ...models import ProjectOptional, ProjectRawModel, ForkRequest
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
@@ -111,6 +111,20 @@ async def update_a_pep(
 
         new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
         new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
+
+    # subsample table update
+    if updated_project.subsample_list is not None:
+        subsample_peppy_list = []
+        for subsample in updated_project.subsample_list:
+            subsample_str = subsample.rstrip(",")
+            subsample_str = StringIO(subsample_str)
+            subsample_pd = pd.read_csv(subsample_str)
+            subsample_pd = subsample_pd.dropna(axis=1, how="all")
+            subsample_df = subsample_pd.to_dict()
+
+            subsample_peppy_list.append(subsample_df)
+
+        new_raw_project[SUBSAMPLE_RAW_DICT_KEY] = subsample_peppy_list
 
     # project config update
     if updated_project.project_config_yaml is not None:
