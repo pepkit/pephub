@@ -11,6 +11,7 @@ import zipfile
 import io
 
 import peppy
+from peppy.const import SAMPLE_DF_KEY
 from pephub.exceptions import PepHubException
 
 from ._version import __version__ as v
@@ -135,7 +136,7 @@ def zip_pep(project: peppy.Project) -> Response:
         sample_table_filename = basename(
             project.to_dict().get("sample_table", "sample_table.csv")
         )
-        content_to_zip[sample_table_filename] = project.sample_table.to_csv()
+        content_to_zip[sample_table_filename] = project[SAMPLE_DF_KEY].to_csv()
 
     if project.subsample_table is not None:
         if not isinstance(project.subsample_table, list):
