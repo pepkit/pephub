@@ -263,7 +263,7 @@ export const ProjectPage: FC = () => {
                 <div className="border-top my-2"></div>
                 <h5 className="fw-bold">Schemas</h5>
                 <div className="d-flex flex-row flex-wrap">
-                  <Badge size="small">PEP 2.1.0</Badge>
+                  <Badge size="small">PEP {projectInfo?.pep_version || '2.1.0'}</Badge>
                 </div>
                 <div className="border-top my-2"></div>
                 <p className="text-sm mb-0">

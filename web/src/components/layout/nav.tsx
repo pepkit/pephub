@@ -58,7 +58,7 @@ export const Nav: FC = () => {
                 />
                 <span className="input-group-text border-start-0 shadow-sm">
                   <div className="px-1 border rounded border-secondary text-secondary text-sm">
-                    {os === 'Mac OS' ? <i className="bi bi-command"></i> : <kbd>ctrl</kbd>}
+                    {os === 'Mac OS' ? <i className="bi bi-command"></i> : 'ctrl'}
                   </div>
                   <div className="ms-1 px-1 border rounded border-secondary text-secondary text-sm">K</div>
                 </span>
