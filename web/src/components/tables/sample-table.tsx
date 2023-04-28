@@ -71,7 +71,21 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
           indicators: true,
         }}
         minRows={500}
-        contextMenu={true}
+        contextMenu={[
+          'row_above',
+          'row_below',
+          '---------',
+          'col_left',
+          'col_right',
+          '---------',
+          'remove_row',
+          'remove_col',
+          '---------',
+          'alignment',
+          '---------',
+          'copy',
+          'cut',
+        ]}
         multiColumnSorting={true}
         filters={true}
         rowHeaders={true}

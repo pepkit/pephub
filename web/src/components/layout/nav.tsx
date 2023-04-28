@@ -64,17 +64,6 @@ export const Nav: FC = () => {
                   <div className="ms-1 px-1 border rounded border-secondary text-secondary text-sm">K</div>
                 </span>
               </div>
-              <Dropdown show={globalSearch.length > 0}>
-                <Dropdown.Menu>
-                  <div className="p-2">
-                    Search PEPhub for <span className="fst-italic">"{globalSearch}"</span>
-                    <button onClick={() => navigateToSearch()} className="ms-2 btn btn-sm btn-outline-dark">
-                      Go
-                      <i className="bi bi-arrow-return-left ms-1"></i>
-                    </button>
-                  </div>
-                </Dropdown.Menu>
-              </Dropdown>
             </li>
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               <a className="nav-link" href="/api/v1/docs">

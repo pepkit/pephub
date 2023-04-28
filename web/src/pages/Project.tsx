@@ -23,21 +23,6 @@ import { Breadcrumb } from 'react-bootstrap';
 import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
-type GetProjectView = 'http' | 'phc';
-
-const MoreToggle = forwardRef<HTMLButtonElement, { onClick: () => void }>(({ onClick }, ref) => (
-  <button
-    ref={ref}
-    onClick={(e) => {
-      e.preventDefault();
-      onClick();
-    }}
-    className="bg-transparent border-0 text-primary-hover me-1"
-  >
-    {/* chevron down */}
-    &#x25bc;
-  </button>
-));
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
@@ -92,7 +77,9 @@ export const ProjectPage: FC = () => {
         <Breadcrumb className="fw-bold">
           <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
           <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
-          <Breadcrumb.Item active>{project}</Breadcrumb.Item>
+          <Breadcrumb.Item active>
+            {project}:{tag}
+          </Breadcrumb.Item>
           {projectInfo?.is_private ? (
             <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
           ) : null}
@@ -222,8 +209,6 @@ export const ProjectPage: FC = () => {
         namespace={namespace || ''}
         project={project || ''}
         tag={tag}
-        description={projectInfo?.description || ''}
-        isPrivate={projectInfo?.is_private || false}
       />
       <ProjectAPIEndpointsModal
         show={showAPIEndpointsModal}
