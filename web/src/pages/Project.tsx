@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { ButtonGroup, Dropdown } from 'react-bootstrap';
+import { Dropdown } from 'react-bootstrap';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { PageLayout } from '../components/layout/page-layout';
@@ -19,6 +19,7 @@ import { CompatibilityModal } from '../components/modals/compatibility-modal';
 import { Badge } from '../components/badges/badge';
 import { ProjectAboutPlaceholder } from '../components/placeholders/project-about-placeholder';
 import { copyToClipboard } from '../utils/etc';
+import { Breadcrumb } from 'react-bootstrap';
 
 type ProjectView = 'samples' | 'config';
 type GetProjectView = 'http' | 'phc';
@@ -73,25 +74,22 @@ export const ProjectPage: FC = () => {
 
   return (
     <PageLayout fullWidth title={`${namespace}/${project}`}>
-      <a className="mb-3" href={`/${namespace}`}>
-        <button className="btn btn-sm btn-outline-dark border border-dark">
-          <i className="bi bi-arrow-bar-left me-1"></i>
-          Back to <span className="fw-bold">{namespace}</span>
-        </button>
-      </a>
+      {/* breadcrumbs */}
+      <div className="fw-bold">
+        <Breadcrumb>
+          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+          <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
+          <Breadcrumb.Item active>{project}</Breadcrumb.Item>
+          {projectInfo?.is_private ? (
+            <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
+          ) : null}
+        </Breadcrumb>
+      </div>
       <div className="mt-2">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
         ) : (
-          <div className="flex-row d-flex align-items-start justify-content-between">
-            <div className="flex-row d-flex align-items-center">
-              <h2 className="fw-bold my-0">
-                {namespace}/{project}:{tag}
-              </h2>
-              {projectInfo?.is_private ? (
-                <span className="border ms-2 badge rounded-pill border-danger text-danger">Private</span>
-              ) : null}
-            </div>
+          <div className="flex-row d-flex align-items-start justify-content-end">
             <div className="d-flex flex-row align-items-center">
               <div className="btn-group me-1" role="group" aria-label="Basic example">
                 <button
