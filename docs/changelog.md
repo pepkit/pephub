@@ -5,6 +5,25 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [0.7.4] - 2022-04-15
 
 ### Fixed
+
+- Couldnt remove columns from sample table
+- Drag n Drop was broken -> now fixed
+- Fix sample table editing due to trailing commas
+- File upload now fixed
+
+### Changed
+
+- Redesign project page for a better user experience
+- Key binding for global search is now better
+
+### Added
+
+- CSS utility classes for better styling
+
+## [0.7.4] - 2022-04-15
+
+### Fixed
+
 - Dockerfile not pulling in `/public` from `web/`
 
 ## [0.7.3] - 2022-04-15
