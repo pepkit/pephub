@@ -167,6 +167,10 @@
   line-height: 1;
 }
 
+.text-primary-light {
+  color: #7ab9fd;
+}
+
 /* Hover affects for bootstrap text-colors */
 .text-primary-hover:hover {
   color: #007bff !important;
@@ -206,6 +210,10 @@
 .text-dark-hover:hover {
   color: #343a40 !important;
   transition: color 0.1s ease-in-out;
+}
+
+.text-transparent {
+  color: transparent !important;
 }
 
 .project-button-toggles {

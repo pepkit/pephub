@@ -1,9 +1,8 @@
 import { FC, useEffect, useState } from 'react';
-import { HotTable, HotColumn } from '@handsontable/react';
+import { HotTable } from '@handsontable/react';
 import { addClassesToRows } from './hooks-callbacks';
 import { readString } from 'react-papaparse';
 import { tableDataToCsvString } from '../../utils/sample-table';
-import { AddColumnModal } from '../modals/add-column-modal';
 
 interface Props {
   data: string;
@@ -16,11 +15,7 @@ interface Props {
  * the csv string and it will handle the rest
  */
 export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height }) => {
-  // internal state
-  const [headers, setHeaders] = useState<string[]>([]);
-  const [rows, setRows] = useState<any[][]>([]);
-
-  const [showAddColumnModal, setShowAddColumnModal] = useState<boolean>(false);
+  const [rows, setRows] = useState<any[][]>([[]]);
 
   // watch the data and update accordingly
   // this is for changes outside of the table
@@ -30,7 +25,14 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
         worker: true,
         complete: (results) => {
           // ts-ignore
-          const data = results.data as any[][];
+          let data = results.data as any[][];
+
+          // check to make sure data isnt a list of objects
+          // if it is, we need to convert it to a list of lists
+          if (data.length > 0 && typeof data[0] === 'object') {
+            data = data.map((row) => Object.values(row));
+          }
+
           setRows(data);
         },
       });
@@ -40,9 +42,10 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
   // if the user makes a change to the table,
   // we need to update the data if
   // the onChange prop is passed in
+  //
   useEffect(() => {
-    if (onChange) {
-      onChange(tableDataToCsvString(headers, rows));
+    if (onChange && rows) {
+      // onChange(tableDataToCsvString(rows));
     }
   }, [rows]);
 
@@ -92,20 +95,6 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
             setRows(newRows);
           }
         }}
-      />
-      <AddColumnModal
-        onAdd={(newColumnName) => {
-          // add a new column to the right
-          setRows((old: any[][]) => {
-            const newTable = old.map((row) => {
-              return [...row, ''];
-            });
-            return newTable;
-          });
-          setHeaders((old) => [...old, newColumnName]);
-        }}
-        show={showAddColumnModal}
-        onHide={() => setShowAddColumnModal(false)}
       />
     </div>
   );

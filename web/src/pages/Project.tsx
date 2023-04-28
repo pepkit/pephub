@@ -1,4 +1,4 @@
-import { FC, forwardRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -46,6 +46,17 @@ export const ProjectPage: FC = () => {
   const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
 
+  // state for editing config, samples, and subsamples
+  const [newProjectConfig, setNewProjectConfig] = useState(projectConfig || '');
+  const [newProjectSamples, setNewProjectSamples] = useState(projectSamples || '');
+  // const [newProjectSubsamples, setNewProjectSubsamples] = useState(projectSubSamples? || '');
+
+  // watch for query changes to update newProjectConfig and newProjectSamples
+  useEffect(() => {
+    setNewProjectConfig(projectConfig || '');
+    setNewProjectSamples(projectSamples || '');
+  }, [projectConfig, projectSamples]);
+
   const downloadZip = () => {
     const completeName = `${namespace}-${project}-${tag}`;
     fetch(`/api/v1/projects/${namespace}/${project}/zip?tag=${tag}`, {
@@ -64,6 +75,18 @@ export const ProjectPage: FC = () => {
         a.click();
         window.URL.revokeObjectURL(file);
       });
+  };
+
+  // check if config or samples are dirty
+  const configIsDirty = newProjectConfig !== projectConfig;
+  const samplesIsDirty = newProjectSamples !== projectSamples;
+
+  // reset config and samples
+  const resetConfig = () => {
+    setNewProjectConfig(projectConfig || '');
+  };
+  const resetSamples = () => {
+    setNewProjectSamples(projectSamples || '');
   };
 
   return (
@@ -151,6 +174,16 @@ export const ProjectPage: FC = () => {
                     className="border-0 bg-transparent project-button-toggles rounded"
                   >
                     <i className="bi bi-filetype-yml me-1"></i>Config
+                    {configIsDirty ? (
+                      <span className="text-xs">
+                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
+                      </span>
+                    ) : (
+                      //  spacer
+                      <span className="text-xs">
+                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
+                      </span>
+                    )}
                   </button>
                 </div>
                 <div
@@ -167,17 +200,33 @@ export const ProjectPage: FC = () => {
                     <i className="bi bi-table me-1"></i>
                     Samples
                   </button>
+                  {samplesIsDirty ? (
+                    <span className="text-xs">
+                      <i className="bi bi-circle-fill ms-1 text-light"></i>
+                    </span>
+                  ) : (
+                    //  spacer
+                    <span className="text-xs">
+                      <i className="bi bi-circle-fill ms-1 text-transparent"></i>
+                    </span>
+                  )}
                 </div>
               </div>
               <div>
-                <span className="text-muted text-sm">
-                  <i className="bi bi-calendar me-1"></i>
-                  Created: {dateStringToDate(projectInfo?.submission_date)}
-                </span>
-                <span className="text-muted text-sm ms-2">
-                  <i className="bi bi-clock me-1"></i>
-                  Updated: {dateStringToDateTime(projectInfo?.last_update_date)}
-                </span>
+                {configIsDirty || samplesIsDirty ? (
+                  <>
+                    <button className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark">Save changes?</button>
+                    <button
+                      className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
+                      onClick={() => {
+                        resetConfig();
+                        resetSamples();
+                      }}
+                    >
+                      Discard
+                    </button>
+                  </>
+                ) : null}
               </div>
             </div>
           </>
@@ -187,17 +236,21 @@ export const ProjectPage: FC = () => {
         <div className="col-12">
           <div>
             {projectView === 'samples' ? (
-              <SampleTable readOnly={!(projectInfo && canEdit(user, projectInfo))} data={projectSamples || ''} />
+              <SampleTable
+                readOnly={!(projectInfo && canEdit(user, projectInfo))}
+                data={newProjectSamples || ''}
+                onChange={(value) => setNewProjectSamples(value)}
+              />
             ) : (
               <ProjectConfigEditor
                 readOnly={!(projectInfo && canEdit(user, projectInfo))}
-                value={projectConfigIsLoading ? 'Loading.' : projectConfig ? projectConfig : 'No config file found.'}
+                value={projectConfigIsLoading ? 'Loading.' : projectConfig ? newProjectConfig : 'No config file found.'}
+                setValue={(value) => setNewProjectConfig(value)}
               />
             )}
           </div>
         </div>
       </div>
-
       {/* Modals */}
       <EditMetaMetadataModal
         show={showEditMetaMetadataModal}

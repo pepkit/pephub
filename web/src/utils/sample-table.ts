@@ -1,7 +1,5 @@
-export const tableDataToCsvString = (headers: string[], tableData: any[][]) => {
+export const tableDataToCsvString = (tableData: any[][]) => {
   const csvRows: string[] = [];
-  csvRows.push(headers.join(','));
-  debugger;
   tableData.forEach((row) => {
     csvRows.push(row.join(','));
   });
