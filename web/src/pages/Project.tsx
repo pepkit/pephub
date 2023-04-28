@@ -176,7 +176,7 @@ export const ProjectPage: FC = () => {
                     <i className="bi bi-pencil-square me-1"></i>
                     Edit
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setShowDeletePEPModal(true)}>
+                  <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
                     <i className="bi bi-trash3 me-1"></i>
                     Delete
                   </Dropdown.Item>
