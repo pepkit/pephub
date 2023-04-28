@@ -9,9 +9,10 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
+  fullWidth?: boolean;
 }
 
-export const PageLayout: FC<Props> = ({ children, title, description, image }) => {
+export const PageLayout: FC<Props> = ({ children, title, description, image, fullWidth }) => {
   const { data } = useApiBase();
   const os = getOS();
   const searchInput = document.getElementById('global-search-bar');
@@ -44,13 +45,16 @@ export const PageLayout: FC<Props> = ({ children, title, description, image }) =
     });
   }
 
+  // set main class based on fullWidth prop
+  const mainClass = fullWidth ? 'px-4 container-height' : 'container container-height';
+
   return (
     <>
       <SEO title={title} description={description} image={image} />
       <header>
         <Nav />
       </header>
-      <main className="container container-height">{children}</main>
+      <main className={mainClass}>{children}</main>
       <div className="container">
         <footer className="flex-wrap py-3 my-4 align-top d-flex justify-content-between align-items-center border-top">
           <span className="badge rounded-pill bg-secondary me-1">pephub {data?.pephub_version}</span>

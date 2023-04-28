@@ -72,7 +72,7 @@ export const ProjectPage: FC = () => {
   };
 
   return (
-    <PageLayout title={`${namespace}/${project}`}>
+    <PageLayout fullWidth title={`${namespace}/${project}`}>
       <a className="mb-3" href={`/${namespace}`}>
         <button className="btn btn-sm btn-outline-dark border border-dark">
           <i className="bi bi-arrow-bar-left me-1"></i>
@@ -231,9 +231,9 @@ export const ProjectPage: FC = () => {
           </div>
         )}
       </div>
-      {/* two columns. one is 2/3 of page then the other is 1/3 of page */}
+      {/* two columns. one is 3/4 of page then the other is 1/4 of page */}
       <div className="row h-100 gx-2 my-2" style={{ minHeight: '100%' }}>
-        <div className="col-9">
+        <div className="col-10">
           <div>
             {projectView === 'samples' ? (
               <div className="p-1 rounded border border-dark shadow-sm overflow-auto">
@@ -246,7 +246,7 @@ export const ProjectPage: FC = () => {
             )}
           </div>
         </div>
-        <div className="col-3">
+        <div className="col-2">
           <div className="p-2 border border-dark shadow-sm rounded h-100">
             {projectInfoIsLoading || projectInfo === undefined ? (
               <ProjectAboutPlaceholder />
