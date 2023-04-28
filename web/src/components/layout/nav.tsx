@@ -81,8 +81,13 @@ export const Nav: FC = () => {
               {user ? (
                 <div className="d-flex align-items-center">
                   <Dropdown className="me-3">
-                    <Dropdown.Toggle variant="outline-dark" id="navbarDropdown">
-                      Profile
+                    <Dropdown.Toggle variant="none" id="navbarDropdown">
+                      <img
+                        className="border rounded-circle border-secondary"
+                        src={user['avatar_url']}
+                        alt={`Avatar for ${user['login']}`}
+                        height="40"
+                      />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                       <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
@@ -93,12 +98,6 @@ export const Nav: FC = () => {
                       <Dropdown.Item onClick={() => logout()}>Logout</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
-                  <img
-                    className="border rounded-circle border-secondary"
-                    src={user['avatar_url']}
-                    alt={`Avatar for ${user['login']}`}
-                    height="50"
-                  />
                 </div>
               ) : (
                 <li className="mx-2 my-0 nav-item h5 pt-1">
