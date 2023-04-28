@@ -8,6 +8,7 @@ class ProjectOptional(UpdateItems):
     sample_table_csv: Optional[str]
     project_config_yaml: Optional[str]
     description: Optional[str]
+    subsample_list: Optional[List[str]]
 
     class Config:
         allow_population_by_field_name = True

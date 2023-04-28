@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectUniqueNameError
 from peppy import Project
-from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY
+from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY, SUBSAMPLE_RAW_DICT_KEY
 
 from ...models import ProjectOptional, ProjectRawModel, ForkRequest
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
@@ -88,19 +88,45 @@ async def update_a_pep(
     Update a PEP from a certain namespace
     """
     # if not logged in, they cant update
+    if namespace not in (list_of_admins or []):
+        return JSONResponse(
+            content={
+                "message": "Unothorized for updating projects.",
+            },
+            status_code=401,
+        )
+
     current_project = agent.project.get(namespace, project, tag=tag)
     raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
     new_raw_project = raw_peppy_project.copy()
 
     # sample table update
     if updated_project.sample_table_csv is not None:
+        # clean it be remove any trailing commas
+        updated_project.sample_table_csv = updated_project.sample_table_csv.rstrip(",")
         sample_table_csv = StringIO(updated_project.sample_table_csv)
         sample_table_df = pd.read_csv(sample_table_csv)
         sample_table_df = sample_table_df.dropna(axis=1, how="all")
+        sample_table_df.fillna("", inplace=True)
         sample_table_df_json = sample_table_df.to_dict()
 
         new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
         new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
+
+    # subsample table update
+    if updated_project.subsample_list is not None:
+        subsample_peppy_list = []
+        for subsample in updated_project.subsample_list:
+            subsample_str = subsample.rstrip(",")
+            subsample_str = StringIO(subsample_str)
+            subsample_pd = pd.read_csv(subsample_str)
+            subsample_pd = subsample_pd.dropna(axis=1, how="all")
+            subsample_pd.fillna("", inplace=True)
+            subsample_df = subsample_pd.to_dict()
+
+            subsample_peppy_list.append(subsample_df)
+
+        new_raw_project[SUBSAMPLE_RAW_DICT_KEY] = subsample_peppy_list
 
     # project config update
     if updated_project.project_config_yaml is not None:

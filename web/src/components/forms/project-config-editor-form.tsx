@@ -55,7 +55,7 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
   return (
     <>
       <ProjectConfigEditor setValue={(v) => setNewProjectConfig(v)} value={newProjectConfig || ''} />
-      <div>
+      <div className="mt-2">
         <button className="btn btn-outline-dark me-1" onClick={() => resetProjectConfig()}>
           Reset
         </button>

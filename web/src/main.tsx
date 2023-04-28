@@ -9,7 +9,6 @@ import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { SearchPage } from './pages/Search';
-import { EditProjectPage } from './pages/EditProject';
 import { EidoValidator } from './pages/Validator';
 
 // notifications
@@ -62,13 +61,7 @@ const router = createBrowserRouter([
     path: '/:namespace/:project',
     element: <ProjectPage />,
   },
-  {
-    path: '/:namespace/:project/edit',
-    element: <EditProjectPage />,
-  },
 ]);
-
-const API_HOST = import.meta.env.VITE_API_HOST;
 
 const App: React.FC = () => {
   return (

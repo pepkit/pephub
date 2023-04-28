@@ -5,5 +5,6 @@ export const dateStringToDateTime = (dateString: string) => {
 
 export const dateStringToDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString();
+  // give full month name
+  return date.toLocaleString('default', { month: 'long' }) + ' ' + date.getDate() + ', ' + date.getFullYear();
 };

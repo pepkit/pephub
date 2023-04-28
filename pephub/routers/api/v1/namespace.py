@@ -63,13 +63,17 @@ async def get_namespace_projects(
         search_result = agent.annotation.get(
             namespace=namespace, limit=limit, offset=offset, admin=namespace_access
         )
+    results = [p.dict() for p in search_result.results]
+
+    # sort by last_update_date
+    results = sorted(results, key=lambda x: x["last_update_date"], reverse=True)
 
     return JSONResponse(
         content={
             "count": search_result.count,
             "limit": limit,
             "offset": offset,
-            "items": [p.dict() for p in search_result.results],
+            "items": results,
             "session_info": session_info,
             "can_edit": user == namespace or namespace in user_orgs,
         }
@@ -91,7 +95,7 @@ async def create_pep(
     tag: str = Form(DEFAULT_TAG),
     description: Union[str, None] = Form(None),
     files: Optional[List[UploadFile]] = File(
-        None  # let the file upload be optional. dont sent a file? We instantiate with blank
+        None  # let the file upload be optional. dont send a file? We instantiate with blank
     ),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):

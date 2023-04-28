@@ -12,10 +12,11 @@
   background-color: #0000001e;
 }
 
-.btn {
+/* .btn {
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-}
+} */
 
+/* tailwind pulse */
 .pulse {
   overflow: visible;
   position: relative;
@@ -49,6 +50,7 @@
   }
 }
 
+/* tailwind bounce */
 .bounce {
   animation: bounce 1s infinite;
 }
@@ -61,6 +63,19 @@
   50% {
     transform: translateY(0);
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* tailwin spin */
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -91,4 +106,121 @@
 
 .overflow-auto {
   overflow: auto;
+}
+
+/* tailwind cursors */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Tailwind font-size utilities */
+.text-xs {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1rem; /* 16px */
+}
+.text-sm {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem; /* 20px */
+}
+.text-base {
+  font-size: 1rem; /* 16px */
+  line-height: 1.5rem; /* 24px */
+}
+.text-lg {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.75rem; /* 28px */
+}
+.text-xl {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem; /* 28px */
+}
+.text-2xl {
+  font-size: 1.5rem; /* 24px */
+  line-height: 2rem; /* 32px */
+}
+.text-3xl {
+  font-size: 1.875rem; /* 30px */
+  line-height: 2.25rem; /* 36px */
+}
+.text-4xl {
+  font-size: 2.25rem; /* 36px */
+  line-height: 2.5rem; /* 40px */
+}
+.text-5xl {
+  font-size: 3rem; /* 48px */
+  line-height: 1;
+}
+.text-6xl {
+  font-size: 3.75rem; /* 60px */
+  line-height: 1;
+}
+.text-7xl {
+  font-size: 4.5rem; /* 72px */
+  line-height: 1;
+}
+.text-8xl {
+  font-size: 6rem; /* 96px */
+  line-height: 1;
+}
+.text-9xl {
+  font-size: 8rem; /* 128px */
+  line-height: 1;
+}
+
+.text-primary-light {
+  color: #7ab9fd;
+}
+
+/* Hover affects for bootstrap text-colors */
+.text-primary-hover:hover {
+  color: #007bff !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-secondary-hover:hover {
+  color: #6c757d !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-success-hover:hover {
+  color: #28a745 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-info-hover:hover {
+  color: #17a2b8 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-warning-hover:hover {
+  color: #ffc107 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-danger-hover:hover {
+  color: #dc3545 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-light-hover:hover {
+  color: #f8f9fa !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-dark-hover:hover {
+  color: #343a40 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-transparent {
+  color: transparent !important;
+}
+
+.project-button-toggles {
+  background-color: none !important;
+}
+
+.project-button-toggles:hover {
+  background-color: #00000011 !important;
+  transition: background-color 0.1s ease-in-out;
 }

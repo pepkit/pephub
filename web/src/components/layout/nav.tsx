@@ -2,6 +2,8 @@ import { FC, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { useSession } from '../../hooks/useSession';
 import { useNavigate } from 'react-router-dom';
+import { getOS } from '../../utils/etc';
+import { SearchBox } from './search-box';
 
 // bootstrap nav bar
 export const Nav: FC = () => {
@@ -13,13 +15,15 @@ export const Nav: FC = () => {
     navigate(`/search?query=${globalSearch}`);
   };
 
+  const os = getOS();
+
   return (
     <nav
-      className="py-2 mb-4 navbar navbar-expand-md border-bottom navbar-light"
+      className="py-2 navbar navbar-expand-md border-bottom navbar-light"
       aria-label="navbar"
       style={{ backgroundColor: '#EFF3F6' }}
     >
-      <div className="container">
+      <div className="d-flex flex-row align-items-center w-100 px-4">
         <a href="/" className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none">
           <img src="/pephub_logo.svg" alt="PEPhub" height="60" />
         </a>
@@ -38,7 +42,7 @@ export const Nav: FC = () => {
           <ul className="mb-2 navbar-nav ms-auto d-flex flex-row align-items-center">
             <li>
               <div className="mt-1 input-group">
-                <input
+                <SearchBox
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       navigateToSearch();
@@ -54,20 +58,12 @@ export const Nav: FC = () => {
                   aria-describedby="search"
                 />
                 <span className="input-group-text border-start-0 shadow-sm">
-                  <div className="px-2 border rounded border-secondary text-secondary">/</div>
+                  <div className="px-1 border rounded border-secondary text-secondary text-sm">
+                    {os === 'Mac OS' ? <i className="bi bi-command"></i> : 'ctrl'}
+                  </div>
+                  <div className="ms-1 px-1 border rounded border-secondary text-secondary text-sm">K</div>
                 </span>
               </div>
-              <Dropdown show={globalSearch.length > 0}>
-                <Dropdown.Menu>
-                  <div className="p-2">
-                    Search PEPhub for <span className="fst-italic">"{globalSearch}"</span>
-                    <button onClick={() => navigateToSearch()} className="ms-2 btn btn-sm btn-outline-dark">
-                      Go
-                      <i className="bi bi-arrow-return-left ms-1"></i>
-                    </button>
-                  </div>
-                </Dropdown.Menu>
-              </Dropdown>
             </li>
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               <a className="nav-link" href="/api/v1/docs">
@@ -85,8 +81,13 @@ export const Nav: FC = () => {
               {user ? (
                 <div className="d-flex align-items-center">
                   <Dropdown className="me-3">
-                    <Dropdown.Toggle variant="outline-dark" id="navbarDropdown">
-                      Profile
+                    <Dropdown.Toggle variant="none" id="navbarDropdown">
+                      <img
+                        className="border rounded-circle border-secondary"
+                        src={user['avatar_url']}
+                        alt={`Avatar for ${user['login']}`}
+                        height="40"
+                      />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                       <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
@@ -97,12 +98,6 @@ export const Nav: FC = () => {
                       <Dropdown.Item onClick={() => logout()}>Logout</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
-                  <img
-                    className="border rounded-circle border-secondary"
-                    src={user['avatar_url']}
-                    alt={`Avatar for ${user['login']}`}
-                    height="50"
-                  />
                 </div>
               ) : (
                 <li className="mx-2 my-0 nav-item h5 pt-1">

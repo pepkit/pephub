@@ -88,23 +88,26 @@ export const submitProjectFiles = (
   token: string,
 ) => {
   const url = `${API_BASE}/namespaces/${namespace}/projects/files`;
+
+  // construct form data
+  const formData = new FormData();
+  formData.append('project_name', project_name);
+  formData.append('tag', tag || 'default');
+  formData.append('is_private', is_private?.toString() || 'false');
+  formData.append('description', description || '');
+
+  // attach files
+  for (let i = 0; i < files.length; i++) {
+    formData.append('files', files[i]);
+  }
+
   return axios
-    .post<ProjectSubmissionResponse>(
-      url,
-      {
-        project_name: project_name,
-        tag: tag || 'default',
-        is_private: is_private || false,
-        description: description || '',
-        files: files,
+    .post<ProjectSubmissionResponse>(url, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
       },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      },
-    )
+    })
     .then((res) => {
       return res.data;
     });

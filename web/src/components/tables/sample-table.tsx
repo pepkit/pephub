@@ -1,9 +1,8 @@
 import { FC, useEffect, useState } from 'react';
-import { HotTable, HotColumn } from '@handsontable/react';
+import { HotTable } from '@handsontable/react';
 import { addClassesToRows } from './hooks-callbacks';
 import { readString } from 'react-papaparse';
 import { tableDataToCsvString } from '../../utils/sample-table';
-import { AddColumnModal } from '../modals/add-column-modal';
 
 interface Props {
   data: string;
@@ -16,11 +15,7 @@ interface Props {
  * the csv string and it will handle the rest
  */
 export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height }) => {
-  // internal state
-  const [headers, setHeaders] = useState<string[]>([]);
-  const [rows, setRows] = useState<any[][]>([]);
-
-  const [showAddColumnModal, setShowAddColumnModal] = useState<boolean>(false);
+  const [rows, setRows] = useState<any[][]>([[]]);
 
   // watch the data and update accordingly
   // this is for changes outside of the table
@@ -30,9 +25,15 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
         worker: true,
         complete: (results) => {
           // ts-ignore
-          const data = results.data as any[][];
-          setHeaders(data[0]);
-          setRows(data.slice(1));
+          let data = results.data as any[][];
+
+          // check to make sure data isnt a list of objects
+          // if it is, we need to convert it to a list of lists
+          if (data.length > 0 && typeof data[0] === 'object') {
+            data = data.map((row) => Object.values(row));
+          }
+
+          setRows(data);
         },
       });
     }
@@ -41,75 +42,62 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
   // if the user makes a change to the table,
   // we need to update the data if
   // the onChange prop is passed in
+  //
   useEffect(() => {
-    if (onChange) {
-      onChange(tableDataToCsvString(headers, rows));
+    if (onChange && rows) {
+      onChange(tableDataToCsvString(rows));
     }
   }, [rows]);
 
   return (
-    <div className="rounded rounded-2">
-      {!readOnly && (
-        <div className="p-1 border border-bottom-0 rounded-top">
-          <button onClick={() => setShowAddColumnModal(true)} className="btn btn-sm btn-dark">
-            <i className="bi bi-plus-circle me-1"></i>
-            Add Column
-          </button>
-          <button disabled className="btn btn-sm btn-dark ms-1">
-            <i className="bi bi-trash me-1"></i>
-            Remove Column
-          </button>
-        </div>
-      )}
-      <HotTable
-        data={rows}
-        stretchH="all"
-        height={height || 700}
-        readOnly={readOnly}
-        colHeaders={headers}
-        dropdownMenu={true}
-        hiddenColumns={{
-          indicators: true,
-        }}
-        manualColumnMove
-        contextMenu={true}
-        multiColumnSorting={true}
-        filters={true}
-        rowHeaders={true}
-        beforeRenderer={addClassesToRows}
-        manualRowMove={true}
-        licenseKey="non-commercial-and-evaluation"
-        manualColumnResize
-        afterChange={(changes) => {
-          if (changes) {
-            // update data in state
-            const newRows = [...rows];
-            changes.forEach(([row, col, _, newValue]) => {
-              // @ts-ignore
-              newRows[row][col] = newValue;
-            });
-            setRows(newRows);
-          }
-        }}
-      >
-        {headers.map((_, i) => (
-          <HotColumn key={i} data={i} />
-        ))}
-      </HotTable>
-      <AddColumnModal
-        onAdd={(newColumnName) => {
-          // add a new column to the right
-          setRows((old: any[][]) => {
-            const newTable = old.map((row) => {
-              return [...row, ''];
-            });
-            return newTable;
-          });
-          setHeaders((old) => [...old, newColumnName]);
-        }}
-        show={showAddColumnModal}
-        onHide={() => setShowAddColumnModal(false)}
-      />
-    </div>
+    <>
+      <div className="rounded rounded-2">
+        <HotTable
+          data={rows}
+          stretchH="all"
+          height={height || 900}
+          readOnly={readOnly}
+          colHeaders={true}
+          dropdownMenu={true}
+          hiddenColumns={{
+            indicators: true,
+          }}
+          minRows={500}
+          contextMenu={[
+            'row_above',
+            'row_below',
+            '---------',
+            'col_left',
+            'col_right',
+            '---------',
+            'remove_row',
+            'remove_col',
+            '---------',
+            'alignment',
+            '---------',
+            'copy',
+            'cut',
+          ]}
+          multiColumnSorting={true}
+          filters={true}
+          rowHeaders={true}
+          beforeRenderer={addClassesToRows}
+          manualRowMove={true}
+          licenseKey="non-commercial-and-evaluation"
+          manualColumnResize
+          afterChange={(changes) => {
+            if (changes) {
+              // update data in state
+              const newRows = [...rows];
+              changes.forEach(([row, col, _, newValue]) => {
+                // @ts-ignore
+                newRows[row][col] = newValue;
+              });
+              setRows(newRows);
+            }
+          }}
+        />
+      </div>
+    </>
   );
 };

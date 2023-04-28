@@ -18,7 +18,7 @@ export const ProjectConfigEditor: FC<Props> = ({ value, language = 'yaml', readO
         setValue && setValue(v || '');
       }}
       language={language}
-      height="40vh"
+      height="80vh"
       defaultLanguage="yaml"
       defaultValue="# Enter your project configuration here"
       value={value}

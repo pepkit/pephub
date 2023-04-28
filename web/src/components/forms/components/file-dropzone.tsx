@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Control, Controller } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 
 interface FileDropzoneProps {
   name: string;
@@ -32,11 +32,22 @@ interface DropzoneProps {
 }
 
 const Dropzone: FC<DropzoneProps> = ({ multiple = true, onChange, innerRef }) => {
-  const { getRootProps, getInputProps, open } = useDropzone({
+  const { acceptedFiles, getRootProps, getInputProps, open } = useDropzone({
     multiple,
   });
 
   innerRef.current = open;
+
+  // when files are accepted, update the form
+  useEffect(() => {
+    if (acceptedFiles.length > 0) {
+      // convert to FileList
+      const fileList = new DataTransfer();
+      acceptedFiles.forEach((file) => fileList.items.add(file));
+      // @ts-ignore
+      onChange({ target: { files: fileList.files } });
+    }
+  }, [acceptedFiles]);
 
   return (
     <div

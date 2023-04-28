@@ -3,11 +3,6 @@ import { PageLayout } from '../components/layout/page-layout';
 import { useSession } from '../hooks/useSession';
 import { ValidatorForm } from '../components/forms/validator-form';
 
-interface FormValues {
-  peps: FileList;
-  schemas: string[];
-}
-
 export const EidoValidator: FC = () => {
   const { user, login } = useSession();
   return (
@@ -17,7 +12,7 @@ export const EidoValidator: FC = () => {
     >
       <h1 className="mb-1">
         <img src="/eido_vertical.svg" height="75px" className="me-2" alt="Eido icon." />
-        Univseral Validator
+        Universal Validator
       </h1>
       <ValidatorForm />
     </PageLayout>

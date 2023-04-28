@@ -12,6 +12,7 @@ import { Pagination } from '../components/layout/pagination';
 import { NamespacePageSearchBar } from '../components/namespace/search-bar';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
 import { useNamespaceInfo } from '../hooks/queries/useNamespaceInfo';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
 export const NamespacePage: FC = () => {
   // get namespace from url
@@ -58,6 +59,13 @@ export const NamespacePage: FC = () => {
 
   return (
     <PageLayout title={namespace}>
+      {/* breadcrumbs */}
+      <div className="fw-bold mt-2">
+        <Breadcrumb>
+          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+          <Breadcrumb.Item active>{namespace}</Breadcrumb.Item>
+        </Breadcrumb>
+      </div>
       <div className="flex-row d-flex align-items-start justify-content-between">
         <h1 id="namespace-header" className="fw-bold">
           {namespace}

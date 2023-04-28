@@ -4,39 +4,41 @@ import { editProjectMetadata } from '../../api/project';
 import { useSession } from '../../hooks/useSession';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useProject } from '../../hooks/queries/useProject';
 
 interface Props {
   namespace: string;
   name: string;
-  description: string;
-  is_private: boolean;
   tag: string;
 }
 
-export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, is_private, tag }) => {
+interface FormValues extends Props {
+  description: string;
+  isPrivate: boolean;
+}
+
+export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
   const { jwt } = useSession();
-  const navigate = useNavigate();
+  const { data: projectInfo } = useProject(namespace, name, tag, jwt);
   const {
     register,
     handleSubmit,
     watch,
     reset: resetForm,
     formState: { isValid, isDirty },
-  } = useForm<Props>({
+  } = useForm<FormValues>({
     defaultValues: {
       name: name,
-      description: description,
-      is_private: is_private,
+      description: projectInfo?.description || '',
+      isPrivate: projectInfo?.is_private,
       tag: tag,
     },
   });
-
-  const newName = watch('name');
   const newTag = watch('tag');
+  const newName = watch('name');
 
-  const onSubmit: SubmitHandler<Props> = (data) => {
-    return editProjectMetadata(namespace, name, tag, jwt, { ...data });
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    return editProjectMetadata(namespace, name, tag, jwt, { is_private: data.isPrivate, ...data });
   };
 
   const queryClient = useQueryClient();
@@ -44,10 +46,19 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, i
   const mutation = useMutation({
     mutationFn: () => handleSubmit(onSubmit)(),
     onSuccess: () => {
-      resetForm();
+      resetForm(
+        {}, // not sure why this works, but it does.
+        {
+          keepValues: true,
+        },
+      );
       toast.success('Project metadata updated successfully.');
       queryClient.invalidateQueries([namespace, name, tag]);
-      navigate(`/${namespace}/${newName}/edit?tag=${newTag}`);
+
+      // if newTag or newName is different, redirect to new project
+      if (newTag !== tag || newName !== name) {
+        window.location.href = `/${namespace}/${newName}?tag=${newTag}`;
+      }
     },
     onError: (error) => {
       toast.error(`There was an error updated project metadata: ${error}`);
@@ -61,7 +72,7 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, i
           Private
         </label>
         <input
-          {...register('is_private')}
+          {...register('isPrivate')}
           className="form-check-input"
           type="checkbox"
           role="switch"
@@ -117,11 +128,11 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, i
       <button
         onClick={() => mutation.mutate()}
         id="metadata-save-btn"
-        disabled={!isDirty && isValid}
+        disabled={(!isDirty && isValid) || mutation.isLoading}
         type="button"
         className="btn btn-success me-1"
       >
-        Save
+        {mutation.isLoading ? 'Saving...' : 'Save'}
       </button>
     </form>
   );
