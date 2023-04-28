@@ -11,14 +11,10 @@ import { ForkPEPModal } from '../components/modals/fork-pep';
 import { useProject } from '../hooks/queries/useProject';
 import { SampleTable } from '../components/tables/sample-table';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
-import { usePapaParse } from 'react-papaparse';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpoints';
 import { CompatibilityModal } from '../components/modals/compatibility-modal';
-import { Badge } from '../components/badges/badge';
-import { ProjectAboutPlaceholder } from '../components/placeholders/project-about-placeholder';
-import { copyToClipboard } from '../utils/etc';
 import { Breadcrumb } from 'react-bootstrap';
 import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 
@@ -102,15 +98,6 @@ export const ProjectPage: FC = () => {
                 <i className="me-1 bi bi-intersect"></i>
                 Compatibility
               </Dropdown.Item>
-              {projectInfo && canEdit(user, projectInfo) ? (
-                <>
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={() => setShowDeletePEPModal(true)} className="text-danger">
-                    <i className="bi bi-trash3 me-1"></i>
-                    Delete
-                  </Dropdown.Item>
-                </>
-              ) : null}
             </Dropdown.Menu>
           </Dropdown>
           {user ? (
@@ -122,10 +109,22 @@ export const ProjectPage: FC = () => {
           {
             // if user is logged in and is owner of project
             user && projectInfo && canEdit(user, projectInfo) ? (
-              <button onClick={() => setShowEditMetaMetadataModal(true)} className="btn btn-sm btn-outline-dark">
-                {/* gear */}
-                <i className="bi bi-gear"></i>
-              </button>
+              <Dropdown className="me-1">
+                <Dropdown.Toggle variant="outline-dark" size="sm">
+                  <i className="bi bi-gear"></i>
+                </Dropdown.Toggle>
+                <Dropdown.Menu className="shadow-lg">
+                  <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
+                    {/*  pencil write */}
+                    <i className="bi bi-pencil-square me-1"></i>
+                    Edit
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => setShowDeletePEPModal(true)}>
+                    <i className="bi bi-trash3 me-1"></i>
+                    Delete
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             ) : null
           }
         </div>
@@ -169,27 +168,21 @@ export const ProjectPage: FC = () => {
                     Samples
                   </button>
                 </div>
-                {/* <div
-                className={
-                  projectView === 'subsamples'
-                    ? 'border-primary border-bottom bg-transparent px-2 py-1'
-                    : 'border-bottom px-2 py-1'
-                }
-              >
-                <button
-                  onClick={() => setProjectView('subsamples')}
-                  className="border-0 bg-transparent project-button-toggles rounded"
-                >
-                  <i className="bi bi-table me-1"></i>
-                  Sub Samples
-                </button>
-              </div> */}
+              </div>
+              <div>
+                <span className="text-muted text-sm">
+                  <i className="bi bi-calendar me-1"></i>
+                  Created: {dateStringToDate(projectInfo?.submission_date)}
+                </span>
+                <span className="text-muted text-sm ms-2">
+                  <i className="bi bi-clock me-1"></i>
+                  Updated: {dateStringToDateTime(projectInfo?.last_update_date)}
+                </span>
               </div>
             </div>
           </>
         )}
       </div>
-      {/* two columns. one is 3/4 of page then the other is 1/4 of page */}
       <div className="row h-100">
         <div className="col-12">
           <div>

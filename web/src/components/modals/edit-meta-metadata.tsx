@@ -12,7 +12,7 @@ interface Props {
 
 export const EditMetaMetadataModal: FC<Props> = ({ namespace, project, tag, show, onHide }) => {
   return (
-    <Modal show={show} onHide={onHide} size="lg">
+    <Modal centered animation={false} show={show} onHide={onHide} size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Edit Metadata</Modal.Title>
       </Modal.Header>
