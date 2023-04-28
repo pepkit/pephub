@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, forwardRef, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -20,9 +20,24 @@ import { Badge } from '../components/badges/badge';
 import { ProjectAboutPlaceholder } from '../components/placeholders/project-about-placeholder';
 import { copyToClipboard } from '../utils/etc';
 import { Breadcrumb } from 'react-bootstrap';
+import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 
-type ProjectView = 'samples' | 'config';
+type ProjectView = 'samples' | 'subsamples' | 'config';
 type GetProjectView = 'http' | 'phc';
+
+const MoreToggle = forwardRef<HTMLButtonElement, { onClick: () => void }>(({ onClick }, ref) => (
+  <button
+    ref={ref}
+    onClick={(e) => {
+      e.preventDefault();
+      onClick();
+    }}
+    className="bg-transparent border-0 text-primary-hover me-1"
+  >
+    {/* chevron down */}
+    &#x25bc;
+  </button>
+));
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
@@ -48,8 +63,7 @@ export const ProjectPage: FC = () => {
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
   const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
-  const [getProjectView, setGetProjectView] = useState<GetProjectView>('phc');
-  const [phcPullCopied, setPhcPullCopied] = useState(false);
+  const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
 
   const downloadZip = () => {
     const completeName = `${namespace}-${project}-${tag}`;
@@ -74,8 +88,8 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="fw-bold px-4 mt-2">
-        <Breadcrumb>
+      <div className="d-flex flex-row align-items-center justify-content-between px-4 mt-2">
+        <Breadcrumb className="fw-bold">
           <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
           <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
           <Breadcrumb.Item active>{project}</Breadcrumb.Item>
@@ -83,169 +97,134 @@ export const ProjectPage: FC = () => {
             <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
           ) : null}
         </Breadcrumb>
+        <div className="d-flex flex-row align-items-center">
+          <Dropdown className="me-1">
+            <Dropdown.Toggle variant="outline-dark" size="sm">
+              <i className="bi bi-three-dots me-1"></i>
+            </Dropdown.Toggle>
+            <Dropdown.Menu className="shadow-lg">
+              <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
+                <i className="bi bi-hdd-rack me-1"></i>
+                API Endpoints
+              </Dropdown.Item>
+              <Dropdown.Item onClick={() => downloadZip()}>
+                <i className="bi bi-file-earmark-zip me-1"></i>
+                Download zip
+              </Dropdown.Item>
+              <Dropdown.Item onClick={() => setShowCompatibilityModal(true)}>
+                <i className="me-1 bi bi-intersect"></i>
+                Compatibility
+              </Dropdown.Item>
+              {projectInfo && canEdit(user, projectInfo) ? (
+                <>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={() => setShowDeletePEPModal(true)} className="text-danger">
+                    <i className="bi bi-trash3 me-1"></i>
+                    Delete
+                  </Dropdown.Item>
+                </>
+              ) : null}
+            </Dropdown.Menu>
+          </Dropdown>
+          {user ? (
+            <button className="btn btn-sm btn-outline-dark me-1" onClick={() => setShowForkPEPModal(true)}>
+              <i className="me-1 bi bi-bezier2"></i>
+              Fork
+            </button>
+          ) : null}
+          {
+            // if user is logged in and is owner of project
+            user && projectInfo && canEdit(user, projectInfo) ? (
+              <button onClick={() => setShowEditMetaMetadataModal(true)} className="btn btn-sm btn-outline-dark">
+                {/* gear */}
+                <i className="bi bi-gear"></i>
+              </button>
+            ) : null
+          }
+        </div>
       </div>
-      <div className="mt-2 px-2 border-bottom border-dark pb-2">
+      <div className="px-4">
+        <p>{projectInfo?.description}</p>
+      </div>
+      <div className="mt-2 px-2 border-bottom border-dark">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
         ) : (
-          <div className="flex-row d-flex align-items-start justify-content-between">
-            <div className="d-flex flex-row align-items-center">
-              <div className="btn-group me-1" role="group" aria-label="Basic example">
-                <button
-                  onClick={() => setProjectView('config')}
-                  type="button"
-                  className={projectView === 'config' ? 'btn btn-outline-dark active' : 'btn btn-outline-dark'}
+          <>
+            <div className="flex-row d-flex align-items-end justify-content-between">
+              <div className="d-flex flex-row align-items-center">
+                <div
+                  className={
+                    projectView === 'config'
+                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
+                      : 'border-bottom px-2 py-1'
+                  }
                 >
-                  <i className="bi bi-filetype-yml"></i>
-                </button>
-                <button
-                  onClick={() => setProjectView('samples')}
-                  type="button"
-                  className={projectView === 'samples' ? 'btn btn-outline-dark active' : 'btn btn-outline-dark'}
+                  <button
+                    onClick={() => setProjectView('config')}
+                    className="border-0 bg-transparent project-button-toggles rounded"
+                  >
+                    <i className="bi bi-filetype-yml me-1"></i>Config
+                  </button>
+                </div>
+                <div
+                  className={
+                    projectView === 'samples'
+                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
+                      : 'border-bottom px-2 py-1'
+                  }
                 >
-                  <i className="bi bi-table"></i>
+                  <button
+                    onClick={() => setProjectView('samples')}
+                    className="border-0 bg-transparent project-button-toggles rounded"
+                  >
+                    <i className="bi bi-table me-1"></i>
+                    Samples
+                  </button>
+                </div>
+                {/* <div
+                className={
+                  projectView === 'subsamples'
+                    ? 'border-primary border-bottom bg-transparent px-2 py-1'
+                    : 'border-bottom px-2 py-1'
+                }
+              >
+                <button
+                  onClick={() => setProjectView('subsamples')}
+                  className="border-0 bg-transparent project-button-toggles rounded"
+                >
+                  <i className="bi bi-table me-1"></i>
+                  Sub Samples
                 </button>
+              </div> */}
               </div>
             </div>
-            <div className="d-flex flex-row align-items-center">
-              <Dropdown>
-                <Dropdown.Toggle className="btn btn-outline-dark border border-dark shadow-sm" variant="outline-dark">
-                  Actions
-                </Dropdown.Toggle>
-                <Dropdown.Menu className="shadow-lg">
-                  <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
-                    <i className="bi bi-hdd-rack me-1"></i>
-                    API Endpoints
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => downloadZip()}>
-                    <i className="bi bi-file-earmark-zip me-1"></i>
-                    Download zip
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setShowCompatibilityModal(true)}>
-                    <i className="me-1 bi bi-intersect"></i>
-                    Compatibility
-                  </Dropdown.Item>
-                  {user ? (
-                    <Dropdown.Item onClick={() => setShowForkPEPModal(true)}>
-                      <i className="me-1 bi bi-bezier2"></i>
-                      Fork
-                    </Dropdown.Item>
-                  ) : (
-                    <Dropdown.Item disabled onClick={() => setShowForkPEPModal(true)}>
-                      <i className="me-1 bi bi-bezier2"></i>
-                      Fork
-                    </Dropdown.Item>
-                  )}
-                  {canEdit(user, projectInfo) ? (
-                    <>
-                      <Dropdown.Divider />
-                      <Dropdown.Item href={`/${namespace}/${project}/edit?tag=${tag || 'default'}`}>
-                        <i className="bi bi-pencil me-1"></i>
-                        Edit
-                      </Dropdown.Item>
-                      <Dropdown.Item onClick={() => setShowDeletePEPModal(true)} className="text-danger">
-                        <i className="bi bi-trash3 me-1"></i>
-                        Delete
-                      </Dropdown.Item>
-                    </>
-                  ) : null}
-                </Dropdown.Menu>
-              </Dropdown>
-              <Dropdown>
-                <Dropdown.Toggle className="btn btn-success border border-dark shadow-sm ms-1" variant="success">
-                  Get project
-                </Dropdown.Toggle>
-                <Dropdown.Menu className="shadow-lg px-2 py-3" style={{ minWidth: '600px', maxWidth: 'none' }}>
-                  <div className="d-flex flex-row mb-2 align-items-center text-sm mt-2">
-                    <div
-                      onClick={() => setGetProjectView('http')}
-                      className={
-                        getProjectView === 'http'
-                          ? 'cursor-pointer border-2 border-bottom border-primary fw-bold me-2 mb-0'
-                          : 'cursor-pointer border-2 border-bottom fw-bold me-2 mb-0'
-                      }
-                    >
-                      HTTPS
-                    </div>
-                    <div
-                      onClick={() => setGetProjectView('phc')}
-                      className={
-                        getProjectView === 'phc'
-                          ? 'cursor-pointer border-2 border-bottom border-primary fw-bold me-2 mb-0'
-                          : 'cursor-pointer border-2 border-bottom fw-bold me-2 mb-0'
-                      }
-                    >
-                      PEPhub CLI
-                    </div>
-                  </div>
-                  {getProjectView === 'http' ? (
-                    <div className="p-1 text-sm border border-dark rounded bg-secondary bg-opacity-10">
-                      <code className="text-dark d-flex flex-row align-items-center justify-content-between">
-                        curl {window.location.origin}/api/v1/{namespace}/{project}/download?tag={tag}
-                        <button
-                          onClick={() => {
-                            setPhcPullCopied(true);
-                            setTimeout(() => {
-                              setPhcPullCopied(false);
-                            }, 2000);
-                            copyToClipboard(`phc pull ${namespace}/${project}:${tag}`);
-                          }}
-                          className="ms-2 btn btn-sm btn-dark-outline"
-                        >
-                          {phcPullCopied ? <i className="bi bi-check-lg"></i> : <i className="bi bi-clipboard"></i>}
-                        </button>
-                      </code>
-                    </div>
-                  ) : (
-                    <div className="p-1 text-sm border border-dark rounded bg-secondary bg-opacity-10">
-                      <code className="text-dark d-flex flex-row align-items-center justify-content-between">
-                        phc pull {namespace}/{project}:{tag}
-                        <button
-                          onClick={() => {
-                            setPhcPullCopied(true);
-                            setTimeout(() => {
-                              setPhcPullCopied(false);
-                            }, 2000);
-                            copyToClipboard(`phc pull ${namespace}/${project}:${tag}`);
-                          }}
-                          className="ms-2 btn btn-sm btn-dark-outline"
-                        >
-                          {phcPullCopied ? <i className="bi bi-check-lg"></i> : <i className="bi bi-clipboard"></i>}
-                        </button>
-                      </code>
-                    </div>
-                  )}
-                  <div className="my-2 border border-top-0"></div>
-                  <div className="mt-2">
-                    <span className="p-1">
-                      <button className="btn px-0 btn-link" onClick={() => downloadZip()}>
-                        <i className="bi bi-file-earmark-zip me-1"></i>
-                        Download ZIP
-                      </button>
-                    </span>
-                  </div>
-                </Dropdown.Menu>
-              </Dropdown>
-            </div>
-          </div>
+          </>
         )}
       </div>
       {/* two columns. one is 3/4 of page then the other is 1/4 of page */}
-      <div className="row h-100 gx-2 my-2">
+      <div className="row h-100">
         <div className="col-12">
           <div>
             {projectView === 'samples' ? (
               <SampleTable readOnly={true} data={projectSamples || ''} />
             ) : (
-              <div className="p-1 rounded border border-dark shadow-sm">
-                <ProjectConfigEditor readOnly={true} value={projectConfig || 'Loading.'} />
-              </div>
+              <ProjectConfigEditor readOnly={true} value={projectConfig || 'Loading.'} />
             )}
           </div>
         </div>
       </div>
 
       {/* Modals */}
+      <EditMetaMetadataModal
+        show={showEditMetaMetadataModal}
+        onHide={() => setShowEditMetaMetadataModal(false)}
+        namespace={namespace || ''}
+        project={project || ''}
+        tag={tag}
+        description={projectInfo?.description || ''}
+        isPrivate={projectInfo?.is_private || false}
+      />
       <ProjectAPIEndpointsModal
         show={showAPIEndpointsModal}
         onHide={() => setShowAPIEndpointsModal(false)}

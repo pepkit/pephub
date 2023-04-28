@@ -10,11 +10,11 @@ interface Props {
   namespace: string;
   name: string;
   description: string;
-  is_private: boolean;
+  isPrivate: boolean;
   tag: string;
 }
 
-export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, is_private, tag }) => {
+export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, isPrivate, tag }) => {
   const { jwt } = useSession();
   const navigate = useNavigate();
   const {
@@ -27,7 +27,7 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, i
     defaultValues: {
       name: name,
       description: description,
-      is_private: is_private,
+      isPrivate: isPrivate,
       tag: tag,
     },
   });
@@ -36,7 +36,7 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, i
   const newTag = watch('tag');
 
   const onSubmit: SubmitHandler<Props> = (data) => {
-    return editProjectMetadata(namespace, name, tag, jwt, { ...data });
+    return editProjectMetadata(namespace, name, tag, jwt, { is_private: data.isPrivate, ...data });
   };
 
   const queryClient = useQueryClient();
@@ -61,7 +61,7 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, description, i
           Private
         </label>
         <input
-          {...register('is_private')}
+          {...register('isPrivate')}
           className="form-check-input"
           type="checkbox"
           role="switch"

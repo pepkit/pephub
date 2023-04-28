@@ -166,3 +166,53 @@
   font-size: 8rem; /* 128px */
   line-height: 1;
 }
+
+/* Hover affects for bootstrap text-colors */
+.text-primary-hover:hover {
+  color: #007bff !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-secondary-hover:hover {
+  color: #6c757d !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-success-hover:hover {
+  color: #28a745 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-info-hover:hover {
+  color: #17a2b8 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-warning-hover:hover {
+  color: #ffc107 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-danger-hover:hover {
+  color: #dc3545 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-light-hover:hover {
+  color: #f8f9fa !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.text-dark-hover:hover {
+  color: #343a40 !important;
+  transition: color 0.1s ease-in-out;
+}
+
+.project-button-toggles {
+  background-color: none !important;
+}
+
+.project-button-toggles:hover {
+  background-color: #00000011 !important;
+  transition: background-color 0.1s ease-in-out;
+}

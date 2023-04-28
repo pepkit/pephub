@@ -47,15 +47,7 @@ export const EditProjectPage = () => {
         </a>
         <Tabs transition={false} defaultActiveKey="meta" className="mt-3">
           <Tab eventKey="meta" title="Metadata">
-            <div className="p-2 border border-top-0 rounded-bottom">
-              <ProjectMetaEditForm
-                namespace={namespace}
-                name={projectData.name}
-                description={projectData.description}
-                tag={projectData.tag || 'default'}
-                is_private={projectData?.is_private || false}
-              />
-            </div>
+            <div className="p-2 border border-top-0 rounded-bottom"></div>
           </Tab>
           <Tab eventKey="Config" title="Config">
             <div className="p-2 border border-top-0 rounded-bottom">
