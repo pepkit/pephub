@@ -60,7 +60,7 @@ export const NamespacePage: FC = () => {
   return (
     <PageLayout title={namespace}>
       {/* breadcrumbs */}
-      <div className="fw-bold">
+      <div className="fw-bold mt-2">
         <Breadcrumb>
           <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
           <Breadcrumb.Item active>{namespace}</Breadcrumb.Item>

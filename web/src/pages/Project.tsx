@@ -74,7 +74,7 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="fw-bold">
+      <div className="fw-bold px-4 mt-2">
         <Breadcrumb>
           <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
           <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
@@ -84,7 +84,7 @@ export const ProjectPage: FC = () => {
           ) : null}
         </Breadcrumb>
       </div>
-      <div className="mt-2">
+      <div className="mt-2 px-2 border-bottom border-dark pb-2">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
         ) : (
@@ -231,66 +231,15 @@ export const ProjectPage: FC = () => {
         )}
       </div>
       {/* two columns. one is 3/4 of page then the other is 1/4 of page */}
-      <div className="row h-100 gx-2 my-2" style={{ minHeight: '100%' }}>
-        <div className="col-10">
+      <div className="row h-100 gx-2 my-2">
+        <div className="col-12">
           <div>
             {projectView === 'samples' ? (
-              <div className="p-1 rounded border border-dark shadow-sm overflow-auto">
-                <SampleTable readOnly={true} data={projectSamples || ''} />
-              </div>
+              <SampleTable readOnly={true} data={projectSamples || ''} />
             ) : (
               <div className="p-1 rounded border border-dark shadow-sm">
                 <ProjectConfigEditor readOnly={true} value={projectConfig || 'Loading.'} />
               </div>
-            )}
-          </div>
-        </div>
-        <div className="col-2">
-          <div className="p-2 border border-dark shadow-sm rounded h-100">
-            {projectInfoIsLoading || projectInfo === undefined ? (
-              <ProjectAboutPlaceholder />
-            ) : (
-              <>
-                <div className="d-flex flex-row align-items-center justify-content-between">
-                  <h5 className="fw-bold">About</h5>
-                </div>
-                <div className="text-sm">
-                  {projectInfo?.description ? (
-                    <p>{projectInfo.description}</p>
-                  ) : (
-                    <p className="text-muted text-italic">No description</p>
-                  )}
-                </div>
-                <div className="border-top my-2"></div>
-                <h5 className="fw-bold">Schemas</h5>
-                <div className="d-flex flex-row flex-wrap">
-                  <Badge size="small">PEP {projectInfo?.pep_version || '2.1.0'}</Badge>
-                </div>
-                <div className="border-top my-2"></div>
-                <p className="text-sm mb-0">
-                  <span>PEP Version:</span> {projectInfo?.pep_version}
-                </p>
-                <p className="text-sm mb-0">
-                  <span>Total Samples:</span> {projectInfo?.number_of_samples}
-                </p>
-                <div className="border-top my-2"></div>
-                <div className="d-flex flex-column text-sm">
-                  <small>
-                    <span className="me-3">
-                      <i className="bi bi-calendar3"></i>
-                      <span className="mx-1">Created:</span>
-                      <span> {dateStringToDate(projectInfo?.submission_date)}</span>
-                    </span>
-                  </small>
-                  <small className="mt-1">
-                    <span className="me-1">
-                      <i className="bi bi-clock"></i>
-                      <span className="mx-1">Last updated:</span>
-                      <span>{dateStringToDateTime(projectInfo?.last_update_date)}</span>
-                    </span>
-                  </small>
-                </div>
-              </>
             )}
           </div>
         </div>

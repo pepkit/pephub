@@ -19,7 +19,7 @@ export const Nav: FC = () => {
 
   return (
     <nav
-      className="py-2 mb-4 navbar navbar-expand-md border-bottom navbar-light"
+      className="py-2 navbar navbar-expand-md border-bottom navbar-light"
       aria-label="navbar"
       style={{ backgroundColor: '#EFF3F6' }}
     >

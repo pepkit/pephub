@@ -72,7 +72,7 @@ export const PageLayout: FC<Props> = ({ children, title, description, image, ful
   }
 
   // set main class based on fullWidth prop
-  const mainClass = fullWidth ? 'px-4 container-height' : 'container container-height';
+  const mainClass = fullWidth ? `container-height` : 'container container-height';
 
   return (
     <>

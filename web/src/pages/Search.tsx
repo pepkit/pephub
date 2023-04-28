@@ -43,7 +43,7 @@ export const SearchPage: FC = () => {
 
   return (
     <PageLayout title="Search">
-      <div className="d-flex flex-row align-items-center">
+      <div className="d-flex flex-row align-items-center mt-2">
         <SearchBar onSearch={() => runSearch()} value={search} setValue={setSearch} />
         <button className="py-2 btn btn-outline-dark border border-2 border-dark ms-2">
           <i className="bi bi-search"></i>

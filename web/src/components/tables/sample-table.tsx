@@ -31,8 +31,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
         complete: (results) => {
           // ts-ignore
           const data = results.data as any[][];
-          setHeaders(data[0]);
-          setRows(data.slice(1));
+          setRows(data);
         },
       });
     }
@@ -64,14 +63,14 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
       <HotTable
         data={rows}
         stretchH="all"
-        height={height || 700}
+        height={height || 900}
         readOnly={readOnly}
-        colHeaders={headers}
+        colHeaders={true}
         dropdownMenu={true}
         hiddenColumns={{
           indicators: true,
         }}
-        manualColumnMove
+        minRows={500}
         contextMenu={true}
         multiColumnSorting={true}
         filters={true}
@@ -91,11 +90,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
             setRows(newRows);
           }
         }}
-      >
-        {headers.map((_, i) => (
-          <HotColumn key={i} data={i} />
-        ))}
-      </HotTable>
+      />
       <AddColumnModal
         onAdd={(newColumnName) => {
           // add a new column to the right
