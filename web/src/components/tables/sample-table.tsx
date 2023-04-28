@@ -48,18 +48,6 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
 
   return (
     <div className="rounded rounded-2">
-      {!readOnly && (
-        <div className="p-1 border border-bottom-0 rounded-top">
-          <button onClick={() => setShowAddColumnModal(true)} className="btn btn-sm btn-dark">
-            <i className="bi bi-plus-circle me-1"></i>
-            Add Column
-          </button>
-          <button disabled className="btn btn-sm btn-dark ms-1">
-            <i className="bi bi-trash me-1"></i>
-            Remove Column
-          </button>
-        </div>
-      )}
       <HotTable
         data={rows}
         stretchH="all"

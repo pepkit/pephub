@@ -29,7 +29,7 @@ export const ProjectPage: FC = () => {
   const tag = searchParams.get('tag') || 'default';
 
   const { data: projectInfo, isLoading: projectInfoIsLoading } = useProject(namespace, project || '', tag, jwt);
-  const { data: projectSamples, isLoading: projectSamplesIsLoading } = useSampleTable(namespace, project, tag, jwt);
+  const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
     namespace,
     project || '',
@@ -187,9 +187,12 @@ export const ProjectPage: FC = () => {
         <div className="col-12">
           <div>
             {projectView === 'samples' ? (
-              <SampleTable readOnly={true} data={projectSamples || ''} />
+              <SampleTable readOnly={!(projectInfo && canEdit(user, projectInfo))} data={projectSamples || ''} />
             ) : (
-              <ProjectConfigEditor readOnly={true} value={projectConfig || 'Loading.'} />
+              <ProjectConfigEditor
+                readOnly={!(projectInfo && canEdit(user, projectInfo))}
+                value={projectConfigIsLoading ? 'Loading.' : projectConfig ? projectConfig : 'No config file found.'}
+              />
             )}
           </div>
         </div>
