@@ -26,7 +26,6 @@ type GetProjectView = 'http' | 'phc';
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
-  const { readString } = usePapaParse();
 
   const { namespace, project } = useParams();
   let [searchParams] = useSearchParams();
@@ -73,7 +72,7 @@ export const ProjectPage: FC = () => {
   };
 
   return (
-    <PageLayout fullWidth title={`${namespace}/${project}`}>
+    <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
       <div className="fw-bold">
         <Breadcrumb>
@@ -89,7 +88,7 @@ export const ProjectPage: FC = () => {
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
         ) : (
-          <div className="flex-row d-flex align-items-start justify-content-end">
+          <div className="flex-row d-flex align-items-start justify-content-between">
             <div className="d-flex flex-row align-items-center">
               <div className="btn-group me-1" role="group" aria-label="Basic example">
                 <button
@@ -107,6 +106,8 @@ export const ProjectPage: FC = () => {
                   <i className="bi bi-table"></i>
                 </button>
               </div>
+            </div>
+            <div className="d-flex flex-row align-items-center">
               <Dropdown>
                 <Dropdown.Toggle className="btn btn-outline-dark border border-dark shadow-sm" variant="outline-dark">
                   Actions
@@ -250,7 +251,9 @@ export const ProjectPage: FC = () => {
               <ProjectAboutPlaceholder />
             ) : (
               <>
-                <h5 className="fw-bold">About</h5>
+                <div className="d-flex flex-row align-items-center justify-content-between">
+                  <h5 className="fw-bold">About</h5>
+                </div>
                 <div className="text-sm">
                   {projectInfo?.description ? (
                     <p>{projectInfo.description}</p>

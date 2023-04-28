@@ -3,6 +3,7 @@ import { Dropdown } from 'react-bootstrap';
 import { useSession } from '../../hooks/useSession';
 import { useNavigate } from 'react-router-dom';
 import { getOS } from '../../utils/etc';
+import { SearchBox } from './search-box';
 
 // bootstrap nav bar
 export const Nav: FC = () => {
@@ -22,7 +23,7 @@ export const Nav: FC = () => {
       aria-label="navbar"
       style={{ backgroundColor: '#EFF3F6' }}
     >
-      <div className="container">
+      <div className="d-flex flex-row align-items-center w-100 px-4">
         <a href="/" className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none">
           <img src="/pephub_logo.svg" alt="PEPhub" height="60" />
         </a>
@@ -41,7 +42,7 @@ export const Nav: FC = () => {
           <ul className="mb-2 navbar-nav ms-auto d-flex flex-row align-items-center">
             <li>
               <div className="mt-1 input-group">
-                <input
+                <SearchBox
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       navigateToSearch();
