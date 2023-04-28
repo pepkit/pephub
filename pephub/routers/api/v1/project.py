@@ -107,6 +107,7 @@ async def update_a_pep(
         sample_table_csv = StringIO(updated_project.sample_table_csv)
         sample_table_df = pd.read_csv(sample_table_csv)
         sample_table_df = sample_table_df.dropna(axis=1, how="all")
+        sample_table_df.fillna("", inplace=True)
         sample_table_df_json = sample_table_df.to_dict()
 
         new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
@@ -120,6 +121,7 @@ async def update_a_pep(
             subsample_str = StringIO(subsample_str)
             subsample_pd = pd.read_csv(subsample_str)
             subsample_pd = subsample_pd.dropna(axis=1, how="all")
+            subsample_pd.fillna("", inplace=True)
             subsample_df = subsample_pd.to_dict()
 
             subsample_peppy_list.append(subsample_df)

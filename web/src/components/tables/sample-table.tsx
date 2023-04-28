@@ -45,57 +45,59 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
   //
   useEffect(() => {
     if (onChange && rows) {
-      // onChange(tableDataToCsvString(rows));
+      onChange(tableDataToCsvString(rows));
     }
   }, [rows]);
 
   return (
-    <div className="rounded rounded-2">
-      <HotTable
-        data={rows}
-        stretchH="all"
-        height={height || 900}
-        readOnly={readOnly}
-        colHeaders={true}
-        dropdownMenu={true}
-        hiddenColumns={{
-          indicators: true,
-        }}
-        minRows={500}
-        contextMenu={[
-          'row_above',
-          'row_below',
-          '---------',
-          'col_left',
-          'col_right',
-          '---------',
-          'remove_row',
-          'remove_col',
-          '---------',
-          'alignment',
-          '---------',
-          'copy',
-          'cut',
-        ]}
-        multiColumnSorting={true}
-        filters={true}
-        rowHeaders={true}
-        beforeRenderer={addClassesToRows}
-        manualRowMove={true}
-        licenseKey="non-commercial-and-evaluation"
-        manualColumnResize
-        afterChange={(changes) => {
-          if (changes) {
-            // update data in state
-            const newRows = [...rows];
-            changes.forEach(([row, col, _, newValue]) => {
-              // @ts-ignore
-              newRows[row][col] = newValue;
-            });
-            setRows(newRows);
-          }
-        }}
-      />
-    </div>
+    <>
+      <div className="rounded rounded-2">
+        <HotTable
+          data={rows}
+          stretchH="all"
+          height={height || 900}
+          readOnly={readOnly}
+          colHeaders={true}
+          dropdownMenu={true}
+          hiddenColumns={{
+            indicators: true,
+          }}
+          minRows={500}
+          contextMenu={[
+            'row_above',
+            'row_below',
+            '---------',
+            'col_left',
+            'col_right',
+            '---------',
+            'remove_row',
+            'remove_col',
+            '---------',
+            'alignment',
+            '---------',
+            'copy',
+            'cut',
+          ]}
+          multiColumnSorting={true}
+          filters={true}
+          rowHeaders={true}
+          beforeRenderer={addClassesToRows}
+          manualRowMove={true}
+          licenseKey="non-commercial-and-evaluation"
+          manualColumnResize
+          afterChange={(changes) => {
+            if (changes) {
+              // update data in state
+              const newRows = [...rows];
+              changes.forEach(([row, col, _, newValue]) => {
+                // @ts-ignore
+                newRows[row][col] = newValue;
+              });
+              setRows(newRows);
+            }
+          }}
+        />
+      </div>
+    </>
   );
 };

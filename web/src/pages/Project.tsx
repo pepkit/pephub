@@ -5,7 +5,6 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { PageLayout } from '../components/layout/page-layout';
 import { useSession } from '../hooks/useSession';
 import { canEdit } from '../utils/permissions';
-import { dateStringToDate, dateStringToDateTime } from '../utils/dates';
 import { DeletePEPModal } from '../components/modals/delete-pep';
 import { ForkPEPModal } from '../components/modals/fork-pep';
 import { useProject } from '../hooks/queries/useProject';
@@ -17,15 +16,19 @@ import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpo
 import { CompatibilityModal } from '../components/modals/compatibility-modal';
 import { Breadcrumb } from 'react-bootstrap';
 import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { editProjectConfig, editProjectSampleTable } from '../api/project';
+import { toast } from 'react-hot-toast';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
 
+  const queryClient = useQueryClient();
+
   const { namespace, project } = useParams();
   let [searchParams] = useSearchParams();
-
   const tag = searchParams.get('tag') || 'default';
 
   const { data: projectInfo, isLoading: projectInfoIsLoading } = useProject(namespace, project || '', tag, jwt);
@@ -39,7 +42,7 @@ export const ProjectPage: FC = () => {
   );
 
   // state
-  const [projectView, setProjectView] = useState<ProjectView>('samples');
+  const [projectView, setProjectView] = useState<ProjectView>('config');
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
@@ -79,7 +82,7 @@ export const ProjectPage: FC = () => {
 
   // check if config or samples are dirty
   const configIsDirty = newProjectConfig !== projectConfig;
-  const samplesIsDirty = newProjectSamples !== projectSamples;
+  const samplesIsDirty = newProjectSamples.trim() !== projectSamples?.trim();
 
   // reset config and samples
   const resetConfig = () => {
@@ -87,6 +90,37 @@ export const ProjectPage: FC = () => {
   };
   const resetSamples = () => {
     setNewProjectSamples(projectSamples || '');
+  };
+
+  const configMutation = useMutation({
+    mutationFn: () => editProjectConfig(namespace || '', project || '', tag, jwt || '', newProjectConfig),
+    onSuccess: () => {
+      toast.success('Successfully updated project config');
+      queryClient.invalidateQueries([namespace, project, tag, 'config']);
+    },
+    onError: (err) => {
+      toast.error(`Error updating project samples: ${err}`);
+    },
+  });
+
+  const sampleTableMutation = useMutation({
+    mutationFn: () => editProjectSampleTable(namespace || '', project || '', tag, jwt || '', newProjectSamples),
+    onSuccess: () => {
+      toast.success('Successfully updated project samples');
+      queryClient.invalidateQueries([namespace, project, tag, 'samples']);
+    },
+    onError: (err) => {
+      toast.error(`Error updating project samples: ${err}`);
+    },
+  });
+
+  const handleProjectChange = () => {
+    if (configIsDirty) {
+      configMutation.mutate();
+    }
+    if (samplesIsDirty) {
+      sampleTableMutation.mutate();
+    }
   };
 
   return (
@@ -202,7 +236,7 @@ export const ProjectPage: FC = () => {
                   </button>
                   {samplesIsDirty ? (
                     <span className="text-xs">
-                      <i className="bi bi-circle-fill ms-1 text-light"></i>
+                      <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
                     </span>
                   ) : (
                     //  spacer
@@ -215,7 +249,13 @@ export const ProjectPage: FC = () => {
               <div>
                 {configIsDirty || samplesIsDirty ? (
                   <>
-                    <button className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark">Save changes?</button>
+                    <button
+                      disabled={configMutation.isLoading || sampleTableMutation.isLoading}
+                      onClick={() => handleProjectChange()}
+                      className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                    >
+                      {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save changes?'}
+                    </button>
                     <button
                       className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
                       onClick={() => {
