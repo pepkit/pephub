@@ -22,6 +22,9 @@ import { toast } from 'react-hot-toast';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+const API_BASE = `${API_HOST}/api/v1`;
+
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
 
@@ -124,7 +127,13 @@ export const ProjectPage: FC = () => {
   };
 
   return (
-    <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
+    <PageLayout
+      fullWidth
+      footer={false}
+      title={`${namespace}/${project}:${tag}`}
+      description={projectInfo?.description || undefined}
+      image={`${API_BASE}/projects/${namespace}/${project}/og-image?tag=${tag}`}
+    >
       {/* breadcrumbs */}
       <div className="d-flex flex-row align-items-center justify-content-between px-4 mt-2">
         <Breadcrumb className="fw-bold">
