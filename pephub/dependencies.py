@@ -4,16 +4,20 @@ import jwt
 import json
 import requests
 import logging
+import cairosvg
 
 from secrets import token_hex
 from dotenv import load_dotenv
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Tuple
 from datetime import datetime, timedelta
+from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from fastapi import Depends, Header, Form
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
+from peppy import Project
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.exceptions import ProjectNotFoundError
@@ -41,6 +45,8 @@ load_dotenv()
 
 # Scheme for the Authorization header
 token_auth_scheme = HTTPBearer()
+
+ASSETS_PATH = os.path.join(os.path.dirname(__file__), "assets")
 
 
 class UserData(BaseModel):
@@ -421,3 +427,104 @@ def verify_namespace_exists(namespace: str, agent: PEPDatabaseAgent = Depends(ge
         )
     else:
         yield namespace
+
+def create_rounded_corner_mask(size: Tuple[int, int], radius: int) -> Image.Image:
+    mask = Image.new("L", size, 0)
+    mask_draw = ImageDraw.Draw(mask)
+    mask_draw.ellipse((0, 0, radius * 2, radius * 2), fill=255)
+    mask_draw.rectangle((radius, 0, size[0] - radius, size[1]), fill=255)
+    mask_draw.rectangle((0, radius, size[0], size[1] - radius), fill=255)
+    mask_draw.ellipse((size[0] - radius * 2, 0, size[0], radius * 2), fill=255)
+    mask_draw.ellipse((0, size[1] - radius * 2, radius * 2, size[1]), fill=255)
+    mask_draw.ellipse((size[0] - radius * 2, size[1] - radius * 2, size[0], size[1]), fill=255)
+    return mask
+
+def project_to_open_graph_image(
+        namespace: str,
+        project: str,
+        tag: Optional[str] = DEFAULT_TAG,
+        proj_obj: Project = None,
+    ) -> Image.Image:
+    """
+    Convert a project to an open graph image
+    """
+
+    def svg_to_image(svg_path: str, size: Tuple[int, int]) -> Image.Image:
+        with open(svg_path, 'r') as svg_file:
+            svg_data = svg_file.read()
+        
+        png_data = BytesIO()
+        cairosvg.svg2png(bytestring=svg_data, write_to=png_data, dpi=192)
+        png_data.seek(0)
+        img = Image.open(png_data)
+        img.thumbnail(size)
+        return img
+
+    scale_factor = 2
+
+    image = Image.new("RGB", (1200 * scale_factor, 630 * scale_factor), color="white")
+    draw = ImageDraw.Draw(image)
+
+    # title font should be 100
+    title_font = ImageFont.truetype(f"{ASSETS_PATH}/Roboto-Bold.ttf", 60 * scale_factor)
+
+    # description font should be 50
+    description_font = ImageFont.truetype(f"{ASSETS_PATH}/Roboto-Regular.ttf", 30 * scale_factor)
+
+    # add icon to upper left corner
+    response = requests.get(f"https://github.com/{namespace}.png")
+    avatar = Image.open(BytesIO(response.content))
+    avatar = avatar.resize((150 * scale_factor, 150 * scale_factor))
+
+    # round corners
+    corner_radius = 20 * scale_factor
+    mask = create_rounded_corner_mask(avatar.size, corner_radius)
+    rounded_avatar = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
+    rounded_avatar.putalpha(mask)
+    image.paste(rounded_avatar, (100 * scale_factor, 100 * scale_factor), mask=rounded_avatar)
+
+    # add project registry path as title
+    registry_path = f"{namespace}/{project}:{tag}"
+
+    # add project description as description
+    description = proj_obj.description
+
+    # add to bottom of image
+    draw.text((100 * scale_factor, 300 * scale_factor), registry_path, font=title_font, fill="black")
+    draw.text((100 * scale_factor, 375 * scale_factor), description, font=description_font, fill="black")
+
+    # Update description_font size and color
+    info_font = ImageFont.truetype(f"{ASSETS_PATH}/Roboto-Regular.ttf", 24 * scale_factor)
+    info_color = (128, 128, 128)  # Light gray color
+
+    # Load and resize the icons for samples, project version, and favorites
+    samples_icon = svg_to_image(f"{ASSETS_PATH}/hash.svg", (30 * scale_factor, 30 * scale_factor))
+    version_icon = svg_to_image(f"{ASSETS_PATH}/hammer.svg", (30 * scale_factor, 30 * scale_factor))
+    favorites_icon = svg_to_image(f"{ASSETS_PATH}/stars.svg", (30 * scale_factor, 30 * scale_factor))
+
+    # Draw the icons at the bottom of the image
+    image.paste(samples_icon, (100 * scale_factor, 500 * scale_factor))
+    image.paste(version_icon, (450 * scale_factor, 500 * scale_factor))
+    image.paste(favorites_icon, (800 * scale_factor, 500 * scale_factor))
+
+    # Draw the icons at the bottom of the image
+    image.paste(samples_icon, (100 * scale_factor, 500 * scale_factor))
+    image.paste(version_icon, (450 * scale_factor, 500 * scale_factor))
+    image.paste(favorites_icon, (800 * scale_factor, 500 * scale_factor))
+
+    # Draw the text for the number of samples, project version, and the number of favorites
+    draw.text((150 * scale_factor, 500 * scale_factor), str(len(proj_obj.samples)), font=info_font, fill=info_color)
+    draw.text((500 * scale_factor, 500 * scale_factor), str(proj_obj.pep_version), font=info_font, fill=info_color)
+    draw.text((850 * scale_factor, 500 * scale_factor), str(0), font=info_font, fill=info_color)
+
+    # Draw labels for each value
+    label_color = (96, 96, 96)  # Darker gray color
+    draw.text((150 * scale_factor, 470 * scale_factor), "Samples", font=info_font, fill=label_color)
+    draw.text((500 * scale_factor, 470 * scale_factor), "Version", font=info_font, fill=label_color)
+    draw.text((850 * scale_factor, 470 * scale_factor), "Favorites", font=info_font, fill=label_color)
+
+    image = image.resize((1200, 630), Image.ANTIALIAS)
+
+    return image
+
+
