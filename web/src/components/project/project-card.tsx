@@ -34,7 +34,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           <div className="btn-group dropend">
             <Dropdown as={ButtonGroup}>
               <button disabled type="button" className="btn btn-sm btn-outline-primary">
-                <i className="bi bi-star"></i>
+                <i className="bi bi-star me-1"></i>
                 Favorite
               </button>
               <Dropdown.Toggle split size="sm" variant="outline-primary" id="dropdown-split-basic" />
@@ -46,9 +46,6 @@ export const ProjectCard: FC<Props> = ({ project }) => {
                 </li>
                 {canEdit(user, project) ? (
                   <>
-                    <Dropdown.Item href={`/${project.namespace}/${project.name}/edit?tag=${project.tag}`}>
-                      Edit
-                    </Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item onClick={() => setShowDeletePEPModal(true)} className="text-danger dropdown-item">
                       <i className="bi bi-trash3 me-1"></i>
