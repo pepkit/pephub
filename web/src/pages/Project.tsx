@@ -27,16 +27,14 @@ export const ProjectPage: FC = () => {
 
   const queryClient = useQueryClient();
 
-  const { namespace, project } = useParams();
+  let { namespace, project } = useParams();
+  namespace = namespace?.toLowerCase();
+  project = project?.toLowerCase();
+
   let [searchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
 
-  const {
-    data: projectInfo,
-    isLoading: projectInfoIsLoading,
-    isError,
-    error,
-  } = useProject(namespace, project || '', tag, jwt);
+  const { data: projectInfo, isLoading: projectInfoIsLoading, error } = useProject(namespace, project || '', tag, jwt);
   const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
     namespace,

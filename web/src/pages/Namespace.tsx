@@ -16,7 +16,8 @@ import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
 export const NamespacePage: FC = () => {
   // get namespace from url
-  const { namespace } = useParams();
+  let { namespace } = useParams();
+  namespace = namespace?.toLowerCase();
 
   // get session info
   const { user, jwt } = useSession();
