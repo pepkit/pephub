@@ -293,7 +293,7 @@ export const ProjectPage: FC = () => {
           </>
         )}
       </div>
-      <div className="row h-100">
+      <div className="row gx-0 h-100">
         <div className="col-12">
           <div>
             {projectView === 'samples' ? (
