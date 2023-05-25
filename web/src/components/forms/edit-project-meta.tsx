@@ -10,6 +10,8 @@ interface Props {
   namespace: string;
   name: string;
   tag: string;
+  onSuccessfulSubmit?: () => void;
+  onFailedSubmit?: () => void;
 }
 
 interface FormValues extends Props {
@@ -17,7 +19,13 @@ interface FormValues extends Props {
   isPrivate: boolean;
 }
 
-export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
+export const ProjectMetaEditForm: FC<Props> = ({
+  namespace,
+  name,
+  tag,
+  onSuccessfulSubmit = () => {},
+  onFailedSubmit = () => {},
+}) => {
   const { jwt } = useSession();
   const { data: projectInfo } = useProject(namespace, name, tag, jwt);
   const {
@@ -54,6 +62,7 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
       );
       toast.success('Project metadata updated successfully.');
       queryClient.invalidateQueries([namespace, name, tag]);
+      onSuccessfulSubmit();
 
       // if newTag or newName is different, redirect to new project
       if (newTag !== tag || newName !== name) {
@@ -62,6 +71,7 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
     },
     onError: (error) => {
       toast.error(`There was an error updated project metadata: ${error}`);
+      onFailedSubmit();
     },
   });
 

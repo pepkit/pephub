@@ -147,7 +147,7 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 mt-2">
+      <div className="d-flex flex-row align-items-center justify-content-between px-4 my-2">
         <Breadcrumb className="fw-bold">
           <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
           <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
@@ -159,27 +159,16 @@ export const ProjectPage: FC = () => {
           ) : null}
         </Breadcrumb>
         <div className="d-flex flex-row align-items-center">
-          <Dropdown className="me-1">
-            <Dropdown.Toggle variant="outline-dark" size="sm">
-              <i className="bi bi-three-dots me-1"></i>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="shadow-lg">
-              <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
-                <i className="bi bi-hdd-rack me-1"></i>
-                API Endpoints
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => downloadZip()}>
-                <i className="bi bi-file-earmark-zip me-1"></i>
-                Download zip
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setShowCompatibilityModal(true)}>
-                <i className="me-1 bi bi-intersect"></i>
-                Compatibility
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
+          <button className="btn btn-sm btn-dark me-1" onClick={() => downloadZip()}>
+            <i className="bi bi-file-earmark-zip me-1"></i>
+            Download
+          </button>
+          <button className="btn btn-sm btn-dark me-1" onClick={() => setShowAPIEndpointsModal(true)}>
+            <i className="bi bi-hdd-rack me-1"></i>
+            API Endpoints
+          </button>
           {user ? (
-            <button className="btn btn-sm btn-outline-dark me-1" onClick={() => setShowForkPEPModal(true)}>
+            <button className="btn btn-sm btn-dark me-1" onClick={() => setShowForkPEPModal(true)}>
               <i className="me-1 bi bi-bezier2"></i>
               Fork
             </button>
@@ -188,15 +177,16 @@ export const ProjectPage: FC = () => {
             // if user is logged in and is owner of project
             user && projectInfo && canEdit(user, projectInfo) ? (
               <Dropdown className="me-1">
-                <Dropdown.Toggle variant="outline-dark" size="sm">
-                  <i className="bi bi-gear"></i>
+                <Dropdown.Toggle variant="dark" size="sm">
+                  <i className="bi bi-pencil"></i>
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="shadow-lg">
                   <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
                     {/*  pencil write */}
                     <i className="bi bi-pencil-square me-1"></i>
-                    Edit
+                    Edit project
                   </Dropdown.Item>
+                  <Dropdown.Divider />
                   <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
                     <i className="bi bi-trash3 me-1"></i>
                     Delete
@@ -268,26 +258,25 @@ export const ProjectPage: FC = () => {
                 </div>
               </div>
               <div>
-                {configIsDirty || samplesIsDirty ? (
-                  <>
-                    <button
-                      disabled={configMutation.isLoading || sampleTableMutation.isLoading}
-                      onClick={() => handleProjectChange()}
-                      className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
-                    >
-                      {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save changes?'}
-                    </button>
-                    <button
-                      className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
-                      onClick={() => {
-                        resetConfig();
-                        resetSamples();
-                      }}
-                    >
-                      Discard
-                    </button>
-                  </>
-                ) : null}
+                <button
+                  disabled={
+                    configMutation.isLoading || sampleTableMutation.isLoading || !(configIsDirty || samplesIsDirty)
+                  }
+                  onClick={() => handleProjectChange()}
+                  className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                >
+                  {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
+                  onClick={() => {
+                    resetConfig();
+                    resetSamples();
+                  }}
+                  disabled={!(configIsDirty || samplesIsDirty)}
+                >
+                  Discard
+                </button>
               </div>
             </div>
           </>

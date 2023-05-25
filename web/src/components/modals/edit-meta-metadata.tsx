@@ -17,7 +17,12 @@ export const EditMetaMetadataModal: FC<Props> = ({ namespace, project, tag, show
         <Modal.Title>Edit Metadata</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <ProjectMetaEditForm namespace={namespace} name={project} tag={tag || 'default'} />
+        <ProjectMetaEditForm
+          onSuccessfulSubmit={() => onHide()}
+          namespace={namespace}
+          name={project}
+          tag={tag || 'default'}
+        />
       </Modal.Body>
     </Modal>
   );
