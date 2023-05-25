@@ -120,7 +120,6 @@ export const submitProjectJSON = (
     tag,
     is_private,
     description,
-    sample_table,
     config,
   }: {
     namespace: string;

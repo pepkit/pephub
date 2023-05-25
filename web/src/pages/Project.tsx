@@ -31,7 +31,12 @@ export const ProjectPage: FC = () => {
   let [searchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
 
-  const { data: projectInfo, isLoading: projectInfoIsLoading } = useProject(namespace, project || '', tag, jwt);
+  const {
+    data: projectInfo,
+    isLoading: projectInfoIsLoading,
+    isError,
+    error,
+  } = useProject(namespace, project || '', tag, jwt);
   const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
     namespace,
@@ -122,6 +127,22 @@ export const ProjectPage: FC = () => {
       sampleTableMutation.mutate();
     }
   };
+
+  if (error) {
+    return (
+      <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
+        <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
+          <h1 className="fw-bold">Error 😫</h1>
+          <p className="text-muted fst-italic">An error occured fetching the project... Are you sure it exists?</p>
+          <div>
+            <a href={`/${namespace}`}>
+              <button className="btn btn-dark">Take me back</button>
+            </a>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
