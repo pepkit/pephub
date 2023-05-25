@@ -17,6 +17,7 @@ uvicorn pephub.main:app --reload
 The backend server should now be running at http://localhost:8000. If you wish to debug the backend server, we've provided a [`launch.json`](../.vscode/launch.json) file for VSCode. You can use this to debug the backend server.
 
 ## Frontend development
+*Before begining, ensure you are using a `nodejs` version > 16.* To manage `node` versions, most people recommend [`nvm`](https://github.com/nvm-sh/nvm).
 
 We use [vite](https://vitejs.dev/) as our development and build tool for the frontend. Before starting, make sure you point the development server at the already running backend server. To do this, create a `.env.local` file inside the `web/` directory with the following contents:
 
