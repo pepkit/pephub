@@ -47,7 +47,7 @@ export const ProjectPage: FC = () => {
   );
 
   // state
-  const [projectView, setProjectView] = useState<ProjectView>('config');
+  const [projectView, setProjectView] = useState<ProjectView>('samples');
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
@@ -219,30 +219,6 @@ export const ProjectPage: FC = () => {
               <div className="d-flex flex-row align-items-center">
                 <div
                   className={
-                    projectView === 'config'
-                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
-                      : 'border-bottom px-2 py-1'
-                  }
-                >
-                  <button
-                    onClick={() => setProjectView('config')}
-                    className="border-0 bg-transparent project-button-toggles rounded"
-                  >
-                    <i className="bi bi-filetype-yml me-1"></i>Config
-                    {configIsDirty ? (
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
-                      </span>
-                    ) : (
-                      //  spacer
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
-                      </span>
-                    )}
-                  </button>
-                </div>
-                <div
-                  className={
                     projectView === 'samples'
                       ? 'border-primary border-bottom bg-transparent px-2 py-1'
                       : 'border-bottom px-2 py-1'
@@ -265,6 +241,30 @@ export const ProjectPage: FC = () => {
                       <i className="bi bi-circle-fill ms-1 text-transparent"></i>
                     </span>
                   )}
+                </div>
+                <div
+                  className={
+                    projectView === 'config'
+                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
+                      : 'border-bottom px-2 py-1'
+                  }
+                >
+                  <button
+                    onClick={() => setProjectView('config')}
+                    className="border-0 bg-transparent project-button-toggles rounded"
+                  >
+                    <i className="bi bi-filetype-yml me-1"></i>Config
+                    {configIsDirty ? (
+                      <span className="text-xs">
+                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
+                      </span>
+                    ) : (
+                      //  spacer
+                      <span className="text-xs">
+                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
+                      </span>
+                    )}
+                  </button>
                 </div>
               </div>
               <div>
