@@ -22,6 +22,7 @@ export const EditMetaMetadataModal: FC<Props> = ({ namespace, project, tag, show
           namespace={namespace}
           name={project}
           tag={tag || 'default'}
+          onCancel={() => onHide()}
         />
       </Modal.Body>
     </Modal>

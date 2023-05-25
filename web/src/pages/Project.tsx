@@ -19,6 +19,7 @@ import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editProjectConfig, editProjectSampleTable } from '../api/project';
 import { toast } from 'react-hot-toast';
+import { Markdown } from '../components/markdown/render';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -29,7 +30,7 @@ export const ProjectPage: FC = () => {
 
   let { namespace, project } = useParams();
   namespace = namespace?.toLowerCase();
-  project = project?.toLowerCase();
+  // project = project?.toLowerCase();
 
   let [searchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
@@ -174,7 +175,7 @@ export const ProjectPage: FC = () => {
           {
             // if user is logged in and is owner of project
             user && projectInfo && canEdit(user, projectInfo) ? (
-              <Dropdown className="me-1">
+              <Dropdown>
                 <Dropdown.Toggle variant="dark" size="sm">
                   <i className="bi bi-pencil"></i>
                 </Dropdown.Toggle>
@@ -195,8 +196,11 @@ export const ProjectPage: FC = () => {
           }
         </div>
       </div>
-      <div className="px-4">
-        <p>{projectInfo?.description}</p>
+      <div className="border border-dark mx-4 rounded shadow-sm">
+        <div className="border-dark border-bottom p-2 fw-bold text-2xl">Description</div>
+        <div className="p-2">
+          <Markdown>{projectInfo?.description || 'No description'}</Markdown>
+        </div>
       </div>
       <div className="mt-2 px-2 border-bottom border-dark">
         {projectInfoIsLoading || projectInfo === undefined ? (
@@ -256,25 +260,30 @@ export const ProjectPage: FC = () => {
                 </div>
               </div>
               <div>
-                <button
-                  disabled={
-                    configMutation.isLoading || sampleTableMutation.isLoading || !(configIsDirty || samplesIsDirty)
-                  }
-                  onClick={() => handleProjectChange()}
-                  className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
-                >
-                  {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
-                </button>
-                <button
-                  className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
-                  onClick={() => {
-                    resetConfig();
-                    resetSamples();
-                  }}
-                  disabled={!(configIsDirty || samplesIsDirty)}
-                >
-                  Discard
-                </button>
+                {/* no matter what, only render if belonging to the user */}
+                {user && projectInfo && canEdit(user, projectInfo) ? (
+                  <>
+                    <button
+                      disabled={
+                        configMutation.isLoading || sampleTableMutation.isLoading || !(configIsDirty || samplesIsDirty)
+                      }
+                      onClick={() => handleProjectChange()}
+                      className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                    >
+                      {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
+                      onClick={() => {
+                        resetConfig();
+                        resetSamples();
+                      }}
+                      disabled={!(configIsDirty || samplesIsDirty)}
+                    >
+                      Discard
+                    </button>
+                  </>
+                ) : null}
               </div>
             </div>
           </>

@@ -1,10 +1,11 @@
 import { FC } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, Controller } from 'react-hook-form';
 import { editProjectMetadata } from '../../api/project';
 import { useSession } from '../../hooks/useSession';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { useProject } from '../../hooks/queries/useProject';
+import { MarkdownEditor } from '../markdown/edit';
 
 interface Props {
   namespace: string;
@@ -12,6 +13,7 @@ interface Props {
   tag: string;
   onSuccessfulSubmit?: () => void;
   onFailedSubmit?: () => void;
+  onCancel?: () => void;
 }
 
 interface FormValues extends Props {
@@ -25,6 +27,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
   tag,
   onSuccessfulSubmit = () => {},
   onFailedSubmit = () => {},
+  onCancel = () => {},
 }) => {
   const { jwt } = useSession();
   const { data: projectInfo } = useProject(namespace, name, tag, jwt);
@@ -32,6 +35,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
     register,
     handleSubmit,
     watch,
+    control,
     reset: resetForm,
     formState: { isValid, isDirty },
   } = useForm<FormValues>({
@@ -124,15 +128,28 @@ export const ProjectMetaEditForm: FC<Props> = ({
         <label htmlFor="project-description" className="form-label">
           Project Description
         </label>
-        <textarea
-          {...register('description')}
-          placeholder="Project description"
-          className="form-control"
-          id="project-description"
-          rows={3}
-        ></textarea>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <MarkdownEditor
+              name="description"
+              value={field.value}
+              onChange={(value) => {
+                field.onChange(value);
+              }}
+            />
+          )}
+        />
       </div>
-      <button onClick={() => resetForm()} type="button" className="btn btn-outline-dark me-1">
+      <button
+        onClick={() => {
+          onCancel();
+          resetForm();
+        }}
+        type="button"
+        className="btn btn-outline-dark me-1"
+      >
         Cancel
       </button>
       <button
