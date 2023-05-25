@@ -16,7 +16,7 @@ _pephub_ is backed by a [postgres](https://www.postgresql.org/) database to stor
 sh setup_db.sh
 docker pull postgres
 docker build -t pephub_db postgres/
-docker run -p 5432:54432 pephub_db
+docker run -p 5432:5432 pephub_db
 ```
 
 You should now have a pephub-compatible postgres instance running at http://localhost:5432.
