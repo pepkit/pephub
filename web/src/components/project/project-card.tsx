@@ -78,8 +78,11 @@ export const ProjectCard: FC<Props> = ({ project }) => {
               <i className="bi bi-calendar3"></i>
               <span className="mx-1">Created:</span>
               <span id="project-submission-date">{dateStringToDateTime(project.submission_date)}</span>
+              <i className="ms-4 bi bi-calendar3"></i>
+              <span className="mx-1">Updated:</span>
+              <span id="project-update-date">{dateStringToDateTime(project.last_update_date)}</span>
             </span>
-            <span className="me-3">{project.digest}</span>
+            <span className="me-5">{project.digest}</span>
           </small>
         </div>
       </div>
