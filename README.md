@@ -13,10 +13,12 @@ Already have everything setup? Skip to [running pephub](#running). Two things ar
 _pephub_ is backed by a [postgres](https://www.postgresql.org/) database to store PEPs. You can easily create a new pephub-compatible postgres instance locally:
 
 ```
-sh setup_db.sh
 docker pull postgres
-docker build -t pephub_db postgres/
-docker run -p 5432:54432 pephub_db
+docker run \
+  -e POSTGRES_USER=pephub \
+  -e POSTGRES_PASSWORD=docker \
+  -e POSTGRES_DB=pephub \
+  postgres
 ```
 
 You should now have a pephub-compatible postgres instance running at http://localhost:5432.
