@@ -84,39 +84,3 @@ except RuntimeError as re:
     _LOGGER_PEPHUB.warning(
         "If this is intentional, ignore this message. Otherwise, you may need to build the spa inside web/ (cd web && npm run build)"
     )
-
-
-# TODO: remove this when we are sure its not needed anymore
-def main():
-    # set up the logger
-    global _LOGGER
-    parser = build_parser()
-    args = parser.parse_args()
-
-    # redefine log level if something
-    # other than INFO is passed
-    if args.log_level != "INFO":
-        coloredlogs.install(
-            logger=_LOGGER_PEPHUB,
-            level=LOG_LEVEL_MAP.get(args.log_level.upper(), logging.INFO),
-            datefmt="%b %d %Y %H:%M:%S",
-            fmt="[%(levelname)s] [%(asctime)s] [PEPHUB] %(message)s",
-        )
-
-    if not args.command:
-        parser.print_help()
-        print("No subcommand given")
-        sys.exit(1)
-
-    if args.command == "serve":
-        uvicorn.run(
-            app,
-            host="0.0.0.0",
-            port=args.port,
-            reload=args.reload,
-            log_level=args.uvicorn_log_level.lower(),
-        )
-
-    else:
-        _LOGGER_PEPHUB.error(f"unknown command: {args.command}")
-        sys.exit(1)
