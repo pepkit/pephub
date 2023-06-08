@@ -160,6 +160,7 @@ sample_table: samples.csv
               setValue={(data) => {
                 setValue('config', data);
               }}
+              height={300}
             />
           </div>
         </Tab>
