@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { useProject } from '../../hooks/queries/useProject';
 import { MarkdownEditor } from '../markdown/edit';
+import { AxiosError } from 'axios';
 
 interface Props {
   namespace: string;
@@ -73,7 +74,12 @@ export const ProjectMetaEditForm: FC<Props> = ({
         window.location.href = `/${namespace}/${newName}?tag=${newTag}`;
       }
     },
-    onError: (error) => {
+    onError: (error: AxiosError) => {
+      // check for axios 401
+      if (error.response?.status === 401) {
+        toast.error('You are not authorized to edit this project.');
+        return;
+      }
       toast.error(`There was an error updated project metadata: ${error}`);
       onFailedSubmit();
     },

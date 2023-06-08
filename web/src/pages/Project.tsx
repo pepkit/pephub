@@ -45,6 +45,22 @@ export const ProjectPage: FC = () => {
     jwt,
   );
 
+  function findStringDifference(str1: string, str2: string) {
+    const length = Math.min(str1.length, str2.length);
+
+    for (let i = 0; i < length; i++) {
+      if (str1[i] !== str2[i]) {
+        return i;
+      }
+    }
+
+    if (str1.length !== str2.length) {
+      return length;
+    }
+
+    return -1; // Strings are identical
+  }
+
   // state
   const [projectView, setProjectView] = useState<ProjectView>('samples');
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
@@ -62,6 +78,13 @@ export const ProjectPage: FC = () => {
   useEffect(() => {
     setNewProjectConfig(projectConfig || '');
     setNewProjectSamples(projectSamples || '');
+    // console.log(projectConfig === newProjectConfig, projectSamples === newProjectSamples);
+    // if (projectSamples !== newProjectSamples) {
+    //   let indx = findStringDifference(projectSamples, newProjectSamples);
+    //   console.log(indx);
+    //   console.log(projectSamples?.slice(indx - 10, indx + 10));
+    //   console.log(newProjectSamples?.slice(indx - 10, indx + 10));
+    // }
   }, [projectConfig, projectSamples]);
 
   const downloadZip = () => {
@@ -198,7 +221,8 @@ export const ProjectPage: FC = () => {
       </div>
       <div className="border border-dark mx-4 rounded shadow-sm">
         <div className="border-dark border-bottom p-2 fw-bold text-2xl">Description</div>
-        <div className="p-2">
+        {/*  wrap text */}
+        <div className="p-2 break-all">
           <Markdown>{projectInfo?.description || 'No description'}</Markdown>
         </div>
       </div>

@@ -23,6 +23,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
     if (data) {
       readString(data, {
         worker: true,
+        quoteChar: "'",
         complete: (results) => {
           // ts-ignore
           let data = results.data as any[][];

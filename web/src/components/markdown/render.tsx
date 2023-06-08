@@ -8,5 +8,9 @@ interface Props {
 }
 
 export const Markdown: FC<Props> = ({ children }) => {
-  return <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{children}</ReactMarkdown>;
+  return (
+    <ReactMarkdown className="break-all" remarkPlugins={[remarkGfm, remarkBreaks]}>
+      {children}
+    </ReactMarkdown>
+  );
 };

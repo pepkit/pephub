@@ -240,3 +240,18 @@
 .w-90 {
   width: 90% !important;
 }
+
+/* tailwind word wrapping */
+.break-words {
+  word-wrap: break-word;
+}
+.break-all {
+  word-break: break-all !important;
+}
+.break-normal {
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.break-keep-all {
+  word-break: keep-all;
+}
