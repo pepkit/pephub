@@ -26,6 +26,8 @@ export const NamespacePage: FC = () => {
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState('');
+  const [orderBy, setOrderBy] = useState('update_date');
+  const [order, setOrder] = useState('desc');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
@@ -34,6 +36,9 @@ export const NamespacePage: FC = () => {
   const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, jwt, {
     limit,
     offset,
+    orderBy,
+    // @ts-ignore - just for now, I know this will work fine
+    order: order || 'asc',
     search: searchDebounced,
   });
 
@@ -110,6 +115,10 @@ export const NamespacePage: FC = () => {
         setSearch={setSearch}
         limit={limit}
         setLimit={setLimit}
+        orderBy={orderBy}
+        setOrderBy={setOrderBy}
+        order={order}
+        setOrder={setOrder}
       />
       <div className="my-2"></div>
       <div className="mt-3">

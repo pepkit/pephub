@@ -65,12 +65,14 @@ async def get_namespace_projects(
         )
     else:
         search_result = agent.annotation.get(
-            namespace=namespace, limit=limit, offset=offset, admin=namespace_access
+            namespace=namespace,
+            limit=limit,
+            offset=offset,
+            admin=namespace_access,
+            order_by=order_by,
+            order_desc=order_desc,
         )
     results = [p.dict() for p in search_result.results]
-
-    # sort by last_update_date
-    results = sorted(results, key=lambda x: x["last_update_date"], reverse=True)
 
     return JSONResponse(
         content={

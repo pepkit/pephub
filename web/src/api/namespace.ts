@@ -22,6 +22,8 @@ export interface PaginationParams {
   offset?: number;
   limit?: number;
   search?: string;
+  orderBy?: string;
+  order?: 'asc' | 'desc';
 }
 
 export interface ProjectSubmissionResponse {
@@ -46,7 +48,7 @@ export const getNamespaceInfo = (namespace: string, token: string | null = null)
 export const getNamespaceProjects = (
   namespace: string,
   token: string | null = null,
-  { search, offset, limit }: PaginationParams,
+  { search, offset, limit, orderBy, order }: PaginationParams,
 ) => {
   // construct query based on search, offset, and limit
   const query = new URLSearchParams();
@@ -58,6 +60,16 @@ export const getNamespaceProjects = (
   }
   if (limit) {
     query.set('limit', limit.toString());
+  }
+  if (orderBy) {
+    query.set('order_by', orderBy);
+  }
+  if (order) {
+    if (order === 'asc') {
+      query.set('order_desc', 'false');
+    } else {
+      query.set('order_desc', 'true');
+    }
   }
   const url = `${API_BASE}/namespaces/${namespace}/projects?${query.toString()}`;
   if (!token) {
