@@ -43,6 +43,8 @@ async def get_namespace_projects(
     session_info: dict = Depends(read_authorization_header),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
+    order_by: str = "update_date",
+    order_desc: bool = False,
 ):
     """
     Fetch the projects for a particular namespace
@@ -58,6 +60,8 @@ async def get_namespace_projects(
             limit=limit,
             offset=offset,
             admin=namespace_access,
+            order_by=order_by,
+            order_desc=order_desc,
         )
     else:
         search_result = agent.annotation.get(
