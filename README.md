@@ -15,9 +15,10 @@ _pephub_ is backed by a [postgres](https://www.postgresql.org/) database to stor
 ```
 docker pull postgres
 docker run \
-  -e POSTGRES_USER=pephub \
+  -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=docker \
-  -e POSTGRES_DB=pephub \
+  -e POSTGRES_DB=pep-db \
+  -p 5432:5432 \
   postgres
 ```
 
