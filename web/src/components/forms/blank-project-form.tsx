@@ -8,6 +8,8 @@ import { ErrorMessage } from '@hookform/error-message';
 import { SampleTable } from '../tables/sample-table';
 import { Tabs, Tab } from 'react-bootstrap';
 import { ProjectConfigEditor } from '../project/project-config';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
+
 
 interface BlankProjectInputs {
   is_private: boolean;
@@ -17,6 +19,7 @@ interface BlankProjectInputs {
   description: string;
   sample_table: string;
   config: string;
+  pep_schema: string;
 }
 
 interface Props {
@@ -65,6 +68,7 @@ sample_table: samples.csv
         description: data.description || '',
         sample_table: data.sample_table,
         config: data.config,
+        pep_schema: data.pep_schema,
       },
       jwt || '',
     );
@@ -141,9 +145,12 @@ sample_table: samples.csv
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
+      <div className="mt-3 mx-1">
+        <SchemaDropdown onSelectTemplate={(template) => console.log(template)} />
+      </div>
       <Tabs defaultActiveKey="samples" id="blank-project-tabs" className="mt-3">
         <Tab eventKey="samples" title="Samples">
-          <div className="p-1 border border-top-0">
+          <div className="p-2 border border-top-1">
             <SampleTable
               height={300}
               data={sampleTableCSV}

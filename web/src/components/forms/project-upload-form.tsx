@@ -1,4 +1,4 @@
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, setValue } from 'react-hook-form';
 import { useSession } from '../../hooks/useSession';
 import { FileDropZone } from './components/file-dropzone';
 import { FC, useRef } from 'react';
@@ -7,6 +7,7 @@ import { submitProjectFiles } from '../../api/namespace';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@hookform/error-message';
 import { toast } from 'react-hot-toast';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface FromFileInputs {
   is_private: boolean;
@@ -15,6 +16,7 @@ interface FromFileInputs {
   tag: string;
   description: string;
   files: FileList;
+  pep_schema: string;
 }
 
 interface Props {
@@ -52,6 +54,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
         is_private: data.is_private,
         description: data.description,
         files: data.files,
+        pep_schema: data.pep_schema,
       },
       jwt || '',
     );
@@ -68,6 +71,10 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
       toast.error(`Error uploading project! ${err}`);
     },
   });
+
+  const handleSelectTemplate = (template: string) => {
+    setValue('pep_schema', template); // Update pep_schema value in the form state
+  };
 
   return (
     <form id="new-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>
@@ -124,6 +131,13 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
+      <div className="mt-3">
+       <SchemaDropdown
+         onSelectTemplate={handleSelectTemplate}
+         className="form-control"
+         {...register('pep_schema')}
+       />
+      </div>
       {uploadFiles ? (
         <div className="dashed-border p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
           <div className="d-flex flex-column align-items-center">

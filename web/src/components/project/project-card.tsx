@@ -63,7 +63,9 @@ export const ProjectCard: FC<Props> = ({ project }) => {
       </div>
       <div>
         <label className="fw-bold">No. of samples:</label>
-        <span className="mb-1">{project.number_of_samples}</span>
+        <span className="mx-1">{project.number_of_samples}</span>
+        <p><label className="fw-bold">Schema:</label>
+        <span className="mx-1">{project.pep_schema}</span></p>
         <p className="mb-0">
           {project.description ? (
             project.description

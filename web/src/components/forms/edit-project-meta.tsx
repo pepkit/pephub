@@ -5,6 +5,7 @@ import { useSession } from '../../hooks/useSession';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { useProject } from '../../hooks/queries/useProject';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface Props {
   namespace: string;
@@ -94,6 +95,12 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
         <div id="pep-name-help" className="form-text">
           Rename your PEP.
         </div>
+      </div>
+      <div className="mb-3">
+       <label htmlFor="schema-tag" className="form-label">
+          Schema
+       </label>
+       <SchemaDropdown onSelectTemplate={(template) => console.log(template)} />
       </div>
       <div className="mb-3">
         <label htmlFor="project-tag" className="form-label">
