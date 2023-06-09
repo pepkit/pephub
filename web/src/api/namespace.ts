@@ -1,5 +1,7 @@
 import { ProjectAnnotation, Project } from '../../types';
+import YAML from 'yaml';
 import axios from 'axios';
+import { readString } from 'react-papaparse';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -22,6 +24,8 @@ export interface PaginationParams {
   offset?: number;
   limit?: number;
   search?: string;
+  orderBy?: string;
+  order?: 'asc' | 'desc';
 }
 
 export interface ProjectSubmissionResponse {
@@ -46,7 +50,7 @@ export const getNamespaceInfo = (namespace: string, token: string | null = null)
 export const getNamespaceProjects = (
   namespace: string,
   token: string | null = null,
-  { search, offset, limit }: PaginationParams,
+  { search, offset, limit, orderBy, order }: PaginationParams,
 ) => {
   // construct query based on search, offset, and limit
   const query = new URLSearchParams();
@@ -58,6 +62,16 @@ export const getNamespaceProjects = (
   }
   if (limit) {
     query.set('limit', limit.toString());
+  }
+  if (orderBy) {
+    query.set('order_by', orderBy);
+  }
+  if (order) {
+    if (order === 'asc') {
+      query.set('order_desc', 'false');
+    } else {
+      query.set('order_desc', 'true');
+    }
   }
   const url = `${API_BASE}/namespaces/${namespace}/projects?${query.toString()}`;
   if (!token) {
@@ -123,9 +137,10 @@ export const submitProjectJSON = (
     tag,
     is_private,
     description,
-    sample_table,
     config,
+    assign_schemas,
     pep_schema,
+    sample_table,
   }: {
     namespace: string;
     project_name: string;
@@ -139,6 +154,32 @@ export const submitProjectJSON = (
   token: string,
 ) => {
   const url = `${API_BASE}/namespaces/${namespace}/projects/json`;
+
+  // syncronously parse sample table
+  // @ts-ignore
+  const sample_table_json = readString(sample_table, { header: true }).data;
+
+  // json to "sample_dict", whihc has columns as keys to
+  // subobjects and row indexs as subkeys in those subobjects
+  // with the values as the values
+  const sample_dict: {
+    [key: string]: {
+      [key: number]: string;
+    };
+  } = {};
+  for (let i = 0; i < sample_table_json.length; i++) {
+    const row = sample_table_json[i];
+    for (const key in row) {
+      if (key in sample_dict) {
+        sample_dict[key][i] = row[key];
+      } else {
+        sample_dict[key] = {};
+        sample_dict[key][i] = row[key];
+      }
+    }
+  }
+
+  const config_json = YAML.parse(config);
   return axios
     .post<ProjectSubmissionResponse>(
       url,
@@ -146,7 +187,8 @@ export const submitProjectJSON = (
         pep_dict: {
           name: project_name,
           description: description || '',
-          config: config,
+          config: config_json,
+          sample_dict: sample_dict,
         },
         is_private: is_private || false,
         tag: tag || 'default',

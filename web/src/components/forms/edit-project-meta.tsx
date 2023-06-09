@@ -1,16 +1,21 @@
 import { FC } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, Controller } from 'react-hook-form';
 import { editProjectMetadata } from '../../api/project';
 import { useSession } from '../../hooks/useSession';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { useProject } from '../../hooks/queries/useProject';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { MarkdownEditor } from '../markdown/edit';
+import { AxiosError } from 'axios';
 
 interface Props {
   namespace: string;
   name: string;
   tag: string;
+  onSuccessfulSubmit?: () => void;
+  onFailedSubmit?: () => void;
+  onCancel?: () => void;
 }
 
 interface FormValues extends Props {
@@ -18,13 +23,21 @@ interface FormValues extends Props {
   isPrivate: boolean;
 }
 
-export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
+export const ProjectMetaEditForm: FC<Props> = ({
+  namespace,
+  name,
+  tag,
+  onSuccessfulSubmit = () => {},
+  onFailedSubmit = () => {},
+  onCancel = () => {},
+}) => {
   const { jwt } = useSession();
   const { data: projectInfo } = useProject(namespace, name, tag, jwt);
   const {
     register,
     handleSubmit,
     watch,
+    control,
     reset: resetForm,
     formState: { isValid, isDirty },
   } = useForm<FormValues>({
@@ -55,14 +68,21 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
       );
       toast.success('Project metadata updated successfully.');
       queryClient.invalidateQueries([namespace, name, tag]);
+      onSuccessfulSubmit();
 
       // if newTag or newName is different, redirect to new project
       if (newTag !== tag || newName !== name) {
         window.location.href = `/${namespace}/${newName}?tag=${newTag}`;
       }
     },
-    onError: (error) => {
+    onError: (error: AxiosError) => {
+      // check for axios 401
+      if (error.response?.status === 401) {
+        toast.error('You are not authorized to edit this project.');
+        return;
+      }
       toast.error(`There was an error updated project metadata: ${error}`);
+      onFailedSubmit();
     },
   });
 
@@ -121,15 +141,28 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
         <label htmlFor="project-description" className="form-label">
           Project Description
         </label>
-        <textarea
-          {...register('description')}
-          placeholder="Project description"
-          className="form-control"
-          id="project-description"
-          rows={3}
-        ></textarea>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <MarkdownEditor
+              name="description"
+              value={field.value}
+              onChange={(value) => {
+                field.onChange(value);
+              }}
+            />
+          )}
+        />
       </div>
-      <button onClick={() => resetForm()} type="button" className="btn btn-outline-dark me-1">
+      <button
+        onClick={() => {
+          onCancel();
+          resetForm();
+        }}
+        type="button"
+        className="btn btn-outline-dark me-1"
+      >
         Cancel
       </button>
       <button

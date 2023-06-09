@@ -24,69 +24,85 @@ Server settings are supplied through environment variables. You may choose to ma
     - [`REDIRECT_URI`](#redirect_uri)
   - [Sentence Transformer](#sentence-transformer)
     - [`HF_MODEL`](#hf_model)
-  
+
 ## General
+
 Coming soon...
 
 ## Postgres
+
 ### `POSTGRES_HOST`
+
 - Description: Hostname of the PostgreSQL server
 - Required: Yes
 - Default Value: localhost
 
 ### `POSTGRES_DB`
+
 - Description: Name of the PostgreSQL database
 - Required: Yes
-- Default Value: pep-db
+- Default Value: pephub
 
 ### `POSTGRES_USER`
+
 - Description: PostgreSQL username
+- Required: Yes
+- Default Value: postgres
+
+### `POSTGRES_PASSWORD`
+
+- Description: PostgreSQL password
 - Required: Yes
 - Default Value: docker
 
-### `POSTGRES_PASSWORD`
-- Description: PostgreSQL password
-- Required: Yes
-- Default Value: password
-
 ### `POSTGRES_PORT`
+
 - Description: PostgreSQL port
 - Required: Yes
 - Default Value: 5432
 
 ## Qdrant
+
 ### `QDRANT_HOST`
+
 - Description: Hostname of the Qdrant server
 - Required: No
 - Default Value: localhost
 
 ### `QDRANT_PORT`
+
 - Description: Port of the Qdrant server
 - Required: No
 - Default Value: 6333
 
 ### `QDRANT_ENABLED`
+
 - Description: Enable/disable Qdrant functionality
 - Required: No
 - Default Value: False
 
 ### `QDRANT_API_KEY`
+
 - Description: API key for connecting to Qdrant
 - Required: No
 - Default Value: Not applicable
 
 ## Github Client
+
 ### `GH_CLIENT_ID`
+
 - Description: GitHub client ID
 - Required: Yes
 - Default Value: Not applicable
 
 ### `GH_CLIENT_SECRET`
+
 - Description: GitHub client secret
 - Required: Yes
 - Default Value: Not applicable
 
 ### `REDIRECT_URI`
+
 - Description: URI to redirect to after GitHub OAuth flow
 - Required: Yes
 - Default Value: http://localhost:8000/auth/callback
@@ -94,6 +110,7 @@ Coming soon...
 ## Sentence Transformer
 
 ### `HF_MODEL`
+
 - Description: HuggingFace model name
 - Required: No
 - Default Value: "sentence-transformers/all-MiniLM-L12-v2"

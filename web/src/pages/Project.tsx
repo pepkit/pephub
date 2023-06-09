@@ -19,6 +19,7 @@ import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editProjectConfig, editProjectSampleTable } from '../api/project';
 import { toast } from 'react-hot-toast';
+import { Markdown } from '../components/markdown/render';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -27,11 +28,14 @@ export const ProjectPage: FC = () => {
 
   const queryClient = useQueryClient();
 
-  const { namespace, project } = useParams();
+  let { namespace, project } = useParams();
+  namespace = namespace?.toLowerCase();
+  // project = project?.toLowerCase();
+
   let [searchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
 
-  const { data: projectInfo, isLoading: projectInfoIsLoading } = useProject(namespace, project || '', tag, jwt);
+  const { data: projectInfo, isLoading: projectInfoIsLoading, error } = useProject(namespace, project || '', tag, jwt);
   const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
     namespace,
@@ -41,8 +45,24 @@ export const ProjectPage: FC = () => {
     jwt,
   );
 
+  function findStringDifference(str1: string, str2: string) {
+    const length = Math.min(str1.length, str2.length);
+
+    for (let i = 0; i < length; i++) {
+      if (str1[i] !== str2[i]) {
+        return i;
+      }
+    }
+
+    if (str1.length !== str2.length) {
+      return length;
+    }
+
+    return -1; // Strings are identical
+  }
+
   // state
-  const [projectView, setProjectView] = useState<ProjectView>('config');
+  const [projectView, setProjectView] = useState<ProjectView>('samples');
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
@@ -58,6 +78,13 @@ export const ProjectPage: FC = () => {
   useEffect(() => {
     setNewProjectConfig(projectConfig || '');
     setNewProjectSamples(projectSamples || '');
+    // console.log(projectConfig === newProjectConfig, projectSamples === newProjectSamples);
+    // if (projectSamples !== newProjectSamples) {
+    //   let indx = findStringDifference(projectSamples, newProjectSamples);
+    //   console.log(indx);
+    //   console.log(projectSamples?.slice(indx - 10, indx + 10));
+    //   console.log(newProjectSamples?.slice(indx - 10, indx + 10));
+    // }
   }, [projectConfig, projectSamples]);
 
   const downloadZip = () => {
@@ -123,10 +150,26 @@ export const ProjectPage: FC = () => {
     }
   };
 
+  if (error) {
+    return (
+      <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
+        <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
+          <h1 className="fw-bold">Error 😫</h1>
+          <p className="text-muted fst-italic">An error occured fetching the project... Are you sure it exists?</p>
+          <div>
+            <a href={`/${namespace}`}>
+              <button className="btn btn-dark">Take me back</button>
+            </a>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 mt-2">
+      <div className="d-flex flex-row align-items-center justify-content-between px-4 my-2">
         <Breadcrumb className="fw-bold">
           <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
           <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
@@ -138,27 +181,16 @@ export const ProjectPage: FC = () => {
           ) : null}
         </Breadcrumb>
         <div className="d-flex flex-row align-items-center">
-          <Dropdown className="me-1">
-            <Dropdown.Toggle variant="outline-dark" size="sm">
-              <i className="bi bi-three-dots me-1"></i>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="shadow-lg">
-              <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
-                <i className="bi bi-hdd-rack me-1"></i>
-                API Endpoints
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => downloadZip()}>
-                <i className="bi bi-file-earmark-zip me-1"></i>
-                Download zip
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setShowCompatibilityModal(true)}>
-                <i className="me-1 bi bi-intersect"></i>
-                Compatibility
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
+          <button className="btn btn-sm btn-dark me-1" onClick={() => downloadZip()}>
+            <i className="bi bi-file-earmark-zip me-1"></i>
+            Download
+          </button>
+          <button className="btn btn-sm btn-dark me-1" onClick={() => setShowAPIEndpointsModal(true)}>
+            <i className="bi bi-hdd-rack me-1"></i>
+            API Endpoints
+          </button>
           {user ? (
-            <button className="btn btn-sm btn-outline-dark me-1" onClick={() => setShowForkPEPModal(true)}>
+            <button className="btn btn-sm btn-dark me-1" onClick={() => setShowForkPEPModal(true)}>
               <i className="me-1 bi bi-bezier2"></i>
               Fork
             </button>
@@ -166,16 +198,17 @@ export const ProjectPage: FC = () => {
           {
             // if user is logged in and is owner of project
             user && projectInfo && canEdit(user, projectInfo) ? (
-              <Dropdown className="me-1">
-                <Dropdown.Toggle variant="outline-dark" size="sm">
-                  <i className="bi bi-gear"></i>
+              <Dropdown>
+                <Dropdown.Toggle variant="dark" size="sm">
+                  <i className="bi bi-pencil"></i>
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="shadow-lg">
                   <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
                     {/*  pencil write */}
                     <i className="bi bi-pencil-square me-1"></i>
-                    Edit
+                    Edit project
                   </Dropdown.Item>
+                  <Dropdown.Divider />
                   <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
                     <i className="bi bi-trash3 me-1"></i>
                     Delete
@@ -186,8 +219,12 @@ export const ProjectPage: FC = () => {
           }
         </div>
       </div>
-      <div className="px-4">
-        <p>{projectInfo?.description}</p>
+      <div className="border border-dark mx-4 rounded shadow-sm">
+        <div className="border-dark border-bottom p-2 fw-bold text-2xl">Description</div>
+        {/*  wrap text */}
+        <div className="p-2 break-all">
+          <Markdown>{projectInfo?.description || 'No description'}</Markdown>
+        </div>
       </div>
       <div className="mt-2 px-2 border-bottom border-dark">
         {projectInfoIsLoading || projectInfo === undefined ? (
@@ -196,30 +233,6 @@ export const ProjectPage: FC = () => {
           <>
             <div className="flex-row d-flex align-items-end justify-content-between">
               <div className="d-flex flex-row align-items-center">
-                <div
-                  className={
-                    projectView === 'config'
-                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
-                      : 'border-bottom px-2 py-1'
-                  }
-                >
-                  <button
-                    onClick={() => setProjectView('config')}
-                    className="border-0 bg-transparent project-button-toggles rounded"
-                  >
-                    <i className="bi bi-filetype-yml me-1"></i>Config
-                    {configIsDirty ? (
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
-                      </span>
-                    ) : (
-                      //  spacer
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
-                      </span>
-                    )}
-                  </button>
-                </div>
                 <div
                   className={
                     projectView === 'samples'
@@ -245,16 +258,43 @@ export const ProjectPage: FC = () => {
                     </span>
                   )}
                 </div>
+                <div
+                  className={
+                    projectView === 'config'
+                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
+                      : 'border-bottom px-2 py-1'
+                  }
+                >
+                  <button
+                    onClick={() => setProjectView('config')}
+                    className="border-0 bg-transparent project-button-toggles rounded"
+                  >
+                    <i className="bi bi-filetype-yml me-1"></i>Config
+                    {configIsDirty ? (
+                      <span className="text-xs">
+                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
+                      </span>
+                    ) : (
+                      //  spacer
+                      <span className="text-xs">
+                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
               <div>
-                {configIsDirty || samplesIsDirty ? (
+                {/* no matter what, only render if belonging to the user */}
+                {user && projectInfo && canEdit(user, projectInfo) ? (
                   <>
                     <button
-                      disabled={configMutation.isLoading || sampleTableMutation.isLoading}
+                      disabled={
+                        configMutation.isLoading || sampleTableMutation.isLoading || !(configIsDirty || samplesIsDirty)
+                      }
                       onClick={() => handleProjectChange()}
                       className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
                     >
-                      {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save changes?'}
+                      {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
                     </button>
                     <button
                       className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
@@ -262,6 +302,7 @@ export const ProjectPage: FC = () => {
                         resetConfig();
                         resetSamples();
                       }}
+                      disabled={!(configIsDirty || samplesIsDirty)}
                     >
                       Discard
                     </button>
@@ -272,7 +313,7 @@ export const ProjectPage: FC = () => {
           </>
         )}
       </div>
-      <div className="row h-100">
+      <div className="row gx-0 h-100">
         <div className="col-12">
           <div>
             {projectView === 'samples' ? (
