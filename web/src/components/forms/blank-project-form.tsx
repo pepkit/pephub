@@ -1,5 +1,5 @@
-import { FC, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { FC, useEffect } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useSession } from '../../hooks/useSession';
 import { submitProjectJSON } from '../../api/namespace';
 import { toast } from 'react-hot-toast';
@@ -9,7 +9,6 @@ import { SampleTable } from '../tables/sample-table';
 import { Tabs, Tab } from 'react-bootstrap';
 import { ProjectConfigEditor } from '../project/project-config';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
-
 
 interface BlankProjectInputs {
   is_private: boolean;
@@ -39,6 +38,7 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { isValid, errors },
   } = useForm<BlankProjectInputs>({
     defaultValues: {
@@ -52,6 +52,7 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
       config: `pep_version: 2.1.0
 sample_table: samples.csv
       `,
+      pep_schema: 'pep/2.1.0',
     },
   });
 
@@ -145,8 +146,23 @@ sample_table: samples.csv
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
-      <div className="mt-3 mx-1">
-        <SchemaDropdown onSelectTemplate={(template) => console.log(template)} />
+      <label className="form-check-label mt-3 mb-1">
+        <i className="bi bi-file-earmark-break me-1"></i>
+        Schema
+      </label>
+      <div>
+        <Controller
+          control={control}
+          name="pep_schema"
+          render={({ field: { onChange, value } }) => (
+            <SchemaDropdown
+              value={value}
+              onChange={(schema) => {
+                setValue('pep_schema', schema);
+              }}
+            />
+          )}
+        />
       </div>
       <Tabs defaultActiveKey="samples" id="blank-project-tabs" className="mt-3">
         <Tab eventKey="samples" title="Samples">

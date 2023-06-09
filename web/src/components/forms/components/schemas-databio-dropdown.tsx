@@ -1,55 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import Select, { ValueType } from 'react-select';
-
-interface Template {
-  name: string;
-  project: string;
-  description: string;
-  url: string;
-}
+import { FC } from 'react';
+import Select, { SingleValue } from 'react-select';
+import { useSchemas } from '../../../hooks/queries/useSchemas';
 
 interface Props {
-  onSelectTemplate: (template: Template) => void;
-  selectedSchema: ValueType<{ label: string; value: string }> | null;
+  value?: string;
+  onChange: (value: string) => void;
 }
 
-const SchemaDropdown: React.FC<Props> = ({ onSelectTemplate, selectedSchema }) => {
-  const [templates, setTemplates] = useState<Template[]>([]);
+const SchemaDropdown: FC<Props> = ({ value, onChange }) => {
+  const { data: schemas, isLoading } = useSchemas();
 
-  useEffect(() => {
-    fetch('https://schema.databio.org/list.json')
-      .then((response) => response.json())
-      .then((response) => {
-        const tplList = Object.values(response) as Template[];
-        setTemplates(tplList);
-      })
-      .catch((error) => {
-        console.log('Error fetching templates:', error);
-      });
-  }, []);
-
-  const handleSelectTemplate = (option: ValueType<{ label: string; value: string }>) => {
-    if (option) {
-      const selectedTemplateName = option.value;
-      const selectedTemplate = templates.find((template) => template.name === selectedTemplateName);
-      if (selectedTemplate) {
-        onSelectTemplate(selectedTemplate);
-      }
-    }
-  };
-
-  const options = templates.map((template) => ({
-    label: template.url,
-    value: template.url,
+  const options = Object.keys(schemas || {}).map((schema) => ({
+    label: schema,
+    value: schema,
   }));
 
   return (
     <div>
       <Select
         options={options}
-        value={selectedSchema}
-        onChange={handleSelectTemplate}
-        placeholder="Assign a schema..."
+        value={options.find((option) => option.value === value)}
+        onChange={(newValue: SingleValue<{ label: string; value: string }>) => {
+          onChange(newValue?.value || '');
+        }}
+        placeholder={isLoading ? 'Fetching schemas...' : 'Assign a schema...'}
         isClearable
         menuPlacement="top"
       />
@@ -58,4 +32,3 @@ const SchemaDropdown: React.FC<Props> = ({ onSelectTemplate, selectedSchema }) =
 };
 
 export { SchemaDropdown };
-

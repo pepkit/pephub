@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from pepdbagent.models import *
 from pepdbagent.const import DEFAULT_TAG
 
+from ..const import DEFAULT_PEP_SCHEMA
+
 
 class ProjectOptional(UpdateItems):
     sample_table_csv: Optional[str]
@@ -83,3 +85,4 @@ class ProjectJsonRequest(BaseModel):
     is_private: bool = False
     tag: str = DEFAULT_TAG
     overwrite: bool = False
+    pep_schema: Optional[str] = DEFAULT_PEP_SCHEMA

@@ -138,7 +138,6 @@ export const submitProjectJSON = (
     is_private,
     description,
     config,
-    assign_schemas,
     pep_schema,
     sample_table,
   }: {
@@ -189,6 +188,7 @@ export const submitProjectJSON = (
           description: description || '',
           config: config_json,
           sample_dict: sample_dict,
+          pep_schema: pep_schema,
         },
         is_private: is_private || false,
         tag: tag || 'default',

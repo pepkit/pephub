@@ -20,6 +20,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editProjectConfig, editProjectSampleTable } from '../api/project';
 import { toast } from 'react-hot-toast';
 import { Markdown } from '../components/markdown/render';
+import { SchemaTag } from '../components/forms/components/shema-tag';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -44,22 +45,6 @@ export const ProjectPage: FC = () => {
     'yaml',
     jwt,
   );
-
-  function findStringDifference(str1: string, str2: string) {
-    const length = Math.min(str1.length, str2.length);
-
-    for (let i = 0; i < length; i++) {
-      if (str1[i] !== str2[i]) {
-        return i;
-      }
-    }
-
-    if (str1.length !== str2.length) {
-      return length;
-    }
-
-    return -1; // Strings are identical
-  }
 
   // state
   const [projectView, setProjectView] = useState<ProjectView>('samples');
@@ -170,16 +155,21 @@ export const ProjectPage: FC = () => {
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
       <div className="d-flex flex-row align-items-center justify-content-between px-4 my-2">
-        <Breadcrumb className="fw-bold">
-          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-          <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
-          <Breadcrumb.Item active>
-            {project}:{tag}
-          </Breadcrumb.Item>
-          {projectInfo?.is_private ? (
-            <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
-          ) : null}
-        </Breadcrumb>
+        <div className="d-flex flex-row align-items-center">
+          <Breadcrumb className="fw-bold">
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
+            <Breadcrumb.Item active>
+              {project}:{tag}
+            </Breadcrumb.Item>
+            {projectInfo?.is_private ? (
+              <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
+            ) : null}
+          </Breadcrumb>
+          <div className="ms-2 mb-2">
+            <SchemaTag schema={projectInfo?.pep_schema} />
+          </div>
+        </div>
         <div className="d-flex flex-row align-items-center">
           <button className="btn btn-sm btn-dark me-1" onClick={() => downloadZip()}>
             <i className="bi bi-file-earmark-zip me-1"></i>

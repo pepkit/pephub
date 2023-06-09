@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { SubmitHandler, useForm, Controller } from 'react-hook-form';
 import { editProjectMetadata } from '../../api/project';
 import { useSession } from '../../hooks/useSession';
@@ -21,6 +21,7 @@ interface Props {
 interface FormValues extends Props {
   description: string;
   isPrivate: boolean;
+  pep_schema: string;
 }
 
 export const ProjectMetaEditForm: FC<Props> = ({
@@ -38,6 +39,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
     handleSubmit,
     watch,
     control,
+    setValue,
     reset: resetForm,
     formState: { isValid, isDirty },
   } = useForm<FormValues>({
@@ -46,6 +48,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
       description: projectInfo?.description || '',
       isPrivate: projectInfo?.is_private,
       tag: tag,
+      pep_schema: projectInfo?.pep_schema || 'pep/2.1.0',
     },
   });
   const newTag = watch('tag');
@@ -117,10 +120,25 @@ export const ProjectMetaEditForm: FC<Props> = ({
         </div>
       </div>
       <div className="mb-3">
-       <label htmlFor="schema-tag" className="form-label">
+        <label htmlFor="schema-tag" className="form-label">
           Schema
-       </label>
-       <SchemaDropdown onSelectTemplate={(template) => console.log(template)} />
+        </label>
+        <div>
+          <Controller
+            control={control}
+            name="pep_schema"
+            render={({ field: { onChange, value } }) => (
+              <SchemaDropdown
+                value={value}
+                onChange={(schema) => {
+                  setValue('pep_schema', schema, {
+                    shouldDirty: true,
+                  });
+                }}
+              />
+            )}
+          />
+        </div>
       </div>
       <div className="mb-3">
         <label htmlFor="project-tag" className="form-label">

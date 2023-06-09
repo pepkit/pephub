@@ -1,4 +1,4 @@
-import { SubmitHandler, useForm, setValue } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useSession } from '../../hooks/useSession';
 import { FileDropZone } from './components/file-dropzone';
 import { FC, useRef } from 'react';
@@ -34,8 +34,14 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { isValid, errors },
-  } = useForm<FromFileInputs>();
+  } = useForm<FromFileInputs>({
+    defaultValues: {
+      is_private: false,
+      pep_schema: 'pep/2.1.0',
+    },
+  });
 
   const uploadFiles = watch('files');
   const namespaceToUpload = watch('namespace');
@@ -71,10 +77,6 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
       toast.error(`Error uploading project! ${err}`);
     },
   });
-
-  const handleSelectTemplate = (template: string) => {
-    setValue('pep_schema', template); // Update pep_schema value in the form state
-  };
 
   return (
     <form id="new-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>
@@ -131,12 +133,23 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
-      <div className="mt-3">
-       <SchemaDropdown
-         onSelectTemplate={handleSelectTemplate}
-         className="form-control"
-         {...register('pep_schema')}
-       />
+      <label className="form-check-label mt-3 mb-1">
+        <i className="bi bi-file-earmark-break me-1"></i>
+        Schema
+      </label>
+      <div>
+        <Controller
+          control={control}
+          name="pep_schema"
+          render={({ field: { onChange, value } }) => (
+            <SchemaDropdown
+              value={value}
+              onChange={(schema) => {
+                setValue('pep_schema', schema);
+              }}
+            />
+          )}
+        />
       </div>
       {uploadFiles ? (
         <div className="dashed-border p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">

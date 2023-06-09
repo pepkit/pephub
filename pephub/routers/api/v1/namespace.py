@@ -126,7 +126,6 @@ async def create_pep(
             p = Project(f"{dirpath}/{init_file.filename}")
             p.name = project_name
             p.description = description
-            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
@@ -134,6 +133,7 @@ async def create_pep(
                     name=project_name,
                     tag=tag,
                     is_private=is_private,
+                    pep_schema=pep_schema,
                 )
             except ProjectUniqueNameError as e:
                 return JSONResponse(
@@ -216,6 +216,7 @@ async def upload_raw_pep(
         is_private = project_from_json.is_private
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
+        pep_schema = project_from_json.pep_schema
 
         # This configurations needed due to Issue #124 Should be removed in the future
         project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
@@ -238,6 +239,7 @@ async def upload_raw_pep(
             tag=tag,
             is_private=is_private,
             overwrite=overwrite,
+            pep_schema=pep_schema,
         )
     except ProjectUniqueNameError:
         return JSONResponse(
