@@ -308,6 +308,8 @@ export const ProjectPage: FC = () => {
           <div>
             {projectView === 'samples' ? (
               <SampleTable
+                // fill to the rest of the screen minus 300px
+                height={window.innerHeight - 300}
                 readOnly={!(projectInfo && canEdit(user, projectInfo))}
                 data={newProjectSamples || ''}
                 onChange={(value) => setNewProjectSamples(value)}
