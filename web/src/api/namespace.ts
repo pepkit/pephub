@@ -77,6 +77,7 @@ export const submitProjectFiles = (
     is_private,
     description,
     files,
+    pep_schema,
   }: {
     namespace: string;
     project_name: string;
@@ -84,6 +85,7 @@ export const submitProjectFiles = (
     is_private?: boolean;
     description?: string;
     files: FileList;
+    pep_schema: string;
   },
   token: string,
 ) => {
@@ -95,6 +97,7 @@ export const submitProjectFiles = (
   formData.append('tag', tag || 'default');
   formData.append('is_private', is_private?.toString() || 'false');
   formData.append('description', description || '');
+  formData.append('pep_schema', pep_schema);
 
   // attach files
   for (let i = 0; i < files.length; i++) {
@@ -122,6 +125,7 @@ export const submitProjectJSON = (
     description,
     sample_table,
     config,
+    pep_schema,
   }: {
     namespace: string;
     project_name: string;
@@ -130,6 +134,7 @@ export const submitProjectJSON = (
     description?: string;
     sample_table: string;
     config: string;
+    pep_schema: string;
   },
   token: string,
 ) => {
