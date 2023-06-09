@@ -8,6 +8,7 @@ export interface ProjectAnnotation {
   last_update_date: string;
   submission_date: string;
   digest: string;
+  pep_schema: string;
 }
 
 export interface User {

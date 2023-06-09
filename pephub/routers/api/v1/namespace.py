@@ -100,6 +100,7 @@ async def create_pep(
     is_private: bool = Form(False),
     tag: str = Form(DEFAULT_TAG),
     description: Union[str, None] = Form(None),
+    pep_schema: str = Form(...),
     files: Optional[List[UploadFile]] = File(
         None  # let the file upload be optional. dont send a file? We instantiate with blank
     ),
@@ -125,6 +126,7 @@ async def create_pep(
             p = Project(f"{dirpath}/{init_file.filename}")
             p.name = project_name
             p.description = description
+            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
@@ -170,6 +172,7 @@ async def create_pep(
             p = Project(f"{dirpath}/{config_file_name}")
             p.name = project_name
             p.description = description
+            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
