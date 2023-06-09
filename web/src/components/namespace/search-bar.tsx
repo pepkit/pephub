@@ -54,10 +54,10 @@ export const NamespacePageSearchBar: FC<Props> = ({
         >
           <option value={'name+asc'}>Name (A-Z)</option>
           <option value={'name+desc'}>Name (Z-A)</option>
-          <option value={'update_date+desc'}>Last update (newest)</option>
-          <option value={'update_date+asc'}>Last update (oldest)</option>
-          <option value={'submission_date+desc'}>Submission date (newest)</option>
-          <option value={'submission_date+asc'}>Submission date (oldest)</option>
+          <option value={'update_date+asc'}>Last update (newest)</option>
+          <option value={'update_date+desc'}>Last update (oldest)</option>
+          <option value={'submission_date+asc'}>Submission date (newest)</option>
+          <option value={'submission_date+desc'}>Submission date (oldest)</option>
         </select>
       </div>
     </div>

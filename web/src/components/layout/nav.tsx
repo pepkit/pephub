@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { getOS } from '../../utils/etc';
 import { SearchBox } from './search-box';
 
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+
 // bootstrap nav bar
 export const Nav: FC = () => {
   const { login, user, logout } = useSession();
@@ -66,7 +68,7 @@ export const Nav: FC = () => {
               </div>
             </li>
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-              <a className="nav-link" href="/api/v1/docs">
+              <a className="nav-link" href={`${API_HOST}/api/v1/docs`}>
                 <i className="me-1 bi bi-journal"></i>
                 API docs
               </a>
