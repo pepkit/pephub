@@ -27,7 +27,7 @@ export const NamespacePage: FC = () => {
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState('');
   const [orderBy, setOrderBy] = useState('update_date');
-  const [order, setOrder] = useState('desc');
+  const [order, setOrder] = useState('asc');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
