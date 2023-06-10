@@ -209,13 +209,9 @@ export const ProjectPage: FC = () => {
           }
         </div>
       </div>
-      <div className="border border-dark mx-4 rounded shadow-sm">
-        <div className="border-dark border-bottom p-2 fw-bold text-2xl">Description</div>
-        {/*  wrap text */}
-        <div className="p-2 break-all">
-          <Markdown>{projectInfo?.description || 'No description'}</Markdown>
-        </div>
-      </div>
+      <p className="px-4">
+        <Markdown>{projectInfo?.description || 'No description'}</Markdown>
+      </p>
       <div className="mt-2 px-2 border-bottom border-dark">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
