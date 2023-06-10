@@ -21,6 +21,8 @@ import { editProjectConfig, editProjectSampleTable } from '../api/project';
 import { toast } from 'react-hot-toast';
 import { Markdown } from '../components/markdown/render';
 import { SchemaTag } from '../components/forms/components/shema-tag';
+import { StatusCircle } from '../components/badges/status-circle';
+import { ValidationTooltip } from '../components/tooltips/validation-tooltip';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -269,31 +271,41 @@ export const ProjectPage: FC = () => {
                   </button>
                 </div>
               </div>
-              <div>
-                {/* no matter what, only render if belonging to the user */}
-                {user && projectInfo && canEdit(user, projectInfo) ? (
-                  <>
-                    <button
-                      disabled={
-                        configMutation.isLoading || sampleTableMutation.isLoading || !(configIsDirty || samplesIsDirty)
-                      }
-                      onClick={() => handleProjectChange()}
-                      className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
-                    >
-                      {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
-                      className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
-                      onClick={() => {
-                        resetConfig();
-                        resetSamples();
-                      }}
-                      disabled={!(configIsDirty || samplesIsDirty)}
-                    >
-                      Discard
-                    </button>
-                  </>
-                ) : null}
+              {/* Validation status */}
+              <div className="d-flex flex-row align-items-center">
+                <ValidationTooltip />
+                <div className="d-flex flex-row align-items-center mb-1 me-4">
+                  <StatusCircle className="me-1" variant="success" />
+                  <span>Valid</span>
+                </div>
+                <div>
+                  {/* no matter what, only render if belonging to the user */}
+                  {user && projectInfo && canEdit(user, projectInfo) ? (
+                    <>
+                      <button
+                        disabled={
+                          configMutation.isLoading ||
+                          sampleTableMutation.isLoading ||
+                          !(configIsDirty || samplesIsDirty)
+                        }
+                        onClick={() => handleProjectChange()}
+                        className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                      >
+                        {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
+                        onClick={() => {
+                          resetConfig();
+                          resetSamples();
+                        }}
+                        disabled={!(configIsDirty || samplesIsDirty)}
+                      >
+                        Discard
+                      </button>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
           </>
