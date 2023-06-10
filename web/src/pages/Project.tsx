@@ -23,6 +23,7 @@ import { Markdown } from '../components/markdown/render';
 import { SchemaTag } from '../components/forms/components/shema-tag';
 import { StatusCircle } from '../components/badges/status-circle';
 import { ValidationTooltip } from '../components/tooltips/validation-tooltip';
+import { useValidation } from '../hooks/queries/useValidation';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -60,6 +61,16 @@ export const ProjectPage: FC = () => {
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig || '');
   const [newProjectSamples, setNewProjectSamples] = useState(projectSamples || '');
   // const [newProjectSubsamples, setNewProjectSubsamples] = useState(projectSubSamples? || '');
+
+  const {
+    data: validationResult,
+    isLoading: isValidationLoading,
+    isFetching: isValidationFetching,
+  } = useValidation(
+    `${namespace}/${project}:${tag}`,
+    projectInfo?.pep_schema,
+    namespace && project && tag && projectInfo ? true : false,
+  );
 
   // watch for query changes to update newProjectConfig and newProjectSamples
   useEffect(() => {
@@ -275,8 +286,22 @@ export const ProjectPage: FC = () => {
               <div className="d-flex flex-row align-items-center">
                 <ValidationTooltip />
                 <div className="d-flex flex-row align-items-center mb-1 me-4">
-                  <StatusCircle className="me-1" variant="success" />
-                  <span>Valid</span>
+                  {isValidationLoading || isValidationFetching ? (
+                    <>
+                      <StatusCircle className="me-1" variant="warning" />
+                      <span>Validating...</span>
+                    </>
+                  ) : validationResult?.valid ? (
+                    <>
+                      <StatusCircle className="me-1" variant="success" />
+                      <span>Valid</span>
+                    </>
+                  ) : (
+                    <>
+                      <StatusCircle className="me-1" variant="danger" />
+                      <span>Invalid</span>
+                    </>
+                  )}
                 </div>
                 <div>
                   {/* no matter what, only render if belonging to the user */}
