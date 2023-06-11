@@ -68,7 +68,7 @@ export const ProjectPage: FC = () => {
     isFetching: isValidationFetching,
   } = useValidation(
     `${namespace}/${project}:${tag}`,
-    projectInfo?.pep_schema,
+    projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
     namespace && project && tag && projectInfo ? true : false,
   );
 

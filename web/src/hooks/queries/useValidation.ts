@@ -41,7 +41,7 @@ export const useValidation = (
   enabled: boolean = false,
 ) => {
   return useQuery(['validation', pep, schema], () => runValidation(pep, schema), {
-    enabled: enabled && pep !== undefined && schema !== undefined && pep.length > 0 && schema.length > 0,
+    enabled: enabled && pep !== undefined && schema !== undefined && pep.length > 0 && schema?.length > 0,
     refetchOnWindowFocus: false,
     retry: false,
   });
