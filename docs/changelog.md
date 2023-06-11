@@ -2,11 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.8.2] - 06-11-2023
+
+### Fixed
+
+- Dockerfile build error due to missing `gcc` dependency.
+
 ## [0.8.1] - 06-11-2023
 
 ### Fixed
 
-- Dockerfile would't build due to `psycopg2` error.
+- Dockerfile build error due to `psycopg2` issue.
 
 ## [0.8.0] - 06-09-2023
 
