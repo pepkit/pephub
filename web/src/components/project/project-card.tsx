@@ -5,6 +5,7 @@ import { useSession } from '../../hooks/useSession';
 import { canEdit } from '../../utils/permissions';
 import { DeletePEPModal } from '../modals/delete-pep';
 import { dateStringToDateTime } from '../../utils/dates';
+import { Badge } from '../badges/badge';
 
 interface Props {
   project: ProjectAnnotation;
@@ -28,6 +29,11 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           </a>
           {project.is_private ? (
             <span className="ms-2 badge rounded-pill border border-danger text-danger">Private</span>
+          ) : null}
+          {project.pep_schema ? (
+            <Badge className="ms-2" size="small" variant="primary">
+              {project.pep_schema}
+            </Badge>
           ) : null}
         </div>
         <div>
@@ -61,8 +67,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
       <div>
         <label className="fw-bold">No. of samples:</label>
         <span className="mx-1">{project.number_of_samples}</span>
-        <p><label className="fw-bold">Schema:</label>
-        <span className="mx-1">{project.pep_schema}</span></p>
+
         <p className="mb-0">
           {project.description ? (
             project.description

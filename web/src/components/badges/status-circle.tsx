@@ -1,17 +1,12 @@
 import { FC } from 'react';
 
-type Variant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
-type Size = 'small' | 'medium' | 'large';
-
 interface Props {
-  variant?: Variant;
-  size?: Size;
-  children: React.ReactNode;
+  variant?: string;
+  size?: string;
   className?: string;
 }
 
-export const Badge: FC<Props> = ({ variant = 'primary', size = 'medium', children, className }) => {
-  // switcher for the variant
+export const StatusCircle: FC<Props> = ({ variant, size, className }) => {
   let highlight = '';
   switch (variant) {
     case 'primary':
@@ -43,30 +38,27 @@ export const Badge: FC<Props> = ({ variant = 'primary', size = 'medium', childre
       break;
   }
 
-  let fontSize = '';
+  let padding = '';
   switch (size) {
     case 'small':
-      fontSize = '0.8rem';
+      padding = 'p-1';
       break;
     case 'medium':
-      fontSize = '1.0rem';
+      padding = 'p-2';
       break;
     case 'large':
-      fontSize = '1.2rem';
+      padding = 'p-3';
       break;
     default:
-      fontSize = '1.0rem';
+      padding = 'p-2';
       break;
   }
-  let classNameString = `d-flex flex-row align-items-center shadow-sm px-2 py-1 fw-semibold text-${highlight} bg-${highlight} bg-opacity-10 border border-${highlight} border-opacity-10 rounded-2`;
+
+  let classNameString = `${padding} bg-${highlight} border border-${highlight} rounded-circle`;
 
   if (className) {
     classNameString = `${classNameString} ${className}`;
   }
 
-  return (
-    <span className={classNameString} style={{ fontSize: fontSize }}>
-      {children}
-    </span>
-  );
+  return <div className={classNameString} />;
 };

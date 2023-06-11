@@ -3,6 +3,7 @@ import { Nav } from './nav';
 import { SEO } from './seo';
 import { useApiBase } from '../../hooks/queries/useApiBase';
 import { getOS } from '../../utils/etc';
+import { StatusCircle } from '../badges/status-circle';
 
 interface Props {
   children: React.ReactNode;
@@ -13,21 +14,36 @@ interface Props {
   footer?: boolean;
 }
 
-interface FooterProps {
-  data?: {
-    pephub_version: string;
-    peppy_version: string;
-    python_version: string;
-  };
-}
-
-const Footer: FC<FooterProps> = ({ data }) => {
+const Footer: FC = () => {
+  const { data, isLoading, isFetching } = useApiBase();
   return (
     <div className="container">
       <footer className="flex-wrap py-3 my-4 align-top d-flex justify-content-between align-items-center border-top">
-        <span className="badge rounded-pill bg-secondary me-1">pephub {data?.pephub_version || ''}</span>
-        <span className="badge rounded-pill bg-secondary me-1">peppy {data?.peppy_version || ''}</span>
-        <span className="badge rounded-pill bg-secondary me-1">Python {data?.python_version || ''}</span>
+        <div className="d-flex flex-column">
+          <div>
+            <span className="badge rounded-pill bg-secondary me-1">pephub {data?.pephub_version || ''}</span>
+            <span className="badge rounded-pill bg-secondary me-1">peppy {data?.peppy_version || ''}</span>
+            <span className="badge rounded-pill bg-secondary me-1">Python {data?.python_version || ''}</span>
+          </div>
+          <div className="d-flex flex-row mt-1 align-items-center">
+            {isLoading || isFetching ? (
+              <>
+                <StatusCircle className="me-1" variant="warning" size="small" />
+                Loading...
+              </>
+            ) : data?.api_version ? (
+              <>
+                <StatusCircle className="me-1" variant="success" size="small" />
+                Connected
+              </>
+            ) : (
+              <>
+                <StatusCircle className="me-1" variant="danger" size="small" />
+                No connection
+              </>
+            )}
+          </div>
+        </div>
         <div className="ms-auto">
           <a href="https://databio.org/">
             <img src="/databio_logo.svg" alt="Sheffield Computational Biology Lab" width="200" />
@@ -39,7 +55,6 @@ const Footer: FC<FooterProps> = ({ data }) => {
 };
 
 export const PageLayout: FC<Props> = ({ children, title, description, image, fullWidth, footer = true }) => {
-  const { data } = useApiBase();
   const os = getOS();
   const searchInput = document.getElementById('global-search-bar');
 
@@ -81,7 +96,7 @@ export const PageLayout: FC<Props> = ({ children, title, description, image, ful
         <Nav />
       </header>
       <main className={mainClass}>{children}</main>
-      {footer && <Footer data={data} />}
+      {footer && <Footer />}
     </>
   );
 };
