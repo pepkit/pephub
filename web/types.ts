@@ -8,6 +8,7 @@ export interface ProjectAnnotation {
   last_update_date: string;
   submission_date: string;
   digest: string;
+  pep_schema: string;
 }
 
 export interface User {
@@ -66,6 +67,7 @@ export interface Project {
   samples: Sample[];
   sample_table_indx: string;
   sample_attributes: string[];
+  pep_schema: string;
 }
 
 export interface SearchHit {
@@ -81,13 +83,13 @@ export interface SearchHit {
 
 export interface Schema {
   description: string;
-  type: string;
-  properties: object;
-  required?: string[];
+  project: string;
+  url: string;
 }
 
+// SchemaResults is a list of Schemas
 export interface SchemaResults {
-  registry: Schema;
+  [key: string]: Schema;
 }
 
 export interface ValidationResult {

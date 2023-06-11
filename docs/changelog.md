@@ -2,6 +2,28 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.8.0] - 2022-06-09-2023
+
+### Fixed
+
+- Sample table editing had bugs
+- Width of sample table was incorrect
+- Not found projects would load forever
+- Case-sensitivity was causing errors
+- Search links were not working
+
+### Added
+
+- Interface updated to support new features
+- Markdwon support for PEPs
+- Assign schemas to PEPs
+- Ability to sort PEPs on namespace page
+- Database setup is now streamlined
+
+### Removed
+
+- `cli` is now deprecated
+
 ## [0.7.4] - 2022-04-15
 
 ### Fixed

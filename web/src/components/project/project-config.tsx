@@ -6,9 +6,10 @@ interface Props {
   language?: string;
   readOnly?: boolean;
   setValue?: (value: string) => void;
+  height?: string | number;
 }
 
-export const ProjectConfigEditor: FC<Props> = ({ value, language = 'yaml', readOnly = false, setValue }) => {
+export const ProjectConfigEditor: FC<Props> = ({ value, language = 'yaml', readOnly = false, setValue, height }) => {
   return (
     <Editor
       options={{
@@ -18,7 +19,7 @@ export const ProjectConfigEditor: FC<Props> = ({ value, language = 'yaml', readO
         setValue && setValue(v || '');
       }}
       language={language}
-      height="80vh"
+      height={height || '80vh'}
       defaultLanguage="yaml"
       defaultValue="# Enter your project configuration here"
       value={value}

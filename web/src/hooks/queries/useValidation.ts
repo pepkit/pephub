@@ -17,7 +17,7 @@ const runValidation = async (pep: FileList | string | undefined, schema: string 
     pep_files = pep;
   }
 
-  // create form dat
+  // create form data
   const formData = new FormData();
   formData.append('pep_registry', pep_registry || '');
   if (pep_files) {

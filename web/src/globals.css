@@ -224,3 +224,34 @@
   background-color: #00000011 !important;
   transition: background-color 0.1s ease-in-out;
 }
+
+.w-60 {
+  width: 60% !important;
+}
+
+.w-70 {
+  width: 70% !important;
+}
+
+.w-80 {
+  width: 80% !important;
+}
+
+.w-90 {
+  width: 90% !important;
+}
+
+/* tailwind word wrapping */
+.break-words {
+  word-wrap: break-word;
+}
+.break-all {
+  word-break: break-all !important;
+}
+.break-normal {
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.break-keep-all {
+  word-break: keep-all;
+}

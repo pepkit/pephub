@@ -9,7 +9,12 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectUniqueNameError
 from peppy import Project
-from peppy.const import SAMPLE_RAW_DICT_KEY, CONFIG_KEY, SAMPLE_DF_KEY, SUBSAMPLE_RAW_DICT_KEY
+from peppy.const import (
+    SAMPLE_RAW_DICT_KEY,
+    CONFIG_KEY,
+    SAMPLE_DF_KEY,
+    SUBSAMPLE_RAW_DICT_KEY,
+)
 
 from ...models import ProjectOptional, ProjectRawModel, ForkRequest
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
@@ -166,6 +171,7 @@ async def update_a_pep(
         agent.project.update(
             {
                 "project": new_project,
+                "pep_schema": updated_project.pep_schema,
             },
             namespace,
             project,

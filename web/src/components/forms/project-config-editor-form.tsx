@@ -5,6 +5,7 @@ import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editProjectConfig } from '../../api/project';
 import { toast } from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 interface Props {
   namespace: string;
@@ -41,6 +42,11 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
       }
     },
     onError: (err) => {
+      // if there exists a response body, render that
+      if ((err as AxiosError).response?.data) {
+        toast.error(JSON.stringify((err as AxiosError).response?.data, null, 2));
+        return;
+      }
       toast.error(`Error saving project config: ${err}`);
     },
   });

@@ -5,6 +5,7 @@ import { useSession } from '../../hooks/useSession';
 import { canEdit } from '../../utils/permissions';
 import { DeletePEPModal } from '../modals/delete-pep';
 import { dateStringToDateTime } from '../../utils/dates';
+import { Badge } from '../badges/badge';
 
 interface Props {
   project: ProjectAnnotation;
@@ -29,12 +30,17 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           {project.is_private ? (
             <span className="ms-2 badge rounded-pill border border-danger text-danger">Private</span>
           ) : null}
+          {project.pep_schema ? (
+            <Badge className="ms-2" size="small" variant="primary">
+              {project.pep_schema}
+            </Badge>
+          ) : null}
         </div>
         <div>
           <div className="btn-group dropend">
             <Dropdown as={ButtonGroup}>
               <button disabled type="button" className="btn btn-sm btn-outline-primary">
-                <i className="bi bi-star"></i>
+                <i className="bi bi-star me-1"></i>
                 Favorite
               </button>
               <Dropdown.Toggle split size="sm" variant="outline-primary" id="dropdown-split-basic" />
@@ -46,9 +52,6 @@ export const ProjectCard: FC<Props> = ({ project }) => {
                 </li>
                 {canEdit(user, project) ? (
                   <>
-                    <Dropdown.Item href={`/${project.namespace}/${project.name}/edit?tag=${project.tag}`}>
-                      Edit
-                    </Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item onClick={() => setShowDeletePEPModal(true)} className="text-danger dropdown-item">
                       <i className="bi bi-trash3 me-1"></i>
@@ -63,7 +66,8 @@ export const ProjectCard: FC<Props> = ({ project }) => {
       </div>
       <div>
         <label className="fw-bold">No. of samples:</label>
-        <span className="mb-1">{project.number_of_samples}</span>
+        <span className="mx-1">{project.number_of_samples}</span>
+
         <p className="mb-0">
           {project.description ? (
             project.description
@@ -81,8 +85,11 @@ export const ProjectCard: FC<Props> = ({ project }) => {
               <i className="bi bi-calendar3"></i>
               <span className="mx-1">Created:</span>
               <span id="project-submission-date">{dateStringToDateTime(project.submission_date)}</span>
+              <i className="ms-4 bi bi-calendar3"></i>
+              <span className="mx-1">Updated:</span>
+              <span id="project-update-date">{dateStringToDateTime(project.last_update_date)}</span>
             </span>
-            <span className="me-3">{project.digest}</span>
+            <span className="me-5">{project.digest}</span>
           </small>
         </div>
       </div>

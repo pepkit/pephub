@@ -43,6 +43,8 @@ async def get_namespace_projects(
     session_info: dict = Depends(read_authorization_header),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
+    order_by: str = "update_date",
+    order_desc: bool = False,
 ):
     """
     Fetch the projects for a particular namespace
@@ -58,15 +60,19 @@ async def get_namespace_projects(
             limit=limit,
             offset=offset,
             admin=namespace_access,
+            order_by=order_by,
+            order_desc=order_desc,
         )
     else:
         search_result = agent.annotation.get(
-            namespace=namespace, limit=limit, offset=offset, admin=namespace_access
+            namespace=namespace,
+            limit=limit,
+            offset=offset,
+            admin=namespace_access,
+            order_by=order_by,
+            order_desc=order_desc,
         )
     results = [p.dict() for p in search_result.results]
-
-    # sort by last_update_date
-    results = sorted(results, key=lambda x: x["last_update_date"], reverse=True)
 
     return JSONResponse(
         content={
@@ -94,6 +100,7 @@ async def create_pep(
     is_private: bool = Form(False),
     tag: str = Form(DEFAULT_TAG),
     description: Union[str, None] = Form(None),
+    pep_schema: str = Form(...),
     files: Optional[List[UploadFile]] = File(
         None  # let the file upload be optional. dont send a file? We instantiate with blank
     ),
@@ -126,6 +133,7 @@ async def create_pep(
                     name=project_name,
                     tag=tag,
                     is_private=is_private,
+                    pep_schema=pep_schema,
                 )
             except ProjectUniqueNameError as e:
                 return JSONResponse(
@@ -164,6 +172,7 @@ async def create_pep(
             p = Project(f"{dirpath}/{config_file_name}")
             p.name = project_name
             p.description = description
+            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
@@ -207,6 +216,7 @@ async def upload_raw_pep(
         is_private = project_from_json.is_private
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
+        pep_schema = project_from_json.pep_schema
 
         # This configurations needed due to Issue #124 Should be removed in the future
         project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
@@ -229,6 +239,7 @@ async def upload_raw_pep(
             tag=tag,
             is_private=is_private,
             overwrite=overwrite,
+            pep_schema=pep_schema,
         )
     except ProjectUniqueNameError:
         return JSONResponse(

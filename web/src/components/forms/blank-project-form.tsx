@@ -1,5 +1,5 @@
-import { FC, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { FC, useEffect } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useSession } from '../../hooks/useSession';
 import { submitProjectJSON } from '../../api/namespace';
 import { toast } from 'react-hot-toast';
@@ -8,6 +8,7 @@ import { ErrorMessage } from '@hookform/error-message';
 import { SampleTable } from '../tables/sample-table';
 import { Tabs, Tab } from 'react-bootstrap';
 import { ProjectConfigEditor } from '../project/project-config';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface BlankProjectInputs {
   is_private: boolean;
@@ -17,6 +18,7 @@ interface BlankProjectInputs {
   description: string;
   sample_table: string;
   config: string;
+  pep_schema: string;
 }
 
 interface Props {
@@ -36,6 +38,7 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { isValid, errors },
   } = useForm<BlankProjectInputs>({
     defaultValues: {
@@ -49,6 +52,7 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
       config: `pep_version: 2.1.0
 sample_table: samples.csv
       `,
+      pep_schema: 'pep/2.1.0',
     },
   });
 
@@ -65,6 +69,7 @@ sample_table: samples.csv
         description: data.description || '',
         sample_table: data.sample_table,
         config: data.config,
+        pep_schema: data.pep_schema,
       },
       jwt || '',
     );
@@ -141,9 +146,27 @@ sample_table: samples.csv
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
+      <label className="form-check-label mt-3 mb-1">
+        <i className="bi bi-file-earmark-break me-1"></i>
+        Schema
+      </label>
+      <div>
+        <Controller
+          control={control}
+          name="pep_schema"
+          render={({ field: { onChange, value } }) => (
+            <SchemaDropdown
+              value={value}
+              onChange={(schema) => {
+                setValue('pep_schema', schema);
+              }}
+            />
+          )}
+        />
+      </div>
       <Tabs defaultActiveKey="samples" id="blank-project-tabs" className="mt-3">
         <Tab eventKey="samples" title="Samples">
-          <div className="p-1 border border-top-0">
+          <div className="p-2 border border-top-1">
             <SampleTable
               height={300}
               data={sampleTableCSV}
@@ -160,6 +183,7 @@ sample_table: samples.csv
               setValue={(data) => {
                 setValue('config', data);
               }}
+              height={300}
             />
           </div>
         </Tab>

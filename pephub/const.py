@@ -110,6 +110,7 @@ VALID_UPDATE_KEYS = [
     "tag",
     "private",
     "description",
+    "pep_schema",
 ]
 
 
@@ -128,3 +129,5 @@ JWT_EXPIRATION_SECONDS = JWT_EXPIRATION * 60  # seconds
 AUTH_CODE_EXPIRATION = 5 * 60  # seconds
 
 CALLBACK_ENDPOINT = "/auth/callback"
+
+DEFAULT_PEP_SCHEMA = "pep/2.1.0"

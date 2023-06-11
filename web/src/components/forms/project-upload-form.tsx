@@ -1,4 +1,4 @@
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useSession } from '../../hooks/useSession';
 import { FileDropZone } from './components/file-dropzone';
 import { FC, useRef } from 'react';
@@ -7,6 +7,7 @@ import { submitProjectFiles } from '../../api/namespace';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@hookform/error-message';
 import { toast } from 'react-hot-toast';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface FromFileInputs {
   is_private: boolean;
@@ -15,6 +16,7 @@ interface FromFileInputs {
   tag: string;
   description: string;
   files: FileList;
+  pep_schema: string;
 }
 
 interface Props {
@@ -32,8 +34,14 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { isValid, errors },
-  } = useForm<FromFileInputs>();
+  } = useForm<FromFileInputs>({
+    defaultValues: {
+      is_private: false,
+      pep_schema: 'pep/2.1.0',
+    },
+  });
 
   const uploadFiles = watch('files');
   const namespaceToUpload = watch('namespace');
@@ -52,6 +60,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
         is_private: data.is_private,
         description: data.description,
         files: data.files,
+        pep_schema: data.pep_schema,
       },
       jwt || '',
     );
@@ -124,6 +133,24 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
+      <label className="form-check-label mt-3 mb-1">
+        <i className="bi bi-file-earmark-break me-1"></i>
+        Schema
+      </label>
+      <div>
+        <Controller
+          control={control}
+          name="pep_schema"
+          render={({ field: { onChange, value } }) => (
+            <SchemaDropdown
+              value={value}
+              onChange={(schema) => {
+                setValue('pep_schema', schema);
+              }}
+            />
+          )}
+        />
+      </div>
       {uploadFiles ? (
         <div className="dashed-border p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
           <div className="d-flex flex-column align-items-center">

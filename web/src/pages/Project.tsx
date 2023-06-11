@@ -19,6 +19,11 @@ import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editProjectConfig, editProjectSampleTable } from '../api/project';
 import { toast } from 'react-hot-toast';
+import { Markdown } from '../components/markdown/render';
+import { SchemaTag } from '../components/forms/components/shema-tag';
+import { StatusCircle } from '../components/badges/status-circle';
+import { ValidationTooltip } from '../components/tooltips/validation-tooltip';
+import { useValidation } from '../hooks/queries/useValidation';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -27,11 +32,14 @@ export const ProjectPage: FC = () => {
 
   const queryClient = useQueryClient();
 
-  const { namespace, project } = useParams();
+  let { namespace, project } = useParams();
+  namespace = namespace?.toLowerCase();
+  // project = project?.toLowerCase();
+
   let [searchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
 
-  const { data: projectInfo, isLoading: projectInfoIsLoading } = useProject(namespace, project || '', tag, jwt);
+  const { data: projectInfo, isLoading: projectInfoIsLoading, error } = useProject(namespace, project || '', tag, jwt);
   const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
     namespace,
@@ -42,7 +50,7 @@ export const ProjectPage: FC = () => {
   );
 
   // state
-  const [projectView, setProjectView] = useState<ProjectView>('config');
+  const [projectView, setProjectView] = useState<ProjectView>('samples');
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
@@ -54,10 +62,27 @@ export const ProjectPage: FC = () => {
   const [newProjectSamples, setNewProjectSamples] = useState(projectSamples || '');
   // const [newProjectSubsamples, setNewProjectSubsamples] = useState(projectSubSamples? || '');
 
+  const {
+    data: validationResult,
+    isLoading: isValidationLoading,
+    isFetching: isValidationFetching,
+  } = useValidation(
+    `${namespace}/${project}:${tag}`,
+    projectInfo?.pep_schema,
+    namespace && project && tag && projectInfo ? true : false,
+  );
+
   // watch for query changes to update newProjectConfig and newProjectSamples
   useEffect(() => {
     setNewProjectConfig(projectConfig || '');
     setNewProjectSamples(projectSamples || '');
+    // console.log(projectConfig === newProjectConfig, projectSamples === newProjectSamples);
+    // if (projectSamples !== newProjectSamples) {
+    //   let indx = findStringDifference(projectSamples, newProjectSamples);
+    //   console.log(indx);
+    //   console.log(projectSamples?.slice(indx - 10, indx + 10));
+    //   console.log(newProjectSamples?.slice(indx - 10, indx + 10));
+    // }
   }, [projectConfig, projectSamples]);
 
   const downloadZip = () => {
@@ -123,42 +148,52 @@ export const ProjectPage: FC = () => {
     }
   };
 
+  if (error) {
+    return (
+      <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
+        <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
+          <h1 className="fw-bold">Error 😫</h1>
+          <p className="text-muted fst-italic">An error occured fetching the project... Are you sure it exists?</p>
+          <div>
+            <a href={`/${namespace}`}>
+              <button className="btn btn-dark">Take me back</button>
+            </a>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 mt-2">
-        <Breadcrumb className="fw-bold">
-          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-          <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
-          <Breadcrumb.Item active>
-            {project}:{tag}
-          </Breadcrumb.Item>
-          {projectInfo?.is_private ? (
-            <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
-          ) : null}
-        </Breadcrumb>
+      <div className="d-flex flex-row align-items-center justify-content-between px-4 my-2">
         <div className="d-flex flex-row align-items-center">
-          <Dropdown className="me-1">
-            <Dropdown.Toggle variant="outline-dark" size="sm">
-              <i className="bi bi-three-dots me-1"></i>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="shadow-lg">
-              <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
-                <i className="bi bi-hdd-rack me-1"></i>
-                API Endpoints
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => downloadZip()}>
-                <i className="bi bi-file-earmark-zip me-1"></i>
-                Download zip
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setShowCompatibilityModal(true)}>
-                <i className="me-1 bi bi-intersect"></i>
-                Compatibility
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
+          <Breadcrumb className="fw-bold">
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
+            <Breadcrumb.Item active>
+              {project}:{tag}
+            </Breadcrumb.Item>
+            {projectInfo?.is_private ? (
+              <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
+            ) : null}
+          </Breadcrumb>
+          <div className="ms-2 mb-2">
+            <SchemaTag schema={projectInfo?.pep_schema} />
+          </div>
+        </div>
+        <div className="d-flex flex-row align-items-center">
+          <button className="btn btn-sm btn-dark me-1" onClick={() => downloadZip()}>
+            <i className="bi bi-file-earmark-zip me-1"></i>
+            Download
+          </button>
+          <button className="btn btn-sm btn-dark me-1" onClick={() => setShowAPIEndpointsModal(true)}>
+            <i className="bi bi-hdd-rack me-1"></i>
+            API Endpoints
+          </button>
           {user ? (
-            <button className="btn btn-sm btn-outline-dark me-1" onClick={() => setShowForkPEPModal(true)}>
+            <button className="btn btn-sm btn-dark me-1" onClick={() => setShowForkPEPModal(true)}>
               <i className="me-1 bi bi-bezier2"></i>
               Fork
             </button>
@@ -166,16 +201,17 @@ export const ProjectPage: FC = () => {
           {
             // if user is logged in and is owner of project
             user && projectInfo && canEdit(user, projectInfo) ? (
-              <Dropdown className="me-1">
-                <Dropdown.Toggle variant="outline-dark" size="sm">
-                  <i className="bi bi-gear"></i>
+              <Dropdown>
+                <Dropdown.Toggle variant="dark" size="sm">
+                  <i className="bi bi-pencil"></i>
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="shadow-lg">
                   <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
                     {/*  pencil write */}
                     <i className="bi bi-pencil-square me-1"></i>
-                    Edit
+                    Edit project
                   </Dropdown.Item>
+                  <Dropdown.Divider />
                   <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
                     <i className="bi bi-trash3 me-1"></i>
                     Delete
@@ -186,9 +222,9 @@ export const ProjectPage: FC = () => {
           }
         </div>
       </div>
-      <div className="px-4">
-        <p>{projectInfo?.description}</p>
-      </div>
+      <p className="px-4">
+        <Markdown>{projectInfo?.description || 'No description'}</Markdown>
+      </p>
       <div className="mt-2 px-2 border-bottom border-dark">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
@@ -196,30 +232,6 @@ export const ProjectPage: FC = () => {
           <>
             <div className="flex-row d-flex align-items-end justify-content-between">
               <div className="d-flex flex-row align-items-center">
-                <div
-                  className={
-                    projectView === 'config'
-                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
-                      : 'border-bottom px-2 py-1'
-                  }
-                >
-                  <button
-                    onClick={() => setProjectView('config')}
-                    className="border-0 bg-transparent project-button-toggles rounded"
-                  >
-                    <i className="bi bi-filetype-yml me-1"></i>Config
-                    {configIsDirty ? (
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
-                      </span>
-                    ) : (
-                      //  spacer
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
-                      </span>
-                    )}
-                  </button>
-                </div>
                 <div
                   className={
                     projectView === 'samples'
@@ -245,38 +257,92 @@ export const ProjectPage: FC = () => {
                     </span>
                   )}
                 </div>
+                <div
+                  className={
+                    projectView === 'config'
+                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
+                      : 'border-bottom px-2 py-1'
+                  }
+                >
+                  <button
+                    onClick={() => setProjectView('config')}
+                    className="border-0 bg-transparent project-button-toggles rounded"
+                  >
+                    <i className="bi bi-filetype-yml me-1"></i>Config
+                    {configIsDirty ? (
+                      <span className="text-xs">
+                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
+                      </span>
+                    ) : (
+                      //  spacer
+                      <span className="text-xs">
+                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
-              <div>
-                {configIsDirty || samplesIsDirty ? (
-                  <>
-                    <button
-                      disabled={configMutation.isLoading || sampleTableMutation.isLoading}
-                      onClick={() => handleProjectChange()}
-                      className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
-                    >
-                      {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save changes?'}
-                    </button>
-                    <button
-                      className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
-                      onClick={() => {
-                        resetConfig();
-                        resetSamples();
-                      }}
-                    >
-                      Discard
-                    </button>
-                  </>
-                ) : null}
+              {/* Validation status */}
+              <div className="d-flex flex-row align-items-center">
+                <ValidationTooltip />
+                <div className="d-flex flex-row align-items-center mb-1 me-4">
+                  {isValidationLoading || isValidationFetching ? (
+                    <>
+                      <StatusCircle className="me-1" variant="warning" />
+                      <span>Validating...</span>
+                    </>
+                  ) : validationResult?.valid ? (
+                    <>
+                      <StatusCircle className="me-1" variant="success" />
+                      <span>Valid</span>
+                    </>
+                  ) : (
+                    <>
+                      <StatusCircle className="me-1" variant="danger" />
+                      <span>Invalid</span>
+                    </>
+                  )}
+                </div>
+                <div>
+                  {/* no matter what, only render if belonging to the user */}
+                  {user && projectInfo && canEdit(user, projectInfo) ? (
+                    <>
+                      <button
+                        disabled={
+                          configMutation.isLoading ||
+                          sampleTableMutation.isLoading ||
+                          !(configIsDirty || samplesIsDirty)
+                        }
+                        onClick={() => handleProjectChange()}
+                        className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                      >
+                        {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
+                        onClick={() => {
+                          resetConfig();
+                          resetSamples();
+                        }}
+                        disabled={!(configIsDirty || samplesIsDirty)}
+                      >
+                        Discard
+                      </button>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
           </>
         )}
       </div>
-      <div className="row h-100">
+      <div className="row gx-0 h-100">
         <div className="col-12">
           <div>
             {projectView === 'samples' ? (
               <SampleTable
+                // fill to the rest of the screen minus 300px
+                height={window.innerHeight - 300}
                 readOnly={!(projectInfo && canEdit(user, projectInfo))}
                 data={newProjectSamples || ''}
                 onChange={(value) => setNewProjectSamples(value)}

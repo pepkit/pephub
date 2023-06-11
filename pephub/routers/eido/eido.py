@@ -26,11 +26,8 @@ from ...dependencies import *
 templates = Jinja2Templates(directory=EIDO_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(EIDO_TEMPLATES_PATH))
 
-path_to_schemas = f"{os.path.dirname(__file__)}/../schemas.yaml"
-try:
-    schemas_to_test = load_yaml(path_to_schemas)
-except Exception as e:
-    print(e, flush=True)
+schemas_url = "https://schema.databio.org/list.json"
+schemas_to_test = requests.get(schemas_url).json()
 
 
 def vwrap(p, schema):
