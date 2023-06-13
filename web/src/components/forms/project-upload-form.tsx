@@ -1,12 +1,13 @@
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { useSession } from '../../hooks/useSession';
-import { FileDropZone } from './components/file-dropzone';
-import { FC, useRef } from 'react';
-import { popFileFromFileList } from '../../utils/dragndrop';
-import { submitProjectFiles } from '../../api/namespace';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@hookform/error-message';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { FC, useRef } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+
+import { submitProjectFiles } from '../../api/namespace';
+import { useSession } from '../../hooks/useSession';
+import { popFileFromFileList } from '../../utils/dragndrop';
+import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface FromFileInputs {

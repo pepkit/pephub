@@ -1,7 +1,8 @@
+import { motion } from 'framer-motion';
 import React, { FC } from 'react';
+
 import { PageLayout } from '../components/layout/page-layout';
 import { useSession } from '../hooks/useSession';
-import { motion } from 'framer-motion';
 
 interface MotionButtonProps {
   onClick?: () => void;

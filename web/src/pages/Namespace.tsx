@@ -1,18 +1,19 @@
 import { FC, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useParams } from 'react-router-dom';
+
 import { PageLayout } from '../components/layout/page-layout';
-import { useSession } from '../hooks/useSession';
+import { Pagination } from '../components/layout/pagination';
+import { AddPEPModal } from '../components/modals/add-pep';
+import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
+import { NamespacePageSearchBar } from '../components/namespace/search-bar';
 import { NamespaceInfoPlaceholder } from '../components/placeholders/namespace-info';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
 import { ProjectCard } from '../components/project/project-card';
-import { AddPEPModal } from '../components/modals/add-pep';
-import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
-import { useDebounce } from '../hooks/useDebounce';
-import { Pagination } from '../components/layout/pagination';
-import { NamespacePageSearchBar } from '../components/namespace/search-bar';
-import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
 import { useNamespaceInfo } from '../hooks/queries/useNamespaceInfo';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
+import { useDebounce } from '../hooks/useDebounce';
+import { useSession } from '../hooks/useSession';
 
 export const NamespacePage: FC = () => {
   // get namespace from url

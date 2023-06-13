@@ -1,13 +1,16 @@
-import { FC, useEffect } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { useSession } from '../../hooks/useSession';
-import { submitProjectJSON } from '../../api/namespace';
-import { toast } from 'react-hot-toast';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@hookform/error-message';
-import { SampleTable } from '../tables/sample-table';
-import { Tabs, Tab } from 'react-bootstrap';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { FC, useEffect } from 'react';
+import { Tab, Tabs } from 'react-bootstrap';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+
+import { Sample } from '../../../types';
+import { submitProjectJSON } from '../../api/namespace';
+import { useSession } from '../../hooks/useSession';
+import { sampleListToArrays, tableDataToCsvString } from '../../utils/sample-table';
 import { ProjectConfigEditor } from '../project/project-config';
+import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface BlankProjectInputs {
@@ -16,7 +19,7 @@ interface BlankProjectInputs {
   project_name: string;
   tag: string;
   description: string;
-  sample_table: string;
+  sample_table: Sample[];
   config: string;
   pep_schema: string;
 }
@@ -45,10 +48,18 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
       is_private: false,
       namespace: user?.login || '',
       project_name: 'new-project',
-      sample_table: `sample_name,genome,fastq_1,fastq_2
-      sample1,GRCh38,fastq_1.fastq.gz,fastq_2.fastq.gz
-      sample2,GRCh38,fastq_1.fastq.gz,fastq_2.fastq.gz
-      `,
+      sample_table: [
+        {
+          sample_name: 'sample1',
+          sample_type: 'sample_type1',
+          genome: 'genome1',
+        },
+        {
+          sample_name: 'sample2',
+          sample_type: 'sample_type2',
+          genome: 'genome2',
+        },
+      ],
       config: `pep_version: 2.1.0
 sample_table: samples.csv
       `,
@@ -67,7 +78,7 @@ sample_table: samples.csv
         project_name: data.project_name,
         tag: data.tag || 'default',
         description: data.description || '',
-        sample_table: data.sample_table,
+        sample_table: tableDataToCsvString(sampleListToArrays(data.sample_table)),
         config: data.config,
         pep_schema: data.pep_schema,
       },

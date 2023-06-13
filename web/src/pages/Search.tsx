@@ -1,13 +1,14 @@
 import { FC, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
 import { PageLayout } from '../components/layout/page-layout';
-import { SearchBar } from '../components/search/search-bar';
 import { SearchOptionsModal } from '../components/modals/search-options';
-import { useSearch } from '../hooks/queries/useSearch';
-import { useSession } from '../hooks/useSession';
-import { useDebounce } from '../hooks/useDebounce';
+import { SearchBar } from '../components/search/search-bar';
 import { SearchLoading } from '../components/search/search-loading';
 import { NamespaceSearchResults, ProjectSearchResults } from '../components/search/search-results';
-import { useSearchParams } from 'react-router-dom';
+import { useSearch } from '../hooks/queries/useSearch';
+import { useDebounce } from '../hooks/useDebounce';
+import { useSession } from '../hooks/useSession';
 
 interface Props {
   children: React.ReactNode;
