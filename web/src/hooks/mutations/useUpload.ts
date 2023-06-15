@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 export const useUpload = (onSubmit, onSuccess, onError) => {
   return useMutation({
@@ -8,8 +9,7 @@ export const useUpload = (onSubmit, onSuccess, onError) => {
       onSuccess();
       toast.success('Project successfully uploaded!');
     },
-    onError: (err) => {
-      onError(err);
+    onError: (err: AxiosError) => {
       toast.error(`Error uploading project! ${err}`);
     },
   });

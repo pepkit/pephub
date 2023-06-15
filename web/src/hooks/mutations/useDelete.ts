@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '../../api/project';
+import { AxiosError } from 'axios';
 
 export const useDelete = (namespace, project, tag, jwt, onHide, redirect) => {
   const queryClient = useQueryClient();
@@ -18,8 +19,8 @@ export const useDelete = (namespace, project, tag, jwt, onHide, redirect) => {
         navigate(redirect);
       }
     },
-    onError: (err) => {
-      toast.error(`There was an error deleting the project: ${err}`);
+    onError: (error: AxiosError) => {
+      toast.error(`There was an error deleting the project: ${error}`);
     },
   });
 

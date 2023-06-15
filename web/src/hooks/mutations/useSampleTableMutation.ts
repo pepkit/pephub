@@ -35,7 +35,9 @@ export const useSampleTableMutation = (
       queryClient.invalidateQueries([namespace, project, tag, 'samples']);
       toast.success('Successfully updated project samples');
     },
-    onError,
+    onError: (error: AxiosError) => {
+      toast.error(`Failed to update project samples: ${error}`);
+    },
   });
 
   return mutation;
