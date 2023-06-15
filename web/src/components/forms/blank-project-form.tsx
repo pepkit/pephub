@@ -12,6 +12,7 @@ import { sampleListToArrays, tableDataToCsvString } from '../../utils/sample-tab
 import { ProjectConfigEditor } from '../project/project-config';
 import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { useBlankProjectForm } from '../../hooks/mutations/useBlankProjectForm';
 
 interface BlankProjectInputs {
   is_private: boolean;
@@ -88,19 +89,10 @@ sample_table: samples.csv
 
   const namespace = watch('namespace');
 
-  // function/object to handle submitting a project
-  const mutation = useMutation({
-    mutationFn: () => handleSubmit(onSubmit)(),
-    onSuccess: () => {
-      toast.success('Project created!');
-      queryClient.invalidateQueries([namespace]);
-      onHide();
-      resetForm();
-    },
-    onError: (error) => {
-      toast.error(`An error occurred: ${error}`);
-    },
-  });
+  const mutation = useBlankProjectForm(
+    () => handleSubmit(onSubmit)(),
+    () => { queryClient.invalidateQueries([namespace]); onHide(); }
+  );
 
   return (
     <form id="blank-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>
