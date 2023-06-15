@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '../../api/project';
 import { useSession } from '../../hooks/useSession';
-import { useMutation } from '@tanstack/react-query';
+import { useDelete } from '../../hooks/mutations/useDelete';
 
 interface Props {
   show: boolean;
@@ -24,23 +24,7 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
 
   const [confirmText, setConfirmText] = useState('');
 
-  // function/object to handle deleting a project
-  const mutation = useMutation({
-    mutationFn: () => deleteProject(namespace, project, tag, jwt || ''),
-    onSuccess: () => {
-      toast.success('Project successfully deleted.');
-      queryClient.invalidateQueries({
-        queryKey: [namespace],
-      });
-      onHide();
-      if (redirect) {
-        navigate(redirect);
-      }
-    },
-    onError: (err) => {
-      toast.error(`There was an error deleting the project: ${err}`);
-    },
-  });
+  const { deleteProjectMutation, isLoading } = useDelete(namespace, project, tag, jwt, tag, redirect);
 
   return (
     <Modal
@@ -75,12 +59,10 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
       </Modal.Body>
       <Modal.Footer>
         <button
-          onClick={() => mutation.mutate()}
-          disabled={confirmText !== `${namespace}/${project}:${tag}` || mutation.isLoading}
-          type="button"
-          className="btn btn-danger"
-        >
-          {mutation.isLoading ? 'Deleting...' : 'Yes, delete'}
+          onClick={deleteProjectMutation}
+          disabled={isLoading}
+          type="button">
+          {isLoading ? 'Deleting...' : 'Yes, delete'}
         </button>
       </Modal.Footer>
     </Modal>

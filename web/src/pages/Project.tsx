@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { FC, useEffect, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { Breadcrumb } from 'react-bootstrap';
@@ -27,6 +27,8 @@ import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { canEdit } from '../utils/permissions';
 import { sampleListToArrays, tableDataToCsvString } from '../utils/sample-table';
+import { useConfig } from '../hooks/mutations/useConfig';
+import { useSampleTableMutation } from '../hooks/mutations/useSampleTable';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -97,34 +99,9 @@ export const ProjectPage: FC = () => {
     setNewProjectSamples(projectSamples?.items || []);
   };
 
-  const configMutation = useMutation({
-    mutationFn: () => editProjectConfig(namespace || '', project || '', tag, jwt || '', newProjectConfig),
-    onSuccess: () => {
-      toast.success('Successfully updated project config');
-      queryClient.invalidateQueries([namespace, project, tag, 'config']);
-    },
-    onError: (err) => {
-      toast.error(`Error updating project samples: ${err}`);
-    },
-  });
+  const configMutation = useConfig(namespace, project, tag, jwt, newProjectConfig);
 
-  const sampleTableMutation = useMutation({
-    mutationFn: () =>
-      editProjectSampleTable(
-        namespace || '',
-        project || '',
-        tag,
-        jwt || '',
-        tableDataToCsvString(sampleListToArrays(newProjectSamples)),
-      ),
-    onSuccess: () => {
-      toast.success('Successfully updated project samples');
-      queryClient.invalidateQueries([namespace, project, tag, 'samples']);
-    },
-    onError: (err) => {
-      toast.error(`Error updating project samples: ${err}`);
-    },
-  });
+  const sampleTableMutation = useSampleTable(namespace, project, tag, jwt, newProjectSamples);
 
   const handleProjectChange = () => {
     if (configIsDirty) {

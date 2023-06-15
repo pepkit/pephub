@@ -2,10 +2,10 @@ import { FC, useEffect, useState } from 'react';
 import { ProjectConfigEditor } from '../project/project-config';
 import { useSession } from '../../hooks/useSession';
 import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editProjectConfig } from '../../api/project';
 import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { useProjectEditConfig } from '../../hooks/mutations/useProjectEditConfig';
 
 interface Props {
   namespace: string;
@@ -27,29 +27,7 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
     setNewProjectConfig(originalConfig);
   };
 
-  // react-query
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: () => editProjectConfig(namespace, project, tag, jwt, newProjectConfig),
-    onSuccess: () => {
-      toast.success('Project config saved successfully');
-      queryClient.invalidateQueries([namespace, project, tag]);
-
-      // reset values if needed
-      if (newProjectConfig !== originalConfig) {
-        setOriginalConfig(newProjectConfig);
-      }
-    },
-    onError: (err) => {
-      // if there exists a response body, render that
-      if ((err as AxiosError).response?.data) {
-        toast.error(JSON.stringify((err as AxiosError).response?.data, null, 2));
-        return;
-      }
-      toast.error(`Error saving project config: ${err}`);
-    },
-  });
+  const mutation = useProjectEditConfig();
 
   useEffect(() => {
     if (projectConfig) {
