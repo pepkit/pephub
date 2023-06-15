@@ -8,6 +8,7 @@ import { useProject } from '../../hooks/queries/useProject';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 import { MarkdownEditor } from '../markdown/edit';
 import { AxiosError } from 'axios';
+import { useEditProjectMeta } from '../../hooks/mutations/useEditProjectMeta';
 
 interface Props {
   namespace: string;
@@ -60,34 +61,19 @@ export const ProjectMetaEditForm: FC<Props> = ({
 
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: () => handleSubmit(onSubmit)(),
-    onSuccess: () => {
-      resetForm(
-        {}, // not sure why this works, but it does.
-        {
-          keepValues: true,
-        },
-      );
-      toast.success('Project metadata updated successfully.');
-      queryClient.invalidateQueries([namespace, name, tag]);
-      onSuccessfulSubmit();
-
-      // if newTag or newName is different, redirect to new project
-      if (newTag !== tag || newName !== name) {
-        window.location.href = `/${namespace}/${newName}?tag=${newTag}`;
-      }
-    },
-    onError: (error: AxiosError) => {
-      // check for axios 401
-      if (error.response?.status === 401) {
-        toast.error('You are not authorized to edit this project.');
-        return;
-      }
-      toast.error(`There was an error updated project metadata: ${error}`);
-      onFailedSubmit();
-    },
-  });
+  const mutation = useEditProjectMeta(
+  () => handleSubmit(onSubmit)(),
+  resetForm,
+  toast,
+  queryClient,
+  namespace,
+  name,
+  tag,
+  onSuccessfulSubmit,
+  onFailedSubmit,
+  newTag,
+  newName
+);
 
   return (
     <form>
