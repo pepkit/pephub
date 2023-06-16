@@ -68,7 +68,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
     );
   };
 
-  const mutation = useUpload(
+  const mutation = useUploadMutation(
     () => handleSubmit(onSubmit)(),
     () => { queryClient.invalidateQueries([namespaceToUpload]); onHide(); }
   );

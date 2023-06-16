@@ -8,7 +8,7 @@ import { useProject } from '../../hooks/queries/useProject';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 import { MarkdownEditor } from '../markdown/edit';
 import { AxiosError } from 'axios';
-import { useEditProjectMeta } from '../../hooks/mutations/useEditProjectMeta';
+import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
 
 interface Props {
   namespace: string;
@@ -61,7 +61,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
 
   const queryClient = useQueryClient();
 
-  const mutation = useEditProjectMeta(
+  const mutation = useEditProjectMetaMutation(
   () => handleSubmit(onSubmit)(),
   resetForm,
   toast,

@@ -27,8 +27,8 @@ import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { canEdit } from '../utils/permissions';
 import { sampleListToArrays, tableDataToCsvString } from '../utils/sample-table';
-import { useConfig } from '../hooks/mutations/useConfig';
-import { useSampleTableMutation } from '../hooks/mutations/useSampleTable';
+import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
+import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -99,9 +99,9 @@ export const ProjectPage: FC = () => {
     setNewProjectSamples(projectSamples?.items || []);
   };
 
-  const configMutation = useConfig(namespace, project, tag, jwt, newProjectConfig);
+  const configMutation = useConfigMutation(namespace, project, tag, jwt, newProjectConfig);
 
-  const sampleTableMutation = useSampleTable(namespace, project, tag, jwt, newProjectSamples);
+  const sampleTableMutation = useSampleTableMutation(namespace, project, tag, jwt, newProjectSamples);
 
   const handleProjectChange = () => {
     if (configIsDirty) {

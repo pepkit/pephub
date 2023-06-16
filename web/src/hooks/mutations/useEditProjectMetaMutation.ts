@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
-export const useEditProjectMeta = (
+export const useEditProjectMetaMutation = (
   handleSubmit: () => Promise<any>,
   resetForm: () => void,
   toast: any,

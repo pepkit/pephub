@@ -2,38 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editProjectConfig } from '../../api/project';
 import { AxiosError } from 'axios';
 
-interface EditProjectConfigMutationOptions {
-  namespace: string;
-  project: string;
-  tag: string;
-  jwt: string;
-  newProjectConfig: string;
-  originalConfig: string;
-  setOriginalConfig: React.Dispatch<React.SetStateAction<string>>;
-  onSuccess?: () => void;
-  onError?: (error: AxiosError) => void;
-}
 
-const useEditProjectConfigMutation = (): ((options: EditProjectConfigMutationOptions) => void) => {
+export const useProjectEditConfigMutation = (namespace, project, tag, jwt, newProjectConfig, originalConfig, setOriginalConfig) => {
   const queryClient = useQueryClient();
 
-  return useMutation(async (options: EditProjectConfigMutationOptions) => {
-    const { namespace, project, tag, jwt, newProjectConfig, originalConfig, setOriginalConfig, onSuccess, onError } = options;
+  return useMutation({
+    mutationFn: () => editProjectConfig(namespace, project, tag, jwt, newProjectConfig),
 
-    try {
-      const response = await editProjectConfig(namespace, project, tag, jwt, newProjectConfig);
-
-      if (onSuccess) {
-        onSuccess();
-      }
-
-      return response;
-    } catch (error) {
-      if (onError) {
-        onError(error);
-      }
-    }
-  }, {
     onSuccess: (data, variables) => {
       const { namespace, project, tag } = variables;
       toast.success('Project config saved successfully');

@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
-export const useBlankProjectForm = (onSubmit, onSuccess, onError) => {
+export const useBlankProjectFormMutation = (onSubmit, onSuccess, onError) => {
   return useMutation({
     mutationFn: onSubmit,
     onSuccess: () => {

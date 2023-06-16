@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '../../api/project';
 import { AxiosError } from 'axios';
 
-export const useDelete = (namespace, project, tag, jwt, onHide, redirect) => {
+export const useDeleteMutation = (namespace, project, tag, jwt, onHide, redirect) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -24,9 +24,5 @@ export const useDelete = (namespace, project, tag, jwt, onHide, redirect) => {
     },
   });
 
-  const deleteProjectMutation = () => {
-    mutation.mutate();
-  };
-
-  return { deleteProjectMutation, isLoading: mutation.isLoading };
+  return { mutation, isLoading: mutation.isLoading  };
 };

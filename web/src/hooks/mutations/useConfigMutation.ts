@@ -3,7 +3,7 @@ import { editProjectConfig } from '../../api/project';
 import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
-export const useConfig = (
+export const useConfigMutation = (
   namespace: string,
   project: string,
   tag: string,

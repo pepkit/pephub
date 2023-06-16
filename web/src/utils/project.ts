@@ -1,4 +1,4 @@
-const downloadZip = (namespace: string, project: string, tag: string, jwt: string | undefined | null) => {
+export const downloadZip = (namespace: string, project: string, tag: string, jwt: string | undefined | null) => {
   const completeName = `${namespace}-${project}-${tag}`;
   fetch(`/api/v1/projects/${namespace}/${project}/zip?tag=${tag}`, {
     method: 'GET',

@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editProjectSampleTable } from '../../api/project';
 import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
-import { tableDataToCsvString, sampleListToArrays } from '../../utils/sampleUtils';
+import { tableDataToCsvString, sampleListToArrays } from '../../utils/sample-table';
 
 interface SampleTableMutationOptions {
   onSuccess?: () => void;

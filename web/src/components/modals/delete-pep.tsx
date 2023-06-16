@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '../../api/project';
 import { useSession } from '../../hooks/useSession';
-import { useDelete } from '../../hooks/mutations/useDelete';
+import { useDeleteMutation } from '../../hooks/mutations/useDeleteMutation';
 
 interface Props {
   show: boolean;
@@ -24,7 +24,7 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
 
   const [confirmText, setConfirmText] = useState('');
 
-  const { deleteProjectMutation, isLoading } = useDelete(namespace, project, tag, jwt, tag, redirect);
+  const { mutation, isLoading } = useDeleteMutation(namespace, project, tag, jwt, tag, redirect);
 
   return (
     <Modal
@@ -59,9 +59,11 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
       </Modal.Body>
       <Modal.Footer>
         <button
-          onClick={deleteProjectMutation}
-          disabled={isLoading}
-          type="button">
+          onClick={() => mutation.mutate()}
+          disabled={confirmText !== `${namespace}/${project}:${tag}` || mutation.isLoading}
+          type="button"
+          className="btn btn-danger"
+        >
           {isLoading ? 'Deleting...' : 'Yes, delete'}
         </button>
       </Modal.Footer>
