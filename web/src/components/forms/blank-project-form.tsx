@@ -12,7 +12,7 @@ import { sampleListToArrays, tableDataToCsvString } from '../../utils/sample-tab
 import { ProjectConfigEditor } from '../project/project-config';
 import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
-import { useBlankProjectForm } from '../../hooks/mutations/useBlankProjectForm';
+import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
 
 interface BlankProjectInputs {
   is_private: boolean;
@@ -89,7 +89,7 @@ sample_table: samples.csv
 
   const namespace = watch('namespace');
 
-  const mutation = useBlankProjectForm(
+  const mutation = useBlankProjectFormMutation(
     () => handleSubmit(onSubmit)(),
     () => { queryClient.invalidateQueries([namespace]); onHide(); }
   );
