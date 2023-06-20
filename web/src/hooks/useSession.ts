@@ -14,13 +14,13 @@ export const useSession = () => {
 
   const login = useCallback(() => {
     const clientRedirectUrl = buildClientRedirectUrl();
-    const url = `${AUTH_BASE}/login?client_redirect_uri=${clientRedirectUrl}`;
+    const currentUrl = window.location.href;
+    const url = `${AUTH_BASE}/login?client_redirect_uri=${clientRedirectUrl}&client_finally_send_to=${currentUrl}`;
     window.location.href = url;
-  }, [AUTH_BASE, buildClientRedirectUrl]);
+  }, [AUTH_BASE, buildClientRedirectUrl, window.location.href]);
 
   const logout = useCallback(() => {
     setJwt(null);
-    window.location.reload();
   }, [setJwt, JWT_STORE]);
 
   // decode the session cookie

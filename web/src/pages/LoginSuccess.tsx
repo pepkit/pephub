@@ -9,6 +9,17 @@ export const LoginSuccessPage: FC = () => {
   const { setJWT } = useSession();
   const [searchParams, _] = useSearchParams();
   let authCode = searchParams.get('code');
+  let redirect = searchParams.get('client_finally_send_to');
+
+  // strip all but the path segment + /login/success
+  if (redirect) {
+    redirect = redirect.replace(/^(?:\/\/|[^/]+)*\//, '');
+
+    // add back the leading slash
+    if (!redirect.startsWith('/')) {
+      redirect = '/' + redirect;
+    }
+  }
 
   useEffect(() => {
     if (authCode) {
@@ -16,10 +27,10 @@ export const LoginSuccessPage: FC = () => {
         .then((res) => res.data)
         .then((data) => {
           setJWT(data.token);
-          navigate('/');
+          navigate(redirect || '/');
         })
         .finally(() => {
-          navigate('/');
+          navigate(redirect || '/');
         });
     }
   }, [authCode, navigate, setJWT]);
