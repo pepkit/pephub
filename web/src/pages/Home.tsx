@@ -1,7 +1,8 @@
+import { motion } from 'framer-motion';
 import React, { FC } from 'react';
+
 import { PageLayout } from '../components/layout/page-layout';
 import { useSession } from '../hooks/useSession';
-import { motion } from 'framer-motion';
 
 interface MotionButtonProps {
   onClick?: () => void;
@@ -29,13 +30,13 @@ function Home() {
         <div className="d-flex flex-column h-100 align-items-center justify-content-center">
           <div className="row align-items-center">
             <div className="col-6">
-              <h1 className="fw-bolder">Easy management of sample metadata.</h1>
+              <h1 className="fw-bolder">Manage your sample metadata.</h1>
               <p>
                 PEPhub is a database, web interface, and API for sharing, retrieving, and validating sample metadata.
                 PEPhub takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to let
                 you store, edit, and access your PEPs in one convenient place.
               </p>
-              <p>To get started submitting your own sample metadata, you only need a GitHub account.</p>
+              <p>Log in with your GitHub account to get started.</p>
               {user ? (
                 <a href={`/${user.login}`}>
                   <MotionButton className="btn btn-dark btn-lg me-3">
@@ -47,7 +48,7 @@ function Home() {
                 </a>
               ) : (
                 <MotionButton className="btn btn-dark btn-lg me-3" onClick={() => login()}>
-                  <i className="bi bi-github"></i> Login with GitHub
+                  <i className="bi bi-github"></i> Log in with GitHub
                 </MotionButton>
               )}
               <a href="/validate">

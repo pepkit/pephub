@@ -29,7 +29,7 @@
     "framer-motion": "^10.12.4",
     "handsontable": "^12.3.3",
     "jwt-decode": "^3.1.2",
-    "prettier": "^2.8.6",
+    "prettier": "^2.8.8",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.2",
     "react-cookie": "^4.1.1",
@@ -50,6 +50,7 @@
     "yaml": "^2.3.1"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react-swc": "^3.0.0",

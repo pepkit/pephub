@@ -104,7 +104,7 @@ export const Nav: FC = () => {
               ) : (
                 <li className="mx-2 my-0 nav-item h5 pt-1">
                   <button className="btn btn-dark" onClick={() => login()}>
-                    <i className="fa fa-github"></i>Login
+                    <i className="fa fa-github"></i>Log in
                   </button>
                 </li>
               )}

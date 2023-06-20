@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { forkProject } from '../../api/project';
+import { useForkMutation } from '../../hooks/mutations/useForkMutation';
 
 interface Props {
   namespace: string;
@@ -57,18 +58,22 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
     });
   };
 
-  const mutation = useMutation({
-    mutationFn: () => handleSubmit(onSubmit)(),
-    onSuccess: () => {
-      toast.success('Project successully forked!');
-      queryClient.invalidateQueries([projectNamespace]);
-      onHide();
-      navigate(`/${projectNamespace}/${projectName}?tag=${projectTag}`);
-    },
-    onError: (error) => {
-      toast.error(`An error occurred: ${error}`);
-    },
-  });
+  const mutation = useForkMutation(() => handleSubmit(onSubmit)(), watch, onHide);
+
+//   const mutation = useMutation({
+//     mutationFn: () => handleSubmit(onSubmit)(),
+//     onSuccess: () => {
+//       toast.success('Project successully forked!');
+//       queryClient.invalidateQueries([projectNamespace]);
+//       onHide();
+//       navigate(`/${projectNamespace}/${projectName}?tag=${projectTag}`);
+//     },
+//     onError: (error) => {
+//       toast.error(`An error occurred: ${error}`);
+//     },
+//   });
+
+
 
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
