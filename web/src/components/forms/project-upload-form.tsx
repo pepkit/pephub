@@ -9,7 +9,7 @@ import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
-import { useUpload } from '../../hooks/mutations/useUpload';
+import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 
 interface FromFileInputs {
   is_private: boolean;
@@ -68,10 +68,13 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
     );
   };
 
-  const mutation = useUploadMutation(
-    () => handleSubmit(onSubmit)(),
-    () => { queryClient.invalidateQueries([namespaceToUpload]); onHide(); }
-  );
+  const handleUpload = async () => {
+    await handleSubmit(onSubmit)();
+    queryClient.invalidateQueries([namespaceToUpload]);
+    onHide();
+  };
+
+  const mutation = useUploadMutation(handleUpload);
 
   return (
     <form id="new-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>
