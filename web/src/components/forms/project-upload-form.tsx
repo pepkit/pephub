@@ -1,13 +1,15 @@
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { useSession } from '../../hooks/useSession';
-import { FileDropZone } from './components/file-dropzone';
-import { FC, useRef } from 'react';
-import { popFileFromFileList } from '../../utils/dragndrop';
-import { submitProjectFiles } from '../../api/namespace';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@hookform/error-message';
+import { useQueryClient } from '@tanstack/react-query';
+import { FC, useRef } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+
+import { submitProjectFiles } from '../../api/namespace';
+import { useSession } from '../../hooks/useSession';
+import { popFileFromFileList } from '../../utils/dragndrop';
+import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 
 interface FromFileInputs {
   is_private: boolean;
@@ -66,17 +68,13 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
     );
   };
 
-  const mutation = useMutation({
-    mutationFn: () => handleSubmit(onSubmit)(),
-    onSuccess: () => {
-      queryClient.invalidateQueries([namespaceToUpload]);
-      toast.success('Project successully uploaded!');
-      onHide();
-    },
-    onError: (err) => {
-      toast.error(`Error uploading project! ${err}`);
-    },
-  });
+  const handleUpload = async () => {
+    await handleSubmit(onSubmit)();
+    queryClient.invalidateQueries([namespaceToUpload]);
+    onHide();
+  };
+
+  const mutation = useUploadMutation(handleUpload);
 
   return (
     <form id="new-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>

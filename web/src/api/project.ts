@@ -1,8 +1,13 @@
 import axios from 'axios';
-import { Project } from '../../types';
+import { Project, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
+
+export interface SampleTableResponse {
+  count: number;
+  items: Sample[];
+}
 
 export interface DeleteProjectResponse {
   message: string;
@@ -29,11 +34,13 @@ export const getSampleTable = (
   tag: string = 'default',
   token: string | null = null,
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}&format=csv`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}`;
   if (!token) {
-    return axios.get<string>(url).then((res) => res.data);
+    return axios.get<SampleTableResponse>(url).then((res) => res.data);
   } else {
-    return axios.get<string>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
+    return axios
+      .get<SampleTableResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
   }
 };
 

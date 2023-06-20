@@ -2,11 +2,12 @@ import { FC, useEffect, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import { addClassesToRows } from './hooks-callbacks';
 import { readString } from 'react-papaparse';
-import { tableDataToCsvString } from '../../utils/sample-table';
+import { arraysToSampleList, sampleListToArrays, tableDataToCsvString } from '../../utils/sample-table';
+import { Sample } from '../../../types';
 
 interface Props {
-  data: string;
-  onChange?: (rows: string) => void;
+  data: Sample[];
+  onChange?: (rows: Sample[]) => void;
   readOnly?: boolean;
   height?: number;
 }
@@ -15,40 +16,8 @@ interface Props {
  * the csv string and it will handle the rest
  */
 export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height }) => {
-  const [rows, setRows] = useState<any[][]>([[]]);
-
-  // watch the data and update accordingly
-  // this is for changes outside of the table
-  useEffect(() => {
-    if (data) {
-      readString(data, {
-        worker: true,
-        quoteChar: "'",
-        complete: (results) => {
-          // ts-ignore
-          let data = results.data as any[][];
-
-          // check to make sure data isnt a list of objects
-          // if it is, we need to convert it to a list of lists
-          if (data.length > 0 && typeof data[0] === 'object') {
-            data = data.map((row) => Object.values(row));
-          }
-
-          setRows(data);
-        },
-      });
-    }
-  }, [data]);
-
-  // if the user makes a change to the table,
-  // we need to update the data if
-  // the onChange prop is passed in
-  //
-  useEffect(() => {
-    if (onChange && rows) {
-      onChange(tableDataToCsvString(rows));
-    }
-  }, [rows]);
+  // parse the list of objects into rows
+  const rows = sampleListToArrays(data);
 
   return (
     <>
@@ -87,14 +56,28 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
           licenseKey="non-commercial-and-evaluation"
           manualColumnResize
           afterChange={(changes) => {
-            if (changes) {
-              // update data in state
-              const newRows = [...rows];
-              changes.forEach(([row, col, _, newValue]) => {
-                // @ts-ignore
-                newRows[row][col] = newValue;
+            if (changes && onChange) {
+              changes.forEach((change) => {
+                const [row, col, _, newVal] = change;
+                // @ts-ignore - we know that col is a number
+                rows[row][col] = newVal;
               });
-              setRows(newRows);
+              onChange(arraysToSampleList(rows));
+            }
+          }}
+          afterRemoveCol={(index, amount) => {
+            // remove all values at the specified index from "rows"
+            rows.forEach((row) => {
+              row.splice(index, 0);
+            });
+            if (onChange) {
+              onChange(arraysToSampleList(rows));
+            }
+          }}
+          afterRemoveRow={(index, amount) => {
+            rows.splice(index, 0);
+            if (onChange) {
+              onChange(arraysToSampleList(rows));
             }
           }}
         />
