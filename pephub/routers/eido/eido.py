@@ -405,6 +405,6 @@ async def validate(
             detail={"error": f"Unknown error while validating: {str(e)}"},
         )
     # everything passed, return valid
-    finally:
+    else:
         # return project is valid
         return {"valid": True, "errors": None}
