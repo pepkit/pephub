@@ -385,7 +385,7 @@ async def validate(
             schema_dict = eido.read_schema(schema_file.name)[0]
         except eido.exceptions.EidoSchemaInvalidError as e:
             raise HTTPException(
-                status_code=406,
+                status_code=200,
                 detail={"error": f"Schema is invalid: {str(e)}"},
             )
 

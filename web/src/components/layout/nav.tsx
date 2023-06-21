@@ -97,7 +97,7 @@ export const Nav: FC = () => {
                         Profile
                       </Dropdown.Item>
                       <Dropdown.Divider />
-                      <Dropdown.Item onClick={() => logout()}>Logout</Dropdown.Item>
+                      <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </div>

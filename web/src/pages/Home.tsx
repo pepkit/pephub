@@ -33,8 +33,8 @@ function Home() {
               <h1 className="fw-bolder">Manage your sample metadata.</h1>
               <p>
                 PEPhub is a database, web interface, and API for sharing, retrieving, and validating sample metadata.
-                PEPhub takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to let
-                you store, edit, and access your PEPs in one convenient place.
+                PEPhub takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to
+                store, edit, and access your PEPs in one place.
               </p>
               <p>Log in with your GitHub account to get started.</p>
               {user ? (

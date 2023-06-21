@@ -55,19 +55,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
     jwt || '',
     onHide,
   );
-
-  //   const mutation = useMutation({
-  //     mutationFn: () => handleSubmit(onSubmit)(),
-  //     onSuccess: () => {
-  //       toast.success('Project successully forked!');
-  //       queryClient.invalidateQueries([projectNamespace]);
-  //       onHide();
-  //       navigate(`/${projectNamespace}/${projectName}?tag=${projectTag}`);
-  //     },
-  //     onError: (error) => {
-  //       toast.error(`An error occurred: ${error}`);
-  //     },
-  //   });
+  
 
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
