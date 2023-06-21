@@ -1,17 +1,14 @@
-import { FC } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { FC, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { Modal } from 'react-bootstrap';
 import { useSession } from '../../hooks/useSession';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { forkProject } from '../../api/project';
 import { useForkMutation } from '../../hooks/mutations/useForkMutation';
 
 interface Props {
   namespace: string;
   project: string;
   tag: string;
+  description?: string;
   show: boolean;
   onHide: () => void;
 }
@@ -24,7 +21,7 @@ interface ForkProjectInputs {
   is_private: boolean;
 }
 
-export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide }) => {
+export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, show, onHide }) => {
   const { user, jwt } = useSession();
 
   // form stuff
@@ -36,8 +33,9 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
   } = useForm<ForkProjectInputs>({
     defaultValues: {
       namespace: user?.login,
-      project,
+      project: project,
       tag: tag || 'default',
+      description: description || '',
     },
   });
 
@@ -85,13 +83,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
             </p>
           </div>
           <div className="mb-3 form-check form-switch">
-            <input
-              {...register('is_private')}
-              className="form-check-input"
-              type="checkbox"
-              role="switch"
-              id="blank-is-private-toggle"
-            />
+            <input {...register('is_private')} className="form-check-input" type="checkbox" role="switch" />
             <label className="form-check-label">
               <i className="bi bi-lock"></i>
               Private
@@ -100,7 +92,6 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
           <span className="fs-4 d-flex align-items-center">
             <select
               {...register('namespace', { required: true })}
-              id="fork-namespace-select"
               className="form-select w-75"
               aria-label="Namespace selection"
             >
@@ -114,13 +105,17 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
             <span className="mx-1 mb-1">/</span>
             <input
               {...register('project', { required: true })}
-              id="fork-project-name"
               type="text"
               className="form-control"
               placeholder="project name"
             />
             <span className="mx-1 mb-1">:</span>
-            <input id="fork-tag" name="fork-tag" type="text" className="form-control" placeholder="default" />
+            <input
+              {...register('tag', { required: true })}
+              type="text"
+              className="form-control"
+              placeholder="default"
+            />
           </span>
           <p className="mt-1 lh-sm text-muted" style={{ fontSize: '0.9rem' }}>
             {' '}
@@ -128,8 +123,10 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
             further.{' '}
           </p>
           <textarea
-            {...register('description')}
-            id="fork-description"
+            {...(register('description'),
+            {
+              defaultValue: description,
+            })}
             className="form-control mt-3"
             rows={3}
             placeholder="Describe your PEP."

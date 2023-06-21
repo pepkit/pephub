@@ -348,6 +348,7 @@ export const ProjectPage: FC = () => {
         onHide={() => setShowForkPEPModal(false)}
         namespace={namespace || ''}
         project={project || ''}
+        description={projectInfo?.description || ''}
         tag={tag}
       />
       <CompatibilityModal
