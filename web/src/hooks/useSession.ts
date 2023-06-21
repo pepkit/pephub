@@ -1,42 +1,38 @@
 import { User } from '../../types';
 import { useCallback } from 'react';
 import jwt_decode from 'jwt-decode';
-import { useCookies } from 'react-cookie';
 import { buildClientRedirectUrl } from '../api/auth';
+import { useLocalStorage } from './useLocalStorage';
 
 const VITE_API_HOST = import.meta.env.VITE_API_HOST || '';
 const AUTH_BASE = `${VITE_API_HOST}/auth`;
-const SESSION_COOKIE_NAME = 'pephub_session';
+const JWT_STORE = 'pephub_session';
 
 export const useSession = () => {
-  const [cookies, setCookie, removeCookie] = useCookies([SESSION_COOKIE_NAME]);
+  const [jwt, setJwt] = useLocalStorage(JWT_STORE, null);
   let decoded = null;
 
   const login = useCallback(() => {
     const clientRedirectUrl = buildClientRedirectUrl();
-    const url = `${AUTH_BASE}/login?client_redirect_uri=${clientRedirectUrl}`;
+    const currentUrl = window.location.href;
+    const url = `${AUTH_BASE}/login?client_redirect_uri=${clientRedirectUrl}&client_finally_send_to=${currentUrl}`;
     window.location.href = url;
-  }, [AUTH_BASE, buildClientRedirectUrl]);
+  }, [AUTH_BASE, buildClientRedirectUrl, window.location.href]);
 
   const logout = useCallback(() => {
-    removeCookie(SESSION_COOKIE_NAME, { path: '/' });
-    window.location.reload();
-  }, [removeCookie, SESSION_COOKIE_NAME]);
-
-  const setJWT = (jwt: string, expires: number = 4320) => {
-    // converts minutes to milliseconds
-    setCookie(SESSION_COOKIE_NAME, jwt, { path: '/', expires: new Date(Date.now() + expires * 60 * 1000) });
-  };
+    setJwt(null);
+  }, [setJwt, JWT_STORE]);
 
   // decode the session cookie
-  if (cookies[SESSION_COOKIE_NAME]) {
-    decoded = jwt_decode(cookies[SESSION_COOKIE_NAME]) as User;
+  if (jwt) {
+    decoded = jwt_decode(jwt) as User;
   }
+
   return {
-    jwt: (cookies[SESSION_COOKIE_NAME] as string) || null,
+    jwt,
     user: decoded || null,
     login,
     logout,
-    setJWT,
+    setJWT: setJwt,
   };
 };

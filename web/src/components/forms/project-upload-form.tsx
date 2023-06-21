@@ -1,14 +1,13 @@
 import { ErrorMessage } from '@hookform/error-message';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { FC, useRef } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
 
-import { submitProjectFiles } from '../../api/namespace';
 import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 
 interface FromFileInputs {
   is_private: boolean;
@@ -32,7 +31,6 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
   const {
     reset: resetForm,
     register,
-    handleSubmit,
     control,
     watch,
     setValue,
@@ -45,42 +43,32 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
   });
 
   const uploadFiles = watch('files');
-  const namespaceToUpload = watch('namespace');
+  const namespace = watch('namespace');
+  const projectName = watch('project_name');
+  const tag = watch('tag');
+  const description = watch('description');
+  const isPrivate = watch('is_private');
+  const pepSchema = watch('pep_schema');
   const fileDialogRef = useRef<() => void | null>(null);
 
-  // instantiate query client
-  const queryClient = useQueryClient();
-
-  // function to handle submitting a project
-  const onSubmit: SubmitHandler<FromFileInputs> = (data) => {
-    return submitProjectFiles(
-      {
-        namespace: data.namespace,
-        project_name: data.project_name,
-        tag: data.tag,
-        is_private: data.is_private,
-        description: data.description,
-        files: data.files,
-        pep_schema: data.pep_schema,
-      },
-      jwt || '',
-    );
+  const onSuccess = () => {
+    resetForm({}, { keepValues: false });
   };
 
-  const mutation = useMutation({
-    mutationFn: () => handleSubmit(onSubmit)(),
-    onSuccess: () => {
-      queryClient.invalidateQueries([namespaceToUpload]);
-      toast.success('Project successully uploaded!');
-      onHide();
-    },
-    onError: (err) => {
-      toast.error(`Error uploading project! ${err}`);
-    },
-  });
+  const mutation = useUploadMutation(
+    namespace,
+    projectName,
+    tag,
+    isPrivate,
+    description,
+    uploadFiles,
+    pepSchema,
+    jwt || '',
+    onSuccess,
+  );
 
   return (
-    <form id="new-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>
+    <form id="new-project-form" className="border-0 form-control">
       <div className="mb-3 mt-3 form-check form-switch">
         <input
           className="form-check-input"

@@ -67,12 +67,16 @@ def delete_device_code_after(code: str, expiration: int = AUTH_CODE_EXPIRATION):
 
 
 @auth.get("/login", response_class=RedirectResponse)
-def login(client_redirect_uri: Union[str, None] = None):
+def login(
+    client_redirect_uri: Union[str, None] = None,
+    client_finally_send_to: Union[str, None] = None,
+):
     """
     Redirects to log user in to GitHub. GitHub will pass a code to the callback URL.
     """
     state = {
         "client_redirect_uri": client_redirect_uri,
+        "client_finally_send_to": client_finally_send_to,
         "secret": JWT_SECRET,
     }
     authorization_url = build_authorization_url(
@@ -152,7 +156,14 @@ def callback(
     # or to a basic login success page.
     # add token as query param
     if client_redirect_uri:
-        send_to = client_redirect_uri + f"?code={auth_code}"
+        # add client_finally_send_to as query param if it exists
+        if state.get("client_finally_send_to"):
+            send_to = (
+                client_redirect_uri
+                + f"?code={auth_code}&client_finally_send_to={state['client_finally_send_to']}"
+            )
+        else:
+            send_to = client_redirect_uri + f"?code={auth_code}"
     else:
         send_to = f"/auth/login/success?code={auth_code}"
     return RedirectResponse(url=send_to, status_code=302)

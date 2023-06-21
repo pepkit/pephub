@@ -2,6 +2,20 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.8.4] - 06-21-2023
+
+### Fixed
+
+- lots of sample table editing bugs
+- sample table editing now works as expected
+- logging in sent you to the homepage no matter what
+
+### Changed
+
+- authentication uses `localStorage` instead of browser cookies
+- forking a PEP brings in the description of the PEP
+- landing page changes
+
 ## [0.8.3] - 06-11-2023
 
 ### Fixed

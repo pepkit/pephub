@@ -303,7 +303,12 @@ async def get_subsamples(
         if download:
             return proj.subsample_table.to_csv()
         else:
-            return proj.subsample_table.to_dict()
+            return JSONResponse(
+                {
+                    "count": len(subsamples),
+                    "items": [s.to_dict() for s in proj.subsample_table],
+                }
+            )
     else:
         return f"Project '{namespace.lower()}/{project.lower()}' does not have any subsamples."
 

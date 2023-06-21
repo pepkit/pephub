@@ -97,14 +97,14 @@ export const Nav: FC = () => {
                         Profile
                       </Dropdown.Item>
                       <Dropdown.Divider />
-                      <Dropdown.Item onClick={() => logout()}>Logout</Dropdown.Item>
+                      <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </div>
               ) : (
                 <li className="mx-2 my-0 nav-item h5 pt-1">
                   <button className="btn btn-dark" onClick={() => login()}>
-                    <i className="fa fa-github"></i>Login
+                    <i className="fa fa-github"></i>Log in
                   </button>
                 </li>
               )}
