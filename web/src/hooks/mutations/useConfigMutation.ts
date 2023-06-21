@@ -8,13 +8,13 @@ export const useConfigMutation = (
   project: string,
   tag: string,
   jwt: string,
-  newProjectConfig: any
+  newProjectConfig: string,
 ) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: () => editProjectConfig(namespace || '', project || '', tag, jwt || '', newProjectConfig),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries([namespace, project, tag, 'config']);
       toast.success('Successfully updated project config');
     },

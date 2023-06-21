@@ -2,11 +2,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { FC, useEffect, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { Breadcrumb } from 'react-bootstrap';
-import { toast } from 'react-hot-toast';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
-import { editProjectConfig, editProjectSampleTable } from '../api/project';
 import { StatusCircle } from '../components/badges/status-circle';
 import { SchemaTag } from '../components/forms/components/shema-tag';
 import { PageLayout } from '../components/layout/page-layout';
@@ -26,16 +24,14 @@ import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { canEdit } from '../utils/permissions';
-import { sampleListToArrays, tableDataToCsvString } from '../utils/sample-table';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
 import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
+import { downloadZip } from '../utils/project';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
-
-  const queryClient = useQueryClient();
 
   let { namespace, project } = useParams();
   namespace = namespace?.toLowerCase();
@@ -99,9 +95,9 @@ export const ProjectPage: FC = () => {
     setNewProjectSamples(projectSamples?.items || []);
   };
 
-  const configMutation = useConfigMutation(namespace, project, tag, jwt, newProjectConfig);
-
-  const sampleTableMutation = useSampleTableMutation(namespace, project, tag, jwt, newProjectSamples);
+  // mutations for updating config and samples on the server
+  const configMutation = useConfigMutation(namespace || '', project || '', tag, jwt || '', newProjectConfig);
+  const sampleTableMutation = useSampleTableMutation(namespace || '', project || '', tag, jwt || '', newProjectSamples);
 
   const handleProjectChange = () => {
     if (configIsDirty) {

@@ -1,23 +1,31 @@
-import { useMutation } from '@tanstack/react-query';
+import { toast } from 'react-hot-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { editProjectMetadata } from '../../api/project';
 
 export const useEditProjectMetaMutation = (
-  handleSubmit: () => Promise<any>,
-  resetForm: () => void,
-  toast: any,
-  queryClient: any,
   namespace: string,
   name: string,
   tag: string,
+  jwt: string | null,
   onSuccessfulSubmit: () => void,
   onFailedSubmit: () => void,
-  newTag: string,
-  newName: string
+  data: {
+    newDescription?: string;
+    newIsPrivate?: boolean;
+    newName?: string;
+    newTag?: string;
+    newSchema?: string;
+  },
 ) => {
+  const queryClient = useQueryClient();
+
+  // destructuring the data object
+  const { newIsPrivate, newName, newTag } = data;
+
   return useMutation({
-    mutationFn: handleSubmit,
+    mutationFn: () => editProjectMetadata(namespace, name, tag, jwt, { is_private: newIsPrivate, ...data }),
     onSuccess: () => {
-      resetForm({}, { keepValues: true });
       toast.success('Project metadata updated successfully.');
       queryClient.invalidateQueries([namespace, name, tag]);
       onSuccessfulSubmit();

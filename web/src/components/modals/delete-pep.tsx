@@ -1,9 +1,5 @@
 import { FC, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { Modal } from 'react-bootstrap';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import { deleteProject } from '../../api/project';
 import { useSession } from '../../hooks/useSession';
 import { useDeleteMutation } from '../../hooks/mutations/useDeleteMutation';
 
@@ -18,13 +14,22 @@ interface Props {
 
 export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, tag, redirect }) => {
   const { jwt } = useSession();
-  const navigate = useNavigate();
-
-  const queryClient = useQueryClient();
 
   const [confirmText, setConfirmText] = useState('');
 
-  const { mutation, isLoading } = useDeleteMutation(namespace, project, tag, jwt, tag, redirect);
+  const onSuccess = () => {
+    setConfirmText('');
+  };
+
+  const { mutation, isLoading } = useDeleteMutation(
+    namespace,
+    project,
+    tag || 'default',
+    jwt || '',
+    onHide,
+    redirect,
+    onSuccess,
+  );
 
   return (
     <Modal

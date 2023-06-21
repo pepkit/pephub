@@ -2,9 +2,6 @@ import { FC, useEffect, useState } from 'react';
 import { ProjectConfigEditor } from '../project/project-config';
 import { useSession } from '../../hooks/useSession';
 import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
-import { editProjectConfig } from '../../api/project';
-import { toast } from 'react-hot-toast';
-import { AxiosError } from 'axios';
 import { useProjectEditConfigMutation } from '../../hooks/mutations/useProjectEditConfigMutation';
 
 interface Props {
@@ -27,7 +24,13 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
     setNewProjectConfig(originalConfig);
   };
 
-  const mutation = useProjectEditConfigMutation(namespace, project, tag, jwt, newProjectConfig, originalConfig, setOriginalConfig);
+  const onSuccess = () => {
+    if (newProjectConfig !== originalConfig) {
+      setOriginalConfig(newProjectConfig);
+    }
+  };
+
+  const mutation = useProjectEditConfigMutation(namespace, project, tag, jwt || '', newProjectConfig, onSuccess);
 
   useEffect(() => {
     if (projectConfig) {

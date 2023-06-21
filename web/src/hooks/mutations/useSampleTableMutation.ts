@@ -4,23 +4,14 @@ import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import { tableDataToCsvString, sampleListToArrays } from '../../utils/sample-table';
 
-interface SampleTableMutationOptions {
-  onSuccess?: () => void;
-  onError?: (error: AxiosError) => void;
-}
-
 export const useSampleTableMutation = (
   namespace: string,
   project: string,
   tag: string,
   jwt: string,
   newProjectSamples: any[],
-  options: SampleTableMutationOptions = {}
 ) => {
   const queryClient = useQueryClient();
-  const { onSuccess, onError = (error: AxiosError) => {
-    toast.error(`Error updating project samples: ${error}`);
-  } } = options;
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -31,7 +22,7 @@ export const useSampleTableMutation = (
         jwt || '',
         tableDataToCsvString(sampleListToArrays(newProjectSamples)),
       ),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries([namespace, project, tag, 'samples']);
       toast.success('Successfully updated project samples');
     },

@@ -1,13 +1,10 @@
-import { FC, useEffect } from 'react';
-import { SubmitHandler, useForm, Controller } from 'react-hook-form';
-import { editProjectMetadata } from '../../api/project';
+import { FC } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { useSession } from '../../hooks/useSession';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
 import { useProject } from '../../hooks/queries/useProject';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 import { MarkdownEditor } from '../markdown/edit';
-import { AxiosError } from 'axios';
+
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
 
 interface Props {
@@ -37,7 +34,6 @@ export const ProjectMetaEditForm: FC<Props> = ({
   const { data: projectInfo } = useProject(namespace, name, tag, jwt);
   const {
     register,
-    handleSubmit,
     watch,
     control,
     setValue,
@@ -52,28 +48,27 @@ export const ProjectMetaEditForm: FC<Props> = ({
       pep_schema: projectInfo?.pep_schema || 'pep/2.1.0',
     },
   });
-  const newTag = watch('tag');
-  const newName = watch('name');
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
-    return editProjectMetadata(namespace, name, tag, jwt, { is_private: data.isPrivate, ...data });
+  const onSubmit = () => {
+    onSuccessfulSubmit();
+    // reset form
+    resetForm({}, { keepValues: false });
   };
 
-  const queryClient = useQueryClient();
+  // watch form values to pass into mutation
+  const newTag = watch('tag');
+  const newName = watch('name');
+  const newDescription = watch('description');
+  const newIsPrivate = watch('isPrivate');
+  const newSchema = watch('pep_schema');
 
-  const mutation = useEditProjectMetaMutation(
-  () => handleSubmit(onSubmit)(),
-  resetForm,
-  toast,
-  queryClient,
-  namespace,
-  name,
-  tag,
-  onSuccessfulSubmit,
-  onFailedSubmit,
-  newTag,
-  newName
-);
+  const mutation = useEditProjectMetaMutation(namespace, name, tag, jwt, onSubmit, onFailedSubmit, {
+    newName: newName,
+    newTag: newTag,
+    newDescription: newDescription,
+    newIsPrivate: newIsPrivate,
+    newSchema: newSchema,
+  });
 
   return (
     <form>

@@ -1,12 +1,9 @@
 import { ErrorMessage } from '@hookform/error-message';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
+import { Controller, useForm } from 'react-hook-form';
 
 import { Sample } from '../../../types';
-import { submitProjectJSON } from '../../api/namespace';
 import { useSession } from '../../hooks/useSession';
 import { sampleListToArrays, tableDataToCsvString } from '../../utils/sample-table';
 import { ProjectConfigEditor } from '../project/project-config';
@@ -33,13 +30,10 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
   // get user innfo
   const { user, jwt } = useSession();
 
-  const queryClient = useQueryClient();
-
   // instantiate form
   const {
     reset: resetForm,
     register,
-    handleSubmit,
     watch,
     setValue,
     control,
@@ -70,32 +64,28 @@ sample_table: samples.csv
 
   const sampleTableCSV = watch('sample_table');
   const configYAML = watch('config');
-
-  const onSubmit: SubmitHandler<BlankProjectInputs> = (data) => {
-    return submitProjectJSON(
-      {
-        is_private: data.is_private,
-        namespace: data.namespace,
-        project_name: data.project_name,
-        tag: data.tag || 'default',
-        description: data.description || '',
-        sample_table: tableDataToCsvString(sampleListToArrays(data.sample_table)),
-        config: data.config,
-        pep_schema: data.pep_schema,
-      },
-      jwt || '',
-    );
-  };
-
   const namespace = watch('namespace');
+  const projectName = watch('project_name');
+  const tag = watch('tag');
+  const description = watch('description');
+  const isPrivate = watch('is_private');
+  const pepSchema = watch('pep_schema');
 
   const mutation = useBlankProjectFormMutation(
-    () => handleSubmit(onSubmit)(),
-    () => { queryClient.invalidateQueries([namespace]); onHide(); }
+    namespace,
+    projectName,
+    tag,
+    isPrivate,
+    description,
+    configYAML,
+    pepSchema,
+    tableDataToCsvString(sampleListToArrays(sampleTableCSV)),
+    jwt || '',
+    onHide,
   );
 
   return (
-    <form id="blank-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>
+    <form id="blank-project-form" className="border-0 form-control">
       <div className="mb-3 mt-3 form-check form-switch">
         <input
           className="form-check-input"
@@ -196,7 +186,7 @@ sample_table: samples.csv
           disabled={!isValid || mutation.isLoading}
           id="blank-project-submit-btn"
           className="btn btn-success me-1"
-          type="submit"
+          type="button"
           onClick={() => mutation.mutate()}
         >
           <i className="bi bi-plus-circle me-1"></i>

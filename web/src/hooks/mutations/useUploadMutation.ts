@@ -1,11 +1,40 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { submitProjectFiles } from '../../api/namespace';
 
-export const useUploadMutation = (onSubmit: (data: Options) => void, onSuccess: () => void, onError: (error: AxiosError) => void) => {
+export const useUploadMutation = (
+  namespace: string,
+  project: string,
+  tag: string,
+  is_private: boolean,
+  description: string,
+  files: FileList,
+  pep_schema: string,
+  jwt?: string,
+  onSuccess?: () => void,
+) => {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: onSubmit,
+    mutationFn: () =>
+      submitProjectFiles(
+        {
+          namespace: namespace,
+          project_name: project,
+          tag: tag,
+          is_private: is_private,
+          description: description,
+          files: files,
+          pep_schema: pep_schema,
+        },
+        jwt || '',
+      ),
     onSuccess: () => {
+      queryClient.invalidateQueries([namespace]);
+      if (onSuccess) {
+        onSuccess();
+      }
       toast.success('Project successfully uploaded!');
     },
     onError: (err: AxiosError) => {

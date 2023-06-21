@@ -4,7 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '../../api/project';
 import { AxiosError } from 'axios';
 
-export const useDeleteMutation = (namespace, project, tag, jwt, onHide, redirect) => {
+export const useDeleteMutation = (
+  namespace: string,
+  project: string,
+  tag: string,
+  jwt: string | undefined,
+  onHide: () => void,
+  redirect: string | undefined,
+  onSuccess?: () => void,
+) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -15,6 +23,7 @@ export const useDeleteMutation = (namespace, project, tag, jwt, onHide, redirect
       queryClient.invalidateQueries({
         queryKey: [namespace],
       });
+      onHide();
       if (redirect) {
         navigate(redirect);
       }
@@ -24,5 +33,5 @@ export const useDeleteMutation = (namespace, project, tag, jwt, onHide, redirect
     },
   });
 
-  return { mutation, isLoading: mutation.isLoading  };
+  return { mutation, isLoading: mutation.isLoading };
 };

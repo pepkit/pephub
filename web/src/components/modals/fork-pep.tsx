@@ -26,13 +26,11 @@ interface ForkProjectInputs {
 
 export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide }) => {
   const { user, jwt } = useSession();
-  const navigate = useNavigate();
 
   // form stuff
   const {
     reset: resetForm,
     register,
-    handleSubmit,
     watch,
     formState: { isValid },
   } = useForm<ForkProjectInputs>({
@@ -46,34 +44,32 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, show, onHide 
   const projectName = watch('project');
   const projectNamespace = watch('namespace');
   const projectTag = watch('tag');
+  const projectDescription = watch('description');
 
-  const queryClient = useQueryClient();
+  const mutation = useForkMutation(
+    namespace,
+    project,
+    tag,
+    projectNamespace,
+    projectName,
+    projectTag,
+    projectDescription,
+    jwt || '',
+    onHide,
+  );
 
-  const onSubmit: SubmitHandler<ForkProjectInputs> = (data) => {
-    return forkProject(namespace, project, tag, jwt, {
-      forkTo: data.namespace,
-      forkName: data.project,
-      forkTag: data.tag,
-      forkDescription: data.description,
-    });
-  };
-
-  const mutation = useForkMutation(() => handleSubmit(onSubmit)(), watch, onHide);
-
-//   const mutation = useMutation({
-//     mutationFn: () => handleSubmit(onSubmit)(),
-//     onSuccess: () => {
-//       toast.success('Project successully forked!');
-//       queryClient.invalidateQueries([projectNamespace]);
-//       onHide();
-//       navigate(`/${projectNamespace}/${projectName}?tag=${projectTag}`);
-//     },
-//     onError: (error) => {
-//       toast.error(`An error occurred: ${error}`);
-//     },
-//   });
-
-
+  //   const mutation = useMutation({
+  //     mutationFn: () => handleSubmit(onSubmit)(),
+  //     onSuccess: () => {
+  //       toast.success('Project successully forked!');
+  //       queryClient.invalidateQueries([projectNamespace]);
+  //       onHide();
+  //       navigate(`/${projectNamespace}/${projectName}?tag=${projectTag}`);
+  //     },
+  //     onError: (error) => {
+  //       toast.error(`An error occurred: ${error}`);
+  //     },
+  //   });
 
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
