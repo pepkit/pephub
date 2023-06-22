@@ -4,6 +4,20 @@ import { Project, Sample } from '../../types';
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
+interface ProjectUpdateItems {
+  project_value?: Project | null;
+  tag?: string | null;
+  is_private?: boolean | null;
+  name?: string | null;
+  pep_schema?: string | null;
+}
+
+interface ProjectUpdateMetadata extends ProjectUpdateItems {
+  sample_table_csv?: string | null;
+  project_config_yaml?: string | null;
+  description?: string | null;
+  subsample_list?: string[] | null;
+}
 export interface SampleTableResponse {
   count: number;
   items: Sample[];
@@ -112,7 +126,7 @@ export const editProjectMetadata = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
-  metadata: { [key: string]: any },
+  metadata: ProjectUpdateMetadata,
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
   return axios.patch(url, metadata, { headers: { Authorization: `Bearer ${token}` } });
