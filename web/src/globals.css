@@ -255,3 +255,10 @@
 .break-keep-all {
   word-break: keep-all;
 }
+
+.no-breaks p {
+  margin: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
