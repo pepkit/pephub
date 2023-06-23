@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import { addClassesToRows } from './hooks-callbacks';
 import { readString } from 'react-papaparse';
-import { arraysToSampleList, sampleListToArrays, tableDataToCsvString } from '../../utils/sample-table';
+import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { Sample } from '../../../types';
 
 interface Props {
