@@ -303,7 +303,7 @@ async def get_subsamples(
             return JSONResponse(
                 {
                     "count": len(subsamples),
-                    "items": [s.to_dict() for s in proj.subsample_table],
+                    "items": subsamples.to_dict(orient="records"),
                 }
             )
     else:

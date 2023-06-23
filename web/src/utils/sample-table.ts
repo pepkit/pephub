@@ -70,3 +70,68 @@ export const arraysToSampleList = (arraysList: any[][]) => {
 
   return sampleList;
 };
+
+/**
+ * Convert a list of samples into an object of objects. Given the example input:
+ * #### Given the example table:
+| sample_name | genome | path |
+|------------|------------|------------|
+| sample1    | hg38   | data/s1.fastq.gz    |
+| sample2   | hg38    | data/s2.fastq.gz    |
+| sample3    | hg38    | data/s3.fastq.gz    |
+
+#### We can represent it as a list of objects:
+```json
+[
+  {
+    "sample_name": "sample1",
+    "genome": "hg38",
+    "path": "data/s1.fastq.gz"
+  },
+  {
+    "sample_name": "sample2",
+    "genome": "hg38",
+    "path": "data/s2.fastq.gz"
+  },
+  {
+    "sample_name": "sample3",
+    "genome": "hg38",
+    "path": "data/s3.fastq.gz"
+  }
+]
+```
+
+#### or, an object of objects:
+```json
+{
+  "sample_name": {
+    "1": "sample1",
+    "2": "sample2",
+    "3": "sample3"
+  },
+  "genome": {
+    "1": "hg38",
+    "2": "hg38",
+    "3": "hg38"
+  },
+  "path": {
+    "1": "data/s1.fastq.gz",
+    "2": "data/s2.fastq.gz",
+    "3": "data/s3.fastq.gz"
+  }
+}
+```
+This function should convert the list of objects into the object of objects.
+ */
+export const sampleListToObjectofObjects = (samples: Sample[]) => {
+  const objectOfObjects: any = {};
+  samples.forEach((sample, index) => {
+    Object.keys(sample).forEach((key) => {
+      if (!objectOfObjects[key]) {
+        objectOfObjects[key] = {};
+      }
+      objectOfObjects[key][index + 1] = sample[key];
+    });
+  });
+  return objectOfObjects;
+};

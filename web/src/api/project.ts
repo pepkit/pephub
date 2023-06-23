@@ -14,7 +14,7 @@ interface ProjectUpdateItems {
 }
 
 interface ProjectUpdateMetadata extends ProjectUpdateItems {
-  sample_table?: { [key: string]: string }[] | null;
+  sample_table?: Sample[] | null;
   project_config_yaml?: string | null;
   description?: string | null;
   subsample_list?: string[] | null;
@@ -149,7 +149,7 @@ export const editProjectSampleTable = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
-  sampleTable: { [key: string]: string }[], // sample table is just a list of objects (JSON)
+  sampleTable: Sample[],
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}&format=csv`;
   return axios.patch(

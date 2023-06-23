@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 from pydantic import BaseModel
 from pepdbagent.models import *
 from pepdbagent.const import DEFAULT_TAG
@@ -74,7 +74,7 @@ class ProjectRawRequest(BaseModel):
     config: dict
     subsample_dict: Optional[list]
     name: str
-    sample_dict: List[dict]
+    sample_dict: dict
 
     class Config:
         allow_population_by_field_name = True

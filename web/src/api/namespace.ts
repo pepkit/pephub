@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { readString } from 'react-papaparse';
 import YAML from 'yaml';
 
-import { Project, ProjectAnnotation } from '../../types';
+import { Project, ProjectAnnotation, Sample } from '../../types';
+import { sampleListToObjectofObjects } from '../utils/sample-table';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -147,7 +147,7 @@ export const submitProjectJSON = (
     tag?: string;
     is_private?: boolean;
     description?: string;
-    sample_table: { [key: string]: string }[];
+    sample_table: Sample[];
     config: string;
     pep_schema: string;
   },
@@ -155,29 +155,7 @@ export const submitProjectJSON = (
 ) => {
   const url = `${API_BASE}/namespaces/${namespace}/projects/json`;
 
-  // syncronously parse sample table
-  // @ts-ignore
-  const sample_table_json = readString(sample_table, { header: true }).data;
-
-  // json to "sample_dict", whihc has columns as keys to
-  // subobjects and row indexs as subkeys in those subobjects
-  // with the values as the values
-  const sample_dict: {
-    [key: string]: {
-      [key: number]: string;
-    };
-  } = {};
-  for (let i = 0; i < sample_table_json.length; i++) {
-    const row = sample_table_json[i];
-    for (const key in row) {
-      if (key in sample_dict) {
-        sample_dict[key][i] = row[key];
-      } else {
-        sample_dict[key] = {};
-        sample_dict[key][i] = row[key];
-      }
-    }
-  }
+  const sample_dict = sampleListToObjectofObjects(sample_table);
 
   const config_json = YAML.parse(config);
   return axios
