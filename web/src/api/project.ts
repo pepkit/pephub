@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import { Project, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
@@ -13,7 +14,7 @@ interface ProjectUpdateItems {
 }
 
 interface ProjectUpdateMetadata extends ProjectUpdateItems {
-  sample_table_csv?: string | null;
+  sample_table?: { [key: string]: string }[] | null;
   project_config_yaml?: string | null;
   description?: string | null;
   subsample_list?: string[] | null;
@@ -148,13 +149,13 @@ export const editProjectSampleTable = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
-  sampleTable: string,
+  sampleTable: { [key: string]: string }[], // sample table is just a list of objects (JSON)
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}&format=csv`;
   return axios.patch(
     url,
     {
-      sample_table_csv: sampleTable,
+      sample_table: sampleTable,
     },
     { headers: { Authorization: `Bearer ${token}` } },
   );

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 from pepdbagent.models import *
 from pepdbagent.const import DEFAULT_TAG
@@ -7,7 +7,8 @@ from ..const import DEFAULT_PEP_SCHEMA
 
 
 class ProjectOptional(UpdateItems):
-    sample_table_csv: Optional[str]
+    # sample table is a list of JSON objects
+    sample_table: Optional[List[dict]]
     project_config_yaml: Optional[str]
     description: Optional[str]
     subsample_list: Optional[List[str]]
@@ -73,7 +74,7 @@ class ProjectRawRequest(BaseModel):
     config: dict
     subsample_dict: Optional[list]
     name: str
-    sample_dict: dict
+    sample_dict: List[dict]
 
     class Config:
         allow_population_by_field_name = True

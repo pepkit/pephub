@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { toast } from 'react-hot-toast';
+
 import { submitProjectJSON } from '../../api/namespace';
 
 export const useBlankProjectFormMutation = (
@@ -11,7 +12,7 @@ export const useBlankProjectFormMutation = (
   description: string,
   config: string,
   pepSchema: string,
-  sampleTable: string,
+  sampleTable: { [key: string]: string }[],
   jwt: string | undefined,
   onSuccess?: () => void,
 ) => {

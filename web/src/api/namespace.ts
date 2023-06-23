@@ -1,7 +1,8 @@
-import { ProjectAnnotation, Project } from '../../types';
-import YAML from 'yaml';
 import axios from 'axios';
 import { readString } from 'react-papaparse';
+import YAML from 'yaml';
+
+import { Project, ProjectAnnotation } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -146,7 +147,7 @@ export const submitProjectJSON = (
     tag?: string;
     is_private?: boolean;
     description?: string;
-    sample_table: string;
+    sample_table: { [key: string]: string }[];
     config: string;
     pep_schema: string;
   },

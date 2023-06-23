@@ -106,11 +106,8 @@ async def update_a_pep(
     new_raw_project = raw_peppy_project.copy()
 
     # sample table update
-    if updated_project.sample_table_csv is not None:
-        # clean it be remove any trailing commas
-        updated_project.sample_table_csv = updated_project.sample_table_csv.rstrip(",")
-        sample_table_csv = StringIO(updated_project.sample_table_csv)
-        sample_table_df = pd.read_csv(sample_table_csv)
+    if updated_project.sample_table is not None:
+        sample_table_df = pd.DataFrame.from_dict(updated_project.sample_table)
         sample_table_df = sample_table_df.dropna(axis=1, how="all")
         sample_table_df.fillna("", inplace=True)
         sample_table_df_json = sample_table_df.to_dict()
@@ -142,7 +139,7 @@ async def update_a_pep(
     if any(
         [
             updated_project.project_config_yaml is not None,
-            updated_project.sample_table_csv is not None,
+            updated_project.sample_table is not None,
         ]
     ):
         try:
