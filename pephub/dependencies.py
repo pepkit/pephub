@@ -144,7 +144,7 @@ def read_authorization_header(Authorization: str = Header(None)) -> Union[str, N
         _LOGGER_PEPHUB.error(e)
         return None
     except jwt.exceptions.ExpiredSignatureError:
-        return HTTPException(status_code=401, detail="JWT has expired")
+        raise HTTPException(status_code=401, detail="JWT has expired")
     return session_info
 
 

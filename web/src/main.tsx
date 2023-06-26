@@ -1,32 +1,29 @@
+// react query stuff
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+// css
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'handsontable/dist/handsontable.full.min.css';
+// handsontable stuff
+import { registerAllModules } from 'handsontable/registry';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Home from './pages/Home';
-
-// routing
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+// notifications
+import { Toaster } from 'react-hot-toast';
+// routing
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+
+import './globals.css';
+import Home from './pages/Home';
+import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
-import { LoginSuccessPage } from './pages/LoginSuccess';
 import { SearchPage } from './pages/Search';
 import { EidoValidator } from './pages/Validator';
 
-// notifications
-import { Toaster } from 'react-hot-toast';
-
-// react query stuff
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-
-// handsontable stuff
-import { registerAllModules } from 'handsontable/registry';
 registerAllModules();
-
-// css
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'handsontable/dist/handsontable.full.min.css';
-import './globals.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {

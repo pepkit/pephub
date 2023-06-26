@@ -293,7 +293,7 @@ async def validate_raw(validation_query: RawValidationQuery):
                     exclude_case=True,
                 )
             except Exception as e:
-                return HTTPException(status_code=406, detail={error_key_name: str(e)})
+                raise HTTPException(status_code=406, detail={error_key_name: str(e)})
 
     return True
 
