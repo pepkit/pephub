@@ -63,7 +63,7 @@ class ProjectRawModel(BaseModel):
     config: dict = Field(alias="_config")
     subsample_dict: Optional[list] = Field(alias="_subsample_dict")
     name: str
-    sample_dict: dict = Field(alias="_sample_dict")
+    sample_dict: list = Field(alias="_sample_dict")
 
     class Config:
         allow_population_by_field_name = True

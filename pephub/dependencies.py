@@ -1,4 +1,6 @@
 import os
+
+import peppy
 import pydantic
 import jwt
 import json
@@ -7,7 +9,7 @@ import logging
 
 from secrets import token_hex
 from dotenv import load_dotenv
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Dict, Any
 from datetime import datetime, timedelta
 
 from fastapi import Depends, Header, Form
@@ -187,11 +189,10 @@ def get_project(
     namespace: str,
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
-    raw: Optional[bool] = False,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     try:
-        proj = agent.project.get(namespace, project, tag, raw=raw)
+        proj = agent.project.get(namespace, project, tag)
         yield proj
     except ProjectNotFoundError:
         raise HTTPException(

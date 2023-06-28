@@ -124,8 +124,6 @@ async def create_pep(
                         shutil.copyfileobj(upload_file.file, local_tmpf)
 
             p = Project(f"{dirpath}/{init_file.filename}")
-            p.name = project_name
-            p.description = description
             try:
                 agent.project.create(
                     p,
@@ -134,6 +132,7 @@ async def create_pep(
                     tag=tag,
                     is_private=is_private,
                     pep_schema=pep_schema,
+                    description=description,
                 )
             except ProjectUniqueNameError as e:
                 return JSONResponse(
@@ -180,6 +179,7 @@ async def create_pep(
                     name=project_name,
                     tag=tag,
                     is_private=is_private,
+                    description=description,
                 )
             except ProjectUniqueNameError as e:
                 return JSONResponse(
