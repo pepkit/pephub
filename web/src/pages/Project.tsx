@@ -8,6 +8,7 @@ import { Sample } from '../../types';
 import { StatusCircle } from '../components/badges/status-circle';
 import { SchemaTag } from '../components/forms/components/shema-tag';
 import { PageLayout } from '../components/layout/page-layout';
+import { ProjectDataNav } from '../components/layout/project-data-nav';
 import { Markdown } from '../components/markdown/render';
 import { CompatibilityModal } from '../components/modals/compatibility-modal';
 import { DeletePEPModal } from '../components/modals/delete-pep';
@@ -18,14 +19,15 @@ import { ProjectPageheaderPlaceholder } from '../components/placeholders/project
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { SampleTable } from '../components/tables/sample-table';
 import { ValidationTooltip } from '../components/tooltips/validation-tooltip';
+import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
+import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
 import { useProject } from '../hooks/queries/useProject';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
+import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { canEdit } from '../utils/permissions';
-import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
-import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
 import { downloadZip } from '../utils/project';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
@@ -44,6 +46,7 @@ export const ProjectPage: FC = () => {
   // fetch data
   const { data: projectInfo, isLoading: projectInfoIsLoading, error } = useProject(namespace, project || '', tag, jwt);
   const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
+  const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag, jwt);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
     namespace,
     project || '',
@@ -63,7 +66,7 @@ export const ProjectPage: FC = () => {
   // state for editing config, samples, and subsamples
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig || '');
   const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(projectSamples?.items || []);
-  // const [newProjectSubsamples, setNewProjectSubsamples] = useState(projectSubSamples? || '');
+  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(projectSubsamples?.items || []);
 
   const {
     data: validationResult,
@@ -79,13 +82,15 @@ export const ProjectPage: FC = () => {
   useEffect(() => {
     setNewProjectConfig(projectConfig || '');
     setNewProjectSamples(projectSamples?.items || []);
-  }, [projectConfig, projectSamples]);
+    setNewProjectSubsamples(projectSubsamples?.items || []);
+  }, [projectConfig, projectSamples, projectSubsamples]);
 
   // check if config or samples are dirty
   const configIsDirty = newProjectConfig !== projectConfig;
 
   // use JSON stringify to compare arrays
   const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(projectSamples?.items || []);
+  const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(projectSubsamples?.items || []);
 
   // reset config and samples
   const resetConfig = () => {
@@ -93,6 +98,9 @@ export const ProjectPage: FC = () => {
   };
   const resetSamples = () => {
     setNewProjectSamples(projectSamples?.items || []);
+  };
+  const resetSubsamples = () => {
+    setNewProjectSubsamples(projectSubsamples?.items || []);
   };
 
   // mutations for updating config and samples on the server
@@ -194,57 +202,13 @@ export const ProjectPage: FC = () => {
         ) : (
           <>
             <div className="flex-row d-flex align-items-end justify-content-between">
-              <div className="d-flex flex-row align-items-center">
-                <div
-                  className={
-                    projectView === 'samples'
-                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
-                      : 'border-bottom px-2 py-1'
-                  }
-                >
-                  <button
-                    onClick={() => setProjectView('samples')}
-                    className="border-0 bg-transparent project-button-toggles rounded"
-                  >
-                    <i className="bi bi-table me-1"></i>
-                    Samples
-                  </button>
-                  {samplesIsDirty ? (
-                    <span className="text-xs">
-                      <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
-                    </span>
-                  ) : (
-                    //  spacer
-                    <span className="text-xs">
-                      <i className="bi bi-circle-fill ms-1 text-transparent"></i>
-                    </span>
-                  )}
-                </div>
-                <div
-                  className={
-                    projectView === 'config'
-                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
-                      : 'border-bottom px-2 py-1'
-                  }
-                >
-                  <button
-                    onClick={() => setProjectView('config')}
-                    className="border-0 bg-transparent project-button-toggles rounded"
-                  >
-                    <i className="bi bi-filetype-yml me-1"></i>Config
-                    {configIsDirty ? (
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
-                      </span>
-                    ) : (
-                      //  spacer
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
-                      </span>
-                    )}
-                  </button>
-                </div>
-              </div>
+              <ProjectDataNav
+                projectView={projectView}
+                setProjectView={(view) => setProjectView(view)}
+                configIsDirty={configIsDirty}
+                samplesIsDirty={samplesIsDirty}
+                subsamplesIsDirty={subsamplesIsDirty}
+              />
               {/* Validation status */}
               <div className="d-flex flex-row align-items-center">
                 <ValidationTooltip />
@@ -286,8 +250,9 @@ export const ProjectPage: FC = () => {
                         onClick={() => {
                           resetConfig();
                           resetSamples();
+                          resetSubsamples();
                         }}
-                        disabled={!(configIsDirty || samplesIsDirty)}
+                        disabled={!(configIsDirty || samplesIsDirty || subsamplesIsDirty)}
                       >
                         Discard
                       </button>
@@ -310,6 +275,16 @@ export const ProjectPage: FC = () => {
                 data={newProjectSamples || []}
                 onChange={(value) => setNewProjectSamples(value)}
               />
+            ) : projectView === 'subsamples' ? (
+              <>
+                <SampleTable
+                  // fill to the rest of the screen minus 300px
+                  height={window.innerHeight - 300}
+                  readOnly={!(projectInfo && canEdit(user, projectInfo))}
+                  data={newProjectSubsamples || []}
+                  onChange={(value) => setNewProjectSubsamples(value)}
+                />
+              </>
             ) : (
               <ProjectConfigEditor
                 readOnly={!(projectInfo && canEdit(user, projectInfo))}

@@ -49,7 +49,23 @@ export const getSampleTable = (
   tag: string = 'default',
   token: string | null = null,
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}&raw=true`;
+  if (!token) {
+    return axios.get<SampleTableResponse>(url).then((res) => res.data);
+  } else {
+    return axios
+      .get<SampleTableResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
+  }
+};
+
+export const getSubsampleTable = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null = null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/subsamples?tag=${tag}&raw=true`;
   if (!token) {
     return axios.get<SampleTableResponse>(url).then((res) => res.data);
   } else {

@@ -1,4 +1,20 @@
+import { toast } from 'react-hot-toast';
+
 import { Sample } from '../../types';
+
+const arraysAreEmpty = (arraysList: any[][]) => {
+  // check if the list of arrays is full of nulls
+  // if so, then the list is empty
+  let empty = true;
+  arraysList.forEach((array) => {
+    array.forEach((item) => {
+      if (item !== null) {
+        empty = false;
+      }
+    });
+  });
+  return empty;
+};
 
 export const sampleListToArrays = (sampleList: Sample[]) => {
   // parse list of arbitrary samples into a list of arrays
@@ -53,10 +69,32 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   // ]
 
   // first row is the header row
-  const headerRow = arraysList[0];
+  let headerRow = arraysList[0];
+
+  if (headerRow.every((cell) => !cell)) {
+    toast.error('Header row cannot be empty! Please add at least one column name.');
+    return [];
+  }
+
+  // get the rest of the rows
+  const theRest = arraysList.slice(1);
   const sampleList: Sample[] = [];
 
-  arraysList.slice(1).forEach((row) => {
+  debugger;
+  // restrict header row to only contain non-null values
+  headerRow = headerRow.filter((key) => key !== null && key !== undefined);
+
+  // if there's only a header row, return a list with one sample where all the property values are null
+  if (arraysAreEmpty(theRest)) {
+    const sample: Sample = {};
+    headerRow.forEach((key) => {
+      sample[key] = null;
+    });
+    sampleList.push(sample);
+    return sampleList;
+  }
+
+  theRest.forEach((row) => {
     // ignore empty rows
     if (row.every((cell) => !cell)) {
       return;

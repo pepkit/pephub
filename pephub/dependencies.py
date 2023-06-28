@@ -187,10 +187,11 @@ def get_project(
     namespace: str,
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
+    raw: Optional[bool] = False,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     try:
-        proj = agent.project.get(namespace, project, tag)
+        proj = agent.project.get(namespace, project, tag, raw=raw)
         yield proj
     except ProjectNotFoundError:
         raise HTTPException(

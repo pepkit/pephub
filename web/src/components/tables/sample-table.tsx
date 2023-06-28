@@ -1,9 +1,9 @@
-import { FC, useEffect, useState } from 'react';
 import { HotTable } from '@handsontable/react';
-import { addClassesToRows } from './hooks-callbacks';
-import { readString } from 'react-papaparse';
-import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
+import { FC } from 'react';
+
 import { Sample } from '../../../types';
+import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
+import { addClassesToRows } from './hooks-callbacks';
 
 interface Props {
   data: Sample[];
@@ -23,7 +23,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
     <>
       <div className="rounded rounded-2">
         <HotTable
-          data={rows}
+          data={rows.length > 0 ? rows : [[]]}
           stretchH="all"
           height={height || 900}
           readOnly={readOnly}
@@ -32,7 +32,8 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
           hiddenColumns={{
             indicators: true,
           }}
-          minRows={500}
+          minCols={1}
+          minRows={50}
           contextMenu={[
             'row_above',
             'row_below',

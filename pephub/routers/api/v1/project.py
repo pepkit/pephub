@@ -115,8 +115,6 @@ async def update_a_pep(
     # sample table update
     if updated_project.sample_table is not None:
         sample_table_df = pd.DataFrame.from_dict(updated_project.sample_table)
-        sample_table_df = sample_table_df.dropna(axis=1, how="all")
-        sample_table_df.fillna("", inplace=True)
         sample_table_df_json = sample_table_df.to_dict()
 
         new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
@@ -129,8 +127,6 @@ async def update_a_pep(
             subsample_str = subsample.rstrip(",")
             subsample_str = StringIO(subsample_str)
             subsample_pd = pd.read_csv(subsample_str)
-            subsample_pd = subsample_pd.dropna(axis=1, how="all")
-            subsample_pd.fillna("", inplace=True)
             subsample_df = subsample_pd.to_dict()
 
             subsample_peppy_list.append(subsample_df)
@@ -267,6 +263,7 @@ async def delete_a_pep(
 async def get_pep_samples(
     proj: peppy.Project = Depends(get_project),
     format: Optional[str] = None,
+    raw: Optional[bool] = False,
 ):
     if format is not None:
         conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
@@ -278,12 +275,21 @@ async def get_pep_samples(
                 detail=f"Invalid format '{format}'. Valid formats are: {list(SAMPLE_CONVERSION_FUNCTIONS.keys())}",
             )
     else:
-        return JSONResponse(
-            {
-                "count": len(proj.samples),
-                "items": [s.to_dict() for s in proj.samples],
-            }
-        )
+        if raw:
+            df = pd.DataFrame(proj[SAMPLE_RAW_DICT_KEY])
+            return JSONResponse(
+                {
+                    "count": df.shape[0],
+                    "items": df.to_dict(orient="records"),
+                }
+            )
+        else:
+            return JSONResponse(
+                {
+                    "count": len(proj.samples),
+                    "items": [s.to_dict() for s in proj.samples],
+                }
+            )
 
 
 @project.get("/samples/{sample_name}")
@@ -301,20 +307,28 @@ async def get_subsamples(
     proj: peppy.Project = Depends(get_project),
     download: bool = False,
 ):
-    subsamples = proj.subsample_table
-
+    subsamples = proj[SUBSAMPLE_RAW_DICT_KEY]
     if subsamples is not None:
+        subsamples = pd.DataFrame(
+            proj[SUBSAMPLE_RAW_DICT_KEY][0]
+        )  # TODO: this seems like a bug @Alex can you check this?
         if download:
-            return proj.subsample_table.to_csv()
+            return subsamples.to_csv()
         else:
             return JSONResponse(
                 {
-                    "count": len(subsamples),
+                    "count": subsamples.shape[0],
                     "items": subsamples.to_dict(orient="records"),
                 }
             )
+
     else:
-        return f"Project '{namespace.lower()}/{project.lower()}' does not have any subsamples."
+        return JSONResponse(
+            {
+                "count": 0,
+                "items": [],
+            }
+        )
 
 
 @project.get("/convert")
