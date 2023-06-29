@@ -8,6 +8,10 @@ import { useSchemas } from '../../hooks/queries/useSchemas';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { useValidation } from '../../hooks/queries/useValidation';
 import { useSchema } from '../../hooks/queries/useSchema';
+import Editor from '@monaco-editor/react';
+import { HotTable } from '@handsontable/react';
+
+
 
 interface ValidatorFormInputs {
   pepFiles?: FileList;
@@ -20,6 +24,7 @@ interface ValidatorFormInputs {
     label: string;
     value: string;
   };
+  schemaPaste?: string;
 }
 
 export const ValidatorForm: FC = () => {
@@ -32,6 +37,7 @@ export const ValidatorForm: FC = () => {
     reset: resetForm,
     control,
     watch,
+    register,
     formState: { isValid, isDirty },
   } = useForm<ValidatorFormInputs>();
 
@@ -40,6 +46,7 @@ export const ValidatorForm: FC = () => {
   const [useExistingPEP, setUseExistingPEP] = useState(false);
   const [useExistingSchema, setUseExistingSchema] = useState(true);
   const [schemaString, setSchemaString] = useState<string | undefined>(undefined);
+  const [activePepPasteTab, setActivePepPasteTab] = useState('pepPaste1');
 
   // watch the form data so we can use it
   const pepFiles = watch('pepFiles');
@@ -47,6 +54,10 @@ export const ValidatorForm: FC = () => {
   const schemaFiles = watch('schemaFiles');
   const schemaRegistryPath = watch('schemaRegistryPath');
 
+  const [schemaPaste, setSchemaPaste] = useState<string>('');
+  const [pepPaste, setPepPaste] = useState<string>('');
+  const [pepPaste2, setPepPaste2] = useState<string>('');
+  
   const { data: schema } = useSchema(schemaRegistryPath?.value);
 
   const {
@@ -69,12 +80,28 @@ export const ValidatorForm: FC = () => {
           setSchemaString(reader.result as string);
         };
         reader.readAsText(schemaFiles[0]);
+      } else if (schemaPaste) {
+        setSchemaString(schemaPaste);
       }
     }
-  }, [schemaRegistryPath?.value, schemaFiles, schema]);
+  }, [schemaRegistryPath?.value, schemaFiles, schema, schemaPaste]);
 
   const runValidation = () => {
     refetch();
+  };
+
+  const handleSchemaPaste = (value: string | undefined) => {
+    setSchemaPaste(value || '');
+  };
+
+  const handlePaste = (fieldName: string, value: string | undefined) => {
+    if (fieldName === 'schemaPaste') {
+      setSchemaPaste(value || '');
+    } else if (fieldName === 'pepPaste') {
+      setPepPaste(value || '');
+    } else if (fieldName === 'pepPaste2') {
+      setPepPaste2(value || '');
+    }
   };
 
   return (
@@ -140,6 +167,107 @@ export const ValidatorForm: FC = () => {
           ) : (
             <FileDropZone multiple name="pepFiles" control={control} innerRef={fileDialogRef} />
           )}
+          {!useExistingPEP && !pepFiles && (
+            <>
+              <div className="my-3"> Or paste your PEP </div>
+              <div className="my-3">
+                <ul className="nav nav-tabs" role="tablist">
+                  <li className="nav-item" role="presentation">
+                    <button
+                      className={`nav-link ${activePepPasteTab === 'pepPaste1' ? 'active' : ''}`}
+                      id="pepPaste1-tab"
+                      data-bs-toggle="tab"
+                      data-bs-target="#pepPaste1"
+                      type="button"
+                      role="tab"
+                      aria-controls="pepPaste1"
+                      aria-selected={activePepPasteTab === 'pepPaste1'}
+                      onClick={() => setActivePepPasteTab('pepPaste1')}
+                    >
+                      <i className="bi bi-table me-1"></i>Samples
+                    </button>
+                  </li>
+                  <li className="nav-item" role="presentation">
+                    <button
+                      className={`nav-link ${activePepPasteTab === 'pepPaste2' ? 'active' : ''}`}
+                      id="pepPaste2-tab"
+                      data-bs-toggle="tab"
+                      data-bs-target="#pepPaste2"
+                      type="button"
+                      role="tab"
+                      aria-controls="pepPaste2"
+                      aria-selected={activePepPasteTab === 'pepPaste2'}
+                      onClick={() => setActivePepPasteTab('pepPaste2')}
+                    >
+                      <i className="bi bi-filetype-yml me-1"></i>Config
+                    </button>
+                  </li>
+                </ul>
+                <div className="tab-content">
+                  <div
+                    className={`tab-pane fade ${activePepPasteTab === 'pepPaste1' ? 'show active' : ''}`}
+                    id="pepPaste1"
+                    role="tabpanel"
+                    aria-labelledby="pepPaste1-tab"
+                  >
+                    <div className="mt-2">
+                    <div className="rounded rounded-2">
+                      <HotTable
+                        stretchH="all"
+                        height={window.innerHeight - 500}
+                        colHeaders={true}
+                        dropdownMenu={true}
+                        hiddenColumns={{
+                          indicators: true,
+                        }}
+                        minRows={500}
+                        contextMenu={[
+                          'row_above',
+                          'row_below',
+                          '---------',
+                          'col_left',
+                          'col_right',
+                          '---------',
+                          'remove_row',
+                          'remove_col',
+                          '---------',
+                          'alignment',
+                          '---------',
+                          'copy',
+                          'cut',
+                        ]}
+                        multiColumnSorting={true}
+                        filters={true}
+                        rowHeaders={true}
+                        manualRowMove={true}
+                        licenseKey="non-commercial-and-evaluation"
+                        manualColumnResize
+                        
+                      />
+                    </div>
+                      
+                  </div>
+                </div>
+                  <div
+                    className={`tab-pane fade ${activePepPasteTab === 'pepPaste2' ? 'show active' : ''}`}
+                    id="pepPaste2"
+                    role="tabpanel"
+                    aria-labelledby="pepPaste2-tab"
+                  >
+                    <div className="mt-2">
+                      <Editor
+                        height={'40vh'}
+                        language="yaml"
+                        value={pepPaste2}
+                        onChange={(value) => handlePaste('pepPaste2', value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
           <div className="my-3"></div>
           <label className="form-label fw-bold h5">2. Select your schema</label>
           <div className="form-check form-switch">
@@ -197,6 +325,20 @@ export const ValidatorForm: FC = () => {
             </div>
           ) : (
             <FileDropZone multiple name="schemaFiles" control={control} innerRef={fileDialogRef} />
+          )}
+          {!useExistingSchema && !schemaFiles && (
+            <>
+              <div className="mt-2">
+                <label className="form-label">Or paste your schema:</label>
+                <Editor
+                  height={'40vh'}
+                  language="yaml"
+                  value={schemaPaste}
+                  onChange={(value) => handleSchemaPaste(value)}
+                  
+                />
+              </div>
+            </>
           )}
           <div className="mt-3">
             <button onClick={() => runValidation()} disabled={!isValid} type="button" className="me-1 btn btn-success">
