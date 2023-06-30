@@ -37,7 +37,6 @@ export const ValidatorForm: FC = () => {
     reset: resetForm,
     control,
     watch,
-    register,
     formState: { isValid, isDirty },
   } = useForm<ValidatorFormInputs>();
 
@@ -46,7 +45,7 @@ export const ValidatorForm: FC = () => {
   const [useExistingPEP, setUseExistingPEP] = useState(false);
   const [useExistingSchema, setUseExistingSchema] = useState(true);
   const [schemaString, setSchemaString] = useState<string | undefined>(undefined);
-  const [activePepPasteTab, setActivePepPasteTab] = useState('pepPaste1');
+  // const [activePepPasteTab, setActivePepPasteTab] = useState('pepPaste1');
 
   // watch the form data so we can use it
   const pepFiles = watch('pepFiles');
@@ -55,8 +54,8 @@ export const ValidatorForm: FC = () => {
   const schemaRegistryPath = watch('schemaRegistryPath');
 
   const [schemaPaste, setSchemaPaste] = useState<string>('');
-  const [pep_Paste1, setPepPaste1] = useState<string>('');
-  const [pep_Paste2, setPepPaste2] = useState<string>('');
+  // const [pep_Paste1, setPepPaste1] = useState<string>('');
+  // const [pep_Paste2, setPepPaste2] = useState<string>('');
   
   const { data: schema } = useSchema(schemaRegistryPath?.value);
   const params = useMemo(() => {
@@ -110,22 +109,22 @@ export const ValidatorForm: FC = () => {
   const handleSchemaPaste = (value: string | undefined) => {
     setSchemaPaste(value || '');
   };
-  const handlePEPPaste1 = (value: string | undefined) => {
-    setPepPaste1(value || '');
-  };
-  const handlePEPPaste2 = (value: string | undefined) => {
-    setPepPaste2(value || '');
-  };
+  // const handlePEPPaste1 = (value: string | undefined) => {
+  //   setPepPaste1(value || '');
+  // };
+  // const handlePEPPaste2 = (value: string | undefined) => {
+  //   setPepPaste2(value || '');
+  // };
 
-  const handlePaste = (fieldName: string, value: string | undefined) => {
-    if (fieldName === 'schemaPaste') {
-      setSchemaPaste(value || '');
-    } else if (fieldName === 'pepPaste1') {
-      setPepPaste1(value || '');
-    } else if (fieldName === 'pepPaste2') {
-      setPepPaste2(value || '');
-    }
-  };
+  // const handlePaste = (fieldName: string, value: string | undefined) => {
+  //   if (fieldName === 'schemaPaste') {
+  //     setSchemaPaste(value || '');
+  //   } else if (fieldName === 'pepPaste1') {
+  //     setPepPaste1(value || '');
+  //   } else if (fieldName === 'pepPaste2') {
+  //     setPepPaste2(value || '');
+  //   }
+  // };
 
   return (
     <>

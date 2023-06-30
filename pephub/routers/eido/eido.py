@@ -61,7 +61,6 @@ async def validate(
     # accept both pep_registry and pep_files, both should be optional
     pep_registry: Optional[str] = Form(None),
     pep_files: Optional[List[UploadFile]] = None,
-    pep_paste2: Optional[str] = Form(None),
     schema: Optional[str] = Form(None),
     schema_registry: Optional[str] = Form(None),
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -80,8 +79,9 @@ async def validate(
     If at any point the PEP or schema cannot be validated, an error is raised and the validation process is
     halted. We also should return errors for when the PEP or Schema can't be loaded or found for some reason.
     """
+    
     # check they sent at least pep_registry or pep_files
-    if pep_registry is None and pep_files is None and pep_paste2 is None:
+    if pep_registry is None and pep_files is None:
         raise HTTPException(
             status_code=400,
             detail={

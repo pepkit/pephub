@@ -45,7 +45,8 @@ const runValidation = async (params: ValidationParams) => {
 
 export const useValidation = (params: ValidationParams) => {
   return useQuery(['validation', params.pep, params.schema, params.schema_registry], () => runValidation(params), {
-    enabled: params.enabled,
+    enabled: params.enabled && params.pep !== undefined && params.schema !== undefined && params.schema_registry
+     !== undefined && params.pep.length > 0 && params.schema?.length > 0 && params.schema_registry?.length > 0,
     refetchOnWindowFocus: false,
     retry: false,
   });
