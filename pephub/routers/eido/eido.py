@@ -61,7 +61,9 @@ async def validate(
     # accept both pep_registry and pep_files, both should be optional
     pep_registry: Optional[str] = Form(None),
     pep_files: Optional[List[UploadFile]] = None,
-    schema: Optional[str] = Form(None),
+    pep_paste2: Optional[str] = Form(None),
+    schema_other: Optional[str] = Form(None),
+    schema_registry: Optional[str] = Form(None),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
@@ -79,7 +81,7 @@ async def validate(
     halted. We also should return errors for when the PEP or Schema can't be loaded or found for some reason.
     """
     # check they sent at least pep_registry or pep_files
-    if pep_registry is None and pep_files is None:
+    if pep_registry is None and pep_files is None and pep_paste2 is None:
         raise HTTPException(
             status_code=400,
             detail={
@@ -111,12 +113,16 @@ async def validate(
 
             p = peppy.Project(f"{dirpath}/{init_file.filename}")
 
-
-    # split schema string from db into namespace and project
-    schema_parts1, schema_parts2 = schema.split("/")
-    # if schema is just two parts, it's a schema.databio.org schema for validating a project that's already in the db
-    if len(schema_parts1) == 1 & len(schema_parts2) == 1:
-        schema_url = f"https://schema.databio.org/{schema}.yaml"
+    if schema_other is None and schema_registry is None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "Must supply either a registry path or a list of files to validate."
+            },
+        )
+    
+    if schema_registry is not None:
+        schema_url = f"https://schema.databio.org/{schema_registry}.yaml"
             
         try:
             response = requests.get(schema_url)
@@ -135,7 +141,7 @@ async def validate(
     else:
         # save schema string to temp file, then read in with eido
         with tempfile.NamedTemporaryFile(mode="w") as schema_file:
-            schema_file.write(schema)
+            schema_file.write(schema_other)
             schema_file.flush()
             try:
                 schema_dict = eido.read_schema(schema_file.name)[0]

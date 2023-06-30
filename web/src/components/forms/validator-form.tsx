@@ -55,8 +55,8 @@ export const ValidatorForm: FC = () => {
   const schemaRegistryPath = watch('schemaRegistryPath');
 
   const [schemaPaste, setSchemaPaste] = useState<string>('');
-  const [pepPaste, setPepPaste] = useState<string>('');
-  const [pepPaste2, setPepPaste2] = useState<string>('');
+  const [pep_Paste1, setPepPaste1] = useState<string>('');
+  const [pep_Paste2, setPepPaste2] = useState<string>('');
   
   const { data: schema } = useSchema(schemaRegistryPath?.value);
 
@@ -93,12 +93,18 @@ export const ValidatorForm: FC = () => {
   const handleSchemaPaste = (value: string | undefined) => {
     setSchemaPaste(value || '');
   };
+  const handlePEPPaste1 = (value: string | undefined) => {
+    setPepPaste1(value || '');
+  };
+  const handlePEPPaste2 = (value: string | undefined) => {
+    setPepPaste2(value || '');
+  };
 
   const handlePaste = (fieldName: string, value: string | undefined) => {
     if (fieldName === 'schemaPaste') {
       setSchemaPaste(value || '');
-    } else if (fieldName === 'pepPaste') {
-      setPepPaste(value || '');
+    } else if (fieldName === 'pepPaste1') {
+      setPepPaste1(value || '');
     } else if (fieldName === 'pepPaste2') {
       setPepPaste2(value || '');
     }
@@ -167,10 +173,10 @@ export const ValidatorForm: FC = () => {
           ) : (
             <FileDropZone multiple name="pepFiles" control={control} innerRef={fileDialogRef} />
           )}
-          {!useExistingPEP && !pepFiles && (
-            <>
-              <div className="my-3"> Or paste your PEP </div>
-              <div className="my-3">
+          {/* {!useExistingPEP && !pepFiles && (
+            <> */}
+              
+              {/* <div className="my-3">
                 <ul className="nav nav-tabs" role="tablist">
                   <li className="nav-item" role="presentation">
                     <button
@@ -258,15 +264,15 @@ export const ValidatorForm: FC = () => {
                       <Editor
                         height={'40vh'}
                         language="yaml"
-                        value={pepPaste2}
-                        onChange={(value) => handlePaste('pepPaste2', value)}
+                        value={pep_Paste2}
+                        onChange={(value) => handlePEPPaste2(value)}
                       />
                     </div>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              </div> */}
+            {/* </>
+          )} */}
 
           <div className="my-3"></div>
           <label className="form-label fw-bold h5">2. Select your schema</label>

@@ -17,6 +17,22 @@ const runValidation = async (pep: FileList | string | undefined, schema: string 
     pep_files = pep;
   }
 
+  let schema_other: string | null | undefined = null;
+  let schema_registry: string | null | undefined = null;
+
+  if (typeof schema === 'string') {
+    if (schema.length < 10) { 
+      schema_other = null;
+      schema_registry = schema;
+    } else {
+      schema_other = schema;
+      schema_registry = null;
+    }
+  } else {
+    schema_other = schema;
+    schema_registry = null;
+  }
+
   // create form data
   const formData = new FormData();
   formData.append('pep_registry', pep_registry || '');
@@ -25,7 +41,8 @@ const runValidation = async (pep: FileList | string | undefined, schema: string 
       formData.append('pep_files', pep_files[i]);
     }
   }
-  formData.append('schema', schema || '');
+  formData.append('schema_other', schema_other || '');
+  formData.append('schema_registry', schema_registry || '');
 
   const { data: result } = await axios.post<ValidationResult>(`${API_BASE}/eido/validate`, formData, {
     headers: {
