@@ -167,11 +167,28 @@ export const editProjectSampleTable = (
   token: string | null,
   sampleTable: Sample[],
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}&format=csv`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
   return axios.patch(
     url,
     {
       sample_table: sampleTable,
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+};
+
+export const editProjectSubsampleTable = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null,
+  subsampleTable: Sample[],
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
+  return axios.patch(
+    url,
+    {
+      subsample_table: subsampleTable,
     },
     { headers: { Authorization: `Bearer ${token}` } },
   );

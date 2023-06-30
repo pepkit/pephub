@@ -70,7 +70,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
         <label className="fw-bold">No. of samples:</label>
         <span className="mx-1">{project.number_of_samples}</span>
 
-        <p className="mb-0">
+        <div className="mb-0">
           {project.description ? (
             <MarkdownToText>{project.description}</MarkdownToText>
           ) : (
@@ -78,7 +78,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
               <span className="text-muted text-italic">No description</span>
             </em>
           )}
-        </p>
+        </div>
       </div>
       <div className="mt-3">
         <div className="d-flex flex-row align-items-center text-muted">

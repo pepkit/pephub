@@ -1,7 +1,8 @@
 import { FC, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
-import { useSession } from '../../hooks/useSession';
 import { useNavigate } from 'react-router-dom';
+
+import { useSession } from '../../hooks/useSession';
 import { getOS } from '../../utils/etc';
 import { SearchBox } from './search-box';
 
@@ -92,21 +93,25 @@ export const Nav: FC = () => {
                       />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
-                      <Dropdown.Item disabled href="/me">
+                      <Dropdown.Item as={'div'} href={`/${user.login}`}>
+                        View PEPs
+                      </Dropdown.Item>
+                      <Dropdown.Item as={'div'} disabled href="/me">
                         Profile
                       </Dropdown.Item>
                       <Dropdown.Divider />
-                      <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
+                      <Dropdown.Item as={'div'} onClick={() => logout()}>
+                        Log out
+                      </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </div>
               ) : (
-                <li className="mx-2 my-0 nav-item h5 pt-1">
+                <div className="mx-2 my-0 nav-item h5 pt-1">
                   <button className="btn btn-dark" onClick={() => login()}>
                     <i className="fa fa-github"></i>Log in
                   </button>
-                </li>
+                </div>
               )}
             </li>
           </ul>

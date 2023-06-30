@@ -121,17 +121,12 @@ async def update_a_pep(
         new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
 
     # subsample table update
-    if updated_project.subsample_list is not None:
-        subsample_peppy_list = []
-        for subsample in updated_project.subsample_list:
-            subsample_str = subsample.rstrip(",")
-            subsample_str = StringIO(subsample_str)
-            subsample_pd = pd.read_csv(subsample_str)
-            subsample_df = subsample_pd.to_dict()
+    if updated_project.subsample_table is not None:
+        subsample_df = pd.DataFrame.from_dict(updated_project.subsample_table)
+        subsample_list = subsample_df.to_dict(orient="records")
 
-            subsample_peppy_list.append(subsample_df)
-
-        new_raw_project[SUBSAMPLE_RAW_DICT_KEY] = subsample_peppy_list
+        new_raw_project[SUBSAMPLE_RAW_DICT_KEY] = subsample_list
+        new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
 
     # project config update
     if updated_project.project_config_yaml is not None:
@@ -143,6 +138,7 @@ async def update_a_pep(
         [
             updated_project.project_config_yaml is not None,
             updated_project.sample_table is not None,
+            updated_project.subsample_table is not None,
         ]
     ):
         try:

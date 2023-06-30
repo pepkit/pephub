@@ -21,6 +21,7 @@ import { SampleTable } from '../components/tables/sample-table';
 import { ValidationTooltip } from '../components/tooltips/validation-tooltip';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
 import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
+import { useSubsampleTableMutation } from '../hooks/mutations/useSubsampleTableMutation';
 import { useProject } from '../hooks/queries/useProject';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
@@ -106,6 +107,13 @@ export const ProjectPage: FC = () => {
   // mutations for updating config and samples on the server
   const configMutation = useConfigMutation(namespace || '', project || '', tag, jwt || '', newProjectConfig);
   const sampleTableMutation = useSampleTableMutation(namespace || '', project || '', tag, jwt || '', newProjectSamples);
+  const subsampleTableMutation = useSubsampleTableMutation(
+    namespace || '',
+    project || '',
+    tag,
+    jwt || '',
+    newProjectSubsamples,
+  );
 
   const handleProjectChange = () => {
     if (configIsDirty) {
@@ -113,6 +121,9 @@ export const ProjectPage: FC = () => {
     }
     if (samplesIsDirty) {
       sampleTableMutation.mutate();
+    }
+    if (subsamplesIsDirty) {
+      subsampleTableMutation.mutate();
     }
   };
 
@@ -193,9 +204,9 @@ export const ProjectPage: FC = () => {
           }
         </div>
       </div>
-      <p className="px-4">
+      <div className="px-4">
         <Markdown>{projectInfo?.description || 'No description'}</Markdown>
-      </p>
+      </div>
       <div className="mt-2 px-2 border-bottom border-dark">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
@@ -238,12 +249,15 @@ export const ProjectPage: FC = () => {
                         disabled={
                           configMutation.isLoading ||
                           sampleTableMutation.isLoading ||
-                          !(configIsDirty || samplesIsDirty)
+                          subsampleTableMutation.isLoading ||
+                          !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
                         }
                         onClick={() => handleProjectChange()}
                         className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
                       >
-                        {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
+                        {configMutation.isLoading || sampleTableMutation.isLoading || subsampleTableMutation.isLoading
+                          ? 'Saving...'
+                          : 'Save'}
                       </button>
                       <button
                         className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
