@@ -5,32 +5,23 @@ import { ValidationResult } from '../../../types';
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
-const runValidation = async (pep: FileList | string | undefined, schema: string | undefined) => {
+interface ValidationParams {
+  pep: FileList | string | undefined,
+  schema: string | undefined,
+  schema_registry: string | undefined,
+  enabled?: boolean,
+}
+
+const runValidation = async (params: ValidationParams) => {
   let pep_registry: string | null = null;
   let pep_files: FileList | null | undefined = null;
 
-  if (typeof pep === 'string') {
-    pep_registry = pep;
+  if (typeof params.pep === 'string') {
+    pep_registry = params.pep;
     pep_files = null;
   } else {
     pep_registry = null;
-    pep_files = pep;
-  }
-
-  let schema_other: string | null | undefined = null;
-  let schema_registry: string | null | undefined = null;
-
-  if (typeof schema === 'string') {
-    if (schema.length < 10) { 
-      schema_other = null;
-      schema_registry = schema;
-    } else {
-      schema_other = schema;
-      schema_registry = null;
-    }
-  } else {
-    schema_other = schema;
-    schema_registry = null;
+    pep_files = params.pep;
   }
 
   // create form data
@@ -41,8 +32,8 @@ const runValidation = async (pep: FileList | string | undefined, schema: string 
       formData.append('pep_files', pep_files[i]);
     }
   }
-  formData.append('schema_other', schema_other || '');
-  formData.append('schema_registry', schema_registry || '');
+  formData.append('schema', params.schema || '');
+  formData.append('schema_registry', params.schema_registry || '');
 
   const { data: result } = await axios.post<ValidationResult>(`${API_BASE}/eido/validate`, formData, {
     headers: {
@@ -52,13 +43,9 @@ const runValidation = async (pep: FileList | string | undefined, schema: string 
   return result;
 };
 
-export const useValidation = (
-  pep: FileList | string | undefined,
-  schema: string | undefined,
-  enabled: boolean = false,
-) => {
-  return useQuery(['validation', pep, schema], () => runValidation(pep, schema), {
-    enabled: enabled && pep !== undefined && schema !== undefined && pep.length > 0 && schema?.length > 0,
+export const useValidation = (params: ValidationParams) => {
+  return useQuery(['validation', params.pep, params.schema, params.schema_registry], () => runValidation(params), {
+    enabled: params.enabled,
     refetchOnWindowFocus: false,
     retry: false,
   });

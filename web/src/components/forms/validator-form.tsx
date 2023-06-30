@@ -1,4 +1,4 @@
-import { FC, useRef, useState, useEffect } from 'react';
+import { FC, useRef, useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { FileDropZone } from './components/file-dropzone';
 import Select from 'react-select';
@@ -59,13 +59,30 @@ export const ValidatorForm: FC = () => {
   const [pep_Paste2, setPepPaste2] = useState<string>('');
   
   const { data: schema } = useSchema(schemaRegistryPath?.value);
+  const params = useMemo(() => {
+    if (useExistingPEP) {
+      return {
+        pep: pepRegistryPath?.value,
+        schema: schemaString,
+        schema_registry: undefined,
+        enabled: true,
+      };
+    } else {
+      return {
+        pep: pepFiles,
+        schema: schemaString,
+        schema_registry: undefined,
+        enabled: true,
+      };
+    }
+  }, [useExistingPEP, pepFiles, pepRegistryPath?.value, schemaString]);
 
   const {
     data: result,
     error,
     isFetching: isValidating,
     refetch,
-  } = useValidation(useExistingPEP ? pepRegistryPath?.value : pepFiles, schemaString);
+  } = useValidation(params);
 
   // handle schema changes to update the schema string
   useEffect(() => {

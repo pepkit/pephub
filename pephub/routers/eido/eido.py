@@ -62,7 +62,7 @@ async def validate(
     pep_registry: Optional[str] = Form(None),
     pep_files: Optional[List[UploadFile]] = None,
     pep_paste2: Optional[str] = Form(None),
-    schema_other: Optional[str] = Form(None),
+    schema: Optional[str] = Form(None),
     schema_registry: Optional[str] = Form(None),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
@@ -113,7 +113,7 @@ async def validate(
 
             p = peppy.Project(f"{dirpath}/{init_file.filename}")
 
-    if schema_other is None and schema_registry is None:
+    if schema is None and schema_registry is None:
         raise HTTPException(
             status_code=400,
             detail={
@@ -141,7 +141,7 @@ async def validate(
     else:
         # save schema string to temp file, then read in with eido
         with tempfile.NamedTemporaryFile(mode="w") as schema_file:
-            schema_file.write(schema_other)
+            schema_file.write(schema)
             schema_file.flush()
             try:
                 schema_dict = eido.read_schema(schema_file.name)[0]
