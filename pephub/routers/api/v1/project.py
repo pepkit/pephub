@@ -123,9 +123,9 @@ async def update_a_pep(
     # subsample table update
     if updated_project.subsample_table is not None:
         subsample_df = pd.DataFrame.from_dict(updated_project.subsample_table)
-        subsample_list = subsample_df.to_dict(orient="records")
+        subsample_df_json = subsample_df.to_dict()
 
-        new_raw_project[SUBSAMPLE_RAW_DICT_KEY] = subsample_list
+        new_raw_project[SUBSAMPLE_RAW_DICT_KEY] = subsample_df_json
         new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
 
     # project config update
