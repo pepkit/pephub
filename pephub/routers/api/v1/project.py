@@ -300,15 +300,13 @@ async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project
 
 @project.get("/subsamples")
 async def get_subsamples(
-    namespace: str,
-    project: str,
     proj: peppy.Project = Depends(get_project),
     download: bool = False,
 ):
-    subsamples = proj[SUBSAMPLE_RAW_DICT_KEY]
+    subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
     if subsamples is not None:
         subsamples = pd.DataFrame(
-            proj[SUBSAMPLE_RAW_DICT_KEY][0]
+            proj[SUBSAMPLE_RAW_LIST_KEY][0]
         )  # TODO: this seems like a bug @Alex can you check this?
         if download:
             return subsamples.to_csv()
