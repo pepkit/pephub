@@ -190,9 +190,10 @@ def get_project(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-):
+    raw: bool = False,
+) -> Union[peppy.Project, Dict[str, Any]]:
     try:
-        proj = agent.project.get(namespace, project, tag)
+        proj = agent.project.get(namespace, project, tag, raw=raw)
         yield proj
     except ProjectNotFoundError:
         raise HTTPException(

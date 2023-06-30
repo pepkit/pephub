@@ -110,7 +110,7 @@ async def update_a_pep(
     # sample table update
     if updated_project.sample_table is not None:
         sample_table_df = pd.DataFrame.from_dict(updated_project.sample_table)
-        sample_table_df_json = sample_table_df.to_dict()
+        sample_table_df_json = sample_table_df.to_dict(orient='records')
 
         new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
         new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
@@ -122,7 +122,7 @@ async def update_a_pep(
             subsample_str = subsample.rstrip(",")
             subsample_str = StringIO(subsample_str)
             subsample_pd = pd.read_csv(subsample_str)
-            subsample_df = subsample_pd.to_dict()
+            subsample_df = subsample_pd.to_dict(orient='records')
 
             subsample_peppy_list.append(subsample_df)
 
