@@ -31,7 +31,9 @@ export const ProjectMetaEditForm: FC<Props> = ({
   onCancel = () => {},
 }) => {
   const { jwt } = useSession();
+
   const { data: projectInfo } = useProject(namespace, name, tag, jwt);
+
   const {
     register,
     watch,
@@ -62,13 +64,16 @@ export const ProjectMetaEditForm: FC<Props> = ({
   const newIsPrivate = watch('isPrivate');
   const newSchema = watch('pep_schema');
 
-  const mutation = useEditProjectMetaMutation(namespace, name, tag, jwt, onSubmit, onFailedSubmit, {
-    newName: newName,
-    newTag: newTag,
-    newDescription: newDescription,
-    newIsPrivate: newIsPrivate,
-    newSchema: newSchema,
-  });
+  // check if things are changed - only send those that are
+  const metadata = {
+    newName: projectInfo?.name === newName ? undefined : newName,
+    newTag: projectInfo?.tag === newTag ? undefined : newTag,
+    newDescription: projectInfo?.description === newDescription ? undefined : newDescription,
+    newIsPrivate: projectInfo?.is_private === newIsPrivate ? undefined : newIsPrivate,
+    newSchema: projectInfo?.pep_schema === newSchema ? undefined : newSchema,
+  };
+
+  const mutation = useEditProjectMetaMutation(namespace, name, tag, jwt, onSubmit, onFailedSubmit, metadata);
 
   return (
     <form>

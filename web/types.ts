@@ -49,7 +49,7 @@ export interface User {
 }
 
 export interface Sample {
-  [key: string]: string;
+  [key: string]: string | null;
 }
 
 export interface Project {

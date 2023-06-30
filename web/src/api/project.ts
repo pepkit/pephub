@@ -1,9 +1,24 @@
 import axios from 'axios';
+
 import { Project, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
+interface ProjectUpdateItems {
+  project_value?: Project | null;
+  tag?: string | null;
+  is_private?: boolean | null;
+  name?: string | null;
+  pep_schema?: string | null;
+}
+
+interface ProjectUpdateMetadata extends ProjectUpdateItems {
+  sample_table?: Sample[] | null;
+  project_config_yaml?: string | null;
+  description?: string | null;
+  subsample_list?: string[] | null;
+}
 export interface SampleTableResponse {
   count: number;
   items: Sample[];
@@ -34,7 +49,23 @@ export const getSampleTable = (
   tag: string = 'default',
   token: string | null = null,
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}&raw=true`;
+  if (!token) {
+    return axios.get<SampleTableResponse>(url).then((res) => res.data);
+  } else {
+    return axios
+      .get<SampleTableResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
+  }
+};
+
+export const getSubsampleTable = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null = null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/subsamples?tag=${tag}&raw=true`;
   if (!token) {
     return axios.get<SampleTableResponse>(url).then((res) => res.data);
   } else {
@@ -112,7 +143,7 @@ export const editProjectMetadata = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
-  metadata: { [key: string]: any },
+  metadata: ProjectUpdateMetadata,
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
   return axios.patch(url, metadata, { headers: { Authorization: `Bearer ${token}` } });
@@ -134,13 +165,13 @@ export const editProjectSampleTable = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
-  sampleTable: string,
+  sampleTable: Sample[],
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}&format=csv`;
   return axios.patch(
     url,
     {
-      sample_table_csv: sampleTable,
+      sample_table: sampleTable,
     },
     { headers: { Authorization: `Bearer ${token}` } },
   );
