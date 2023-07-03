@@ -1,15 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+
 import { ValidationResult } from '../../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
 interface ValidationParams {
-  pep: FileList | string | undefined,
-  schema: string | undefined,
-  schema_registry: string | undefined,
-  enabled?: boolean,
+  pep: FileList | string | undefined;
+  schema: string | undefined;
+  schema_registry: string | undefined;
+  enabled?: boolean;
 }
 
 const runValidation = async (params: ValidationParams) => {
@@ -45,8 +46,14 @@ const runValidation = async (params: ValidationParams) => {
 
 export const useValidation = (params: ValidationParams) => {
   return useQuery(['validation', params.pep, params.schema, params.schema_registry], () => runValidation(params), {
-    enabled: params.enabled && params.pep !== undefined && params.schema !== undefined && params.schema_registry
-     !== undefined && params.pep.length > 0 && params.schema?.length > 0 && params.schema_registry?.length > 0,
+    enabled:
+      params.enabled &&
+      params.pep !== undefined &&
+      params.schema !== undefined &&
+      params.schema_registry !== undefined &&
+      params.pep.length > 0 &&
+      params.schema?.length > 0 &&
+      params.schema_registry?.length > 0,
     refetchOnWindowFocus: false,
     retry: false,
   });
