@@ -116,9 +116,9 @@ async def update_a_pep(
         new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
 
     # subsample table update
-    if updated_project.subsample_list is not None:
+    if updated_project.subsample_table is not None:
         subsample_peppy_list = []
-        for subsample in updated_project.subsample_list:
+        for subsample in updated_project.subsample_table:
             subsample_str = subsample.rstrip(",")
             subsample_str = StringIO(subsample_str)
             subsample_pd = pd.read_csv(subsample_str)
