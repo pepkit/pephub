@@ -73,11 +73,12 @@ export const ProjectPage: FC = () => {
     data: validationResult,
     isLoading: isValidationLoading,
     isFetching: isValidationFetching,
-  } = useValidation(
-    `${namespace}/${project}:${tag}`,
-    projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
-    namespace && project && tag && projectInfo ? true : false,
-  );
+  } = useValidation({
+    pep: `${namespace}/${project}:${tag}`,
+    schema: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
+    schema_registry: projectInfo?.pep_schema,
+    enabled: namespace && project && tag && projectInfo ? true : false,
+  });
 
   // watch for query changes to update newProjectConfig and newProjectSamples
   useEffect(() => {
