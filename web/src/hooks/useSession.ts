@@ -1,6 +1,7 @@
-import { User } from '../../types';
-import { useCallback } from 'react';
 import jwt_decode from 'jwt-decode';
+import { useCallback } from 'react';
+
+import { User } from '../../types';
 import { buildClientRedirectUrl } from '../api/auth';
 import { useLocalStorage } from './useLocalStorage';
 
@@ -21,6 +22,8 @@ export const useSession = () => {
 
   const logout = useCallback(() => {
     setJwt(null);
+    // reload the page for UX
+    window.location.reload();
   }, [setJwt, JWT_STORE]);
 
   // decode the session cookie

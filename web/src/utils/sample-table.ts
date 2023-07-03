@@ -1,28 +1,19 @@
+import { toast } from 'react-hot-toast';
+
 import { Sample } from '../../types';
 
-export const tableDataToCsvString = (tableData: any[][]) => {
-  const csvRows: string[] = [];
-  tableData.forEach((row) => {
-    // ignore rows containing only empty strings
-    if (row.every((cell) => !cell)) {
-      return;
-    }
-    // sometimes there are commas INSIDE the actual cell,
-    // and we want to preserve that relationship, while
-    // updating the csvRows array
-    const csvRow = row.map((cell: any) => {
-      if (cell && cell.includes(',')) {
-        return `"${cell}"`;
-      } else {
-        return cell;
+const arraysAreEmpty = (arraysList: any[][]) => {
+  // check if the list of arrays is full of nulls
+  // if so, then the list is empty
+  let empty = true;
+  arraysList.forEach((array) => {
+    array.forEach((item) => {
+      if (item !== null) {
+        empty = false;
       }
     });
-    csvRows.push(csvRow.join(','));
   });
-  let csvString = csvRows.join('\n');
-  // remove leading and trailing whitespace
-  csvString = csvString.trim();
-  return csvString;
+  return empty;
 };
 
 export const sampleListToArrays = (sampleList: Sample[]) => {
@@ -78,10 +69,32 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   // ]
 
   // first row is the header row
-  const headerRow = arraysList[0];
+  let headerRow = arraysList[0];
+
+  if (headerRow.every((cell) => !cell)) {
+    toast.error('Header row cannot be empty! Please add at least one column name.');
+    return [];
+  }
+
+  // get the rest of the rows
+  const theRest = arraysList.slice(1);
   const sampleList: Sample[] = [];
 
-  arraysList.slice(1).forEach((row) => {
+  debugger;
+  // restrict header row to only contain non-null values
+  headerRow = headerRow.filter((key) => key !== null && key !== undefined);
+
+  // if there's only a header row, return a list with one sample where all the property values are null
+  if (arraysAreEmpty(theRest)) {
+    const sample: Sample = {};
+    headerRow.forEach((key) => {
+      sample[key] = null;
+    });
+    sampleList.push(sample);
+    return sampleList;
+  }
+
+  theRest.forEach((row) => {
     // ignore empty rows
     if (row.every((cell) => !cell)) {
       return;
@@ -94,4 +107,69 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   });
 
   return sampleList;
+};
+
+/**
+ * Convert a list of samples into an object of objects. Given the example input:
+ * #### Given the example table:
+| sample_name | genome | path |
+|------------|------------|------------|
+| sample1    | hg38   | data/s1.fastq.gz    |
+| sample2   | hg38    | data/s2.fastq.gz    |
+| sample3    | hg38    | data/s3.fastq.gz    |
+
+#### We can represent it as a list of objects:
+```json
+[
+  {
+    "sample_name": "sample1",
+    "genome": "hg38",
+    "path": "data/s1.fastq.gz"
+  },
+  {
+    "sample_name": "sample2",
+    "genome": "hg38",
+    "path": "data/s2.fastq.gz"
+  },
+  {
+    "sample_name": "sample3",
+    "genome": "hg38",
+    "path": "data/s3.fastq.gz"
+  }
+]
+```
+
+#### or, an object of objects:
+```json
+{
+  "sample_name": {
+    "1": "sample1",
+    "2": "sample2",
+    "3": "sample3"
+  },
+  "genome": {
+    "1": "hg38",
+    "2": "hg38",
+    "3": "hg38"
+  },
+  "path": {
+    "1": "data/s1.fastq.gz",
+    "2": "data/s2.fastq.gz",
+    "3": "data/s3.fastq.gz"
+  }
+}
+```
+This function should convert the list of objects into the object of objects.
+ */
+export const sampleListToObjectofObjects = (samples: Sample[]) => {
+  const objectOfObjects: any = {};
+  samples.forEach((sample, index) => {
+    Object.keys(sample).forEach((key) => {
+      if (!objectOfObjects[key]) {
+        objectOfObjects[key] = {};
+      }
+      objectOfObjects[key][index + 1] = sample[key];
+    });
+  });
+  return objectOfObjects;
 };

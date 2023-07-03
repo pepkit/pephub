@@ -1,11 +1,13 @@
 import { FC, useState } from 'react';
 import { ButtonGroup, Dropdown } from 'react-bootstrap';
+
 import { ProjectAnnotation } from '../../../types';
 import { useSession } from '../../hooks/useSession';
-import { canEdit } from '../../utils/permissions';
-import { DeletePEPModal } from '../modals/delete-pep';
 import { dateStringToDateTime } from '../../utils/dates';
+import { canEdit } from '../../utils/permissions';
 import { Badge } from '../badges/badge';
+import { MarkdownToText } from '../markdown/render';
+import { DeletePEPModal } from '../modals/delete-pep';
 
 interface Props {
   project: ProjectAnnotation;
@@ -70,7 +72,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
 
         <p className="mb-0">
           {project.description ? (
-            project.description
+            <MarkdownToText>{project.description}</MarkdownToText>
           ) : (
             <em>
               <span className="text-muted text-italic">No description</span>

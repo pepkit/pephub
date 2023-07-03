@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { editProjectSampleTable } from '../../api/project';
-import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
-import { tableDataToCsvString, sampleListToArrays } from '../../utils/sample-table';
+import { toast } from 'react-hot-toast';
+
+import { editProjectSampleTable } from '../../api/project';
 
 export const useSampleTableMutation = (
   namespace: string,
@@ -14,14 +14,7 @@ export const useSampleTableMutation = (
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () =>
-      editProjectSampleTable(
-        namespace || '',
-        project || '',
-        tag,
-        jwt || '',
-        tableDataToCsvString(sampleListToArrays(newProjectSamples)),
-      ),
+    mutationFn: () => editProjectSampleTable(namespace || '', project || '', tag, jwt || '', newProjectSamples),
     onSuccess: () => {
       queryClient.invalidateQueries([namespace, project, tag, 'samples']);
       toast.success('Successfully updated project samples');
