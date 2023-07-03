@@ -1,8 +1,6 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { FC } from 'react';
 
 import { useApiBase } from '../../hooks/queries/useApiBase';
-import { useSession } from '../../hooks/useSession';
 import { getOS } from '../../utils/etc';
 import { StatusCircle } from '../badges/status-circle';
 import { Nav } from './nav';
@@ -58,24 +56,6 @@ const Footer: FC = () => {
 };
 
 export const PageLayout: FC<Props> = ({ children, title, description, image, fullWidth, footer = true }) => {
-  const { logout } = useSession();
-
-  // get query client we just created above
-  const queryClient = useQueryClient();
-
-  // set default options for all queries
-  queryClient.setDefaultOptions({
-    queries: {
-      onError: (error: any) => {
-        // check if axios error
-        // if so, check if 401
-        if (error.response && error.response.status === 401) {
-          logout(); // just deletes the token
-        }
-      },
-    },
-  });
-
   const os = getOS();
   const searchInput = document.getElementById('global-search-bar');
 

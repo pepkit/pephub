@@ -141,6 +141,7 @@ async def update_a_pep(
         [
             updated_project.project_config_yaml is not None,
             updated_project.sample_table is not None,
+            updated_project.subsample_table is not None,
         ]
     ):
         try:

@@ -126,7 +126,7 @@ def get_db() -> PEPDatabaseAgent:
     return agent
 
 
-def read_authorization_header(Authorization: str = Header(None)) -> Union[str, None]:
+def read_authorization_header(Authorization: str = Header(None)) -> Union[dict, None]:
     """
     Reads and decodes a JWT, returning the decoded variables.
 

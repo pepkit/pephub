@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import jwt_decode from 'jwt-decode';
 import { useCallback } from 'react';
 
@@ -11,6 +12,29 @@ const JWT_STORE = 'pephub_session';
 
 export const useSession = () => {
   const [jwt, setJwt] = useLocalStorage(JWT_STORE, null);
+
+  // hit endpoint to check if the session is valid
+  // if not, clear the session
+  const {} = useQuery({
+    queryKey: ['session', jwt],
+    queryFn: async () => {
+      if (!jwt) return null;
+      const response = await fetch(`${AUTH_BASE}/session`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      if (response.status === 401) {
+        setJwt(null);
+        // reload page to clear session
+        window.location.reload();
+        return null;
+      }
+      return response.json();
+    },
+    enabled: !!jwt,
+  });
+
   let decoded = null;
 
   const login = useCallback(() => {
