@@ -93,16 +93,12 @@ export const Nav: FC = () => {
                       />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item as={'div'} href={`/${user.login}`}>
-                        View PEPs
-                      </Dropdown.Item>
-                      <Dropdown.Item as={'div'} disabled href="/me">
+                      <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
+                      <Dropdown.Item disabled href="/me">
                         Profile
                       </Dropdown.Item>
                       <Dropdown.Divider />
-                      <Dropdown.Item as={'div'} onClick={() => logout()}>
-                        Log out
-                      </Dropdown.Item>
+                      <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </div>
