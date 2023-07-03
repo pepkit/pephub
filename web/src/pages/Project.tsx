@@ -10,7 +10,7 @@ import { SchemaTag } from '../components/forms/components/shema-tag';
 import { PageLayout } from '../components/layout/page-layout';
 import { ProjectDataNav } from '../components/layout/project-data-nav';
 import { Markdown } from '../components/markdown/render';
-import { CompatibilityModal } from '../components/modals/compatibility-modal';
+// import { CompatibilityModal } from '../components/modals/compatibility-modal';
 import { DeletePEPModal } from '../components/modals/delete-pep';
 import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { ForkPEPModal } from '../components/modals/fork-pep';
@@ -341,13 +341,13 @@ export const ProjectPage: FC = () => {
         description={projectInfo?.description || ''}
         tag={tag}
       />
-      <CompatibilityModal
-        namespace={namespace || ''}
-        project={project || ''}
-        tag={tag}
-        show={showCompatibilityModal}
-        onHide={() => setShowCompatibilityModal(false)}
-      />
+      {/*<CompatibilityModal*/}
+      {/*  namespace={namespace || ''}*/}
+      {/*  project={project || ''}*/}
+      {/*  tag={tag}*/}
+      {/*  show={showCompatibilityModal}*/}
+      {/*  onHide={() => setShowCompatibilityModal(false)}*/}
+      {/*/>*/}
     </PageLayout>
   );
 };
