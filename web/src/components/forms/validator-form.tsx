@@ -1,17 +1,16 @@
-import { FC, useRef, useState, useEffect, useMemo } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { FileDropZone } from './components/file-dropzone';
-import Select from 'react-select';
-import { useSession } from '../../hooks/useSession';
-import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
-import { useSchemas } from '../../hooks/queries/useSchemas';
-import { popFileFromFileList } from '../../utils/dragndrop';
-import { useValidation } from '../../hooks/queries/useValidation';
-import { useSchema } from '../../hooks/queries/useSchema';
-import Editor from '@monaco-editor/react';
 import { HotTable } from '@handsontable/react';
+import Editor from '@monaco-editor/react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select';
 
-
+import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
+import { useSchema } from '../../hooks/queries/useSchema';
+import { useSchemas } from '../../hooks/queries/useSchemas';
+import { useValidation } from '../../hooks/queries/useValidation';
+import { useSession } from '../../hooks/useSession';
+import { popFileFromFileList } from '../../utils/dragndrop';
+import { FileDropZone } from './components/file-dropzone';
 
 interface ValidatorFormInputs {
   pepFiles?: FileList;
@@ -56,7 +55,7 @@ export const ValidatorForm: FC = () => {
   const [schemaPaste, setSchemaPaste] = useState<string>('');
   // const [pep_Paste1, setPepPaste1] = useState<string>('');
   // const [pep_Paste2, setPepPaste2] = useState<string>('');
-  
+
   const { data: schema } = useSchema(schemaRegistryPath?.value);
   const params = useMemo(() => {
     if (useExistingPEP) {
@@ -76,12 +75,7 @@ export const ValidatorForm: FC = () => {
     }
   }, [useExistingPEP, pepFiles, pepRegistryPath?.value, schemaString]);
 
-  const {
-    data: result,
-    error,
-    isFetching: isValidating,
-    refetch,
-  } = useValidation(params);
+  const { data: result, error, isFetching: isValidating, refetch } = useValidation(params);
 
   // handle schema changes to update the schema string
   useEffect(() => {
@@ -101,6 +95,19 @@ export const ValidatorForm: FC = () => {
       }
     }
   }, [schemaRegistryPath?.value, schemaFiles, schema, schemaPaste]);
+
+  const resetValidator = () => {
+    resetForm({
+      pepFiles: undefined,
+      pepRegistryPath: undefined,
+      schemaFiles: undefined,
+      schemaRegistryPath: undefined,
+      schemaPaste: undefined,
+    });
+    setUseExistingPEP(false);
+    // setPepPaste1('');
+    // setPepPaste2('');
+  };
 
   const runValidation = () => {
     refetch();
@@ -191,8 +198,8 @@ export const ValidatorForm: FC = () => {
           )}
           {/* {!useExistingPEP && !pepFiles && (
             <> */}
-              
-              {/* <div className="my-3">
+
+          {/* <div className="my-3">
                 <ul className="nav nav-tabs" role="tablist">
                   <li className="nav-item" role="presentation">
                     <button
@@ -287,7 +294,7 @@ export const ValidatorForm: FC = () => {
                   </div>
                 </div>
               </div> */}
-            {/* </>
+          {/* </>
           )} */}
 
           <div className="my-3"></div>
@@ -357,7 +364,6 @@ export const ValidatorForm: FC = () => {
                   language="yaml"
                   value={schemaPaste}
                   onChange={(value) => handleSchemaPaste(value)}
-                  
                 />
               </div>
             </>
@@ -366,7 +372,12 @@ export const ValidatorForm: FC = () => {
             <button onClick={() => runValidation()} disabled={!isValid} type="button" className="me-1 btn btn-success">
               Validate
             </button>
-            <button disabled={!isDirty} type="button" onClick={() => resetForm()} className="me-1 btn btn-outline-dark">
+            <button
+              disabled={!isDirty}
+              type="button"
+              onClick={() => resetValidator()}
+              className="me-1 btn btn-outline-dark"
+            >
               Reset
             </button>
           </div>
@@ -396,8 +407,12 @@ export const ValidatorForm: FC = () => {
                   <p className="mb-0">PEP is invalid!</p>
                   <p className="mb-0">Errors:</p>
                   <code>
-                    {result.errors.map(e => {
-                      return <pre className='mb-0 text-danger'>{"->"} {e}</pre>
+                    {result.errors.map((e) => {
+                      return (
+                        <pre className="mb-0 text-danger">
+                          {'->'} {e}
+                        </pre>
+                      );
                     })}
                   </code>
                 </div>
