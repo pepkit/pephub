@@ -61,7 +61,7 @@ class JWTDeviceTokenResponse(BaseModel):
 class ProjectRawModel(BaseModel):
     config: dict = Field(alias="_config")
     subsample_list: Optional[list] = Field(alias="_subsample_list")
-    sample_dict: list = Field(alias="_sample_dict")
+    sample_list: list[dict] = Field(alias="_sample_dict")
 
     class Config:
         allow_population_by_field_name = True
@@ -70,7 +70,7 @@ class ProjectRawModel(BaseModel):
 class ProjectRawRequest(BaseModel):
     config: dict
     subsample_list: Optional[list]
-    sample_dict: dict
+    sample_list: list[dict]
 
     class Config:
         allow_population_by_field_name = True
@@ -79,6 +79,8 @@ class ProjectRawRequest(BaseModel):
 
 class ProjectJsonRequest(BaseModel):
     pep_dict: ProjectRawRequest
+    name: str
+    description: Optional[str] = None
     is_private: bool = False
     tag: str = DEFAULT_TAG
     overwrite: bool = False

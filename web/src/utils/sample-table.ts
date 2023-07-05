@@ -80,7 +80,6 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   const theRest = arraysList.slice(1);
   const sampleList: Sample[] = [];
 
-  debugger;
   // restrict header row to only contain non-null values
   headerRow = headerRow.filter((key) => key !== null && key !== undefined);
 

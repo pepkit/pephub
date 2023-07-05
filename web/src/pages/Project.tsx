@@ -221,30 +221,37 @@ export const ProjectPage: FC = () => {
                 samplesIsDirty={samplesIsDirty}
                 subsamplesIsDirty={subsamplesIsDirty}
               />
-              {/* Validation status */}
-              <div className="d-flex flex-row align-items-center">
-                <ValidationTooltip />
-                <div className="d-flex flex-row align-items-center mb-1 me-4">
-                  {isValidationLoading || isValidationFetching ? (
-                    <>
-                      <StatusCircle className="me-1" variant="warning" />
-                      <span>Validating...</span>
-                    </>
-                  ) : validationResult?.valid ? (
-                    <>
-                      <StatusCircle className="me-1" variant="success" />
-                      <span>Valid</span>
-                    </>
+              {/* no matter what, only render if belonging to the user */}
+              {user && projectInfo && canEdit(user, projectInfo) ? (
+                <div className="d-flex flex-row align-items-center">
+                  {/* Validation status */}
+                  <ValidationTooltip />
+                  {projectInfo?.pep_schema ? (
+                    <div className="d-flex flex-row align-items-center mb-1 me-4">
+                      {isValidationLoading || isValidationFetching ? (
+                        <>
+                          <StatusCircle className="me-1" variant="warning" />
+                          <span>Validating...</span>
+                        </>
+                      ) : validationResult?.valid ? (
+                        <>
+                          <StatusCircle className="me-1" variant="success" />
+                          <span>Valid</span>
+                        </>
+                      ) : (
+                        <>
+                          <StatusCircle className="me-1" variant="danger" />
+                          <span>Invalid</span>
+                        </>
+                      )}
+                    </div>
                   ) : (
                     <>
                       <StatusCircle className="me-1" variant="danger" />
-                      <span>Invalid</span>
+                      <span>Add schema to PEP to valid</span>
                     </>
                   )}
-                </div>
-                <div>
-                  {/* no matter what, only render if belonging to the user */}
-                  {user && projectInfo && canEdit(user, projectInfo) ? (
+                  <div>
                     <>
                       <button
                         disabled={
@@ -272,9 +279,9 @@ export const ProjectPage: FC = () => {
                         Discard
                       </button>
                     </>
-                  ) : null}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </>
         )}

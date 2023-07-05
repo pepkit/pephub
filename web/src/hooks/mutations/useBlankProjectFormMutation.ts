@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
 import { submitProjectJSON } from '../../api/namespace';
+import { extractError, extractErrorMessage } from '../../utils/etc';
 
 export const useBlankProjectFormMutation = (
   namespace: string,
@@ -41,7 +42,12 @@ export const useBlankProjectFormMutation = (
       }
     },
     onError: (err: AxiosError) => {
-      toast.error(`Error uploading project! ${err}`);
+      // extract out error message if it exists, else unknown
+      const errorMessage = extractErrorMessage(err);
+      const error = extractError(err);
+      toast.error(`${errorMessage}: ${error}`, {
+        duration: 5000,
+      });
     },
   });
 };

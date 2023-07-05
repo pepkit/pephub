@@ -155,20 +155,18 @@ export const submitProjectJSON = (
 ) => {
   const url = `${API_BASE}/namespaces/${namespace}/projects/json`;
 
-  const sample_dict = sampleListToObjectofObjects(sample_table);
-
   const config_json = YAML.parse(config);
   return axios
     .post<ProjectSubmissionResponse>(
       url,
       {
         pep_dict: {
-          name: project_name,
-          description: description || '',
           config: config_json,
-          sample_dict: sample_dict,
+          sample_list: sample_table,
           pep_schema: pep_schema,
         },
+        description: description || '',
+        name: project_name,
         is_private: is_private || false,
         tag: tag || 'default',
       },

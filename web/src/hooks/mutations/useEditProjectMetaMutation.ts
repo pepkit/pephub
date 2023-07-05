@@ -1,7 +1,9 @@
-import { toast } from 'react-hot-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { toast } from 'react-hot-toast';
+
 import { editProjectMetadata } from '../../api/project';
+import { extractError, extractErrorMessage } from '../../utils/etc';
 
 export const useEditProjectMetaMutation = (
   namespace: string,
@@ -43,13 +45,21 @@ export const useEditProjectMetaMutation = (
         window.location.href = `/${namespace}/${newName || name}?tag=${newTag || tag}`;
       }
     },
-    onError: (error: AxiosError) => {
-      if (error.response?.status === 401) {
+    onError: (err: AxiosError) => {
+      if (err.response?.status === 401) {
         toast.error('You are not authorized to edit this project.');
         return;
+      } else {
+        // extract out error message if it exists, else unknown
+        const errorMessage = extractErrorMessage(err);
+        const error = extractError(err);
+        toast.error(`${errorMessage}: ${error}`, {
+          duration: 5000,
+        });
       }
-      toast.error(`There was an error updating project metadata: ${error}`);
-      onFailedSubmit();
+      if (onFailedSubmit) {
+        onFailedSubmit();
+      }
     },
   });
 };

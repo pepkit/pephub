@@ -1,11 +1,11 @@
 import { FC } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { useSession } from '../../hooks/useSession';
-import { useProject } from '../../hooks/queries/useProject';
-import { SchemaDropdown } from './components/schemas-databio-dropdown';
-import { MarkdownEditor } from '../markdown/edit';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
+import { useProject } from '../../hooks/queries/useProject';
+import { useSession } from '../../hooks/useSession';
+import { MarkdownEditor } from '../markdown/edit';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface Props {
   namespace: string;
