@@ -5,7 +5,7 @@ import { Breadcrumb } from 'react-bootstrap';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
-import { StatusCircle } from '../components/badges/status-circle';
+import { StatusIcon } from '../components/badges/status-icons';
 import { SchemaTag } from '../components/forms/components/shema-tag';
 import { PageLayout } from '../components/layout/page-layout';
 import { ProjectDataNav } from '../components/layout/project-data-nav';
@@ -230,24 +230,24 @@ export const ProjectPage: FC = () => {
                     <div className="d-flex flex-row align-items-center mb-1 me-4">
                       {isValidationLoading || isValidationFetching ? (
                         <>
-                          <StatusCircle className="me-1" variant="warning" />
+                          <StatusIcon className="text-2xl cursor-pointer" variant="warning" />
                           <span>Validating...</span>
                         </>
                       ) : validationResult?.valid ? (
                         <>
-                          <StatusCircle className="me-1" variant="success" />
+                          <StatusIcon className="text-2xl cursor-pointer" variant="success" />
                           <span>Valid</span>
                         </>
                       ) : (
                         <>
-                          <StatusCircle className="me-1" variant="danger" />
+                          <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
                           <span>Invalid</span>
                         </>
                       )}
                     </div>
                   ) : (
                     <>
-                      <StatusCircle className="me-1" variant="danger" />
+                      <StatusIcon className="me-1" variant="danger" />
                       <span>Add schema to PEP to valid</span>
                     </>
                   )}
