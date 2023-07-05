@@ -14,15 +14,17 @@ interface ValidationParams {
 }
 
 const runValidation = async (params: ValidationParams) => {
+  const { pep, schema, schema_registry } = params;
+  
   let pep_registry: string | null = null;
   let pep_files: FileList | null | undefined = null;
 
-  if (typeof params.pep === 'string') {
-    pep_registry = params.pep;
+  if (typeof pep === 'string') {
+    pep_registry = pep;
     pep_files = null;
   } else {
     pep_registry = null;
-    pep_files = params.pep;
+    pep_files = pep;
   }
 
   // create form data
@@ -33,8 +35,8 @@ const runValidation = async (params: ValidationParams) => {
       formData.append('pep_files', pep_files[i]);
     }
   }
-  formData.append('schema', params.schema || '');
-  formData.append('schema_registry', params.schema_registry || '');
+  formData.append('schema', schema || '');
+  formData.append('schema_registry', schema_registry || '');
 
   const { data: result } = await axios.post<ValidationResult>(`${API_BASE}/eido/validate`, formData, {
     headers: {
@@ -45,15 +47,16 @@ const runValidation = async (params: ValidationParams) => {
 };
 
 export const useValidation = (params: ValidationParams) => {
-  return useQuery(['validation', params.pep, params.schema, params.schema_registry], () => runValidation(params), {
+  const { pep, schema, schema_registry, enabled } = params;
+  return useQuery(['validation', pep, schema, schema_registry], () => runValidation(params), {
     enabled:
-      params.enabled &&
-      params.pep !== undefined &&
-      params.schema !== undefined &&
-      params.schema_registry !== undefined &&
-      params.pep.length > 0 &&
-      params.schema?.length > 0 &&
-      params.schema_registry?.length > 0,
+      enabled &&
+      pep !== undefined &&
+      schema !== undefined &&
+      schema_registry !== undefined &&
+      pep.length > 0 &&
+      schema?.length > 0 &&
+      schema_registry?.length > 0,
     refetchOnWindowFocus: false,
     retry: false,
   });

@@ -161,9 +161,9 @@ async def validate(
     # while we catch this, its still a 200 response since we want to
     # return the validation errors
     except eido.exceptions.EidoValidationError as e:
-        errors = ["-> " + str(error) for error in e.errors_by_type]
-        error_message = "\n".join(errors)
-        return {"valid": False, "errors": {str(error_message)}}
+        errors = [str(error) for error in e.errors_by_type]
+        # error_message = "\n".join(errors)
+        return {"valid": False, "errors": errors}
     except Exception as e:
         raise HTTPException(
             status_code=406,

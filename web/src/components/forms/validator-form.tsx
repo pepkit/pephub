@@ -395,9 +395,11 @@ export const ValidatorForm: FC = () => {
                 <div className="alert alert-danger" role="alert">
                   <p className="mb-0">PEP is invalid!</p>
                   <p className="mb-0">Errors:</p>
-                  <pre>
-                    <code>{result.errors}</code>
-                  </pre>
+                  <code>
+                    {result.errors.map(e => {
+                      return <pre className='mb-0 text-danger'>{"->"} {e}</pre>
+                    })}
+                  </code>
                 </div>
               </>
             )}

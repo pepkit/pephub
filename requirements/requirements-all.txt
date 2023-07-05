@@ -9,7 +9,7 @@ tqdm
 uvicorn
 python-dotenv
 pepdbagent
-peppy<=0.35.5
+peppy<=0.35.6
 qdrant-client
 requests
 aiofiles
