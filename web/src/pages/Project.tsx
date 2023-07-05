@@ -263,32 +263,47 @@ export const ProjectPage: FC = () => {
                       ) : validationResult?.valid ? (
                         <>
                           <Dropdown>
-                            <Dropdown.Toggle as={ValiationToggle}>
-                              <StatusIcon className="text-2xl cursor-pointer" variant="success" />
-                            </Dropdown.Toggle>
+                            <div className="d-flex align-items-center">
+                              <Dropdown.Toggle as={ValiationToggle}>
+                                <StatusIcon className="text-2xl cursor-pointer" variant="success" />
+                              </Dropdown.Toggle>
+                              <span className="text-success">Valid</span>
+                            </div>
                             <Dropdown.Menu>
-                              <Dropdown.Header className="text-success">Success message goes here</Dropdown.Header>
+                              <Dropdown.Header className="text-success">Your PEP is valid against {projectInfo?.pep_schema}</Dropdown.Header>
                             </Dropdown.Menu>
                           </Dropdown>
                         </>
                       ) : (
                         <>
                           <Dropdown>
+                          <div className="d-flex align-items-center">
                             <Dropdown.Toggle as={ValiationToggle}>
                               <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
                             </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              <Dropdown.Header className="text-danger">Validation errors go here</Dropdown.Header>
+                            <span className="text-danger">Invalid</span>
+                          </div>
+                            <Dropdown.Menu className="border border-dark shadow-lg">
+                              <Dropdown.Header>
+                                <span className='text-danger'>Your PEP is invalid against {projectInfo?.pep_schema}</span>
+                                {validationResult?.errors.map((error, index) => (
+                                  <Dropdown.Item className='text-danger' key={index}>{error}</Dropdown.Item>
+                                ))}
+                              </Dropdown.Header>
                             </Dropdown.Menu>
                           </Dropdown>
                         </>
                       )}
                     </div>
                   ) : (
+                    <div className="d-flex flex-row align-items-center mb-1 me-4">
                     <>
-                      <StatusIcon className="me-1" variant="danger" />
-                      <span>Add schema to PEP to valid</span>
+                      <div className="d-flex align-items-center">
+                        <StatusIcon className="text-2xl" variant="warning" />
+                        <span>Add schema to PEP to validate</span>
+                      </div>
                     </>
+                    </div>
                   )}
                   <div>
                     <>
