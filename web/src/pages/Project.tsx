@@ -1,5 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { FC, useEffect, useState } from 'react';
+import { FC, ForwardRefRenderFunction, MouseEvent, forwardRef, useEffect, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { Breadcrumb } from 'react-bootstrap';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -32,6 +31,27 @@ import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
+
+interface CustomToggleProps {
+  children?: React.ReactNode;
+  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+}
+
+const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ children, onClick }, ref) => (
+  <a
+    href=""
+    ref={ref}
+    onClick={(e) => {
+      e.preventDefault();
+      if (onClick) {
+        onClick(e);
+      }
+    }}
+    className="text-decoration-none"
+  >
+    {children}
+  </a>
+));
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
@@ -230,18 +250,37 @@ export const ProjectPage: FC = () => {
                     <div className="d-flex flex-row align-items-center mb-1 me-4">
                       {isValidationLoading || isValidationFetching ? (
                         <>
-                          <StatusIcon className="text-2xl cursor-pointer" variant="warning" />
+                          <Dropdown>
+                            <Dropdown.Toggle as={ValiationToggle}>
+                              <StatusIcon className="text-xl cursor-pointer" variant="warning" />
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Header>Currently validating message goes here</Dropdown.Header>
+                            </Dropdown.Menu>
+                          </Dropdown>
                           <span>Validating...</span>
                         </>
                       ) : validationResult?.valid ? (
                         <>
-                          <StatusIcon className="text-2xl cursor-pointer" variant="success" />
-                          <span>Valid</span>
+                          <Dropdown>
+                            <Dropdown.Toggle as={ValiationToggle}>
+                              <StatusIcon className="text-2xl cursor-pointer" variant="success" />
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Header className="text-success">Success message goes here</Dropdown.Header>
+                            </Dropdown.Menu>
+                          </Dropdown>
                         </>
                       ) : (
                         <>
-                          <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
-                          <span>Invalid</span>
+                          <Dropdown>
+                            <Dropdown.Toggle as={ValiationToggle}>
+                              <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Header className="text-danger">Validation errors go here</Dropdown.Header>
+                            </Dropdown.Menu>
+                          </Dropdown>
                         </>
                       )}
                     </div>
