@@ -250,14 +250,6 @@ export const ProjectPage: FC = () => {
                     <div className="d-flex flex-row align-items-center mb-1 me-4">
                       {isValidationLoading || isValidationFetching ? (
                         <>
-                          <Dropdown>
-                            <Dropdown.Toggle as={ValiationToggle}>
-                              <StatusIcon className="text-xl cursor-pointer" variant="warning" />
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              <Dropdown.Header>Currently validating message goes here</Dropdown.Header>
-                            </Dropdown.Menu>
-                          </Dropdown>
                           <span>Validating...</span>
                         </>
                       ) : validationResult?.valid ? (
@@ -269,7 +261,7 @@ export const ProjectPage: FC = () => {
                               </Dropdown.Toggle>
                               <span className="text-success">Valid</span>
                             </div>
-                            <Dropdown.Menu>
+                            <Dropdown.Menu className="border border-dark shadow-lg">
                               <Dropdown.Header className="text-success">Your PEP is valid against {projectInfo?.pep_schema}</Dropdown.Header>
                             </Dropdown.Menu>
                           </Dropdown>
@@ -284,20 +276,26 @@ export const ProjectPage: FC = () => {
                             <span className="text-danger">Invalid</span>
                           </div>
                             <Dropdown.Menu className="border border-dark shadow-lg">
-                              <Dropdown.Header>
-                                <span className='text-danger'>Your PEP is invalid against {projectInfo?.pep_schema}</span>
-                                <p className="mb-0">
-                                  <span className='text-danger'>Errors found in {validationResult?.error_type}{' '}</span>
-                                  {validationResult?.sample_names && (
-                                    <OverlayTrigger overlay={<Tooltip id="validation">{validationResult?.sample_names}</Tooltip>}>
-                                      <i className="bi bi-info-circle me-2 mb-2"></i>
-                                    </OverlayTrigger>
-                                  )}
-                                </p>
-                                {validationResult?.errors.map((error, index) => (
-                                  <Dropdown.Item className='text-danger' key={index}>{error}</Dropdown.Item>
-                                ))}
-                              </Dropdown.Header>
+                            <Dropdown.Header>
+                              {validationResult?.error_type === 'Schema' ? (
+                                <span className='text-danger'>Schema is invalid</span>
+                              ) : (
+                                <>
+                                  <span className='text-danger'>Your PEP is invalid against {projectInfo?.pep_schema}</span>
+                                  <p className="mb-0">
+                                    <span className='text-danger'>Errors found in {validationResult?.error_type}{' '}</span>
+                                    {validationResult?.sample_names && (
+                                      <OverlayTrigger overlay={<Tooltip id="validation">{validationResult?.sample_names}</Tooltip>}>
+                                        <i className="bi bi-info-circle me-2 mb-2"></i>
+                                      </OverlayTrigger>
+                                    )}
+                                  </p>
+                                  {validationResult?.errors.map((error, index) => (
+                                    <Dropdown.Item className='text-danger' key={index}>{error}</Dropdown.Item>
+                                  ))}
+                                </>
+                              )}
+                            </Dropdown.Header>
                             </Dropdown.Menu>
                           </Dropdown>
                         </>

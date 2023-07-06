@@ -138,6 +138,7 @@ async def validate(
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as yaml_file:
             yaml_file.write(yaml_string)
             schema_dict = yaml_file.name
+            
     else:
         # save schema string to temp file, then read in with eido
         with tempfile.NamedTemporaryFile(mode="w") as schema_file:
@@ -181,12 +182,12 @@ async def validate(
 
         errors = [str(error) for error in e.errors_by_type]
         return {"valid": False, "error_type": error_type, "sample_names": sample_names, "errors": errors}
-
+    
     except Exception as e:
-        raise HTTPException(
-            status_code=406,
-            detail={"error": f"Unknown error while validating: {str(e)}"},
-        )
+        sample_names = []
+        errors = [str(e)]
+        return {"valid": False, "error_type": "Schema", "sample_names": "", "errors": errors}
+
     # everything passed, return valid
     else:
         # return project is valid

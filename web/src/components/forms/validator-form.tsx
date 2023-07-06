@@ -406,13 +406,17 @@ export const ValidatorForm: FC = () => {
             ) : (
               <>
                 <div className="alert alert-danger" role="alert">
-                  <p className="mb-0">PEP is invalid!</p>
+                  <p className="mb-0">{result.error_type === 'Schema' ? 'Schema is invalid, found issue with:' : 'PEP is invalid!'}</p>
                   <p className="mb-0">
-                    Errors found in {result.error_type}{' '}
-                    {result.sample_names && (
-                      <OverlayTrigger overlay={<Tooltip id="validation">{result.sample_names}</Tooltip>}>
-                        <i className="bi bi-info-circle me-2 mb-2"></i>
-                      </OverlayTrigger>
+                    {result.error_type !== 'Schema' && (
+                      <>
+                        Errors found in {result.error_type}{' '}
+                        {result.sample_names && (
+                          <OverlayTrigger overlay={<Tooltip id="validation">{result.sample_names}</Tooltip>}>
+                            <i className="bi bi-info-circle me-2 mb-2"></i>
+                          </OverlayTrigger>
+                        )}
+                      </>
                     )}
                   </p>
                   <code>
@@ -423,8 +427,6 @@ export const ValidatorForm: FC = () => {
                     ))}
                   </code>
                 </div>
-
-
               </>
             )}
           </>
