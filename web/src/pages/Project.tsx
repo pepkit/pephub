@@ -81,7 +81,7 @@ export const ProjectPage: FC = () => {
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
-  const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
+  // const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
 
   // state for editing config, samples, and subsamples
