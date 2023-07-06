@@ -182,39 +182,33 @@ export const ProjectPage: FC = () => {
             <SchemaTag schema={projectInfo?.pep_schema} />
           </div>
         </div>
-        <div className="d-flex flex-row align-items-center">
-          <button
-            className="btn btn-sm btn-dark me-1"
-            onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}
-          >
+        <div className="btn-group" role="group" aria-label="Default button group">
+          <button className="btn btn-outline-primary" onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}>
             <i className="bi bi-file-earmark-zip me-1"></i>
             Download
           </button>
-          <button className="btn btn-sm btn-dark me-1" onClick={() => setShowAPIEndpointsModal(true)}>
+          <button className="btn btn-outline-primary" onClick={() => setShowAPIEndpointsModal(true)}>
             <i className="bi bi-hdd-rack me-1"></i>
             API Endpoints
           </button>
-          {user ? (
-            <button className="btn btn-sm btn-dark me-1" onClick={() => setShowForkPEPModal(true)}>
+          {user && (
+            <button className="btn btn-outline-primary" onClick={() => setShowForkPEPModal(true)}>
               <i className="me-1 bi bi-bezier2"></i>
               Fork
             </button>
-          ) : null}
-          {
-            // if user is logged in and is owner of project
-            user && projectInfo && canEdit(user, projectInfo) ? (
-              <>
-                <button className="btn btn-sm btn-dark me-1" onClick={() => setShowEditMetaMetadataModal(true)}>
-                  <i className="me-1 bi bi-pencil-square"></i>
-                  Edit project
-                </button>
-                <button className="btn btn-sm btn-danger me-1" onClick={() => setShowDeletePEPModal(true)}>
-                  <i className="me-1 bi bi-trash3"></i>
-                  Delete
-                </button>
-              </>
-            ) : null
-          }
+          )}
+          {user && projectInfo && canEdit(user, projectInfo) && (
+            <>
+              <button className="btn btn-outline-primary" onClick={() => setShowEditMetaMetadataModal(true)}>
+                <i className="me-1 bi bi-pencil-square"></i>
+                Edit project
+              </button>
+              <button className="btn btn-outline-danger" onClick={() => setShowDeletePEPModal(true)}>
+                <i className="me-1 bi bi-trash3"></i>
+                Delete
+              </button>
+            </>
+          )}
         </div>
       </div>
       <div className="px-4">
