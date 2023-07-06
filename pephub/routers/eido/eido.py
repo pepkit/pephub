@@ -138,6 +138,7 @@ async def validate(
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as yaml_file:
             yaml_file.write(yaml_string)
             schema_dict = yaml_file.name
+            
     else:
         # save schema string to temp file, then read in with eido
         with tempfile.NamedTemporaryFile(mode="w") as schema_file:
@@ -161,14 +162,32 @@ async def validate(
     # while we catch this, its still a 200 response since we want to
     # return the validation errors
     except eido.exceptions.EidoValidationError as e:
+        sample_names = []
+        for item_list in e.errors_by_type.values():
+            for item in item_list:
+                if item['sample_name'] == "project":
+                    error_type = "Project"
+                    sample_names = None
+                    break
+                else:
+                    sample_names.append(item['sample_name'])
+                    error_type = "Samples"
+
+        if sample_names is not None:
+            sample_counter = len(sample_names)
+            if sample_counter > 30:
+                sample_names = ["More than 30 samples have encountered errors."]
+            else:
+                sample_names = ", ".join(sample_names)
+
         errors = [str(error) for error in e.errors_by_type]
-        # error_message = "\n".join(errors)
-        return {"valid": False, "errors": errors}
+        return {"valid": False, "error_type": error_type, "sample_names": sample_names, "errors": errors}
+    
     except Exception as e:
-        raise HTTPException(
-            status_code=406,
-            detail={"error": f"Unknown error while validating: {str(e)}"},
-        )
+        sample_names = []
+        errors = [str(e)]
+        return {"valid": False, "error_type": "Schema", "sample_names": "", "errors": errors}
+
     # everything passed, return valid
     else:
         # return project is valid

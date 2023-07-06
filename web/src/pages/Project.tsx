@@ -1,6 +1,6 @@
 import { FC, ForwardRefRenderFunction, MouseEvent, forwardRef, useEffect, useState } from 'react';
-import { Dropdown } from 'react-bootstrap';
-import { Breadcrumb } from 'react-bootstrap';
+import { Breadcrumb, Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
+
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
@@ -250,45 +250,66 @@ export const ProjectPage: FC = () => {
                     <div className="d-flex flex-row align-items-center mb-1 me-4">
                       {isValidationLoading || isValidationFetching ? (
                         <>
-                          <Dropdown>
-                            <Dropdown.Toggle as={ValiationToggle}>
-                              <StatusIcon className="text-xl cursor-pointer" variant="warning" />
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              <Dropdown.Header>Currently validating message goes here</Dropdown.Header>
-                            </Dropdown.Menu>
-                          </Dropdown>
                           <span>Validating...</span>
                         </>
                       ) : validationResult?.valid ? (
                         <>
                           <Dropdown>
-                            <Dropdown.Toggle as={ValiationToggle}>
-                              <StatusIcon className="text-2xl cursor-pointer" variant="success" />
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              <Dropdown.Header className="text-success">Success message goes here</Dropdown.Header>
+                            <div className="d-flex align-items-center">
+                              <Dropdown.Toggle as={ValiationToggle}>
+                                <StatusIcon className="text-2xl cursor-pointer" variant="success" />
+                              </Dropdown.Toggle>
+                              <span className="text-success">Valid</span>
+                            </div>
+                            <Dropdown.Menu className="border border-dark shadow-lg">
+                              <Dropdown.Header className="text-success">Your PEP is valid against {projectInfo?.pep_schema}</Dropdown.Header>
                             </Dropdown.Menu>
                           </Dropdown>
                         </>
                       ) : (
                         <>
                           <Dropdown>
+                          <div className="d-flex align-items-center">
                             <Dropdown.Toggle as={ValiationToggle}>
                               <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
                             </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              <Dropdown.Header className="text-danger">Validation errors go here</Dropdown.Header>
+                            <span className="text-danger">Invalid</span>
+                          </div>
+                            <Dropdown.Menu className="border border-dark shadow-lg">
+                            <Dropdown.Header>
+                              {validationResult?.error_type === 'Schema' ? (
+                                <span className='text-danger'>Schema is invalid</span>
+                              ) : (
+                                <>
+                                  <span className='text-danger'>Your PEP is invalid against {projectInfo?.pep_schema}</span>
+                                  <p className="mb-0">
+                                    <span className='text-danger'>Errors found in {validationResult?.error_type}{' '}</span>
+                                    {validationResult?.sample_names && (
+                                      <OverlayTrigger overlay={<Tooltip id="validation">{validationResult?.sample_names}</Tooltip>}>
+                                        <i className="bi bi-info-circle me-2 mb-2"></i>
+                                      </OverlayTrigger>
+                                    )}
+                                  </p>
+                                  {validationResult?.errors.map((error, index) => (
+                                    <Dropdown.Item className='text-danger' key={index}>{error}</Dropdown.Item>
+                                  ))}
+                                </>
+                              )}
+                            </Dropdown.Header>
                             </Dropdown.Menu>
                           </Dropdown>
                         </>
                       )}
                     </div>
                   ) : (
+                    <div className="d-flex flex-row align-items-center mb-1 me-4">
                     <>
-                      <StatusIcon className="me-1" variant="danger" />
-                      <span>Add schema to PEP to valid</span>
+                      <div className="d-flex align-items-center">
+                        <StatusIcon className="text-2xl" variant="warning" />
+                        <span>Add schema to PEP to validate</span>
+                      </div>
                     </>
+                    </div>
                   )}
                   <div>
                     <>
