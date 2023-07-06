@@ -24,13 +24,13 @@ export const StatusIcon: FC<Props> = ({ variant, size, className }) => {
       padding = 'p-1';
       break;
     case 'medium':
-      padding = 'p-2';
+      padding = 'p-1';
       break;
     case 'large':
-      padding = 'p-3';
+      padding = 'p-2';
       break;
     default:
-      padding = 'p-2';
+      padding = 'p-1';
       break;
   }
 
