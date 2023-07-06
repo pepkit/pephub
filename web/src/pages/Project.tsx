@@ -287,7 +287,7 @@ export const ProjectPage: FC = () => {
                                     <p className="mb-0 fw-bold">
                                       <span className="text-danger">
                                         Errors found in {validationResult?.error_type}
-                                        {':'}
+                                        {': '}
                                       </span>
                                       {validationResult?.sample_names && (
                                         <OverlayTrigger

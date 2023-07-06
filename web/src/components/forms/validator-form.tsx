@@ -416,13 +416,15 @@ export const ValidatorForm: FC = () => {
                             <i className="bi bi-info-circle me-2 mb-2"></i>
                           </OverlayTrigger>
                         )}
+                        <br /><br />
                       </>
                     )}
                   </p>
-                  <code>
+                  <code className="error-code">
                     {result.errors.map((e) => (
-                      <pre className="mb-0 text-danger" key={e}>
-                        {`-> ${e}`}
+                      <pre className="mb-2 text-danger" key={e}>
+                        <i className="bi bi bi-exclamation-triangle me-2"></i>
+                        {`${e}`}
                       </pre>
                     ))}
                   </code>
