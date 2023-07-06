@@ -3,6 +3,8 @@ import Editor from '@monaco-editor/react';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+
 
 import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
 import { useSchema } from '../../hooks/queries/useSchema';
@@ -405,17 +407,24 @@ export const ValidatorForm: FC = () => {
               <>
                 <div className="alert alert-danger" role="alert">
                   <p className="mb-0">PEP is invalid!</p>
-                  <p className="mb-0">Errors:</p>
+                  <p className="mb-0">
+                    Errors found in {result.error_type}{' '}
+                    {result.sample_names && (
+                      <OverlayTrigger overlay={<Tooltip id="validation">{result.sample_names}</Tooltip>}>
+                        <i className="bi bi-info-circle me-2 mb-2"></i>
+                      </OverlayTrigger>
+                    )}
+                  </p>
                   <code>
-                    {result.errors.map((e) => {
-                      return (
-                        <pre className="mb-0 text-danger">
-                          {'->'} {e}
-                        </pre>
-                      );
-                    })}
+                    {result.errors.map((e) => (
+                      <pre className="mb-0 text-danger" key={e}>
+                        {`-> ${e}`}
+                      </pre>
+                    ))}
                   </code>
                 </div>
+
+
               </>
             )}
           </>

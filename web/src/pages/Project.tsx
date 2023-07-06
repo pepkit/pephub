@@ -1,6 +1,6 @@
 import { FC, ForwardRefRenderFunction, MouseEvent, forwardRef, useEffect, useState } from 'react';
-import { Dropdown } from 'react-bootstrap';
-import { Breadcrumb } from 'react-bootstrap';
+import { Breadcrumb, Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
+
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
@@ -286,6 +286,14 @@ export const ProjectPage: FC = () => {
                             <Dropdown.Menu className="border border-dark shadow-lg">
                               <Dropdown.Header>
                                 <span className='text-danger'>Your PEP is invalid against {projectInfo?.pep_schema}</span>
+                                <p className="mb-0">
+                                  <span className='text-danger'>Errors found in {validationResult?.error_type}{' '}</span>
+                                  {validationResult?.sample_names && (
+                                    <OverlayTrigger overlay={<Tooltip id="validation">{validationResult?.sample_names}</Tooltip>}>
+                                      <i className="bi bi-info-circle me-2 mb-2"></i>
+                                    </OverlayTrigger>
+                                  )}
+                                </p>
                                 {validationResult?.errors.map((error, index) => (
                                   <Dropdown.Item className='text-danger' key={index}>{error}</Dropdown.Item>
                                 ))}
