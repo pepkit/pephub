@@ -203,23 +203,16 @@ export const ProjectPage: FC = () => {
           {
             // if user is logged in and is owner of project
             user && projectInfo && canEdit(user, projectInfo) ? (
-              <Dropdown>
-                <Dropdown.Toggle variant="dark" size="sm">
-                  <i className="bi bi-pencil"></i>
-                </Dropdown.Toggle>
-                <Dropdown.Menu className="shadow-lg">
-                  <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
-                    {/*  pencil write */}
-                    <i className="bi bi-pencil-square me-1"></i>
-                    Edit project
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
-                    <i className="bi bi-trash3 me-1"></i>
-                    Delete
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+              <>
+                <button className="btn btn-sm btn-dark me-1" onClick={() => setShowEditMetaMetadataModal(true)}>
+                  <i className="me-1 bi bi-pencil-square"></i>
+                  Edit project
+                </button>
+                <button className="btn btn-sm btn-danger me-1" onClick={() => setShowDeletePEPModal(true)}>
+                  <i className="me-1 bi bi-trash3"></i>
+                  Delete
+                </button>
+              </>
             ) : null
           }
         </div>
