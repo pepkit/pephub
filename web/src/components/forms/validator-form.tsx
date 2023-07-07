@@ -1,6 +1,6 @@
 import Editor from '@monaco-editor/react';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { Nav, OverlayTrigger, Tab, Tabs, Tooltip } from 'react-bootstrap';
+import { OverlayTrigger, Tab, Tabs, Tooltip } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 
@@ -197,9 +197,9 @@ export const ValidatorForm: FC = () => {
               </div>
             </Tab>
             <Tab eventKey="new" title="Upload schema">
-              <div className="pb-2 px-2 border border-top-0 rounded-bottom">
+              <div className="d-flex flex-column align-items-center w-100 border border-top-0 rounded-bottom pb-3">
                 {schemaFiles ? (
-                  <div className="d-flex flex-column align-items-center">
+                  <div className="d-flex flex-column align-items-center w-00">
                     {Array.from(schemaFiles).map((file, i) => {
                       return (
                         <div key={i} className="flex-row d-flex align-items-center">
@@ -224,7 +224,9 @@ export const ValidatorForm: FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <FileDropZone multiple name="schemaFiles" control={control} innerRef={fileDialogRef} />
+                  <div className="w-100 px-2">
+                    <FileDropZone multiple name="schemaFiles" control={control} innerRef={fileDialogRef} />
+                  </div>
                 )}
               </div>
             </Tab>
