@@ -29,7 +29,10 @@ export const Nav: FC = () => {
       <div className="d-flex flex-row align-items-center w-100 px-4">
         {user ? (
           <div>
-            <a href={`/${user.login}`} className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none">
+            <a
+              href={`/${user.login}`}
+              className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none"
+            >
               <img src="/pephub_logo.svg" alt="PEPhub" height="60" />
             </a>
           </div>
@@ -89,7 +92,7 @@ export const Nav: FC = () => {
               </a>
             </li>
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-              <a className="nav-link" href="/validate" >
+              <a className="nav-link" href="/validate">
                 <i className="bi bi-check2-circle me-1"></i>Validation
               </a>
             </li>
@@ -99,22 +102,22 @@ export const Nav: FC = () => {
                   <a className="nav-link" href={`/${user.login}`}>
                     <span className="d-flex flex-row align-items-center">
                       <img className="me-1" src="/pep-dark.svg" height="30px" />
-                        <span>View PEPs</span>
+                      <span>View PEPs</span>
                     </span>
                   </a>
                 </div>
-              ) : null }
+              ) : null}
             </li>
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               {user ? (
-                  <div className="mx-2 my-0 nav-item h5 pt-1">
-                    <button className="btn btn-dark" onClick={() => logout()}>
-                      <i className="fa fa-github"></i>Log out
-                    </button>
-                  </div>
-              ) : (
                 <div className="mx-2 my-0 nav-item h5 pt-1">
-                  <button className="btn btn-dark" onClick={() => login()}>
+                  <button className="btn btn-sm btn-dark px-3 mb-1" onClick={() => logout()}>
+                    <i className="fa fa-github"></i>Log out
+                  </button>
+                </div>
+              ) : (
+                <div className="my-0 nav-item h5 pt-1">
+                  <button className="btn btn-sm btn-dark px-3 mb-1" onClick={() => login()}>
                     <i className="fa fa-github"></i>Log in
                   </button>
                 </div>

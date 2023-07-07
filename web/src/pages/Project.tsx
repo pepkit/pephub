@@ -166,7 +166,7 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 my-2">
+      <div className="d-flex flex-row align-items-center justify-content-between px-2 my-2">
         <div className="d-flex flex-row align-items-center">
           <Breadcrumb className="fw-bold">
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -182,28 +182,31 @@ export const ProjectPage: FC = () => {
             <SchemaTag schema={projectInfo?.pep_schema} />
           </div>
         </div>
-        <div className="btn-group" role="group" aria-label="Default button group">
-          <button className="btn btn-outline-primary" onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}>
+        <div className="d-flex flex-row align-items-center">
+          <button
+            className="me-1 btn btn-sm btn-outline-dark"
+            onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}
+          >
             <i className="bi bi-file-earmark-zip me-1"></i>
             Download
           </button>
-          <button className="btn btn-outline-primary" onClick={() => setShowAPIEndpointsModal(true)}>
+          <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowAPIEndpointsModal(true)}>
             <i className="bi bi-hdd-rack me-1"></i>
             API Endpoints
           </button>
           {user && (
-            <button className="btn btn-outline-primary" onClick={() => setShowForkPEPModal(true)}>
+            <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowForkPEPModal(true)}>
               <i className="me-1 bi bi-bezier2"></i>
               Fork
             </button>
           )}
           {user && projectInfo && canEdit(user, projectInfo) && (
             <>
-              <button className="btn btn-outline-primary" onClick={() => setShowEditMetaMetadataModal(true)}>
+              <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowEditMetaMetadataModal(true)}>
                 <i className="me-1 bi bi-pencil-square"></i>
                 Edit project
               </button>
-              <button className="btn btn-outline-danger" onClick={() => setShowDeletePEPModal(true)}>
+              <button className="me-1 btn btn-sm btn-danger" onClick={() => setShowDeletePEPModal(true)}>
                 <i className="me-1 bi bi-trash3"></i>
                 Delete
               </button>

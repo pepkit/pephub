@@ -77,19 +77,19 @@ export const NamespacePage: FC = () => {
         <h1 id="namespace-header" className="fw-bold">
           {namespace}
         </h1>
-        <div className="btn-group">
-          <button onClick={() => setShowEndpointsModal(true)} className="btn btn-outline-primary">
+        <div className="d-flex flex-row align-items-center">
+          <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark me-1">
             <i className="bi bi-hdd-rack me-1"></i>
             API Endpoints
           </button>
           {user?.login === namespace && (
             <button
               onClick={() => setShowAddPEPModal(true)}
-              className="btn btn-outline-success me-1"
+              className="btn btn-sm btn-success me-1"
               data-bs-toggle="modal"
               data-bs-target="#newProject"
             >
-              <i className="bi bi-plus-circle"></i>
+              <i className="bi bi-plus-circle me-1"></i>
               Add PEP
             </button>
           )}

@@ -38,33 +38,6 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             </Badge>
           ) : null}
         </div>
-        <div>
-          <div className="btn-group dropend">
-            <Dropdown as={ButtonGroup}>
-              <button disabled type="button" className="btn btn-sm btn-outline-primary">
-                <i className="bi bi-star me-1"></i>
-                Favorite
-              </button>
-              <Dropdown.Toggle split size="sm" variant="outline-primary" id="dropdown-split-basic" />
-              <Dropdown.Menu>
-                <li>
-                  <a className="dropdown-item" href={`/${project.namespace}/${project.name}?tag=${project.tag}`}>
-                    View
-                  </a>
-                </li>
-                {canEdit(user, project) ? (
-                  <>
-                    <Dropdown.Divider />
-                    <Dropdown.Item onClick={() => setShowDeletePEPModal(true)} className="text-danger dropdown-item">
-                      <i className="bi bi-trash3 me-1"></i>
-                      Delete
-                    </Dropdown.Item>
-                  </>
-                ) : null}
-              </Dropdown.Menu>
-            </Dropdown>
-          </div>
-        </div>
       </div>
       <div>
         <label className="fw-bold">No. of samples:</label>
