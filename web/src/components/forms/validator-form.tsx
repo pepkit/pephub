@@ -1,9 +1,8 @@
-import { HotTable } from '@handsontable/react';
 import Editor from '@monaco-editor/react';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip, Nav, Tab } from 'react-bootstrap';
 
 
 import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
@@ -43,20 +42,16 @@ export const ValidatorForm: FC = () => {
 
   const fileDialogRef = useRef<() => void | null>(null);
 
-  const [useExistingPEP, setUseExistingPEP] = useState(false);
+  const [useExistingPEP, setUseExistingPEP] = useState(true);
   const [useExistingSchema, setUseExistingSchema] = useState(true);
   const [schemaString, setSchemaString] = useState<string | undefined>(undefined);
-  // const [activePepPasteTab, setActivePepPasteTab] = useState('pepPaste1');
+  const [schemaPaste, setSchemaPaste] = useState<string>('');
 
   // watch the form data so we can use it
   const pepFiles = watch('pepFiles');
   const pepRegistryPath = watch('pepRegistryPath');
   const schemaFiles = watch('schemaFiles');
   const schemaRegistryPath = watch('schemaRegistryPath');
-
-  const [schemaPaste, setSchemaPaste] = useState<string>('');
-  // const [pep_Paste1, setPepPaste1] = useState<string>('');
-  // const [pep_Paste2, setPepPaste2] = useState<string>('');
 
   const { data: schema } = useSchema(schemaRegistryPath?.value);
   const params = useMemo(() => {
@@ -107,8 +102,6 @@ export const ValidatorForm: FC = () => {
       schemaPaste: undefined,
     });
     setUseExistingPEP(false);
-    // setPepPaste1('');
-    // setPepPaste2('');
   };
 
   const runValidation = () => {
@@ -118,40 +111,21 @@ export const ValidatorForm: FC = () => {
   const handleSchemaPaste = (value: string | undefined) => {
     setSchemaPaste(value || '');
   };
-  // const handlePEPPaste1 = (value: string | undefined) => {
-  //   setPepPaste1(value || '');
-  // };
-  // const handlePEPPaste2 = (value: string | undefined) => {
-  //   setPepPaste2(value || '');
-  // };
-
-  // const handlePaste = (fieldName: string, value: string | undefined) => {
-  //   if (fieldName === 'schemaPaste') {
-  //     setSchemaPaste(value || '');
-  //   } else if (fieldName === 'pepPaste1') {
-  //     setPepPaste1(value || '');
-  //   } else if (fieldName === 'pepPaste2') {
-  //     setPepPaste2(value || '');
-  //   }
-  // };
-
+  
   return (
     <>
       <form className="form-control border-dark shadow-sm">
         <div className="p-2">
           <label className="form-label fw-bold h5">1. Select your PEP</label>
-          <div className="form-check form-switch">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              role="switch"
-              id="use-existing"
-              checked={useExistingPEP}
-              onChange={() => setUseExistingPEP(!useExistingPEP)}
-            />
-            <label className="form-check-label" htmlFor="use-existing">
-              Use existing?
-            </label>
+          <div>
+            <Nav variant="tabs" activeKey={useExistingPEP ? 'existing' : 'upload'} onSelect={(selectedKey) => setUseExistingPEP(selectedKey === 'existing')}>
+              <Nav.Item>
+                <Nav.Link eventKey="existing">Use your PEP</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="upload">Upload</Nav.Link>
+              </Nav.Item>
+            </Nav>
           </div>
           {useExistingPEP ? (
             <Controller
@@ -198,107 +172,7 @@ export const ValidatorForm: FC = () => {
           ) : (
             <FileDropZone multiple name="pepFiles" control={control} innerRef={fileDialogRef} />
           )}
-          {/* {!useExistingPEP && !pepFiles && (
-            <> */}
-
-          {/* <div className="my-3">
-                <ul className="nav nav-tabs" role="tablist">
-                  <li className="nav-item" role="presentation">
-                    <button
-                      className={`nav-link ${activePepPasteTab === 'pepPaste1' ? 'active' : ''}`}
-                      id="pepPaste1-tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#pepPaste1"
-                      type="button"
-                      role="tab"
-                      aria-controls="pepPaste1"
-                      aria-selected={activePepPasteTab === 'pepPaste1'}
-                      onClick={() => setActivePepPasteTab('pepPaste1')}
-                    >
-                      <i className="bi bi-table me-1"></i>Samples
-                    </button>
-                  </li>
-                  <li className="nav-item" role="presentation">
-                    <button
-                      className={`nav-link ${activePepPasteTab === 'pepPaste2' ? 'active' : ''}`}
-                      id="pepPaste2-tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#pepPaste2"
-                      type="button"
-                      role="tab"
-                      aria-controls="pepPaste2"
-                      aria-selected={activePepPasteTab === 'pepPaste2'}
-                      onClick={() => setActivePepPasteTab('pepPaste2')}
-                    >
-                      <i className="bi bi-filetype-yml me-1"></i>Config
-                    </button>
-                  </li>
-                </ul>
-                <div className="tab-content">
-                  <div
-                    className={`tab-pane fade ${activePepPasteTab === 'pepPaste1' ? 'show active' : ''}`}
-                    id="pepPaste1"
-                    role="tabpanel"
-                    aria-labelledby="pepPaste1-tab"
-                  >
-                    <div className="mt-2">
-                    <div className="rounded rounded-2">
-                      <HotTable
-                        stretchH="all"
-                        height={window.innerHeight - 500}
-                        colHeaders={true}
-                        dropdownMenu={true}
-                        hiddenColumns={{
-                          indicators: true,
-                        }}
-                        minRows={500}
-                        contextMenu={[
-                          'row_above',
-                          'row_below',
-                          '---------',
-                          'col_left',
-                          'col_right',
-                          '---------',
-                          'remove_row',
-                          'remove_col',
-                          '---------',
-                          'alignment',
-                          '---------',
-                          'copy',
-                          'cut',
-                        ]}
-                        multiColumnSorting={true}
-                        filters={true}
-                        rowHeaders={true}
-                        manualRowMove={true}
-                        licenseKey="non-commercial-and-evaluation"
-                        manualColumnResize
-                        
-                      />
-                    </div>
-                      
-                  </div>
-                </div>
-                  <div
-                    className={`tab-pane fade ${activePepPasteTab === 'pepPaste2' ? 'show active' : ''}`}
-                    id="pepPaste2"
-                    role="tabpanel"
-                    aria-labelledby="pepPaste2-tab"
-                  >
-                    <div className="mt-2">
-                      <Editor
-                        height={'40vh'}
-                        language="yaml"
-                        value={pep_Paste2}
-                        onChange={(value) => handlePEPPaste2(value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div> */}
-          {/* </>
-          )} */}
-
+          
           <div className="my-3"></div>
           <label className="form-label fw-bold h5">2. Select your schema</label>
           <div className="form-check form-switch">
@@ -383,8 +257,8 @@ export const ValidatorForm: FC = () => {
               Reset
             </button>
           </div>
-        </div>
-      </form>
+      </div>
+    </form>
       <div className="my-3">
         {isValidating ? (
           <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '300px' }}>
