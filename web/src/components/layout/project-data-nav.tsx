@@ -21,6 +21,9 @@ interface ViewButtonProps {
 const ViewButton: FC<ViewButtonProps> = ({ view, setProjectView, icon, text, isDirty }) => (
   <div>
     <button onClick={() => setProjectView(view)} className="border-0 bg-transparent project-button-toggles rounded">
+      <span className="text-xs">
+        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
+      </span>
       <i className={icon}></i>
       {text}
       {isDirty ? (

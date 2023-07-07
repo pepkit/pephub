@@ -168,7 +168,7 @@ export const ProjectPage: FC = () => {
       {/* breadcrumbs */}
       <div className="d-flex flex-row align-items-center justify-content-between px-2 my-2">
         <div className="d-flex flex-row align-items-center">
-          <Breadcrumb className="fw-bold">
+          <Breadcrumb className="fw-bold mt-1">
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
             <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
             <Breadcrumb.Item active>
@@ -178,11 +178,11 @@ export const ProjectPage: FC = () => {
               <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
             ) : null}
           </Breadcrumb>
-          <div className="ms-2 mb-2">
+          <div className="ms-2 mb-1">
             <SchemaTag schema={projectInfo?.pep_schema} />
           </div>
         </div>
-        <div className="d-flex flex-row align-items-center">
+        <div className="d-flex flex-row align-items-start ">
           <button
             className="me-1 btn btn-sm btn-outline-dark"
             onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}

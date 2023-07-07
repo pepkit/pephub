@@ -111,7 +111,11 @@ export const Nav: FC = () => {
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               {user ? (
                 <div className="mx-2 my-0 nav-item h5 pt-1">
-                  <button className="btn btn-sm btn-dark px-3 mb-1" onClick={() => logout()}>
+                  <button
+                    className="d-flex flex-row align-items-center btn btn-sm btn-dark px-3 mb-1"
+                    onClick={() => logout()}
+                  >
+                    <img height="20" className="rounded-circle me-2" src={user.avatar_url} />
                     <i className="fa fa-github"></i>Log out
                   </button>
                 </div>
