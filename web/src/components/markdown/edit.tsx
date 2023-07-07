@@ -1,19 +1,24 @@
 import { FC } from 'react';
-import { Tabs, Tab } from 'react-bootstrap';
+import { Tab, Tabs } from 'react-bootstrap';
+
 import { Markdown } from './render';
 
 interface Props {
   value?: string;
   onChange?: (value: string) => void;
   name?: string;
+  rows?: number;
 }
 
-export const MarkdownEditor: FC<Props> = ({ value, onChange, name }) => {
+export const MarkdownEditor: FC<Props> = ({ value, onChange, name, rows }) => {
   const predictRows = (value: string) => {
     const chars = value.length;
-    const rows = Math.floor(chars / 80);
+    const rows = Math.floor(chars / 40);
     return rows;
   };
+
+  const numRows = rows || predictRows(value || '');
+
   return (
     <div className="">
       <Tabs>
@@ -24,7 +29,7 @@ export const MarkdownEditor: FC<Props> = ({ value, onChange, name }) => {
               placeholder="Write your content here..."
               value={value}
               onChange={(e) => onChange && onChange(e.target.value)}
-              rows={predictRows(value || '')}
+              rows={numRows}
               name={name}
             ></textarea>
           </div>

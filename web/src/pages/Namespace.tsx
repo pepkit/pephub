@@ -14,6 +14,7 @@ import { useNamespaceInfo } from '../hooks/queries/useNamespaceInfo';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
 import { useDebounce } from '../hooks/useDebounce';
 import { useSession } from '../hooks/useSession';
+import { numberWithCommas } from '../utils/etc';
 
 export const NamespacePage: FC = () => {
   // get namespace from url
@@ -33,7 +34,7 @@ export const NamespacePage: FC = () => {
   const searchDebounced = useDebounce<string>(search, 500);
 
   // data fetching
-  const { data: namespaceInfo, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace, jwt);
+  const { data: _, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace, jwt);
   const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, jwt, {
     limit,
     offset,
@@ -52,7 +53,7 @@ export const NamespacePage: FC = () => {
     return (
       <PageLayout title={namespace}>
         <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
-          <h1 className="fw-bold">Error 😫</h1>
+          <h1 className="fw-bold">Error occured!</h1>
           <p className="text-muted fst-italic">An error occured fetching the namespace... Are you sure it exists?</p>
           <div>
             <a href="/">
@@ -80,7 +81,7 @@ export const NamespacePage: FC = () => {
         <div className="d-flex flex-row align-items-center">
           <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark me-1">
             <i className="bi bi-hdd-rack me-1"></i>
-            API Endpoints
+            API
           </button>
           {user?.login === namespace && (
             <button
@@ -101,10 +102,7 @@ export const NamespacePage: FC = () => {
       ) : (
         <>
           <p className="mb-0">
-            <span className="fw-bold">Total projects: {namespaceInfo?.number_of_projects}</span>{' '}
-          </p>
-          <p className="mb-0">
-            <span className="fw-bold">Total samples: {namespaceInfo?.number_of_samples}</span>{' '}
+            <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
           </p>
         </>
       )}

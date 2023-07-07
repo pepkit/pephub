@@ -3,16 +3,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import { FC, useRef } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 
+import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
-import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 
 interface FromFileInputs {
   is_private: boolean;
   namespace: string;
-  project_name: string;
+  name: string;
   tag: string;
   description: string;
   files: FileList;
@@ -44,7 +44,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
 
   const uploadFiles = watch('files');
   const namespace = watch('namespace');
-  const projectName = watch('project_name');
+  const projectName = watch('name');
   const tag = watch('tag');
   const description = watch('description');
   const isPrivate = watch('is_private');
@@ -53,6 +53,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
 
   const onSuccess = () => {
     resetForm({}, { keepValues: false });
+    onHide();
   };
 
   const mutation = useUploadMutation(
@@ -103,7 +104,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
           className="form-control"
           placeholder="name"
           // dont allow any whitespace
-          {...register('project_name', {
+          {...register('name', {
             required: true,
             pattern: {
               value: /^\S+$/,
@@ -114,7 +115,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
         <span className="mx-1 mb-1">:</span>
         <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag')} />
       </span>
-      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
+      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="description"
         className="form-control mt-3"
@@ -152,7 +153,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
                     onClick={() => {
                       popFileFromFileList(uploadFiles, i, (newFiles) => resetForm({ files: newFiles }));
                     }}
-                    className="py-0 btn btn-link text-danger"
+                    className="py-0 btn btn-link text-danger shadow-none"
                   >
                     <i className="bi bi-x-circle"></i>
                   </button>

@@ -31,7 +31,7 @@ export interface PaginationParams {
 
 export interface ProjectSubmissionResponse {
   namespace: string;
-  project_name: string;
+  name: string;
   proj: Project;
   init_file: string;
   tag: string;
@@ -87,7 +87,7 @@ export const getNamespaceProjects = (
 export const submitProjectFiles = (
   {
     namespace,
-    project_name,
+    name,
     tag,
     is_private,
     description,
@@ -95,7 +95,7 @@ export const submitProjectFiles = (
     pep_schema,
   }: {
     namespace: string;
-    project_name: string;
+    name: string;
     tag?: string;
     is_private?: boolean;
     description?: string;
@@ -108,7 +108,7 @@ export const submitProjectFiles = (
 
   // construct form data
   const formData = new FormData();
-  formData.append('project_name', project_name);
+  formData.append('name', name);
   formData.append('tag', tag || 'default');
   formData.append('is_private', is_private?.toString() || 'false');
   formData.append('description', description || '');
@@ -134,7 +134,7 @@ export const submitProjectFiles = (
 export const submitProjectJSON = (
   {
     namespace,
-    project_name,
+    name,
     tag,
     is_private,
     description,
@@ -143,7 +143,7 @@ export const submitProjectJSON = (
     sample_table,
   }: {
     namespace: string;
-    project_name: string;
+    name: string;
     tag?: string;
     is_private?: boolean;
     description?: string;
@@ -166,7 +166,7 @@ export const submitProjectJSON = (
           pep_schema: pep_schema,
         },
         description: description || '',
-        name: project_name,
+        name: name,
         is_private: is_private || false,
         tag: tag || 'default',
       },

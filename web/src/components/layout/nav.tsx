@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Dropdown } from 'react-bootstrap';
+import { Dropdown, NavDropdown } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 import { useSession } from '../../hooks/useSession';
@@ -98,26 +98,22 @@ export const Nav: FC = () => {
             </li>
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               {user ? (
-                <div>
-                  <a className="nav-link" href={`/${user.login}`}>
-                    <span className="d-flex flex-row align-items-center">
-                      <img className="me-1" src="/pep-dark.svg" height="30px" />
-                      <span>View PEPs</span>
-                    </span>
-                  </a>
-                </div>
-              ) : null}
-            </li>
-            <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-              {user ? (
                 <div className="mx-2 my-0 nav-item h5 pt-1">
-                  <button
-                    className="d-flex flex-row align-items-center btn btn-sm btn-dark px-3 mb-1"
-                    onClick={() => logout()}
-                  >
-                    <img height="20" className="rounded-circle me-2" src={user.avatar_url} />
-                    <i className="fa fa-github"></i>Log out
-                  </button>
+                  <Dropdown className="me-3">
+                    <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
+                      <img
+                        className="border rounded-circle border-secondary"
+                        src={user['avatar_url']}
+                        alt={`Avatar for ${user['login']}`}
+                        height="40"
+                      />
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
+                      <Dropdown.Divider />
+                      <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
                 </div>
               ) : (
                 <div className="my-0 nav-item h5 pt-1">

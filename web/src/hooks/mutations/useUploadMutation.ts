@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { toast } from 'react-hot-toast';
+
 import { submitProjectFiles } from '../../api/namespace';
 
 export const useUploadMutation = (
@@ -21,7 +22,7 @@ export const useUploadMutation = (
       submitProjectFiles(
         {
           namespace: namespace,
-          project_name: project,
+          name: project,
           tag: tag,
           is_private: is_private,
           description: description,

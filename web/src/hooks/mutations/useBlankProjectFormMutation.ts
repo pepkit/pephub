@@ -24,7 +24,7 @@ export const useBlankProjectFormMutation = (
       submitProjectJSON(
         {
           namespace: namespace,
-          project_name: projectName,
+          name: projectName,
           tag: tag,
           is_private: isPrivate,
           description: description,

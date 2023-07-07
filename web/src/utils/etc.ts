@@ -48,3 +48,8 @@ export const extractError = (err: AxiosError): string => {
   }
   return 'Unknown';
 };
+
+// function to add commas to numbers
+export const numberWithCommas = (x: number): string => {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};

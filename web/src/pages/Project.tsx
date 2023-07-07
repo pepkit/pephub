@@ -166,7 +166,7 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="d-flex flex-row align-items-center justify-content-between px-2 my-2">
+      <div className="d-flex flex-row align-items-center justify-content-between px-2 mb-2 mt-4">
         <div className="d-flex flex-row align-items-center">
           <Breadcrumb className="fw-bold mt-1">
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -182,7 +182,7 @@ export const ProjectPage: FC = () => {
             <SchemaTag schema={projectInfo?.pep_schema} />
           </div>
         </div>
-        <div className="d-flex flex-row align-items-start ">
+        <div className="d-flex flex-row align-items-start btn-g">
           <button
             className="me-1 btn btn-sm btn-outline-dark"
             onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}
@@ -192,7 +192,7 @@ export const ProjectPage: FC = () => {
           </button>
           <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowAPIEndpointsModal(true)}>
             <i className="bi bi-hdd-rack me-1"></i>
-            API Endpoints
+            API
           </button>
           {user && (
             <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowForkPEPModal(true)}>
@@ -204,7 +204,7 @@ export const ProjectPage: FC = () => {
             <>
               <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowEditMetaMetadataModal(true)}>
                 <i className="me-1 bi bi-pencil-square"></i>
-                Edit project
+                Edit
               </button>
               <button className="me-1 btn btn-sm btn-danger" onClick={() => setShowDeletePEPModal(true)}>
                 <i className="me-1 bi bi-trash3"></i>

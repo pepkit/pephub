@@ -30,19 +30,23 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             {project.namespace}/{project.name}:{project.tag}
           </a>
           {project.is_private ? (
-            <span className="ms-2 badge rounded-pill border border-danger text-danger">Private</span>
-          ) : null}
-          {project.pep_schema ? (
-            <Badge className="ms-2" size="small" variant="primary">
-              {project.pep_schema}
-            </Badge>
-          ) : null}
+            <span className="ms-2 badge text-dark rounded-pill border border-dark">Private</span>
+          ) : (
+            <span className="ms-2 badge text-dark rounded-pill border border-dark">Public</span>
+          )}
         </div>
       </div>
       <div>
-        <label className="fw-bold">No. of samples:</label>
-        <span className="mx-1">{project.number_of_samples}</span>
-
+        <div className="d-flex flex-row align-items-center">
+          <div className="me-4">
+            <label className="fw-bold">No. of samples:</label>
+            <span className="mx-1">{project.number_of_samples}</span>
+          </div>
+          <div>
+            <label className="fw-bold">Schema:</label>
+            <span className="mx-1">{project.pep_schema || 'No schema'}</span>
+          </div>
+        </div>
         <div className="mb-0">
           {project.description ? (
             <MarkdownToText>{project.description}</MarkdownToText>

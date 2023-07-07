@@ -6,6 +6,7 @@ import { useProject } from '../../hooks/queries/useProject';
 import { useSession } from '../../hooks/useSession';
 import { MarkdownEditor } from '../markdown/edit';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { SchemaTooltip } from './tooltips/form-tooltips';
 
 interface Props {
   namespace: string;
@@ -101,14 +102,12 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-name"
           aria-describedby="pep-name-help"
         />
-        <div id="pep-name-help" className="form-text">
-          Rename your PEP.
-        </div>
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
           Schema
         </label>
+        <SchemaTooltip className="ms-1" />
         <div>
           <Controller
             control={control}
@@ -137,9 +136,6 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-tag"
           aria-describedby="pep-name-help"
         />
-        <div id="pep-name-help" className="form-text">
-          Change your project tag.
-        </div>
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
@@ -155,6 +151,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
               onChange={(value) => {
                 field.onChange(value);
               }}
+              rows={10}
             />
           )}
         />
