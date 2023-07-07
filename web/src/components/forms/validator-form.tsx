@@ -1,9 +1,8 @@
 import Editor from '@monaco-editor/react';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { Nav, OverlayTrigger, Tab, Tabs, Tooltip } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
-import { OverlayTrigger, Tooltip, Nav, Tab } from 'react-bootstrap';
-
 
 import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
 import { useSchema } from '../../hooks/queries/useSchema';
@@ -111,130 +110,126 @@ export const ValidatorForm: FC = () => {
   const handleSchemaPaste = (value: string | undefined) => {
     setSchemaPaste(value || '');
   };
-  
+
   return (
     <>
       <form className="form-control border-dark shadow-sm">
         <div className="p-2">
           <label className="form-label fw-bold h5">1. Select your PEP</label>
-          <div>
-            <Nav variant="tabs" activeKey={useExistingPEP ? 'existing' : 'upload'} onSelect={(selectedKey) => setUseExistingPEP(selectedKey === 'existing')}>
-              <Nav.Item>
-                <Nav.Link eventKey="existing">Use your PEP</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="upload">Upload</Nav.Link>
-              </Nav.Item>
-            </Nav>
-          </div>
-          {useExistingPEP ? (
-            <Controller
-              name="pepRegistryPath"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  isClearable
-                  placeholder="Select a PEP"
-                  className="mt-2"
-                  // @ts-ignore
-                  options={
-                    projects?.items.map((project) => ({
-                      value: `${project.namespace}/${project.name}:${project.tag}`,
-                      label: `${project.namespace}/${project.name}:${project.tag}`,
-                    })) || []
-                  }
+          <Tabs>
+            <Tab eventKey="existing" title="Use existing PEP">
+              <div className="p-2 border border-top-0 rounded-bottom">
+                <Controller
+                  name="pepRegistryPath"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      isClearable
+                      placeholder="Select a PEP"
+                      className="mt-2"
+                      // @ts-ignore
+                      options={
+                        projects?.items.map((project) => ({
+                          value: `${project.namespace}/${project.name}:${project.tag}`,
+                          label: `${project.namespace}/${project.name}:${project.tag}`,
+                        })) || []
+                      }
+                    />
+                  )}
                 />
-              )}
-            />
-          ) : pepFiles ? (
-            <div className="d-flex flex-column align-items-center">
-              {Array.from(pepFiles).map((file, i) => {
-                return (
-                  <div key={i} className="flex-row d-flex align-items-center">
-                    <i className="bi bi-file-earmark-text me-1"></i>
-                    <span className="text-secondary">{file.name}</span>
+              </div>
+            </Tab>
+            <Tab eventKey="new" title="Upload PEP">
+              <div className="d-flex flex-column align-items-center w-100 border border-top-0 rounded-bottom pb-3">
+                {pepFiles ? (
+                  <>
+                    {Array.from(pepFiles).map((file, i) => {
+                      return (
+                        <div key={i} className="flex-row d-flex align-items-center">
+                          <i className="bi bi-file-earmark-text me-1"></i>
+                          <span className="text-secondary">{file.name}</span>
+                          <button
+                            onClick={() => {
+                              popFileFromFileList(pepFiles, i, (newFiles) => resetForm({ pepFiles: newFiles }));
+                            }}
+                            className="py-0 btn btn-link text-danger shadow-none"
+                          >
+                            <i className="bi bi-x-circle"></i>
+                          </button>
+                        </div>
+                      );
+                    })}
                     <button
-                      onClick={() => {
-                        popFileFromFileList(pepFiles, i, (newFiles) => resetForm({ pepFiles: newFiles }));
-                      }}
-                      className="py-0 btn btn-link text-danger shadow-none"
+                      onClick={() => resetForm({ pepFiles: undefined })}
+                      className="mt-2 btn btn-sm btn-outline-dark"
                     >
-                      <i className="bi bi-x-circle"></i>
+                      Clear
                     </button>
+                  </>
+                ) : (
+                  <div className="w-100 px-2">
+                    <FileDropZone multiple name="pepFiles" control={control} innerRef={fileDialogRef} />
                   </div>
-                );
-              })}
-              <button onClick={() => resetForm({ pepFiles: undefined })} className="mt-2 btn btn-sm btn-outline-dark">
-                Clear
-              </button>
-            </div>
-          ) : (
-            <FileDropZone multiple name="pepFiles" control={control} innerRef={fileDialogRef} />
-          )}
-          
+                )}
+              </div>
+            </Tab>
+          </Tabs>
           <div className="my-3"></div>
           <label className="form-label fw-bold h5">2. Select your schema</label>
-          <div className="form-check form-switch">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              role="switch"
-              id="use-existing"
-              checked={useExistingSchema}
-              onChange={() => setUseExistingSchema(!useExistingSchema)}
-            />
-            <label className="form-check-label" htmlFor="use-existing">
-              Use existing?
-            </label>
-          </div>
-          {useExistingSchema ? (
-            <Controller
-              name="schemaRegistryPath"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  isClearable
-                  placeholder="Select a schema"
-                  className="mt-2"
-                  // @ts-ignore
-                  options={schemas ? Object.keys(schemas).map((schema) => ({ value: schema, label: schema })) : []}
+          <Tabs>
+            <Tab eventKey="existing" title="Use existing schema">
+              <div className="p-2 border border-top-0 rounded-bottom">
+                <Controller
+                  name="schemaRegistryPath"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      isClearable
+                      placeholder="Select a schema"
+                      className="mt-2"
+                      // @ts-ignore
+                      options={schemas ? Object.keys(schemas).map((schema) => ({ value: schema, label: schema })) : []}
+                    />
+                  )}
                 />
-              )}
-            />
-          ) : schemaFiles ? (
-            <div className="d-flex flex-column align-items-center">
-              {Array.from(schemaFiles).map((file, i) => {
-                return (
-                  <div key={i} className="flex-row d-flex align-items-center">
-                    <i className="bi bi-file-earmark-text me-1"></i>
-                    <span className="text-secondary">{file.name}</span>
+              </div>
+            </Tab>
+            <Tab eventKey="new" title="Upload schema">
+              <div className="pb-2 px-2 border border-top-0 rounded-bottom">
+                {schemaFiles ? (
+                  <div className="d-flex flex-column align-items-center">
+                    {Array.from(schemaFiles).map((file, i) => {
+                      return (
+                        <div key={i} className="flex-row d-flex align-items-center">
+                          <i className="bi bi-file-earmark-text me-1"></i>
+                          <span className="text-secondary">{file.name}</span>
+                          <button
+                            onClick={() => {
+                              popFileFromFileList(schemaFiles, i, (newFiles) => resetForm({ schemaFiles: newFiles }));
+                            }}
+                            className="py-0 btn btn-link text-danger shadow-none"
+                          >
+                            <i className="bi bi-x-circle"></i>
+                          </button>
+                        </div>
+                      );
+                    })}
                     <button
-                      onClick={() => {
-                        popFileFromFileList(schemaFiles, i, (newFiles) => resetForm({ schemaFiles: newFiles }));
-                      }}
-                      className="py-0 btn btn-link text-danger shadow-none"
+                      onClick={() => resetForm({ schemaFiles: undefined })}
+                      className="mt-2 btn btn-sm btn-outline-dark"
                     >
-                      <i className="bi bi-x-circle"></i>
+                      Clear
                     </button>
                   </div>
-                );
-              })}
-              <button
-                onClick={() => resetForm({ schemaFiles: undefined })}
-                className="mt-2 btn btn-sm btn-outline-dark"
-              >
-                Clear
-              </button>
-            </div>
-          ) : (
-            <FileDropZone multiple name="schemaFiles" control={control} innerRef={fileDialogRef} />
-          )}
-          {!useExistingSchema && !schemaFiles && (
-            <>
-              <div className="mt-2">
-                <label className="form-label">Or paste your schema:</label>
+                ) : (
+                  <FileDropZone multiple name="schemaFiles" control={control} innerRef={fileDialogRef} />
+                )}
+              </div>
+            </Tab>
+            <Tab eventKey="paste" title="Paste schema">
+              <div className="p-2 border border-top-0 rounded-bottom">
                 <Editor
                   height={'40vh'}
                   language="yaml"
@@ -242,8 +237,8 @@ export const ValidatorForm: FC = () => {
                   onChange={(value) => handleSchemaPaste(value)}
                 />
               </div>
-            </>
-          )}
+            </Tab>
+          </Tabs>
           <div className="mt-3">
             <button onClick={() => runValidation()} disabled={!isValid} type="button" className="me-1 btn btn-success">
               Validate
@@ -257,8 +252,8 @@ export const ValidatorForm: FC = () => {
               Reset
             </button>
           </div>
-      </div>
-    </form>
+        </div>
+      </form>
       <div className="my-3">
         {isValidating ? (
           <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '300px' }}>
@@ -280,7 +275,9 @@ export const ValidatorForm: FC = () => {
             ) : (
               <>
                 <div className="alert alert-danger" role="alert">
-                  <p className="mb-0">{result.error_type === 'Schema' ? 'Schema is invalid, found issue with:' : 'PEP is invalid!'}</p>
+                  <p className="mb-0">
+                    {result.error_type === 'Schema' ? 'Schema is invalid, found issue with:' : 'PEP is invalid!'}
+                  </p>
                   <p className="mb-0">
                     {result.error_type !== 'Schema' && (
                       <>
@@ -290,7 +287,8 @@ export const ValidatorForm: FC = () => {
                             <i className="bi bi-info-circle me-2 mb-2"></i>
                           </OverlayTrigger>
                         )}
-                        <br /><br />
+                        <br />
+                        <br />
                       </>
                     )}
                   </p>
