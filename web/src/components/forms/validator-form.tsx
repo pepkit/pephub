@@ -1,11 +1,10 @@
 import Editor from '@monaco-editor/react';
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { OverlayTrigger, Tab, Tabs, Tooltip } from 'react-bootstrap';
+import { FC, useRef, useState } from 'react';
+import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 
 import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
-import { useSchema } from '../../hooks/queries/useSchema';
 import { useSchemas } from '../../hooks/queries/useSchemas';
 import { ValidationParams } from '../../hooks/queries/useValidation';
 import { useValidation } from '../../hooks/queries/useValidation';
@@ -19,7 +18,7 @@ interface ValidatorFormInputs {
     label: string;
     value: string;
   } | null;
-  schemaFiles?: FileList;
+  schemaFile?: FileList;
   schemaRegistryPath?: {
     label: string;
     value: string;
@@ -35,6 +34,7 @@ export const ValidatorForm: FC = () => {
   // instantiate form
   const {
     reset: resetForm,
+    setValue: setFormValue,
     control,
     watch,
     formState: { isValid, isDirty },
@@ -45,64 +45,60 @@ export const ValidatorForm: FC = () => {
   const [useExistingPEP, setUseExistingPEP] = useState(true);
   const [useExistingSchema, setUseExistingSchema] = useState(true);
 
-  const [schemaString, setSchemaString] = useState<string | undefined>(undefined);
-  const [schemaPaste, setSchemaPaste] = useState<string>('');
-
   // watch the form data so we can use it
   const pepFiles = watch('pepFiles');
   const pepRegistryPath = watch('pepRegistryPath');
-  const schemaFiles = watch('schemaFiles');
+  const schemaFile = watch('schemaFile');
   const schemaRegistryPath = watch('schemaRegistryPath');
-
-  const { data: schema } = useSchema(schemaRegistryPath?.value);
+  const schemaPasteValue = watch('schemaPaste');
 
   // validation params for the useValidation hook
-  let params = {} as ValidationParams;
+  let params = {
+    enabled: false,
+  } as ValidationParams;
 
+  // populate params based on form data for the PEP
   if (useExistingPEP) {
-    params = {
-      pep: pepRegistryPath?.value,
-      schema: schemaString,
-      schema_registry: undefined,
-      enabled: true,
-    };
+    params.pep_registry = pepRegistryPath?.value;
+    params.pep_files = undefined;
   } else {
-    params = {
-      pep: pepFiles,
-      schema: schemaString,
-      schema_registry: undefined,
-      enabled: true,
-    };
+    params.pep_registry = undefined;
+    params.pep_files = pepFiles;
   }
 
-  const { data: result, error, isFetching: isValidating, refetch } = useValidation(params);
+  // populate params based on form data for the schema
+  if (useExistingSchema) {
+    params.schema_registry = schemaRegistryPath?.value;
+    params.schema = undefined;
+  } else if (schemaPasteValue) {
+    params.schema_registry = undefined;
+    params.schema = schemaPasteValue;
+  } else {
+    params.schema_registry = undefined;
+    // just take the first file they give
+    params.schema_file = schemaFile && schemaFile.length > 0 ? schemaFile[0] : undefined;
+  }
 
-  // handle schema changes to update the schema string
-  useEffect(() => {
-    // when these change, we need to parse either to a string
-    if (useExistingSchema) {
-      setSchemaString(JSON.stringify(schema));
-    } else {
-      // read contents from file
-      if (schemaFiles) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          setSchemaString(reader.result as string);
-        };
-        reader.readAsText(schemaFiles[0]);
-      } else if (schemaPaste) {
-        setSchemaString(schemaPaste);
-      } else {
-        setSchemaString(undefined);
-      }
-    }
-  }, [schemaRegistryPath?.value, schemaFiles, schema, schemaPaste]);
+  // only enable if one of the PEP options is selected and
+  // one of the schema options is selected
+  // if (useExistingPEP && useExistingSchema) {
+  //   params.enabled = !!pepRegistryPath && !!schemaRegistryPath;
+  // } else if (!!useExistingPEP && !useExistingSchema) {
+  //   params.enabled = !!pepRegistryPath && (!!schemaPasteValue || !!schemaFile);
+  // } else if (!useExistingPEP && useExistingSchema) {
+  //   params.enabled = !!pepFiles && !!schemaRegistryPath;
+  // } else {
+  //   params.enabled = !!pepFiles && (!!schemaPasteValue || !!schemaFile);
+  // }
+
+  // validator hook
+  const { data: result, error, isFetching: isValidating, refetch } = useValidation(params);
 
   const resetValidator = () => {
     resetForm({
       pepFiles: undefined,
       pepRegistryPath: null,
-      schemaFiles: undefined,
+      schemaFile: undefined,
       schemaRegistryPath: null,
       schemaPaste: undefined,
     });
@@ -112,12 +108,22 @@ export const ValidatorForm: FC = () => {
     refetch();
   };
 
-  const handleSchemaPaste = (value: string | undefined) => {
-    setSchemaPaste(value || '');
-  };
-
   return (
     <>
+      {/* Only in development mode  */}
+      {/* render the params */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="my-3">
+          <pre>
+            <code>{JSON.stringify(params, null, 2)}</code>
+          </pre>
+          <pre>
+            <code>Use existing PEP: {JSON.stringify(useExistingPEP)}</code>
+            <br />
+            <code>Use existing schema: {JSON.stringify(useExistingSchema)}</code>
+          </pre>
+        </div>
+      )}
       <form className="form-control border-dark shadow-sm">
         <div className="p-2">
           <label className="form-label fw-bold h5">1. Select your PEP</label>
@@ -156,7 +162,7 @@ export const ValidatorForm: FC = () => {
               </div>
             </Tab>
             <Tab eventKey="new" title="Upload PEP">
-              <div className="d-flex flex-column align-items-center w-100 border border-top-0 rounded-bottom pb-3">
+              <div className="d-flex flex-column align-items-center w-100 border border-top-0 rounded-bottom py-3">
                 {pepFiles ? (
                   <>
                     {Array.from(pepFiles).map((file, i) => {
@@ -166,7 +172,7 @@ export const ValidatorForm: FC = () => {
                           <span className="text-secondary">{file.name}</span>
                           <button
                             onClick={() => {
-                              popFileFromFileList(pepFiles, i, (newFiles) => resetForm({ pepFiles: newFiles }));
+                              popFileFromFileList(pepFiles, i, (newFiles) => setFormValue('pepFiles', newFiles));
                             }}
                             className="py-0 btn btn-link text-danger shadow-none"
                           >
@@ -176,7 +182,7 @@ export const ValidatorForm: FC = () => {
                       );
                     })}
                     <button
-                      onClick={() => resetForm({ pepFiles: undefined })}
+                      onClick={() => setFormValue('pepFiles', undefined)}
                       className="mt-2 btn btn-sm btn-outline-dark"
                     >
                       Clear
@@ -222,16 +228,16 @@ export const ValidatorForm: FC = () => {
             </Tab>
             <Tab eventKey="new" title="Upload schema">
               <div className="d-flex flex-column align-items-center w-100 border border-top-0 rounded-bottom pb-3">
-                {schemaFiles ? (
+                {schemaFile ? (
                   <div className="d-flex flex-column align-items-center w-100 pt-2">
-                    {Array.from(schemaFiles).map((file, i) => {
+                    {Array.from(schemaFile).map((file, i) => {
                       return (
                         <div key={i} className="flex-row d-flex align-items-center">
                           <i className="bi bi-file-earmark-text me-1"></i>
                           <span className="text-secondary">{file.name}</span>
                           <button
                             onClick={() => {
-                              popFileFromFileList(schemaFiles, i, (newFiles) => resetForm({ schemaFiles: newFiles }));
+                              popFileFromFileList(schemaFile, i, (newFiles) => setFormValue('schemaFile', newFiles));
                             }}
                             className="py-0 btn btn-link text-danger shadow-none"
                           >
@@ -241,7 +247,7 @@ export const ValidatorForm: FC = () => {
                       );
                     })}
                     <button
-                      onClick={() => resetForm({ schemaFiles: undefined })}
+                      onClick={() => setFormValue('schemaFile', undefined)}
                       className="mt-2 btn btn-sm btn-outline-dark"
                     >
                       Clear
@@ -249,18 +255,17 @@ export const ValidatorForm: FC = () => {
                   </div>
                 ) : (
                   <div className="w-100 px-2">
-                    <FileDropZone multiple name="schemaFiles" control={control} innerRef={fileDialogRef} />
+                    <FileDropZone multiple name="schemaFile" control={control} innerRef={fileDialogRef} />
                   </div>
                 )}
               </div>
             </Tab>
             <Tab eventKey="paste" title="Paste schema">
               <div className="p-2 border border-top-0 rounded-bottom">
-                <Editor
-                  height={'40vh'}
-                  language="yaml"
-                  value={schemaPaste}
-                  onChange={(value) => handleSchemaPaste(value)}
+                <Controller
+                  name="schemaPaste"
+                  control={control}
+                  render={({ field }) => <Editor {...field} height={'40vh'} language="yaml" />}
                 />
               </div>
             </Tab>
@@ -280,17 +285,6 @@ export const ValidatorForm: FC = () => {
           </div>
         </div>
       </form>
-      {/* render the params */}
-      <div className="my-3">
-        <pre>
-          <code>{JSON.stringify(params, null, 2)}</code>
-        </pre>
-        <pre>
-          <code>Use existing PEP: {JSON.stringify(useExistingPEP)}</code>
-          <br />
-          <code>Use existing schema: {JSON.stringify(useExistingSchema)}</code>
-        </pre>
-      </div>
       <div className="my-3">
         {isValidating ? (
           <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '300px' }}>

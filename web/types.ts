@@ -83,8 +83,9 @@ export interface SearchHit {
 
 export interface Schema {
   description: string;
-  project: string;
-  url: string;
+  version: string;
+  properties: object;
+  required: string[];
 }
 
 // SchemaResults is a list of Schemas

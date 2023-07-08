@@ -1,9 +1,9 @@
 import eido
-import jinja2
 import requests
 import tempfile
 import peppy
 import shutil
+import yaml
 
 from fastapi import UploadFile, Form, APIRouter
 from starlette.requests import Request
@@ -50,6 +50,7 @@ async def validate(
     pep_registry: Optional[str] = Form(None),
     pep_files: Optional[List[UploadFile]] = None,
     schema: Optional[str] = Form(None),
+    schema_file: Optional[UploadFile] = None,
     schema_registry: Optional[str] = Form(None),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
@@ -101,7 +102,7 @@ async def validate(
 
             p = peppy.Project(f"{dirpath}/{init_file.filename}")
 
-    if schema is None and schema_registry is None:
+    if schema is None and schema_registry is None and schema_file is None:
         raise HTTPException(
             status_code=400,
             detail={
@@ -126,7 +127,9 @@ async def validate(
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as yaml_file:
             yaml_file.write(yaml_string)
             schema_dict = yaml_file.name
-
+    elif schema_file is not None:
+        contents = schema_file.file.read()
+        schema_dict = yaml.safe_load(contents)
     else:
         # save schema string to temp file, then read in with eido
         with tempfile.NamedTemporaryFile(mode="w") as schema_file:
