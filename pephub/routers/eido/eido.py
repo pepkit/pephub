@@ -1,35 +1,24 @@
 import eido
 import jinja2
-import aiofiles
 import requests
 import tempfile
 import peppy
-import yaml
 import shutil
-import pandas as pd
 
-from io import StringIO
-from fastapi import File, UploadFile, Form, APIRouter
-from fastapi.responses import HTMLResponse
+from fastapi import UploadFile, Form, APIRouter
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from starlette.responses import FileResponse
-from starlette.templating import Jinja2Templates
 from typing import List
-from yacman import load_yaml
 
-from ..models import RawValidationQuery
-from ...const import EIDO_TEMPLATES_PATH, STATICS_PATH
 from ...helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...dependencies import *
 
-templates = Jinja2Templates(directory=EIDO_TEMPLATES_PATH)
-je = jinja2.Environment(loader=jinja2.FileSystemLoader(EIDO_TEMPLATES_PATH))
 
 schemas_url = "https://schema.databio.org/list.json"
 schemas_to_test = requests.get(schemas_url).json()
 
 router = APIRouter(prefix="/api/v1/eido", tags=["eido"])
+
 
 @router.get("/schemas")
 async def status():
@@ -55,7 +44,6 @@ async def get_schema(request: Request, namespace: str, project: str):
     return schema
 
 
-# NEW STUFF FOR REACT FRONTEND
 @router.post("/validate")
 async def validate(
     # accept both pep_registry and pep_files, both should be optional
@@ -79,7 +67,7 @@ async def validate(
     If at any point the PEP or schema cannot be validated, an error is raised and the validation process is
     halted. We also should return errors for when the PEP or Schema can't be loaded or found for some reason.
     """
-    
+
     # check they sent at least pep_registry or pep_files
     if pep_registry is None and pep_files is None:
         raise HTTPException(
@@ -120,10 +108,10 @@ async def validate(
                 "error": "Must supply either a registry path or a list of files to validate."
             },
         )
-    
+
     if schema_registry is not None:
         schema_url = f"https://schema.databio.org/{schema_registry}.yaml"
-            
+
         try:
             response = requests.get(schema_url)
             response.raise_for_status()  # Check if the request was successful
@@ -135,10 +123,10 @@ async def validate(
             )
 
         # save schema string to temp file
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as yaml_file:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as yaml_file:
             yaml_file.write(yaml_string)
             schema_dict = yaml_file.name
-            
+
     else:
         # save schema string to temp file, then read in with eido
         with tempfile.NamedTemporaryFile(mode="w") as schema_file:
@@ -151,7 +139,7 @@ async def validate(
                     status_code=200,
                     detail={"error": f"Schema is invalid: {str(e)}"},
                 )
-            
+
     # validate project
     try:
         eido.validate_project(
@@ -164,21 +152,23 @@ async def validate(
     except eido.exceptions.EidoValidationError as e:
         property_names = []
         for item_list in e.errors_by_type.values():
-            property_name = item_list[0]['type']
+            property_name = item_list[0]["type"]
             for item in item_list:
-                if item['sample_name'] == "project":
+                if item["sample_name"] == "project":
                     error_type = "Project"
                     break
                 else:
                     error_type = "Samples"
                     if len(item_list) > 20:
-                        property_names = ["More than 20 samples have encountered errors."]
+                        property_names = [
+                            "More than 20 samples have encountered errors."
+                        ]
                     else:
                         property_name += f" ({item['sample_name']})"
             property_names.append(property_name)
 
         return {"valid": False, "error_type": error_type, "errors": property_names}
-    
+
     except Exception as e:
         errors = [str(e)]
         return {"valid": False, "error_type": "Schema", "errors": errors}

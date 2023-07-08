@@ -138,6 +138,7 @@ async def create_pep(
                     namespace=namespace,
                     name=name,
                     tag=tag,
+                    description=description,
                     is_private=is_private,
                     pep_schema=pep_schema,
                 )
