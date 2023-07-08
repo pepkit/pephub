@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { editProjectConfig } from '../../api/project';
-import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { toast } from 'react-hot-toast';
+
+import { editProjectConfig } from '../../api/project';
 
 export const useProjectEditConfigMutation = (
   namespace: string,

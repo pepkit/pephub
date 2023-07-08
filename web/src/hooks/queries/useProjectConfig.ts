@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { getProjectConfig } from '../../api/project';
 
 export const useProjectConfig = (
