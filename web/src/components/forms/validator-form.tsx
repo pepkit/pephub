@@ -42,7 +42,7 @@ export const ValidatorForm: FC = () => {
   const fileDialogRef = useRef<() => void | null>(null);
 
   const [useExistingPEP, setUseExistingPEP] = useState(true);
-  const [useExistingSchema, setUseExistingSchema] = useState(true);
+  const [useExistingSchema, setUseExistingSchema] = useState(false);
   const [schemaString, setSchemaString] = useState<string | undefined>(undefined);
   const [schemaPaste, setSchemaPaste] = useState<string>('');
 
@@ -232,13 +232,13 @@ export const ValidatorForm: FC = () => {
             </Tab>
             <Tab eventKey="paste" title="Paste schema">
               <div className="p-2 border border-top-0 rounded-bottom">
-                <Editor
-                  height={'40vh'}
-                  language="yaml"
-                  value={schemaPaste}
-                  onChange={(value) => handleSchemaPaste(value)}
-                />
-              </div>
+                    <Editor
+                      height={'40vh'}
+                      language="yaml"
+                      value={schemaPaste}
+                      onChange={(value) => handleSchemaPaste(value)}
+                    />
+                  </div>
             </Tab>
           </Tabs>
           <div className="mt-3">
