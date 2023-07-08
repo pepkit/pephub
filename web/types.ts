@@ -49,7 +49,7 @@ export interface User {
 }
 
 export interface Sample {
-  [key: string]: string;
+  [key: string]: string | null;
 }
 
 export interface Project {
@@ -83,8 +83,9 @@ export interface SearchHit {
 
 export interface Schema {
   description: string;
-  project: string;
-  url: string;
+  version: string;
+  properties: object;
+  required: string[];
 }
 
 // SchemaResults is a list of Schemas
@@ -94,5 +95,6 @@ export interface SchemaResults {
 
 export interface ValidationResult {
   valid: boolean;
-  errors: string;
+  error_type: string;
+  errors: string[];
 }

@@ -1,8 +1,9 @@
 import { FC, useEffect, useState } from 'react';
-import { ProjectConfigEditor } from '../project/project-config';
-import { useSession } from '../../hooks/useSession';
-import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
+
 import { useProjectEditConfigMutation } from '../../hooks/mutations/useProjectEditConfigMutation';
+import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
+import { useSession } from '../../hooks/useSession';
+import { ProjectConfigEditor } from '../project/project-config';
 
 interface Props {
   namespace: string;

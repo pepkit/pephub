@@ -1,9 +1,10 @@
 import { FC } from 'react';
-import { Nav } from './nav';
-import { SEO } from './seo';
+
 import { useApiBase } from '../../hooks/queries/useApiBase';
 import { getOS } from '../../utils/etc';
-import { StatusCircle } from '../badges/status-circle';
+import { StatusCircle } from '../badges/status-circles';
+import { Nav } from './nav';
+import { SEO } from './seo';
 
 interface Props {
   children: React.ReactNode;

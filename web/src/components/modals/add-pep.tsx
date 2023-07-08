@@ -1,7 +1,8 @@
 import { FC } from 'react';
 import { Modal, Tab, Tabs } from 'react-bootstrap';
-import { ProjectUploadForm } from '../forms/project-upload-form';
+
 import { BlankProjectForm } from '../forms/blank-project-form';
+import { ProjectUploadForm } from '../forms/project-upload-form';
 
 interface Props {
   show: boolean;

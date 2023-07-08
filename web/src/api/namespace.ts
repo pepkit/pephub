@@ -1,7 +1,7 @@
-import { ProjectAnnotation, Project } from '../../types';
-import YAML from 'yaml';
 import axios from 'axios';
-import { readString } from 'react-papaparse';
+import YAML from 'yaml';
+
+import { Project, ProjectAnnotation, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -30,7 +30,7 @@ export interface PaginationParams {
 
 export interface ProjectSubmissionResponse {
   namespace: string;
-  project_name: string;
+  name: string;
   proj: Project;
   init_file: string;
   tag: string;
@@ -86,7 +86,7 @@ export const getNamespaceProjects = (
 export const submitProjectFiles = (
   {
     namespace,
-    project_name,
+    name,
     tag,
     is_private,
     description,
@@ -94,7 +94,7 @@ export const submitProjectFiles = (
     pep_schema,
   }: {
     namespace: string;
-    project_name: string;
+    name: string;
     tag?: string;
     is_private?: boolean;
     description?: string;
@@ -107,7 +107,7 @@ export const submitProjectFiles = (
 
   // construct form data
   const formData = new FormData();
-  formData.append('project_name', project_name);
+  formData.append('name', name);
   formData.append('tag', tag || 'default');
   formData.append('is_private', is_private?.toString() || 'false');
   formData.append('description', description || '');
@@ -133,7 +133,7 @@ export const submitProjectFiles = (
 export const submitProjectJSON = (
   {
     namespace,
-    project_name,
+    name,
     tag,
     is_private,
     description,
@@ -142,11 +142,11 @@ export const submitProjectJSON = (
     sample_table,
   }: {
     namespace: string;
-    project_name: string;
+    name: string;
     tag?: string;
     is_private?: boolean;
     description?: string;
-    sample_table: string;
+    sample_table: Sample[];
     config: string;
     pep_schema: string;
   },
@@ -154,42 +154,18 @@ export const submitProjectJSON = (
 ) => {
   const url = `${API_BASE}/namespaces/${namespace}/projects/json`;
 
-  // syncronously parse sample table
-  // @ts-ignore
-  const sample_table_json = readString(sample_table, { header: true }).data;
-
-  // json to "sample_dict", whihc has columns as keys to
-  // subobjects and row indexs as subkeys in those subobjects
-  // with the values as the values
-  const sample_dict: {
-    [key: string]: {
-      [key: number]: string;
-    };
-  } = {};
-  for (let i = 0; i < sample_table_json.length; i++) {
-    const row = sample_table_json[i];
-    for (const key in row) {
-      if (key in sample_dict) {
-        sample_dict[key][i] = row[key];
-      } else {
-        sample_dict[key] = {};
-        sample_dict[key][i] = row[key];
-      }
-    }
-  }
-
   const config_json = YAML.parse(config);
   return axios
     .post<ProjectSubmissionResponse>(
       url,
       {
         pep_dict: {
-          name: project_name,
-          description: description || '',
           config: config_json,
-          sample_dict: sample_dict,
+          sample_list: sample_table,
           pep_schema: pep_schema,
         },
+        description: description || '',
+        name: name,
         is_private: is_private || false,
         tag: tag || 'default',
       },

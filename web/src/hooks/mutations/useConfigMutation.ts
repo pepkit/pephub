@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { editProjectConfig } from '../../api/project';
-import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { toast } from 'react-hot-toast';
+
+import { editProjectConfig } from '../../api/project';
 
 export const useConfigMutation = (
   namespace: string,
@@ -15,7 +16,7 @@ export const useConfigMutation = (
   const mutation = useMutation({
     mutationFn: () => editProjectConfig(namespace || '', project || '', tag, jwt || '', newProjectConfig),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace, project, tag, 'config']);
+      queryClient.invalidateQueries([namespace, project, tag]);
       toast.success('Successfully updated project config');
     },
     onError: (error: AxiosError) => {

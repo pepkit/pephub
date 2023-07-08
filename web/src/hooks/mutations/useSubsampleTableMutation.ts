@@ -3,21 +3,21 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
-import { editProjectSampleTable } from '../../api/project';
+import { editProjectSubsampleTable } from '../../api/project';
 
-export const useSampleTableMutation = (
+export const useSubsampleTableMutation = (
   namespace: string,
   project: string,
   tag: string,
   jwt: string,
-  newProjectSamples: Sample[],
+  newProjectSubsamples: Sample[],
 ) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => editProjectSampleTable(namespace || '', project || '', tag, jwt || '', newProjectSamples),
+    mutationFn: () => editProjectSubsampleTable(namespace || '', project || '', tag, jwt || '', newProjectSubsamples),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace, project, tag, 'samples']);
+      queryClient.invalidateQueries([namespace, project, tag, 'subsamples']);
       toast.success('Successfully updated project samples');
     },
     onError: (error: AxiosError) => {

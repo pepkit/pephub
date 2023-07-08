@@ -1,15 +1,14 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { FC, useEffect, useState } from 'react';
-import { Dropdown } from 'react-bootstrap';
-import { Breadcrumb } from 'react-bootstrap';
+import { FC, MouseEvent, forwardRef, useEffect, useState } from 'react';
+import { Breadcrumb, Dropdown } from 'react-bootstrap';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
-import { StatusCircle } from '../components/badges/status-circle';
+import { StatusIcon } from '../components/badges/status-icons';
 import { SchemaTag } from '../components/forms/components/shema-tag';
 import { PageLayout } from '../components/layout/page-layout';
+import { ProjectDataNav } from '../components/layout/project-data-nav';
 import { Markdown } from '../components/markdown/render';
-import { CompatibilityModal } from '../components/modals/compatibility-modal';
+// import { CompatibilityModal } from '../components/modals/compatibility-modal';
 import { DeletePEPModal } from '../components/modals/delete-pep';
 import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { ForkPEPModal } from '../components/modals/fork-pep';
@@ -17,18 +16,40 @@ import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpo
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { SampleTable } from '../components/tables/sample-table';
-import { ValidationTooltip } from '../components/tooltips/validation-tooltip';
+import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
+import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
+import { useSubsampleTableMutation } from '../hooks/mutations/useSubsampleTableMutation';
 import { useProject } from '../hooks/queries/useProject';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
+import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { canEdit } from '../utils/permissions';
-import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
-import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
 import { downloadZip } from '../utils/project';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
+
+interface CustomToggleProps {
+  children?: React.ReactNode;
+  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+}
+
+const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ children, onClick }, ref) => (
+  <a
+    href=""
+    ref={ref}
+    onClick={(e) => {
+      e.preventDefault();
+      if (onClick) {
+        onClick(e);
+      }
+    }}
+    className="text-decoration-none"
+  >
+    {children}
+  </a>
+));
 
 export const ProjectPage: FC = () => {
   const { user, jwt } = useSession();
@@ -44,6 +65,7 @@ export const ProjectPage: FC = () => {
   // fetch data
   const { data: projectInfo, isLoading: projectInfoIsLoading, error } = useProject(namespace, project || '', tag, jwt);
   const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
+  const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag, jwt);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
     namespace,
     project || '',
@@ -57,35 +79,38 @@ export const ProjectPage: FC = () => {
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
-  const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
+  // const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
 
   // state for editing config, samples, and subsamples
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig || '');
   const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(projectSamples?.items || []);
-  // const [newProjectSubsamples, setNewProjectSubsamples] = useState(projectSubSamples? || '');
+  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(projectSubsamples?.items || []);
 
   const {
     data: validationResult,
     isLoading: isValidationLoading,
     isFetching: isValidationFetching,
-  } = useValidation(
-    `${namespace}/${project}:${tag}`,
-    projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
-    namespace && project && tag && projectInfo ? true : false,
-  );
+  } = useValidation({
+    pep_registry: `${namespace}/${project}:${tag}`,
+    schema: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
+    schema_registry: projectInfo?.pep_schema,
+    enabled: namespace && project && tag && projectInfo ? true : false,
+  });
 
   // watch for query changes to update newProjectConfig and newProjectSamples
   useEffect(() => {
     setNewProjectConfig(projectConfig || '');
     setNewProjectSamples(projectSamples?.items || []);
-  }, [projectConfig, projectSamples]);
+    setNewProjectSubsamples(projectSubsamples?.items || []);
+  }, [projectConfig, projectSamples, projectSubsamples]);
 
   // check if config or samples are dirty
   const configIsDirty = newProjectConfig !== projectConfig;
 
   // use JSON stringify to compare arrays
   const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(projectSamples?.items || []);
+  const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(projectSubsamples?.items || []);
 
   // reset config and samples
   const resetConfig = () => {
@@ -94,10 +119,20 @@ export const ProjectPage: FC = () => {
   const resetSamples = () => {
     setNewProjectSamples(projectSamples?.items || []);
   };
+  const resetSubsamples = () => {
+    setNewProjectSubsamples(projectSubsamples?.items || []);
+  };
 
   // mutations for updating config and samples on the server
   const configMutation = useConfigMutation(namespace || '', project || '', tag, jwt || '', newProjectConfig);
   const sampleTableMutation = useSampleTableMutation(namespace || '', project || '', tag, jwt || '', newProjectSamples);
+  const subsampleTableMutation = useSubsampleTableMutation(
+    namespace || '',
+    project || '',
+    tag,
+    jwt || '',
+    newProjectSubsamples,
+  );
 
   const handleProjectChange = () => {
     if (configIsDirty) {
@@ -105,6 +140,9 @@ export const ProjectPage: FC = () => {
     }
     if (samplesIsDirty) {
       sampleTableMutation.mutate();
+    }
+    if (subsamplesIsDirty) {
+      subsampleTableMutation.mutate();
     }
   };
 
@@ -127,9 +165,9 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 my-2">
+      <div className="d-flex flex-row align-items-center justify-content-between px-2 mb-2 mt-4">
         <div className="d-flex flex-row align-items-center">
-          <Breadcrumb className="fw-bold">
+          <Breadcrumb className="fw-bold mt-1">
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
             <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
             <Breadcrumb.Item active>
@@ -139,162 +177,163 @@ export const ProjectPage: FC = () => {
               <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
             ) : null}
           </Breadcrumb>
-          <div className="ms-2 mb-2">
+          <div className="ms-2 mb-1">
             <SchemaTag schema={projectInfo?.pep_schema} />
           </div>
         </div>
-        <div className="d-flex flex-row align-items-center">
+        <div className="d-flex flex-row align-items-start btn-g">
           <button
-            className="btn btn-sm btn-dark me-1"
+            className="me-1 btn btn-sm btn-outline-dark"
             onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}
           >
             <i className="bi bi-file-earmark-zip me-1"></i>
             Download
           </button>
-          <button className="btn btn-sm btn-dark me-1" onClick={() => setShowAPIEndpointsModal(true)}>
+          <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowAPIEndpointsModal(true)}>
             <i className="bi bi-hdd-rack me-1"></i>
-            API Endpoints
+            API
           </button>
-          {user ? (
-            <button className="btn btn-sm btn-dark me-1" onClick={() => setShowForkPEPModal(true)}>
+          {user && (
+            <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowForkPEPModal(true)}>
               <i className="me-1 bi bi-bezier2"></i>
               Fork
             </button>
-          ) : null}
-          {
-            // if user is logged in and is owner of project
-            user && projectInfo && canEdit(user, projectInfo) ? (
-              <Dropdown>
-                <Dropdown.Toggle variant="dark" size="sm">
-                  <i className="bi bi-pencil"></i>
-                </Dropdown.Toggle>
-                <Dropdown.Menu className="shadow-lg">
-                  <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
-                    {/*  pencil write */}
-                    <i className="bi bi-pencil-square me-1"></i>
-                    Edit project
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
-                    <i className="bi bi-trash3 me-1"></i>
-                    Delete
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            ) : null
-          }
+          )}
+          {user && projectInfo && canEdit(user, projectInfo) && (
+            <>
+              <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowEditMetaMetadataModal(true)}>
+                <i className="me-1 bi bi-pencil-square"></i>
+                Edit
+              </button>
+              <button className="me-1 btn btn-sm btn-danger" onClick={() => setShowDeletePEPModal(true)}>
+                <i className="me-1 bi bi-trash3"></i>
+                Delete
+              </button>
+            </>
+          )}
         </div>
       </div>
-      <p className="px-4">
+      <div className="px-4">
         <Markdown>{projectInfo?.description || 'No description'}</Markdown>
-      </p>
+      </div>
       <div className="mt-2 px-2 border-bottom border-dark">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
         ) : (
           <>
             <div className="flex-row d-flex align-items-end justify-content-between">
-              <div className="d-flex flex-row align-items-center">
-                <div
-                  className={
-                    projectView === 'samples'
-                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
-                      : 'border-bottom px-2 py-1'
-                  }
-                >
-                  <button
-                    onClick={() => setProjectView('samples')}
-                    className="border-0 bg-transparent project-button-toggles rounded"
-                  >
-                    <i className="bi bi-table me-1"></i>
-                    Samples
-                  </button>
-                  {samplesIsDirty ? (
-                    <span className="text-xs">
-                      <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
-                    </span>
+              <ProjectDataNav
+                projectView={projectView}
+                setProjectView={(view) => setProjectView(view)}
+                configIsDirty={configIsDirty}
+                samplesIsDirty={samplesIsDirty}
+                subsamplesIsDirty={subsamplesIsDirty}
+              />
+              {/* no matter what, only render if belonging to the user */}
+              {user && projectInfo && canEdit(user, projectInfo) ? (
+                <div className="d-flex flex-row align-items-center">
+                  {/* <ValidationTooltip /> */}
+                  {projectInfo?.pep_schema ? (
+                    <div className="d-flex flex-row align-items-center mb-1 me-4">
+                      {isValidationLoading || isValidationFetching ? (
+                        <>
+                          <span>Validating...</span>
+                        </>
+                      ) : validationResult?.valid ? (
+                        <>
+                          <Dropdown>
+                            <div className="d-flex align-items-center">
+                              <Dropdown.Toggle as={ValiationToggle}>
+                                <StatusIcon className="text-2xl cursor-pointer" variant="success" />
+                              </Dropdown.Toggle>
+                              <span className="text-success">Valid</span>
+                            </div>
+                            <Dropdown.Menu className="border border-dark shadow-lg">
+                              <Dropdown.Header className="text-success">
+                                Your PEP is valid against {projectInfo?.pep_schema}
+                              </Dropdown.Header>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </>
+                      ) : (
+                        <>
+                          <Dropdown>
+                            <div className="d-flex align-items-center">
+                              <Dropdown.Toggle as={ValiationToggle}>
+                                <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
+                              </Dropdown.Toggle>
+                              <span className="text-danger">Invalid</span>
+                            </div>
+                            <Dropdown.Menu className="border border-dark shadow-lg">
+                              <Dropdown.Header>
+                                {validationResult?.error_type === 'Schema' ? (
+                                  <span className="text-danger">Schema is invalid</span>
+                                ) : (
+                                  <>
+                                    <span className="text-danger fw-bold">
+                                      Your PEP is invalid against {projectInfo?.pep_schema}
+                                    </span>
+                                    <p className="mb-0 fw-bold">
+                                      <span className="text-danger">
+                                        Errors found in {validationResult?.error_type}
+                                        {': '}
+                                      </span>
+                                    </p>
+                                    {validationResult?.errors.map((error, index) => (
+                                      <Dropdown.Header className="text-danger" key={index}>
+                                        <i className="bi bi bi-exclamation-triangle me-2"></i>
+                                        {error}
+                                      </Dropdown.Header>
+                                    ))}
+                                  </>
+                                )}
+                              </Dropdown.Header>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </>
+                      )}
+                    </div>
                   ) : (
-                    //  spacer
-                    <span className="text-xs">
-                      <i className="bi bi-circle-fill ms-1 text-transparent"></i>
-                    </span>
+                    <div className="d-flex flex-row align-items-center mb-1 me-4">
+                      <>
+                        <div className="d-flex align-items-center">
+                          <StatusIcon className="text-2xl" variant="warning" />
+                          <span>Add schema to PEP to validate</span>
+                        </div>
+                      </>
+                    </div>
                   )}
-                </div>
-                <div
-                  className={
-                    projectView === 'config'
-                      ? 'border-primary border-bottom bg-transparent px-2 py-1'
-                      : 'border-bottom px-2 py-1'
-                  }
-                >
-                  <button
-                    onClick={() => setProjectView('config')}
-                    className="border-0 bg-transparent project-button-toggles rounded"
-                  >
-                    <i className="bi bi-filetype-yml me-1"></i>Config
-                    {configIsDirty ? (
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
-                      </span>
-                    ) : (
-                      //  spacer
-                      <span className="text-xs">
-                        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
-                      </span>
-                    )}
-                  </button>
-                </div>
-              </div>
-              {/* Validation status */}
-              <div className="d-flex flex-row align-items-center">
-                <ValidationTooltip />
-                <div className="d-flex flex-row align-items-center mb-1 me-4">
-                  {isValidationLoading || isValidationFetching ? (
-                    <>
-                      <StatusCircle className="me-1" variant="warning" />
-                      <span>Validating...</span>
-                    </>
-                  ) : validationResult?.valid ? (
-                    <>
-                      <StatusCircle className="me-1" variant="success" />
-                      <span>Valid</span>
-                    </>
-                  ) : (
-                    <>
-                      <StatusCircle className="me-1" variant="danger" />
-                      <span>Invalid</span>
-                    </>
-                  )}
-                </div>
-                <div>
-                  {/* no matter what, only render if belonging to the user */}
-                  {user && projectInfo && canEdit(user, projectInfo) ? (
+                  <div>
                     <>
                       <button
                         disabled={
                           configMutation.isLoading ||
                           sampleTableMutation.isLoading ||
-                          !(configIsDirty || samplesIsDirty)
+                          subsampleTableMutation.isLoading ||
+                          !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
                         }
                         onClick={() => handleProjectChange()}
                         className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
                       >
-                        {configMutation.isLoading || sampleTableMutation.isLoading ? 'Saving...' : 'Save'}
+                        {configMutation.isLoading || sampleTableMutation.isLoading || subsampleTableMutation.isLoading
+                          ? 'Saving...'
+                          : 'Save'}
                       </button>
                       <button
                         className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
                         onClick={() => {
                           resetConfig();
                           resetSamples();
+                          resetSubsamples();
                         }}
-                        disabled={!(configIsDirty || samplesIsDirty)}
+                        disabled={!(configIsDirty || samplesIsDirty || subsamplesIsDirty)}
                       >
                         Discard
                       </button>
                     </>
-                  ) : null}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </>
         )}
@@ -310,6 +349,16 @@ export const ProjectPage: FC = () => {
                 data={newProjectSamples || []}
                 onChange={(value) => setNewProjectSamples(value)}
               />
+            ) : projectView === 'subsamples' ? (
+              <>
+                <SampleTable
+                  // fill to the rest of the screen minus 300px
+                  height={window.innerHeight - 300}
+                  readOnly={!(projectInfo && canEdit(user, projectInfo))}
+                  data={newProjectSubsamples || []}
+                  onChange={(value) => setNewProjectSubsamples(value)}
+                />
+              </>
             ) : (
               <ProjectConfigEditor
                 readOnly={!(projectInfo && canEdit(user, projectInfo))}
@@ -351,13 +400,13 @@ export const ProjectPage: FC = () => {
         description={projectInfo?.description || ''}
         tag={tag}
       />
-      <CompatibilityModal
-        namespace={namespace || ''}
-        project={project || ''}
-        tag={tag}
-        show={showCompatibilityModal}
-        onHide={() => setShowCompatibilityModal(false)}
-      />
+      {/*<CompatibilityModal*/}
+      {/*  namespace={namespace || ''}*/}
+      {/*  project={project || ''}*/}
+      {/*  tag={tag}*/}
+      {/*  show={showCompatibilityModal}*/}
+      {/*  onHide={() => setShowCompatibilityModal(false)}*/}
+      {/*/>*/}
     </PageLayout>
   );
 };

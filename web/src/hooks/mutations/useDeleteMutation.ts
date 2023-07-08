@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+
 import { deleteProject } from '../../api/project';
-import { AxiosError } from 'axios';
 
 export const useDeleteMutation = (
   namespace: string,
@@ -20,13 +21,19 @@ export const useDeleteMutation = (
     mutationFn: () => deleteProject(namespace, project, tag, jwt || ''),
     onSuccess: () => {
       toast.success('Project successfully deleted.');
+      // need to wait for database to update before redirecting
+      if (redirect) {
+        setTimeout(() => {
+          navigate(redirect);
+        }, 500);
+      }
+      onHide();
+      if (onSuccess) {
+        onSuccess();
+      }
       queryClient.invalidateQueries({
         queryKey: [namespace],
       });
-      onHide();
-      if (redirect) {
-        navigate(redirect);
-      }
     },
     onError: (error: AxiosError) => {
       toast.error(`There was an error deleting the project: ${error}`);

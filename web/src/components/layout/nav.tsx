@@ -1,7 +1,8 @@
 import { FC, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
-import { useSession } from '../../hooks/useSession';
 import { useNavigate } from 'react-router-dom';
+
+import { useSession } from '../../hooks/useSession';
 import { getOS } from '../../utils/etc';
 import { SearchBox } from './search-box';
 
@@ -26,9 +27,20 @@ export const Nav: FC = () => {
       style={{ backgroundColor: '#EFF3F6' }}
     >
       <div className="d-flex flex-row align-items-center w-100 px-4">
-        <a href="/" className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none">
-          <img src="/pephub_logo.svg" alt="PEPhub" height="60" />
-        </a>
+        {user ? (
+          <div>
+            <a
+              href={`/${user.login}`}
+              className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none"
+            >
+              <img src="/pephub_logo.svg" alt="PEPhub" height="60" />
+            </a>
+          </div>
+        ) : (
+          <a href="/" className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none">
+            <img src="/pephub_logo.svg" alt="PEPhub" height="60" />
+          </a>
+        )}
         <button
           className="navbar-toggler"
           type="button"
@@ -79,11 +91,16 @@ export const Nav: FC = () => {
                 GitHub
               </a>
             </li>
-            <li className="mx-2 my-0 nav-item h5">
+            <li className="text-body mx-2 my-0 nav-item h5 pt-1">
+              <a className="nav-link" href="/validate">
+                <i className="bi bi-check2-circle me-1"></i>Validation
+              </a>
+            </li>
+            <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               {user ? (
-                <div className="d-flex align-items-center">
+                <div className="mx-2 my-0 nav-item h5 pt-1">
                   <Dropdown className="me-3">
-                    <Dropdown.Toggle variant="none" id="navbarDropdown">
+                    <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
                       <img
                         className="border rounded-circle border-secondary"
                         src={user['avatar_url']}
@@ -93,20 +110,17 @@ export const Nav: FC = () => {
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                       <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
-                      <Dropdown.Item disabled href="/me">
-                        Profile
-                      </Dropdown.Item>
                       <Dropdown.Divider />
                       <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </div>
               ) : (
-                <li className="mx-2 my-0 nav-item h5 pt-1">
-                  <button className="btn btn-dark" onClick={() => login()}>
+                <div className="my-0 nav-item h5 pt-1">
+                  <button className="btn btn-sm btn-dark px-3 mb-1" onClick={() => login()}>
                     <i className="fa fa-github"></i>Log in
                   </button>
-                </li>
+                </div>
               )}
             </li>
           </ul>

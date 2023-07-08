@@ -1,8 +1,9 @@
-import { FC, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { FC } from 'react';
 import { Modal } from 'react-bootstrap';
-import { useSession } from '../../hooks/useSession';
+import { useForm } from 'react-hook-form';
+
 import { useForkMutation } from '../../hooks/mutations/useForkMutation';
+import { useSession } from '../../hooks/useSession';
 
 interface Props {
   namespace: string;
@@ -55,7 +56,6 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
     jwt || '',
     onHide,
   );
-  
 
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>

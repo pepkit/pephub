@@ -1,5 +1,6 @@
-import { SearchHit } from '../../types';
 import axios from 'axios';
+
+import { SearchHit } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;

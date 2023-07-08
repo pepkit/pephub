@@ -2,10 +2,8 @@ import { FC } from 'react';
 
 import { ValidatorForm } from '../components/forms/validator-form';
 import { PageLayout } from '../components/layout/page-layout';
-import { useSession } from '../hooks/useSession';
 
 export const EidoValidator: FC = () => {
-  const { user, login } = useSession();
   return (
     <PageLayout
       title="Eido Validator"

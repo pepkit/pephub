@@ -1,4 +1,6 @@
 import os
+
+import peppy
 import pydantic
 import jwt
 import json
@@ -7,7 +9,7 @@ import logging
 
 from secrets import token_hex
 from dotenv import load_dotenv
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Dict, Any
 from datetime import datetime, timedelta
 
 from fastapi import Depends, Header, Form
@@ -124,7 +126,7 @@ def get_db() -> PEPDatabaseAgent:
     return agent
 
 
-def read_authorization_header(Authorization: str = Header(None)) -> Union[str, None]:
+def read_authorization_header(Authorization: str = Header(None)) -> Union[dict, None]:
     """
     Reads and decodes a JWT, returning the decoded variables.
 
@@ -144,7 +146,7 @@ def read_authorization_header(Authorization: str = Header(None)) -> Union[str, N
         _LOGGER_PEPHUB.error(e)
         return None
     except jwt.exceptions.ExpiredSignatureError:
-        return HTTPException(status_code=401, detail="JWT has expired")
+        raise HTTPException(status_code=401, detail="JWT has expired")
     return session_info
 
 
@@ -188,9 +190,10 @@ def get_project(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-):
+    raw: bool = False,
+) -> Union[peppy.Project, Dict[str, Any]]:
     try:
-        proj = agent.project.get(namespace, project, tag)
+        proj = agent.project.get(namespace, project, tag, raw=raw)
         yield proj
     except ProjectNotFoundError:
         raise HTTPException(

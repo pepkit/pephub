@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+
 import { Schema } from '../../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';

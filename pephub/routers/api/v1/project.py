@@ -1,25 +1,22 @@
 import eido
-import peppy
 import yaml
 import pandas as pd
 from io import StringIO
 from typing import Callable
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pepdbagent import PEPDatabaseAgent
-from pepdbagent.exceptions import ProjectUniqueNameError
 from peppy import Project
 from peppy.const import (
     SAMPLE_RAW_DICT_KEY,
     CONFIG_KEY,
     SAMPLE_DF_KEY,
-    SUBSAMPLE_RAW_DICT_KEY,
+    SUBSAMPLE_RAW_LIST_KEY,
 )
 
-from ...models import ProjectOptional, ProjectRawModel, ForkRequest
+from ...models import ProjectOptional, ProjectRawModel
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import *
-from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS, ALL_VERSIONS
+from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS
 
 from pepdbagent.exceptions import ProjectUniqueNameError
 
@@ -36,20 +33,18 @@ project = APIRouter(
 
 @project.get("", summary="Fetch a PEP")
 async def get_a_pep(
-    proj: peppy.Project = Depends(get_project),
+    proj: Union[peppy.Project, dict] = Depends(get_project),
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
-    raw: bool = False,
 ):
     """
     Fetch a PEP from a certain namespace
     """
-    if raw:
+    if not isinstance(proj, peppy.Project):
         try:
-            raw_project = ProjectRawModel(**proj.to_dict(extended=True))
+            raw_project = ProjectRawModel(**proj)
         except Exception:
             raise HTTPException(500, f"Unexpected project error!")
         return raw_project.dict(by_alias=False)
-
     samples = [s.to_dict() for s in proj.samples]
     sample_table_index = proj.sample_table_index
 
@@ -65,6 +60,13 @@ async def get_a_pep(
     if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
         try:
             del proj_dict["name"]
+        except KeyError:
+            pass
+
+    # default to description from annotation
+    if hasattr(proj, "description") and hasattr(proj_annotation, "description"):
+        try:
+            del proj_dict["description"]
         except KeyError:
             pass
 
@@ -106,32 +108,28 @@ async def update_a_pep(
     new_raw_project = raw_peppy_project.copy()
 
     # sample table update
-    if updated_project.sample_table_csv is not None:
-        # clean it be remove any trailing commas
-        updated_project.sample_table_csv = updated_project.sample_table_csv.rstrip(",")
-        sample_table_csv = StringIO(updated_project.sample_table_csv)
-        sample_table_df = pd.read_csv(sample_table_csv)
-        sample_table_df = sample_table_df.dropna(axis=1, how="all")
-        sample_table_df.fillna("", inplace=True)
-        sample_table_df_json = sample_table_df.to_dict()
+    if updated_project.sample_table is not None:
+        sample_table_df = pd.DataFrame.from_dict(updated_project.sample_table)
+        sample_table_df_json = sample_table_df.to_dict(orient="records")
 
         new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
         new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
 
     # subsample table update
-    if updated_project.subsample_list is not None:
+    if updated_project.subsample_table is not None:
         subsample_peppy_list = []
-        for subsample in updated_project.subsample_list:
+        for subsample in updated_project.subsample_table:
             subsample_str = subsample.rstrip(",")
             subsample_str = StringIO(subsample_str)
             subsample_pd = pd.read_csv(subsample_str)
-            subsample_pd = subsample_pd.dropna(axis=1, how="all")
-            subsample_pd.fillna("", inplace=True)
-            subsample_df = subsample_pd.to_dict()
+            subsample_df = subsample_pd.to_dict(orient="records")
 
             subsample_peppy_list.append(subsample_df)
 
-        new_raw_project[SUBSAMPLE_RAW_DICT_KEY] = subsample_peppy_list
+        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = subsample_peppy_list
+
+    if updated_project.description:
+        new_raw_project["_config"]["description"] = updated_project.description
 
     # project config update
     if updated_project.project_config_yaml is not None:
@@ -142,7 +140,8 @@ async def update_a_pep(
     if any(
         [
             updated_project.project_config_yaml is not None,
-            updated_project.sample_table_csv is not None,
+            updated_project.sample_table is not None,
+            updated_project.subsample_table is not None,
         ]
     ):
         try:
@@ -263,6 +262,7 @@ async def delete_a_pep(
 async def get_pep_samples(
     proj: peppy.Project = Depends(get_project),
     format: Optional[str] = None,
+    raw: Optional[bool] = False,
 ):
     if format is not None:
         conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
@@ -274,12 +274,21 @@ async def get_pep_samples(
                 detail=f"Invalid format '{format}'. Valid formats are: {list(SAMPLE_CONVERSION_FUNCTIONS.keys())}",
             )
     else:
-        return JSONResponse(
-            {
-                "count": len(proj.samples),
-                "items": [s.to_dict() for s in proj.samples],
-            }
-        )
+        if raw:
+            df = pd.DataFrame(proj[SAMPLE_RAW_DICT_KEY])
+            return JSONResponse(
+                {
+                    "count": df.shape[0],
+                    "items": df.to_dict(orient="records"),
+                }
+            )
+        else:
+            return JSONResponse(
+                {
+                    "count": len(proj.samples),
+                    "items": [s.to_dict() for s in proj.samples],
+                }
+            )
 
 
 @project.get("/samples/{sample_name}")
@@ -292,25 +301,31 @@ async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project
 
 @project.get("/subsamples")
 async def get_subsamples(
-    namespace: str,
-    project: str,
     proj: peppy.Project = Depends(get_project),
     download: bool = False,
 ):
-    subsamples = proj.subsample_table
-
+    subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
     if subsamples is not None:
+        subsamples = pd.DataFrame(
+            proj[SUBSAMPLE_RAW_LIST_KEY][0]
+        )  # TODO: this seems like a bug @Alex can you check this?
         if download:
-            return proj.subsample_table.to_csv()
+            return subsamples.to_csv()
         else:
             return JSONResponse(
                 {
-                    "count": len(subsamples),
-                    "items": [s.to_dict() for s in proj.subsample_table],
+                    "count": subsamples.shape[0],
+                    "items": subsamples.to_dict(orient="records"),
                 }
             )
+
     else:
-        return f"Project '{namespace.lower()}/{project.lower()}' does not have any subsamples."
+        return JSONResponse(
+            {
+                "count": 0,
+                "items": [],
+            }
+        )
 
 
 @project.get("/convert")

@@ -4,7 +4,7 @@ import jinja2
 import requests
 import time
 from typing import Union
-from fastapi import APIRouter, Request, Header, BackgroundTasks
+from fastapi import APIRouter, Request, Header, BackgroundTasks, Depends
 from fastapi.responses import RedirectResponse, Response
 from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
@@ -15,6 +15,7 @@ from ...dependencies import (
     CLIAuthSystem,
     generate_random_auth_code,
     generate_random_device_code,
+    read_authorization_header,
 )
 
 from ...helpers import build_authorization_url
@@ -259,3 +260,13 @@ def login_success(request: Request):
     return templates.TemplateResponse(
         "login_success_default.html", {"request": request}
     )
+
+
+@auth.get("/session")
+def get_session_from_jwt(
+    session_info: Union[dict, None] = Depends(read_authorization_header)
+):
+    if session_info:
+        return session_info
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")

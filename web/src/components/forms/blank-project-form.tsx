@@ -4,12 +4,11 @@ import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Sample } from '../../../types';
+import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
 import { useSession } from '../../hooks/useSession';
-import { sampleListToArrays, tableDataToCsvString } from '../../utils/sample-table';
 import { ProjectConfigEditor } from '../project/project-config';
 import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
-import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
 
 interface BlankProjectInputs {
   is_private: boolean;
@@ -62,7 +61,7 @@ sample_table: samples.csv
     },
   });
 
-  const sampleTableCSV = watch('sample_table');
+  const sampleTable = watch('sample_table');
   const configYAML = watch('config');
   const namespace = watch('namespace');
   const projectName = watch('project_name');
@@ -79,7 +78,7 @@ sample_table: samples.csv
     description,
     configYAML,
     pepSchema,
-    tableDataToCsvString(sampleListToArrays(sampleTableCSV)),
+    sampleTable,
     jwt || '',
     onHide,
   );
@@ -162,7 +161,7 @@ sample_table: samples.csv
           <div className="p-2 border border-top-1">
             <SampleTable
               height={300}
-              data={sampleTableCSV}
+              data={sampleTable}
               onChange={(data) => {
                 setValue('sample_table', data);
               }}

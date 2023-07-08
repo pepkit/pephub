@@ -1,7 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { toast } from 'react-hot-toast';
+
+import { Sample } from '../../../types';
 import { submitProjectJSON } from '../../api/namespace';
+import { extractError, extractErrorMessage } from '../../utils/etc';
 
 export const useBlankProjectFormMutation = (
   namespace: string,
@@ -11,7 +14,7 @@ export const useBlankProjectFormMutation = (
   description: string,
   config: string,
   pepSchema: string,
-  sampleTable: string,
+  sampleTable: Sample[],
   jwt: string | undefined,
   onSuccess?: () => void,
 ) => {
@@ -21,7 +24,7 @@ export const useBlankProjectFormMutation = (
       submitProjectJSON(
         {
           namespace: namespace,
-          project_name: projectName,
+          name: projectName,
           tag: tag,
           is_private: isPrivate,
           description: description,
@@ -39,7 +42,12 @@ export const useBlankProjectFormMutation = (
       }
     },
     onError: (err: AxiosError) => {
-      toast.error(`Error uploading project! ${err}`);
+      // extract out error message if it exists, else unknown
+      const errorMessage = extractErrorMessage(err);
+      const error = extractError(err);
+      toast.error(`${errorMessage}: ${error}`, {
+        duration: 5000,
+      });
     },
   });
 };

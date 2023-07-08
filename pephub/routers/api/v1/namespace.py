@@ -9,7 +9,12 @@ from pepdbagent.exceptions import ProjectUniqueNameError
 
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
-from ....const import DEFAULT_TAG, BLANK_PEP_CONFIG, BLANK_PEP_SAMPLE_TABLE
+from ....const import (
+    DEFAULT_TAG,
+    BLANK_PEP_CONFIG,
+    BLANK_PEP_SAMPLE_TABLE,
+    DEFAULT_PEP_SCHEMA,
+)
 from ...models import ProjectRawModel, ProjectJsonRequest
 
 from dotenv import load_dotenv
@@ -96,11 +101,11 @@ async def get_namespace_projects(
 )
 async def create_pep(
     namespace: str,
-    project_name: str = Form(...),
+    name: str = Form(...),
     is_private: bool = Form(False),
     tag: str = Form(DEFAULT_TAG),
     description: Union[str, None] = Form(None),
-    pep_schema: str = Form(...),
+    pep_schema: str = Form(DEFAULT_PEP_SCHEMA),
     files: Optional[List[UploadFile]] = File(
         None  # let the file upload be optional. dont send a file? We instantiate with blank
     ),
@@ -124,14 +129,16 @@ async def create_pep(
                         shutil.copyfileobj(upload_file.file, local_tmpf)
 
             p = Project(f"{dirpath}/{init_file.filename}")
-            p.name = project_name
+            p.name = name
             p.description = description
+            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
                     namespace=namespace,
-                    name=project_name,
+                    name=name,
                     tag=tag,
+                    description=description,
                     is_private=is_private,
                     pep_schema=pep_schema,
                 )
@@ -147,11 +154,11 @@ async def create_pep(
             return JSONResponse(
                 content={
                     "namespace": namespace,
-                    "project_name": project_name,
+                    "name": name,
                     "proj": p.to_dict(),
                     "init_file": init_file.filename,
                     "tag": tag,
-                    "registry_path": f"{namespace}/{project_name}:{tag}",
+                    "registry_path": f"{namespace}/{name}:{tag}",
                 },
                 status_code=202,
             )
@@ -170,14 +177,14 @@ async def create_pep(
 
             # init project
             p = Project(f"{dirpath}/{config_file_name}")
-            p.name = project_name
+            p.name = name
             p.description = description
             p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
                     namespace=namespace,
-                    name=project_name,
+                    name=name,
                     tag=tag,
                     is_private=is_private,
                 )
@@ -193,10 +200,10 @@ async def create_pep(
             return JSONResponse(
                 content={
                     "namespace": namespace,
-                    "project_name": project_name,
+                    "name": name,
                     "proj": p.to_dict(),
                     "tag": tag,
-                    "registry_path": f"{namespace}/{project_name}:{tag}",
+                    "registry_path": f"{namespace}/{name}:{tag}",
                 },
                 status_code=202,
             )
@@ -216,11 +223,20 @@ async def upload_raw_pep(
         is_private = project_from_json.is_private
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
-        pep_schema = project_from_json.pep_schema
+        pep_schema = project_from_json.pep_dict.pep_schema
+        name = project_from_json.name
+        description = project_from_json.description
 
         # This configurations needed due to Issue #124 Should be removed in the future
         project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
         p_project = peppy.Project().from_dict(project_dict.dict(by_alias=True))
+
+        # for DX, we want people to be able to just send name and description,
+        # although it is required in the peppy.Project config, so we set it here
+        if name is not None:
+            p_project.name = project_from_json.name
+        if description is not None:
+            p_project.description = project_from_json.description
 
     except Exception as e:
         return JSONResponse(
@@ -237,6 +253,7 @@ async def upload_raw_pep(
             namespace=namespace,
             name=p_project.name,
             tag=tag,
+            description=description,
             is_private=is_private,
             overwrite=overwrite,
             pep_schema=pep_schema,
@@ -253,7 +270,7 @@ async def upload_raw_pep(
     return JSONResponse(
         content={
             "namespace": namespace,
-            "project_name": p_project.name,
+            "name": p_project.name,
             "tag": tag,
             "registry_path": f"{namespace}/{p_project.name}:{tag}",
         },

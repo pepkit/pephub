@@ -1,11 +1,12 @@
 import { FC } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { useSession } from '../../hooks/useSession';
-import { useProject } from '../../hooks/queries/useProject';
-import { SchemaDropdown } from './components/schemas-databio-dropdown';
-import { MarkdownEditor } from '../markdown/edit';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
+import { useProject } from '../../hooks/queries/useProject';
+import { useSession } from '../../hooks/useSession';
+import { MarkdownEditor } from '../markdown/edit';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { SchemaTooltip } from './tooltips/form-tooltips';
 
 interface Props {
   namespace: string;
@@ -31,7 +32,9 @@ export const ProjectMetaEditForm: FC<Props> = ({
   onCancel = () => {},
 }) => {
   const { jwt } = useSession();
+
   const { data: projectInfo } = useProject(namespace, name, tag, jwt);
+
   const {
     register,
     watch,
@@ -62,13 +65,16 @@ export const ProjectMetaEditForm: FC<Props> = ({
   const newIsPrivate = watch('isPrivate');
   const newSchema = watch('pep_schema');
 
-  const mutation = useEditProjectMetaMutation(namespace, name, tag, jwt, onSubmit, onFailedSubmit, {
-    newName: newName,
-    newTag: newTag,
-    newDescription: newDescription,
-    newIsPrivate: newIsPrivate,
-    newSchema: newSchema,
-  });
+  // check if things are changed - only send those that are
+  const metadata = {
+    newName: projectInfo?.name === newName ? undefined : newName,
+    newTag: projectInfo?.tag === newTag ? undefined : newTag,
+    newDescription: projectInfo?.description === newDescription ? undefined : newDescription,
+    newIsPrivate: projectInfo?.is_private === newIsPrivate ? undefined : newIsPrivate,
+    newSchema: projectInfo?.pep_schema === newSchema ? undefined : newSchema,
+  };
+
+  const mutation = useEditProjectMetaMutation(namespace, name, tag, jwt, onSubmit, onFailedSubmit, metadata);
 
   return (
     <form>
@@ -96,14 +102,12 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-name"
           aria-describedby="pep-name-help"
         />
-        <div id="pep-name-help" className="form-text">
-          Rename your PEP.
-        </div>
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
           Schema
         </label>
+        <SchemaTooltip className="ms-1" />
         <div>
           <Controller
             control={control}
@@ -132,9 +136,6 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-tag"
           aria-describedby="pep-name-help"
         />
-        <div id="pep-name-help" className="form-text">
-          Change your project tag.
-        </div>
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
@@ -150,6 +151,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
               onChange={(value) => {
                 field.onChange(value);
               }}
+              rows={10}
             />
           )}
         />
