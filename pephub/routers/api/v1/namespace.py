@@ -224,6 +224,8 @@ async def upload_raw_pep(
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
         pep_schema = project_from_json.pep_dict.pep_schema
+        name = project_from_json.name
+        description = project_from_json.description
 
         # This configurations needed due to Issue #124 Should be removed in the future
         project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
@@ -231,9 +233,9 @@ async def upload_raw_pep(
 
         # for DX, we want people to be able to just send name and description,
         # although it is required in the peppy.Project config, so we set it here
-        if project_from_json.name is not None:
+        if name is not None:
             p_project.name = project_from_json.name
-        if project_from_json.description is not None:
+        if description is not None:
             p_project.description = project_from_json.description
 
     except Exception as e:
@@ -251,6 +253,7 @@ async def upload_raw_pep(
             namespace=namespace,
             name=p_project.name,
             tag=tag,
+            description=description,
             is_private=is_private,
             overwrite=overwrite,
             pep_schema=pep_schema,
