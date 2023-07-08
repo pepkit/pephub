@@ -7,6 +7,7 @@ import Select from 'react-select';
 import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
 import { useSchema } from '../../hooks/queries/useSchema';
 import { useSchemas } from '../../hooks/queries/useSchemas';
+import { ValidationParams } from '../../hooks/queries/useValidation';
 import { useValidation } from '../../hooks/queries/useValidation';
 import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
@@ -17,12 +18,12 @@ interface ValidatorFormInputs {
   pepRegistryPath?: {
     label: string;
     value: string;
-  };
+  } | null;
   schemaFiles?: FileList;
   schemaRegistryPath?: {
     label: string;
     value: string;
-  };
+  } | null;
   schemaPaste?: string;
 }
 
@@ -42,7 +43,8 @@ export const ValidatorForm: FC = () => {
   const fileDialogRef = useRef<() => void | null>(null);
 
   const [useExistingPEP, setUseExistingPEP] = useState(true);
-  const [useExistingSchema, setUseExistingSchema] = useState(false);
+  const [useExistingSchema, setUseExistingSchema] = useState(true);
+
   const [schemaString, setSchemaString] = useState<string | undefined>(undefined);
   const [schemaPaste, setSchemaPaste] = useState<string>('');
 
@@ -53,23 +55,25 @@ export const ValidatorForm: FC = () => {
   const schemaRegistryPath = watch('schemaRegistryPath');
 
   const { data: schema } = useSchema(schemaRegistryPath?.value);
-  const params = useMemo(() => {
-    if (useExistingPEP) {
-      return {
-        pep: pepRegistryPath?.value,
-        schema: schemaString,
-        schema_registry: undefined,
-        enabled: true,
-      };
-    } else {
-      return {
-        pep: pepFiles,
-        schema: schemaString,
-        schema_registry: undefined,
-        enabled: true,
-      };
-    }
-  }, [useExistingPEP, pepFiles, pepRegistryPath?.value, schemaString]);
+
+  // validation params for the useValidation hook
+  let params = {} as ValidationParams;
+
+  if (useExistingPEP) {
+    params = {
+      pep: pepRegistryPath?.value,
+      schema: schemaString,
+      schema_registry: undefined,
+      enabled: true,
+    };
+  } else {
+    params = {
+      pep: pepFiles,
+      schema: schemaString,
+      schema_registry: undefined,
+      enabled: true,
+    };
+  }
 
   const { data: result, error, isFetching: isValidating, refetch } = useValidation(params);
 
@@ -88,6 +92,8 @@ export const ValidatorForm: FC = () => {
         reader.readAsText(schemaFiles[0]);
       } else if (schemaPaste) {
         setSchemaString(schemaPaste);
+      } else {
+        setSchemaString(undefined);
       }
     }
   }, [schemaRegistryPath?.value, schemaFiles, schema, schemaPaste]);
@@ -95,12 +101,11 @@ export const ValidatorForm: FC = () => {
   const resetValidator = () => {
     resetForm({
       pepFiles: undefined,
-      pepRegistryPath: undefined,
+      pepRegistryPath: null,
       schemaFiles: undefined,
-      schemaRegistryPath: undefined,
+      schemaRegistryPath: null,
       schemaPaste: undefined,
     });
-    setUseExistingPEP(false);
   };
 
   const runValidation = () => {
@@ -116,7 +121,17 @@ export const ValidatorForm: FC = () => {
       <form className="form-control border-dark shadow-sm">
         <div className="p-2">
           <label className="form-label fw-bold h5">1. Select your PEP</label>
-          <Tabs>
+          <Tabs
+            defaultActiveKey="existing"
+            id="pep-tabs"
+            onSelect={(key) => {
+              if (key === 'existing') {
+                setUseExistingPEP(true);
+              } else {
+                setUseExistingPEP(false);
+              }
+            }}
+          >
             <Tab eventKey="existing" title="Use existing PEP">
               <div className="p-2 border border-top-0 rounded-bottom">
                 <Controller
@@ -177,8 +192,17 @@ export const ValidatorForm: FC = () => {
           </Tabs>
           <div className="my-3"></div>
           <label className="form-label fw-bold h5">2. Select your schema</label>
-          <Tabs defaultActiveKey="existing">
-            <Tab eventKey="existing" title="Use existing schema" onClick={() => setUseExistingSchema(true)}>
+          <Tabs
+            defaultActiveKey="existing"
+            onSelect={(key) => {
+              if (key === 'existing') {
+                setUseExistingSchema(true);
+              } else {
+                setUseExistingSchema(false);
+              }
+            }}
+          >
+            <Tab eventKey="existing" title="Use existing schema">
               <div className="p-2 border border-top-0 rounded-bottom">
                 <Controller
                   name="schemaRegistryPath"
@@ -199,7 +223,7 @@ export const ValidatorForm: FC = () => {
             <Tab eventKey="new" title="Upload schema">
               <div className="d-flex flex-column align-items-center w-100 border border-top-0 rounded-bottom pb-3">
                 {schemaFiles ? (
-                  <div className="d-flex flex-column align-items-center w-00">
+                  <div className="d-flex flex-column align-items-center w-100 pt-2">
                     {Array.from(schemaFiles).map((file, i) => {
                       return (
                         <div key={i} className="flex-row d-flex align-items-center">
@@ -256,6 +280,17 @@ export const ValidatorForm: FC = () => {
           </div>
         </div>
       </form>
+      {/* render the params */}
+      <div className="my-3">
+        <pre>
+          <code>{JSON.stringify(params, null, 2)}</code>
+        </pre>
+        <pre>
+          <code>Use existing PEP: {JSON.stringify(useExistingPEP)}</code>
+          <br />
+          <code>Use existing schema: {JSON.stringify(useExistingSchema)}</code>
+        </pre>
+      </div>
       <div className="my-3">
         {isValidating ? (
           <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '300px' }}>
@@ -280,13 +315,7 @@ export const ValidatorForm: FC = () => {
                   <p className="mb-0">
                     {result.error_type === 'Schema' ? 'Schema is invalid, found issue with:' : 'PEP is invalid!'}
                   </p>
-                  <p className="mb-0">
-                    {result.error_type !== 'Schema' && (
-                      <>
-                        Errors found in {result.error_type}{' '}
-                      </>
-                    )}
-                  </p>
+                  <p className="mb-0">{result.error_type !== 'Schema' && <>Errors found in {result.error_type} </>}</p>
                   <code className="error-code">
                     {result.errors.map((e) => (
                       <pre className="mb-2 text-danger" key={e}>

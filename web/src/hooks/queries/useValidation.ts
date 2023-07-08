@@ -6,7 +6,7 @@ import { ValidationResult } from '../../../types';
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
-interface ValidationParams {
+export interface ValidationParams {
   pep: FileList | string | undefined;
   schema: string | undefined;
   schema_registry: string | undefined;
@@ -15,7 +15,7 @@ interface ValidationParams {
 
 const runValidation = async (params: ValidationParams) => {
   const { pep, schema, schema_registry } = params;
-  
+
   let pep_registry: string | null = null;
   let pep_files: FileList | null | undefined = null;
 
