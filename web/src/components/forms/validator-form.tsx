@@ -284,13 +284,6 @@ export const ValidatorForm: FC = () => {
                     {result.error_type !== 'Schema' && (
                       <>
                         Errors found in {result.error_type}{' '}
-                        {result.sample_names && (
-                          <OverlayTrigger overlay={<Tooltip id="validation">{result.sample_names}</Tooltip>}>
-                            <i className="bi bi-info-circle me-2 mb-2"></i>
-                          </OverlayTrigger>
-                        )}
-                        <br />
-                        <br />
                       </>
                     )}
                   </p>

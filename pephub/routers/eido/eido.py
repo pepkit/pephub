@@ -162,31 +162,29 @@ async def validate(
     # while we catch this, its still a 200 response since we want to
     # return the validation errors
     except eido.exceptions.EidoValidationError as e:
-        sample_names = []
+        property_names = []
         for item_list in e.errors_by_type.values():
+            property_name = item_list[0]['type']
             for item in item_list:
                 if item['sample_name'] == "project":
                     error_type = "Project"
-                    sample_names = None
                     break
                 else:
-                    sample_names.append(item['sample_name'])
                     error_type = "Samples"
+                    if len(item_list) > 20:
+                        property_names = ["More than 20 samples have encountered errors."]
+                    else:
+                        property_name += f" ({item['sample_name']})"
+            property_names.append(property_name)
 
-        if sample_names is not None:
-            sample_counter = len(sample_names)
-            if sample_counter > 30:
-                sample_names = ["More than 30 samples have encountered errors."]
-            else:
-                sample_names = ", ".join(sample_names)
 
         errors = [str(error) for error in e.errors_by_type]
-        return {"valid": False, "error_type": error_type, "sample_names": sample_names, "errors": errors}
+        return {"valid": False, "error_type": error_type, "errors": property_names}
     
     except Exception as e:
         sample_names = []
         errors = [str(e)]
-        return {"valid": False, "error_type": "Schema", "sample_names": "", "errors": errors}
+        return {"valid": False, "error_type": "Schema", "errors": property_names}
 
     # everything passed, return valid
     else:

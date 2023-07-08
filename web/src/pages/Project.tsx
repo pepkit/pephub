@@ -279,13 +279,6 @@ export const ProjectPage: FC = () => {
                                         Errors found in {validationResult?.error_type}
                                         {': '}
                                       </span>
-                                      {validationResult?.sample_names && (
-                                        <OverlayTrigger
-                                          overlay={<Tooltip id="validation">{validationResult?.sample_names}</Tooltip>}
-                                        >
-                                          <i className="bi bi-info-circle me-2 mb-2"></i>
-                                        </OverlayTrigger>
-                                      )}
                                     </p>
                                     {validationResult?.errors.map((error, index) => (
                                       <Dropdown.Header className="text-danger" key={index}>

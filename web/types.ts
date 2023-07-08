@@ -95,6 +95,5 @@ export interface SchemaResults {
 export interface ValidationResult {
   valid: boolean;
   error_type: string;
-  sample_names: string[];
   errors: string[];
 }
