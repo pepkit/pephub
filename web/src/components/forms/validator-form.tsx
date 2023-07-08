@@ -177,8 +177,8 @@ export const ValidatorForm: FC = () => {
           </Tabs>
           <div className="my-3"></div>
           <label className="form-label fw-bold h5">2. Select your schema</label>
-          <Tabs>
-            <Tab eventKey="existing" title="Use existing schema">
+          <Tabs defaultActiveKey="existing">
+            <Tab eventKey="existing" title="Use existing schema" onClick={() => setUseExistingSchema(true)}>
               <div className="p-2 border border-top-0 rounded-bottom">
                 <Controller
                   name="schemaRegistryPath"
