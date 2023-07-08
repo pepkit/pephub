@@ -177,14 +177,11 @@ async def validate(
                         property_name += f" ({item['sample_name']})"
             property_names.append(property_name)
 
-
-        errors = [str(error) for error in e.errors_by_type]
         return {"valid": False, "error_type": error_type, "errors": property_names}
     
     except Exception as e:
-        sample_names = []
         errors = [str(e)]
-        return {"valid": False, "error_type": "Schema", "errors": property_names}
+        return {"valid": False, "error_type": "Schema", "errors": errors}
 
     # everything passed, return valid
     else:
