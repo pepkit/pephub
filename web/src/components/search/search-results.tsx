@@ -1,6 +1,7 @@
 import { FC } from 'react';
-import { SearchHit } from '../../../types';
 import { ProgressBar } from 'react-bootstrap';
+
+import { SearchHit } from '../../../types';
 
 interface ProjectProps {
   hits: SearchHit[];

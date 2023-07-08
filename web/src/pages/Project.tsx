@@ -1,5 +1,5 @@
-import { FC, ForwardRefRenderFunction, MouseEvent, forwardRef, useEffect, useState } from 'react';
-import { Breadcrumb, Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FC, MouseEvent, forwardRef, useEffect, useState } from 'react';
+import { Breadcrumb, Dropdown } from 'react-bootstrap';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
@@ -16,7 +16,6 @@ import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpo
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { SampleTable } from '../components/tables/sample-table';
-import { ValidationTooltip } from '../components/tooltips/validation-tooltip';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
 import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
 import { useSubsampleTableMutation } from '../hooks/mutations/useSubsampleTableMutation';

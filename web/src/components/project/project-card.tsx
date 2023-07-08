@@ -1,11 +1,8 @@
 import { FC, useState } from 'react';
-import { ButtonGroup, Dropdown } from 'react-bootstrap';
 
 import { ProjectAnnotation } from '../../../types';
 import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
-import { canEdit } from '../../utils/permissions';
-import { Badge } from '../badges/badge';
 import { MarkdownToText } from '../markdown/render';
 import { DeletePEPModal } from '../modals/delete-pep';
 

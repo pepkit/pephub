@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Dropdown, NavDropdown } from 'react-bootstrap';
+import { Dropdown } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 import { useSession } from '../../hooks/useSession';

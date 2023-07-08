@@ -1,5 +1,6 @@
 import Handsontable from 'handsontable';
-import { SELECTED_CLASS, ODD_ROW_CLASS } from './constants';
+
+import { ODD_ROW_CLASS, SELECTED_CLASS } from './constants';
 
 type AddClassesToRows = (
   TD: HTMLTableCellElement,

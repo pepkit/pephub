@@ -1,6 +1,7 @@
-import { Modal } from 'react-bootstrap';
-import { ProjectMetaEditForm } from '../forms/edit-project-meta';
 import { FC } from 'react';
+import { Modal } from 'react-bootstrap';
+
+import { ProjectMetaEditForm } from '../forms/edit-project-meta';
 
 interface Props {
   namespace: string;

@@ -2,7 +2,6 @@ import axios from 'axios';
 import YAML from 'yaml';
 
 import { Project, ProjectAnnotation, Sample } from '../../types';
-import { sampleListToObjectofObjects } from '../utils/sample-table';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
