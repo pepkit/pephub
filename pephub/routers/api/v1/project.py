@@ -380,15 +380,20 @@ async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
 async def fork_pep_to_namespace(
     fork_request: ForkRequest,
     proj: peppy.Project = Depends(get_project),
+    proj_annotation: AnnotationModel = Depends(get_project_annotation),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     fork_to = fork_request.fork_to
     fork_name = fork_request.fork_name
     fork_tag = fork_request.fork_tag
-    proj.description = fork_request.fork_description or ""
     try:
         agent.project.create(
-            project=proj, namespace=fork_to, name=fork_name, tag=fork_tag or DEFAULT_TAG
+            project=proj,
+            namespace=fork_to,
+            name=fork_name,
+            tag=fork_tag or DEFAULT_TAG,
+            description=proj_annotation.description,
+            pep_schema=proj_annotation.pep_schema,
         )
     except ProjectUniqueNameError as e:
         return JSONResponse(
