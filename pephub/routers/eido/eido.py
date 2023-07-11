@@ -155,7 +155,8 @@ async def validate(
     except eido.exceptions.EidoValidationError as e:
         property_names = []
         for item_list in e.errors_by_type.values():
-            property_name = item_list[0]["type"]
+            property_type = item_list[0]['type']
+            property_name = []
             for item in item_list:
                 if item["sample_name"] == "project":
                     error_type = "Project"
@@ -167,8 +168,8 @@ async def validate(
                             "More than 20 samples have encountered errors."
                         ]
                     else:
-                        property_name += f" ({item['sample_name']})"
-            property_names.append(property_name)
+                        property_name.append(item['sample_name'])
+            property_names.append(f"{property_type} ({', '.join(property_name)})")
 
         return {"valid": False, "error_type": error_type, "errors": property_names}
 
