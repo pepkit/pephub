@@ -2,6 +2,19 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.9.1] - 11-05-2023
+
+### Fixed
+
+- forking was broken
+- order in config file was incorrect
+
+
+### Added
+
+- config endpoint
+
+
 ## [0.9.0] - 07-05-2023
 
 ### Fixed
@@ -10,7 +23,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - strip markdown in description of projects in project list
 - sample table stability updates
 
-## Added
+### Added
 
 - better authentication awareness, app now checks for login status on every render, removes session if no longer valid
 - added basic subsample table editing
