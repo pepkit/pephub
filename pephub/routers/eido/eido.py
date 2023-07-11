@@ -154,22 +154,29 @@ async def validate(
     # return the validation errors
     except eido.exceptions.EidoValidationError as e:
         property_names = []
+        error_type_list = []
         for item_list in e.errors_by_type.values():
             property_type = item_list[0]['type']
-            property_name = []
+            property_name_list = []
             for item in item_list:
                 if item["sample_name"] == "project":
-                    error_type = "Project"
+                    error_type_list.append("Project")
                     break
                 else:
-                    error_type = "Samples"
+                    error_type_list.append("Samples")
                     if len(item_list) > 20:
                         property_names = [
                             "More than 20 samples have encountered errors."
                         ]
                     else:
-                        property_name.append(item['sample_name'])
-            property_names.append(f"{property_type} ({', '.join(property_name)})")
+                        property_name_list.append(item['sample_name'])
+
+            if len(property_name_list) > 0:
+                property_names.append(f"{property_type} ({', '.join(property_name_list)})")
+            else:
+                property_names.append(f"{property_type} in the project")
+
+        error_type = " and ".join(set(error_type_list))
 
         return {"valid": False, "error_type": error_type, "errors": property_names}
 
