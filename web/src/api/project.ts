@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { Project, Sample } from '../../types';
+import { Project, ProjectConfigResponse, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -79,14 +79,15 @@ export const getProjectConfig = (
   namespace: string,
   projectName: string,
   tag: string = 'default',
-  filter: string = 'yaml',
   token: string | null = null,
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}/convert?tag=${tag}&filter=${filter}`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/config?tag=${tag}&raw=true&format=String`;
   if (!token) {
-    return axios.get<string>(url).then((res) => res.data);
+    return axios.get<ProjectConfigResponse>(url).then((res) => res.data);
   } else {
-    return axios.get<string>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
+    return axios
+      .get<ProjectConfigResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
   }
 };
 

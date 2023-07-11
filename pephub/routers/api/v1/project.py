@@ -2,7 +2,7 @@ import eido
 import yaml
 import pandas as pd
 from io import StringIO
-from typing import Callable
+from typing import Callable, Literal, Union
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
@@ -291,6 +291,25 @@ async def get_pep_samples(
             )
 
 
+@project.get("/config", summary="Get project configuration file")
+async def get_pep_samples(
+    proj: Union[peppy.Project, dict] = Depends(get_project),
+    format: Optional[Literal["JSON", "String"]] = "JSON",
+    raw: Optional[bool] = False,
+):
+    if raw:
+        proj_config = proj[CONFIG_KEY]
+    else:
+        proj_config = proj.to_dict(extended=True, orient="records")[CONFIG_KEY]
+    if format == "JSON":
+        return JSONResponse(proj_config)
+    return JSONResponse(
+        {
+            "config": yaml.dump(proj_config, sort_keys=False),
+        }
+    )
+
+
 @project.get("/samples/{sample_name}")
 async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
     if sample_name not in get_project_sample_names(proj):
@@ -306,9 +325,12 @@ async def get_subsamples(
 ):
     subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
     if subsamples is not None:
-        subsamples = pd.DataFrame(
-            proj[SUBSAMPLE_RAW_LIST_KEY][0]
-        )  # TODO: this seems like a bug @Alex can you check this?
+        try:
+            subsamples = pd.DataFrame(
+                proj[SUBSAMPLE_RAW_LIST_KEY][0]
+            )  # TODO: this seems like a bug @Alex can you check this?
+        except IndexError:
+            subsamples = pd.DataFrame()
         if download:
             return subsamples.to_csv()
         else:
@@ -380,15 +402,20 @@ async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
 async def fork_pep_to_namespace(
     fork_request: ForkRequest,
     proj: peppy.Project = Depends(get_project),
+    proj_annotation: AnnotationModel = Depends(get_project_annotation),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     fork_to = fork_request.fork_to
     fork_name = fork_request.fork_name
     fork_tag = fork_request.fork_tag
-    proj.description = fork_request.fork_description or ""
     try:
         agent.project.create(
-            project=proj, namespace=fork_to, name=fork_name, tag=fork_tag or DEFAULT_TAG
+            project=proj,
+            namespace=fork_to,
+            name=fork_name,
+            tag=fork_tag or DEFAULT_TAG,
+            description=proj_annotation.description,
+            pep_schema=proj_annotation.pep_schema,
         )
     except ProjectUniqueNameError as e:
         return JSONResponse(
