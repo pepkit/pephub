@@ -70,7 +70,6 @@ export const ProjectPage: FC = () => {
     namespace,
     project || '',
     tag,
-    'yaml',
     jwt,
   );
 
@@ -83,7 +82,7 @@ export const ProjectPage: FC = () => {
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
 
   // state for editing config, samples, and subsamples
-  const [newProjectConfig, setNewProjectConfig] = useState(projectConfig || '');
+  const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
   const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(projectSamples?.items || []);
   const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(projectSubsamples?.items || []);
 
@@ -100,13 +99,13 @@ export const ProjectPage: FC = () => {
 
   // watch for query changes to update newProjectConfig and newProjectSamples
   useEffect(() => {
-    setNewProjectConfig(projectConfig || '');
+    setNewProjectConfig(projectConfig?.config || '');
     setNewProjectSamples(projectSamples?.items || []);
     setNewProjectSubsamples(projectSubsamples?.items || []);
   }, [projectConfig, projectSamples, projectSubsamples]);
 
   // check if config or samples are dirty
-  const configIsDirty = newProjectConfig !== projectConfig;
+  const configIsDirty = newProjectConfig !== projectConfig?.config;
 
   // use JSON stringify to compare arrays
   const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(projectSamples?.items || []);
@@ -114,7 +113,7 @@ export const ProjectPage: FC = () => {
 
   // reset config and samples
   const resetConfig = () => {
-    setNewProjectConfig(projectConfig || '');
+    setNewProjectConfig(projectConfig?.config || '');
   };
   const resetSamples = () => {
     setNewProjectSamples(projectSamples?.items || []);
@@ -362,7 +361,13 @@ export const ProjectPage: FC = () => {
             ) : (
               <ProjectConfigEditor
                 readOnly={!(projectInfo && canEdit(user, projectInfo))}
-                value={projectConfigIsLoading ? 'Loading.' : projectConfig ? newProjectConfig : 'No config file found.'}
+                value={
+                  projectConfigIsLoading
+                    ? 'Loading.'
+                    : projectConfig?.config
+                    ? newProjectConfig
+                    : 'No config file found.'
+                }
                 setValue={(value) => setNewProjectConfig(value)}
               />
             )}

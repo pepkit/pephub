@@ -11,6 +11,10 @@ export interface ProjectAnnotation {
   pep_schema: string;
 }
 
+export interface ProjectConfigResponse {
+  config: string;
+}
+
 export interface User {
   orgs: string[];
   login: string;

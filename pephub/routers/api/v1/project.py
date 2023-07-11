@@ -2,7 +2,7 @@ import eido
 import yaml
 import pandas as pd
 from io import StringIO
-from typing import Callable, Literal
+from typing import Callable, Literal, Union
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
@@ -293,18 +293,21 @@ async def get_pep_samples(
 
 @project.get("/config", summary="Get project configuration file")
 async def get_pep_samples(
-    proj: peppy.Project = Depends(get_project),
+    proj: Union[peppy.Project, dict] = Depends(get_project),
     format: Optional[Literal["JSON", "String"]] = "JSON",
+    raw: Optional[bool] = False,
 ):
-    proj_config = proj.to_dict(extended=True, orient="records")[CONFIG_KEY]
+    if raw:
+        proj_config = proj[CONFIG_KEY]
+    else:
+        proj_config = proj.to_dict(extended=True, orient="records")[CONFIG_KEY]
     if format == "JSON":
-        return JSONResponse(
-            proj_config
-        )
+        return JSONResponse(proj_config)
     return JSONResponse(
         {
-            "items": yaml.dump(proj_config),
-        })
+            "config": yaml.dump(proj_config, sort_keys=False),
+        }
+    )
 
 
 @project.get("/samples/{sample_name}")
@@ -322,9 +325,12 @@ async def get_subsamples(
 ):
     subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
     if subsamples is not None:
-        subsamples = pd.DataFrame(
-            proj[SUBSAMPLE_RAW_LIST_KEY][0]
-        )  # TODO: this seems like a bug @Alex can you check this?
+        try:
+            subsamples = pd.DataFrame(
+                proj[SUBSAMPLE_RAW_LIST_KEY][0]
+            )  # TODO: this seems like a bug @Alex can you check this?
+        except IndexError:
+            subsamples = pd.DataFrame()
         if download:
             return subsamples.to_csv()
         else:
