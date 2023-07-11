@@ -2,7 +2,7 @@ import eido
 import yaml
 import pandas as pd
 from io import StringIO
-from typing import Callable
+from typing import Callable, Literal
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
@@ -289,6 +289,22 @@ async def get_pep_samples(
                     "items": [s.to_dict() for s in proj.samples],
                 }
             )
+
+
+@project.get("/config", summary="Get project configuration file")
+async def get_pep_samples(
+    proj: peppy.Project = Depends(get_project),
+    format: Optional[Literal["JSON", "String"]] = "JSON",
+):
+    proj_config = proj.to_dict(extended=True, orient="records")[CONFIG_KEY]
+    if format == "JSON":
+        return JSONResponse(
+            proj_config
+        )
+    return JSONResponse(
+        {
+            "items": yaml.dump(proj_config),
+        })
 
 
 @project.get("/samples/{sample_name}")
