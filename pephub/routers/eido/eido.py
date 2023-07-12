@@ -8,7 +8,7 @@ import yaml
 from fastapi import UploadFile, Form, APIRouter
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from typing import List
+from typing import List, Tuple
 
 from ...helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...dependencies import *
@@ -153,22 +153,7 @@ async def validate(
     # while we catch this, its still a 200 response since we want to
     # return the validation errors
     except eido.exceptions.EidoValidationError as e:
-        property_names = []
-        for item_list in e.errors_by_type.values():
-            property_name = item_list[0]["type"]
-            for item in item_list:
-                if item["sample_name"] == "project":
-                    error_type = "Project"
-                    break
-                else:
-                    error_type = "Samples"
-                    if len(item_list) > 20:
-                        property_names = [
-                            "More than 20 samples have encountered errors."
-                        ]
-                    else:
-                        property_name += f" ({item['sample_name']})"
-            property_names.append(property_name)
+        error_type, property_names = await eido_error_string_converter(e)
 
         return {"valid": False, "error_type": error_type, "errors": property_names}
 
@@ -180,3 +165,36 @@ async def validate(
     else:
         # return project is valid
         return {"valid": True, "errors": None}
+
+
+async def eido_error_string_converter(e: eido.exceptions.EidoValidationError) -> Tuple[str, List[str]]:
+    """
+    Convert eido error into nice modified string
+
+    :param e: eido Validation error
+    :return: error_type, property_names
+    """
+    property_names = []
+    error_type_list = []
+    for item_list in e.errors_by_type.values():
+        property_type = item_list[0]['type']
+        property_name_list = []
+        for item in item_list:
+            if item["sample_name"] == "project":
+                error_type_list.append("Project")
+                break
+            else:
+                error_type_list.append("Samples")
+                if len(item_list) > 20:
+                    property_names = [
+                        "More than 20 samples have encountered errors."
+                    ]
+                else:
+                    property_name_list.append(item['sample_name'])
+
+        if len(property_name_list) > 0:
+            property_names.append(f"{property_type} ({', '.join(property_name_list)})")
+        else:
+            property_names.append(f"{property_type} in the project")
+    error_type = " and ".join(set(error_type_list))
+    return error_type, property_names

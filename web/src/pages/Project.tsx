@@ -90,12 +90,17 @@ export const ProjectPage: FC = () => {
     data: validationResult,
     isLoading: isValidationLoading,
     isFetching: isValidationFetching,
+    refetch,
   } = useValidation({
     pep_registry: `${namespace}/${project}:${tag}`,
     schema: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
     schema_registry: projectInfo?.pep_schema,
     enabled: namespace && project && tag && projectInfo ? true : false,
   });
+
+  const runValidation = () => {
+    refetch();
+  };
 
   // watch for query changes to update newProjectConfig and newProjectSamples
   useEffect(() => {
@@ -133,15 +138,18 @@ export const ProjectPage: FC = () => {
     newProjectSubsamples,
   );
 
-  const handleProjectChange = () => {
+  const handleProjectChange = async () => {
     if (configIsDirty) {
-      configMutation.mutate();
+      await configMutation.mutateAsync();
+      runValidation(); 
     }
     if (samplesIsDirty) {
-      sampleTableMutation.mutate();
+      await sampleTableMutation.mutateAsync();
+      runValidation(); 
     }
     if (subsamplesIsDirty) {
-      subsampleTableMutation.mutate();
+      await subsampleTableMutation.mutateAsync();
+      runValidation(); 
     }
   };
 
@@ -177,7 +185,9 @@ export const ProjectPage: FC = () => {
             ) : null}
           </Breadcrumb>
           <div className="ms-2 mb-1">
+          <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
             <SchemaTag schema={projectInfo?.pep_schema} />
+          </a>
           </div>
         </div>
         <div className="d-flex flex-row align-items-start btn-g">

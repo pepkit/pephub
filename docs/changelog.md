@@ -2,7 +2,19 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
-## [0.9.1] - 11-05-2023
+## [0.9.2] - 07-12-2023
+
+### Fixed
+
+- validating was not firing when updating sample table, subsample table, or config
+
+
+### Added
+
+- github organizations UI visibility 
+- schema tag has link to schema
+
+## [0.9.1] - 07-11-2023
 
 ### Fixed
 

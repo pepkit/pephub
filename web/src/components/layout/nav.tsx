@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Dropdown } from 'react-bootstrap';
+import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 import { useSession } from '../../hooks/useSession';
@@ -110,6 +110,42 @@ export const Nav: FC = () => {
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                       <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
+                      <Dropdown.Divider />
+                      <h6 className="dropdown-header">Organizations</h6>
+                      {user?.orgs.length > 0 ? (
+                        user.orgs.map((org) => (
+                          <Dropdown.Item key={org} eventKey={org}>
+                            <a className="ps-3 dropdown-item" href={`/${org}`} onClick={(e) => e.stopPropagation()}>
+                              {org}
+                            </a>
+                          </Dropdown.Item>
+                        ))
+                      ) : (
+                        <>
+                          <OverlayTrigger
+                            overlay={
+                              <Tooltip id="orgs">
+                                Below would be a list of organizations you belong to. If you are a part of an organization but don't see it here,
+                                you may need to make your membership public on GitHub then log out and log back in here. {" "}
+                                <span>More info found {" "}
+                                  <a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-your-membership-in-organizations/publicizing-or-hiding-organization-membership" target="_blank" rel="noopener noreferrer">
+                                    here
+                                  </a>.
+                                </span>
+                              </Tooltip>
+                            }
+                            placement="left"
+                            delay={{ show: 250, hide: 1200 }}
+                            trigger="hover"
+                          >
+                            <span>
+                              <Dropdown.Item disabled>No organizations found. {" "}
+                                <i className="bi bi-info-circle me-1 mb-1"></i>
+                              </Dropdown.Item>
+                            </span>
+                          </OverlayTrigger>
+                        </>
+                      )}
                       <Dropdown.Divider />
                       <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
                     </Dropdown.Menu>
