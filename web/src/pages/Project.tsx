@@ -185,7 +185,7 @@ export const ProjectPage: FC = () => {
             ) : null}
           </Breadcrumb>
           <div className="ms-2 mb-1">
-          <a href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
+          <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
             <SchemaTag schema={projectInfo?.pep_schema} />
           </a>
           </div>
