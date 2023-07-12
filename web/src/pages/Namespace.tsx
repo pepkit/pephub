@@ -1,5 +1,6 @@
 import { FC, useState, Fragment } from 'react';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import Badge from 'react-bootstrap/Badge';
 import { useParams } from 'react-router-dom';
 
 import { PageLayout } from '../components/layout/page-layout';
@@ -106,10 +107,9 @@ export const NamespacePage: FC = () => {
             <span className="fw-bold">Organizations you belong to: {' '}
               {user?.orgs.map((org, index) => (
                 <Fragment key={org}>
-                  {index !== 0 && ', '}
                   <a href={`/${org}`}>
-                    {org}
-                  </a>
+                    <Badge bg="primary">{org}</Badge>
+                  </a>{" "}
                 </Fragment>
               ))}
             </span>

@@ -126,10 +126,17 @@ export const Nav: FC = () => {
                             overlay={
                               <Tooltip id="orgs">
                                 Below would be a list of organizations you belong to. If you are a part of an organization but don't see it here,
-                                you may need to make your membership public on GitHub.
+                                you may need to make your membership public on GitHub then log out and log back in here. {" "}
+                                <span>More info found {" "}
+                                  <a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-your-membership-in-organizations/publicizing-or-hiding-organization-membership" target="_blank" rel="noopener noreferrer">
+                                    here
+                                  </a>.
+                                </span>
                               </Tooltip>
                             }
                             placement="left"
+                            delay={{ show: 250, hide: 1200 }}
+                            trigger="hover"
                           >
                             <span>
                               <Dropdown.Item disabled>No organizations found. {" "}
