@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, Fragment } from 'react';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useParams } from 'react-router-dom';
 
@@ -101,6 +101,20 @@ export const NamespacePage: FC = () => {
         <NamespaceInfoPlaceholder />
       ) : (
         <>
+          { namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
+          <p className="mb-0">
+            <span className="fw-bold">Organizations you belong to: {' '}
+              {user?.orgs.map((org, index) => (
+                <Fragment key={org}>
+                  {index !== 0 && ', '}
+                  <a href={`/${org}`}>
+                    {org}
+                  </a>
+                </Fragment>
+              ))}
+            </span>
+          </p>
+          )}
           <p className="mb-0">
             <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
           </p>
