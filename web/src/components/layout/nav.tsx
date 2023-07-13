@@ -102,14 +102,9 @@ export const Nav: FC = () => {
                 <div className="mx-2 my-0 nav-item h5 pt-1">
                   <Dropdown className="me-3">
                     <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
-                      <img
-                        className="border rounded-circle border-secondary"
-                        src={user['avatar_url']}
-                        alt={`Avatar for ${user['login']}`}
-                        height="40"
-                      />
+                      <GitHubAvatar namespace={user['login']} height={40} width={40} />
                     </Dropdown.Toggle>
-                    <Dropdown.Menu>
+                    <Dropdown.Menu className="border border-dark shadow-lg">
                       <Dropdown.Item href={`/${user.login}`}>My PEPs</Dropdown.Item>
                       <Dropdown.Divider />
                       <Dropdown.Header>Organizations</Dropdown.Header>

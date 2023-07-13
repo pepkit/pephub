@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { ProgressBar } from 'react-bootstrap';
-
+import { GitHubAvatar } from '../../components/badges/github-avatar';
 import { SearchHit } from '../../../types';
 
 interface ProjectProps {
@@ -40,6 +40,7 @@ export const ProjectSearchResults: FC<ProjectProps> = ({ hits }) => {
     );
   return (
     <div>
+      <br />
       <h2 className="fw-bold">Projects</h2>
       {hits.map((hit, i) => (
         <HitCard hit={hit} key={i} />
@@ -68,10 +69,10 @@ export const NamespaceSearchResults: FC<NamespaceProps> = ({ hits }) => {
     <>
       <h2 className="fw-bold">Namespaces</h2>
       {hits.map((hit) => (
-        <div key={hit} className="d-flex flex-row align-items-center">
-          <i className="bi bi-folder me-2"></i>
-          <a href={`/${hit}`}>
-            <h5 className="fw-bold">{hit}</h5>
+        <div key={hit} className="d-flex flex-row align-items-center mt-2">
+          <GitHubAvatar namespace={hit} height={30} width={30} />
+          <a href={`/${hit}`} className="ms-1">
+            <h5 className="fw-bold m-0">{hit}</h5>
           </a>
         </div>
       ))}
