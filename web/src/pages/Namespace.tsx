@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 
 import { PageLayout } from '../components/layout/page-layout';
 import { Pagination } from '../components/layout/pagination';
+import { GitHubAvatar } from '../components/badges/github-avatar';
 import { AddPEPModal } from '../components/modals/add-pep';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespacePageSearchBar } from '../components/namespace/search-bar';
@@ -77,7 +78,8 @@ export const NamespacePage: FC = () => {
       </div>
       <div className="flex-row d-flex align-items-start justify-content-between">
         <h1 id="namespace-header" className="fw-bold">
-          {namespace}
+          <GitHubAvatar namespace={namespace} height={60} width={60} />
+          {" "}{namespace}
         </h1>
         <div className="d-flex flex-row align-items-center">
           <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark me-1">
@@ -108,7 +110,10 @@ export const NamespacePage: FC = () => {
               {user?.orgs.map((org, index) => (
                 <Fragment key={org}>
                   <a href={`/${org}`}>
-                    <Badge bg="primary">{org}</Badge>
+                    <Badge bg="secondary">
+                    <GitHubAvatar namespace={org} height={20} width={20} />
+                      {" "}{org}
+                    </Badge>
                   </a>{" "}
                 </Fragment>
               ))}

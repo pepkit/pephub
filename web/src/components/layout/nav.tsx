@@ -1,6 +1,7 @@
 import { FC, useState } from 'react';
 import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { GitHubAvatar } from '../../components/badges/github-avatar';
 
 import { useSession } from '../../hooks/useSession';
 import { getOS } from '../../utils/etc';
@@ -115,8 +116,9 @@ export const Nav: FC = () => {
                       {user?.orgs.length > 0 ? (
                         user.orgs.map((org) => (
                           <Dropdown.Item key={org} eventKey={org}>
-                            <a className="ps-3 dropdown-item" href={`/${org}`} onClick={(e) => e.stopPropagation()}>
-                              {org}
+                            <a className="ps-3 dropdown-item d-flex align-items-center" href={`/${org}`} onClick={(e) => e.stopPropagation()}>
+                              <GitHubAvatar namespace={org} height={20} width={20} />
+                              <span className="ms-2">{org}</span>
                             </a>
                           </Dropdown.Item>
                         ))
