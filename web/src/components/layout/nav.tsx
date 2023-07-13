@@ -1,8 +1,8 @@
 import { FC, useState } from 'react';
 import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { GitHubAvatar } from '../../components/badges/github-avatar';
 
+import { GitHubAvatar } from '../../components/badges/github-avatar';
 import { useSession } from '../../hooks/useSession';
 import { getOS } from '../../utils/etc';
 import { SearchBox } from './search-box';
@@ -110,15 +110,19 @@ export const Nav: FC = () => {
                       />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                      <Dropdown.Item href={`/${user.login}`}>View PEPs</Dropdown.Item>
+                      <Dropdown.Item href={`/${user.login}`}>My PEPs</Dropdown.Item>
                       <Dropdown.Divider />
-                      <h6 className="dropdown-header">Organizations</h6>
+                      <Dropdown.Header>Organizations</Dropdown.Header>
                       {user?.orgs.length > 0 ? (
                         user.orgs.map((org) => (
                           <Dropdown.Item key={org} eventKey={org}>
-                            <a className="ps-3 dropdown-item d-flex align-items-center" href={`/${org}`} onClick={(e) => e.stopPropagation()}>
+                            <a
+                              className="dropdown-item d-flex align-items-center"
+                              href={`/${org}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <GitHubAvatar namespace={org} height={20} width={20} />
-                              <span className="ms-2">{org}</span>
+                              <span className="ms-1">{org}</span>
                             </a>
                           </Dropdown.Item>
                         ))
@@ -127,12 +131,19 @@ export const Nav: FC = () => {
                           <OverlayTrigger
                             overlay={
                               <Tooltip id="orgs">
-                                Below would be a list of organizations you belong to. If you are a part of an organization but don't see it here,
-                                you may need to make your membership public on GitHub then log out and log back in here. {" "}
-                                <span>More info found {" "}
-                                  <a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-your-membership-in-organizations/publicizing-or-hiding-organization-membership" target="_blank" rel="noopener noreferrer">
+                                Below would be a list of organizations you belong to. If you are a part of an
+                                organization but don't see it here, you may need to make your membership public on
+                                GitHub then log out and log back in here.{' '}
+                                <span>
+                                  More info found{' '}
+                                  <a
+                                    href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-your-membership-in-organizations/publicizing-or-hiding-organization-membership"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
                                     here
-                                  </a>.
+                                  </a>
+                                  .
                                 </span>
                               </Tooltip>
                             }
@@ -141,8 +152,8 @@ export const Nav: FC = () => {
                             trigger="hover"
                           >
                             <span>
-                              <Dropdown.Item disabled>No organizations found. {" "}
-                                <i className="bi bi-info-circle me-1 mb-1"></i>
+                              <Dropdown.Item disabled>
+                                No organizations found. <i className="bi bi-info-circle me-1 mb-1"></i>
                               </Dropdown.Item>
                             </span>
                           </OverlayTrigger>

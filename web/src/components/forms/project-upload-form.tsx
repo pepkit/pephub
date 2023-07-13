@@ -6,6 +6,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
+import { GitHubAvatar } from '../badges/github-avatar';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
@@ -21,9 +22,10 @@ interface FromFileInputs {
 
 interface Props {
   onHide: () => void;
+  defaultNamespace?: string;
 }
 
-export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
+export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user info
   const { user, jwt } = useSession();
 
@@ -39,6 +41,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
     defaultValues: {
       is_private: false,
       pep_schema: 'pep/2.1.0',
+      namespace: defaultNamespace || user?.login || '',
     },
   });
 
@@ -93,6 +96,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
           <option value={user?.login}>{user?.login}</option>
           {user?.orgs.map((org) => (
             <option key={org} value={org}>
+              <GitHubAvatar namespace={org} height={20} width={20} />
               {org}
             </option>
           ))}

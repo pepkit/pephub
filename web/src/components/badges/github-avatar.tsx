@@ -1,9 +1,9 @@
 import { FC } from 'react';
 
 interface GitHubAvatarProps {
-    namespace: string | undefined;
-    width: number | undefined;
-    height: number | undefined;
+  namespace: string | undefined;
+  width: number | undefined;
+  height: number | undefined;
 }
 
 export const GitHubAvatar: FC<GitHubAvatarProps> = ({ namespace, width, height }) => {
@@ -11,10 +11,11 @@ export const GitHubAvatar: FC<GitHubAvatarProps> = ({ namespace, width, height }
 
   return (
     <img
-      className="border rounded-circle border-secondary"
+      className="border border-dark rounded-circle"
       src={imageUrl}
       alt={`Avatar for ${namespace}`}
-      style={{ width, height, borderRadius: '50%' }}
+      height={height}
+      width={width}
     />
   );
 };

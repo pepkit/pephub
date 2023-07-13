@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Sample } from '../../../types';
 import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
 import { useSession } from '../../hooks/useSession';
+import { GitHubAvatar } from '../badges/github-avatar';
 import { ProjectConfigEditor } from '../project/project-config';
 import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
@@ -23,9 +24,10 @@ interface BlankProjectInputs {
 
 interface Props {
   onHide: () => void;
+  defaultNamespace?: string;
 }
 
-export const BlankProjectForm: FC<Props> = ({ onHide }) => {
+export const BlankProjectForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user innfo
   const { user, jwt } = useSession();
 
@@ -40,7 +42,7 @@ export const BlankProjectForm: FC<Props> = ({ onHide }) => {
   } = useForm<BlankProjectInputs>({
     defaultValues: {
       is_private: false,
-      namespace: user?.login || '',
+      namespace: defaultNamespace || user?.login || '',
       project_name: 'new-project',
       sample_table: [
         {

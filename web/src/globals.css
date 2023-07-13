@@ -263,3 +263,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.text-decoration-none {
+  text-decoration: none !important;
+}
