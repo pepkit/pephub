@@ -56,6 +56,9 @@ function Home() {
                   <i className="bi bi-check2-circle me-1"></i>Validation
                 </MotionButton>
               </a>
+              <p className="mt-3 fw-bolder">
+                <a href="/geo" className="text-decoration-none" >View 100,000+ projects from GEO</a>
+              </p>
             </div>
             <div className="col-6 align-items-center">
               <img className="ms-5" src="/landing_icon.svg" alt="Landing icon" height="500" />
