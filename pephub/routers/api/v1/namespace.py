@@ -1,11 +1,11 @@
 import tempfile
 import shutil
 
-import peppy
 from fastapi import APIRouter, File, UploadFile, Request, Depends, Form, Body
 from fastapi.responses import JSONResponse
 from peppy import Project
 from pepdbagent.exceptions import ProjectUniqueNameError
+from pepdbagent.const import DEFAULT_LIMIT_INFO
 
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
@@ -18,6 +18,7 @@ from ....const import (
 from ...models import ProjectRawModel, ProjectJsonRequest
 
 from dotenv import load_dotenv
+from .base import api
 
 load_dotenv()
 
@@ -276,3 +277,15 @@ async def upload_raw_pep(
         },
         status_code=202,
     )
+
+
+@api.get(
+    "/namespace/info",
+    summary="Get information list of biggest namespaces",
+    tags=["namespace"],
+)
+async def get_namespace_information(
+    limit: Optional[int] = DEFAULT_LIMIT_INFO,
+    agent: PEPDatabaseAgent = Depends(get_db),
+) -> NamespaceList:
+    return agent.namespace.info(limit=limit)
