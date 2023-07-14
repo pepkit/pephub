@@ -6,6 +6,7 @@ import { GitHubAvatar } from '../../components/badges/github-avatar';
 import { useSession } from '../../hooks/useSession';
 import { getOS } from '../../utils/etc';
 import { SearchBox } from './search-box';
+import { motion } from 'framer-motion';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 
@@ -57,21 +58,67 @@ export const Nav: FC = () => {
           <ul className="mb-2 navbar-nav ms-auto d-flex flex-row align-items-center">
             <li>
               <div className="mt-1 input-group">
-                <SearchBox
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      navigateToSearch();
-                    }
-                  }}
-                  value={globalSearch}
-                  onChange={(e) => setGlobalSearch(e.target.value)}
-                  id="global-search-bar"
-                  type="text"
-                  className="form-control border-end-0 shadow-sm"
-                  placeholder="Search pephub"
-                  aria-label="search"
-                  aria-describedby="search"
-                />
+                {user ? (
+                    <SearchBox
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          navigateToSearch();
+                        }
+                      }}
+                      value={globalSearch}
+                      onChange={(e) => setGlobalSearch(e.target.value)}
+                      id="global-search-bar"
+                      type="text"
+                      className="form-control border-end-0 shadow-sm"
+                      placeholder="Search pephub"
+                      aria-label="search"
+                      aria-describedby="search"
+                    />
+                ) : (
+                  <>
+                    <motion.div
+                      animate="visible"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                      
+                    >
+                      <SearchBox
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            navigateToSearch();
+                          }
+                        }}
+                        value={globalSearch}
+                        onChange={(e) => setGlobalSearch(e.target.value)}
+                        id="global-search-bar"
+                        type="text"
+                        className="form-control border-end-0 shadow-sm"
+                        placeholder="Search pephub"
+                        aria-label="search"
+                        aria-describedby="search"
+                      />
+                      
+                      {!globalSearch && (
+                        <motion.div
+                          animate="visible"
+                          
+                          style={{
+                            position: 'absolute'
+                          }}
+                        >
+                        <div className="mt-2 input-group">
+                          <span className="input-group-text border-start-0 shadow-sm">
+                            <i className="bi bi-arrow-up"></i>    
+                            <div className="ms-2">Search through 100,000+ projects now. Try searching for...
+                            </div>
+                          </span>
+                        </div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </>
+                )}
                 <span className="input-group-text border-start-0 shadow-sm">
                   <div className="px-1 border rounded border-secondary text-secondary text-sm">
                     {os === 'Mac OS' ? <i className="bi bi-command"></i> : 'ctrl'}
