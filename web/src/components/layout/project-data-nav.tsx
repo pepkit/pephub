@@ -59,7 +59,7 @@ export const ProjectDataNav: FC<NavProps> = ({
         <ViewButton
           view="samples"
           setProjectView={setProjectView}
-          icon="bi bi-table me-2 text-muted"
+          icon="bi bi-table me-2"
           text="Samples"
           isDirty={samplesIsDirty}
         />
@@ -74,7 +74,7 @@ export const ProjectDataNav: FC<NavProps> = ({
         <ViewButton
           view="subsamples"
           setProjectView={setProjectView}
-          icon="bi bi-grid-3x3-gap-fill me-2 text-muted"
+          icon="bi bi-grid-3x3-gap-fill me-2"
           text="Subsamples"
           isDirty={subsamplesIsDirty}
         />
@@ -89,7 +89,7 @@ export const ProjectDataNav: FC<NavProps> = ({
         <ViewButton
           view="config"
           setProjectView={setProjectView}
-          icon="bi bi-filetype-yml me-2 text-muted"
+          icon="bi bi-filetype-yml me-2"
           text="Config"
           isDirty={configIsDirty}
         />
