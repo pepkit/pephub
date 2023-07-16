@@ -11,7 +11,7 @@ export const GitHubAvatar: FC<GitHubAvatarProps> = ({ namespace, width, height }
 
   return (
     <img
-      className="border border-dark rounded-circle"
+      className="rounded-circle"
       src={imageUrl}
       alt={`Avatar for ${namespace}`}
       height={height}

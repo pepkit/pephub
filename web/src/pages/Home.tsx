@@ -36,6 +36,7 @@ function Home() {
                 PEPhub takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to
                 store, edit, and access your PEPs in one place.
               </p>
+              <br />
               <p>Log in with your GitHub account to get started.</p>
               {user ? (
                 <a href={`/${user.login}`}>

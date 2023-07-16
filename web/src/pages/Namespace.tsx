@@ -126,7 +126,7 @@ export const NamespacePage: FC = () => {
         </>
       )}
       {/* Render projects  in namespace */}
-      <div className="my-2 border-bottom border-secondary"></div>
+      <div className="my-3 border-bottom border-grey"></div>
       <NamespacePageSearchBar
         namespace={namespace || ''}
         search={search}
@@ -138,7 +138,7 @@ export const NamespacePage: FC = () => {
         order={order}
         setOrder={setOrder}
       />
-      <div className="my-2"></div>
+      <div className="my-3"></div>
       <div className="mt-3">
         {projectsIsLoading || projects === undefined ? (
           <ProjectListPlaceholder />
