@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useState } from 'react';
 import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -6,15 +7,45 @@ import { GitHubAvatar } from '../../components/badges/github-avatar';
 import { useSession } from '../../hooks/useSession';
 import { getOS } from '../../utils/etc';
 import { SearchBox } from './search-box';
-import { motion } from 'framer-motion';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
+
+const SearchBoxTooltip = () => {
+  // always show
+  return (
+    <Tooltip
+      placement="top"
+      id="search-box-tooltip"
+      style={{
+        opacity: 1,
+        transform: 'translateY(-10px)',
+      }}
+      arrowProps={{
+        // rotate 180 degrees
+        style: {
+          transform: 'rotate(180deg)',
+          // shift right by 10px
+          translate: '10px',
+        },
+      }}
+      className="text-start"
+    >
+      Try searching for some metadata! Try cohesin, or CTCF, or any other keyword.
+    </Tooltip>
+  );
+};
 
 // bootstrap nav bar
 export const Nav: FC = () => {
   const { login, user, logout } = useSession();
   const navigate = useNavigate();
   const [globalSearch, setGlobalSearch] = useState<string>('');
+  const [showTooltip, setShowTooltip] = useState<boolean>(true);
+
+  // remove after 5 seconds
+  setTimeout(() => {
+    setShowTooltip(false);
+  }, 5000);
 
   const navigateToSearch = () => {
     navigate(`/search?query=${globalSearch}`);
@@ -59,21 +90,21 @@ export const Nav: FC = () => {
             <li>
               <div className="mt-1 input-group">
                 {user ? (
-                    <SearchBox
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          navigateToSearch();
-                        }
-                      }}
-                      value={globalSearch}
-                      onChange={(e) => setGlobalSearch(e.target.value)}
-                      id="global-search-bar"
-                      type="text"
-                      className="form-control border-end-0 shadow-sm"
-                      placeholder="Search pephub"
-                      aria-label="search"
-                      aria-describedby="search"
-                    />
+                  <SearchBox
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        navigateToSearch();
+                      }
+                    }}
+                    value={globalSearch}
+                    onChange={(e) => setGlobalSearch(e.target.value)}
+                    id="global-search-bar"
+                    type="text"
+                    className="form-control border-end-0 shadow-sm"
+                    placeholder="Search pephub"
+                    aria-label="search"
+                    aria-describedby="search"
+                  />
                 ) : (
                   <>
                     <motion.div
@@ -81,7 +112,6 @@ export const Nav: FC = () => {
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
-                      
                     >
                       <SearchBox
                         onKeyDown={(e) => {
@@ -93,29 +123,33 @@ export const Nav: FC = () => {
                         onChange={(e) => setGlobalSearch(e.target.value)}
                         id="global-search-bar"
                         type="text"
-                        className="form-control border-end-0 shadow-sm"
+                        className="form-control border-end-0 shadow-sm rounded-0 rounded-start"
                         placeholder="Search pephub"
                         aria-label="search"
                         aria-describedby="search"
                       />
-                      
-                      {!globalSearch && (
-                        <motion.div
-                          animate="visible"
-                          
-                          style={{
-                            position: 'absolute'
-                          }}
-                        >
-                        <div className="mt-2 input-group">
-                          <span className="input-group-text border-start-0 shadow-sm">
-                            <i className="bi bi-arrow-up"></i>    
-                            <div className="ms-2">Search through 100,000+ projects now. Try searching for...
-                            </div>
-                          </span>
-                        </div>
-                        </motion.div>
-                      )}
+                      <AnimatePresence>
+                        {showTooltip && (
+                          <motion.div
+                            className="d-block position-absolute top-100"
+                            // "pop" in the tooltip
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3, delay: 0.5 }}
+                            style={{
+                              left: '-5px',
+                            }}
+                            // shrink away after 3 seconds
+                            exit={{
+                              opacity: 0,
+                              // remove spring transition
+                              transition: { duration: 0.1 },
+                            }}
+                          >
+                            <SearchBoxTooltip />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   </>
                 )}
