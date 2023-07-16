@@ -52,7 +52,7 @@ export const ProjectDataNav: FC<NavProps> = ({
       <div
         className={
           projectView === 'samples'
-            ? 'border border-grey border-bottom-0 rounded-top shadow bg-solid px-1 py-2 text-muted'
+            ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2 text-muted'
             : 'px-2 py-1'
         }
       >
@@ -67,7 +67,7 @@ export const ProjectDataNav: FC<NavProps> = ({
       <div
         className={
           projectView === 'subsamples'
-            ? 'border border-grey border-bottom-0 rounded-top shadow bg-solid px-1 py-2' 
+            ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2'
             : 'px-2 py-1'
         }
       >
@@ -81,7 +81,9 @@ export const ProjectDataNav: FC<NavProps> = ({
       </div>
       <div
         className={
-          projectView === 'config' ? 'border border-grey border-bottom-0 rounded-top shadow bg-solid px-1 py-2' : 'px-2 py-1'
+          projectView === 'config'
+            ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2'
+            : 'px-2 py-1'
         }
       >
         <ViewButton
