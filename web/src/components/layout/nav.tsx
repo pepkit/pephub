@@ -96,6 +96,7 @@ export const Nav: FC = () => {
                         navigateToSearch();
                       }
                     }}
+                    onClick={() => setShowTooltip(false)}
                     value={globalSearch}
                     onChange={(e) => setGlobalSearch(e.target.value)}
                     id="global-search-bar"
