@@ -20,7 +20,7 @@ interface ViewButtonProps {
 
 const ViewButton: FC<ViewButtonProps> = ({ view, setProjectView, icon, text, isDirty }) => (
   <div>
-    <button onClick={() => setProjectView(view)} className="border-0 bg-transparent project-button-toggles rounded">
+    <button onClick={() => setProjectView(view)} className="border-0 bg-transparent mr-4">
       <span className="text-xs">
         <i className="bi bi-circle-fill ms-1 text-transparent"></i>
       </span>
@@ -52,14 +52,14 @@ export const ProjectDataNav: FC<NavProps> = ({
       <div
         className={
           projectView === 'samples'
-            ? 'border-primary border-bottom bg-transparent px-2 py-1'
-            : 'border-bottom px-2 py-1'
+            ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2 text-muted'
+            : 'px-2 py-1'
         }
       >
         <ViewButton
           view="samples"
           setProjectView={setProjectView}
-          icon="bi bi-table me-1"
+          icon="bi bi-table me-2"
           text="Samples"
           isDirty={samplesIsDirty}
         />
@@ -67,27 +67,29 @@ export const ProjectDataNav: FC<NavProps> = ({
       <div
         className={
           projectView === 'subsamples'
-            ? 'border-primary border-bottom bg-transparent px-2 py-1'
-            : 'border-bottom px-2 py-1'
+            ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2'
+            : 'px-2 py-1'
         }
       >
         <ViewButton
           view="subsamples"
           setProjectView={setProjectView}
-          icon="bi bi-grid-3x3-gap-fill me-1"
+          icon="bi bi-grid-3x3-gap-fill me-2"
           text="Subsamples"
           isDirty={subsamplesIsDirty}
         />
       </div>
       <div
         className={
-          projectView === 'config' ? 'border-primary border-bottom bg-transparent px-2 py-1' : 'border-bottom px-2 py-1'
+          projectView === 'config'
+            ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2'
+            : 'px-2 py-1'
         }
       >
         <ViewButton
           view="config"
           setProjectView={setProjectView}
-          icon="bi bi-filetype-yml me-1"
+          icon="bi bi-filetype-yml me-2"
           text="Config"
           isDirty={configIsDirty}
         />

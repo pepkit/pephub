@@ -10,10 +10,6 @@ import { useSearch } from '../hooks/queries/useSearch';
 import { useDebounce } from '../hooks/useDebounce';
 import { useSession } from '../hooks/useSession';
 
-interface Props {
-  children: React.ReactNode;
-}
-
 export const SearchPage: FC = () => {
   const { jwt } = useSession();
 
@@ -83,5 +79,4 @@ export const SearchPage: FC = () => {
       />
     </PageLayout>
   );
-  runSearch;
 };

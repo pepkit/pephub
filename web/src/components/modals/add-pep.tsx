@@ -6,10 +6,11 @@ import { ProjectUploadForm } from '../forms/project-upload-form';
 
 interface Props {
   show: boolean;
+  defaultNamespace?: string;
   onHide: () => void;
 }
 
-export const AddPEPModal: FC<Props> = ({ show, onHide }) => {
+export const AddPEPModal: FC<Props> = ({ show, onHide, defaultNamespace }) => {
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
       <Modal.Header closeButton>
@@ -27,7 +28,7 @@ export const AddPEPModal: FC<Props> = ({ show, onHide }) => {
             }
           >
             <div className="border border-top-0">
-              <BlankProjectForm onHide={onHide} />
+              <BlankProjectForm defaultNamespace={defaultNamespace} onHide={onHide} />
             </div>
           </Tab>
           <Tab
@@ -40,7 +41,7 @@ export const AddPEPModal: FC<Props> = ({ show, onHide }) => {
             }
           >
             <div className="border border-top-0">
-              <ProjectUploadForm onHide={onHide} />
+              <ProjectUploadForm defaultNamespace={defaultNamespace} onHide={onHide} />
             </div>
           </Tab>
         </Tabs>

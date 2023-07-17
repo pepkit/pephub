@@ -25,6 +25,7 @@ const Footer: FC = () => {
             <span className="badge rounded-pill bg-secondary me-1">pephub {data?.pephub_version || ''}</span>
             <span className="badge rounded-pill bg-secondary me-1">peppy {data?.peppy_version || ''}</span>
             <span className="badge rounded-pill bg-secondary me-1">Python {data?.python_version || ''}</span>
+            <span className="badge rounded-pill bg-secondary me-1">pepdbagent {data?.pepdbagent_version || ''}</span>
           </div>
           <div className="d-flex flex-row mt-1 align-items-center">
             {isLoading || isFetching ? (

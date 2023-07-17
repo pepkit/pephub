@@ -138,7 +138,7 @@ export const ValidatorForm: FC = () => {
               }
             }}
           >
-            <Tab eventKey="existing" title="Use existing PEP">
+            <Tab eventKey="existing" title="From PEPhub">
               <div className="p-2 border border-top-0 rounded-bottom">
                 <Controller
                   name="pepRegistryPath"
@@ -208,7 +208,7 @@ export const ValidatorForm: FC = () => {
               }
             }}
           >
-            <Tab eventKey="existing" title="Use existing schema">
+            <Tab eventKey="existing" title="From PEPhub">
               <div className="p-2 border border-top-0 rounded-bottom">
                 <Controller
                   name="schemaRegistryPath"

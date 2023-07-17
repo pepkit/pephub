@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import { PageLayout } from '../components/layout/page-layout';
+import { LandingInfoPlaceholder } from '../components/placeholders/landing-leaderboard';
+import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
 import { useSession } from '../hooks/useSession';
+import { numberWithCommas } from '../utils/etc';
 
 interface MotionButtonProps {
   onClick?: () => void;
@@ -24,6 +27,18 @@ const MotionButton: FC<MotionButtonProps> = ({ children, className, onClick }) =
 
 function Home() {
   const { user, login } = useSession();
+  const limit = 3;
+  const { data: largestNamespaces } = useBiggestNamespace(limit);
+
+  type ArrayOfNumbersOrNull = (number | null)[];
+
+  const [xAnimation, setXAnimation] = useState<ArrayOfNumbersOrNull>([null, 8, 0]);
+
+  // stop pulsing after 6 seconds
+  setTimeout(() => {
+    setXAnimation([0]);
+  }, 6000);
+
   return (
     <PageLayout>
       <div className="container" style={{ height: '80vh' }}>
@@ -36,6 +51,7 @@ function Home() {
                 PEPhub takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to
                 store, edit, and access your PEPs in one place.
               </p>
+              <br />
               <p>Log in with your GitHub account to get started.</p>
               {user ? (
                 <a href={`/${user.login}`}>
@@ -56,6 +72,25 @@ function Home() {
                   <i className="bi bi-check2-circle me-1"></i>Validation
                 </MotionButton>
               </a>
+              <h4 className="mt-5">Largest namespaces on PEPhub:</h4>
+              <div>
+                {largestNamespaces ? (
+                  largestNamespaces.results.map((namespace, index) => {
+                    return (
+                      <div key={index}>
+                        <span className="ms-2">
+                          {index + 1}.{' '}
+                          <a className="text-decoration-none" href={`/${namespace.namespace}`}>
+                            {namespace.namespace}: {numberWithCommas(namespace.number_of_projects)}
+                          </a>
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <LandingInfoPlaceholder total={3} />
+                )}
+              </div>
             </div>
             <div className="col-6 align-items-center">
               <img className="ms-5" src="/landing_icon.svg" alt="Landing icon" height="500" />
