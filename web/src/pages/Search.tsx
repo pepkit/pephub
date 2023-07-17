@@ -1,7 +1,6 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { SearchResult } from '../api/search';
 import { PageLayout } from '../components/layout/page-layout';
 import { SearchOptionsModal } from '../components/modals/search-options';
 import { SearchBar } from '../components/search/search-bar';
@@ -25,25 +24,19 @@ export const SearchPage: FC = () => {
   const [limit, setLimit] = useState(searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10);
   const [offset, setOffset] = useState(searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0);
   const [showSearchOptionsModal, setShowSearchOptionsModal] = useState(false);
+  const searchDebounced = useDebounce<string>(search, 500);
 
   const {
     data: searchResults,
     isFetching,
-    refetch: refetchSearch,
+    refetch,
     isFetched,
-  } = useSearch(search, limit, offset, scoreThreshold, jwt, false);
+  } = useSearch(searchDebounced, limit, offset, scoreThreshold, jwt);
 
   const runSearch = () => {
     setSearchParams({ query: search, limit: limit.toString(), offset: offset.toString() });
-    refetchSearch();
+    refetch();
   };
-
-  // run refetch on page load
-  useEffect(() => {
-    if (search) {
-      refetchSearch();
-    }
-  }, []);
 
   return (
     <PageLayout title="Search">
@@ -67,6 +60,11 @@ export const SearchPage: FC = () => {
             <ProjectSearchResults hits={searchResults.results} />
           </>
         )}
+        {!isFetched && (
+          <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
+            <h5>Search for projects</h5>
+          </div>
+        )}
       </div>
       <SearchOptionsModal
         scoreThreshold={scoreThreshold}
@@ -81,5 +79,4 @@ export const SearchPage: FC = () => {
       />
     </PageLayout>
   );
-  runSearch;
 };
