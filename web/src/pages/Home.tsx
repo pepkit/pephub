@@ -2,8 +2,10 @@ import { motion } from 'framer-motion';
 import React, { FC, useState } from 'react';
 
 import { PageLayout } from '../components/layout/page-layout';
-import { useSession } from '../hooks/useSession';
+import { LandingInfoPlaceholder } from '../components/placeholders/landing-leaderboard';
 import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
+import { useSession } from '../hooks/useSession';
+import { numberWithCommas } from '../utils/etc';
 
 interface MotionButtonProps {
   onClick?: () => void;
@@ -26,7 +28,7 @@ const MotionButton: FC<MotionButtonProps> = ({ children, className, onClick }) =
 function Home() {
   const { user, login } = useSession();
   const limit = 3;
-  const { data: test} = useBiggestNamespace(limit);
+  const { data: largestNamespaces } = useBiggestNamespace(limit);
 
   type ArrayOfNumbersOrNull = (number | null)[];
 
@@ -70,26 +72,25 @@ function Home() {
                   <i className="bi bi-check2-circle me-1"></i>Validation
                 </MotionButton>
               </a>
-              <div className="mt-3 d-flex flex-row align-items-center fw-bolder">
-                <a href="/geo" className="text-decoration-none">
-                  View 100,000+ projects from GEO
-                </a>
-                {/* arrow left */}
-                <motion.i
-                  // bounce animation on x axis
-                  // @ts-ignore - it works and isn't critical to the app
-                  animate={{ x: xAnimation }}
-                  className="p-0 text-2xl bi bi-arrow-left ms-2"
-                  transition={{
-                    duration: 1,
-                    ease: 'easeInOut',
-                    times: [0, 0.2, 0.5, 0.8, 1],
-                    repeat: Infinity,
-                    repeatDelay: 0.5,
-                  }}
-                />
+              <h4 className="mt-5">Largest namespaces on PEPhub:</h4>
+              <div>
+                {largestNamespaces ? (
+                  largestNamespaces.results.map((namespace, index) => {
+                    return (
+                      <div key={index}>
+                        <span className="ms-2">
+                          {index + 1}.{' '}
+                          <a className="text-decoration-none" href={`/${namespace.namespace}`}>
+                            {namespace.namespace}: {numberWithCommas(namespace.number_of_projects)}
+                          </a>
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <LandingInfoPlaceholder total={3} />
+                )}
               </div>
-              <span className="text-muted">{test?.limit}</span>
             </div>
             <div className="col-6 align-items-center">
               <img className="ms-5" src="/landing_icon.svg" alt="Landing icon" height="500" />
