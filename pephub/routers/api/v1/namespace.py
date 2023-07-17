@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from peppy import Project
 from pepdbagent.exceptions import ProjectUniqueNameError
 from pepdbagent.const import DEFAULT_LIMIT_INFO
+from pepdbagent.models import ListOfNamespaceInfo
 
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
@@ -287,5 +288,5 @@ async def upload_raw_pep(
 async def get_namespace_information(
     limit: Optional[int] = DEFAULT_LIMIT_INFO,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> NamespaceList:
+) -> ListOfNamespaceInfo:
     return agent.namespace.info(limit=limit)
