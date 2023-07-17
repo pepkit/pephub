@@ -3,6 +3,7 @@ import React, { FC, useState } from 'react';
 
 import { PageLayout } from '../components/layout/page-layout';
 import { useSession } from '../hooks/useSession';
+import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
 
 interface MotionButtonProps {
   onClick?: () => void;
@@ -24,6 +25,8 @@ const MotionButton: FC<MotionButtonProps> = ({ children, className, onClick }) =
 
 function Home() {
   const { user, login } = useSession();
+  const limit = 3;
+  const { data: test} = useBiggestNamespace(limit);
 
   type ArrayOfNumbersOrNull = (number | null)[];
 
@@ -86,6 +89,7 @@ function Home() {
                   }}
                 />
               </div>
+              <span className="text-muted">{test?.limit}</span>
             </div>
             <div className="col-6 align-items-center">
               <img className="ms-5" src="/landing_icon.svg" alt="Landing icon" height="500" />

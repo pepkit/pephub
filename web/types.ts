@@ -102,3 +102,8 @@ export interface ValidationResult {
   error_type: string;
   errors: string[];
 }
+
+export interface BiggestNamespaceResults {
+  namespace: string;
+  number_of_projects: number;
+}
