@@ -100,31 +100,29 @@ export const NamespacePage: FC = () => {
         </div>
       </div>
       {/* Render info about the namespace */}
-      {namespaceInfoIsLoading ? (
-        <NamespaceInfoPlaceholder />
-      ) : (
-        <>
-          {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
-            <p className="mb-0">
-              <span className="fw-bold d-flex">
-                Organizations you belong to:{' '}
-                <div className="d-flex align-items-center">
-                  {user?.orgs.map((org) => (
-                    <Fragment key={org}>
-                      <a className="ms-1 text-decoration-none" href={`/${org}`}>
-                        <NamespaceBadge className="me-1" namespace={org} />
-                      </a>{' '}
-                    </Fragment>
-                  ))}
-                </div>
-              </span>
-            </p>
-          )}
+      
+      <>
+        {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
           <p className="mb-0">
-            <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
+            <span className="fw-bold d-flex">
+              Organizations you belong to:{' '}
+              <div className="d-flex align-items-center">
+                {user?.orgs.map((org) => (
+                  <Fragment key={org}>
+                    <a className="ms-1 text-decoration-none" href={`/${org}`}>
+                      <NamespaceBadge className="me-1" namespace={org} />
+                    </a>{' '}
+                  </Fragment>
+                ))}
+              </div>
+            </span>
           </p>
-        </>
-      )}
+        )}
+        <p className="mb-0">
+          <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
+        </p>
+      </>
+      
       {/* Render projects  in namespace */}
       <div className="my-3 border-bottom border-grey"></div>
       <NamespacePageSearchBar
