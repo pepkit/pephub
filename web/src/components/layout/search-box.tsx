@@ -4,6 +4,7 @@ import { FC, useState } from 'react';
 interface Props {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   value?: string;
+  onClick?: () => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   id?: string;
   type?: string;
@@ -16,6 +17,7 @@ interface Props {
 export const SearchBox: FC<Props> = ({
   onChange,
   onKeyDown,
+  onClick,
   value,
   id,
   type,
@@ -40,6 +42,7 @@ export const SearchBox: FC<Props> = ({
       type="text"
       onFocus={handleFocus}
       onBlur={handleBlur}
+      onClick={onClick}
       value={value}
       onChange={onChange}
       id={id}

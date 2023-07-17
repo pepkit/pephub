@@ -172,7 +172,7 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
-      <div className="d-flex flex-row align-items-center justify-content-between px-2 mb-2 mt-4">
+      <div className="d-flex flex-row align-items-center justify-content-between px-4 mb-2 mt-4">
         <div className="d-flex flex-row align-items-center">
           <Breadcrumb className="fw-bold mt-1">
             <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -222,15 +222,15 @@ export const ProjectPage: FC = () => {
           )}
         </div>
       </div>
-      <div className="px-4">
+      <div className="d-flex flex-row align-items-center px-4">
         <Markdown>{projectInfo?.description || 'No description'}</Markdown>
       </div>
-      <div className="mt-2 px-2 border-bottom border-dark">
+      <div className="mt-2 px-2">
         {projectInfoIsLoading || projectInfo === undefined ? (
           <ProjectPageheaderPlaceholder />
         ) : (
           <>
-            <div className="flex-row d-flex align-items-end justify-content-between">
+            <div className="flex-row d-flex align-items-end justify-content-between mx-3">
               <ProjectDataNav
                 projectView={projectView}
                 setProjectView={(view) => setProjectView(view)}
@@ -312,7 +312,7 @@ export const ProjectPage: FC = () => {
                       </>
                     </div>
                   )}
-                  <div>
+                  <div className="px-1">
                     <>
                       <button
                         disabled={

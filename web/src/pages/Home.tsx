@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import { PageLayout } from '../components/layout/page-layout';
 import { useSession } from '../hooks/useSession';
@@ -24,6 +24,16 @@ const MotionButton: FC<MotionButtonProps> = ({ children, className, onClick }) =
 
 function Home() {
   const { user, login } = useSession();
+
+  type ArrayOfNumbersOrNull = (number | null)[];
+
+  const [xAnimation, setXAnimation] = useState<ArrayOfNumbersOrNull>([null, 8, 0]);
+
+  // stop pulsing after 6 seconds
+  setTimeout(() => {
+    setXAnimation([0]);
+  }, 6000);
+
   return (
     <PageLayout>
       <div className="container" style={{ height: '80vh' }}>
@@ -36,6 +46,7 @@ function Home() {
                 PEPhub takes advantage of the Portable Encapsulated Projects (PEP) biological metadata standard to
                 store, edit, and access your PEPs in one place.
               </p>
+              <br />
               <p>Log in with your GitHub account to get started.</p>
               {user ? (
                 <a href={`/${user.login}`}>
@@ -56,9 +67,25 @@ function Home() {
                   <i className="bi bi-check2-circle me-1"></i>Validation
                 </MotionButton>
               </a>
-              <p className="mt-3 fw-bolder">
-                <a href="/geo" className="text-decoration-none" >View 100,000+ projects from GEO</a>
-              </p>
+              <div className="mt-3 d-flex flex-row align-items-center fw-bolder">
+                <a href="/geo" className="text-decoration-none">
+                  View 100,000+ projects from GEO
+                </a>
+                {/* arrow left */}
+                <motion.i
+                  // bounce animation on x axis
+                  // @ts-ignore - it works and isn't critical to the app
+                  animate={{ x: xAnimation }}
+                  className="p-0 text-2xl bi bi-arrow-left ms-2"
+                  transition={{
+                    duration: 1,
+                    ease: 'easeInOut',
+                    times: [0, 0.2, 0.5, 0.8, 1],
+                    repeat: Infinity,
+                    repeatDelay: 0.5,
+                  }}
+                />
+              </div>
             </div>
             <div className="col-6 align-items-center">
               <img className="ms-5" src="/landing_icon.svg" alt="Landing icon" height="500" />
