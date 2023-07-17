@@ -1,6 +1,7 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { SearchResult } from '../api/search';
 import { PageLayout } from '../components/layout/page-layout';
 import { SearchOptionsModal } from '../components/modals/search-options';
 import { SearchBar } from '../components/search/search-bar';
@@ -9,10 +10,6 @@ import { NamespaceSearchResults, ProjectSearchResults } from '../components/sear
 import { useSearch } from '../hooks/queries/useSearch';
 import { useDebounce } from '../hooks/useDebounce';
 import { useSession } from '../hooks/useSession';
-
-interface Props {
-  children: React.ReactNode;
-}
 
 export const SearchPage: FC = () => {
   const { jwt } = useSession();
@@ -28,19 +25,25 @@ export const SearchPage: FC = () => {
   const [limit, setLimit] = useState(searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10);
   const [offset, setOffset] = useState(searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0);
   const [showSearchOptionsModal, setShowSearchOptionsModal] = useState(false);
-  const searchDebounced = useDebounce<string>(search, 500);
 
   const {
     data: searchResults,
     isFetching,
-    refetch,
+    refetch: refetchSearch,
     isFetched,
-  } = useSearch(searchDebounced, limit, offset, scoreThreshold, jwt);
+  } = useSearch(search, limit, offset, scoreThreshold, jwt, false);
 
   const runSearch = () => {
     setSearchParams({ query: search, limit: limit.toString(), offset: offset.toString() });
-    refetch();
+    refetchSearch();
   };
+
+  // run refetch on page load
+  useEffect(() => {
+    if (search) {
+      refetchSearch();
+    }
+  }, []);
 
   return (
     <PageLayout title="Search">
@@ -63,11 +66,6 @@ export const SearchPage: FC = () => {
             <NamespaceSearchResults hits={searchResults.namespace_hits} />
             <ProjectSearchResults hits={searchResults.results} />
           </>
-        )}
-        {!isFetched && (
-          <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
-            <h5>Search for projects</h5>
-          </div>
         )}
       </div>
       <SearchOptionsModal
