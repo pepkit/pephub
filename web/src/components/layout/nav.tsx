@@ -30,7 +30,7 @@ const SearchBoxTooltip = () => {
       }}
       className="text-start"
     >
-      Try searching for some metadata! Try cohesin, or CTCF, or any other keyword.
+      Try searching for some metadata! Try bonemarrow, or scATAc-seq, or even a specific gene like TP53.
     </Tooltip>
   );
 };
@@ -41,6 +41,9 @@ export const Nav: FC = () => {
   const navigate = useNavigate();
   const [globalSearch, setGlobalSearch] = useState<string>('');
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
+
+  // on landing page?
+  const isLandingPage = window.location.pathname === '/';
 
   // remove after 5 seconds
   setTimeout(() => {
@@ -130,7 +133,7 @@ export const Nav: FC = () => {
                         aria-describedby="search"
                       />
                       <AnimatePresence>
-                        {showTooltip && (
+                        {showTooltip && isLandingPage && (
                           <motion.div
                             className="d-block position-absolute top-100"
                             // "pop" in the tooltip
