@@ -80,7 +80,7 @@ function Home() {
                       <div key={index}>
                         <span className="ms-2">
                           {index + 1}.{' '}
-                          <a className="text-decoration-none" href={`/${namespace.namespace}`}>
+                          <a href={`/${namespace.namespace}`}>
                             {namespace.namespace}: {numberWithCommas(namespace.number_of_projects)}
                           </a>
                         </span>
