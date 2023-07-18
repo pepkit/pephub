@@ -10,12 +10,14 @@ interface Props {
   onChange?: (rows: Sample[]) => void;
   readOnly?: boolean;
   height?: number;
+  minRows?: number;
+  stretchH?: 'none' | 'all' | 'last';
 }
 /**
  * This table is meant to handle csv strings, so just pass in
  * the csv string and it will handle the rest
  */
-export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height }) => {
+export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height, minRows, stretchH }) => {
   // parse the list of objects into rows
   const rows = sampleListToArrays(data);
 
@@ -24,7 +26,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
       <div className="rounded rounded-2">
         <HotTable
           data={rows.length > 0 ? rows : [[]]}
-          stretchH="all"
+          stretchH={stretchH || 'all'}
           height={height || 900}
           readOnly={readOnly}
           colHeaders={true}
@@ -33,7 +35,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
             indicators: true,
           }}
           minCols={1}
-          minRows={50}
+          minRows={minRows || 50}
           contextMenu={[
             'row_above',
             'row_below',
