@@ -2,6 +2,20 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.9.4] - 07-18-2023
+
+### Fixed
+
+- Typo in tooltip for search bar
+
+### Added
+
+- Tooltip on landing page namespace list
+
+### Changed
+
+- Styling of landing namespaces to more clearly indicate they are links
+
 ## [0.9.3] - 07-17-2023
 
 ### Changed

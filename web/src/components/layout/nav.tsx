@@ -30,7 +30,7 @@ const SearchBoxTooltip = () => {
       }}
       className="text-start"
     >
-      Try searching for some metadata! Try bonemarrow, or scATAc-seq, or even a specific gene like TP53.
+      Try searching for some metadata! Try bone marrow, or scATAC-seq, or even a specific gene like TP53.
     </Tooltip>
   );
 };

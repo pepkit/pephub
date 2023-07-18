@@ -3,6 +3,7 @@ import React, { FC, useState } from 'react';
 
 import { PageLayout } from '../components/layout/page-layout';
 import { LandingInfoPlaceholder } from '../components/placeholders/landing-leaderboard';
+import { GenericTooltip } from '../components/tooltips/generic-tooltip';
 import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
 import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
@@ -72,7 +73,13 @@ function Home() {
                   <i className="bi bi-check2-circle me-1"></i>Validation
                 </MotionButton>
               </a>
-              <h4 className="mt-5">Largest namespaces on PEPhub:</h4>
+              <h4 className="mt-5">
+                Largest namespaces on PEPhub
+                <GenericTooltip
+                  className="ms-1 text-base"
+                  text="Largest namespaces are determined by the total number of PEPs contained within that namespace. Click them to view their PEPs."
+                />
+              </h4>
               <div>
                 {largestNamespaces ? (
                   largestNamespaces.results.map((namespace, index) => {
@@ -80,7 +87,7 @@ function Home() {
                       <div key={index}>
                         <span className="ms-2">
                           {index + 1}.{' '}
-                          <a className="text-decoration-none" href={`/${namespace.namespace}`}>
+                          <a href={`/${namespace.namespace}`}>
                             {namespace.namespace}: {numberWithCommas(namespace.number_of_projects)}
                           </a>
                         </span>
