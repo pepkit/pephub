@@ -380,17 +380,19 @@ export const ProjectPage: FC = () => {
                 />
               </>
             ) : (
-              <ProjectConfigEditor
-                readOnly={!(projectInfo && canEdit(user, projectInfo))}
-                value={
-                  projectConfigIsLoading
-                    ? 'Loading.'
-                    : projectConfig?.config
-                    ? newProjectConfig
-                    : 'No config file found.'
-                }
-                setValue={(value) => setNewProjectConfig(value)}
-              />
+              <div className="border border-t">
+                <ProjectConfigEditor
+                  readOnly={!(projectInfo && canEdit(user, projectInfo))}
+                  value={
+                    projectConfigIsLoading
+                      ? 'Loading.'
+                      : projectConfig?.config
+                      ? newProjectConfig
+                      : 'No config file found.'
+                  }
+                  setValue={(value) => setNewProjectConfig(value)}
+                />
+              </div>
             )}
           </div>
         </div>

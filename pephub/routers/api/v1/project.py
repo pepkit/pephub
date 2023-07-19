@@ -142,7 +142,9 @@ async def update_a_pep(
 
         try:
             # validate project (it will also validate samples)
-            eido.validate_project(new_project, "http://schema.databio.org/pep/2.1.0.yaml")
+            eido.validate_project(
+                new_project, "http://schema.databio.org/pep/2.1.0.yaml"
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=400,
