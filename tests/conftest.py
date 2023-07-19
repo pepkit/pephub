@@ -7,7 +7,6 @@ import requests
 from pepdbagent import PEPDatabaseAgent
 
 
-
 @pytest.fixture
 def test_access_token():
     return "access_token"
@@ -21,6 +20,7 @@ def test_user_data():
 @pytest.fixture
 def requests_get_mock(mocker):
     return mocker.patch("requests.get")
+
 
 @pytest.fixture
 def data_path():
@@ -64,7 +64,7 @@ def project_object_registry(project_file_path):
 
 @pytest.fixture
 def yaml_string():
-    return '''
+    return """
     description: test PEP schema
     properties:
       dcc:
@@ -85,19 +85,20 @@ def yaml_string():
               type: string
     required:
       - samples
-    '''
+    """
 
 
 @pytest.fixture
 def schema_paste(yaml_string):
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as yaml_file:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as yaml_file:
         yaml_file.write(yaml_string)
         file_path = yaml_file.name
     return file_path
 
+
 @pytest.fixture
 def yaml_string_invalid():
-    return '''
+    return """
     description: test PEP schema
     properties:
       dcc:
@@ -119,12 +120,12 @@ def yaml_string_invalid():
     required:
       - samples
       - fail
-    '''
+    """
 
 
 @pytest.fixture
 def schema_paste_invalid(yaml_string_invalid):
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as yaml_file:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as yaml_file:
         yaml_file.write(yaml_string_invalid)
         file_path = yaml_file.name
     return file_path
@@ -144,25 +145,25 @@ def db():
 
 @pytest.fixture
 def schema_from_url_valid():
-    url = "https://schema.databio.org/pep/2.1.0.yaml" 
+    url = "https://schema.databio.org/pep/2.1.0.yaml"
     response = requests.get(url)
     yaml_string = response.text
 
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as yaml_file:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as yaml_file:
         yaml_file.write(yaml_string)
         file_path = yaml_file.name
 
     return file_path
+
 
 @pytest.fixture
 def schema_from_url_invalid():
-    url = "https://schema.databio.org/pipelines/ProseqPEP.yaml" 
+    url = "https://schema.databio.org/pipelines/ProseqPEP.yaml"
     response = requests.get(url)
     yaml_string = response.text
 
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as yaml_file:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as yaml_file:
         yaml_file.write(yaml_string)
         file_path = yaml_file.name
 
     return file_path
-

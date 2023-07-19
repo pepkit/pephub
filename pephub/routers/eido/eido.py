@@ -167,7 +167,9 @@ async def validate(
         return {"valid": True, "errors": None}
 
 
-async def eido_error_string_converter(e: eido.exceptions.EidoValidationError) -> Tuple[str, List[str]]:
+async def eido_error_string_converter(
+    e: eido.exceptions.EidoValidationError,
+) -> Tuple[str, List[str]]:
     """
     Convert eido error into nice modified string
 
@@ -177,7 +179,7 @@ async def eido_error_string_converter(e: eido.exceptions.EidoValidationError) ->
     property_names = []
     error_type_list = []
     for item_list in e.errors_by_type.values():
-        property_type = item_list[0]['type']
+        property_type = item_list[0]["type"]
         property_name_list = []
         for item in item_list:
             if item["sample_name"] == "project":
@@ -186,11 +188,9 @@ async def eido_error_string_converter(e: eido.exceptions.EidoValidationError) ->
             else:
                 error_type_list.append("Samples")
                 if len(item_list) > 20:
-                    property_names = [
-                        "More than 20 samples have encountered errors."
-                    ]
+                    property_names = ["More than 20 samples have encountered errors."]
                 else:
-                    property_name_list.append(item['sample_name'])
+                    property_name_list.append(item["sample_name"])
 
         if len(property_name_list) > 0:
             property_names.append(f"{property_type} ({', '.join(property_name_list)})")

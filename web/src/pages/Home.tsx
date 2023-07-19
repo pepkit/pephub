@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import React, { FC, useState } from 'react';
 
+import { Sample } from '../../types';
 import { PageLayout } from '../components/layout/page-layout';
 import { LandingInfoPlaceholder } from '../components/placeholders/landing-leaderboard';
+import { SampleTable } from '../components/tables/sample-table';
 import { GenericTooltip } from '../components/tooltips/generic-tooltip';
 import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
 import { useSession } from '../hooks/useSession';
@@ -26,26 +28,58 @@ const MotionButton: FC<MotionButtonProps> = ({ children, className, onClick }) =
   </motion.button>
 );
 
+const DEFAULT_SAMPLE_TABLE_DATA = [
+  {
+    sample_name: '4-1_11102016',
+    sample_library_strategy: 'miRNA-Seq',
+    assembly: 'hg19',
+    time_point: 'morning',
+  },
+  {
+    sample_name: '3-1_11102016',
+    sample_library_strategy: 'miRNA-Seq',
+    assembly: 'hg19',
+    time_point: 'morning',
+  },
+  {
+    sample_name: '2-2_11102016',
+    sample_library_strategy: 'miRNA-Seq',
+    assembly: 'hg19',
+    time_point: 'afternoon',
+  },
+  {
+    sample_name: '2-1_11102016',
+    sample_library_strategy: 'miRNA-Seq',
+    assembly: 'hg19',
+    time_point: 'morning',
+  },
+  {
+    sample_name: '8-3_11152016',
+    sample_library_strategy: 'miRNA-Seq',
+    assembly: 'hg19',
+    time_point: 'evening',
+  },
+  {
+    sample_name: '8-1_11152016',
+    sample_library_strategy: 'miRNA-Seq',
+    assembly: 'hg19',
+    time_point: 'morning',
+  },
+];
+
 function Home() {
   const { user, login } = useSession();
   const limit = 3;
   const { data: largestNamespaces } = useBiggestNamespace(limit);
 
-  type ArrayOfNumbersOrNull = (number | null)[];
-
-  const [xAnimation, setXAnimation] = useState<ArrayOfNumbersOrNull>([null, 8, 0]);
-
-  // stop pulsing after 6 seconds
-  setTimeout(() => {
-    setXAnimation([0]);
-  }, 6000);
+  const [samples, setSamples] = useState<Sample[]>(DEFAULT_SAMPLE_TABLE_DATA);
 
   return (
-    <PageLayout>
-      <div className="container" style={{ height: '80vh' }}>
+    <PageLayout fullWidth>
+      <div className="mx-5" style={{ height: '80vh' }}>
         <div className="d-flex flex-column h-100 align-items-center justify-content-center">
           <div className="row align-items-center">
-            <div className="col-6">
+            <div className="col-5">
               <h1 className="fw-bolder">Manage your sample metadata.</h1>
               <p>
                 PEPhub is a database, web interface, and API for sharing, retrieving, and validating sample metadata.
@@ -100,7 +134,22 @@ function Home() {
               </div>
             </div>
             <div className="col-6 align-items-center">
-              <img className="ms-5" src="/landing_icon.svg" alt="Landing icon" height="500" />
+              <div className="ms-5 mt-5">
+                <div className="mb-1 d-flex flex-row align-items-center">
+                  <a className="ms-1 fw-bold" href="/example/landing">
+                    View this PEP now!
+                  </a>
+                  <div className="bounce-x ms-2">
+                    <i className="bi bi-arrow-left ms-1"></i>
+                  </div>
+                </div>
+                <SampleTable
+                  className="remove-wtHider-shadow"
+                  minRows={12}
+                  data={samples}
+                  onChange={(s) => setSamples(s)}
+                />
+              </div>
             </div>
           </div>
         </div>

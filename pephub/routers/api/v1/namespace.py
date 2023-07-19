@@ -4,6 +4,7 @@ import shutil
 from fastapi import APIRouter, File, UploadFile, Request, Depends, Form, Body
 from fastapi.responses import JSONResponse
 from peppy import Project
+from peppy.const import DESC_KEY, NAME_KEY
 from pepdbagent.exceptions import ProjectUniqueNameError
 from pepdbagent.const import DEFAULT_LIMIT_INFO
 from pepdbagent.models import ListOfNamespaceInfo
@@ -225,20 +226,23 @@ async def upload_raw_pep(
         is_private = project_from_json.is_private
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
-        pep_schema = project_from_json.pep_dict.pep_schema
-        name = project_from_json.name
-        description = project_from_json.description
+        pep_schema = project_from_json.pep_schema
+        if hasattr(project_from_json, NAME_KEY):
+            name = project_from_json.name
+        else:
+            name = project_from_json.pep_dict.config.get(NAME_KEY)
+        if hasattr(project_from_json, DESC_KEY):
+            description = project_from_json.description
+        else:
+            description = project_from_json.pep_dict.config.get(DESC_KEY)
 
         # This configurations needed due to Issue #124 Should be removed in the future
         project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
-        p_project = peppy.Project().from_dict(project_dict.dict(by_alias=True))
+        ff = project_dict.dict(by_alias=True)
+        p_project = peppy.Project().from_dict(ff)
 
-        # for DX, we want people to be able to just send name and description,
-        # although it is required in the peppy.Project config, so we set it here
-        if name is not None:
-            p_project.name = project_from_json.name
-        if description is not None:
-            p_project.description = project_from_json.description
+        p_project.name = name
+        p_project.description = description
 
     except Exception as e:
         return JSONResponse(

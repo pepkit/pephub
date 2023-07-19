@@ -17,6 +17,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import './globals.css';
 import Home from './pages/Home';
+import About from './pages/About';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
+    path: '/about',
+    element: <About />,
+  },
+  {
     path: '/search',
     element: <SearchPage />,
   },
@@ -47,6 +52,7 @@ const router = createBrowserRouter([
     path: '/validate',
     element: <EidoValidator />,
   },
+
   {
     path: '/login/success',
     element: <LoginSuccessPage />,

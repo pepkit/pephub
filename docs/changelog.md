@@ -2,6 +2,23 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.9.5] - 07-19-2023
+
+### Fixed
+
+- Changing sample_name error
+
+### Added
+
+- Landing sample table
+- UI tweaks
+- About page (In progress)
+- Sample, subsample, config update simultaneously when saved
+
+### Changed
+
+- Landing page
+
 ## [0.9.4] - 07-18-2023
 
 ### Fixed

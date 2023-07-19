@@ -11,7 +11,7 @@ class ProjectOptional(UpdateItems):
     sample_table: Optional[List[dict]]
     project_config_yaml: Optional[str]
     description: Optional[str]
-    subsample_table: Optional[List[dict]]
+    subsample_tables: Optional[List[List[dict]]]
 
     class Config:
         allow_population_by_field_name = True
@@ -69,8 +69,8 @@ class ProjectRawModel(BaseModel):
 
 class ProjectRawRequest(BaseModel):
     config: dict
-    subsample_list: Optional[list]
-    sample_list: list[dict]
+    subsample_list: Optional[List[List[dict]]]
+    sample_list: List[dict]
 
     class Config:
         allow_population_by_field_name = True
@@ -79,7 +79,7 @@ class ProjectRawRequest(BaseModel):
 
 class ProjectJsonRequest(BaseModel):
     pep_dict: ProjectRawRequest
-    name: str
+    name: Optional[str] = None
     description: Optional[str] = None
     is_private: bool = False
     tag: str = DEFAULT_TAG

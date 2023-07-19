@@ -19,6 +19,7 @@ import { SampleTable } from '../components/tables/sample-table';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
 import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
 import { useSubsampleTableMutation } from '../hooks/mutations/useSubsampleTableMutation';
+import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useProject } from '../hooks/queries/useProject';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
@@ -137,19 +138,29 @@ export const ProjectPage: FC = () => {
     jwt || '',
     newProjectSubsamples,
   );
+  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', project || '', tag, jwt || '', {
+    config: newProjectConfig,
+    samples: newProjectSamples,
+    subsamples: newProjectSubsamples,
+  });
+
+  const handleTotalProjectChange = async () => {
+    await totalProjectMutation.mutateAsync();
+    runValidation();
+  };
 
   const handleProjectChange = async () => {
     if (configIsDirty) {
       await configMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
     if (samplesIsDirty) {
       await sampleTableMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
     if (subsamplesIsDirty) {
       await subsampleTableMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
   };
 
@@ -185,9 +196,9 @@ export const ProjectPage: FC = () => {
             ) : null}
           </Breadcrumb>
           <div className="ms-2 mb-1">
-          <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
-            <SchemaTag schema={projectInfo?.pep_schema} />
-          </a>
+            <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
+              <SchemaTag schema={projectInfo?.pep_schema} />
+            </a>
           </div>
         </div>
         <div className="d-flex flex-row align-items-start btn-g">
@@ -321,7 +332,7 @@ export const ProjectPage: FC = () => {
                           subsampleTableMutation.isLoading ||
                           !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
                         }
-                        onClick={() => handleProjectChange()}
+                        onClick={() => handleTotalProjectChange()}
                         className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
                       >
                         {configMutation.isLoading || sampleTableMutation.isLoading || subsampleTableMutation.isLoading
@@ -369,17 +380,19 @@ export const ProjectPage: FC = () => {
                 />
               </>
             ) : (
-              <ProjectConfigEditor
-                readOnly={!(projectInfo && canEdit(user, projectInfo))}
-                value={
-                  projectConfigIsLoading
-                    ? 'Loading.'
-                    : projectConfig?.config
-                    ? newProjectConfig
-                    : 'No config file found.'
-                }
-                setValue={(value) => setNewProjectConfig(value)}
-              />
+              <div className="border border-t">
+                <ProjectConfigEditor
+                  readOnly={!(projectInfo && canEdit(user, projectInfo))}
+                  value={
+                    projectConfigIsLoading
+                      ? 'Loading.'
+                      : projectConfig?.config
+                      ? newProjectConfig
+                      : 'No config file found.'
+                  }
+                  setValue={(value) => setNewProjectConfig(value)}
+                />
+              </div>
             )}
           </div>
         </div>
