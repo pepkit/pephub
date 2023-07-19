@@ -109,24 +109,12 @@ async def update_a_pep(
 
     # sample table update
     if updated_project.sample_table is not None:
-        sample_table_df = pd.DataFrame.from_dict(updated_project.sample_table)
-        sample_table_df_json = sample_table_df.to_dict(orient="records")
-
-        new_raw_project[SAMPLE_RAW_DICT_KEY] = sample_table_df_json
+        new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
         new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
 
     # subsample table update
-    if updated_project.subsample_table is not None:
-        subsample_peppy_list = []
-        for subsample in updated_project.subsample_table:
-            subsample_str = subsample.rstrip(",")
-            subsample_str = StringIO(subsample_str)
-            subsample_pd = pd.read_csv(subsample_str)
-            subsample_df = subsample_pd.to_dict(orient="records")
-
-            subsample_peppy_list.append(subsample_df)
-
-        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = subsample_peppy_list
+    if updated_project.subsample_tables is not None:
+        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = updated_project.subsample_tables
 
     if updated_project.description:
         new_raw_project["_config"]["description"] = updated_project.description
@@ -141,7 +129,7 @@ async def update_a_pep(
         [
             updated_project.project_config_yaml is not None,
             updated_project.sample_table is not None,
-            updated_project.subsample_table is not None,
+            updated_project.subsample_tables is not None,
         ]
     ):
         try:
@@ -151,20 +139,15 @@ async def update_a_pep(
                 status_code=400,
                 detail=f"Could not create PEP from provided yaml. Error: {e}",
             )
-        # validate each sample in the table according to the project
-        for s in new_project.samples:
-            sample_name: str = s[new_project.st_index]
-            try:
-                eido.validate_sample(
-                    new_project,
-                    sample_name,
-                    "http://schema.databio.org/pep/2.0.0.yaml",  # just use the base PEP schema for now
-                )
-            except Exception as e:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Sample {sample_name} failed validation: {e}",
-                )
+
+        try:
+            # validate project (it will also validate samples)
+            eido.validate_project(new_project, "http://schema.databio.org/pep/2.1.0.yaml")
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"",
+            )
 
         # if we get through all samples, then update project in the database
         agent.project.update(

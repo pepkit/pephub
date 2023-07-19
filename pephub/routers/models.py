@@ -11,7 +11,7 @@ class ProjectOptional(UpdateItems):
     sample_table: Optional[List[dict]]
     project_config_yaml: Optional[str]
     description: Optional[str]
-    subsample_table: Optional[List[dict]]
+    subsample_tables: Optional[List[List[dict]]]
 
     class Config:
         allow_population_by_field_name = True
