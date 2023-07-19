@@ -6,6 +6,7 @@ import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table
 import { addClassesToRows } from './hooks-callbacks';
 
 interface Props {
+  className?: string;
   data: Sample[];
   onChange?: (rows: Sample[]) => void;
   readOnly?: boolean;
@@ -17,17 +18,30 @@ interface Props {
  * This table is meant to handle csv strings, so just pass in
  * the csv string and it will handle the rest
  */
-export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height, minRows, stretchH }) => {
+export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height, minRows, stretchH, className }) => {
   // parse the list of objects into rows
   const rows = sampleListToArrays(data);
+  const ROW_HEIGHT = 23; // px
+
+  // compute table height based on number of rows
+  // or the minRows prop if it is provided
+  let tableHeight = rows.length * ROW_HEIGHT + 50;
+  if (minRows) {
+    tableHeight = minRows * ROW_HEIGHT + 50;
+  }
+
+  let tableClassName = 'rounded rounded-2';
+  if (className) {
+    tableClassName += ` ${className}`;
+  }
 
   return (
     <>
-      <div className="rounded rounded-2">
+      <div className={tableClassName}>
         <HotTable
           data={rows.length > 0 ? rows : [[]]}
           stretchH={stretchH || 'all'}
-          height={height || 900}
+          height={height || tableHeight}
           readOnly={readOnly}
           colHeaders={true}
           dropdownMenu={true}

@@ -79,7 +79,7 @@ function Home() {
       <div className="mx-5" style={{ height: '80vh' }}>
         <div className="d-flex flex-column h-100 align-items-center justify-content-center">
           <div className="row align-items-center">
-            <div className="col-6">
+            <div className="col-5">
               <h1 className="fw-bolder">Manage your sample metadata.</h1>
               <p>
                 PEPhub is a database, web interface, and API for sharing, retrieving, and validating sample metadata.
@@ -134,8 +134,21 @@ function Home() {
               </div>
             </div>
             <div className="col-6 align-items-center">
-              <div className="shadow ms-5 mt-5">
-                <SampleTable minRows={20} data={samples} height={450} onChange={(s) => setSamples(s)} />
+              <div className="ms-5 mt-5">
+                <div className="mb-1 d-flex flex-row align-items-center">
+                  <a className="ms-1 fw-bold" href="/example/landing">
+                    View this PEP now!
+                  </a>
+                  <div className="bounce-x ms-2">
+                    <i className="bi bi-arrow-left ms-1"></i>
+                  </div>
+                </div>
+                <SampleTable
+                  className="remove-wtHider-shadow"
+                  minRows={12}
+                  data={samples}
+                  onChange={(s) => setSamples(s)}
+                />
               </div>
             </div>
           </div>
