@@ -98,7 +98,7 @@ async def update_a_pep(
     if namespace not in (list_of_admins or []):
         return JSONResponse(
             content={
-                "message": "Unothorized for updating projects.",
+                "message": "Unauthorized for updating projects.",
             },
             status_code=401,
         )

@@ -86,11 +86,7 @@ export const ProjectPage: FC = () => {
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
   const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(projectSamples?.items || []);
   const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(projectSubsamples?.items || []);
-  const [newTotalProject, setNewTotalProject] = useState({
-    config: projectConfig?.config || '',
-    samples: projectSamples?.items || [],
-    subsamples: projectSubsamples?.items || [],
-  });
+  
 
 
   const {
@@ -114,7 +110,6 @@ export const ProjectPage: FC = () => {
     setNewProjectConfig(projectConfig?.config || '');
     setNewProjectSamples(projectSamples?.items || []);
     setNewProjectSubsamples(projectSubsamples?.items || []);
-    setNewTotalProject({ config: projectConfig?.config || '', samples: projectSamples?.items || [], subsamples: projectSubsamples?.items || [] });
   }, [projectConfig, projectSamples, projectSubsamples]);
 
   // check if config or samples are dirty
@@ -150,7 +145,11 @@ export const ProjectPage: FC = () => {
     project || '',
     tag,
     jwt || '',
-    newTotalProject
+    {
+      config: newProjectConfig,
+      samples: newProjectSamples,
+      subsamples: newProjectSubsamples,
+    }
   );
 
   const handleTotalProjectChange = async () => {
