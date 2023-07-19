@@ -216,7 +216,7 @@ export const editTotalProject = (
     requestBody = { ...requestBody, sample_table: data.samples };
   }
   if (data.subsamples) {
-    requestBody = { ...requestBody, subsample_table: data.subsamples };
+    requestBody = { ...requestBody, subsample_tables: [data.subsamples] };
   }
 
   return axios.patch(
