@@ -207,7 +207,6 @@ export const editTotalProject = (
   },
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
-  debugger;
   let requestBody = {};
   if (data.config) {
     requestBody = { ...requestBody, project_config_yaml: data.config };
