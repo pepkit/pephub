@@ -220,11 +220,6 @@ export const editTotalProject = (
   }
 
   return axios.patch(
-    url,
-    {
-      requestBody
-    },
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
+    url, requestBody, { headers: { Authorization: `Bearer ${token}` } });
 };
 
