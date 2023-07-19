@@ -194,3 +194,37 @@ export const editProjectSubsampleTable = (
     { headers: { Authorization: `Bearer ${token}` } },
   );
 };
+
+export const editTotalProject = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null,
+  data: { 
+    config?: string,
+    samples?: Sample[],
+    subsamples?: Sample[],
+  }
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
+  
+  let requestBody = {};
+  if (data.config) {
+    requestBody = { ...requestBody, project_config_yaml: data.config };
+  }
+  if (data.samples) {
+    requestBody = { ...requestBody, sample_table: data.samples };
+  }
+  if (data.subsamples) {
+    requestBody = { ...requestBody, subsample_table: data.subsamples };
+  }
+
+  return axios.patch(
+    url,
+    {
+      requestBody
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+};
+

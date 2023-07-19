@@ -27,6 +27,7 @@ import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
+import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -85,6 +86,12 @@ export const ProjectPage: FC = () => {
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
   const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(projectSamples?.items || []);
   const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(projectSubsamples?.items || []);
+  const [newTotalProject, setNewTotalProject] = useState({
+    config: projectConfig?.config || '',
+    samples: projectSamples?.items || [],
+    subsamples: projectSubsamples?.items || [],
+  });
+
 
   const {
     data: validationResult,
@@ -107,6 +114,7 @@ export const ProjectPage: FC = () => {
     setNewProjectConfig(projectConfig?.config || '');
     setNewProjectSamples(projectSamples?.items || []);
     setNewProjectSubsamples(projectSubsamples?.items || []);
+    setNewTotalProject({ config: projectConfig?.config || '', samples: projectSamples?.items || [], subsamples: projectSubsamples?.items || [] });
   }, [projectConfig, projectSamples, projectSubsamples]);
 
   // check if config or samples are dirty
@@ -137,6 +145,18 @@ export const ProjectPage: FC = () => {
     jwt || '',
     newProjectSubsamples,
   );
+  const totalProjectMutation = useTotalProjectChangeMutation(
+    namespace || '',
+    project || '',
+    tag,
+    jwt || '',
+    newTotalProject
+  );
+
+  const handleTotalProjectChange = async () => {
+    await totalProjectMutation.mutateAsync();
+    runValidation();
+  }
 
   const handleProjectChange = async () => {
     if (configIsDirty) {
@@ -321,7 +341,7 @@ export const ProjectPage: FC = () => {
                           subsampleTableMutation.isLoading ||
                           !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
                         }
-                        onClick={() => handleProjectChange()}
+                        onClick={() => handleTotalProjectChange()}
                         className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
                       >
                         {configMutation.isLoading || sampleTableMutation.isLoading || subsampleTableMutation.isLoading
