@@ -1,7 +1,7 @@
 import axios from 'axios';
 import YAML from 'yaml';
 
-import { Project, ProjectAnnotation, Sample } from '../../types';
+import { BiggestNamespaceResults, Project, ProjectAnnotation, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -38,6 +38,12 @@ export interface ProjectSubmissionResponse {
   msg?: string;
 }
 
+export interface BiggestNamespaces {
+  number_of_namespaces: number;
+  limit: number;
+  results: BiggestNamespaceResults[];
+}
+
 export const getNamespaceInfo = (namespace: string, token: string | null = null) => {
   const url = `${API_BASE}/namespaces/${namespace}/`; // note the trailing slash
   if (!token) {
@@ -45,6 +51,11 @@ export const getNamespaceInfo = (namespace: string, token: string | null = null)
   } else {
     return axios.get<NamespaceResponse>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
   }
+};
+
+export const getBiggestNamespaces = (limit: number) => {
+  const url = `${API_BASE}/namespace/info?limit=${limit}`; // note the trailing slash
+  return axios.get<BiggestNamespaces>(url).then((res) => res.data);
 };
 
 export const getNamespaceProjects = (

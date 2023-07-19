@@ -153,7 +153,7 @@ async def update_a_pep(
             )
         # validate each sample in the table according to the project
         for s in new_project.samples:
-            sample_name: str = s.sample_name
+            sample_name: str = s[new_project.st_index]
             try:
                 eido.validate_sample(
                     new_project,

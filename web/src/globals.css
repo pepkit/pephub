@@ -67,6 +67,22 @@
   }
 }
 
+/* tailwind bounce but in x direction */
+.bounce-x {
+  animation: bounce-x 1s infinite;
+}
+@keyframes bounce-x {
+  0%,
+  100% {
+    transform: translateX(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateX(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
 /* tailwin spin */
 .spin {
   animation: spin 1s linear infinite;
@@ -278,4 +294,10 @@
   border-left: '10px solid transparent' !important;
   border-right: '10px solid transparent' !important;
   border-bottom: '10px solid #343a40' !important;
+}
+
+.remove-wtHider-shadow {
+  .handsontable.wtHider {
+    box-shadow: none !important;
+  }
 }

@@ -94,6 +94,7 @@ class CLIAuthSystem:
         return encoded_user_data
 
 
+# database connection
 agent = PEPDatabaseAgent(
     user=os.environ.get("POSTGRES_USER") or DEFAULT_POSTGRES_USER,
     password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
@@ -101,6 +102,9 @@ agent = PEPDatabaseAgent(
     database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
     port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
 )
+
+# sentence_transformer model
+st_model = SentenceTransformer(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
 
 
 def generate_random_auth_code() -> str:
@@ -388,12 +392,7 @@ def get_sentence_transformer() -> SentenceTransformer:
     """
     Return sentence transformer encoder
     """
-    model = SentenceTransformer(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
-    try:
-        yield model
-    finally:
-        # no need to do anything
-        pass
+    return st_model
 
 
 def get_namespace_info(

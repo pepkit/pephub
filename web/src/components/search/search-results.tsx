@@ -1,7 +1,8 @@
 import { FC } from 'react';
 import { ProgressBar } from 'react-bootstrap';
-import { GitHubAvatar } from '../../components/badges/github-avatar';
+
 import { SearchHit } from '../../../types';
+import { GitHubAvatar } from '../../components/badges/github-avatar';
 
 interface ProjectProps {
   hits: SearchHit[];
@@ -10,6 +11,10 @@ interface ProjectProps {
 const HitCard = ({ hit }: { hit: SearchHit }) => {
   const [namespace, projectTag] = hit.payload.registry.split('/');
   const [project, tag] = projectTag.split(':');
+
+  // round to 2 decimal places
+  let hit_score = Math.round(hit.score * 100) / 100;
+
   return (
     <div className="border-bottom border-dark border-2 mt-2 p-1">
       <div className="d-flex flex-row align-items-center justify-content-between">
@@ -17,7 +22,7 @@ const HitCard = ({ hit }: { hit: SearchHit }) => {
           <h5 className="fw-bold">{hit.payload.registry}</h5>
         </a>
         <div className="w-25">
-          <ProgressBar variant="success" now={hit.score * 100} label={`${hit.score}%`} />
+          <ProgressBar variant="success" now={hit.score * 100} label={`${hit_score * 100}%`} />
         </div>
       </div>
       <p className="truncate text-secondary" style={{ fontSize: '0.9rem' }}>

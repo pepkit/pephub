@@ -30,7 +30,7 @@ const SearchBoxTooltip = () => {
       }}
       className="text-start"
     >
-      Try searching for some metadata! Try bonemarrow, or scATAc-seq, or even a specific gene like TP53.
+      Try searching for some metadata! Try bone marrow, or scATAC-seq, or even a specific gene like TP53.
     </Tooltip>
   );
 };
@@ -180,6 +180,11 @@ export const Nav: FC = () => {
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
               <a className="nav-link" href="/validate">
                 <i className="bi bi-check2-circle me-1"></i>Validation
+              </a>
+            </li>
+            <li className="text-body mx-2 my-0 nav-item h5 pt-1">
+              <a className="nav-link" href="/about">
+                <i className="bi bi-info-circle me-1"></i>About
               </a>
             </li>
             <li className="text-body mx-2 my-0 nav-item h5 pt-1">
