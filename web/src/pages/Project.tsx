@@ -19,6 +19,7 @@ import { SampleTable } from '../components/tables/sample-table';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
 import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
 import { useSubsampleTableMutation } from '../hooks/mutations/useSubsampleTableMutation';
+import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useProject } from '../hooks/queries/useProject';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
@@ -27,7 +28,6 @@ import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
-import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
@@ -86,8 +86,6 @@ export const ProjectPage: FC = () => {
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
   const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(projectSamples?.items || []);
   const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(projectSubsamples?.items || []);
-  
-
 
   const {
     data: validationResult,
@@ -140,35 +138,29 @@ export const ProjectPage: FC = () => {
     jwt || '',
     newProjectSubsamples,
   );
-  const totalProjectMutation = useTotalProjectChangeMutation(
-    namespace || '',
-    project || '',
-    tag,
-    jwt || '',
-    {
-      config: newProjectConfig,
-      samples: newProjectSamples,
-      subsamples: newProjectSubsamples,
-    }
-  );
+  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', project || '', tag, jwt || '', {
+    config: newProjectConfig,
+    samples: newProjectSamples,
+    subsamples: newProjectSubsamples,
+  });
 
   const handleTotalProjectChange = async () => {
     await totalProjectMutation.mutateAsync();
     runValidation();
-  }
+  };
 
   const handleProjectChange = async () => {
     if (configIsDirty) {
       await configMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
     if (samplesIsDirty) {
       await sampleTableMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
     if (subsamplesIsDirty) {
       await subsampleTableMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
   };
 
@@ -204,9 +196,9 @@ export const ProjectPage: FC = () => {
             ) : null}
           </Breadcrumb>
           <div className="ms-2 mb-1">
-          <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
-            <SchemaTag schema={projectInfo?.pep_schema} />
-          </a>
+            <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
+              <SchemaTag schema={projectInfo?.pep_schema} />
+            </a>
           </div>
         </div>
         <div className="d-flex flex-row align-items-start btn-g">

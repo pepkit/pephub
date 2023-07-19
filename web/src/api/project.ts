@@ -200,14 +200,14 @@ export const editTotalProject = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
-  data: { 
-    config?: string,
-    samples?: Sample[],
-    subsamples?: Sample[],
-  }
+  data: {
+    config?: string;
+    samples?: Sample[];
+    subsamples?: Sample[];
+  },
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
-  
+  debugger;
   let requestBody = {};
   if (data.config) {
     requestBody = { ...requestBody, project_config_yaml: data.config };
@@ -215,11 +215,9 @@ export const editTotalProject = (
   if (data.samples) {
     requestBody = { ...requestBody, sample_table: data.samples };
   }
-  if (data.subsamples) {
+  if (data.subsamples && data.subsamples.length > 0) {
     requestBody = { ...requestBody, subsample_tables: [data.subsamples] };
   }
 
-  return axios.patch(
-    url, requestBody, { headers: { Authorization: `Bearer ${token}` } });
+  return axios.patch(url, requestBody, { headers: { Authorization: `Bearer ${token}` } });
 };
-

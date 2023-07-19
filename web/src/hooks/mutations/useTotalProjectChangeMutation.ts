@@ -6,9 +6,9 @@ import { Sample } from '../../../types';
 import { editTotalProject } from '../../api/project';
 
 interface TotalProjectChangeMutationProps {
-    config?: string;
-    samples?: Sample[];
-    subsamples?: Sample[];
+  config?: string;
+  samples?: Sample[];
+  subsamples?: Sample[];
 }
 
 export const useTotalProjectChangeMutation = (
@@ -23,7 +23,7 @@ export const useTotalProjectChangeMutation = (
   const mutation = useMutation({
     mutationFn: () => editTotalProject(namespace || '', project || '', tag, jwt || '', data),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace, project, tag, data]);
+      queryClient.invalidateQueries([namespace, project, tag]);
       toast.success('Successfully updated the project!');
     },
     onError: (error: AxiosError) => {
@@ -33,4 +33,3 @@ export const useTotalProjectChangeMutation = (
 
   return mutation;
 };
-
