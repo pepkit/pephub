@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 
-import { Sample } from '../../types';
 import { PageLayout } from '../components/layout/page-layout';
 import { LandingInfoPlaceholder } from '../components/placeholders/landing-leaderboard';
 import { SampleTable } from '../components/tables/sample-table';
 import { GenericTooltip } from '../components/tooltips/generic-tooltip';
 import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
+import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
@@ -28,58 +28,21 @@ const MotionButton: FC<MotionButtonProps> = ({ children, className, onClick }) =
   </motion.button>
 );
 
-const DEFAULT_SAMPLE_TABLE_DATA = [
-  {
-    sample_name: '4-1_11102016',
-    sample_library_strategy: 'miRNA-Seq',
-    assembly: 'hg19',
-    time_point: 'morning',
-  },
-  {
-    sample_name: '3-1_11102016',
-    sample_library_strategy: 'miRNA-Seq',
-    assembly: 'hg19',
-    time_point: 'morning',
-  },
-  {
-    sample_name: '2-2_11102016',
-    sample_library_strategy: 'miRNA-Seq',
-    assembly: 'hg19',
-    time_point: 'afternoon',
-  },
-  {
-    sample_name: '2-1_11102016',
-    sample_library_strategy: 'miRNA-Seq',
-    assembly: 'hg19',
-    time_point: 'morning',
-  },
-  {
-    sample_name: '8-3_11152016',
-    sample_library_strategy: 'miRNA-Seq',
-    assembly: 'hg19',
-    time_point: 'evening',
-  },
-  {
-    sample_name: '8-1_11152016',
-    sample_library_strategy: 'miRNA-Seq',
-    assembly: 'hg19',
-    time_point: 'morning',
-  },
-];
+const API_HOST = import.meta.env.VITE_API_HOST || '';
 
 function Home() {
   const { user, login } = useSession();
   const limit = 3;
   const { data: largestNamespaces } = useBiggestNamespace(limit);
 
-  const [samples, setSamples] = useState<Sample[]>(DEFAULT_SAMPLE_TABLE_DATA);
+  const { data: exampleSamples } = useSampleTable('databio', 'example', 'default', '');
 
   return (
-    <PageLayout fullWidth>
-      <div className="mx-5" style={{ height: '80vh' }}>
+    <PageLayout>
+      <div className="h80 mt-2">
         <div className="d-flex flex-column h-100 align-items-center justify-content-center">
           <div className="row align-items-center">
-            <div className="col-5">
+            <div className="col-lg-6 col-sm-12">
               <h1 className="fw-bolder">Manage your sample metadata.</h1>
               <p>
                 PEPhub is a database, web interface, and API for sharing, retrieving, and validating sample metadata.
@@ -88,25 +51,27 @@ function Home() {
               </p>
               <br />
               <p>Log in with your GitHub account to get started.</p>
-              {user ? (
-                <a href={`/${user.login}`}>
-                  <MotionButton className="btn btn-dark btn-lg me-3">
-                    <span className="d-flex flex-row align-items-center">
-                      <img className="me-1" src="/pep.svg" height="30px" />
-                      My PEPs
-                    </span>
+              <div className="d-flex flex-row align-items-center flex-wrap">
+                {user ? (
+                  <a href={`/${user.login}`}>
+                    <MotionButton className="mt-1 btn btn-dark btn-lg me-3">
+                      <span className="d-flex flex-row align-items-center">
+                        <img className="me-1" src="/pep.svg" height="30px" />
+                        My PEPs
+                      </span>
+                    </MotionButton>
+                  </a>
+                ) : (
+                  <MotionButton className="btn btn btn-dark btn-lg me-3" onClick={() => login()}>
+                    <i className="bi bi-github"></i> Log in with GitHub
+                  </MotionButton>
+                )}
+                <a href="/validate">
+                  <MotionButton className="mt-1 btn btn-outline-dark btn-lg me-3">
+                    <i className="bi bi-check2-circle me-1"></i>Validation
                   </MotionButton>
                 </a>
-              ) : (
-                <MotionButton className="btn btn-dark btn-lg me-3" onClick={() => login()}>
-                  <i className="bi bi-github"></i> Log in with GitHub
-                </MotionButton>
-              )}
-              <a href="/validate">
-                <MotionButton className="btn btn-outline-dark btn-lg me-3">
-                  <i className="bi bi-check2-circle me-1"></i>Validation
-                </MotionButton>
-              </a>
+              </div>
               <h4 className="mt-5">
                 Largest namespaces on PEPhub
                 <GenericTooltip
@@ -133,22 +98,31 @@ function Home() {
                 )}
               </div>
             </div>
-            <div className="col-6 align-items-center">
-              <div className="ms-5 mt-5">
+            <div className="col-lg-6 col-sm-12 align-items-center">
+              <div className="mt-5">
                 <div className="mb-1 d-flex flex-row align-items-center">
-                  <a className="ms-1 fw-bold" href="/example/landing">
-                    View this PEP now!
+                  <a href={'/databio/example'}>
+                    <button className="btn btn-dark bg-gradient btn-sm me-1">
+                      <i className="bi bi-eye me-1"></i>
+                      View PEP
+                    </button>
                   </a>
-                  <div className="bounce-x ms-2">
-                    <i className="bi bi-arrow-left ms-1"></i>
-                  </div>
+                  <a href={`${API_HOST}/api/v1/projects/databio/example`}>
+                    <button className="btn btn-dark bg-gradient btn-sm me-1">
+                      <i className="bi bi-download me-1"></i>
+                      Download JSON
+                    </button>
+                  </a>
+                  <button className="btn btn-dark bg-gradient btn-sm me-1">
+                    <img className="me-1" src="/github-branch-white.svg" height="15px" />
+                    Fork PEP
+                  </button>
+                  <button className="btn btn-dark bg-gradient btn-sm me-1">
+                    <i className="bi bi-check2-circle me-1"></i>
+                    Validate Schema
+                  </button>
                 </div>
-                <SampleTable
-                  className="remove-wtHider-shadow"
-                  minRows={12}
-                  data={samples}
-                  onChange={(s) => setSamples(s)}
-                />
+                <SampleTable className="remove-wtHider-shadow" minRows={9} data={exampleSamples?.items || []} />
               </div>
             </div>
           </div>
