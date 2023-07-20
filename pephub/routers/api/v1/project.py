@@ -231,17 +231,23 @@ async def delete_a_pep(
         raise HTTPException(
             status_code=404, detail=f"Project {namespace}/{project}:{tag} not found"
         )
-
-    agent.project.delete(namespace, project, tag=tag)
-
-    return JSONResponse(
+    
+    try:
+        agent.project.delete(namespace, project, tag=tag)
+        return JSONResponse(
         content={
-            "message": "PEP deleted",
+            "message": "PEP deleted.",
             "registry": f"{namespace}/{project}:{tag}",
         },
         status_code=202,
     )
 
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not delete PEP. Server error: {e}",
+        )
+    
 
 @project.get("/samples")
 async def get_pep_samples(
