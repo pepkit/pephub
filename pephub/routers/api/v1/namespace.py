@@ -228,7 +228,10 @@ async def upload_raw_pep(
         overwrite = project_from_json.overwrite
         pep_schema = project_from_json.pep_schema
         if hasattr(project_from_json, NAME_KEY):
-            name = project_from_json.name
+            if project_from_json.name:
+                name = project_from_json.name
+            else:
+                name = project_from_json.pep_dict.config.get(NAME_KEY)
         else:
             name = project_from_json.pep_dict.config.get(NAME_KEY)
         if hasattr(project_from_json, DESC_KEY):
