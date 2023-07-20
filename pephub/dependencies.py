@@ -416,7 +416,9 @@ def get_namespace_info(
 
 
 def verify_namespace_exists(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
-    if not agent.namespace.get(query=namespace):
+    try:
+        yield agent.namespace.get(query=namespace).results[0]
+    except IndexError:
         raise HTTPException(
             404,
             f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
