@@ -30,7 +30,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
     tableHeight = minRows * ROW_HEIGHT + 50;
   }
 
-  let tableClassName = 'rounded rounded-2';
+  let tableClassName = '';
   if (className) {
     tableClassName += ` ${className}`;
   }

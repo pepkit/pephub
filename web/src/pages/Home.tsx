@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React, { FC } from 'react';
 
+import { LandingPaths } from '../components/layout/landing-paths';
 import { PageLayout } from '../components/layout/page-layout';
 import { LandingInfoPlaceholder } from '../components/placeholders/landing-leaderboard';
 import { SampleTable } from '../components/tables/sample-table';
@@ -27,8 +28,6 @@ const MotionButton: FC<MotionButtonProps> = ({ children, className, onClick }) =
     {children}
   </motion.button>
 );
-
-const API_HOST = import.meta.env.VITE_API_HOST || '';
 
 function Home() {
   const { user, login } = useSession();
@@ -99,30 +98,21 @@ function Home() {
               </div>
             </div>
             <div className="col-lg-6 col-sm-12 align-items-center">
-              <div className="mt-5">
-                <div className="mb-1 d-flex flex-row align-items-center">
-                  <a href={'/databio/example'}>
-                    <button className="btn btn-dark bg-gradient btn-sm me-1">
-                      <i className="bi bi-eye me-1"></i>
-                      View PEP
-                    </button>
-                  </a>
-                  <a href={`${API_HOST}/api/v1/projects/databio/example`}>
-                    <button className="btn btn-dark bg-gradient btn-sm me-1">
-                      <i className="bi bi-download me-1"></i>
-                      Download JSON
-                    </button>
-                  </a>
-                  <button className="btn btn-dark bg-gradient btn-sm me-1">
-                    <img className="me-1" src="/github-branch-white.svg" height="15px" />
-                    Fork PEP
-                  </button>
-                  <button className="btn btn-dark bg-gradient btn-sm me-1">
-                    <i className="bi bi-check2-circle me-1"></i>
-                    Validate Schema
-                  </button>
+              <div className="mt-5 ms-5">
+                <div className="position-relative">
+                  <div className="mobile-gaurd">
+                    <LandingPaths />
+                  </div>
+                  <motion.div
+                    // fade in from below, subtly
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="landing-table shadow"
+                  >
+                    <SampleTable minRows={9} data={exampleSamples?.items || []} />
+                  </motion.div>
                 </div>
-                <SampleTable className="remove-wtHider-shadow" minRows={9} data={exampleSamples?.items || []} />
               </div>
             </div>
           </div>

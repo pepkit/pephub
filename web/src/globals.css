@@ -296,15 +296,40 @@
   border-bottom: '10px solid #343a40' !important;
 }
 
-.remove-wtHider-shadow {
-  .handsontable.wtHider {
-    box-shadow: none !important;
-  }
-}
-
 /* landing container full page height, but only on desktop */
 @media (min-width: 768px) {
   .h80 {
     height: 80vh;
+  }
+}
+
+.wtHolder {
+  overflow: hidden;
+  background-color: #f5f5f5;
+  box-shadow: 0 0 5px #ccc inset;
+}
+
+/* subtle glow animation */
+.landing-paths {
+  transform: translateY(-40%) translateX(-5%);
+}
+
+.landing-path-glow {
+  animation: glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    stroke: #7ab9fd;
+  }
+  to {
+    stroke: #007bff;
+  }
+}
+
+/* mobile gaurd - dont render if on iPad or smaller */
+@media (max-width: 768px) {
+  .mobile-gaurd {
+    display: none;
   }
 }

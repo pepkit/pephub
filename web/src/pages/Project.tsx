@@ -52,7 +52,8 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
 ));
 
 export const ProjectPage: FC = () => {
-  const { user, jwt } = useSession();
+  // user info
+  const { user, jwt, login } = useSession();
 
   let { namespace, project } = useParams();
   namespace = namespace?.toLowerCase();
@@ -61,6 +62,7 @@ export const ProjectPage: FC = () => {
   // get tag from url
   let [searchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
+  const fork = searchParams.get('fork');
 
   // fetch data
   const { data: projectInfo, isLoading: projectInfoIsLoading, error } = useProject(namespace, project || '', tag, jwt);
@@ -109,6 +111,17 @@ export const ProjectPage: FC = () => {
     setNewProjectSubsamples(projectSubsamples?.items || []);
   }, [projectConfig, projectSamples, projectSubsamples]);
 
+  // watch for the fork query param to open the fork modal
+  useEffect(() => {
+    if (fork) {
+      if (user) {
+        setShowForkPEPModal(true);
+      } else {
+        login();
+      }
+    }
+  }, [fork]);
+
   // check if config or samples are dirty
   const configIsDirty = newProjectConfig !== projectConfig?.config;
 
@@ -141,15 +154,15 @@ export const ProjectPage: FC = () => {
   const handleProjectChange = async () => {
     if (configIsDirty) {
       await configMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
     if (samplesIsDirty) {
       await sampleTableMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
     if (subsamplesIsDirty) {
       await subsampleTableMutation.mutateAsync();
-      runValidation(); 
+      runValidation();
     }
   };
 
@@ -185,9 +198,9 @@ export const ProjectPage: FC = () => {
             ) : null}
           </Breadcrumb>
           <div className="ms-2 mb-1">
-          <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
-            <SchemaTag schema={projectInfo?.pep_schema} />
-          </a>
+            <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
+              <SchemaTag schema={projectInfo?.pep_schema} />
+            </a>
           </div>
         </div>
         <div className="d-flex flex-row align-items-start btn-g">
