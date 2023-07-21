@@ -334,6 +334,20 @@
   }
 }
 
+.landing-icon-border {
+  border: 1px solid;
+  animation: border-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes border-glow {
+  from {
+    border-color: #7ab9fd;
+  }
+  to {
+    border-color: #0d6efd;
+  }
+}
+
 .top-left-landing-icon {
   position: absolute;
   bottom: 332px;
