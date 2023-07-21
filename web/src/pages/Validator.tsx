@@ -1,9 +1,16 @@
 import { FC } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { ValidatorForm } from '../components/forms/validator-form';
 import { PageLayout } from '../components/layout/page-layout';
 
 export const EidoValidator: FC = () => {
+  // get any potential defaults from the URL
+  const [params, setParams] = useSearchParams();
+
+  const pepRegistryPath = params.get('pepRegistryPath') || '';
+  const schemaRegistryPath = params.get('schemaRegistryPath') || '';
+
   return (
     <PageLayout
       title="Eido Validator"
@@ -13,7 +20,7 @@ export const EidoValidator: FC = () => {
         <img src="/eido_vertical.svg" height="75px" className="me-2" alt="Eido icon." />
         Universal Validator
       </h1>
-      <ValidatorForm />
+      <ValidatorForm defaultPepRegistryPath={pepRegistryPath} defaultSchemaRegistryPath={schemaRegistryPath} />
     </PageLayout>
   );
 };

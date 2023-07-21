@@ -53,7 +53,8 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
 ));
 
 export const ProjectPage: FC = () => {
-  const { user, jwt } = useSession();
+  // user info
+  const { user, jwt, login } = useSession();
 
   let { namespace, project } = useParams();
   namespace = namespace?.toLowerCase();
@@ -62,6 +63,7 @@ export const ProjectPage: FC = () => {
   // get tag from url
   let [searchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
+  const fork = searchParams.get('fork');
 
   // fetch data
   const { data: projectInfo, isLoading: projectInfoIsLoading, error } = useProject(namespace, project || '', tag, jwt);
@@ -109,6 +111,17 @@ export const ProjectPage: FC = () => {
     setNewProjectSamples(projectSamples?.items || []);
     setNewProjectSubsamples(projectSubsamples?.items || []);
   }, [projectConfig, projectSamples, projectSubsamples]);
+
+  // watch for the fork query param to open the fork modal
+  useEffect(() => {
+    if (fork) {
+      if (user) {
+        setShowForkPEPModal(true);
+      } else {
+        login();
+      }
+    }
+  }, [fork]);
 
   // check if config or samples are dirty
   const configIsDirty = newProjectConfig !== projectConfig?.config;

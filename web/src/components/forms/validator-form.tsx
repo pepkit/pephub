@@ -26,8 +26,13 @@ interface ValidatorFormInputs {
   schemaPaste?: string;
 }
 
-export const ValidatorForm: FC = () => {
-  const { user, jwt } = useSession();
+interface ValidatorFormProps {
+  defaultPepRegistryPath?: string;
+  defaultSchemaRegistryPath?: string;
+}
+
+export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, defaultSchemaRegistryPath }) => {
+  const { user, jwt, login } = useSession();
   const { data: projects } = useNamespaceProjects(user?.login, jwt || '', {});
   const { data: schemas } = useSchemas();
 
@@ -38,7 +43,22 @@ export const ValidatorForm: FC = () => {
     control,
     watch,
     formState: { isValid, isDirty },
-  } = useForm<ValidatorFormInputs>();
+  } = useForm<ValidatorFormInputs>({
+    defaultValues: {
+      pepRegistryPath: defaultPepRegistryPath
+        ? {
+            label: defaultPepRegistryPath || '',
+            value: defaultPepRegistryPath || '',
+          }
+        : null,
+      schemaRegistryPath: defaultSchemaRegistryPath
+        ? {
+            label: defaultSchemaRegistryPath || '',
+            value: defaultSchemaRegistryPath || '',
+          }
+        : null,
+    },
+  });
 
   const fileDialogRef = useRef<() => void | null>(null);
 
@@ -156,6 +176,24 @@ export const ValidatorForm: FC = () => {
                           label: `${project.namespace}/${project.name}:${project.tag}`,
                         })) || []
                       }
+                      noOptionsMessage={() => {
+                        if (user) {
+                          return (
+                            <span>
+                              No PEPs found in your namespace. <a href={`/${user.login}`}>Create a new PEP</a>.
+                            </span>
+                          );
+                        } else {
+                          return (
+                            <span>
+                              <span className="text-primary cursor-pointer" onClick={() => login()}>
+                                Log in
+                              </span>{' '}
+                              to see your PEPs.
+                            </span>
+                          );
+                        }
+                      }}
                     />
                   )}
                 />

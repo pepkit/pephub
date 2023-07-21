@@ -1,5 +1,4 @@
 import { FC, Fragment, useState } from 'react';
-import Badge from 'react-bootstrap/Badge';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useParams } from 'react-router-dom';
 
@@ -10,7 +9,6 @@ import { AddPEPModal } from '../components/modals/add-pep';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePageSearchBar } from '../components/namespace/search-bar';
-import { NamespaceInfoPlaceholder } from '../components/placeholders/namespace-info';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
 import { ProjectCard } from '../components/project/project-card';
 import { useNamespaceInfo } from '../hooks/queries/useNamespaceInfo';
@@ -100,7 +98,7 @@ export const NamespacePage: FC = () => {
         </div>
       </div>
       {/* Render info about the namespace */}
-      
+
       <>
         {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
           <p className="mb-0">
@@ -122,7 +120,7 @@ export const NamespacePage: FC = () => {
           <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
         </p>
       </>
-      
+
       {/* Render projects  in namespace */}
       <div className="my-3 border-bottom border-grey"></div>
       <NamespacePageSearchBar

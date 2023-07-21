@@ -296,8 +296,137 @@
   border-bottom: '10px solid #343a40' !important;
 }
 
-.remove-wtHider-shadow {
-  .handsontable.wtHider {
-    box-shadow: none !important;
+/* landing container full page height, but only on desktop */
+@media (min-width: 768px) {
+  .h80 {
+    height: 80vh;
+  }
+}
+
+.wtHolder {
+  overflow: hidden;
+  background-color: #f5f5f5;
+  box-shadow: 0 0 5px #ccc inset;
+}
+
+/* subtle glow animation */
+.landing-paths {
+  transform: translateY(-40%) translateX(-5%);
+}
+
+.landing-path-glow {
+  animation: glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    stroke: #7ab9fd;
+  }
+  to {
+    stroke: #007bff;
+  }
+}
+
+/* mobile gaurd - dont render if on iPad or smaller */
+@media (max-width: 768px) {
+  .mobile-gaurd {
+    display: none;
+  }
+}
+
+.top-left-landing-icon {
+  position: absolute;
+  bottom: 332px;
+  left: -22px;
+  width: 140px;
+  height: 50px;
+}
+
+.bottom-left-landing-icon {
+  position: absolute;
+  top: 338px;
+  left: -22px;
+  width: 140px;
+  height: 50px;
+}
+
+.top-right-landing-icon {
+  position: absolute;
+  bottom: 332px;
+  right: 37px;
+  width: 140px;
+  height: 50px;
+}
+
+.bottom-right-landing-icon {
+  position: absolute;
+  top: 338px;
+  right: 37px;
+  width: 140px;
+  height: 50px;
+}
+
+@media (max-width: 1398px) {
+  .top-left-landing-icon {
+    position: absolute;
+    bottom: 300px;
+    left: -30px;
+    width: 140px;
+    height: 50px;
+  }
+
+  .bottom-left-landing-icon {
+    position: absolute;
+    top: 305px;
+    left: -30px;
+    width: 140px;
+    height: 50px;
+  }
+
+  .top-right-landing-icon {
+    position: absolute;
+    bottom: 300px;
+    right: 30px;
+    width: 140px;
+    height: 50px;
+  }
+
+  .bottom-right-landing-icon {
+    position: absolute;
+    top: 305px;
+    right: 30px;
+    width: 140px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 1198px) {
+  .landing-paths {
+    height: 550px;
+    width: 510px;
+    transform: translateY(-41%) translateX(20px);
+  }
+}
+
+@media (max-width: 990px) {
+  .landing-paths {
+    display: none;
+  }
+
+  /*  icons disappear */
+  .top-left-landing-icon {
+    display: none !important;
+  }
+
+  .bottom-left-landing-icon {
+    display: none !important;
+  }
+
+  .top-right-landing-icon {
+    display: none !important;
+  }
+
+  .bottom-right-landing-icon {
+    display: none !important;
   }
 }
