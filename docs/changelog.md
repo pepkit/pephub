@@ -2,6 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.9.6] - 07-20-2023
+
+### Fixed
+
+- Upload raw project errors
+
+### Changed
+
+- More stylish landing page that exemplifies pephub features
+- Better error handling on queries
+
 ## [0.9.5] - 07-19-2023
 
 ### Fixed

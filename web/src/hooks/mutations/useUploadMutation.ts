@@ -3,6 +3,8 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { submitProjectFiles } from '../../api/namespace';
+import { extractError, extractErrorMessage } from '../../utils/etc';
+
 
 export const useUploadMutation = (
   namespace: string,
@@ -39,7 +41,13 @@ export const useUploadMutation = (
       toast.success('Project successfully uploaded!');
     },
     onError: (err: AxiosError) => {
-      toast.error(`Error uploading project! ${err}`);
+      // extract out error message if it exists, else unknown
+      const errorMessage = extractErrorMessage(err);
+      const error = extractError(err);
+      toast.error(`${errorMessage}: ${error}`, {
+        duration: 5000,
+      });
     },
+    
   });
 };

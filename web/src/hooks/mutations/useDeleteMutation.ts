@@ -4,6 +4,8 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { deleteProject } from '../../api/project';
+import { extractError, extractErrorMessage } from '../../utils/etc';
+
 
 export const useDeleteMutation = (
   namespace: string,
@@ -35,8 +37,13 @@ export const useDeleteMutation = (
         queryKey: [namespace],
       });
     },
-    onError: (error: AxiosError) => {
-      toast.error(`There was an error deleting the project: ${error}`);
+    onError: (err: AxiosError) => {
+      // extract out error message if it exists, else unknown
+      const errorMessage = extractErrorMessage(err);
+      const error = extractError(err);
+      toast.error(`${errorMessage}: ${error}`, {
+        duration: 5000,
+      });
     },
   });
 

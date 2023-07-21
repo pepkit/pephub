@@ -4,6 +4,8 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { forkProject } from '../../api/project';
+import { extractError, extractErrorMessage } from '../../utils/etc';
+
 
 export const useForkMutation = (
   namespace: string,
@@ -36,8 +38,13 @@ export const useForkMutation = (
       }
       navigate(`/${forkTo}/${forkName.toLowerCase()}?tag=${forkTag}`);
     },
-    onError: (error: AxiosError) => {
-      toast.error(`An error occurred: ${error}`);
+    onError: (err: AxiosError) => {
+      // extract out error message if it exists, else unknown
+      const errorMessage = extractErrorMessage(err);
+      const error = extractError(err);
+      toast.error(`${errorMessage}: ${error}`, {
+        duration: 5000,
+      });
     },
   });
 };

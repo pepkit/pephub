@@ -4,6 +4,8 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
 import { editTotalProject } from '../../api/project';
+import { extractError, extractErrorMessage } from '../../utils/etc';
+
 
 interface TotalProjectChangeMutationProps {
   config?: string;
@@ -26,8 +28,13 @@ export const useTotalProjectChangeMutation = (
       queryClient.invalidateQueries([namespace, project, tag]);
       toast.success('Successfully updated the project!');
     },
-    onError: (error: AxiosError) => {
-      toast.error(`Failed to update project: ${error}`);
+    onError: (err: AxiosError) => {
+        // extract out error message if it exists, else unknown
+        const errorMessage = extractErrorMessage(err);
+        const error = extractError(err);
+        toast.error(`${errorMessage}: ${error}`, {
+          duration: 5000,
+        });
     },
   });
 

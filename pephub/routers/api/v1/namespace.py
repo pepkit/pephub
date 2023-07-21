@@ -27,7 +27,11 @@ load_dotenv()
 namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"])
 
 
-@namespace.get("/", summary="Fetch details about a particular namespace.")
+@namespace.get(
+    "/",
+    summary="Fetch details about a particular namespace.",
+    dependencies=[Depends(verify_namespace_exists)],
+)
 async def get_namespace(
     request: Request,
     nspace: Namespace = Depends(get_namespace_info),
@@ -228,7 +232,10 @@ async def upload_raw_pep(
         overwrite = project_from_json.overwrite
         pep_schema = project_from_json.pep_schema
         if hasattr(project_from_json, NAME_KEY):
-            name = project_from_json.name
+            if project_from_json.name:
+                name = project_from_json.name
+            else:
+                name = project_from_json.pep_dict.config.get(NAME_KEY)
         else:
             name = project_from_json.pep_dict.config.get(NAME_KEY)
         if hasattr(project_from_json, DESC_KEY):
