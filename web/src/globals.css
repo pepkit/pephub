@@ -333,3 +333,100 @@
     display: none;
   }
 }
+
+.top-left-landing-icon {
+  position: absolute;
+  bottom: 332px;
+  left: -22px;
+  width: 140px;
+  height: 50px;
+}
+
+.bottom-left-landing-icon {
+  position: absolute;
+  top: 338px;
+  left: -22px;
+  width: 140px;
+  height: 50px;
+}
+
+.top-right-landing-icon {
+  position: absolute;
+  bottom: 332px;
+  right: 37px;
+  width: 140px;
+  height: 50px;
+}
+
+.bottom-right-landing-icon {
+  position: absolute;
+  top: 338px;
+  right: 37px;
+  width: 140px;
+  height: 50px;
+}
+
+@media (max-width: 1398px) {
+  .top-left-landing-icon {
+    position: absolute;
+    bottom: 300px;
+    left: -30px;
+    width: 140px;
+    height: 50px;
+  }
+
+  .bottom-left-landing-icon {
+    position: absolute;
+    top: 305px;
+    left: -30px;
+    width: 140px;
+    height: 50px;
+  }
+
+  .top-right-landing-icon {
+    position: absolute;
+    bottom: 300px;
+    right: 30px;
+    width: 140px;
+    height: 50px;
+  }
+
+  .bottom-right-landing-icon {
+    position: absolute;
+    top: 305px;
+    right: 30px;
+    width: 140px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 1198px) {
+  .landing-paths {
+    height: 550px;
+    width: 510px;
+    transform: translateY(-41%) translateX(20px);
+  }
+}
+
+@media (max-width: 990px) {
+  .landing-paths {
+    display: none;
+  }
+
+  /*  icons disappear */
+  .top-left-landing-icon {
+    display: none !important;
+  }
+
+  .bottom-left-landing-icon {
+    display: none !important;
+  }
+
+  .top-right-landing-icon {
+    display: none !important;
+  }
+
+  .bottom-right-landing-icon {
+    display: none !important;
+  }
+}

@@ -81,16 +81,9 @@ export const LandingPaths: FC = () => {
       >
         <a href={'/databio/example'}>
           <motion.div
-            className="fw-bold text-primary bg-gradient rounded shadow border bg-white border-primary cursor-pointer d-flex flex-row align-items-center justify-content-center"
+            className="bottom-right-landing-icon fw-bold text-primary bg-gradient rounded shadow border bg-white border-primary cursor-pointer d-flex flex-row align-items-center justify-content-center"
             // "sink in" on hover
             whileHover={{ scale: 1.05 }}
-            style={{
-              position: 'absolute',
-              top: '338px',
-              right: '37px',
-              width: '140px',
-              height: '50px',
-            }}
           >
             <i className="bi bi-eye-fill me-1"></i>
             View PEP
@@ -98,16 +91,9 @@ export const LandingPaths: FC = () => {
         </a>
         <a href="databio/example?fork=true">
           <motion.div
-            className="fw-bold text-primary bg-gradient rounded shadow border bg-white border-primary cursor-pointer d-flex flex-row align-items-center justify-content-center"
+            className="top-right-landing-icon fw-bold text-primary bg-gradient rounded shadow border bg-white border-primary cursor-pointer d-flex flex-row align-items-center justify-content-center"
             // "sink in" on hover
             whileHover={{ scale: 1.05 }}
-            style={{
-              position: 'absolute',
-              bottom: '332px',
-              right: '37px',
-              width: '140px',
-              height: '50px',
-            }}
           >
             <img src="/github-branch-primary.svg" height="20px" className="me-1" />
             Fork PEP
@@ -115,16 +101,10 @@ export const LandingPaths: FC = () => {
         </a>
         <a href={'/validate?pepRegistryPath=databio/example'}>
           <motion.div
-            className="fw-bold text-primary bg-gradient rounded shadow border bg-white border-primary cursor-pointer d-flex flex-row align-items-center justify-content-center"
+            className="bottom-left-landing-icon fw-bold text-primary bg-gradient rounded shadow border bg-white border-primary cursor-pointer d-flex flex-row align-items-center justify-content-center"
             // "sink in" on hover
             whileHover={{ scale: 1.05 }}
-            style={{
-              position: 'absolute',
-              top: '338px',
-              left: '-22px',
-              width: '140px',
-              height: '50px',
-            }}
+            style={{}}
           >
             <i className="bi bi-check2-circle me-1"></i>
             Validate PEP
@@ -132,16 +112,9 @@ export const LandingPaths: FC = () => {
         </a>
         <a href={`${API_HOST}/api/v1/projects/databio/example`}>
           <motion.div
-            className="fw-bold text-primary bg-gradient rounded shadow border bg-white border-primary cursor-pointer d-flex flex-row align-items-center justify-content-center"
+            className="top-left-landing-icon fw-bold text-primary bg-gradient rounded shadow border bg-white border-primary cursor-pointer d-flex flex-row align-items-center justify-content-center"
             // "sink in" on hover
             whileHover={{ scale: 1.05 }}
-            style={{
-              position: 'absolute',
-              bottom: '332px',
-              left: '-22px',
-              width: '140px',
-              height: '50px',
-            }}
           >
             <i className="bi bi-download me-1"></i>
             Get JSON
