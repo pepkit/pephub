@@ -38,6 +38,14 @@ async def get_a_pep(
 ):
     """
     Fetch a PEP from a certain namespace
+
+    Don't have a namespace or project? 
+
+    Use the following:
+
+        project: example
+        namespace: databio
+
     """
     if not isinstance(proj, peppy.Project):
         try:
@@ -93,6 +101,13 @@ async def update_a_pep(
 ):
     """
     Update a PEP from a certain namespace
+
+    Don't have a namespace or project? 
+
+    Use the following:
+
+        project: example
+        namespace: databio
     """
     # if not logged in, they cant update
     if namespace not in (list_of_admins or []):
@@ -255,6 +270,16 @@ async def get_pep_samples(
     format: Optional[str] = None,
     raw: Optional[bool] = False,
 ):
+    """
+    Get samples from a certain project and namespace
+
+    Don't have a namespace or project? 
+
+    Use the following:
+
+        project: example
+        namespace: databio
+    """
     if format is not None:
         conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
         if conversion_func is not None:
@@ -288,6 +313,16 @@ async def get_pep_samples(
     format: Optional[Literal["JSON", "String"]] = "JSON",
     raw: Optional[bool] = False,
 ):
+    """
+    Get project configuration file from a certain project and namespace
+
+    Don't have a namespace or project? 
+
+    Use the following:
+
+        project: example
+        namespace: databio
+    """
     if raw:
         proj_config = proj[CONFIG_KEY]
     else:
@@ -303,6 +338,17 @@ async def get_pep_samples(
 
 @project.get("/samples/{sample_name}")
 async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
+    """
+    Get a particular sample from a certain project and namespace
+
+    Don't have a sample name, namespace, or project? 
+
+    Use the following:
+
+        sample_name: 4-1_11102016
+        project: example
+        namespace: databio
+    """
     if sample_name not in get_project_sample_names(proj):
         raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
     sample = proj.get_sample(sample_name)
@@ -314,6 +360,16 @@ async def get_subsamples(
     proj: peppy.Project = Depends(get_project),
     download: bool = False,
 ):
+    """
+    Get subsamples from a certain project and namespace
+
+    Don't have a namespace, or project? 
+
+    Use the following:
+    
+        project: example
+        namespace: databio
+    """
     subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
     if subsamples is not None:
         try:
@@ -353,6 +409,14 @@ async def convert_pep(
 
     See, http://eido.databio.org/en/latest/filters/#convert-a-pep-into-an-alternative-format-with-a-filter
     for more information.
+
+    Don't have a namespace, or project? 
+
+    Use the following:
+    
+        project: example
+        namespace: databio
+
     """
     # default to basic
     if filter is None:
@@ -381,7 +445,17 @@ async def convert_pep(
 
 @project.get("/zip")
 async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
-    """Zip a pep"""
+    """
+    Zip a pep
+
+    Don't have a namespace, or project? 
+
+    Use the following:
+    
+        project: example
+        namespace: databio
+    
+    """
     return zip_pep(proj)
 
 
@@ -396,6 +470,12 @@ async def fork_pep_to_namespace(
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
+    """
+    Fork a project for a particular namespace you have write access to.
+
+    Don't know your namespace and/project? Log in to see.
+
+    """
     fork_to = fork_request.fork_to
     fork_name = fork_request.fork_name
     fork_tag = fork_request.fork_tag
