@@ -71,6 +71,14 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   // first row is the header row
   let headerRow = arraysList[0];
 
+  // look for null values, simply populate with the column name
+  headerRow = headerRow.map((cell, index) => {
+    if (!cell) {
+      return `column_${index + 1}`;
+    }
+    return cell;
+  });
+
   if (headerRow.every((cell) => !cell)) {
     toast.error('Header row cannot be empty! Please add at least one column name.');
     return [];
@@ -79,9 +87,6 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   // get the rest of the rows
   const theRest = arraysList.slice(1);
   const sampleList: Sample[] = [];
-
-  // restrict header row to only contain non-null values
-  headerRow = headerRow.filter((key) => key !== null && key !== undefined);
 
   // if there's only a header row, return a list with one sample where all the property values are null
   if (arraysAreEmpty(theRest)) {
