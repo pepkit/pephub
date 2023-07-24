@@ -309,6 +309,14 @@
   box-shadow: 0 0 5px #ccc inset;
 }
 
+/*  on mobile, remove all x-margins */
+@media screen and (max-width: 990px) {
+  .landing-table-container {
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+  }
+}
+
 /* subtle glow animation */
 .landing-paths {
   transform: translateY(-40%) translateX(-5%);
