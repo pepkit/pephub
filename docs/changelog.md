@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.9.7] - 07-24-2023
+
+### Fixed
+
+- sample table would exhibit odd, erratic behavior if column names were left blank
+- alnding page styling was not otpimal
+
 ## [0.9.6] - 07-20-2023
 
 ### Fixed

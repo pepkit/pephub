@@ -39,7 +39,7 @@ async def get_a_pep(
     """
     Fetch a PEP from a certain namespace
 
-    Don't have a namespace or project? 
+    Don't have a namespace or project?
 
     Use the following:
 
@@ -102,7 +102,7 @@ async def update_a_pep(
     """
     Update a PEP from a certain namespace
 
-    Don't have a namespace or project? 
+    Don't have a namespace or project?
 
     Use the following:
 
@@ -273,7 +273,7 @@ async def get_pep_samples(
     """
     Get samples from a certain project and namespace
 
-    Don't have a namespace or project? 
+    Don't have a namespace or project?
 
     Use the following:
 
@@ -316,7 +316,7 @@ async def get_pep_samples(
     """
     Get project configuration file from a certain project and namespace
 
-    Don't have a namespace or project? 
+    Don't have a namespace or project?
 
     Use the following:
 
@@ -341,7 +341,7 @@ async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project
     """
     Get a particular sample from a certain project and namespace
 
-    Don't have a sample name, namespace, or project? 
+    Don't have a sample name, namespace, or project?
 
     Use the following:
 
@@ -363,10 +363,10 @@ async def get_subsamples(
     """
     Get subsamples from a certain project and namespace
 
-    Don't have a namespace, or project? 
+    Don't have a namespace, or project?
 
     Use the following:
-    
+
         project: example
         namespace: databio
     """
@@ -410,10 +410,10 @@ async def convert_pep(
     See, http://eido.databio.org/en/latest/filters/#convert-a-pep-into-an-alternative-format-with-a-filter
     for more information.
 
-    Don't have a namespace, or project? 
+    Don't have a namespace, or project?
 
     Use the following:
-    
+
         project: example
         namespace: databio
 
@@ -448,13 +448,13 @@ async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
     """
     Zip a pep
 
-    Don't have a namespace, or project? 
+    Don't have a namespace, or project?
 
     Use the following:
-    
+
         project: example
         namespace: databio
-    
+
     """
     return zip_pep(proj)
 

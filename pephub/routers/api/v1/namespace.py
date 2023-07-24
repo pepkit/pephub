@@ -39,7 +39,7 @@ async def get_namespace(
     """
     Fetch namespace. Returns a JSON representation of the namespace.
 
-    Don't have a namespace? 
+    Don't have a namespace?
 
     Use the following:
 
@@ -67,7 +67,7 @@ async def get_namespace_projects(
     """
     Fetch the projects for a particular namespace
 
-    Don't have a namespace? 
+    Don't have a namespace?
 
     Use the following:
 
