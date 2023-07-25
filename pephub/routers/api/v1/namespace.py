@@ -30,7 +30,7 @@ namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"
 @namespace.get(
     "/",
     summary="Fetch details about a particular namespace.",
-    dependencies=[Depends(verify_namespace_exists)],
+    # dependencies=[Depends(verify_namespace_exists)],
 )
 async def get_namespace(
     request: Request,
