@@ -30,7 +30,7 @@ namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"
 @namespace.get(
     "/",
     summary="Fetch details about a particular namespace.",
-    dependencies=[Depends(verify_namespace_exists)],
+    # dependencies=[Depends(verify_namespace_exists)],
 )
 async def get_namespace(
     request: Request,
@@ -38,6 +38,12 @@ async def get_namespace(
 ):
     """
     Fetch namespace. Returns a JSON representation of the namespace.
+
+    Don't have a namespace?
+
+    Use the following:
+
+        namespace: databio
     """
     nspace = nspace.dict()
     nspace["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
@@ -60,6 +66,12 @@ async def get_namespace_projects(
 ):
     """
     Fetch the projects for a particular namespace
+
+    Don't have a namespace?
+
+    Use the following:
+
+        namespace: databio
     """
 
     # TODO, this API will change. Searching
@@ -118,6 +130,12 @@ async def create_pep(
     ),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
+    """
+    Create a PEP for a particular namespace you have write access to.
+
+    Don't know your namespace? Log in to see.
+
+    """
     if files is not None:
         init_file = parse_user_file_upload(files)
         init_file, other_files = split_upload_files_on_init_file(files, init_file)
@@ -226,6 +244,12 @@ async def upload_raw_pep(
     project_from_json: ProjectJsonRequest,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
+    """
+    Upload a raw project for a particular namespace you have write access to.
+
+    Don't know your namespace? Log in to see.
+
+    """
     try:
         is_private = project_from_json.is_private
         tag = project_from_json.tag

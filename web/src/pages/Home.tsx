@@ -66,7 +66,7 @@ function Home() {
                   </MotionButton>
                 )}
                 <a href="/validate">
-                  <MotionButton className="mt-1 btn btn-outline-dark btn-lg me-3">
+                  <MotionButton className="btn btn-outline-dark btn-lg me-3">
                     <i className="bi bi-check2-circle me-1"></i>Validation
                   </MotionButton>
                 </a>
@@ -98,7 +98,7 @@ function Home() {
               </div>
             </div>
             <div className="col-lg-6 col-sm-12 align-items-center">
-              <div className="mt-5 ms-5">
+              <div className="mt-5 ms-5 landing-table-container">
                 <div className="position-relative">
                   <div className="mobile-gaurd">
                     <LandingPaths />

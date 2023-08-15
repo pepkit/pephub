@@ -9,6 +9,7 @@ from fastapi import UploadFile, Form, APIRouter
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from typing import List, Tuple
+from pepdbagent.utils import registry_path_converter
 
 from ...helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...dependencies import *
@@ -79,9 +80,8 @@ async def validate(
         )
 
     if pep_registry is not None:
-        # split into namespace, name, tag
-        namespace, name_tag = pep_registry.split("/")
-        name, tag = name_tag.split(":")
+        namespace, name, tag = registry_path_converter(pep_registry)
+        tag = tag or DEFAULT_TAG
         p = agent.project.get(namespace, name, tag)
     else:
         init_file = parse_user_file_upload(pep_files)
