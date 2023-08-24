@@ -65,7 +65,10 @@ async def get_namespace_projects(
     namespace_access: List[str] = Depends(get_namespace_access_list),
     order_by: str = "update_date",
     order_desc: bool = False,
-    filter_by: Annotated[Optional[Literal["submission_date", "last_update_date"]], "filter projects by submission or update date"] = None,
+    filter_by: Annotated[
+        Optional[Literal["submission_date", "last_update_date"]],
+        "filter projects by submission or update date",
+    ] = None,
     filter_start_date: Annotated[Optional[str], "Date format: YYYY/MM/DD"] = None,
     filter_end_date: Annotated[Optional[str], "Date format: YYYY/MM/DD"] = None,
 ):
