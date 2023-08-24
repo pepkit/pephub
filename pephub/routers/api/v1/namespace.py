@@ -8,6 +8,8 @@ from peppy.const import DESC_KEY, NAME_KEY
 from pepdbagent.exceptions import ProjectUniqueNameError
 from pepdbagent.const import DEFAULT_LIMIT_INFO
 from pepdbagent.models import ListOfNamespaceInfo
+from typing import Literal
+from typing_extensions import Annotated
 
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
@@ -63,6 +65,9 @@ async def get_namespace_projects(
     namespace_access: List[str] = Depends(get_namespace_access_list),
     order_by: str = "update_date",
     order_desc: bool = False,
+    filter_by: Annotated[Optional[Literal["submission_date", "last_update_date"]], "filter projects by submission or update date"] = None,
+    filter_start_date: Annotated[Optional[str], "Date format: YYYY/MM/DD"] = None,
+    filter_end_date: Annotated[Optional[str], "Date format: YYYY/MM/DD"] = None,
 ):
     """
     Fetch the projects for a particular namespace
@@ -86,6 +91,9 @@ async def get_namespace_projects(
             admin=namespace_access,
             order_by=order_by,
             order_desc=order_desc,
+            filter_by=filter_by,
+            filter_start_date=filter_start_date,
+            filter_end_date=filter_end_date,
         )
     else:
         search_result = agent.annotation.get(
@@ -95,6 +103,9 @@ async def get_namespace_projects(
             admin=namespace_access,
             order_by=order_by,
             order_desc=order_desc,
+            filter_by=filter_by,
+            filter_start_date=filter_start_date,
+            filter_end_date=filter_end_date,
         )
     results = [p.dict() for p in search_result.results]
 
