@@ -2,15 +2,23 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+# [0.10.1] - 08-30-2023
+
+### Changed
+
+- Add opengraph image link
+
 # [0.10.0] - 08-24-2023
+
 ### Added
+
 - Date filter to project annotation endpoint
 
 ## [0.9.9] - 08-22-2023
 
 ### Changed
 
-- schema tag URL to route to schema splash page 
+- schema tag URL to route to schema splash page
 
 ## [0.9.8] - 07-24-2023
 
