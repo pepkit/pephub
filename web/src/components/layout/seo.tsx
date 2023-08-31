@@ -11,7 +11,7 @@ export const SEO: FC<Props> = ({ title, description, image }) => {
   const pageTitle = title || 'PEPhub';
   const pageDescription =
     description || 'PEPhub is a web interface, API, and database to store and manage biological metadata.';
-  const pageImage = image || '/og-image.png';
+  const pageImage = image || 'https://github.com/pepkit/pephub/assets/41063083/d195244b-bc2c-4c17-9e4c-87e7e867bb9c';
   const pageUrl = 'https://pephub.databio.org/';
   const pageType = 'website';
   return (
