@@ -192,6 +192,8 @@ export const ProjectPage: FC = () => {
     );
   }
 
+  const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
+
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       {/* breadcrumbs */}
@@ -208,7 +210,7 @@ export const ProjectPage: FC = () => {
             ) : null}
           </Breadcrumb>
           <div className="ms-2 mb-1">
-            <a className="text-decoration-none" href={`https://schema.databio.org/${projectInfo?.pep_schema}.yaml`}>
+            <a className="text-decoration-none" href={`https://schema.databio.org/#/${projectHash}`}>
               <SchemaTag schema={projectInfo?.pep_schema} />
             </a>
           </div>

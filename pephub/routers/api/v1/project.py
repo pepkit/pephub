@@ -125,7 +125,7 @@ async def update_a_pep(
     # sample table update
     if updated_project.sample_table is not None:
         new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
-        new_raw_project[CONFIG_KEY] = current_project.config.to_dict()
+        new_raw_project[CONFIG_KEY] = dict(current_project.config)
 
     # subsample table update
     if updated_project.subsample_tables is not None:

@@ -22,14 +22,14 @@ export const LandingPaths: FC = () => {
           className="landing-path-glow"
           d="M300,10 Q275,10 275,35 L275,615 Q275,640 300,640"
           stroke="#3b82f6"
-          stroke-width="3"
+          strokeWidth="3"
           fill="none"
         />
         <path
           className="landing-path-glow"
           d="M100,10 Q125,10 125,35 L125,615 Q125,640 100,640"
           stroke="#3b82f6"
-          stroke-width="3"
+          strokeWidth="3"
           fill="none"
         />
         <line
@@ -39,7 +39,7 @@ export const LandingPaths: FC = () => {
           y2="10"
           x2="400"
           stroke="#3b82f6"
-          stroke-width="3"
+          strokeWidth="3"
           fill="none"
         />
         <line
@@ -49,7 +49,7 @@ export const LandingPaths: FC = () => {
           y2="640"
           x2="400"
           stroke="#3b82f6"
-          stroke-width="3"
+          strokeWidth="3"
           fill="none"
         />
         <line
@@ -59,7 +59,7 @@ export const LandingPaths: FC = () => {
           y2="10"
           x2="0"
           stroke="#3b82f6"
-          stroke-width="3"
+          strokeWidth="3"
           fill="none"
         />
         <line
@@ -69,7 +69,7 @@ export const LandingPaths: FC = () => {
           y2="640"
           x2="0"
           stroke="#3b82f6"
-          stroke-width="3"
+          strokeWidth="3"
           fill="none"
         />
       </motion.svg>
