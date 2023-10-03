@@ -9,6 +9,7 @@ from os.path import exists, basename
 from yaml import safe_load
 import zipfile
 import io
+import yaml
 
 import peppy
 from peppy.const import SAMPLE_DF_KEY
@@ -130,20 +131,24 @@ def zip_pep(project: peppy.Project) -> Response:
     if project.config:
         prj_cof_file = project.config_file or "config.yaml"
         cfg_filename_base = basename(prj_cof_file)
-        content_to_zip[cfg_filename_base] = project.config.to_yaml()
+        content_to_zip[cfg_filename_base] = yaml.dump(project.config, indent=4)
 
     if project.sample_table is not None:
         sample_table_filename = basename(
             project.to_dict().get("sample_table", "sample_table.csv")
         )
-        content_to_zip[sample_table_filename] = project[SAMPLE_DF_KEY].to_csv()
+        content_to_zip[sample_table_filename] = project[SAMPLE_DF_KEY].to_csv(
+            index=False
+        )
 
     if project.subsample_table is not None:
         if not isinstance(project.subsample_table, list):
             subsample_table_filename = basename(
                 project.to_dict().get("subsample_table", "subsample_table.csv")
             )
-            content_to_zip[subsample_table_filename] = project.subsample_table.to_csv()
+            content_to_zip[subsample_table_filename] = project.subsample_table.to_csv(
+                index=False
+            )
         else:
             subsample_table_filenames = project.to_dict().get(
                 "subsample_table", "subsample_table.csv"
@@ -152,7 +157,7 @@ def zip_pep(project: peppy.Project) -> Response:
                 project.subsample_table, subsample_table_filenames
             ):
                 subsample_table_filename = basename(sstable_filename)
-                content_to_zip[subsample_table_filename] = sstable.to_csv()
+                content_to_zip[subsample_table_filename] = sstable.to_csv(index=False)
 
     zip_filename = project.name or f"downloaded_pep_{date.today()}"
     return zip_conv_result(content_to_zip, filename=zip_filename)

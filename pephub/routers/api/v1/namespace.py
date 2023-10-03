@@ -1,31 +1,51 @@
 import tempfile
 import shutil
 
-import peppy
 from fastapi import APIRouter, File, UploadFile, Request, Depends, Form, Body
 from fastapi.responses import JSONResponse
 from peppy import Project
+from peppy.const import DESC_KEY, NAME_KEY
 from pepdbagent.exceptions import ProjectUniqueNameError
+from pepdbagent.const import DEFAULT_LIMIT_INFO
+from pepdbagent.models import ListOfNamespaceInfo
+from typing import Literal
+from typing_extensions import Annotated
 
 from ....dependencies import *
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
-from ....const import DEFAULT_TAG, BLANK_PEP_CONFIG, BLANK_PEP_SAMPLE_TABLE
+from ....const import (
+    DEFAULT_TAG,
+    BLANK_PEP_CONFIG,
+    BLANK_PEP_SAMPLE_TABLE,
+    DEFAULT_PEP_SCHEMA,
+)
 from ...models import ProjectRawModel, ProjectJsonRequest
 
 from dotenv import load_dotenv
+from .base import api
 
 load_dotenv()
 
 namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"])
 
 
-@namespace.get("/", summary="Fetch details about a particular namespace.")
+@namespace.get(
+    "/",
+    summary="Fetch details about a particular namespace.",
+    # dependencies=[Depends(verify_namespace_exists)],
+)
 async def get_namespace(
     request: Request,
     nspace: Namespace = Depends(get_namespace_info),
 ):
     """
     Fetch namespace. Returns a JSON representation of the namespace.
+
+    Don't have a namespace?
+
+    Use the following:
+
+        namespace: databio
     """
     nspace = nspace.dict()
     nspace["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
@@ -43,9 +63,23 @@ async def get_namespace_projects(
     session_info: dict = Depends(read_authorization_header),
     user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
+    order_by: str = "update_date",
+    order_desc: bool = False,
+    filter_by: Annotated[
+        Optional[Literal["submission_date", "last_update_date"]],
+        "filter projects by submission or update date",
+    ] = None,
+    filter_start_date: Annotated[Optional[str], "Date format: YYYY/MM/DD"] = None,
+    filter_end_date: Annotated[Optional[str], "Date format: YYYY/MM/DD"] = None,
 ):
     """
     Fetch the projects for a particular namespace
+
+    Don't have a namespace?
+
+    Use the following:
+
+        namespace: databio
     """
 
     # TODO, this API will change. Searching
@@ -58,15 +92,25 @@ async def get_namespace_projects(
             limit=limit,
             offset=offset,
             admin=namespace_access,
+            order_by=order_by,
+            order_desc=order_desc,
+            filter_by=filter_by,
+            filter_start_date=filter_start_date,
+            filter_end_date=filter_end_date,
         )
     else:
         search_result = agent.annotation.get(
-            namespace=namespace, limit=limit, offset=offset, admin=namespace_access
+            namespace=namespace,
+            limit=limit,
+            offset=offset,
+            admin=namespace_access,
+            order_by=order_by,
+            order_desc=order_desc,
+            filter_by=filter_by,
+            filter_start_date=filter_start_date,
+            filter_end_date=filter_end_date,
         )
     results = [p.dict() for p in search_result.results]
-
-    # sort by last_update_date
-    results = sorted(results, key=lambda x: x["last_update_date"], reverse=True)
 
     return JSONResponse(
         content={
@@ -90,15 +134,22 @@ async def get_namespace_projects(
 )
 async def create_pep(
     namespace: str,
-    project_name: str = Form(...),
+    name: str = Form(...),
     is_private: bool = Form(False),
     tag: str = Form(DEFAULT_TAG),
     description: Union[str, None] = Form(None),
+    pep_schema: str = Form(DEFAULT_PEP_SCHEMA),
     files: Optional[List[UploadFile]] = File(
         None  # let the file upload be optional. dont send a file? We instantiate with blank
     ),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
+    """
+    Create a PEP for a particular namespace you have write access to.
+
+    Don't know your namespace? Log in to see.
+
+    """
     if files is not None:
         init_file = parse_user_file_upload(files)
         init_file, other_files = split_upload_files_on_init_file(files, init_file)
@@ -117,15 +168,18 @@ async def create_pep(
                         shutil.copyfileobj(upload_file.file, local_tmpf)
 
             p = Project(f"{dirpath}/{init_file.filename}")
-            p.name = project_name
+            p.name = name
             p.description = description
+            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
                     namespace=namespace,
-                    name=project_name,
+                    name=name,
                     tag=tag,
+                    description=description,
                     is_private=is_private,
+                    pep_schema=pep_schema,
                 )
             except ProjectUniqueNameError as e:
                 return JSONResponse(
@@ -139,11 +193,11 @@ async def create_pep(
             return JSONResponse(
                 content={
                     "namespace": namespace,
-                    "project_name": project_name,
+                    "name": name,
                     "proj": p.to_dict(),
                     "init_file": init_file.filename,
                     "tag": tag,
-                    "registry_path": f"{namespace}/{project_name}:{tag}",
+                    "registry_path": f"{namespace}/{name}:{tag}",
                 },
                 status_code=202,
             )
@@ -162,13 +216,14 @@ async def create_pep(
 
             # init project
             p = Project(f"{dirpath}/{config_file_name}")
-            p.name = project_name
+            p.name = name
             p.description = description
+            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
                     namespace=namespace,
-                    name=project_name,
+                    name=name,
                     tag=tag,
                     is_private=is_private,
                 )
@@ -184,10 +239,10 @@ async def create_pep(
             return JSONResponse(
                 content={
                     "namespace": namespace,
-                    "project_name": project_name,
+                    "name": name,
                     "proj": p.to_dict(),
                     "tag": tag,
-                    "registry_path": f"{namespace}/{project_name}:{tag}",
+                    "registry_path": f"{namespace}/{name}:{tag}",
                 },
                 status_code=202,
             )
@@ -203,14 +258,36 @@ async def upload_raw_pep(
     project_from_json: ProjectJsonRequest,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
+    """
+    Upload a raw project for a particular namespace you have write access to.
+
+    Don't know your namespace? Log in to see.
+
+    """
     try:
         is_private = project_from_json.is_private
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
+        pep_schema = project_from_json.pep_schema
+        if hasattr(project_from_json, NAME_KEY):
+            if project_from_json.name:
+                name = project_from_json.name
+            else:
+                name = project_from_json.pep_dict.config.get(NAME_KEY)
+        else:
+            name = project_from_json.pep_dict.config.get(NAME_KEY)
+        if hasattr(project_from_json, DESC_KEY):
+            description = project_from_json.description
+        else:
+            description = project_from_json.pep_dict.config.get(DESC_KEY)
 
         # This configurations needed due to Issue #124 Should be removed in the future
         project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
-        p_project = peppy.Project().from_dict(project_dict.dict(by_alias=True))
+        ff = project_dict.dict(by_alias=True)
+        p_project = peppy.Project().from_dict(ff)
+
+        p_project.name = name
+        p_project.description = description
 
     except Exception as e:
         return JSONResponse(
@@ -227,8 +304,10 @@ async def upload_raw_pep(
             namespace=namespace,
             name=p_project.name,
             tag=tag,
+            description=description,
             is_private=is_private,
             overwrite=overwrite,
+            pep_schema=pep_schema,
         )
     except ProjectUniqueNameError:
         return JSONResponse(
@@ -242,9 +321,21 @@ async def upload_raw_pep(
     return JSONResponse(
         content={
             "namespace": namespace,
-            "project_name": p_project.name,
+            "name": p_project.name,
             "tag": tag,
             "registry_path": f"{namespace}/{p_project.name}:{tag}",
         },
         status_code=202,
     )
+
+
+@api.get(
+    "/namespace/info",
+    summary="Get information list of biggest namespaces",
+    tags=["namespace"],
+)
+async def get_namespace_information(
+    limit: Optional[int] = DEFAULT_LIMIT_INFO,
+    agent: PEPDatabaseAgent = Depends(get_db),
+) -> ListOfNamespaceInfo:
+    return agent.namespace.info(limit=limit)

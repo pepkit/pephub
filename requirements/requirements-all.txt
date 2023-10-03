@@ -8,8 +8,8 @@ python-multipart>=0.0.5
 tqdm
 uvicorn
 python-dotenv
-pepdbagent
-peppy
+pepdbagent>=0.6.0
+peppy>=0.40.0a4
 qdrant-client
 requests
 aiofiles

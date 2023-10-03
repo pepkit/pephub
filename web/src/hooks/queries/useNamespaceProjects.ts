@@ -1,5 +1,6 @@
-import { PaginationParams } from '../../api/namespace';
 import { useQuery } from '@tanstack/react-query';
+
+import { PaginationParams } from '../../api/namespace';
 import { getNamespaceProjects } from '../../api/namespace';
 
 export const useNamespaceProjects = (namespace: string | undefined, token: string | null, params: PaginationParams) => {

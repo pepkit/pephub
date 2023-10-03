@@ -2,6 +2,195 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+# [0.10.4] - 10-02-2023
+
+### Fixed
+
+- PEP zip downloading
+
+# [0.10.3] - 08-31-2023
+
+### Changed
+
+- Add support for twitter cards, change some things.
+
+# [0.10.2] - 08-31-2023
+
+### Changed
+
+- Changed image link for open graph image
+
+# [0.10.1] - 08-30-2023
+
+### Changed
+
+- Add opengraph image link
+
+# [0.10.0] - 08-24-2023
+
+### Added
+
+- Date filter to project annotation endpoint
+
+## [0.9.9] - 08-22-2023
+
+### Changed
+
+- schema tag URL to route to schema splash page
+
+## [0.9.8] - 07-24-2023
+
+### Fixed
+
+- cant add a PEP to a namespace if you don't have any to begin with
+
+## [0.9.7] - 07-24-2023
+
+### Fixed
+
+- sample table would exhibit odd, erratic behavior if column names were left blank
+- alnding page styling was not otpimal
+
+## [0.9.6] - 07-20-2023
+
+### Fixed
+
+- Upload raw project errors
+
+### Changed
+
+- More stylish landing page that exemplifies pephub features
+- Better error handling on queries
+
+## [0.9.5] - 07-19-2023
+
+### Fixed
+
+- Changing sample_name error
+
+### Added
+
+- Landing sample table
+- UI tweaks
+- About page (In progress)
+- Sample, subsample, config update simultaneously when saved
+
+### Changed
+
+- Landing page
+
+## [0.9.4] - 07-18-2023
+
+### Fixed
+
+- Typo in tooltip for search bar
+
+### Added
+
+- Tooltip on landing page namespace list
+
+### Changed
+
+- Styling of landing namespaces to more clearly indicate they are links
+
+## [0.9.3] - 07-17-2023
+
+### Changed
+
+- Styling updates
+- Landing tooltips
+- Minor UI updates
+
+## [0.9.2] - 07-12-2023
+
+### Fixed
+
+- validating was not firing when updating sample table, subsample table, or config
+
+### Added
+
+- github organizations UI visibility
+- schema tag has link to schema
+
+## [0.9.1] - 07-11-2023
+
+### Fixed
+
+- forking was broken
+- order in config file was incorrect
+
+### Added
+
+- config endpoint
+
+## [0.9.0] - 07-05-2023
+
+### Fixed
+
+- description updating was broken
+- strip markdown in description of projects in project list
+- sample table stability updates
+
+### Added
+
+- better authentication awareness, app now checks for login status on every render, removes session if no longer valid
+- added basic subsample table editing
+- better validation error messages for universal validator
+
+## [0.8.4] - 06-21-2023
+
+### Fixed
+
+- lots of sample table editing bugs
+- sample table editing now works as expected
+- logging in sent you to the homepage no matter what
+
+### Changed
+
+- authentication uses `localStorage` instead of browser cookies
+- forking a PEP brings in the description of the PEP
+- landing page changes
+
+## [0.8.3] - 06-11-2023
+
+### Fixed
+
+- schema validation error causing crash in production.
+
+## [0.8.2] - 06-11-2023
+
+### Fixed
+
+- Dockerfile build error due to missing `gcc` dependency.
+
+## [0.8.1] - 06-11-2023
+
+### Fixed
+
+- Dockerfile build error due to `psycopg2` issue.
+
+## [0.8.0] - 06-09-2023
+
+### Fixed
+
+- Sample table editing had bugs
+- Width of sample table was incorrect
+- Not found projects would load forever
+- Case-sensitivity was causing errors
+- Search links were not working
+
+### Added
+
+- Interface updated to support new features
+- Markdwon support for PEPs
+- Assign schemas to PEPs
+- Ability to sort PEPs on namespace page
+- Database setup is now streamlined
+
+### Removed
+
+- `cli` is now deprecated
+
 ## [0.7.4] - 2022-04-15
 
 ### Fixed

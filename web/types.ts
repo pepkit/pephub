@@ -8,6 +8,11 @@ export interface ProjectAnnotation {
   last_update_date: string;
   submission_date: string;
   digest: string;
+  pep_schema: string;
+}
+
+export interface ProjectConfigResponse {
+  config: string;
 }
 
 export interface User {
@@ -48,7 +53,7 @@ export interface User {
 }
 
 export interface Sample {
-  [key: string]: string;
+  [key: string]: string | null;
 }
 
 export interface Project {
@@ -66,6 +71,7 @@ export interface Project {
   samples: Sample[];
   sample_table_indx: string;
   sample_attributes: string[];
+  pep_schema: string;
 }
 
 export interface SearchHit {
@@ -81,16 +87,23 @@ export interface SearchHit {
 
 export interface Schema {
   description: string;
-  type: string;
+  version: string;
   properties: object;
-  required?: string[];
+  required: string[];
 }
 
+// SchemaResults is a list of Schemas
 export interface SchemaResults {
-  registry: Schema;
+  [key: string]: Schema;
 }
 
 export interface ValidationResult {
   valid: boolean;
-  errors: string;
+  error_type: string;
+  errors: string[];
+}
+
+export interface BiggestNamespaceResults {
+  namespace: string;
+  number_of_projects: number;
 }

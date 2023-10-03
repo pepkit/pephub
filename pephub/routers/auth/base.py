@@ -4,7 +4,7 @@ import jinja2
 import requests
 import time
 from typing import Union
-from fastapi import APIRouter, Request, Header, BackgroundTasks
+from fastapi import APIRouter, Request, Header, BackgroundTasks, Depends
 from fastapi.responses import RedirectResponse, Response
 from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
@@ -15,6 +15,7 @@ from ...dependencies import (
     CLIAuthSystem,
     generate_random_auth_code,
     generate_random_device_code,
+    read_authorization_header,
 )
 
 from ...helpers import build_authorization_url
@@ -67,12 +68,16 @@ def delete_device_code_after(code: str, expiration: int = AUTH_CODE_EXPIRATION):
 
 
 @auth.get("/login", response_class=RedirectResponse)
-def login(client_redirect_uri: Union[str, None] = None):
+def login(
+    client_redirect_uri: Union[str, None] = None,
+    client_finally_send_to: Union[str, None] = None,
+):
     """
     Redirects to log user in to GitHub. GitHub will pass a code to the callback URL.
     """
     state = {
         "client_redirect_uri": client_redirect_uri,
+        "client_finally_send_to": client_finally_send_to,
         "secret": JWT_SECRET,
     }
     authorization_url = build_authorization_url(
@@ -152,7 +157,14 @@ def callback(
     # or to a basic login success page.
     # add token as query param
     if client_redirect_uri:
-        send_to = client_redirect_uri + f"?code={auth_code}"
+        # add client_finally_send_to as query param if it exists
+        if state.get("client_finally_send_to"):
+            send_to = (
+                client_redirect_uri
+                + f"?code={auth_code}&client_finally_send_to={state['client_finally_send_to']}"
+            )
+        else:
+            send_to = client_redirect_uri + f"?code={auth_code}"
     else:
         send_to = f"/auth/login/success?code={auth_code}"
     return RedirectResponse(url=send_to, status_code=302)
@@ -248,3 +260,13 @@ def login_success(request: Request):
     return templates.TemplateResponse(
         "login_success_default.html", {"request": request}
     )
+
+
+@auth.get("/session")
+def get_session_from_jwt(
+    session_info: Union[dict, None] = Depends(read_authorization_header)
+):
+    if session_info:
+        return session_info
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")

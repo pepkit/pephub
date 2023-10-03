@@ -1,27 +1,31 @@
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { useSession } from '../../hooks/useSession';
-import { FileDropZone } from './components/file-dropzone';
-import { FC, useRef } from 'react';
-import { popFileFromFileList } from '../../utils/dragndrop';
-import { submitProjectFiles } from '../../api/namespace';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@hookform/error-message';
-import { toast } from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { FC, useRef } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+
+import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
+import { useSession } from '../../hooks/useSession';
+import { popFileFromFileList } from '../../utils/dragndrop';
+import { GitHubAvatar } from '../badges/github-avatar';
+import { FileDropZone } from './components/file-dropzone';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface FromFileInputs {
   is_private: boolean;
   namespace: string;
-  project_name: string;
+  name: string;
   tag: string;
   description: string;
   files: FileList;
+  pep_schema: string;
 }
 
 interface Props {
   onHide: () => void;
+  defaultNamespace?: string;
 }
 
-export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
+export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user info
   const { user, jwt } = useSession();
 
@@ -29,48 +33,46 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
   const {
     reset: resetForm,
     register,
-    handleSubmit,
     control,
     watch,
+    setValue,
     formState: { isValid, errors },
-  } = useForm<FromFileInputs>();
-
-  const uploadFiles = watch('files');
-  const namespaceToUpload = watch('namespace');
-  const fileDialogRef = useRef<() => void | null>(null);
-
-  // instantiate query client
-  const queryClient = useQueryClient();
-
-  // function to handle submitting a project
-  const onSubmit: SubmitHandler<FromFileInputs> = (data) => {
-    return submitProjectFiles(
-      {
-        namespace: data.namespace,
-        project_name: data.project_name,
-        tag: data.tag,
-        is_private: data.is_private,
-        description: data.description,
-        files: data.files,
-      },
-      jwt || '',
-    );
-  };
-
-  const mutation = useMutation({
-    mutationFn: () => handleSubmit(onSubmit)(),
-    onSuccess: () => {
-      queryClient.invalidateQueries([namespaceToUpload]);
-      toast.success('Project successully uploaded!');
-      onHide();
-    },
-    onError: (err) => {
-      toast.error(`Error uploading project! ${err}`);
+  } = useForm<FromFileInputs>({
+    defaultValues: {
+      is_private: false,
+      pep_schema: 'pep/2.1.0',
+      namespace: defaultNamespace || user?.login || '',
     },
   });
 
+  const uploadFiles = watch('files');
+  const namespace = watch('namespace');
+  const projectName = watch('name');
+  const tag = watch('tag');
+  const description = watch('description');
+  const isPrivate = watch('is_private');
+  const pepSchema = watch('pep_schema');
+  const fileDialogRef = useRef<() => void | null>(null);
+
+  const onSuccess = () => {
+    resetForm({}, { keepValues: false });
+    onHide();
+  };
+
+  const mutation = useUploadMutation(
+    namespace,
+    projectName,
+    tag,
+    isPrivate,
+    description,
+    uploadFiles,
+    pepSchema,
+    jwt || '',
+    onSuccess,
+  );
+
   return (
-    <form id="new-project-form" className="border-0 form-control" onSubmit={handleSubmit(onSubmit)}>
+    <form id="new-project-form" className="border-0 form-control">
       <div className="mb-3 mt-3 form-check form-switch">
         <input
           className="form-check-input"
@@ -94,6 +96,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
           <option value={user?.login}>{user?.login}</option>
           {user?.orgs.map((org) => (
             <option key={org} value={org}>
+              <GitHubAvatar namespace={org} height={20} width={20} />
               {org}
             </option>
           ))}
@@ -105,7 +108,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
           className="form-control"
           placeholder="name"
           // dont allow any whitespace
-          {...register('project_name', {
+          {...register('name', {
             required: true,
             pattern: {
               value: /^\S+$/,
@@ -116,7 +119,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
         <span className="mx-1 mb-1">:</span>
         <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag')} />
       </span>
-      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
+      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="description"
         className="form-control mt-3"
@@ -124,6 +127,24 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
+      <label className="form-check-label mt-3 mb-1">
+        <i className="bi bi-file-earmark-break me-1"></i>
+        Schema
+      </label>
+      <div>
+        <Controller
+          control={control}
+          name="pep_schema"
+          render={({ field: { onChange, value } }) => (
+            <SchemaDropdown
+              value={value}
+              onChange={(schema) => {
+                setValue('pep_schema', schema);
+              }}
+            />
+          )}
+        />
+      </div>
       {uploadFiles ? (
         <div className="dashed-border p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
           <div className="d-flex flex-column align-items-center">
@@ -136,7 +157,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide }) => {
                     onClick={() => {
                       popFileFromFileList(uploadFiles, i, (newFiles) => resetForm({ files: newFiles }));
                     }}
-                    className="py-0 btn btn-link text-danger"
+                    className="py-0 btn btn-link text-danger shadow-none"
                   >
                     <i className="bi bi-x-circle"></i>
                   </button>

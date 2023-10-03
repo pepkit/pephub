@@ -7,9 +7,10 @@ interface Props {
   variant?: Variant;
   size?: Size;
   children: React.ReactNode;
+  className?: string;
 }
 
-export const Badge: FC<Props> = ({ variant = 'primary', size = 'medium', children }) => {
+export const Badge: FC<Props> = ({ variant = 'primary', size = 'medium', children, className }) => {
   // switcher for the variant
   let highlight = '';
   switch (variant) {
@@ -57,11 +58,14 @@ export const Badge: FC<Props> = ({ variant = 'primary', size = 'medium', childre
       fontSize = '1.0rem';
       break;
   }
+  let classNameString = `d-flex flex-row align-items-center shadow-sm px-2 py-1 fw-semibold text-${highlight} bg-${highlight} bg-opacity-10 border border-${highlight} border-opacity-10 rounded-2`;
+
+  if (className) {
+    classNameString = `${classNameString} ${className}`;
+  }
+
   return (
-    <span
-      className={`d-flex flex-row align-items-center shadow-sm mb-2 px-2 py-1 fw-semibold text-${highlight} bg-${highlight} bg-opacity-10 border border-${highlight} border-opacity-10 rounded-2`}
-      style={{ fontSize: fontSize }}
-    >
+    <span className={classNameString} style={{ fontSize: fontSize }}>
       {children}
     </span>
   );

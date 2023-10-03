@@ -1,22 +1,26 @@
-import { FC, useState } from 'react';
+import { FC, Fragment, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useParams } from 'react-router-dom';
+
+import { GitHubAvatar } from '../components/badges/github-avatar';
 import { PageLayout } from '../components/layout/page-layout';
-import { useSession } from '../hooks/useSession';
-import { NamespaceInfoPlaceholder } from '../components/placeholders/namespace-info';
-import { ProjectListPlaceholder } from '../components/placeholders/project-list';
-import { ProjectCard } from '../components/project/project-card';
+import { Pagination } from '../components/layout/pagination';
 import { AddPEPModal } from '../components/modals/add-pep';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
-import { useDebounce } from '../hooks/useDebounce';
-import { Pagination } from '../components/layout/pagination';
+import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePageSearchBar } from '../components/namespace/search-bar';
-import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
+import { ProjectListPlaceholder } from '../components/placeholders/project-list';
+import { ProjectCard } from '../components/project/project-card';
 import { useNamespaceInfo } from '../hooks/queries/useNamespaceInfo';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
+import { useDebounce } from '../hooks/useDebounce';
+import { useSession } from '../hooks/useSession';
+import { numberWithCommas } from '../utils/etc';
 
 export const NamespacePage: FC = () => {
   // get namespace from url
-  const { namespace } = useParams();
+  let { namespace } = useParams();
+  namespace = namespace?.toLowerCase();
 
   // get session info
   const { user, jwt } = useSession();
@@ -25,14 +29,19 @@ export const NamespacePage: FC = () => {
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState('');
+  const [orderBy, setOrderBy] = useState('update_date');
+  const [order, setOrder] = useState('asc');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
   // data fetching
-  const { data: namespaceInfo, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace, jwt);
+  const { data: _, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace, jwt);
   const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, jwt, {
     limit,
     offset,
+    orderBy,
+    // @ts-ignore - just for now, I know this will work fine
+    order: order || 'asc',
     search: searchDebounced,
   });
 
@@ -45,7 +54,7 @@ export const NamespacePage: FC = () => {
     return (
       <PageLayout title={namespace}>
         <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
-          <h1 className="fw-bold">Error 😫</h1>
+          <h1 className="fw-bold">Error occured!</h1>
           <p className="text-muted fst-italic">An error occured fetching the namespace... Are you sure it exists?</p>
           <div>
             <a href="/">
@@ -68,17 +77,17 @@ export const NamespacePage: FC = () => {
       </div>
       <div className="flex-row d-flex align-items-start justify-content-between">
         <h1 id="namespace-header" className="fw-bold">
-          {namespace}
+          <GitHubAvatar namespace={namespace} height={60} width={60} /> {namespace}
         </h1>
-        <div>
-          <button onClick={() => setShowEndpointsModal(true)} className="btn btn-outline-primary me-1">
+        <div className="d-flex flex-row align-items-center">
+          <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark me-1">
             <i className="bi bi-hdd-rack me-1"></i>
-            API Endpoints
+            API
           </button>
-          {user?.login === namespace ? (
+          {user?.login === namespace || user?.orgs.includes(namespace || '') ? (
             <button
               onClick={() => setShowAddPEPModal(true)}
-              className="btn btn-outline-success me-1"
+              className="btn btn-sm btn-success me-1"
               data-bs-toggle="modal"
               data-bs-target="#newProject"
             >
@@ -89,28 +98,43 @@ export const NamespacePage: FC = () => {
         </div>
       </div>
       {/* Render info about the namespace */}
-      {namespaceInfoIsLoading ? (
-        <NamespaceInfoPlaceholder />
-      ) : (
-        <>
+
+      <>
+        {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
           <p className="mb-0">
-            <span className="fw-bold">Total projects: {namespaceInfo?.number_of_projects}</span>{' '}
+            <span className="fw-bold d-flex">
+              Organizations you belong to:{' '}
+              <div className="d-flex align-items-center">
+                {user?.orgs.map((org) => (
+                  <Fragment key={org}>
+                    <a className="ms-1 text-decoration-none" href={`/${org}`}>
+                      <NamespaceBadge className="me-1" namespace={org} />
+                    </a>{' '}
+                  </Fragment>
+                ))}
+              </div>
+            </span>
           </p>
-          <p className="mb-0">
-            <span className="fw-bold">Total samples: {namespaceInfo?.number_of_samples}</span>{' '}
-          </p>
-        </>
-      )}
+        )}
+        <p className="mb-0">
+          <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
+        </p>
+      </>
+
       {/* Render projects  in namespace */}
-      <div className="my-2 border-bottom border-secondary"></div>
+      <div className="my-3 border-bottom border-grey"></div>
       <NamespacePageSearchBar
         namespace={namespace || ''}
         search={search}
         setSearch={setSearch}
         limit={limit}
         setLimit={setLimit}
+        orderBy={orderBy}
+        setOrderBy={setOrderBy}
+        order={order}
+        setOrder={setOrder}
       />
-      <div className="my-2"></div>
+      <div className="my-3"></div>
       <div className="mt-3">
         {projectsIsLoading || projects === undefined ? (
           <ProjectListPlaceholder />
@@ -131,7 +155,7 @@ export const NamespacePage: FC = () => {
           ) : null}
         </div>
       </div>
-      <AddPEPModal show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
+      <AddPEPModal defaultNamespace={namespace} show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
       <NamespaceAPIEndpointsModal
         namespace={namespace || ''}
         show={showEndpointsModal}

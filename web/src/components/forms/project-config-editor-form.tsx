@@ -1,10 +1,9 @@
 import { FC, useEffect, useState } from 'react';
-import { ProjectConfigEditor } from '../project/project-config';
-import { useSession } from '../../hooks/useSession';
+
+import { useProjectEditConfigMutation } from '../../hooks/mutations/useProjectEditConfigMutation';
 import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { editProjectConfig } from '../../api/project';
-import { toast } from 'react-hot-toast';
+import { useSession } from '../../hooks/useSession';
+import { ProjectConfigEditor } from '../project/project-config';
 
 interface Props {
   namespace: string;
@@ -15,7 +14,7 @@ interface Props {
 export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) => {
   const { jwt } = useSession();
 
-  const { data: projectConfig } = useProjectConfig(namespace, project, tag, 'yaml', jwt);
+  const { data: projectConfig } = useProjectConfig(namespace, project, tag, jwt);
 
   // state
   const [originalConfig, setOriginalConfig] = useState<string>('');
@@ -26,29 +25,18 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
     setNewProjectConfig(originalConfig);
   };
 
-  // react-query
-  const queryClient = useQueryClient();
+  const onSuccess = () => {
+    if (newProjectConfig !== originalConfig) {
+      setOriginalConfig(newProjectConfig);
+    }
+  };
 
-  const mutation = useMutation({
-    mutationFn: () => editProjectConfig(namespace, project, tag, jwt, newProjectConfig),
-    onSuccess: () => {
-      toast.success('Project config saved successfully');
-      queryClient.invalidateQueries([namespace, project, tag]);
-
-      // reset values if needed
-      if (newProjectConfig !== originalConfig) {
-        setOriginalConfig(newProjectConfig);
-      }
-    },
-    onError: (err) => {
-      toast.error(`Error saving project config: ${err}`);
-    },
-  });
+  const mutation = useProjectEditConfigMutation(namespace, project, tag, jwt || '', newProjectConfig, onSuccess);
 
   useEffect(() => {
     if (projectConfig) {
-      setOriginalConfig(projectConfig);
-      setNewProjectConfig(projectConfig);
+      setOriginalConfig(projectConfig.config);
+      setNewProjectConfig(projectConfig.config);
     }
   }, [projectConfig]);
 

@@ -26,6 +26,8 @@ FROM python:3.10-slim
 LABEL authors="Nathan LeRoy, Nathan Sheffield"
 
 RUN apt-get update
+RUN apt-get install -y gcc
+RUN apt-get install -y libpq-dev
 RUN apt-get install -y --no-install-recommends git
 
 EXPOSE 5432

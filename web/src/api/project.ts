@@ -1,8 +1,28 @@
 import axios from 'axios';
-import { Project } from '../../types';
+
+import { Project, ProjectConfigResponse, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
+
+interface ProjectUpdateItems {
+  project_value?: Project | null;
+  tag?: string | null;
+  is_private?: boolean | null;
+  name?: string | null;
+  pep_schema?: string | null;
+}
+
+interface ProjectUpdateMetadata extends ProjectUpdateItems {
+  sample_table?: Sample[] | null;
+  project_config_yaml?: string | null;
+  description?: string | null;
+  subsample_list?: string[] | null;
+}
+export interface SampleTableResponse {
+  count: number;
+  items: Sample[];
+}
 
 export interface DeleteProjectResponse {
   message: string;
@@ -29,11 +49,29 @@ export const getSampleTable = (
   tag: string = 'default',
   token: string | null = null,
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}&format=csv`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}&raw=true`;
   if (!token) {
-    return axios.get<string>(url).then((res) => res.data);
+    return axios.get<SampleTableResponse>(url).then((res) => res.data);
   } else {
-    return axios.get<string>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
+    return axios
+      .get<SampleTableResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
+  }
+};
+
+export const getSubsampleTable = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null = null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/subsamples?tag=${tag}&raw=true`;
+  if (!token) {
+    return axios.get<SampleTableResponse>(url).then((res) => res.data);
+  } else {
+    return axios
+      .get<SampleTableResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
   }
 };
 
@@ -41,14 +79,15 @@ export const getProjectConfig = (
   namespace: string,
   projectName: string,
   tag: string = 'default',
-  filter: string = 'yaml',
   token: string | null = null,
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}/convert?tag=${tag}&filter=${filter}`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/config?tag=${tag}&raw=true&format=String`;
   if (!token) {
-    return axios.get<string>(url).then((res) => res.data);
+    return axios.get<ProjectConfigResponse>(url).then((res) => res.data);
   } else {
-    return axios.get<string>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
+    return axios
+      .get<ProjectConfigResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
   }
 };
 
@@ -105,7 +144,7 @@ export const editProjectMetadata = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
-  metadata: { [key: string]: any },
+  metadata: ProjectUpdateMetadata,
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
   return axios.patch(url, metadata, { headers: { Authorization: `Bearer ${token}` } });
@@ -127,14 +166,57 @@ export const editProjectSampleTable = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
-  sampleTable: string,
+  sampleTable: Sample[],
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}&format=csv`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
   return axios.patch(
     url,
     {
-      sample_table_csv: sampleTable,
+      sample_table: sampleTable,
     },
     { headers: { Authorization: `Bearer ${token}` } },
   );
+};
+
+export const editProjectSubsampleTable = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null,
+  subsampleTable: Sample[],
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
+  return axios.patch(
+    url,
+    {
+      subsample_table: subsampleTable,
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+};
+
+export const editTotalProject = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null,
+  data: {
+    config?: string;
+    samples?: Sample[];
+    subsamples?: Sample[];
+  },
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}?tag=${tag}`;
+  let requestBody = {};
+  if (data.config) {
+    requestBody = { ...requestBody, project_config_yaml: data.config };
+  }
+  if (data.samples) {
+    requestBody = { ...requestBody, sample_table: data.samples };
+  }
+  if (data.subsamples && data.subsamples.length > 0) {
+    requestBody = { ...requestBody, subsample_tables: [data.subsamples] };
+  }
+
+  return axios.patch(url, requestBody, { headers: { Authorization: `Bearer ${token}` } });
 };

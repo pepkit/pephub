@@ -1,6 +1,8 @@
 import { FC } from 'react';
-import { SearchHit } from '../../../types';
 import { ProgressBar } from 'react-bootstrap';
+
+import { SearchHit } from '../../../types';
+import { GitHubAvatar } from '../../components/badges/github-avatar';
 
 interface ProjectProps {
   hits: SearchHit[];
@@ -9,6 +11,10 @@ interface ProjectProps {
 const HitCard = ({ hit }: { hit: SearchHit }) => {
   const [namespace, projectTag] = hit.payload.registry.split('/');
   const [project, tag] = projectTag.split(':');
+
+  // round to 2 decimal places
+  let hit_score = Math.round(hit.score * 100) / 100;
+
   return (
     <div className="border-bottom border-dark border-2 mt-2 p-1">
       <div className="d-flex flex-row align-items-center justify-content-between">
@@ -16,7 +22,7 @@ const HitCard = ({ hit }: { hit: SearchHit }) => {
           <h5 className="fw-bold">{hit.payload.registry}</h5>
         </a>
         <div className="w-25">
-          <ProgressBar variant="success" now={hit.score * 100} label={`${hit.score}%`} />
+          <ProgressBar variant="success" now={hit.score * 100} label={`${hit_score * 100}%`} />
         </div>
       </div>
       <p className="truncate text-secondary" style={{ fontSize: '0.9rem' }}>
@@ -39,6 +45,7 @@ export const ProjectSearchResults: FC<ProjectProps> = ({ hits }) => {
     );
   return (
     <div>
+      <br />
       <h2 className="fw-bold">Projects</h2>
       {hits.map((hit, i) => (
         <HitCard hit={hit} key={i} />
@@ -67,10 +74,10 @@ export const NamespaceSearchResults: FC<NamespaceProps> = ({ hits }) => {
     <>
       <h2 className="fw-bold">Namespaces</h2>
       {hits.map((hit) => (
-        <div key={hit} className="d-flex flex-row align-items-center">
-          <i className="bi bi-folder me-2"></i>
-          <a href={`/${hit}`}>
-            <h5 className="fw-bold">{hit}</h5>
+        <div key={hit} className="d-flex flex-row align-items-center mt-2">
+          <GitHubAvatar namespace={hit} height={30} width={30} />
+          <a href={`/${hit}`} className="ms-1">
+            <h5 className="fw-bold m-0">{hit}</h5>
           </a>
         </div>
       ))}

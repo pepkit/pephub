@@ -1,3 +1,5 @@
+import { AxiosError } from 'axios';
+
 export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
 };
@@ -23,4 +25,31 @@ export const getOS = (): OS => {
     return 'Linux';
   }
   return 'Unknown';
+};
+
+export const extractErrorMessage = (err: AxiosError): string => {
+  // extract out error message if it exists, else unknown
+  const data = err.response?.data;
+  if (data && typeof data === 'object' && 'message' in data) {
+    return data.message as string;
+  } else if (data && typeof data === 'string') {
+    return data;
+  }
+  return 'Unknown error occured.';
+};
+
+export const extractError = (err: AxiosError): string => {
+  // extract out error message if it exists, else unknown
+  const data = err.response?.data;
+  if (data && typeof data === 'object' && 'error' in data) {
+    return data.error as string;
+  } else if (data && typeof data === 'string') {
+    return data;
+  }
+  return 'Unknown';
+};
+
+// function to add commas to numbers
+export const numberWithCommas = (x: number): string => {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };

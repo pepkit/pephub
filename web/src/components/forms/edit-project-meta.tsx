@@ -1,29 +1,45 @@
 import { FC } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { editProjectMetadata } from '../../api/project';
-import { useSession } from '../../hooks/useSession';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
+import { Controller, useForm } from 'react-hook-form';
+
+import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
 import { useProject } from '../../hooks/queries/useProject';
+import { useSession } from '../../hooks/useSession';
+import { MarkdownEditor } from '../markdown/edit';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { SchemaTooltip } from './tooltips/form-tooltips';
 
 interface Props {
   namespace: string;
   name: string;
   tag: string;
+  onSuccessfulSubmit?: () => void;
+  onFailedSubmit?: () => void;
+  onCancel?: () => void;
 }
 
 interface FormValues extends Props {
   description: string;
   isPrivate: boolean;
+  pep_schema: string;
 }
 
-export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
+export const ProjectMetaEditForm: FC<Props> = ({
+  namespace,
+  name,
+  tag,
+  onSuccessfulSubmit = () => {},
+  onFailedSubmit = () => {},
+  onCancel = () => {},
+}) => {
   const { jwt } = useSession();
+
   const { data: projectInfo } = useProject(namespace, name, tag, jwt);
+
   const {
     register,
-    handleSubmit,
     watch,
+    control,
+    setValue,
     reset: resetForm,
     formState: { isValid, isDirty },
   } = useForm<FormValues>({
@@ -32,38 +48,33 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
       description: projectInfo?.description || '',
       isPrivate: projectInfo?.is_private,
       tag: tag,
+      pep_schema: projectInfo?.pep_schema || 'pep/2.1.0',
     },
   });
-  const newTag = watch('tag');
-  const newName = watch('name');
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
-    return editProjectMetadata(namespace, name, tag, jwt, { is_private: data.isPrivate, ...data });
+  const onSubmit = () => {
+    onSuccessfulSubmit();
+    // reset form
+    resetForm({}, { keepValues: false });
   };
 
-  const queryClient = useQueryClient();
+  // watch form values to pass into mutation
+  const newTag = watch('tag');
+  const newName = watch('name');
+  const newDescription = watch('description');
+  const newIsPrivate = watch('isPrivate');
+  const newSchema = watch('pep_schema');
 
-  const mutation = useMutation({
-    mutationFn: () => handleSubmit(onSubmit)(),
-    onSuccess: () => {
-      resetForm(
-        {}, // not sure why this works, but it does.
-        {
-          keepValues: true,
-        },
-      );
-      toast.success('Project metadata updated successfully.');
-      queryClient.invalidateQueries([namespace, name, tag]);
+  // check if things are changed - only send those that are
+  const metadata = {
+    newName: projectInfo?.name === newName ? undefined : newName,
+    newTag: projectInfo?.tag === newTag ? undefined : newTag,
+    newDescription: projectInfo?.description === newDescription ? undefined : newDescription,
+    newIsPrivate: projectInfo?.is_private === newIsPrivate ? undefined : newIsPrivate,
+    newSchema: projectInfo?.pep_schema === newSchema ? undefined : newSchema,
+  };
 
-      // if newTag or newName is different, redirect to new project
-      if (newTag !== tag || newName !== name) {
-        window.location.href = `/${namespace}/${newName}?tag=${newTag}`;
-      }
-    },
-    onError: (error) => {
-      toast.error(`There was an error updated project metadata: ${error}`);
-    },
-  });
+  const mutation = useEditProjectMetaMutation(namespace, name, tag, jwt, onSubmit, onFailedSubmit, metadata);
 
   return (
     <form>
@@ -91,8 +102,27 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
           id="project-name"
           aria-describedby="pep-name-help"
         />
-        <div id="pep-name-help" className="form-text">
-          Rename your PEP.
+      </div>
+      <div className="mb-3">
+        <label htmlFor="schema-tag" className="form-label">
+          Schema
+        </label>
+        <SchemaTooltip className="ms-1" />
+        <div>
+          <Controller
+            control={control}
+            name="pep_schema"
+            render={({ field: { onChange, value } }) => (
+              <SchemaDropdown
+                value={value}
+                onChange={(schema) => {
+                  setValue('pep_schema', schema, {
+                    shouldDirty: true,
+                  });
+                }}
+              />
+            )}
+          />
         </div>
       </div>
       <div className="mb-3">
@@ -106,23 +136,34 @@ export const ProjectMetaEditForm: FC<Props> = ({ namespace, name, tag }) => {
           id="project-tag"
           aria-describedby="pep-name-help"
         />
-        <div id="pep-name-help" className="form-text">
-          Change your project tag.
-        </div>
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
           Project Description
         </label>
-        <textarea
-          {...register('description')}
-          placeholder="Project description"
-          className="form-control"
-          id="project-description"
-          rows={3}
-        ></textarea>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <MarkdownEditor
+              name="description"
+              value={field.value}
+              onChange={(value) => {
+                field.onChange(value);
+              }}
+              rows={10}
+            />
+          )}
+        />
       </div>
-      <button onClick={() => resetForm()} type="button" className="btn btn-outline-dark me-1">
+      <button
+        onClick={() => {
+          onCancel();
+          resetForm();
+        }}
+        type="button"
+        className="btn btn-outline-dark me-1"
+      >
         Cancel
       </button>
       <button

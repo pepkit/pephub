@@ -1,68 +1,55 @@
-import { FC, useEffect, useState } from 'react';
 import { HotTable } from '@handsontable/react';
+import { FC } from 'react';
+
+import { Sample } from '../../../types';
+import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { addClassesToRows } from './hooks-callbacks';
-import { readString } from 'react-papaparse';
-import { tableDataToCsvString } from '../../utils/sample-table';
 
 interface Props {
-  data: string;
-  onChange?: (rows: string) => void;
+  className?: string;
+  data: Sample[];
+  onChange?: (rows: Sample[]) => void;
   readOnly?: boolean;
   height?: number;
+  minRows?: number;
+  stretchH?: 'none' | 'all' | 'last';
 }
 /**
  * This table is meant to handle csv strings, so just pass in
  * the csv string and it will handle the rest
  */
-export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height }) => {
-  const [rows, setRows] = useState<any[][]>([[]]);
+export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height, minRows, stretchH, className }) => {
+  // parse the list of objects into rows
+  const rows = sampleListToArrays(data);
+  const ROW_HEIGHT = 23; // px
 
-  // watch the data and update accordingly
-  // this is for changes outside of the table
-  useEffect(() => {
-    if (data) {
-      readString(data, {
-        worker: true,
-        complete: (results) => {
-          // ts-ignore
-          let data = results.data as any[][];
+  // compute table height based on number of rows
+  // or the minRows prop if it is provided
+  let tableHeight = rows.length * ROW_HEIGHT + 50;
+  if (minRows) {
+    tableHeight = minRows * ROW_HEIGHT + 50;
+  }
 
-          // check to make sure data isnt a list of objects
-          // if it is, we need to convert it to a list of lists
-          if (data.length > 0 && typeof data[0] === 'object') {
-            data = data.map((row) => Object.values(row));
-          }
-
-          setRows(data);
-        },
-      });
-    }
-  }, [data]);
-
-  // if the user makes a change to the table,
-  // we need to update the data if
-  // the onChange prop is passed in
-  //
-  useEffect(() => {
-    if (onChange && rows) {
-      onChange(tableDataToCsvString(rows));
-    }
-  }, [rows]);
+  let tableClassName = '';
+  if (className) {
+    tableClassName += ` ${className}`;
+  }
 
   return (
     <>
-      <div className="rounded rounded-2">
+      <div className={tableClassName}>
         <HotTable
-          data={rows}
-          stretchH="all"
-          height={height || 900}
+          data={rows.length > 0 ? rows : [[]]}
+          stretchH={stretchH || 'all'}
+          height={height || tableHeight}
           readOnly={readOnly}
           colHeaders={true}
           dropdownMenu={true}
           hiddenColumns={{
             indicators: true,
           }}
-          minRows={500}
+          minCols={1}
+          minRows={minRows || 50}
           contextMenu={[
             'row_above',
             'row_below',
@@ -86,14 +73,28 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
           licenseKey="non-commercial-and-evaluation"
           manualColumnResize
           afterChange={(changes) => {
-            if (changes) {
-              // update data in state
-              const newRows = [...rows];
-              changes.forEach(([row, col, _, newValue]) => {
-                // @ts-ignore
-                newRows[row][col] = newValue;
+            if (changes && onChange) {
+              changes.forEach((change) => {
+                const [row, col, _, newVal] = change;
+                // @ts-ignore - we know that col is a number
+                rows[row][col] = newVal;
               });
-              setRows(newRows);
+              onChange(arraysToSampleList(rows));
+            }
+          }}
+          afterRemoveCol={(index, amount) => {
+            // remove all values at the specified index from "rows"
+            rows.forEach((row) => {
+              row.splice(index, 0);
+            });
+            if (onChange) {
+              onChange(arraysToSampleList(rows));
+            }
+          }}
+          afterRemoveRow={(index, amount) => {
+            rows.splice(index, 0);
+            if (onChange) {
+              onChange(arraysToSampleList(rows));
             }
           }}
         />

@@ -1,4 +1,6 @@
 import os
+
+import peppy
 import pydantic
 import jwt
 import json
@@ -8,7 +10,9 @@ import cairosvg
 
 from secrets import token_hex
 from dotenv import load_dotenv
-from typing import Union, List, Optional, Tuple
+
+from typing import Union, List, Optional, Dict, Any, Tuple
+
 from datetime import datetime, timedelta
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -98,6 +102,7 @@ class CLIAuthSystem:
         return encoded_user_data
 
 
+# database connection
 agent = PEPDatabaseAgent(
     user=os.environ.get("POSTGRES_USER") or DEFAULT_POSTGRES_USER,
     password=os.environ.get("POSTGRES_PASSWORD") or DEFAULT_POSTGRES_PASSWORD,
@@ -105,6 +110,9 @@ agent = PEPDatabaseAgent(
     database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
     port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
 )
+
+# sentence_transformer model
+st_model = SentenceTransformer(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
 
 
 def generate_random_auth_code() -> str:
@@ -130,7 +138,7 @@ def get_db() -> PEPDatabaseAgent:
     return agent
 
 
-def read_authorization_header(Authorization: str = Header(None)) -> Union[str, None]:
+def read_authorization_header(Authorization: str = Header(None)) -> Union[dict, None]:
     """
     Reads and decodes a JWT, returning the decoded variables.
 
@@ -150,7 +158,7 @@ def read_authorization_header(Authorization: str = Header(None)) -> Union[str, N
         _LOGGER_PEPHUB.error(e)
         return None
     except jwt.exceptions.ExpiredSignatureError:
-        return HTTPException(status_code=401, detail="JWT has expired")
+        raise HTTPException(status_code=401, detail="JWT has expired")
     return session_info
 
 
@@ -194,9 +202,10 @@ def get_project(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-):
+    raw: bool = False,
+) -> Union[peppy.Project, Dict[str, Any]]:
     try:
-        proj = agent.project.get(namespace, project, tag)
+        proj = agent.project.get(namespace, project, tag, raw=raw)
         yield proj
     except ProjectNotFoundError:
         raise HTTPException(
@@ -391,12 +400,7 @@ def get_sentence_transformer() -> SentenceTransformer:
     """
     Return sentence transformer encoder
     """
-    model = SentenceTransformer(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
-    try:
-        yield model
-    finally:
-        # no need to do anything
-        pass
+    return st_model
 
 
 def get_namespace_info(
@@ -420,7 +424,9 @@ def get_namespace_info(
 
 
 def verify_namespace_exists(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
-    if not agent.namespace.get(query=namespace):
+    try:
+        yield agent.namespace.get(query=namespace).results[0]
+    except IndexError:
         raise HTTPException(
             404,
             f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",

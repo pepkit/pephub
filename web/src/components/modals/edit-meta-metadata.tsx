@@ -1,6 +1,7 @@
-import { Modal } from 'react-bootstrap';
-import { ProjectMetaEditForm } from '../forms/edit-project-meta';
 import { FC } from 'react';
+import { Modal } from 'react-bootstrap';
+
+import { ProjectMetaEditForm } from '../forms/edit-project-meta';
 
 interface Props {
   namespace: string;
@@ -17,7 +18,13 @@ export const EditMetaMetadataModal: FC<Props> = ({ namespace, project, tag, show
         <Modal.Title>Edit Metadata</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <ProjectMetaEditForm namespace={namespace} name={project} tag={tag || 'default'} />
+        <ProjectMetaEditForm
+          onSuccessfulSubmit={() => onHide()}
+          namespace={namespace}
+          name={project}
+          tag={tag || 'default'}
+          onCancel={() => onHide()}
+        />
       </Modal.Body>
     </Modal>
   );

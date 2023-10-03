@@ -19,14 +19,14 @@ export const NamespaceAPIEndpointsModal: FC<Props> = ({ namespace, show, onHide 
         <span className="badge bg-primary me-1">GET</span>
         <span className="fw-bold">Namespace:</span>
         <code>
-          <a href={`${API_BASE}/namespaces/${namespace}/`}>/api/v1/namespaces/{namespace}</a>
+          <a href={`${API_BASE}/api/v1/namespaces/${namespace}/`}>/api/v1/namespaces/{namespace}</a>
         </code>
       </p>
       <p className="mb-2">
         <span className="badge bg-primary me-1">GET</span>
         <span className="fw-bold">Namespace:</span>
         <code>
-          <a href={`${API_BASE}/namespaces/${namespace}/projects/`}>/api/v1/namespaces/{namespace}/projects</a>
+          <a href={`${API_BASE}/api/v1/namespaces/${namespace}/projects/`}>/api/v1/namespaces/{namespace}/projects</a>
         </code>
       </p>
     </Modal.Body>
