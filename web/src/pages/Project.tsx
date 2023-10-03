@@ -30,6 +30,10 @@ import { downloadZip } from '../utils/project';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
+
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+const API_BASE = `${API_HOST}/api/v1`;
+
 interface CustomToggleProps {
   children?: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
@@ -50,6 +54,7 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
     {children}
   </a>
 ));
+
 
 export const ProjectPage: FC = () => {
   // user info
@@ -195,7 +200,13 @@ export const ProjectPage: FC = () => {
   const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
 
   return (
-    <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
+    <PageLayout
+      fullWidth
+      footer={false}
+      title={`${namespace}/${project}:${tag}`}
+      description={projectInfo?.description || undefined}
+      image={`${API_BASE}/projects/${namespace}/${project}/og-image?tag=${tag}`}
+    >
       {/* breadcrumbs */}
       <div className="d-flex flex-row align-items-center justify-content-between px-4 mb-2 mt-4">
         <div className="d-flex flex-row align-items-center">

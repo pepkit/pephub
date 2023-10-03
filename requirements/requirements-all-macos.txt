@@ -16,3 +16,5 @@ aiofiles
 pyjwt[crypto]
 coloredlogs
 sentence-transformers
+Pillow
+cairosvg

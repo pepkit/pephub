@@ -1,10 +1,16 @@
 import eido
 import yaml
 import pandas as pd
+import io
+
 from io import StringIO
+
 from typing import Callable, Literal, Union
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse, PlainTextResponse, Response
+from pepdbagent import PEPDatabaseAgent
+from pepdbagent.exceptions import ProjectUniqueNameError
+
 from peppy import Project
 from peppy.const import (
     SAMPLE_RAW_DICT_KEY,
@@ -507,3 +513,22 @@ async def fork_pep_to_namespace(
         },
         status_code=202,
     )
+
+@project.get(
+    "/og-image",
+    summary="Get an og-image for a project",
+)
+async def get_og_image(
+    namespace: str,
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    proj: peppy.Project = Depends(get_project),
+):
+    """Get an og-image for a project"""
+    image = project_to_open_graph_image(namespace, project, tag, proj)
+
+    image_bytes = io.BytesIO()
+    image.save(image_bytes, format="PNG")
+    image_bytes = image_bytes.getvalue()
+
+    return Response(content=image_bytes, media_type="image/png")
