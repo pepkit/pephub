@@ -140,3 +140,4 @@ postgres/
 .idea
 environment/local.env
 qdrant_storage/
+postgres-data/

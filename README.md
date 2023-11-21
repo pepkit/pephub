@@ -144,23 +144,17 @@ docker run -p 8000:8000 \
 
 The server has been Dockerized and packaged with a [postgres](https://hub.docker.com/_/postgres) image to be run with [`docker compose`](https://docs.docker.com/compose/). This lets you run everything at once and develop without having to manage database instances. The `docker-compose.yaml` file is written such that it mounts the database storage info to a folder called `postgres/` at the root of the repository. This lets you load the database once and have it persist its state after restarting the container.
 
-You can start a development environment in three steps:
+You can start a development environment in two steps:
 
-**1. Obtain the latest database schema:**
-
-```console
-sh setup_db.sh
-```
-
-**2. Curate your environment:**
+**1. Curate your environment:**
 Since we are running in `docker`, we need to supply environment variables to the container. The `docker-compose.yaml` file is written such that you can supply a `.env` file at the root with your configurations. See the [example env file](environment/template.env) for reference. See [here](docs/server-settings.md) for a detailed explanation of all configurable server settings. For now, you can simply copy the `env` file:
 
 ```
 cp environment/template.env .env
 ```
 
-**3. Build and start the containers:**
-If you are running on an Apple M1 chip, you will need to set the following env variable prior to running `docker compose`:
+**2. Build and start the containers:**
+If you are running on an Apple M-Series chip, you will need to set the following env variable prior to running `docker compose`:
 
 ```console
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
@@ -173,7 +167,7 @@ docker compose up --build
 `pephub` now runs/listens on http://localhost:8000  
 `postgres` now runs/listens on http://localhost:5432
 
-**3. Utilize the [`load_db`](scripts/load_db.py) script to populate the database with `examples/`:**
+**(Optional) 3. Utilize the [`load_db`](scripts/load_db.py) script to populate the database with `examples/`:**
 
 ```console
 cd scripts
