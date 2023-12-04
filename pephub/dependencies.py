@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from typing import Union, List, Optional, Dict, Any
 from datetime import datetime, timedelta
 
-from fastapi import Depends, Header, Form
+from fastapi import Depends, Header
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
@@ -23,7 +23,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
 
-from .routers.models import AnnotationModel, NamespaceList, Namespace, ForkRequest
+from .routers.models import AnnotationModel, Namespace, ForkRequest
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -314,13 +314,13 @@ def verify_user_can_write_project(
         if session_info is None:
             raise HTTPException(
                 401,
-                f"Please authenticate before editing project.",
+                "Please authenticate before editing project.",
             )
         # AUTHORIZATION REQUIRED
         if session_info["login"] != namespace and namespace not in orgs:
             raise HTTPException(
                 403,
-                f"The current authenticated user does not have permission to edit this project.",
+                "The current authenticated user does not have permission to edit this project.",
             )
 
 

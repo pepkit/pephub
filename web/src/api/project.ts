@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { Project, ProjectConfigResponse, Sample } from '../../types';
+import { Project, ProjectAnnotation, ProjectConfigResponse, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -40,6 +40,20 @@ export const getProject = (
     return axios.get<Project>(url).then((res) => res.data);
   } else {
     return axios.get<Project>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
+  }
+};
+
+export const getProjectAnnotation = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null = null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/annotation?tag=${tag}`;
+  if (!token) {
+    return axios.get<ProjectAnnotation>(url).then((res) => res.data);
+  } else {
+    return axios.get<ProjectAnnotation>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
   }
 };
 

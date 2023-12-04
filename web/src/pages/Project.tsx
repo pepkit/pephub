@@ -19,7 +19,7 @@ import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
 import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
 import { useSubsampleTableMutation } from '../hooks/mutations/useSubsampleTableMutation';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
-import { useProject } from '../hooks/queries/useProject';
+import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
@@ -65,7 +65,11 @@ export const ProjectPage: FC = () => {
   const fork = searchParams.get('fork');
 
   // fetch data
-  const { data: projectInfo, isLoading: projectInfoIsLoading, error } = useProject(namespace, project || '', tag, jwt);
+  const {
+    data: projectInfo,
+    isLoading: projectInfoIsLoading,
+    error,
+  } = useProjectAnnotation(namespace, project || '', tag, jwt);
   const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
   const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag, jwt);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
