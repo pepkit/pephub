@@ -92,8 +92,8 @@ async def get_a_pep(
     summary="Update a PEP",
 )
 async def update_a_pep(
-    project: str,
     namespace: str,
+    project: str,
     updated_project: ProjectOptional,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -507,3 +507,13 @@ async def fork_pep_to_namespace(
         },
         status_code=202,
     )
+
+
+@project.get("/annotation")
+async def get_subsamples(
+    proj_annotation: AnnotationModel = Depends(get_project_annotation),
+):
+    """
+    Get project annotation from a certain project and namespace
+    """
+    return proj_annotation

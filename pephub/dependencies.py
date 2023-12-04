@@ -213,7 +213,6 @@ def get_project_annotation(
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
 ) -> AnnotationModel:
-    # TODO: Is just grabbing the first annotation the right thing to do?
     try:
         anno = agent.annotation.get(
             namespace, project, tag, admin=namespace_access_list
@@ -224,14 +223,6 @@ def get_project_annotation(
             404,
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
-
-
-# TODO: This isn't used; do we still need it?
-def get_namespaces(
-    agent: PEPDatabaseAgent = Depends(get_db),
-    user: str = Depends(get_user_from_session_info),
-) -> List[NamespaceList]:
-    yield agent.namespace.get(admin=user)
 
 
 def verify_user_can_write_namespace(
@@ -257,8 +248,8 @@ def verify_user_can_write_namespace(
 
 
 def verify_user_can_read_project(
-    project: str,
     namespace: str,
+    project: str,
     tag: Optional[str] = DEFAULT_TAG,
     project_annotation: AnnotationModel = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_authorization_header),
