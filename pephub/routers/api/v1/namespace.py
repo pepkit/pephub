@@ -12,11 +12,10 @@ from peppy.const import DESC_KEY, NAME_KEY
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectUniqueNameError
 from pepdbagent.const import DEFAULT_LIMIT_INFO
-from pepdbagent.models import ListOfNamespaceInfo
+from pepdbagent.models import ListOfNamespaceInfo, Namespace
 from typing import Literal
 from typing_extensions import Annotated
 
-from ...models import Namespace
 from ....dependencies import (
     get_db,
     get_namespace_info,

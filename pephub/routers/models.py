@@ -1,6 +1,6 @@
-from typing import Optional
-from pydantic import BaseModel
-from pepdbagent.models import *
+from typing import Optional, List
+from pydantic import BaseModel, Field, Extra
+from pepdbagent.models import UpdateItems
 from pepdbagent.const import DEFAULT_TAG
 
 from ..const import DEFAULT_PEP_SCHEMA

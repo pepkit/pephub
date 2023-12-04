@@ -14,7 +14,14 @@ from peppy.const import (
     SUBSAMPLE_RAW_LIST_KEY,
 )
 
-from ...models import ProjectOptional, ProjectRawModel, AnnotationModel, ForkRequest
+from pepdbagent import PEPDatabaseAgent
+from pepdbagent.exceptions import ProjectUniqueNameError
+from pepdbagent.models import AnnotationModel
+
+from dotenv import load_dotenv
+
+
+from ...models import ProjectOptional, ProjectRawModel, ForkRequest
 from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
 from ....dependencies import (
     get_db,
@@ -27,10 +34,6 @@ from ....dependencies import (
 )
 from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS
 
-from pepdbagent import PEPDatabaseAgent
-from pepdbagent.exceptions import ProjectUniqueNameError
-
-from dotenv import load_dotenv
 
 load_dotenv()
 

@@ -1,7 +1,6 @@
-import json
 from datetime import date
 from typing import List, Union, Tuple
-from fastapi import Response, Depends, UploadFile
+from fastapi import Response, UploadFile
 from fastapi.exceptions import HTTPException
 from ubiquerg import VersionInHelpParser
 
@@ -54,7 +53,7 @@ def build_parser():
             "--config",
             required=False,
             dest="config",
-            help=f"A path to the pepserver config file",
+            help="A path to the pepserver config file",
         )
 
     sps["serve"].add_argument(
