@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, JSONResponse
 from platform import python_version
 
+from pepdbagent import PEPDatabaseAgent
+
 from ...._version import __version__ as pephub_version
-from ....dependencies import *
+from ....dependencies import (
+    get_db,
+    read_authorization_header,
+)
 from ....const import BASE_TEMPLATES_PATH
 
 user = APIRouter(prefix="/api/v1/me", tags=["profile"])
@@ -36,7 +41,7 @@ def profile_data(
 
 
 @user.get("/data")
-def profile_data(
+def profile_data2(
     request: Request,
     session_info=Depends(read_authorization_header),
     agent: PEPDatabaseAgent = Depends(get_db),

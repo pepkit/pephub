@@ -2,6 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.10.5] - 12-04-2023
+
+### Changed
+
+- optimized web interface fetching of PEP annotation data. 
+
+### Added
+
+- project annotation endpoint  (#234)
+
+
 # [0.10.4] - 10-02-2023
 
 ### Fixed

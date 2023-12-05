@@ -1,14 +1,20 @@
-from enum import Enum
-from fastapi import APIRouter, __version__ as fastapi_version
+from typing import List
+
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from peppy import __version__ as peppy_version
-from platform import python_version
 from pepdbagent import PEPDatabaseAgent
 
-from ...._version import __version__ as pephub_version
-from ....dependencies import *
+from sentence_transformers import SentenceTransformer
+from qdrant_client import QdrantClient
+
+from ....dependencies import (
+    get_db,
+    get_qdrant,
+    get_sentence_transformer,
+    get_namespace_access_list,
+)
 from ...models import SearchQuery
-from ....const import DEFAULT_QDRANT_COLLECTION_NAME, ALL_VERSIONS
+from ....const import DEFAULT_QDRANT_COLLECTION_NAME
 
 
 from dotenv import load_dotenv

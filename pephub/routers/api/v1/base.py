@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-from ....dependencies import *
 from ....const import ALL_VERSIONS
 
 

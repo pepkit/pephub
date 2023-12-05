@@ -1,9 +1,10 @@
 import eido
 import yaml
 import pandas as pd
-from io import StringIO
-from typing import Callable, Literal, Union
-from fastapi import APIRouter
+import peppy
+from typing import Callable, Literal, Union, Optional
+from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
 from peppy.const import (
@@ -13,14 +14,26 @@ from peppy.const import (
     SUBSAMPLE_RAW_LIST_KEY,
 )
 
-from ...models import ProjectOptional, ProjectRawModel
-from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
-from ....dependencies import *
-from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS
-
+from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectUniqueNameError
+from pepdbagent.models import AnnotationModel
 
 from dotenv import load_dotenv
+
+
+from ...models import ProjectOptional, ProjectRawModel, ForkRequest
+from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
+from ....dependencies import (
+    get_db,
+    get_project,
+    get_project_annotation,
+    get_namespace_access_list,
+    verify_user_can_fork,
+    verify_user_can_read_project,
+    DEFAULT_TAG,
+)
+from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS
+
 
 load_dotenv()
 
@@ -51,7 +64,7 @@ async def get_a_pep(
         try:
             raw_project = ProjectRawModel(**proj)
         except Exception:
-            raise HTTPException(500, f"Unexpected project error!")
+            raise HTTPException(500, "Unexpected project error!")
         return raw_project.dict(by_alias=False)
     samples = [s.to_dict() for s in proj.samples]
     sample_table_index = proj.sample_table_index
@@ -92,8 +105,8 @@ async def get_a_pep(
     summary="Update a PEP",
 )
 async def update_a_pep(
-    project: str,
     namespace: str,
+    project: str,
     updated_project: ProjectOptional,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -160,10 +173,10 @@ async def update_a_pep(
             eido.validate_project(
                 new_project, "http://schema.databio.org/pep/2.1.0.yaml"
             )
-        except Exception as e:
+        except Exception as _:
             raise HTTPException(
                 status_code=400,
-                detail=f"",
+                detail="Could not validate PEP. Please check your PEP and try again.",
             )
 
         # if we get through all samples, then update project in the database
@@ -308,7 +321,7 @@ async def get_pep_samples(
 
 
 @project.get("/config", summary="Get project configuration file")
-async def get_pep_samples(
+async def get_pep_config(
     proj: Union[peppy.Project, dict] = Depends(get_project),
     format: Optional[Literal["JSON", "String"]] = "JSON",
     raw: Optional[bool] = False,
@@ -507,3 +520,13 @@ async def fork_pep_to_namespace(
         },
         status_code=202,
     )
+
+
+@project.get("/annotation")
+async def get_project_annotation(
+    proj_annotation: AnnotationModel = Depends(get_project_annotation),
+):
+    """
+    Get project annotation from a certain project and namespace
+    """
+    return proj_annotation

@@ -5,7 +5,7 @@ import requests
 import time
 from typing import Union
 from fastapi import APIRouter, Request, Header, BackgroundTasks, Depends
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import RedirectResponse
 from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
@@ -136,7 +136,7 @@ def callback(
 
     if state.get("device"):
         DEVICE_CODES[state["device_code"]]["token"] = token
-        return f"/login/device/success"
+        return "/login/device/success"
 
     else:
         # create random auth code

@@ -12,18 +12,19 @@ from dotenv import load_dotenv
 from typing import Union, List, Optional, Dict, Any
 from datetime import datetime, timedelta
 
-from fastapi import Depends, Header, Form
+from fastapi import Depends, Header
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.exceptions import ProjectNotFoundError
+from pepdbagent.models import AnnotationModel, Namespace
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
 
-from .routers.models import AnnotationModel, NamespaceList, Namespace, ForkRequest
+from .routers.models import ForkRequest
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -213,7 +214,6 @@ def get_project_annotation(
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
 ) -> AnnotationModel:
-    # TODO: Is just grabbing the first annotation the right thing to do?
     try:
         anno = agent.annotation.get(
             namespace, project, tag, admin=namespace_access_list
@@ -224,14 +224,6 @@ def get_project_annotation(
             404,
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
-
-
-# TODO: This isn't used; do we still need it?
-def get_namespaces(
-    agent: PEPDatabaseAgent = Depends(get_db),
-    user: str = Depends(get_user_from_session_info),
-) -> List[NamespaceList]:
-    yield agent.namespace.get(admin=user)
 
 
 def verify_user_can_write_namespace(
@@ -257,8 +249,8 @@ def verify_user_can_write_namespace(
 
 
 def verify_user_can_read_project(
-    project: str,
     namespace: str,
+    project: str,
     tag: Optional[str] = DEFAULT_TAG,
     project_annotation: AnnotationModel = Depends(get_project_annotation),
     session_info: Union[dict, None] = Depends(read_authorization_header),
@@ -323,13 +315,13 @@ def verify_user_can_write_project(
         if session_info is None:
             raise HTTPException(
                 401,
-                f"Please authenticate before editing project.",
+                "Please authenticate before editing project.",
             )
         # AUTHORIZATION REQUIRED
         if session_info["login"] != namespace and namespace not in orgs:
             raise HTTPException(
                 403,
-                f"The current authenticated user does not have permission to edit this project.",
+                "The current authenticated user does not have permission to edit this project.",
             )
 
 

@@ -1,17 +1,30 @@
 import tempfile
 import shutil
+import json
+from typing import List, Optional, Union
 
-from fastapi import APIRouter, File, UploadFile, Request, Depends, Form, Body
+import peppy
+
+from fastapi import APIRouter, File, UploadFile, Request, Depends, Form
 from fastapi.responses import JSONResponse
 from peppy import Project
 from peppy.const import DESC_KEY, NAME_KEY
+from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectUniqueNameError
 from pepdbagent.const import DEFAULT_LIMIT_INFO
-from pepdbagent.models import ListOfNamespaceInfo
+from pepdbagent.models import ListOfNamespaceInfo, Namespace
 from typing import Literal
 from typing_extensions import Annotated
 
-from ....dependencies import *
+from ....dependencies import (
+    get_db,
+    get_namespace_info,
+    get_user_from_session_info,
+    read_authorization_header,
+    get_organizations_from_session_info,
+    get_namespace_access_list,
+    verify_user_can_write_namespace,
+)
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ....const import (
     DEFAULT_TAG,
@@ -292,7 +305,7 @@ async def upload_raw_pep(
     except Exception as e:
         return JSONResponse(
             content={
-                "message": f"Incorrect raw project was provided. Couldn't initiate peppy object.",
+                "message": "Incorrect raw project was provided. Couldn't initiate peppy object.",
                 "error": f"{e}",
                 "status_code": 417,
             },
@@ -313,7 +326,7 @@ async def upload_raw_pep(
         return JSONResponse(
             content={
                 "message": f"Project '{namespace}/{p_project.name}:{tag}' already exists in namespace",
-                "error": f"Set overwrite=True to overwrite or update project",
+                "error": "Set overwrite=True to overwrite or update project",
                 "status_code": 409,
             },
             status_code=409,

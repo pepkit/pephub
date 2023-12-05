@@ -7,7 +7,6 @@ from peppy.const import PEP_LATEST_VERSION
 from platform import python_version
 from fastapi import __version__ as fastapi_version
 from pepdbagent import __version__ as pepdbagent_version
-from pepdbagent.const import DEFAULT_TAG
 
 from secrets import token_hex
 
@@ -131,3 +130,4 @@ AUTH_CODE_EXPIRATION = 5 * 60  # seconds
 CALLBACK_ENDPOINT = "/auth/callback"
 
 DEFAULT_PEP_SCHEMA = "pep/2.1.0"
+DEFAULT_TAG = "default"

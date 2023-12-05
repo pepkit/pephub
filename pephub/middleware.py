@@ -4,7 +4,7 @@ from fastapi import Request
 from fastapi.responses import FileResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.types import Send
 
 from .const import SPA_PATH
 
