@@ -165,21 +165,6 @@ export const ProjectPage: FC = () => {
     runValidation();
   };
 
-  const handleProjectChange = async () => {
-    if (configIsDirty) {
-      await configMutation.mutateAsync();
-      runValidation();
-    }
-    if (samplesIsDirty) {
-      await sampleTableMutation.mutateAsync();
-      runValidation();
-    }
-    if (subsamplesIsDirty) {
-      await subsampleTableMutation.mutateAsync();
-      runValidation();
-    }
-  };
-
   // if (projectInfo?.pop) {
   //   return (
   //     <POPnterface />
@@ -354,12 +339,16 @@ export const ProjectPage: FC = () => {
                           configMutation.isPending ||
                           sampleTableMutation.isPending ||
                           subsampleTableMutation.isPending ||
+                          totalProjectMutation.isPending ||
                           !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
                         }
                         onClick={() => handleTotalProjectChange()}
                         className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
                       >
-                        {configMutation.isPending || sampleTableMutation.isPending || subsampleTableMutation.isPending
+                        {configMutation.isPending ||
+                        sampleTableMutation.isPending ||
+                        subsampleTableMutation.isPending ||
+                        totalProjectMutation.isPending
                           ? 'Saving...'
                           : 'Save'}
                       </button>

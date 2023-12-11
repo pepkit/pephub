@@ -149,7 +149,13 @@ async def update_a_pep(
 
     # project config update
     if updated_project.project_config_yaml is not None:
-        yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+        try:
+            yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+        except yaml.scanner.ScannerError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not parse provided yaml. Error: {e}",
+            )
         new_raw_project[CONFIG_KEY] = yaml_dict
 
     # run the validation if either the sample table or project config is updated
@@ -502,13 +508,9 @@ async def fork_pep_to_namespace(
             pep_schema=proj_annotation.pep_schema,
         )
     except ProjectUniqueNameError as e:
-        return JSONResponse(
-            content={
-                "message": f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",
-                "error": f"{e}",
-                "status_code": 400,
-            },
+        raise HTTPException(
             status_code=400,
+            detail=f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",
         )
 
     return JSONResponse(
