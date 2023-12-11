@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 
 import peppy
 
-from fastapi import APIRouter, File, UploadFile, Request, Depends, Form
+from fastapi import APIRouter, File, UploadFile, Request, Depends, Form, HTTPException
 from fastapi.responses import JSONResponse
 from peppy import Project
 from peppy.const import DESC_KEY, NAME_KEY
@@ -194,13 +194,9 @@ async def create_pep(
                     is_private=is_private,
                     pep_schema=pep_schema,
                 )
-            except ProjectUniqueNameError as e:
-                return JSONResponse(
-                    content={
-                        "message": f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
-                        "error": f"{e}",
-                        "status_code": 400,
-                    },
+            except ProjectUniqueNameError:
+                raise HTTPException(
+                    detail=f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
                     status_code=400,
                 )
             return JSONResponse(
@@ -241,12 +237,8 @@ async def create_pep(
                     is_private=is_private,
                 )
             except ProjectUniqueNameError as e:
-                return JSONResponse(
-                    content={
-                        "message": f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
-                        "error": f"{e}",
-                        "status_code": 400,
-                    },
+                raise HTTPException(
+                    detail=f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
                     status_code=400,
                 )
             return JSONResponse(
@@ -303,12 +295,8 @@ async def upload_raw_pep(
         p_project.description = description
 
     except Exception as e:
-        return JSONResponse(
-            content={
-                "message": "Incorrect raw project was provided. Couldn't initiate peppy object.",
-                "error": f"{e}",
-                "status_code": 417,
-            },
+        raise HTTPException(
+            detail=f"Incorrect raw project was provided. Couldn't initiate peppy object: {e}",
             status_code=417,
         )
     try:
@@ -323,13 +311,9 @@ async def upload_raw_pep(
             pep_schema=pep_schema,
         )
     except ProjectUniqueNameError:
-        return JSONResponse(
-            content={
-                "message": f"Project '{namespace}/{p_project.name}:{tag}' already exists in namespace",
-                "error": "Set overwrite=True to overwrite or update project",
-                "status_code": 409,
-            },
-            status_code=409,
+        raise HTTPException(
+            detail=f"Project '{namespace}/{p_project.name}:{tag}' already exists in namespace",
+            status_code=400,
         )
     return JSONResponse(
         content={

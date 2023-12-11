@@ -39,8 +39,7 @@ export const useDeleteMutation = (
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown
       const errorMessage = extractErrorMessage(err);
-      const error = extractError(err);
-      toast.error(`${errorMessage}: ${error}`, {
+      toast.error(`${errorMessage}`, {
         duration: 5000,
       });
     },
