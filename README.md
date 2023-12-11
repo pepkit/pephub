@@ -142,29 +142,18 @@ docker run -p 8000:8000 \
 
 ### Option 2. `docker compose`:
 
-The server has been Dockerized and packaged with a [postgres](https://hub.docker.com/_/postgres) image to be run with [`docker compose`](https://docs.docker.com/compose/). This lets you run everything at once and develop without having to manage database instances. The `docker-compose.yaml` file is written such that it mounts the database storage info to a folder called `postgres/` at the root of the repository. This lets you load the database once and have it persist its state after restarting the container.
+The server has been Dockerized and packaged with a [postgres](https://hub.docker.com/_/postgres) image to be run with [`docker compose`](https://docs.docker.com/compose/). This lets you run everything at once and develop without having to manage database instances.
 
-You can start a development environment in three steps:
+You can start a development environment in two steps:
 
-**1. Obtain the latest database schema:**
-
-```console
-sh setup_db.sh
-```
-
-**2. Curate your environment:**
+**1. Curate your environment:**
 Since we are running in `docker`, we need to supply environment variables to the container. The `docker-compose.yaml` file is written such that you can supply a `.env` file at the root with your configurations. See the [example env file](environment/template.env) for reference. See [here](docs/server-settings.md) for a detailed explanation of all configurable server settings. For now, you can simply copy the `env` file:
 
 ```
 cp environment/template.env .env
 ```
 
-**3. Build and start the containers:**
-If you are running on an Apple M1 chip, you will need to set the following env variable prior to running `docker compose`:
-
-```console
-export DOCKER_DEFAULT_PLATFORM=linux/amd64
-```
+**2. Build and start the containers:**
 
 ```console
 docker compose up --build
@@ -173,7 +162,7 @@ docker compose up --build
 `pephub` now runs/listens on http://localhost:8000  
 `postgres` now runs/listens on http://localhost:5432
 
-**3. Utilize the [`load_db`](scripts/load_db.py) script to populate the database with `examples/`:**
+**3. (_Optional_) Utilize the [`load_db`](scripts/load_db.py) script to populate the database with `examples/`:**
 
 ```console
 cd scripts
@@ -182,6 +171,21 @@ python load_db.py \
 --password password \
 --database pephub
 ../examples
+```
+
+**4. (_Optional_) GitHub Authentication Client Setup**
+
+_pephub_ uses GitHub for namespacing and authentication. As such, a GitHub application capable of logging in users is required. We've [included instructions](https://github.com/pepkit/pephub/blob/master/docs/authentication.md#setting-up-github-oauth-for-your-own-server) for setting this up locally using your own GitHub account.
+
+**5. (_Optional_) Vector Database Setup**
+
+We've added [semantic-search](https://huggingface.co/course/chapter5/6?fw=tf#using-embeddings-for-semantic-search) capabilities to pephub. Optionally, you may host an instance of the [qdrant](https://qdrant.tech/) **vector database** to store embeddings computed using a sentence transformer that has mined and processed any relevant metadata from PEPs. If no qdrant connection settings are supplied, pephub will default to SQL search. Read more [here](docs/semantic-search.md). To run qdrant locally, simply run the following:
+
+```
+docker pull qdrant/qdrant
+docker run -p 6333:6333 \
+    -v $(pwd)/qdrant_storage:/qdrant/storage \
+    qdrant/qdrant
 ```
 
 _Note: If you wish to run the development environment with a pubic database, curate your `.env` file as such._
