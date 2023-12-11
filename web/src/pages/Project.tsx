@@ -180,6 +180,12 @@ export const ProjectPage: FC = () => {
     }
   };
 
+  // if (projectInfo?.pop) {
+  //   return (
+  //     <POPnterface />
+  //   )
+  // }
+
   if (error) {
     return (
       <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
