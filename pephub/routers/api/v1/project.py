@@ -65,7 +65,7 @@ async def get_a_pep(
             raw_project = ProjectRawModel(**proj)
         except Exception:
             raise HTTPException(500, "Unexpected project error!")
-        return raw_project.dict(by_alias=False)
+        return raw_project.model_dump(by_alias=False)
     samples = [s.to_dict() for s in proj.samples]
     sample_table_index = proj.sample_table_index
 
@@ -75,7 +75,7 @@ async def get_a_pep(
     sample_attributes = proj._samples[0]._attributes
 
     proj_dict = proj.to_dict()
-    proj_annotation_dict = proj_annotation.dict()
+    proj_annotation_dict = proj_annotation.model_dump()
 
     # default to name from annotation
     if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
@@ -202,7 +202,7 @@ async def update_a_pep(
 
     # update "meta meta data"
     update_dict = {}  # dict used to pass to the `db.update_item` function
-    for k, v in updated_project.dict(exclude_unset=True).items():
+    for k, v in updated_project.model_dump(exclude_unset=True).items():
         # is the value an attribute of the peppy project?
         if k in new_raw_project:
             new_raw_project[k] = v
@@ -237,7 +237,7 @@ async def update_a_pep(
             # "project": raw_peppy_project,
             "registry": f"{namespace}/{project}:{tag}",
             "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
-            "project": updated_project.dict(),
+            "project": updated_project.model_dump(),
         },
         status_code=202,
     )
