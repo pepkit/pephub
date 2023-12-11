@@ -19,11 +19,12 @@ from pydantic import BaseModel
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.exceptions import ProjectNotFoundError
+from pepdbagent.models import AnnotationModel, Namespace
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
 from sentence_transformers import SentenceTransformer
 
-from .routers.models import AnnotationModel, Namespace, ForkRequest
+from .routers.models import ForkRequest
 from .const import (
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,

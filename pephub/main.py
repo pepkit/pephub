@@ -27,7 +27,7 @@ coloredlogs.install(
 _LOGGER_PEPPY = logging.getLogger("peppy")
 coloredlogs.install(
     logger=_LOGGER_PEPPY,
-    level=logging.INFO,
+    level=logging.ERROR,
     datefmt="%b %d %Y %H:%M:%S",
     fmt="[%(levelname)s] [%(asctime)s] [PEPPY] %(message)s",
 )
