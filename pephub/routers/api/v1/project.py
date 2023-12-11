@@ -12,6 +12,8 @@ from peppy.const import (
     CONFIG_KEY,
     SAMPLE_DF_KEY,
     SUBSAMPLE_RAW_LIST_KEY,
+    SAMPLE_TABLE_INDEX_KEY,
+    SAMPLE_NAME_ATTR,
 )
 
 from pepdbagent import PEPDatabaseAgent
@@ -138,10 +140,35 @@ async def update_a_pep(
         new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
         new_raw_project[CONFIG_KEY] = dict(current_project.config)
 
+        if updated_project.project_config_yaml is not None:
+            try:
+                yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+            except yaml.scanner.ScannerError as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Could not parse provided yaml. Error: {e}",
+                )
+
+            sample_table_index_col = yaml_dict.get(
+                SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
+            )
+        else:
+            sample_table_index_col = current_project.config.get(
+                SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
+            )
+
         # check all sample names are something other than
         # None or an empty string
         for sample in new_raw_project[SAMPLE_RAW_DICT_KEY]:
-            if sample["sample_name"] is None or sample["sample_name"] == "":
+            if sample_table_index_col not in sample:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Sample table does not contain column '{sample_table_index_col}'. Please check sample table",
+                )
+            if (
+                sample[sample_table_index_col] is None
+                or sample[sample_table_index_col] == ""
+            ):
                 raise HTTPException(
                     status_code=400,
                     detail="Sample name cannot be None or an empty string. Please check sample table",
