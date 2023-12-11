@@ -113,4 +113,4 @@ Coming soon...
 
 - Description: HuggingFace model name
 - Required: No
-- Default Value: "sentence-transformers/all-MiniLM-L12-v2"
+- Default Value: "BAAI/bge-small-en-v1.5"

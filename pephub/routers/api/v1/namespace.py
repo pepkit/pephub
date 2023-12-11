@@ -132,7 +132,6 @@ async def get_namespace_projects(
             "offset": offset,
             "items": results,
             "session_info": session_info,
-            "can_edit": user == namespace or namespace in user_orgs,
         }
     )
 
