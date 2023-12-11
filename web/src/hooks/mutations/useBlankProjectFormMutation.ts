@@ -35,7 +35,9 @@ export const useBlankProjectFormMutation = (
         jwt || '',
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace]);
+      queryClient.invalidateQueries({
+        queryKey: [namespace],
+      });
       toast.success('Project successfully uploaded!');
       if (onSuccess) {
         onSuccess();

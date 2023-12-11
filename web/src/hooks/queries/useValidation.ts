@@ -44,10 +44,11 @@ const runValidation = async (params: ValidationParams) => {
 
 export const useValidation = (params: ValidationParams) => {
   const { pep_registry, pep_files, schema, schema_registry, enabled } = params;
-  return useQuery(['validation', pep_registry, pep_files, schema, schema_registry], () => runValidation(params), {
+  return useQuery({
+    queryKey: ['validation', pep_registry, pep_files, schema, schema_registry],
+    queryFn: () => runValidation(params),
     enabled: enabled,
     refetchOnWindowFocus: false,
     retry: false,
-    cacheTime: 0,
   });
 };

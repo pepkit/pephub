@@ -351,15 +351,15 @@ export const ProjectPage: FC = () => {
                     <>
                       <button
                         disabled={
-                          configMutation.isLoading ||
-                          sampleTableMutation.isLoading ||
-                          subsampleTableMutation.isLoading ||
+                          configMutation.isPending ||
+                          sampleTableMutation.isPending ||
+                          subsampleTableMutation.isPending ||
                           !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
                         }
                         onClick={() => handleTotalProjectChange()}
                         className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
                       >
-                        {configMutation.isLoading || sampleTableMutation.isLoading || subsampleTableMutation.isLoading
+                        {configMutation.isPending || sampleTableMutation.isPending || subsampleTableMutation.isPending
                           ? 'Saving...'
                           : 'Save'}
                       </button>

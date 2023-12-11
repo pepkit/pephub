@@ -134,12 +134,12 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
         </button>
         <button
           onClick={() => mutation.mutate()}
-          disabled={!isValid || mutation.isLoading}
+          disabled={!isValid || mutation.isPending}
           id="fork-submit-btn"
           type="submit"
           className="btn btn-success"
         >
-          {mutation.isLoading ? 'Forking...' : 'Fork'}
+          {mutation.isPending ? 'Forking...' : 'Fork'}
         </button>
       </Modal.Footer>
     </Modal>

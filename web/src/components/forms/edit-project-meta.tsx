@@ -169,11 +169,11 @@ export const ProjectMetaEditForm: FC<Props> = ({
       <button
         onClick={() => mutation.mutate()}
         id="metadata-save-btn"
-        disabled={(!isDirty && isValid) || mutation.isLoading}
+        disabled={(!isDirty && isValid) || mutation.isPending}
         type="button"
         className="btn btn-success me-1"
       >
-        {mutation.isLoading ? 'Saving...' : 'Save'}
+        {mutation.isPending ? 'Saving...' : 'Save'}
       </button>
     </form>
   );

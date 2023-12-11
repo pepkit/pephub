@@ -6,7 +6,6 @@ import { Sample } from '../../../types';
 import { editTotalProject } from '../../api/project';
 import { extractError, extractErrorMessage } from '../../utils/etc';
 
-
 interface TotalProjectChangeMutationProps {
   config?: string;
   samples?: Sample[];
@@ -25,16 +24,18 @@ export const useTotalProjectChangeMutation = (
   const mutation = useMutation({
     mutationFn: () => editTotalProject(namespace || '', project || '', tag, jwt || '', data),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace, project, tag]);
+      queryClient.invalidateQueries({
+        queryKey: [namespace, project, tag],
+      });
       toast.success('Successfully updated the project!');
     },
     onError: (err: AxiosError) => {
-        // extract out error message if it exists, else unknown
-        const errorMessage = extractErrorMessage(err);
-        const error = extractError(err);
-        toast.error(`${errorMessage}: ${error}`, {
-          duration: 5000,
-        });
+      // extract out error message if it exists, else unknown
+      const errorMessage = extractErrorMessage(err);
+      const error = extractError(err);
+      toast.error(`${errorMessage}: ${error}`, {
+        duration: 5000,
+      });
     },
   });
 

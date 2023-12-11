@@ -49,10 +49,10 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
         </button>
         <button
           onClick={() => mutation.mutate()}
-          disabled={newProjectConfig === originalConfig || mutation.isLoading}
+          disabled={newProjectConfig === originalConfig || mutation.isPending}
           className="btn btn-success me-1"
         >
-          {mutation.isLoading ? 'Saving...' : 'Save'}
+          {mutation.isPending ? 'Saving...' : 'Save'}
         </button>
       </div>
     </>

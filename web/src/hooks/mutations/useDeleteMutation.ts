@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '../../api/project';
 import { extractError, extractErrorMessage } from '../../utils/etc';
 
-
 export const useDeleteMutation = (
   namespace: string,
   project: string,
@@ -47,5 +46,5 @@ export const useDeleteMutation = (
     },
   });
 
-  return { mutation, isLoading: mutation.isLoading };
+  return mutation;
 };

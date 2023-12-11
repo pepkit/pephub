@@ -181,7 +181,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           className="btn btn-success me-1"
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isLoading ? 'Submitting...' : 'Submit'}
+          {mutation.isPending ? 'Submitting...' : 'Submit'}
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
           Cancel

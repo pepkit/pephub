@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { forkProject } from '../../api/project';
 import { extractError, extractErrorMessage } from '../../utils/etc';
 
-
 export const useForkMutation = (
   namespace: string,
   project: string,
@@ -32,7 +31,9 @@ export const useForkMutation = (
       }),
     onSuccess: () => {
       toast.success('Project successully forked!');
-      queryClient.invalidateQueries([forkTo]);
+      queryClient.invalidateQueries({
+        queryKey: [forkTo],
+      });
       if (onHide) {
         onHide();
       }
