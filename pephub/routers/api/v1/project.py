@@ -124,10 +124,8 @@ async def update_a_pep(
     """
     # if not logged in, they cant update
     if namespace not in (list_of_admins or []):
-        return JSONResponse(
-            content={
-                "message": "Unauthorized for updating projects.",
-            },
+        raise HTTPException(
+            detail="You do not have permission to update this project.",
             status_code=401,
         )
 
@@ -139,6 +137,15 @@ async def update_a_pep(
     if updated_project.sample_table is not None:
         new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
         new_raw_project[CONFIG_KEY] = dict(current_project.config)
+
+        # check all sample names are something other than
+        # None or an empty string
+        for sample in new_raw_project[SAMPLE_RAW_DICT_KEY]:
+            if sample["sample_name"] is None or sample["sample_name"] == "":
+                raise HTTPException(
+                    status_code=400,
+                    detail="Sample name cannot be None or an empty string. Please check sample table",
+                )
 
     # subsample table update
     if updated_project.subsample_tables is not None:
