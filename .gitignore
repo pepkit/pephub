@@ -141,3 +141,4 @@ postgres/
 environment/local.env
 qdrant_storage/
 postgres-data/
+local_cache/
