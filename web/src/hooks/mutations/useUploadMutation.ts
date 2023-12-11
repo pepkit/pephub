@@ -5,7 +5,6 @@ import { toast } from 'react-hot-toast';
 import { submitProjectFiles } from '../../api/namespace';
 import { extractError, extractErrorMessage } from '../../utils/etc';
 
-
 export const useUploadMutation = (
   namespace: string,
   project: string,
@@ -34,7 +33,9 @@ export const useUploadMutation = (
         jwt || '',
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace]);
+      queryClient.invalidateQueries({
+        queryKey: [namespace],
+      });
       if (onSuccess) {
         onSuccess();
       }
@@ -43,11 +44,9 @@ export const useUploadMutation = (
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown
       const errorMessage = extractErrorMessage(err);
-      const error = extractError(err);
-      toast.error(`${errorMessage}: ${error}`, {
+      toast.error(`${errorMessage}`, {
         duration: 5000,
       });
     },
-    
   });
 };

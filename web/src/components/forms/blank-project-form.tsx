@@ -184,14 +184,14 @@ sample_table: samples.csv
       </Tabs>
       <div className="mt-3">
         <button
-          disabled={!isValid || mutation.isLoading}
+          disabled={!isValid || mutation.isPending}
           id="blank-project-submit-btn"
           className="btn btn-success me-1"
           type="button"
           onClick={() => mutation.mutate()}
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isLoading ? 'Submitting...' : 'Add'}
+          {mutation.isPending ? 'Submitting...' : 'Add'}
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
           Cancel

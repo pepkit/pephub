@@ -38,7 +38,9 @@ export const useEditProjectMetaMutation = (
     mutationFn: () => editProjectMetadata(namespace, name, tag, jwt, metadata),
     onSuccess: () => {
       toast.success('Project metadata updated successfully.');
-      queryClient.invalidateQueries([namespace, name, tag]);
+      queryClient.invalidateQueries({
+        queryKey: [namespace, name, tag],
+      });
       onSuccessfulSubmit();
 
       if (newName || newTag) {

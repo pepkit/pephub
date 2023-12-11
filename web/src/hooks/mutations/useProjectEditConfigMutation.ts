@@ -18,7 +18,9 @@ export const useProjectEditConfigMutation = (
     mutationFn: () => editProjectConfig(namespace, project, tag, jwt || '', newProjectConfig),
     onSuccess: () => {
       toast.success('Project config saved successfully');
-      queryClient.invalidateQueries([namespace, project, tag]);
+      queryClient.invalidateQueries({
+        queryKey: [namespace, project, tag],
+      });
 
       if (onSuccess) {
         onSuccess();

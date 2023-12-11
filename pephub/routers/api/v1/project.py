@@ -12,6 +12,8 @@ from peppy.const import (
     CONFIG_KEY,
     SAMPLE_DF_KEY,
     SUBSAMPLE_RAW_LIST_KEY,
+    SAMPLE_TABLE_INDEX_KEY,
+    SAMPLE_NAME_ATTR,
 )
 
 from pepdbagent import PEPDatabaseAgent
@@ -65,7 +67,7 @@ async def get_a_pep(
             raw_project = ProjectRawModel(**proj)
         except Exception:
             raise HTTPException(500, "Unexpected project error!")
-        return raw_project.dict(by_alias=False)
+        return raw_project.model_dump(by_alias=False)
     samples = [s.to_dict() for s in proj.samples]
     sample_table_index = proj.sample_table_index
 
@@ -75,7 +77,7 @@ async def get_a_pep(
     sample_attributes = proj._samples[0]._attributes
 
     proj_dict = proj.to_dict()
-    proj_annotation_dict = proj_annotation.dict()
+    proj_annotation_dict = proj_annotation.model_dump()
 
     # default to name from annotation
     if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
@@ -124,10 +126,8 @@ async def update_a_pep(
     """
     # if not logged in, they cant update
     if namespace not in (list_of_admins or []):
-        return JSONResponse(
-            content={
-                "message": "Unauthorized for updating projects.",
-            },
+        raise HTTPException(
+            detail="You do not have permission to update this project.",
             status_code=401,
         )
 
@@ -140,6 +140,40 @@ async def update_a_pep(
         new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
         new_raw_project[CONFIG_KEY] = dict(current_project.config)
 
+        if updated_project.project_config_yaml is not None:
+            try:
+                yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+            except yaml.scanner.ScannerError as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Could not parse provided yaml. Error: {e}",
+                )
+
+            sample_table_index_col = yaml_dict.get(
+                SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
+            )
+        else:
+            sample_table_index_col = current_project.config.get(
+                SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
+            )
+
+        # check all sample names are something other than
+        # None or an empty string
+        for sample in new_raw_project[SAMPLE_RAW_DICT_KEY]:
+            if sample_table_index_col not in sample:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Sample table does not contain column '{sample_table_index_col}'. Please check sample table",
+                )
+            if (
+                sample[sample_table_index_col] is None
+                or sample[sample_table_index_col] == ""
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Sample name cannot be None or an empty string. Please check sample table",
+                )
+
     # subsample table update
     if updated_project.subsample_tables is not None:
         new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = updated_project.subsample_tables
@@ -149,7 +183,13 @@ async def update_a_pep(
 
     # project config update
     if updated_project.project_config_yaml is not None:
-        yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+        try:
+            yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+        except yaml.scanner.ScannerError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not parse provided yaml. Error: {e}",
+            )
         new_raw_project[CONFIG_KEY] = yaml_dict
 
     # run the validation if either the sample table or project config is updated
@@ -202,7 +242,7 @@ async def update_a_pep(
 
     # update "meta meta data"
     update_dict = {}  # dict used to pass to the `db.update_item` function
-    for k, v in updated_project.dict(exclude_unset=True).items():
+    for k, v in updated_project.model_dump(exclude_unset=True).items():
         # is the value an attribute of the peppy project?
         if k in new_raw_project:
             new_raw_project[k] = v
@@ -237,7 +277,7 @@ async def update_a_pep(
             # "project": raw_peppy_project,
             "registry": f"{namespace}/{project}:{tag}",
             "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
-            "project": updated_project.dict(),
+            "project": updated_project.model_dump(),
         },
         status_code=202,
     )
@@ -502,13 +542,9 @@ async def fork_pep_to_namespace(
             pep_schema=proj_annotation.pep_schema,
         )
     except ProjectUniqueNameError as e:
-        return JSONResponse(
-            content={
-                "message": f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",
-                "error": f"{e}",
-                "status_code": 400,
-            },
+        raise HTTPException(
             status_code=400,
+            detail=f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",
         )
 
     return JSONResponse(

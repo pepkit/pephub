@@ -9,5 +9,8 @@ const fetchSchemas = async () => {
 };
 
 export const useSchemas = () => {
-  return useQuery(['schemas'], fetchSchemas);
+  return useQuery({
+    queryKey: ['schemas'],
+    queryFn: () => fetchSchemas(),
+  });
 };

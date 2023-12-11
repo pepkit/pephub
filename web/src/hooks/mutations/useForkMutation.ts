@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { forkProject } from '../../api/project';
 import { extractError, extractErrorMessage } from '../../utils/etc';
 
-
 export const useForkMutation = (
   namespace: string,
   project: string,
@@ -32,7 +31,9 @@ export const useForkMutation = (
       }),
     onSuccess: () => {
       toast.success('Project successully forked!');
-      queryClient.invalidateQueries([forkTo]);
+      queryClient.invalidateQueries({
+        queryKey: [forkTo],
+      });
       if (onHide) {
         onHide();
       }
@@ -41,8 +42,7 @@ export const useForkMutation = (
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown
       const errorMessage = extractErrorMessage(err);
-      const error = extractError(err);
-      toast.error(`${errorMessage}: ${error}`, {
+      toast.error(`${errorMessage}`, {
         duration: 5000,
       });
     },

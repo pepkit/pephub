@@ -17,7 +17,9 @@ export const useSubsampleTableMutation = (
   const mutation = useMutation({
     mutationFn: () => editProjectSubsampleTable(namespace || '', project || '', tag, jwt || '', newProjectSubsamples),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace, project, tag, 'subsamples']);
+      queryClient.invalidateQueries({
+        queryKey: [namespace, project, tag, 'subsamples'],
+      });
       toast.success('Successfully updated project samples');
     },
     onError: (error: AxiosError) => {

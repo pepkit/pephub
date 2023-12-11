@@ -12,7 +12,9 @@ const fetchSchema = async (registry: string) => {
 };
 
 export const useSchema = (registry: string | undefined) => {
-  return useQuery(['schema', registry], () => fetchSchema(registry || ''), {
+  return useQuery({
+    queryKey: ['schema', registry],
+    queryFn: () => fetchSchema(registry || ''),
     enabled: registry !== undefined && registry.length > 0,
     refetchOnWindowFocus: false,
   });

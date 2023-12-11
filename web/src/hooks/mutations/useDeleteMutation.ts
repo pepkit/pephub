@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '../../api/project';
 import { extractError, extractErrorMessage } from '../../utils/etc';
 
-
 export const useDeleteMutation = (
   namespace: string,
   project: string,
@@ -40,12 +39,11 @@ export const useDeleteMutation = (
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown
       const errorMessage = extractErrorMessage(err);
-      const error = extractError(err);
-      toast.error(`${errorMessage}: ${error}`, {
+      toast.error(`${errorMessage}`, {
         duration: 5000,
       });
     },
   });
 
-  return { mutation, isLoading: mutation.isLoading };
+  return mutation;
 };

@@ -9,6 +9,7 @@ export interface ProjectAnnotation {
   submission_date: string;
   digest: string;
   pep_schema: string;
+  pop: boolean;
 }
 
 export interface ProjectConfigResponse {
