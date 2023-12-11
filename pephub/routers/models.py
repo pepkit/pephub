@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, Field, Extra
+from pydantic import BaseModel, Field, ConfigDict
 from pepdbagent.models import UpdateItems
 from pepdbagent.const import DEFAULT_TAG
 
@@ -8,13 +8,12 @@ from ..const import DEFAULT_PEP_SCHEMA
 
 class ProjectOptional(UpdateItems):
     # sample table is a list of JSON objects
-    sample_table: Optional[List[dict]]
-    project_config_yaml: Optional[str]
-    description: Optional[str]
-    subsample_tables: Optional[List[List[dict]]]
+    sample_table: Optional[List[dict]] = None
+    project_config_yaml: Optional[str] = None
+    description: Optional[str] = None
+    subsample_tables: Optional[List[List[dict]]] = None
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class SearchQuery(BaseModel):
@@ -27,7 +26,7 @@ class SearchQuery(BaseModel):
 
 class RawValidationQuery(BaseModel):
     project_config: str
-    sample_table: Optional[str]
+    sample_table: Optional[str] = None
 
 
 class TokenExchange(BaseModel):
@@ -60,21 +59,18 @@ class JWTDeviceTokenResponse(BaseModel):
 
 class ProjectRawModel(BaseModel):
     config: dict = Field(alias="_config")
-    subsample_list: Optional[list] = Field(alias="_subsample_list")
+    subsample_list: Optional[list] = Field(alias="_subsample_list", default=None)
     sample_list: list[dict] = Field(alias="_sample_dict")
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class ProjectRawRequest(BaseModel):
     config: dict
-    subsample_list: Optional[List[List[dict]]]
+    subsample_list: Optional[List[List[dict]]] = None
     sample_list: List[dict]
 
-    class Config:
-        allow_population_by_field_name = True
-        extra = Extra.allow
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class ProjectJsonRequest(BaseModel):

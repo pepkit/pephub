@@ -71,6 +71,7 @@ app.include_router(eido_router)
 
 # mount ui
 app.add_middleware(SPA)
+
 # app.add_middleware(EnvironmentMiddleware)
 try:
     app.mount("/", StaticFiles(directory=SPA_PATH, html=True), name="spa")

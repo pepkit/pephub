@@ -287,7 +287,7 @@ async def upload_raw_pep(
 
         # This configurations needed due to Issue #124 Should be removed in the future
         project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
-        ff = project_dict.dict(by_alias=True)
+        ff = project_dict.model_dump(by_alias=True)
         p_project = peppy.Project().from_dict(ff)
 
         p_project.name = name
