@@ -1,4 +1,7 @@
-import { FC, useState } from 'react';
+import { FC, Fragment, useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 import { ProjectAnnotation } from '../../../types';
 import { useSession } from '../../hooks/useSession';
@@ -32,7 +35,53 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           ) : (
             <span className="ms-2 badge text-dark rounded-pill border border-dark">Public</span>
           )}
+          {project.pop ? (
+            <span className="ms-2 badge bg-primary text-white rounded-pill border border-primary flex align-items-center bg-opacity-75">
+              <img
+                src="/popcorn-white.svg"
+                height="10px"
+                width="10px"
+                alt="Popcorn icon"
+                className="me-1 text-primary"
+              />
+              POP
+            </span>
+          ) : null}
         </div>
+        <Dropdown as={ButtonGroup}>
+          <Button variant="outline-dark">
+            <i className="bi bi-star me-1"></i>
+            Favorite
+          </Button>
+
+          <Dropdown.Toggle split variant="outline-dark" id="dropdown-split-basic" />
+
+          <Dropdown.Menu>
+            <Dropdown.Item href={`/${project.namespace}/${project.name}`}>View</Dropdown.Item>
+            {user ? (
+              <Dropdown.Item onClick={() => {}}>Fork</Dropdown.Item>
+            ) : (
+              <Dropdown.Item disabled onClick={() => {}}>
+                Fork
+              </Dropdown.Item>
+            )}
+            {/* divider */}
+
+            {user && user.login === project.namespace && (
+              <Fragment>
+                <Dropdown.Divider />
+                <Dropdown.Item
+                  onClick={() => {
+                    setShowDeletePEPModal(true);
+                  }}
+                  className="text-danger"
+                >
+                  Delete
+                </Dropdown.Item>
+              </Fragment>
+            )}
+          </Dropdown.Menu>
+        </Dropdown>
       </div>
       <div>
         <div className="d-flex flex-row align-items-center">

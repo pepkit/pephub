@@ -23,7 +23,7 @@ export const NamespacePage: FC = () => {
   namespace = namespace?.toLowerCase();
 
   // get session info
-  const { user, jwt } = useSession();
+  const { user } = useSession();
 
   // pagination
   const [limit, setLimit] = useState(10);
@@ -35,8 +35,8 @@ export const NamespacePage: FC = () => {
   const searchDebounced = useDebounce<string>(search, 500);
 
   // data fetching
-  const { data: _, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace, jwt);
-  const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, jwt, {
+  const { data: _, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace);
+  const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, {
     limit,
     offset,
     orderBy,
@@ -85,20 +85,20 @@ export const NamespacePage: FC = () => {
             API
           </button>
           {user?.login === namespace || user?.orgs.includes(namespace || '') ? (
-            <button
-              onClick={() => setShowAddPEPModal(true)}
-              className="btn btn-sm btn-success me-1"
-              data-bs-toggle="modal"
-              data-bs-target="#newProject"
-            >
-              <i className="bi bi-plus-circle me-1"></i>
-              Add PEP
-            </button>
+            <Fragment>
+              <button
+                onClick={() => setShowAddPEPModal(true)}
+                className="btn btn-sm btn-success me-1"
+                data-bs-toggle="modal"
+                data-bs-target="#newProject"
+              >
+                <i className="bi bi-plus-circle me-1"></i>
+                Add
+              </button>
+            </Fragment>
           ) : null}
         </div>
       </div>
-      {/* Render info about the namespace */}
-
       <>
         {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
           <p className="mb-0">

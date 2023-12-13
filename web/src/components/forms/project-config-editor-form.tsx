@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from 'react';
 
 import { useProjectEditConfigMutation } from '../../hooks/mutations/useProjectEditConfigMutation';
 import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
-import { useSession } from '../../hooks/useSession';
 import { ProjectConfigEditor } from '../project/project-config';
 
 interface Props {
@@ -12,9 +11,7 @@ interface Props {
 }
 
 export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) => {
-  const { jwt } = useSession();
-
-  const { data: projectConfig } = useProjectConfig(namespace, project, tag, jwt);
+  const { data: projectConfig } = useProjectConfig(namespace, project, tag);
 
   // state
   const [originalConfig, setOriginalConfig] = useState<string>('');
@@ -31,7 +28,7 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
     }
   };
 
-  const mutation = useProjectEditConfigMutation(namespace, project, tag, jwt || '', newProjectConfig, onSuccess);
+  const mutation = useProjectEditConfigMutation(namespace, project, tag, newProjectConfig, onSuccess);
 
   useEffect(() => {
     if (projectConfig) {
@@ -49,10 +46,10 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
         </button>
         <button
           onClick={() => mutation.mutate()}
-          disabled={newProjectConfig === originalConfig || mutation.isLoading}
+          disabled={newProjectConfig === originalConfig || mutation.isPending}
           className="btn btn-success me-1"
         >
-          {mutation.isLoading ? 'Saving...' : 'Save'}
+          {mutation.isPending ? 'Saving...' : 'Save'}
         </button>
       </div>
     </>

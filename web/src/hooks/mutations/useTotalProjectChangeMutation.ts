@@ -4,8 +4,8 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
 import { editTotalProject } from '../../api/project';
-import { extractError, extractErrorMessage } from '../../utils/etc';
-
+import { extractErrorMessage } from '../../utils/etc';
+import { useSession } from '../useSession';
 
 interface TotalProjectChangeMutationProps {
   config?: string;
@@ -17,24 +17,25 @@ export const useTotalProjectChangeMutation = (
   namespace: string,
   project: string,
   tag: string,
-  jwt: string,
   data: TotalProjectChangeMutationProps,
 ) => {
+  const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => editTotalProject(namespace || '', project || '', tag, jwt || '', data),
+    mutationFn: () => editTotalProject(namespace || '', project || '', tag, session.jwt || '', data),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace, project, tag]);
+      queryClient.invalidateQueries({
+        queryKey: [namespace, project, tag],
+      });
       toast.success('Successfully updated the project!');
     },
     onError: (err: AxiosError) => {
-        // extract out error message if it exists, else unknown
-        const errorMessage = extractErrorMessage(err);
-        const error = extractError(err);
-        toast.error(`${errorMessage}: ${error}`, {
-          duration: 5000,
-        });
+      // extract out error message if it exists, else unknown
+      const errorMessage = extractErrorMessage(err);
+      toast.error(`${errorMessage}`, {
+        duration: 5000,
+      });
     },
   });
 

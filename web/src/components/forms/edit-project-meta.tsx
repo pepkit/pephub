@@ -3,7 +3,6 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
 import { useProject } from '../../hooks/queries/useProject';
-import { useSession } from '../../hooks/useSession';
 import { MarkdownEditor } from '../markdown/edit';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 import { SchemaTooltip } from './tooltips/form-tooltips';
@@ -31,9 +30,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
   onFailedSubmit = () => {},
   onCancel = () => {},
 }) => {
-  const { jwt } = useSession();
-
-  const { data: projectInfo } = useProject(namespace, name, tag, jwt);
+  const { data: projectInfo } = useProject(namespace, name, tag);
 
   const {
     register,
@@ -74,7 +71,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
     newSchema: projectInfo?.pep_schema === newSchema ? undefined : newSchema,
   };
 
-  const mutation = useEditProjectMetaMutation(namespace, name, tag, jwt, onSubmit, onFailedSubmit, metadata);
+  const mutation = useEditProjectMetaMutation(namespace, name, tag, onSubmit, onFailedSubmit, metadata);
 
   return (
     <form>
@@ -169,11 +166,11 @@ export const ProjectMetaEditForm: FC<Props> = ({
       <button
         onClick={() => mutation.mutate()}
         id="metadata-save-btn"
-        disabled={(!isDirty && isValid) || mutation.isLoading}
+        disabled={(!isDirty && isValid) || mutation.isPending}
         type="button"
         className="btn btn-success me-1"
       >
-        {mutation.isLoading ? 'Saving...' : 'Save'}
+        {mutation.isPending ? 'Saving...' : 'Save'}
       </button>
     </form>
   );

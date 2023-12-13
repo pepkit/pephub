@@ -22,7 +22,7 @@ from pepdbagent.exceptions import ProjectNotFoundError
 from pepdbagent.models import AnnotationModel, Namespace
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
-from sentence_transformers import SentenceTransformer
+from fastembed.embedding import FlagEmbedding as Embedding
 
 from .routers.models import ForkRequest
 from .const import (
@@ -105,7 +105,9 @@ agent = PEPDatabaseAgent(
 )
 
 # sentence_transformer model
-st_model = SentenceTransformer(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
+embedding_model = Embedding(
+    model_name=os.getenv("HF_MODEL", DEFAULT_HF_MODEL), max_length=512
+)
 
 
 def generate_random_auth_code() -> str:
@@ -380,11 +382,11 @@ def get_qdrant(
         pass
 
 
-def get_sentence_transformer() -> SentenceTransformer:
+def get_sentence_transformer() -> Embedding:
     """
     Return sentence transformer encoder
     """
-    return st_model
+    return embedding_model
 
 
 def get_namespace_info(

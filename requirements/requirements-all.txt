@@ -9,13 +9,11 @@ tqdm
 uvicorn
 python-dotenv
 pepdbagent>=0.6.0a2
+pepdbagent @ git+https://github.com/pepkit/pepdbagent@dev#egg=pepdbagent
 peppy>=0.40.0a5
 qdrant-client
 requests
 aiofiles
 pyjwt[crypto]
 coloredlogs
--f https://download.pytorch.org/whl/torch_stable.html
-torch==1.13.1+cpu
-torchvision==0.14.1+cpu
-sentence-transformers
+fastembed

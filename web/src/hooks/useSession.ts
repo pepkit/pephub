@@ -10,7 +10,15 @@ const VITE_API_HOST = import.meta.env.VITE_API_HOST || '';
 const AUTH_BASE = `${VITE_API_HOST}/auth`;
 const JWT_STORE = 'pephub_session';
 
-export const useSession = () => {
+interface Session {
+  jwt: string | null;
+  user: User | null;
+  login: () => void;
+  logout: () => void;
+  setJWT: (jwt: string | null) => void;
+}
+
+export const useSession = (): Session => {
   const [jwt, setJwt] = useLocalStorage(JWT_STORE, null);
 
   // hit endpoint to check if the session is valid
@@ -60,6 +68,6 @@ export const useSession = () => {
     user: decoded || null,
     login,
     logout,
-    setJWT: setJwt,
+    setJWT: setJwt as (jwt: string | null) => void,
   };
 };

@@ -21,3 +21,4 @@ pephub/data
 postgres/
 .idea
 qdrant_storage/
+local_cache/

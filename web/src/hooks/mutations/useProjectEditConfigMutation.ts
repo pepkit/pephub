@@ -3,22 +3,25 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { editProjectConfig } from '../../api/project';
+import { useSession } from '../useSession';
 
 export const useProjectEditConfigMutation = (
   namespace: string,
   project: string,
   tag: string,
-  jwt: string | undefined,
   newProjectConfig: string,
   onSuccess?: () => void,
 ) => {
+  const session = useSession();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => editProjectConfig(namespace, project, tag, jwt || '', newProjectConfig),
+    mutationFn: () => editProjectConfig(namespace, project, tag, session.jwt || '', newProjectConfig),
     onSuccess: () => {
       toast.success('Project config saved successfully');
-      queryClient.invalidateQueries([namespace, project, tag]);
+      queryClient.invalidateQueries({
+        queryKey: [namespace, project, tag],
+      });
 
       if (onSuccess) {
         onSuccess();

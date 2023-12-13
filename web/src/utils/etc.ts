@@ -28,10 +28,12 @@ export const getOS = (): OS => {
 };
 
 export const extractErrorMessage = (err: AxiosError): string => {
+  const ERROR_MESSAGE_KEY = 'detail';
+
   // extract out error message if it exists, else unknown
   const data = err.response?.data;
-  if (data && typeof data === 'object' && 'message' in data) {
-    return data.message as string;
+  if (data && typeof data === 'object' && ERROR_MESSAGE_KEY in data) {
+    return data[ERROR_MESSAGE_KEY] as string;
   } else if (data && typeof data === 'string') {
     return data;
   }

@@ -1,7 +1,6 @@
 import { ErrorMessage } from '@hookform/error-message';
-import { useQueryClient } from '@tanstack/react-query';
 import { FC, useRef } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 import { useSession } from '../../hooks/useSession';
@@ -27,7 +26,7 @@ interface Props {
 
 export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user info
-  const { user, jwt } = useSession();
+  const { user } = useSession();
 
   // instantiate form
   const {
@@ -67,7 +66,6 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
     description,
     uploadFiles,
     pepSchema,
-    jwt || '',
     onSuccess,
   );
 
@@ -181,7 +179,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           className="btn btn-success me-1"
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isLoading ? 'Submitting...' : 'Submit'}
+          {mutation.isPending ? 'Submitting...' : 'Submit'}
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
           Cancel

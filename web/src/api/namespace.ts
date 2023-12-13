@@ -191,3 +191,54 @@ export const submitProjectJSON = (
       return res;
     });
 };
+
+export const submitPop = (
+  {
+    namespace,
+    name,
+    tag,
+    is_private,
+    description,
+    pep_schema,
+    peps,
+  }: {
+    namespace: string;
+    name: string;
+    tag?: string;
+    is_private?: boolean;
+    description?: string;
+    peps: Sample[];
+    pep_schema: string;
+  },
+  token: string,
+) => {
+  const url = `${API_BASE}/namespaces/${namespace}/projects/json`;
+
+  const config_json = YAML.parse('pep_version: 2.1.0');
+
+  return axios
+    .post<ProjectSubmissionResponse>(
+      url,
+      {
+        pep_dict: {
+          config: config_json,
+          sample_list: peps,
+          pep_schema: pep_schema,
+        },
+        description: description || '',
+        name: name,
+        is_private: is_private || false,
+        tag: tag || 'default',
+        pop: true,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+    .then((res) => {
+      return res;
+    });
+};

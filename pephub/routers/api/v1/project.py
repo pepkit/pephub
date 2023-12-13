@@ -12,6 +12,8 @@ from peppy.const import (
     CONFIG_KEY,
     SAMPLE_DF_KEY,
     SUBSAMPLE_RAW_LIST_KEY,
+    SAMPLE_TABLE_INDEX_KEY,
+    SAMPLE_NAME_ATTR,
 )
 
 from pepdbagent import PEPDatabaseAgent
@@ -124,10 +126,8 @@ async def update_a_pep(
     """
     # if not logged in, they cant update
     if namespace not in (list_of_admins or []):
-        return JSONResponse(
-            content={
-                "message": "Unauthorized for updating projects.",
-            },
+        raise HTTPException(
+            detail="You do not have permission to update this project.",
             status_code=401,
         )
 
@@ -140,6 +140,40 @@ async def update_a_pep(
         new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
         new_raw_project[CONFIG_KEY] = dict(current_project.config)
 
+        if updated_project.project_config_yaml is not None:
+            try:
+                yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+            except yaml.scanner.ScannerError as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Could not parse provided yaml. Error: {e}",
+                )
+
+            sample_table_index_col = yaml_dict.get(
+                SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
+            )
+        else:
+            sample_table_index_col = current_project.config.get(
+                SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
+            )
+
+        # check all sample names are something other than
+        # None or an empty string
+        for sample in new_raw_project[SAMPLE_RAW_DICT_KEY]:
+            if sample_table_index_col not in sample:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Sample table does not contain column '{sample_table_index_col}'. Please check sample table",
+                )
+            if (
+                sample[sample_table_index_col] is None
+                or sample[sample_table_index_col] == ""
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Sample name cannot be None or an empty string. Please check sample table",
+                )
+
     # subsample table update
     if updated_project.subsample_tables is not None:
         new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = updated_project.subsample_tables
@@ -149,7 +183,13 @@ async def update_a_pep(
 
     # project config update
     if updated_project.project_config_yaml is not None:
-        yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+        try:
+            yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+        except yaml.scanner.ScannerError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not parse provided yaml. Error: {e}",
+            )
         new_raw_project[CONFIG_KEY] = yaml_dict
 
     # run the validation if either the sample table or project config is updated
@@ -184,6 +224,7 @@ async def update_a_pep(
             {
                 "project": new_project,
                 "pep_schema": updated_project.pep_schema,
+                "pop": updated_project.pop,
             },
             namespace,
             project,
@@ -502,13 +543,9 @@ async def fork_pep_to_namespace(
             pep_schema=proj_annotation.pep_schema,
         )
     except ProjectUniqueNameError as e:
-        return JSONResponse(
-            content={
-                "message": f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",
-                "error": f"{e}",
-                "status_code": 400,
-            },
+        raise HTTPException(
             status_code=400,
+            detail=f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",
         )
 
     return JSONResponse(

@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 
-import { useDeleteMutation } from '../../hooks/mutations/useDeleteMutation';
+import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
 
 interface Props {
   show: boolean;
@@ -9,17 +9,28 @@ interface Props {
   namespace: string;
   project: string;
   tag?: string;
-  redirect?: string;
 }
 
-export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, tag, redirect }) => {
+export const ConvertToPEPModal: FC<Props> = ({ show, onHide, namespace, project, tag }) => {
   const [confirmText, setConfirmText] = useState('');
 
   const onSuccess = () => {
     setConfirmText('');
   };
 
-  const mutation = useDeleteMutation(namespace, project, tag || 'default', onHide, redirect, onSuccess);
+  const mutation = useEditProjectMetaMutation(
+    namespace,
+    project,
+    tag || 'default',
+    () => {
+      onHide();
+      onSuccess();
+    },
+    () => {},
+    {
+      isPop: false,
+    },
+  );
 
   return (
     <Modal
@@ -35,7 +46,7 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
         <h1 className="modal-title fs-5">Delete PEP?</h1>
       </Modal.Header>
       <Modal.Body>
-        <p>Are you sure you want to delete this PEP? This action cannot be undone.</p>
+        <p>Are you sure you want to convert this to a PEP?</p>
         <label className="mb-3">
           Please type{' '}
           <span className="fw-bold">
@@ -57,9 +68,9 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
           onClick={() => mutation.mutate()}
           disabled={confirmText !== `${namespace}/${project}:${tag}` || mutation.isPending}
           type="button"
-          className="btn btn-danger"
+          className="btn btn-success"
         >
-          {mutation.isPending ? 'Deleting...' : 'Yes, delete'}
+          {mutation.isPending ? 'Converting...' : 'Yes, convert'}
         </button>
       </Modal.Footer>
     </Modal>

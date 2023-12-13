@@ -8,11 +8,8 @@ import { SearchLoading } from '../components/search/search-loading';
 import { NamespaceSearchResults, ProjectSearchResults } from '../components/search/search-results';
 import { useSearch } from '../hooks/queries/useSearch';
 import { useDebounce } from '../hooks/useDebounce';
-import { useSession } from '../hooks/useSession';
 
 export const SearchPage: FC = () => {
-  const { jwt } = useSession();
-
   // search params
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -31,7 +28,7 @@ export const SearchPage: FC = () => {
     isFetching,
     refetch,
     isFetched,
-  } = useSearch(searchDebounced, limit, offset, scoreThreshold, jwt);
+  } = useSearch(searchDebounced, limit, offset, scoreThreshold);
 
   const runSearch = () => {
     setSearchParams({ query: search, limit: limit.toString(), offset: offset.toString() });

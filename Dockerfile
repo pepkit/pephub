@@ -40,6 +40,5 @@ COPY . /app
 COPY --from=build /src/dist web/dist/
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements/requirements-all-docker.txt --no-cache-dir
-RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
 CMD ["uvicorn", "pephub.main:app", "--host", "0.0.0.0", "--port", "80"]

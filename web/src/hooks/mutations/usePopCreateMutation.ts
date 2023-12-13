@@ -2,18 +2,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
-import { submitProjectFiles } from '../../api/namespace';
-import { extractError, extractErrorMessage } from '../../utils/etc';
+import { Sample } from '../../../types';
+import { submitPop, submitProjectJSON } from '../../api/namespace';
+import { extractErrorMessage } from '../../utils/etc';
 import { useSession } from '../useSession';
 
-export const useUploadMutation = (
+export const usePopCreateMutation = (
   namespace: string,
-  project: string,
+  projectName: string,
   tag: string,
-  is_private: boolean,
+  isPrivate: boolean,
   description: string,
-  files: FileList,
-  pep_schema: string,
+  pepSchema: string,
+  peps: Sample[],
   onSuccess?: () => void,
 ) => {
   const session = useSession();
@@ -21,15 +22,15 @@ export const useUploadMutation = (
 
   return useMutation({
     mutationFn: () =>
-      submitProjectFiles(
+      submitPop(
         {
           namespace: namespace,
-          name: project,
+          name: projectName,
           tag: tag,
-          is_private: is_private,
+          is_private: isPrivate,
           description: description,
-          files: files,
-          pep_schema: pep_schema,
+          pep_schema: pepSchema,
+          peps: peps,
         },
         session.jwt || '',
       ),
@@ -37,10 +38,10 @@ export const useUploadMutation = (
       queryClient.invalidateQueries({
         queryKey: [namespace],
       });
+      toast.success('Project successfully uploaded!');
       if (onSuccess) {
         onSuccess();
       }
-      toast.success('Project successfully uploaded!');
     },
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown

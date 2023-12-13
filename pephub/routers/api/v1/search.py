@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from pepdbagent import PEPDatabaseAgent
 
-from sentence_transformers import SentenceTransformer
+from fastembed.embedding import FlagEmbedding as Embedding
 from qdrant_client import QdrantClient
 
 from ....dependencies import (
@@ -29,7 +29,7 @@ search = APIRouter(prefix="/api/v1/search", tags=["search"])
 async def search_for_pep(
     query: SearchQuery,
     qdrant: QdrantClient = Depends(get_qdrant),
-    model: SentenceTransformer = Depends(get_sentence_transformer),
+    model: Embedding = Depends(get_sentence_transformer),
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access: List[str] = Depends(get_namespace_access_list),
 ):
@@ -42,7 +42,7 @@ async def search_for_pep(
     score_threshold = query.score_threshold
     if qdrant is not None:
         try:
-            query_vec = model.encode(query.query)
+            query_vec = list(model.embed(query.query))[0]
             # count = len(qdrant.search(
             #     collection_name=(
             #         query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME

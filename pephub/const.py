@@ -63,7 +63,7 @@ BLANK_PEP_SAMPLE_TABLE = pd.DataFrame(
 # https://arxiv.org/abs/2210.07316
 # figure 4
 # great speed to accuracy tradeoff
-DEFAULT_HF_MODEL = "sentence-transformers/all-MiniLM-L12-v2"
+DEFAULT_HF_MODEL = "BAAI/bge-small-en-v1.5"
 
 EIDO_TEMPLATES_DIRNAME = "templates/eido"
 EIDO_TEMPLATES_PATH = os.path.join(

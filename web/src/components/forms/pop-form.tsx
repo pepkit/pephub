@@ -1,25 +1,20 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { FC } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 
-import { Sample } from '../../../types';
+import { ProjectAnnotation } from '../../../types';
 import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
+import { usePopCreateMutation } from '../../hooks/mutations/usePopCreateMutation';
 import { useSession } from '../../hooks/useSession';
-import { GitHubAvatar } from '../badges/github-avatar';
-import { ProjectConfigEditor } from '../project/project-config';
-import { SampleTable } from '../tables/sample-table';
-import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { PepSelector } from './components/pep-selector';
 
-interface BlankProjectInputs {
+interface POPInputs {
   is_private: boolean;
   namespace: string;
   project_name: string;
   tag: string;
   description: string;
-  sample_table: Sample[];
-  config: string;
-  pep_schema: string;
+  peps: ProjectAnnotation[];
 }
 
 interface Props {
@@ -27,7 +22,7 @@ interface Props {
   defaultNamespace?: string;
 }
 
-export const BlankProjectForm: FC<Props> = ({ onHide, defaultNamespace }) => {
+export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user innfo
   const { user } = useSession();
 
@@ -39,48 +34,37 @@ export const BlankProjectForm: FC<Props> = ({ onHide, defaultNamespace }) => {
     setValue,
     control,
     formState: { isValid, errors },
-  } = useForm<BlankProjectInputs>({
+  } = useForm<POPInputs>({
     defaultValues: {
       is_private: false,
       namespace: defaultNamespace || user?.login || '',
-      project_name: 'new-project',
-      sample_table: [
-        {
-          sample_name: 'sample1',
-          sample_type: 'sample_type1',
-          genome: 'genome1',
-        },
-        {
-          sample_name: 'sample2',
-          sample_type: 'sample_type2',
-          genome: 'genome2',
-        },
-      ],
-      config: `pep_version: 2.1.0
-sample_table: samples.csv
-      `,
-      pep_schema: 'pep/2.1.0',
+      project_name: 'new-pop',
+      peps: [],
     },
   });
 
-  const sampleTable = watch('sample_table');
-  const configYAML = watch('config');
   const namespace = watch('namespace');
   const projectName = watch('project_name');
   const tag = watch('tag');
   const description = watch('description');
   const isPrivate = watch('is_private');
-  const pepSchema = watch('pep_schema');
+  const peps = watch('peps');
 
-  const mutation = useBlankProjectFormMutation(
+  const mutation = usePopCreateMutation(
     namespace,
     projectName,
     tag,
     isPrivate,
     description,
-    configYAML,
-    pepSchema,
-    sampleTable,
+    'pep/2.1.0', // default schema for now
+    peps.map((pep) => {
+      return {
+        sample_name: `${pep.namespace}/${pep.name}:${pep.tag}`,
+        namespace: pep.namespace,
+        name: pep.name,
+        tag: pep.tag,
+      };
+    }),
     onHide,
   );
 
@@ -136,54 +120,58 @@ sample_table: samples.csv
         id="blank_description"
         className="form-control mt-3"
         rows={3}
-        placeholder="Describe your PEP."
+        placeholder="Describe your POP."
         {...register('description')}
       ></textarea>
-      <label className="form-check-label mt-3 mb-1">
-        <i className="bi bi-file-earmark-break me-1"></i>
-        Schema
-      </label>
+      <label className="form-check-label mt-3 mb-1">Add PEPs to your POP</label>
+      {/* Add a dropdown here */}
       <div>
         <Controller
           control={control}
-          name="pep_schema"
+          name="peps"
           render={({ field: { onChange, value } }) => (
-            <SchemaDropdown
+            <PepSelector
               value={value}
-              onChange={(schema) => {
-                setValue('pep_schema', schema);
+              onChange={(peps) => {
+                setValue('peps', peps);
               }}
             />
           )}
         />
       </div>
-      <Tabs defaultActiveKey="samples" id="blank-project-tabs" className="mt-3">
-        <Tab eventKey="samples" title="Samples">
-          <div className="p-2 border border-top-1">
-            <SampleTable
-              height={300}
-              data={sampleTable}
-              onChange={(data) => {
-                setValue('sample_table', data);
-              }}
-            />
-          </div>
-        </Tab>
-        <Tab eventKey="config" title="Config">
-          <div className="p-1 border border-top-0">
-            <ProjectConfigEditor
-              value={configYAML}
-              setValue={(data) => {
-                setValue('config', data);
-              }}
-              height={300}
-            />
-          </div>
-        </Tab>
-      </Tabs>
+      {peps.length > 0 ? (
+        <div className="mt-3 pt-3 border-top">
+          {peps.map((pep) => {
+            return (
+              <div className="rounded border my-1 px-2 pt-0 pb-2 shadow-sm">
+                <div className="d-flex flex-row align-items-center justify-content-between">
+                  <div className="w-100">
+                    <div className="d-flex flex-row align-items-center justify-content-between w-100">
+                      <p className="m-0 fw-bold">{`${pep.namespace}/${pep.name}:${pep.tag}`}</p>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-link shadow-none text-danger px-2 py-1"
+                        onClick={() => {
+                          setValue(
+                            'peps',
+                            peps.filter((p) => p.digest !== pep.digest),
+                          );
+                        }}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
+                    <p className="m-0 text-sm text-secondary fst-italic">{pep.description || 'No description.'}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
       <div className="mt-3">
         <button
-          disabled={!isValid || mutation.isPending}
+          disabled={!isValid || mutation.isPending || peps.length === 0}
           id="blank-project-submit-btn"
           className="btn btn-success me-1"
           type="button"

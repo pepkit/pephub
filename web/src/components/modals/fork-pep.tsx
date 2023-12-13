@@ -23,7 +23,7 @@ interface ForkProjectInputs {
 }
 
 export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, show, onHide }) => {
-  const { user, jwt } = useSession();
+  const { user } = useSession();
 
   // form stuff
   const {
@@ -53,7 +53,6 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
     projectName,
     projectTag,
     projectDescription,
-    jwt || '',
     onHide,
   );
 
@@ -134,12 +133,12 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
         </button>
         <button
           onClick={() => mutation.mutate()}
-          disabled={!isValid || mutation.isLoading}
+          disabled={!isValid || mutation.isPending}
           id="fork-submit-btn"
           type="submit"
           className="btn btn-success"
         >
-          {mutation.isLoading ? 'Forking...' : 'Fork'}
+          {mutation.isPending ? 'Forking...' : 'Fork'}
         </button>
       </Modal.Footer>
     </Modal>

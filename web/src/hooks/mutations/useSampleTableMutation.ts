@@ -4,20 +4,23 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
 import { editProjectSampleTable } from '../../api/project';
+import { useSession } from '../useSession';
 
 export const useSampleTableMutation = (
   namespace: string,
   project: string,
   tag: string,
-  jwt: string,
   newProjectSamples: Sample[],
 ) => {
+  const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => editProjectSampleTable(namespace || '', project || '', tag, jwt || '', newProjectSamples),
+    mutationFn: () => editProjectSampleTable(namespace || '', project || '', tag, session.jwt || '', newProjectSamples),
     onSuccess: () => {
-      queryClient.invalidateQueries([namespace, project, tag, 'samples']);
+      queryClient.invalidateQueries({
+        queryKey: [namespace, project, tag, 'samples'],
+      });
       toast.success('Successfully updated project samples');
     },
     onError: (error: AxiosError) => {
