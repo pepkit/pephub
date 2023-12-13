@@ -23,7 +23,7 @@ interface ForkProjectInputs {
 }
 
 export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, show, onHide }) => {
-  const { user, jwt } = useSession();
+  const { user } = useSession();
 
   // form stuff
   const {
@@ -53,7 +53,6 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
     projectName,
     projectTag,
     projectDescription,
-    jwt || '',
     onHide,
   );
 

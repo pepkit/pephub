@@ -2,7 +2,6 @@ import { FC, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 
 import { useDeleteMutation } from '../../hooks/mutations/useDeleteMutation';
-import { useSession } from '../../hooks/useSession';
 
 interface Props {
   show: boolean;

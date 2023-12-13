@@ -29,7 +29,7 @@ interface Props {
 
 export const BlankProjectForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user innfo
-  const { user, jwt } = useSession();
+  const { user } = useSession();
 
   // instantiate form
   const {

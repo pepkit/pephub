@@ -1,7 +1,6 @@
 import { ErrorMessage } from '@hookform/error-message';
-import { useQueryClient } from '@tanstack/react-query';
 import { FC, useRef } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 import { useSession } from '../../hooks/useSession';
@@ -27,7 +26,7 @@ interface Props {
 
 export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user info
-  const { user, jwt } = useSession();
+  const { user } = useSession();
 
   // instantiate form
   const {
@@ -67,7 +66,6 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
     description,
     uploadFiles,
     pepSchema,
-    jwt || '',
     onSuccess,
   );
 

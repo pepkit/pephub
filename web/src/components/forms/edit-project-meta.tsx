@@ -3,7 +3,6 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
 import { useProject } from '../../hooks/queries/useProject';
-import { useSession } from '../../hooks/useSession';
 import { MarkdownEditor } from '../markdown/edit';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 import { SchemaTooltip } from './tooltips/form-tooltips';

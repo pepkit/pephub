@@ -23,7 +23,7 @@ interface Props {
 
 export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user innfo
-  const { user, jwt } = useSession();
+  const { user } = useSession();
 
   // instantiate form
   const {

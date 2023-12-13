@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from 'react';
 
 import { useProjectEditConfigMutation } from '../../hooks/mutations/useProjectEditConfigMutation';
 import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
-import { useSession } from '../../hooks/useSession';
 import { ProjectConfigEditor } from '../project/project-config';
 
 interface Props {
@@ -12,8 +11,6 @@ interface Props {
 }
 
 export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) => {
-  const { jwt } = useSession();
-
   const { data: projectConfig } = useProjectConfig(namespace, project, tag);
 
   // state
