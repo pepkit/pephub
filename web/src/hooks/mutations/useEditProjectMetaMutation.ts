@@ -4,12 +4,12 @@ import { toast } from 'react-hot-toast';
 
 import { editProjectMetadata } from '../../api/project';
 import { extractError, extractErrorMessage } from '../../utils/etc';
+import { useSession } from '../useSession';
 
 export const useEditProjectMetaMutation = (
   namespace: string,
   name: string,
   tag: string,
-  jwt: string | null,
   onSuccessfulSubmit: () => void,
   onFailedSubmit: () => void,
   data: {
@@ -21,6 +21,7 @@ export const useEditProjectMetaMutation = (
   },
 ) => {
   const queryClient = useQueryClient();
+  const session = useSession();
 
   // destructuring the data object
   const { newName, newTag } = data;
@@ -35,7 +36,7 @@ export const useEditProjectMetaMutation = (
   };
 
   return useMutation({
-    mutationFn: () => editProjectMetadata(namespace, name, tag, jwt, metadata),
+    mutationFn: () => editProjectMetadata(namespace, name, tag, session.jwt, metadata),
     onSuccess: () => {
       toast.success('Project metadata updated successfully.');
       queryClient.invalidateQueries({

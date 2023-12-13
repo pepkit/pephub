@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { Modal, Tab, Tabs } from 'react-bootstrap';
 
 import { BlankProjectForm } from '../forms/blank-project-form';
+import { PopForm } from '../forms/pop-form';
 import { ProjectUploadForm } from '../forms/project-upload-form';
 
 interface Props {
@@ -23,7 +24,7 @@ export const AddPEPModal: FC<Props> = ({ show, onHide, defaultNamespace }) => {
             title={
               <span>
                 <i className="bi bi-pencil me-1"></i>
-                Blank
+                Blank PEP
               </span>
             }
           >
@@ -36,12 +37,25 @@ export const AddPEPModal: FC<Props> = ({ show, onHide, defaultNamespace }) => {
             title={
               <span>
                 <i className="bi bi-cloud-upload me-1"></i>
-                Upload
+                Upload PEP
               </span>
             }
           >
             <div className="border border-top-0">
               <ProjectUploadForm defaultNamespace={defaultNamespace} onHide={onHide} />
+            </div>
+          </Tab>
+          <Tab
+            eventKey="pop"
+            title={
+              <span>
+                <i className="bi bi-collection me-1"></i>
+                POP
+              </span>
+            }
+          >
+            <div className="border border-top-0">
+              <PopForm defaultNamespace={defaultNamespace} onHide={onHide} />
             </div>
           </Tab>
         </Tabs>

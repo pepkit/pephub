@@ -4,18 +4,20 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
 import { editProjectSubsampleTable } from '../../api/project';
+import { useSession } from '../useSession';
 
 export const useSubsampleTableMutation = (
   namespace: string,
   project: string,
   tag: string,
-  jwt: string,
   newProjectSubsamples: Sample[],
 ) => {
+  const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => editProjectSubsampleTable(namespace || '', project || '', tag, jwt || '', newProjectSubsamples),
+    mutationFn: () =>
+      editProjectSubsampleTable(namespace || '', project || '', tag, session.jwt || '', newProjectSubsamples),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [namespace, project, tag, 'subsamples'],

@@ -14,7 +14,7 @@ interface Props {
 export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) => {
   const { jwt } = useSession();
 
-  const { data: projectConfig } = useProjectConfig(namespace, project, tag, jwt);
+  const { data: projectConfig } = useProjectConfig(namespace, project, tag);
 
   // state
   const [originalConfig, setOriginalConfig] = useState<string>('');
@@ -31,7 +31,7 @@ export const ProjectConfigEditorForm: FC<Props> = ({ namespace, project, tag }) 
     }
   };
 
-  const mutation = useProjectEditConfigMutation(namespace, project, tag, jwt || '', newProjectConfig, onSuccess);
+  const mutation = useProjectEditConfigMutation(namespace, project, tag, newProjectConfig, onSuccess);
 
   useEffect(() => {
     if (projectConfig) {

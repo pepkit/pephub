@@ -32,8 +32,8 @@ interface ValidatorFormProps {
 }
 
 export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, defaultSchemaRegistryPath }) => {
-  const { user, jwt, login } = useSession();
-  const { data: projects } = useNamespaceProjects(user?.login, jwt || '', {});
+  const { user, login } = useSession();
+  const { data: projects } = useNamespaceProjects(user?.login, {});
   const { data: schemas } = useSchemas();
 
   // instantiate form

@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { Sample } from '../../../types';
 import { editTotalProject } from '../../api/project';
 import { extractError, extractErrorMessage } from '../../utils/etc';
+import { useSession } from '../useSession';
 
 interface TotalProjectChangeMutationProps {
   config?: string;
@@ -16,13 +17,13 @@ export const useTotalProjectChangeMutation = (
   namespace: string,
   project: string,
   tag: string,
-  jwt: string,
   data: TotalProjectChangeMutationProps,
 ) => {
+  const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => editTotalProject(namespace || '', project || '', tag, jwt || '', data),
+    mutationFn: () => editTotalProject(namespace || '', project || '', tag, session.jwt || '', data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [namespace, project, tag],

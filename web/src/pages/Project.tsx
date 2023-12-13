@@ -13,6 +13,7 @@ import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { ForkPEPModal } from '../components/modals/fork-pep';
 import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpoints';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
+import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { SampleTable } from '../components/tables/sample-table';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
@@ -69,15 +70,10 @@ export const ProjectPage: FC = () => {
     data: projectInfo,
     isLoading: projectInfoIsLoading,
     error,
-  } = useProjectAnnotation(namespace, project || '', tag, jwt);
-  const { data: projectSamples } = useSampleTable(namespace, project, tag, jwt);
-  const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag, jwt);
-  const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(
-    namespace,
-    project || '',
-    tag,
-    jwt,
-  );
+  } = useProjectAnnotation(namespace, project || '', tag);
+  const { data: projectSamples } = useSampleTable(namespace, project, tag);
+  const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag);
+  const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(namespace, project || '', tag);
 
   // state
   const [projectView, setProjectView] = useState<ProjectView>('samples');
@@ -145,16 +141,10 @@ export const ProjectPage: FC = () => {
   };
 
   // mutations for updating config and samples on the server
-  const configMutation = useConfigMutation(namespace || '', project || '', tag, jwt || '', newProjectConfig);
-  const sampleTableMutation = useSampleTableMutation(namespace || '', project || '', tag, jwt || '', newProjectSamples);
-  const subsampleTableMutation = useSubsampleTableMutation(
-    namespace || '',
-    project || '',
-    tag,
-    jwt || '',
-    newProjectSubsamples,
-  );
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', project || '', tag, jwt || '', {
+  const configMutation = useConfigMutation(namespace || '', project || '', tag, newProjectConfig);
+  const sampleTableMutation = useSampleTableMutation(namespace || '', project || '', tag, newProjectSamples);
+  const subsampleTableMutation = useSubsampleTableMutation(namespace || '', project || '', tag, newProjectSubsamples);
+  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', project || '', tag, {
     config: newProjectConfig,
     samples: newProjectSamples,
     subsamples: newProjectSubsamples,
@@ -165,11 +155,9 @@ export const ProjectPage: FC = () => {
     runValidation();
   };
 
-  // if (projectInfo?.pop) {
-  //   return (
-  //     <POPnterface />
-  //   )
-  // }
+  if (projectInfo?.pop) {
+    return <PopInterface />;
+  }
 
   if (error) {
     return (

@@ -31,9 +31,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
   onFailedSubmit = () => {},
   onCancel = () => {},
 }) => {
-  const { jwt } = useSession();
-
-  const { data: projectInfo } = useProject(namespace, name, tag, jwt);
+  const { data: projectInfo } = useProject(namespace, name, tag);
 
   const {
     register,
@@ -74,7 +72,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
     newSchema: projectInfo?.pep_schema === newSchema ? undefined : newSchema,
   };
 
-  const mutation = useEditProjectMetaMutation(namespace, name, tag, jwt, onSubmit, onFailedSubmit, metadata);
+  const mutation = useEditProjectMetaMutation(namespace, name, tag, onSubmit, onFailedSubmit, metadata);
 
   return (
     <form>

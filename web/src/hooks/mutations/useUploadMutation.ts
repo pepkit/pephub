@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 
 import { submitProjectFiles } from '../../api/namespace';
 import { extractError, extractErrorMessage } from '../../utils/etc';
+import { useSession } from '../useSession';
 
 export const useUploadMutation = (
   namespace: string,
@@ -13,9 +14,9 @@ export const useUploadMutation = (
   description: string,
   files: FileList,
   pep_schema: string,
-  jwt?: string,
   onSuccess?: () => void,
 ) => {
+  const session = useSession();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -30,7 +31,7 @@ export const useUploadMutation = (
           files: files,
           pep_schema: pep_schema,
         },
-        jwt || '',
+        session.jwt || '',
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({

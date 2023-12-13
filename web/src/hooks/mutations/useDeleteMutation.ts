@@ -5,21 +5,22 @@ import { useNavigate } from 'react-router-dom';
 
 import { deleteProject } from '../../api/project';
 import { extractError, extractErrorMessage } from '../../utils/etc';
+import { useSession } from '../useSession';
 
 export const useDeleteMutation = (
   namespace: string,
   project: string,
   tag: string,
-  jwt: string | undefined,
   onHide: () => void,
   redirect: string | undefined,
   onSuccess?: () => void,
 ) => {
+  const session = useSession();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: () => deleteProject(namespace, project, tag, jwt || ''),
+    mutationFn: () => deleteProject(namespace, project, tag, session.jwt || ''),
     onSuccess: () => {
       toast.success('Project successfully deleted.');
       // need to wait for database to update before redirecting

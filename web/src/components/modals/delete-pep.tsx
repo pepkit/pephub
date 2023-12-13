@@ -14,15 +14,13 @@ interface Props {
 }
 
 export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, tag, redirect }) => {
-  const { jwt } = useSession();
-
   const [confirmText, setConfirmText] = useState('');
 
   const onSuccess = () => {
     setConfirmText('');
   };
 
-  const mutation = useDeleteMutation(namespace, project, tag || 'default', jwt || '', onHide, redirect, onSuccess);
+  const mutation = useDeleteMutation(namespace, project, tag || 'default', onHide, redirect, onSuccess);
 
   return (
     <Modal

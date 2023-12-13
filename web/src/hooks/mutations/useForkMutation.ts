@@ -4,7 +4,8 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { forkProject } from '../../api/project';
-import { extractError, extractErrorMessage } from '../../utils/etc';
+import { extractErrorMessage } from '../../utils/etc';
+import { useSession } from '../useSession';
 
 export const useForkMutation = (
   namespace: string,
@@ -14,16 +15,16 @@ export const useForkMutation = (
   forkName: string,
   forkTag?: string,
   forkDescription?: string,
-  jwt?: string,
   onHide?: () => void,
 ) => {
   const navigate = useNavigate();
 
   const queryClient = useQueryClient();
+  const session = useSession();
 
   return useMutation({
     mutationFn: () =>
-      forkProject(namespace, project, tag, jwt, {
+      forkProject(namespace, project, tag, session.jwt, {
         forkTo: forkTo,
         forkName: forkName,
         forkTag: forkTag,

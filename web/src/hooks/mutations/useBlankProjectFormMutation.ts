@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { Sample } from '../../../types';
 import { submitProjectJSON } from '../../api/namespace';
 import { extractError, extractErrorMessage } from '../../utils/etc';
+import { useSession } from '../useSession';
 
 export const useBlankProjectFormMutation = (
   namespace: string,
@@ -15,10 +16,11 @@ export const useBlankProjectFormMutation = (
   config: string,
   pepSchema: string,
   sampleTable: Sample[],
-  jwt: string | undefined,
   onSuccess?: () => void,
 ) => {
+  const session = useSession();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: () =>
       submitProjectJSON(
@@ -32,7 +34,7 @@ export const useBlankProjectFormMutation = (
           pep_schema: pepSchema,
           sample_table: sampleTable,
         },
-        jwt || '',
+        session.jwt || '',
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({

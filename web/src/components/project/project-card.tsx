@@ -32,6 +32,18 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           ) : (
             <span className="ms-2 badge text-dark rounded-pill border border-dark">Public</span>
           )}
+          {project.pop ? (
+            <span className="ms-2 badge bg-primary text-white rounded-pill border border-primary flex align-items-center bg-opacity-75">
+              <img
+                src="/popcorn-white.svg"
+                height="10px"
+                width="10px"
+                alt="Popcorn icon"
+                className="me-1 text-primary"
+              />
+              POP
+            </span>
+          ) : null}
         </div>
       </div>
       <div>
