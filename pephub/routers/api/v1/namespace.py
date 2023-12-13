@@ -235,7 +235,7 @@ async def create_pep(
                     tag=tag,
                     is_private=is_private,
                 )
-            except ProjectUniqueNameError as e:
+            except ProjectUniqueNameError as _:
                 raise HTTPException(
                     detail=f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
                     status_code=400,
@@ -273,6 +273,7 @@ async def upload_raw_pep(
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
         pep_schema = project_from_json.pep_schema
+        pop = project_from_json.pop or False
         if hasattr(project_from_json, NAME_KEY):
             if project_from_json.name:
                 name = project_from_json.name
@@ -308,6 +309,7 @@ async def upload_raw_pep(
             is_private=is_private,
             overwrite=overwrite,
             pep_schema=pep_schema,
+            pop=pop,
         )
     except ProjectUniqueNameError:
         raise HTTPException(

@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { ProjectAnnotation } from '../../../types';
 import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
+import { usePopCreateMutation } from '../../hooks/mutations/usePopCreateMutation';
 import { useSession } from '../../hooks/useSession';
 import { PepSelector } from './components/pep-selector';
 
@@ -49,15 +50,21 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   const isPrivate = watch('is_private');
   const peps = watch('peps');
 
-  const mutation = useBlankProjectFormMutation(
+  const mutation = usePopCreateMutation(
     namespace,
     projectName,
     tag,
     isPrivate,
     description,
-    '',
-    'pep/2.1.0', // default schema
-    [],
+    'pep/2.1.0', // default schema for now
+    peps.map((pep) => {
+      return {
+        sample_name: `${pep.namespace}/${pep.name}:${pep.tag}`,
+        namespace: pep.namespace,
+        name: pep.name,
+        tag: pep.tag,
+      };
+    }),
     onHide,
   );
 
@@ -128,45 +135,34 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
               onChange={(peps) => {
                 setValue('peps', peps);
               }}
-              namespace={namespace}
             />
           )}
         />
       </div>
       {peps.length > 0 ? (
-        <div className="my-2">
-          <div className="d-flex justify-content-end">
-            <button
-              type="button"
-              className="btn shadow-none btn-link text-danger px-2 py-1"
-              onClick={(e) => {
-                e.preventDefault();
-                setValue('peps', []);
-              }}
-            >
-              Remove all
-            </button>
-          </div>
+        <div className="mt-3 pt-3 border-top">
           {peps.map((pep) => {
             return (
-              <div className="rounded border border-primary my-1 p-1 bg-primary bg-opacity-10">
+              <div className="rounded border my-1 px-2 pt-0 pb-2 shadow-sm">
                 <div className="d-flex flex-row align-items-center justify-content-between">
-                  <div>
-                    <p className="m-0 text-sm fw-bold">{`${pep.namespace}/${pep.name}:${pep.tag}`}</p>
+                  <div className="w-100">
+                    <div className="d-flex flex-row align-items-center justify-content-between w-100">
+                      <p className="m-0 fw-bold">{`${pep.namespace}/${pep.name}:${pep.tag}`}</p>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-link shadow-none text-danger px-2 py-1"
+                        onClick={() => {
+                          setValue(
+                            'peps',
+                            peps.filter((p) => p.digest !== pep.digest),
+                          );
+                        }}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
                     <p className="m-0 text-sm text-secondary fst-italic">{pep.description || 'No description.'}</p>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-danger px-2 py-1"
-                    onClick={() => {
-                      setValue(
-                        'peps',
-                        peps.filter((p) => p.digest !== pep.digest),
-                      );
-                    }}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </button>
                 </div>
               </div>
             );

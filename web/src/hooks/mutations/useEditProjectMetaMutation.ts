@@ -18,6 +18,7 @@ export const useEditProjectMetaMutation = (
     newName?: string;
     newTag?: string;
     newSchema?: string;
+    isPop?: boolean;
   },
 ) => {
   const queryClient = useQueryClient();
@@ -33,6 +34,7 @@ export const useEditProjectMetaMutation = (
     name: data.newName,
     tag: data.newTag,
     pep_schema: data.newSchema,
+    pop: data.isPop,
   };
 
   return useMutation({

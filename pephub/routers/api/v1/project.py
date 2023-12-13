@@ -224,6 +224,7 @@ async def update_a_pep(
             {
                 "project": new_project,
                 "pep_schema": updated_project.pep_schema,
+                "pop": updated_project.pop,
             },
             namespace,
             project,
