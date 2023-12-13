@@ -15,5 +15,4 @@ requests
 aiofiles
 pyjwt[crypto]
 coloredlogs
--f https://download.pytorch.org/whl/torch_stable.html
-sentence-transformers
+fastembed
