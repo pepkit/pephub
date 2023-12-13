@@ -7,9 +7,9 @@ import { useSession } from '../useSession';
 export const useNamespaceProjects = (namespace: string | undefined, params: PaginationParams) => {
   const session = useSession();
   const query = useQuery({
-    queryKey: [namespace, params],
+    queryKey: [namespace, params, session.jwt],
     queryFn: () => getNamespaceProjects(namespace || '', session.jwt, params),
-    enabled: namespace !== undefined && session.jwt !== null,
+    enabled: namespace !== undefined,
   });
   return query;
 };
