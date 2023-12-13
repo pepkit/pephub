@@ -344,12 +344,12 @@ async def upload_raw_pep(
 
 # favorites endpoints
 @namespace.get(
-    "/favorites",
+    "/stars",
     summary="Get information about user favorite projects.",
     dependencies=[Depends(verify_user_can_write_namespace)],
     response_model=AnnotationList,
 )
-async def get_user_favorites(
+async def get_user_stars(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
@@ -360,13 +360,13 @@ async def get_user_favorites(
 
 
 @namespace.post(
-    "/favorites",
+    "/stars",
     summary="Add project to favorites.",
     dependencies=[
         Depends(verify_user_can_write_namespace),
     ],
 )
-async def add_to_favorites(
+async def add_to_stars(
     project: FavoriteRequest,
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -397,11 +397,11 @@ async def add_to_favorites(
 
 
 @namespace.delete(
-    "/favorites",
+    "/stars",
     summary="Delete project from favorites.",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
-async def remove_from_favorites(
+async def remove_from_stars(
     project: FavoriteRequest,
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),

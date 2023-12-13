@@ -8,7 +8,7 @@ python-multipart>=0.0.5
 tqdm
 uvicorn
 python-dotenv
-pepdbagent>=0.6.0
+pepdbagent>=0.6.0a2
 peppy>=0.40.0a5
 qdrant-client
 requests
