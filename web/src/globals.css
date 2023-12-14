@@ -1,3 +1,7 @@
+body {
+  overflow: scroll; /* Show scrollbars */
+}
+
 .container-height {
   min-height: calc(100vh - 300px);
 }

@@ -2,6 +2,7 @@ import axios from 'axios';
 import YAML from 'yaml';
 
 import { BiggestNamespaceResults, Project, ProjectAnnotation, Sample } from '../../types';
+import { constructQueryFromPaginationParams } from '../utils/etc';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -44,6 +45,13 @@ export interface BiggestNamespaces {
   results: BiggestNamespaceResults[];
 }
 
+interface StarsResponse {
+  count: number;
+  limit: number;
+  offset: number;
+  items: ProjectAnnotation[];
+}
+
 export const getNamespaceInfo = (namespace: string, token: string | null = null) => {
   const url = `${API_BASE}/namespaces/${namespace}/`; // note the trailing slash
   if (!token) {
@@ -63,27 +71,7 @@ export const getNamespaceProjects = (
   token: string | null = null,
   { search, offset, limit, orderBy, order }: PaginationParams,
 ) => {
-  // construct query based on search, offset, and limit
-  const query = new URLSearchParams();
-  if (search) {
-    query.set('q', search);
-  }
-  if (offset) {
-    query.set('offset', offset.toString());
-  }
-  if (limit) {
-    query.set('limit', limit.toString());
-  }
-  if (orderBy) {
-    query.set('order_by', orderBy);
-  }
-  if (order) {
-    if (order === 'asc') {
-      query.set('order_desc', 'false');
-    } else {
-      query.set('order_desc', 'true');
-    }
-  }
+  const query = constructQueryFromPaginationParams({ search, offset, limit, orderBy, order });
   const url = `${API_BASE}/namespaces/${namespace}/projects?${query.toString()}`;
   if (!token) {
     return axios.get<NamespaceProjectsResponse>(url).then((res) => res.data);
@@ -91,6 +79,20 @@ export const getNamespaceProjects = (
     return axios
       .get<NamespaceProjectsResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => res.data);
+  }
+};
+
+export const getNamespaceStars = (
+  namespace: string,
+  token: string | null = null,
+  { search, offset, limit, orderBy, order }: PaginationParams,
+) => {
+  const query = constructQueryFromPaginationParams({ search, offset, limit, orderBy, order });
+  const url = `${API_BASE}/namespaces/${namespace}/stars?${query.toString()}`;
+  if (!token) {
+    return axios.get<StarsResponse>(url).then((res) => res.data);
+  } else {
+    return axios.get<StarsResponse>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
   }
 };
 
@@ -238,6 +240,59 @@ export const submitPop = (
         },
       },
     )
+    .then((res) => {
+      return res;
+    });
+};
+
+export const starRepository = (
+  namespace: string,
+  star_namespace: string,
+  star_project: string,
+  star_tag: string,
+  token: string,
+) => {
+  const url = `${API_BASE}/namespaces/${namespace}/stars`;
+  return axios
+    .post(
+      url,
+      {
+        namespace: star_namespace,
+        project: star_project,
+        tag: star_tag,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+    .then((res) => {
+      return res;
+    });
+};
+
+export const removeStar = (
+  namespace: string,
+  star_namespace: string,
+  star_project: string,
+  star_tag: string,
+  token: string,
+) => {
+  const url = `${API_BASE}/namespaces/${namespace}/stars`;
+  return axios
+    .delete(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        namespace: star_namespace,
+        project: star_project,
+        tag: star_tag,
+      },
+    })
     .then((res) => {
       return res;
     });

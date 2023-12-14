@@ -9,13 +9,17 @@ import { AddPEPModal } from '../components/modals/add-pep';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePageSearchBar } from '../components/namespace/search-bar';
+import { NamespaceViewSelector } from '../components/namespace/view-selector';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
 import { ProjectCard } from '../components/project/project-card';
 import { useNamespaceInfo } from '../hooks/queries/useNamespaceInfo';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
+import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useDebounce } from '../hooks/useDebounce';
 import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
+
+type View = 'peps' | 'stars';
 
 export const NamespacePage: FC = () => {
   // get namespace from url
@@ -31,6 +35,7 @@ export const NamespacePage: FC = () => {
   const [search, setSearch] = useState('');
   const [orderBy, setOrderBy] = useState('update_date');
   const [order, setOrder] = useState('asc');
+  const [view, setView] = useState<View>('peps');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
@@ -44,6 +49,7 @@ export const NamespacePage: FC = () => {
     order: order || 'asc',
     search: searchDebounced,
   });
+  const { data: stars } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
@@ -120,41 +126,51 @@ export const NamespacePage: FC = () => {
           <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
         </p>
       </>
-
-      {/* Render projects  in namespace */}
-      <div className="my-3 border-bottom border-grey"></div>
-      <NamespacePageSearchBar
-        namespace={namespace || ''}
-        search={search}
-        setSearch={setSearch}
-        limit={limit}
-        setLimit={setLimit}
-        orderBy={orderBy}
-        setOrderBy={setOrderBy}
-        order={order}
-        setOrder={setOrder}
-      />
-      <div className="my-3"></div>
       <div className="mt-3">
-        {projectsIsLoading || projects === undefined ? (
-          <ProjectListPlaceholder />
-        ) : (
-          projects.items.map((project, i) => <ProjectCard key={i} project={project} />)
-        )}
-        <>
-          {projects?.count && projects?.count > limit ? (
-            <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
-          ) : null}
-        </>
-        {/* no projects exists */}
-        <div>
-          {projects?.items.length === 0 ? (
-            <div className="text-center">
-              <p className="text-muted">No projects found</p>
-            </div>
-          ) : null}
-        </div>
+        <NamespaceViewSelector numStars={stars?.items.length || 0} view={view} setView={setView} />
       </div>
+      {/* Render projects  in namespace */}
+      <div className="my-1 border-bottom border-grey"></div>
+      {view === 'peps' ? (
+        <Fragment>
+          <NamespacePageSearchBar
+            namespace={namespace || ''}
+            search={search}
+            setSearch={setSearch}
+            limit={limit}
+            setLimit={setLimit}
+            orderBy={orderBy}
+            setOrderBy={setOrderBy}
+            order={order}
+            setOrder={setOrder}
+          />
+          <div className="my-3"></div>
+          <div className="mt-3">
+            {projectsIsLoading || projects === undefined ? (
+              <ProjectListPlaceholder />
+            ) : (
+              projects.items.map((project, i) => <ProjectCard key={i} project={project} />)
+            )}
+            <>
+              {projects?.count && projects?.count > limit ? (
+                <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
+              ) : null}
+            </>
+            {/* no projects exists */}
+            <div>
+              {projects?.items.length === 0 ? (
+                <div className="text-center">
+                  <p className="text-muted">No projects found</p>
+                </div>
+              ) : (
+                <pre>
+                  <code>JSON.stringify(stars?.items)</code>
+                </pre>
+              )}
+            </div>
+          </div>
+        </Fragment>
+      ) : null}
       <AddPEPModal defaultNamespace={namespace} show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
       <NamespaceAPIEndpointsModal
         namespace={namespace || ''}

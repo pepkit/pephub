@@ -1,9 +1,11 @@
 import { FC, Fragment, useState } from 'react';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 import { ProjectAnnotation } from '../../../types';
+import { useAddStar } from '../../hooks/mutations/useAddStar';
 import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { MarkdownToText } from '../markdown/render';
@@ -18,6 +20,8 @@ export const ProjectCard: FC<Props> = ({ project }) => {
 
   // state
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
+
+  const starMutation = useAddStar(user?.login || '', project.namespace, project.name, project.tag);
 
   return (
     <div
@@ -49,24 +53,25 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           ) : null}
         </div>
         <Dropdown as={ButtonGroup}>
-          <Button variant="outline-dark">
+          <Button
+            variant="outline-dark"
+            size="sm"
+            disabled={!user}
+            onClick={() => {
+              starMutation.mutate();
+            }}
+          >
             <i className="bi bi-star me-1"></i>
-            Favorite
+            Star
           </Button>
-
           <Dropdown.Toggle split variant="outline-dark" id="dropdown-split-basic" />
-
           <Dropdown.Menu>
             <Dropdown.Item href={`/${project.namespace}/${project.name}`}>View</Dropdown.Item>
             {user ? (
               <Dropdown.Item onClick={() => {}}>Fork</Dropdown.Item>
             ) : (
-              <Dropdown.Item disabled onClick={() => {}}>
-                Fork
-              </Dropdown.Item>
+              <Dropdown.Item disabled>Fork (log in to fork)</Dropdown.Item>
             )}
-            {/* divider */}
-
             {user && user.login === project.namespace && (
               <Fragment>
                 <Dropdown.Divider />

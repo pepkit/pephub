@@ -1,5 +1,7 @@
 import { AxiosError } from 'axios';
 
+import { PaginationParams } from '../api/namespace';
+
 export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
 };
@@ -54,4 +56,30 @@ export const extractError = (err: AxiosError): string => {
 // function to add commas to numbers
 export const numberWithCommas = (x: number): string => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+export const constructQueryFromPaginationParams = (params: PaginationParams): URLSearchParams => {
+  const { search, offset, limit, orderBy, order } = params;
+  // construct query based on search, offset, and limit
+  const query = new URLSearchParams();
+  if (search) {
+    query.set('q', search);
+  }
+  if (offset) {
+    query.set('offset', offset.toString());
+  }
+  if (limit) {
+    query.set('limit', limit.toString());
+  }
+  if (orderBy) {
+    query.set('order_by', orderBy);
+  }
+  if (order) {
+    if (order === 'asc') {
+      query.set('order_desc', 'false');
+    } else {
+      query.set('order_desc', 'true');
+    }
+  }
+  return query;
 };
