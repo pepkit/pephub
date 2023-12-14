@@ -12,7 +12,7 @@ from peppy.const import DESC_KEY, NAME_KEY
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectUniqueNameError
 from pepdbagent.const import DEFAULT_LIMIT_INFO
-from pepdbagent.models import ListOfNamespaceInfo, Namespace
+from pepdbagent.models import ListOfNamespaceInfo, Namespace, AnnotationList
 from typing import Literal
 from typing_extensions import Annotated
 
@@ -32,7 +32,7 @@ from ....const import (
     BLANK_PEP_SAMPLE_TABLE,
     DEFAULT_PEP_SCHEMA,
 )
-from ...models import ProjectRawModel, ProjectJsonRequest
+from ...models import ProjectRawModel, ProjectJsonRequest, FavoriteRequest
 
 from dotenv import load_dotenv
 from .base import api
@@ -325,6 +325,94 @@ async def upload_raw_pep(
         },
         status_code=202,
     )
+
+
+# favorites endpoints
+@namespace.get(
+    "/stars",
+    summary="Get information about user favorite projects.",
+    dependencies=[Depends(verify_user_can_write_namespace)],
+    response_model=AnnotationList,
+)
+async def get_user_stars(
+    namespace: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    """
+    Get information about user favorite projects.
+    """
+    return agent.user.get_favorites(namespace=namespace)
+
+
+@namespace.post(
+    "/stars",
+    summary="Add project to favorites.",
+    dependencies=[
+        Depends(verify_user_can_write_namespace),
+    ],
+)
+async def add_to_stars(
+    project: FavoriteRequest,
+    namespace: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    """
+    Add project to favorites
+    """
+    try:
+        agent.user.add_to_favorites(
+            namespace=namespace,
+            project_namespace=project.namespace,
+            project_name=project.name,
+            project_tag=project.tag,
+        )
+        return JSONResponse(
+            content={
+                "namespace": namespace,
+                "registry_path": f"{project.namespace}/{project.name}:{project.tag}",
+                "message": "PEP was added to favorites.",
+            },
+            status_code=202,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not add PEP to favorites. Server error: {e}",
+        )
+
+
+@namespace.delete(
+    "/stars",
+    summary="Delete project from favorites.",
+    dependencies=[Depends(verify_user_can_write_namespace)],
+)
+async def remove_from_stars(
+    project: FavoriteRequest,
+    namespace: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    """
+    Add project to favorites
+    """
+    try:
+        agent.user.remove_from_favorites(
+            namespace=namespace,
+            project_namespace=project.namespace,
+            project_name=project.name,
+            project_tag=project.tag,
+        )
+        return JSONResponse(
+            content={
+                "message": "PEP was removed from favorites.",
+                "registry": f"{project.namespace}/{project.name}:{project.tag}",
+            },
+            status_code=202,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could remove pep from favorites. Server error: {e}",
+        )
 
 
 @api.get(

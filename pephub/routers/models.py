@@ -42,6 +42,12 @@ class ForkRequest(BaseModel):
     fork_description: Optional[str] = None
 
 
+class FavoriteRequest(BaseModel):
+    namespace: str
+    name: str
+    tag: Optional[str] = DEFAULT_TAG
+
+
 class InitializeDeviceCodeResponse(BaseModel):
     device_code: str
     auth_url: str
