@@ -15,8 +15,6 @@ interface Props {
   onHide: () => void;
   scoreThreshold: number;
   setScoreThreshold: (scoreThreshold: number) => void;
-  limit: number;
-  setLimit: (limit: number) => void;
   offset: number;
   setOffset: (offset: number) => void;
   onSearch: () => void;
@@ -27,15 +25,12 @@ export const SearchOptionsModal: FC<Props> = ({
   onHide,
   scoreThreshold,
   setScoreThreshold,
-  limit,
-  setLimit,
   offset,
   setOffset,
   onSearch,
 }) => {
   const setToDefault = () => {
     setScoreThreshold(0.5);
-    setLimit(10);
     setOffset(0);
   };
 
@@ -61,15 +56,6 @@ export const SearchOptionsModal: FC<Props> = ({
           ></input>
           <span className="ms-2 fw-bold mx-2">{scoreThreshold}</span>
         </div>
-        <label htmlFor="limit" className="form-label">
-          Limit
-        </label>
-        <select value={limit} onChange={(e) => setLimit(parseInt(e.target.value))} className="form-control form-select">
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </select>
         <label htmlFor="offset" className="form-label mt-2">
           Offset
         </label>

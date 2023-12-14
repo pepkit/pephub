@@ -49,7 +49,7 @@ interface StarsResponse {
   count: number;
   limit: number;
   offset: number;
-  items: ProjectAnnotation[];
+  results: ProjectAnnotation[];
 }
 
 export const getNamespaceInfo = (namespace: string, token: string | null = null) => {
@@ -258,7 +258,7 @@ export const starRepository = (
       url,
       {
         namespace: star_namespace,
-        project: star_project,
+        name: star_project,
         tag: star_tag,
       },
       {
@@ -289,7 +289,7 @@ export const removeStar = (
       },
       data: {
         namespace: star_namespace,
-        project: star_project,
+        name: star_project,
         tag: star_tag,
       },
     })

@@ -192,10 +192,25 @@ export const Nav: FC = () => {
                 <div className="mx-2 my-0 nav-item h5 pt-1">
                   <Dropdown className="me-3">
                     <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
-                      <GitHubAvatar namespace={user['login']} height={40} width={40} />
+                      <GitHubAvatar namespace={user.login} height={40} width={40} />
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="border border-dark shadow-lg">
-                      <Dropdown.Item href={`/${user.login}`}>My PEPs</Dropdown.Item>
+                      <Dropdown.Header className="d-flex flex-row align-items-center">
+                        <GitHubAvatar namespace={user.login} height={20} width={20} />
+                        <div className="d-flex flex-column">
+                          <span className="ms-2">{user.login}</span>
+                          <span className="ms-2 text-xs">{user.company}</span>
+                        </div>
+                      </Dropdown.Header>
+                      <Dropdown.Divider />
+                      <Dropdown.Item href={`/${user.login}`}>
+                        <i className="bi bi-person me-1"></i>
+                        My PEPs
+                      </Dropdown.Item>
+                      <Dropdown.Item href={`/${user.login}?view=stars`}>
+                        <i className="bi bi-star me-1"></i>
+                        Stars
+                      </Dropdown.Item>
                       <Dropdown.Divider />
                       <Dropdown.Header>Organizations</Dropdown.Header>
                       {user?.orgs.length > 0 ? (

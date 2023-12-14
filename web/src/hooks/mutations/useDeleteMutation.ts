@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { deleteProject } from '../../api/project';
-import { extractError, extractErrorMessage } from '../../utils/etc';
+import { extractErrorMessage } from '../../utils/etc';
 import { useSession } from '../useSession';
 
 export const useDeleteMutation = (

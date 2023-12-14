@@ -155,6 +155,8 @@ export const ProjectPage: FC = () => {
     runValidation();
   };
 
+  const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
+
   if (error) {
     return (
       <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
@@ -170,8 +172,6 @@ export const ProjectPage: FC = () => {
       </PageLayout>
     );
   }
-
-  const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
 
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>

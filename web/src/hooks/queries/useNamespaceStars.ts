@@ -13,6 +13,7 @@ export const useNamespaceStars = (
     queryKey: [namespace, 'stars'],
     queryFn: () => getNamespaceStars(namespace || '', session?.jwt || '', params),
     enabled: enabled && namespace !== undefined && session?.jwt !== null,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
   return query;
 };

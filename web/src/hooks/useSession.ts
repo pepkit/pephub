@@ -10,10 +10,14 @@ const VITE_API_HOST = import.meta.env.VITE_API_HOST || '';
 const AUTH_BASE = `${VITE_API_HOST}/auth`;
 const JWT_STORE = 'pephub_session';
 
+interface LoginParams {
+  next?: string;
+}
+
 interface Session {
   jwt: string | null;
   user: User | null;
-  login: () => void;
+  login: (params?: LoginParams) => void;
   logout: () => void;
   setJWT: (jwt: string | null) => void;
 }
@@ -45,12 +49,19 @@ export const useSession = (): Session => {
 
   let decoded = null;
 
-  const login = useCallback(() => {
-    const clientRedirectUrl = buildClientRedirectUrl();
-    const currentUrl = window.location.href;
-    const url = `${AUTH_BASE}/login?client_redirect_uri=${clientRedirectUrl}&client_finally_send_to=${currentUrl}`;
-    window.location.href = url;
-  }, [AUTH_BASE, buildClientRedirectUrl, window.location.href]);
+  const login = useCallback(
+    (params?: LoginParams) => {
+      const clientRedirectUrl = buildClientRedirectUrl();
+      const currentUrl = window.location.href;
+      let final = currentUrl;
+      if (params?.next) {
+        final = params?.next;
+      }
+      const url = `${AUTH_BASE}/login?client_redirect_uri=${clientRedirectUrl}&client_finally_send_to=${final}`;
+      window.location.href = url;
+    },
+    [AUTH_BASE, buildClientRedirectUrl, window.location.href],
+  );
 
   const logout = useCallback(() => {
     setJwt(null);

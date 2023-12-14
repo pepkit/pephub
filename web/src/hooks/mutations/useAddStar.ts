@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 
 import { starRepository } from '../../api/namespace';
 import { extractErrorMessage } from '../../utils/etc';

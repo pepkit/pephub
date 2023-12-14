@@ -2,6 +2,10 @@ body {
   overflow: scroll; /* Show scrollbars */
 }
 
+/* from tailwinds mb-0.5 */
+.mb-tiny {
+  margin-bottom: 0.125rem;
+}
 .container-height {
   min-height: calc(100vh - 300px);
 }
@@ -91,6 +95,10 @@ body {
 .spin {
   animation: spin 1s linear infinite;
 }
+.spin-fast {
+  animation: spin 0.5s linear infinite;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -244,6 +252,46 @@ body {
 .project-button-toggles:hover {
   background-color: #00000011 !important;
   transition: background-color 0.1s ease-in-out;
+}
+
+.fill-primary {
+  fill: #7ab9fd;
+}
+
+.fill-secondary {
+  fill: #6c757d;
+}
+
+.fill-success {
+  fill: #28a745;
+}
+
+.fill-info {
+  fill: #17a2b8;
+}
+
+.fill-warning {
+  fill: #ffc107;
+}
+
+.fill-danger {
+  fill: #dc3545;
+}
+
+.fill-light {
+  fill: #f8f9fa;
+}
+
+.fill-dark {
+  fill: #343a40;
+}
+
+.w-4 {
+  width: 1rem;
+}
+
+.h-4 {
+  height: 1rem;
 }
 
 .w-60 {

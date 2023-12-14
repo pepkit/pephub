@@ -1,11 +1,14 @@
-import { FC } from 'react';
+import { FC, Fragment } from 'react';
 import { ProgressBar } from 'react-bootstrap';
 
 import { SearchHit } from '../../../types';
 import { GitHubAvatar } from '../../components/badges/github-avatar';
 
-interface ProjectProps {
+interface SearchResultProps {
   hits: SearchHit[];
+  offset: number;
+  setOffset: (offset: number) => void;
+  numResultsPerPage: number;
 }
 
 const HitCard = ({ hit }: { hit: SearchHit }) => {
@@ -32,7 +35,7 @@ const HitCard = ({ hit }: { hit: SearchHit }) => {
   );
 };
 
-export const ProjectSearchResults: FC<ProjectProps> = ({ hits }) => {
+export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setOffset, numResultsPerPage }) => {
   if (hits.length === 0)
     return (
       <div
@@ -50,6 +53,37 @@ export const ProjectSearchResults: FC<ProjectProps> = ({ hits }) => {
       {hits.map((hit, i) => (
         <HitCard hit={hit} key={i} />
       ))}
+      <div className="mt-3">
+        {hits.length > 0 && (
+          <Fragment>
+            <div className="d-flex flex-row align-items-center justify-content-center gap-2">
+              <button
+                disabled={offset === 0}
+                className="btn btn-sm btn-outline-dark"
+                onClick={() => {
+                  setOffset(offset - numResultsPerPage);
+                }}
+              >
+                Previous
+              </button>
+              <button
+                className="btn btn-sm btn-outline-dark"
+                onClick={() => {
+                  setOffset(offset + numResultsPerPage);
+                }}
+              >
+                More
+              </button>
+            </div>
+            <div className="d-flex align-items-center justify-content-center mt-2">
+              <span className="me-1">
+                Showing results {offset + 1} - {offset + numResultsPerPage}
+              </span>
+              {/* <span className="badge bg-primary bg-opacity-25 text-primary">{hits.length}</span> */}
+            </div>
+          </Fragment>
+        )}
+      </div>
     </div>
   );
 };

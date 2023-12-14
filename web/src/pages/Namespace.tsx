@@ -8,6 +8,7 @@ import { Pagination } from '../components/layout/pagination';
 import { AddPEPModal } from '../components/modals/add-pep';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
+import { NamespacePagePlaceholder } from '../components/namespace/namespace-page-placeholder';
 import { NamespacePageSearchBar } from '../components/namespace/search-bar';
 import { NamespaceViewSelector } from '../components/namespace/view-selector';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
@@ -22,6 +23,10 @@ import { numberWithCommas } from '../utils/etc';
 type View = 'peps' | 'stars';
 
 export const NamespacePage: FC = () => {
+  // get view out of url its a query param
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewFromUrl = urlParams.get('view') as View;
+
   // get namespace from url
   let { namespace } = useParams();
   namespace = namespace?.toLowerCase();
@@ -35,7 +40,7 @@ export const NamespacePage: FC = () => {
   const [search, setSearch] = useState('');
   const [orderBy, setOrderBy] = useState('update_date');
   const [order, setOrder] = useState('asc');
-  const [view, setView] = useState<View>('peps');
+  const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
@@ -49,14 +54,22 @@ export const NamespacePage: FC = () => {
     order: order || 'asc',
     search: searchDebounced,
   });
-  const { data: stars } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
+  const { data: stars, isLoading: starsIsLoading } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
 
+  if (namespaceInfoIsLoading || starsIsLoading) {
+    return (
+      <PageLayout title={namespace}>
+        <NamespacePagePlaceholder />
+      </PageLayout>
+    );
+  }
+
   // fetcing error almost always means the namespace doesn't exist
-  if (error) {
+  else if (error) {
     return (
       <PageLayout title={namespace}>
         <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
@@ -70,118 +83,136 @@ export const NamespacePage: FC = () => {
         </div>
       </PageLayout>
     );
-  }
-
-  return (
-    <PageLayout title={namespace}>
-      {/* breadcrumbs */}
-      <div className="fw-bold mt-2">
-        <Breadcrumb>
-          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-          <Breadcrumb.Item active>{namespace}</Breadcrumb.Item>
-        </Breadcrumb>
-      </div>
-      <div className="flex-row d-flex align-items-start justify-content-between">
-        <h1 id="namespace-header" className="fw-bold">
-          <GitHubAvatar namespace={namespace} height={60} width={60} /> {namespace}
-        </h1>
-        <div className="d-flex flex-row align-items-center">
-          <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark me-1">
-            <i className="bi bi-hdd-rack me-1"></i>
-            API
-          </button>
-          {user?.login === namespace || user?.orgs.includes(namespace || '') ? (
-            <Fragment>
-              <button
-                onClick={() => setShowAddPEPModal(true)}
-                className="btn btn-sm btn-success me-1"
-                data-bs-toggle="modal"
-                data-bs-target="#newProject"
-              >
-                <i className="bi bi-plus-circle me-1"></i>
-                Add
-              </button>
-            </Fragment>
-          ) : null}
+  } else {
+    return (
+      <PageLayout title={namespace}>
+        {/* breadcrumbs */}
+        <div className="fw-bold mt-2">
+          <Breadcrumb>
+            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item active>{namespace}</Breadcrumb.Item>
+          </Breadcrumb>
         </div>
-      </div>
-      <>
-        {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
+        <div className="flex-row d-flex align-items-start justify-content-between">
+          <h1 id="namespace-header" className="fw-bold">
+            <GitHubAvatar namespace={namespace} height={60} width={60} /> {namespace}
+          </h1>
+          <div className="d-flex flex-row align-items-center">
+            <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark me-1">
+              <i className="bi bi-hdd-rack me-1"></i>
+              API
+            </button>
+            {user?.login === namespace || user?.orgs.includes(namespace || '') ? (
+              <Fragment>
+                <button
+                  onClick={() => setShowAddPEPModal(true)}
+                  className="btn btn-sm btn-success me-1"
+                  data-bs-toggle="modal"
+                  data-bs-target="#newProject"
+                >
+                  <i className="bi bi-plus-circle me-1"></i>
+                  Add
+                </button>
+              </Fragment>
+            ) : null}
+          </div>
+        </div>
+        <>
+          {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
+            <p className="mb-0">
+              <span className="fw-bold d-flex">
+                Organizations you belong to:{' '}
+                <div className="d-flex align-items-center">
+                  {user?.orgs.map((org) => (
+                    <Fragment key={org}>
+                      <a className="ms-1 text-decoration-none" href={`/${org}`}>
+                        <NamespaceBadge className="me-1" namespace={org} />
+                      </a>{' '}
+                    </Fragment>
+                  ))}
+                </div>
+              </span>
+            </p>
+          )}
           <p className="mb-0">
-            <span className="fw-bold d-flex">
-              Organizations you belong to:{' '}
-              <div className="d-flex align-items-center">
-                {user?.orgs.map((org) => (
-                  <Fragment key={org}>
-                    <a className="ms-1 text-decoration-none" href={`/${org}`}>
-                      <NamespaceBadge className="me-1" namespace={org} />
-                    </a>{' '}
-                  </Fragment>
+            <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
+          </p>
+        </>
+        {user && namespace === user?.login ? (
+          <div className="mt-3">
+            <NamespaceViewSelector
+              numPeps={projects?.count || 0}
+              numStars={stars?.results.length || 0}
+              view={view}
+              setView={setView}
+            />
+            <div className="my-1 border-bottom border-grey"></div>
+          </div>
+        ) : (
+          <div className="my-3 border-bottom border-grey"></div>
+        )}
+        {/* Render projects  in namespace */}
+
+        {view === 'peps' ? (
+          <Fragment>
+            <div className="mt-3"></div>
+            <NamespacePageSearchBar
+              namespace={namespace || ''}
+              search={search}
+              setSearch={setSearch}
+              limit={limit}
+              setLimit={setLimit}
+              orderBy={orderBy}
+              setOrderBy={setOrderBy}
+              order={order}
+              setOrder={setOrder}
+            />
+            <div className="my-3"></div>
+            <div className="mt-3">
+              {projectsIsLoading || projects === undefined ? (
+                <ProjectListPlaceholder />
+              ) : (
+                projects.items.map((project, i) => <ProjectCard key={i} project={project} />)
+              )}
+              <>
+                {projects?.count && projects?.count > limit ? (
+                  <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
+                ) : null}
+              </>
+              {/* no projects exists */}
+              <div>
+                {projects?.items.length === 0 ? (
+                  <div className="text-center">
+                    <p className="text-muted">No projects found</p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </Fragment>
+        ) : (
+          // render stars in namespace
+          <Fragment>
+            {stars?.results.length === 0 ? (
+              <div className="text-center mt-5">
+                <p className="fst-italic text-muted">No stars found. Star some projects and they will show up here!</p>
+                <i className="text-muted text-4xl bi bi-stars mt-4"></i>
+              </div>
+            ) : (
+              <div className="mt-3">
+                {stars?.results.map((star) => (
+                  <ProjectCard key={star.digest} project={star} />
                 ))}
               </div>
-            </span>
-          </p>
-        )}
-        <p className="mb-0">
-          <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
-        </p>
-      </>
-      {user && namespace === user?.login ? (
-        <div className="mt-3">
-          <NamespaceViewSelector numStars={stars?.items.length || 0} view={view} setView={setView} />
-          <div className="my-1 border-bottom border-grey"></div>
-        </div>
-      ) : (
-        <div className="my-3 border-bottom border-grey"></div>
-      )}
-      {/* Render projects  in namespace */}
-
-      {view === 'peps' ? (
-        <Fragment>
-          <NamespacePageSearchBar
-            namespace={namespace || ''}
-            search={search}
-            setSearch={setSearch}
-            limit={limit}
-            setLimit={setLimit}
-            orderBy={orderBy}
-            setOrderBy={setOrderBy}
-            order={order}
-            setOrder={setOrder}
-          />
-          <div className="my-3"></div>
-          <div className="mt-3">
-            {projectsIsLoading || projects === undefined ? (
-              <ProjectListPlaceholder />
-            ) : (
-              projects.items.map((project, i) => <ProjectCard key={i} project={project} />)
             )}
-            <>
-              {projects?.count && projects?.count > limit ? (
-                <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
-              ) : null}
-            </>
-            {/* no projects exists */}
-            <div>
-              {projects?.items.length === 0 ? (
-                <div className="text-center">
-                  <p className="text-muted">No projects found</p>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </Fragment>
-      ) : (
-        <pre>
-          <code>{JSON.stringify(stars?.items)}</code>
-        </pre>
-      )}
-      <AddPEPModal defaultNamespace={namespace} show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
-      <NamespaceAPIEndpointsModal
-        namespace={namespace || ''}
-        show={showEndpointsModal}
-        onHide={() => setShowEndpointsModal(false)}
-      />
-    </PageLayout>
-  );
+          </Fragment>
+        )}
+        <AddPEPModal defaultNamespace={namespace} show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
+        <NamespaceAPIEndpointsModal
+          namespace={namespace || ''}
+          show={showEndpointsModal}
+          onHide={() => setShowEndpointsModal(false)}
+        />
+      </PageLayout>
+    );
+  }
 };
