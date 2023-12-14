@@ -218,12 +218,6 @@ export const ProjectPage: FC = () => {
                 <i className="me-1 bi bi-pencil-square"></i>
                 Edit
               </button>
-              {projectInfo?.pop && (
-                <button className="me-1 btn btn-sm btn-outline-dark">
-                  <i className="me-1 bi bi-arrow-repeat"></i>
-                  Convert to PEP
-                </button>
-              )}
               <button className="me-1 btn btn-sm btn-danger" onClick={() => setShowDeletePEPModal(true)}>
                 <i className="me-1 bi bi-trash3"></i>
                 Delete
