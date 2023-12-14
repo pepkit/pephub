@@ -126,11 +126,16 @@ export const NamespacePage: FC = () => {
           <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
         </p>
       </>
-      <div className="mt-3">
-        <NamespaceViewSelector numStars={stars?.items.length || 0} view={view} setView={setView} />
-      </div>
+      {user && namespace === user?.login ? (
+        <div className="mt-3">
+          <NamespaceViewSelector numStars={stars?.items.length || 0} view={view} setView={setView} />
+          <div className="my-1 border-bottom border-grey"></div>
+        </div>
+      ) : (
+        <div className="my-3 border-bottom border-grey"></div>
+      )}
       {/* Render projects  in namespace */}
-      <div className="my-1 border-bottom border-grey"></div>
+
       {view === 'peps' ? (
         <Fragment>
           <NamespacePageSearchBar
@@ -162,15 +167,15 @@ export const NamespacePage: FC = () => {
                 <div className="text-center">
                   <p className="text-muted">No projects found</p>
                 </div>
-              ) : (
-                <pre>
-                  <code>JSON.stringify(stars?.items)</code>
-                </pre>
-              )}
+              ) : null}
             </div>
           </div>
         </Fragment>
-      ) : null}
+      ) : (
+        <pre>
+          <code>{JSON.stringify(stars?.items)}</code>
+        </pre>
+      )}
       <AddPEPModal defaultNamespace={namespace} show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
       <NamespaceAPIEndpointsModal
         namespace={namespace || ''}

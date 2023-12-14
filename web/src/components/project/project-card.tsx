@@ -10,6 +10,7 @@ import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { MarkdownToText } from '../markdown/render';
 import { DeletePEPModal } from '../modals/delete-pep';
+import { ForkPEPModal } from '../modals/fork-pep';
 
 interface Props {
   project: ProjectAnnotation;
@@ -20,6 +21,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
 
   // state
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
+  const [showForkPEPModal, setShowForkPEPModal] = useState(false);
 
   const starMutation = useAddStar(user?.login || '', project.namespace, project.name, project.tag);
 
@@ -68,7 +70,13 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           <Dropdown.Menu>
             <Dropdown.Item href={`/${project.namespace}/${project.name}`}>View</Dropdown.Item>
             {user ? (
-              <Dropdown.Item onClick={() => {}}>Fork</Dropdown.Item>
+              <Dropdown.Item
+                onClick={() => {
+                  setShowForkPEPModal(true);
+                }}
+              >
+                Fork
+              </Dropdown.Item>
             ) : (
               <Dropdown.Item disabled>Fork (log in to fork)</Dropdown.Item>
             )}
@@ -124,6 +132,13 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           </small>
         </div>
       </div>
+      <ForkPEPModal
+        show={showForkPEPModal}
+        onHide={() => setShowForkPEPModal(false)}
+        project={project.name}
+        namespace={project.namespace}
+        tag={project.tag}
+      />
       <DeletePEPModal
         show={showDeletePEPModal}
         onHide={() => setShowDeletePEPModal(false)}
