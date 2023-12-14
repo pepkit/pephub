@@ -10,7 +10,11 @@ from fastapi.responses import JSONResponse
 from peppy import Project
 from peppy.const import DESC_KEY, NAME_KEY
 from pepdbagent import PEPDatabaseAgent
-from pepdbagent.exceptions import ProjectUniqueNameError
+from pepdbagent.exceptions import (
+    ProjectUniqueNameError,
+    ProjectAlreadyInFavorites,
+    ProjectNotInFavorites,
+)
 from pepdbagent.const import DEFAULT_LIMIT_INFO
 from pepdbagent.models import ListOfNamespaceInfo, Namespace, AnnotationList
 from typing import Literal
@@ -60,7 +64,7 @@ async def get_namespace(
 
         namespace: databio
     """
-    nspace = nspace.dict()
+    nspace = nspace.model_dump()
     nspace["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
     return JSONResponse(content=nspace)
 
@@ -360,7 +364,7 @@ async def add_to_stars(
     Add project to favorites
     """
     try:
-        agent.user.add_project_to_favorites(
+        agent.user.add_to_favorites(
             namespace=namespace,
             project_namespace=project.namespace,
             project_name=project.name,
@@ -374,10 +378,10 @@ async def add_to_stars(
             },
             status_code=202,
         )
-    except Exception as e:
+    except ProjectAlreadyInFavorites as _:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not add PEP to favorites. Server error: {e}",
+            detail="PEP already in favorites.",
         )
 
 
@@ -395,7 +399,7 @@ async def remove_from_stars(
     Add project to favorites
     """
     try:
-        agent.user.remove_project_from_favorites(
+        agent.user.remove_from_favorites(
             namespace=namespace,
             project_namespace=project.namespace,
             project_name=project.name,
@@ -408,10 +412,10 @@ async def remove_from_stars(
             },
             status_code=202,
         )
-    except Exception as e:
+    except ProjectNotInFavorites as _:
         raise HTTPException(
             status_code=400,
-            detail=f"Could remove pep from favorites. Server error: {e}",
+            detail="PEP not in favorites.",
         )
 
 

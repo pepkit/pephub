@@ -10,6 +10,7 @@ export interface ProjectAnnotation {
   digest: string;
   pep_schema: string;
   pop: boolean;
+  stars_number: number;
 }
 
 export interface ProjectConfigResponse {

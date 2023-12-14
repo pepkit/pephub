@@ -2,6 +2,7 @@ import { FC, Fragment, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
+import { set } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { ProjectAnnotation } from '../../../types';
@@ -10,10 +11,12 @@ import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
 import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
+import { copyToClipboard } from '../../utils/etc';
 import { MarkdownToText } from '../markdown/render';
 import { DeletePEPModal } from '../modals/delete-pep';
 import { ForkPEPModal } from '../modals/fork-pep';
 import { LoadingSpinner } from '../spinners/loading-spinner';
+import { ProjectCardDropdown } from './project-card-dropdown';
 
 interface Props {
   project: ProjectAnnotation;
@@ -26,6 +29,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
   // state
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const starAddMutation = useAddStar(user?.login || '', project.namespace, project.name, project.tag);
   const starRemoveMutation = useRemoveStar(user?.login || '', project.namespace, project.name, project.tag);
@@ -63,87 +67,21 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             </span>
           ) : null}
         </div>
-        <Dropdown as={ButtonGroup}>
-          <Button
-            disabled={starAddMutation.isPending || starRemoveMutation.isPending}
-            variant="outline-dark"
-            size="sm"
-            onClick={() => {
-              if (!user) {
-                toast.error('You must be logged in to star a project!');
-              } else if (isStarred) {
-                starRemoveMutation.mutate();
-              } else {
-                starAddMutation.mutate();
-              }
-            }}
-          >
-            {isStarred ? (
-              <Fragment>
-                <div className="d-flex align-items-center">
-                  <i className="text-primary bi bi-star-fill me-1"></i>
-                  <span className="text-primary">
-                    {starRemoveMutation.isPending ? (
-                      <Fragment>
-                        Star
-                        <LoadingSpinner className="w-4 h-4 spin ms-1 mb-tiny fill-secondary" />
-                      </Fragment>
-                    ) : (
-                      'Star'
-                    )}
-                  </span>
-                </div>
-              </Fragment>
-            ) : (
-              <Fragment>
-                <div className="d-flex align-items-center">
-                  <i className="bi bi-star me-1"></i>
-                  <span>
-                    {starAddMutation.isPending ? (
-                      <Fragment>
-                        Star
-                        <LoadingSpinner className="w-4 h-4 spin ms-1 mb-tiny fill-secondary" />
-                      </Fragment>
-                    ) : (
-                      'Star'
-                    )}
-                  </span>
-                </div>
-              </Fragment>
-            )}
-          </Button>
-          <Dropdown.Toggle split variant="outline-dark" id="dropdown-split-basic" />
-          <Dropdown.Menu>
-            <Dropdown.Item href={`/${project.namespace}/${project.name}`}>View</Dropdown.Item>
-            {user ? (
-              <Dropdown.Item
-                onClick={() => {
-                  setShowForkPEPModal(true);
-                }}
-              >
-                Fork
-              </Dropdown.Item>
-            ) : (
-              <Dropdown.Item disabled>Fork (log in to fork)</Dropdown.Item>
-            )}
-            {user && user.login === project.namespace && (
-              <Fragment>
-                <Dropdown.Divider />
-                <Dropdown.Item
-                  onClick={() => {
-                    setShowDeletePEPModal(true);
-                  }}
-                  className="text-danger"
-                >
-                  Delete
-                </Dropdown.Item>
-              </Fragment>
-            )}
-          </Dropdown.Menu>
-        </Dropdown>
+        <ProjectCardDropdown
+          project={project}
+          isStarred={!!isStarred}
+          copied={copied}
+          setCopied={setCopied}
+          setShowDeletePEPModal={setShowDeletePEPModal}
+          setShowForkPEPModal={setShowForkPEPModal}
+        />
       </div>
       <div>
         <div className="d-flex flex-row align-items-center">
+          <div className="me-4">
+            <i className="bi bi-star-fill"></i>
+            <span className="mx-1">{project.stars_number || 0}</span>
+          </div>
           <div className="me-4">
             <label className="fw-bold">No. of samples:</label>
             <span className="mx-1">{project.number_of_samples}</span>

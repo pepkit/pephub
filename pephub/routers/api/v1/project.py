@@ -224,7 +224,6 @@ async def update_a_pep(
             {
                 "project": new_project,
                 "pep_schema": updated_project.pep_schema,
-                "pop": updated_project.pop,
             },
             namespace,
             project,
@@ -542,7 +541,7 @@ async def fork_pep_to_namespace(
             description=proj_annotation.description,
             pep_schema=proj_annotation.pep_schema,
         )
-    except ProjectUniqueNameError as e:
+    except ProjectUniqueNameError as _:
         raise HTTPException(
             status_code=400,
             detail=f"Project '{fork_to}/{fork_name}:{fork_tag}' already exists in namespace",

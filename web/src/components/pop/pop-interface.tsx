@@ -2,8 +2,7 @@ import { Fragment, useState } from 'react';
 
 import { ProjectAnnotation } from '../../../types';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
-import { PageLayout } from '../layout/page-layout';
-import { ConvertToPEPModal } from '../modals/convert-to-pep';
+import { PopItem } from './pop-item';
 
 interface Props {
   project: ProjectAnnotation;
@@ -19,15 +18,13 @@ export const PopInterface = ({ project }: Props) => {
   return (
     <Fragment>
       <div className="my-3 border-top w-100"></div>
-      <div className="container">
+      <div className="px-2">
         <div>
-          {peps?.items.map((pep) => (
-            <div className="rounded border border-dark my-2 p-3 shdaow-sm">
-              <span className="fw-bold">
-                {pep.namespace}/{pep.name}:{pep.tag}
-              </span>
-            </div>
-          ))}
+          <ul className="list-group">
+            {peps?.items.map((pep) => (
+              <PopItem key={`${pep.namespace}/${pep.name}:${pep.tag}`} pep={pep} />
+            ))}
+          </ul>
         </div>
         <div className="d-flex flex-row align-items-center justify-content-center">
           {!isAddingNew ? (
@@ -38,8 +35,8 @@ export const PopInterface = ({ project }: Props) => {
           ) : (
             <div className="d-flex flex-row align-items-center gap-2 w-100">
               <input
-                className="form-control"
-                placeholder="Add new PEP"
+                className="form-control border-dark"
+                placeholder="Add new PEP to POP"
                 value={''}
                 onChange={(e) => {
                   // setNewPEP(e.target.value);
@@ -60,15 +57,6 @@ export const PopInterface = ({ project }: Props) => {
           )}
         </div>
       </div>
-      <ConvertToPEPModal
-        show={modalOpen}
-        onHide={() => {
-          setModalOpen(false);
-        }}
-        namespace={namespace}
-        project={name}
-        tag={tag}
-      />
     </Fragment>
   );
 };

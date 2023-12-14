@@ -26,6 +26,8 @@ import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
+import { dateStringToDate, dateStringToDateTime } from '../utils/dates';
+import { copyToClipboard, getOS } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
 
@@ -56,6 +58,9 @@ export const ProjectPage: FC = () => {
   // user info
   const { user, jwt, login } = useSession();
 
+  // os info
+  const os = getOS();
+
   let { namespace, project } = useParams();
   namespace = namespace?.toLowerCase();
   // project = project?.toLowerCase();
@@ -80,8 +85,8 @@ export const ProjectPage: FC = () => {
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
-  // const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // state for editing config, samples, and subsamples
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
@@ -157,6 +162,27 @@ export const ProjectPage: FC = () => {
 
   const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
 
+  // on save handler
+  useEffect(() => {
+    window.addEventListener('keydown', (e) => {
+      let ctrlKey = false;
+      switch (os) {
+        case 'Mac OS':
+          ctrlKey = e.metaKey;
+          break;
+        default:
+          ctrlKey = e.ctrlKey;
+          break;
+      }
+      if (ctrlKey && e.key === 's') {
+        e.preventDefault();
+        if (configIsDirty || samplesIsDirty || subsamplesIsDirty) {
+          handleTotalProjectChange();
+        }
+      }
+    });
+  }, []);
+
   if (error) {
     return (
       <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
@@ -226,8 +252,44 @@ export const ProjectPage: FC = () => {
           )}
         </div>
       </div>
-      <div className="d-flex flex-row align-items-center px-4">
-        <Markdown>{projectInfo?.description || 'No description'}</Markdown>
+      <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100">
+        <div className="w-25">
+          <Markdown>{projectInfo?.description || 'No description'}</Markdown>
+        </div>
+        <div className="d-flex flex-row align-items-center">
+          <div className="border border-dark shadow-sm rounded px-2 d-flex align-items-center">
+            <span className="text-sm fw-bold">{`${projectInfo?.namespace}/${projectInfo?.name}:${
+              projectInfo?.tag || 'default'
+            }`}</span>
+            <button
+              className="btn btn-sm btn-link-dark shadow-none ms-1"
+              onClick={() => {
+                copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
+                setCopied(true);
+                setTimeout(() => {
+                  setCopied(false);
+                }, 1000);
+              }}
+            >
+              {copied ? <i className="bi bi-check"></i> : <i className="bi bi-clipboard" />}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="px-4">
+        <div className="d-flex flex-row align-items-center text-muted mt-1">
+          <small className="d-flex flex-row align-items-center justify-content-between w-100">
+            <span className="me-3">
+              <i className="bi bi-calendar3"></i>
+              <span className="mx-1">Created:</span>
+              <span id="project-submission-date">{dateStringToDate(projectInfo?.submission_date || '')}</span>
+              <i className="ms-4 bi bi-calendar3"></i>
+              <span className="mx-1">Updated:</span>
+              <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
+            </span>
+            <span className="">{projectInfo?.digest}</span>
+          </small>
+        </div>
       </div>
       {projectInfo?.pop ? (
         <PopInterface project={projectInfo} />
