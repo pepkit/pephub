@@ -360,7 +360,7 @@ async def add_to_stars(
     Add project to favorites
     """
     try:
-        agent.user.add_to_favorites(
+        agent.user.add_project_to_favorites(
             namespace=namespace,
             project_namespace=project.namespace,
             project_name=project.name,
@@ -395,7 +395,7 @@ async def remove_from_stars(
     Add project to favorites
     """
     try:
-        agent.user.remove_from_favorites(
+        agent.user.remove_project_from_favorites(
             namespace=namespace,
             project_namespace=project.namespace,
             project_name=project.name,
