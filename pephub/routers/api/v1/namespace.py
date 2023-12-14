@@ -123,7 +123,7 @@ async def get_namespace_projects(
             filter_start_date=filter_start_date,
             filter_end_date=filter_end_date,
         )
-    results = [p.dict() for p in search_result.results]
+    results = [p.model_dump() for p in search_result.results]
 
     return JSONResponse(
         content={

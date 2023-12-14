@@ -1,4 +1,4 @@
-import { FC, Fragment, useState } from 'react';
+import { FC, Fragment, useEffect, useState } from 'react';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useParams } from 'react-router-dom';
 
@@ -35,11 +35,11 @@ export const NamespacePage: FC = () => {
   const { user } = useSession();
 
   // pagination
-  const [limit, setLimit] = useState(10);
-  const [offset, setOffset] = useState(0);
-  const [search, setSearch] = useState('');
-  const [orderBy, setOrderBy] = useState('update_date');
-  const [order, setOrder] = useState('asc');
+  const [limit, setLimit] = useState(urlParams.get('limit') ? parseInt(urlParams.get('limit')!) : 10);
+  const [offset, setOffset] = useState(urlParams.get('offset') ? parseInt(urlParams.get('offset')!) : 0);
+  const [search, setSearch] = useState(urlParams.get('search') || '');
+  const [orderBy, setOrderBy] = useState(urlParams.get('orderBy') || 'update_date');
+  const [order, setOrder] = useState(urlParams.get('order') || 'asc');
   const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
 
   const searchDebounced = useDebounce<string>(search, 500);
@@ -59,6 +59,51 @@ export const NamespacePage: FC = () => {
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
+
+  // update url when search changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && search === '') {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.delete('search');
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+    } else if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('search', search);
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+    }
+  }, [search]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('offset', offset.toString());
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+    }
+  }, [offset]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('orderBy', orderBy);
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+    }
+  }, [orderBy]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('order', order);
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+    }
+  }, [order]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('limit', limit.toString());
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+    }
+  }, [limit]);
 
   if (namespaceInfoIsLoading || starsIsLoading) {
     return (

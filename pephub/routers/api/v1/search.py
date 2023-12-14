@@ -43,16 +43,7 @@ async def search_for_pep(
     if qdrant is not None:
         try:
             query_vec = list(model.embed(query.query))[0]
-            # count = len(qdrant.search(
-            #     collection_name=(
-            #         query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
-            #     ),
-            #     query_vector=query_vec,
-            #     limit=1e99, # get everything above the threshold
-            #     offset=offset,
-            #     score_threshold=score_threshold,
-            # ))
-            results = qdrant.search(
+            vector_results = qdrant.search(
                 collection_name=(
                     query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
                 ),
@@ -61,31 +52,53 @@ async def search_for_pep(
                 offset=offset,
                 score_threshold=score_threshold,
             )
+            sql_results = agent.annotation.get(
+                query=query.query,
+                limit=limit,
+                offset=offset,
+                namespace=None,
+                admin=namespace_access,
+            )
+            vector_results_mapped = [r.model_dump() for r in vector_results]
+            sql_results_mapped = [
+                {
+                    "id": r.digest,
+                    "version": 0,
+                    "score": 1.0,  # Its a SQL search, so we just set the score to 1.0
+                    "payload": {
+                        "description": r.description,
+                        "registry": f"{r.namespace}/{r.name}:{r.tag}",
+                    },
+                    "vector": None,
+                }
+                for r in sql_results.results
+            ]
+            results = vector_results_mapped + sql_results_mapped
             namespaces = agent.namespace.get(admin=namespace_access)
             namespace_hits = [
                 n.namespace
                 for n in namespaces.results
                 if query.query.lower() in n.namespace.lower()
             ]
-            # TODO: make this a helper function
             namespace_hits.extend(
                 [
                     n
                     for n in list(
                         set(
                             [
-                                r.dict()["payload"]["registry"].split("/")[0]
-                                for r in results
+                                r.model_dump()["payload"]["registry"].split("/")[0]
+                                for r in vector_results
                             ]
                         )
                     )
                     if n not in namespace_hits
                 ]
             )
+
             return JSONResponse(
                 content={
                     "query": query.query,
-                    "results": [r.dict() for r in results],
+                    "results": results,
                     "namespace_hits": namespace_hits,
                     "limit": limit,
                     "offset": offset,
