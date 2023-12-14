@@ -37,7 +37,16 @@ export const NamespacePageSearchBar: FC<Props> = ({
           className="form-control w-60"
           placeholder={`Search for PEPs in ${namespace}`}
         />
-        <select value={limit} onChange={(e) => setLimit(parseInt(e.target.value))} className="form-control form-select">
+        <select
+          value={limit}
+          onChange={(e) => {
+            setLimit(parseInt(e.target.value));
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('limit', e.target.value);
+            window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+          }}
+          className="form-control form-select"
+        >
           <option value={5}>Limit 5</option>
           <option value={10}>Limit 10</option>
           <option value={20}>Limit 20</option>
@@ -49,6 +58,10 @@ export const NamespacePageSearchBar: FC<Props> = ({
             const [orderBy, order] = e.target.value.split('+');
             setOrderBy(orderBy);
             setOrder(order);
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('orderBy', orderBy);
+            urlParams.set('order', order);
+            window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
           }}
           className="form-control form-select"
         >

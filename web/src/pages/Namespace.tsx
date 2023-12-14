@@ -10,6 +10,7 @@ import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-e
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePagePlaceholder } from '../components/namespace/namespace-page-placeholder';
 import { NamespacePageSearchBar } from '../components/namespace/search-bar';
+import { StarFilterBar } from '../components/namespace/star-filter-bar';
 import { NamespaceViewSelector } from '../components/namespace/view-selector';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
 import { ProjectCard } from '../components/project/project-card';
@@ -40,7 +41,6 @@ export const NamespacePage: FC = () => {
   const [search, setSearch] = useState(urlParams.get('search') || '');
   const [orderBy, setOrderBy] = useState(urlParams.get('orderBy') || 'update_date');
   const [order, setOrder] = useState(urlParams.get('order') || 'asc');
-  const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
@@ -59,6 +59,8 @@ export const NamespacePage: FC = () => {
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
+  const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
+  const [starSearch, setStarSearch] = useState<string>(urlParams.get('starSearch') || '');
 
   // update url when search changes
   useEffect(() => {
@@ -74,36 +76,16 @@ export const NamespacePage: FC = () => {
   }, [search]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && starSearch === '') {
       const urlParams = new URLSearchParams(window.location.search);
-      urlParams.set('offset', offset.toString());
+      urlParams.delete('starSearch');
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+    } else if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('starSearch', starSearch);
       window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
     }
-  }, [offset]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.set('orderBy', orderBy);
-      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
-    }
-  }, [orderBy]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.set('order', order);
-      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
-    }
-  }, [order]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.set('limit', limit.toString());
-      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
-    }
-  }, [limit]);
+  }, [starSearch]);
 
   if (namespaceInfoIsLoading || starsIsLoading) {
     return (
@@ -244,9 +226,16 @@ export const NamespacePage: FC = () => {
               </div>
             ) : (
               <div className="mt-3">
-                {stars?.results.map((star) => (
-                  <ProjectCard key={star.digest} project={star} />
-                ))}
+                <StarFilterBar search={starSearch} setSearch={setStarSearch} />
+                {stars?.results
+                  .filter(
+                    (star) =>
+                      star.description.toLowerCase().includes(starSearch.toLowerCase()) ||
+                      star.name.toLowerCase().includes(starSearch.toLowerCase()),
+                  )
+                  .map((star) => (
+                    <ProjectCard key={star.digest} project={star} />
+                  ))}
               </div>
             )}
           </Fragment>
