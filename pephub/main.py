@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from ._version import __version__ as server_v
 from .const import PKG_NAME, TAGS_METADATA, SPA_PATH
 from .routers.api.v1.base import api as api_base
-from .routers.api.v1.namespace import namespace as api_namespace
+from .routers.api.v1.namespace import namespace as api_namespace, namespaces
 from .routers.api.v1.project import project as api_project
 from .routers.api.v1.user import user as api_user
 from .routers.api.v1.search import search as api_search
@@ -64,6 +64,7 @@ app.add_middleware(
 app.include_router(api_base)
 app.include_router(api_user)
 app.include_router(api_namespace)
+app.include_router(namespaces)
 app.include_router(api_project)
 app.include_router(api_search)
 app.include_router(auth_router)

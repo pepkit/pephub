@@ -5,7 +5,16 @@ from typing import List, Optional, Union
 
 import peppy
 
-from fastapi import APIRouter, File, UploadFile, Request, Depends, Form, HTTPException
+from fastapi import (
+    APIRouter,
+    File,
+    UploadFile,
+    Request,
+    Depends,
+    Form,
+    HTTPException,
+    Query,
+)
 from fastapi.responses import JSONResponse
 from peppy import Project
 from peppy.const import DESC_KEY, NAME_KEY
@@ -43,6 +52,7 @@ from .base import api
 
 load_dotenv()
 
+namespaces = APIRouter(prefix="/api/v1/namespaces", tags=["namespace"])
 namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"])
 
 
@@ -69,16 +79,20 @@ async def get_namespace(
     return JSONResponse(content=nspace)
 
 
-@namespace.get("/projects", summary="Fetch all projects inside a particular namespace.")
+@namespace.get(
+    "/projects",
+    summary="Fetch all projects inside a particular namespace.",
+    response_model=AnnotationList,
+)
 async def get_namespace_projects(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
     limit: int = 10,
     offset: int = 0,
-    user=Depends(get_user_from_session_info),
-    q: str = None,
+    # user=Depends(get_user_from_session_info),
+    query: str = None,
     session_info: dict = Depends(read_authorization_header),
-    user_orgs: List[str] = Depends(get_organizations_from_session_info),
+    # user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
     order_by: str = "update_date",
     order_desc: bool = False,
@@ -88,6 +102,7 @@ async def get_namespace_projects(
     ] = None,
     filter_start_date: Annotated[Optional[str], "Date format: YYYY/MM/DD"] = None,
     filter_end_date: Annotated[Optional[str], "Date format: YYYY/MM/DD"] = None,
+    pep_type: Optional[Literal["pep", "pop"]] = None,
 ):
     """
     Fetch the projects for a particular namespace
@@ -98,13 +113,11 @@ async def get_namespace_projects(
 
         namespace: databio
     """
-
-    # TODO, this API will change. Searching
     # through a namespace for projects doesnt make sense
     # get projects in namespace
-    if q is not None:
+    if query is not None:
         search_result = agent.annotation.get(
-            query=q,
+            query=query,
             namespace=namespace,
             limit=limit,
             offset=offset,
@@ -114,6 +127,7 @@ async def get_namespace_projects(
             filter_by=filter_by,
             filter_start_date=filter_start_date,
             filter_end_date=filter_end_date,
+            pep_type=pep_type,
         )
     else:
         search_result = agent.annotation.get(
@@ -126,6 +140,7 @@ async def get_namespace_projects(
             filter_by=filter_by,
             filter_start_date=filter_start_date,
             filter_end_date=filter_end_date,
+            pep_type=pep_type,
         )
     results = [p.model_dump() for p in search_result.results]
 
@@ -364,7 +379,7 @@ async def add_to_stars(
     Add project to favorites
     """
     try:
-        agent.user.add_to_favorites(
+        agent.user.add_project_to_favorites(
             namespace=namespace,
             project_namespace=project.namespace,
             project_name=project.name,
@@ -399,7 +414,7 @@ async def remove_from_stars(
     Add project to favorites
     """
     try:
-        agent.user.remove_from_favorites(
+        agent.user.remove_project_from_favorites(
             namespace=namespace,
             project_namespace=project.namespace,
             project_name=project.name,
@@ -419,13 +434,28 @@ async def remove_from_stars(
         )
 
 
-@api.get(
-    "/namespace/info",
+@namespaces.get(
+    "/info",
     summary="Get information list of biggest namespaces",
-    tags=["namespace"],
+    response_model=ListOfNamespaceInfo,
 )
 async def get_namespace_information(
     limit: Optional[int] = DEFAULT_LIMIT_INFO,
     agent: PEPDatabaseAgent = Depends(get_db),
 ) -> ListOfNamespaceInfo:
     return agent.namespace.info(limit=limit)
+
+
+@namespaces.get(
+    "/projects_list",
+    summary="Get list of annotations for list of projects",
+    response_model=AnnotationList,
+)
+async def get_namespace_projects_list(
+    namespace_access: List[str] = Depends(get_namespace_access_list),
+    agent: PEPDatabaseAgent = Depends(get_db),
+    registry_paths: Annotated[List[str], Query()] = None,
+):
+    return agent.annotation.get_by_rp_list(
+        registry_paths=registry_paths, admin=namespace_access
+    )
