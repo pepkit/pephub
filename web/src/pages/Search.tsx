@@ -46,7 +46,7 @@ export const SearchPage: FC = () => {
     scoreThreshold,
     limit,
     offset,
-    autoRun: true,
+    autoRun: false,
   });
 
   const runSearch = () => {

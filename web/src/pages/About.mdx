@@ -1,0 +1,19 @@
+import React, { FC, useState } from 'react';
+
+import { PageLayout } from '../components/layout/page-layout';
+
+<PageLayout fullWidth>
+  <div className="mx-5" style={{ height: '80vh' }}>  
+    # PEPhub
+
+    PEPhub is database, web interface and API for sharing, retrieving, and validating PEPs.
+
+    ### What is PEP?
+    Portable Encapsulated Projects, commonly known as PEP, represents a collaborative initiative aimed at enhancing the reusability of sample metadata. It is simply **yaml** + **csv** files (or just csv) that contains samples and project metadata. The CSV file, known as the sample table, contains details about individual samples, while the YAML configuration file provides metadata related to projects, amendments, and other sample modifiers.
+    PEPs serve as a standardized format for running workflows using tools such as [Snakemake](https://snakemake.readthedocs.io/en/stable/), [Common Workflow Language](https://www.commonwl.org/), [Looper](http://looper.databio.org/en/latest/), and other workflow systems.
+    For further details about PEP and its usage, please visit: [http://pep.databio.org/en/latest/](http://pep.databio.org/en/latest/)
+
+  </div>
+</PageLayout>
+
+export default About;

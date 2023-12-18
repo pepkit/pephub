@@ -95,6 +95,9 @@ async def search_for_pep(
                 ]
             )
 
+            # finally, sort the results by score
+            results = sorted(results, key=lambda x: x["score"], reverse=True)
+
             return JSONResponse(
                 content={
                     "query": query.query,

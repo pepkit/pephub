@@ -16,8 +16,8 @@ import { Toaster } from 'react-hot-toast';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import './globals.css';
+import { About } from './pages/About';
 import Home from './pages/Home';
-import About from './pages/About';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
