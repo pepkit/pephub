@@ -132,5 +132,6 @@ CALLBACK_ENDPOINT = "/auth/callback"
 DEFAULT_PEP_SCHEMA = "pep/2.1.0"
 DEFAULT_TAG = "default"
 
-QDRANT_SEARCH_LIMIT_FOR_NUM_RESULTS = 5_000
-QDRANT_SEARCH_SCORE_THRESHOLD_FOR_NUM_RESULTS = 0.72
+DEFAULT_QDRANT_SCORE_THRESHOLD = (
+    0.72  # empirical value, highly dependent on the model used
+)

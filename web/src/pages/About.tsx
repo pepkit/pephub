@@ -1,6 +1,6 @@
 import { MDXProvider } from '@mdx-js/react';
 
-import AboutContent from './About.mdx';
+import AboutContent from './about.mdx';
 
 export const About = () => {
   return (

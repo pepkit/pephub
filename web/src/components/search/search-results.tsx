@@ -7,8 +7,10 @@ import { GitHubAvatar } from '../../components/badges/github-avatar';
 export const NUM_RESULTS_PER_PAGE = 10;
 
 interface SearchResultProps {
+  limit: number;
   hits: SearchHit[];
   offset: number;
+  total: number;
   setOffset: (offset: number) => void;
 }
 
@@ -38,22 +40,38 @@ const HitCard = ({ hit }: { hit: SearchHit }) => {
   );
 };
 
-export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setOffset }) => {
-  if (hits.length === 0)
+export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setOffset, limit }) => {
+  if (hits.length === 0 && offset === 0)
     return (
-      <div
-        className="text-muted d-flex flex-column align-items-center justify-content-center"
-        style={{ minHeight: '50vh' }}
-      >
+      <div className="text-muted d-flex flex-column align-items-center justify-content-center border-top py-4">
         <p className="mb-1">No projects found :(</p>
-        <p>Try lowering your score threshold</p>
+        <p>Try broadening your search</p>
       </div>
     );
+  else if (hits.length === 0 && offset !== 0) {
+    return (
+      <div className="text-muted d-flex flex-column align-items-center justify-content-center border-top py-4">
+        <p className="mb-1">No more projects found :(</p>
+        <p>Try broadening your search</p>
+        <div className="d-flex flex-row align-items-center justify-content-center gap-2 mt-2">
+          <button
+            disabled={offset === 0}
+            className="btn btn-sm btn-outline-dark"
+            onClick={() => {
+              setOffset(offset - limit);
+            }}
+          >
+            Go back
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <br />
       <h2 className="fw-bold">Projects</h2>
-      {hits.slice(offset, offset + NUM_RESULTS_PER_PAGE).map((hit, i) => (
+      {hits.map((hit, i) => (
         <HitCard hit={hit} key={i} />
       ))}
       <div className="mt-3">
@@ -64,7 +82,7 @@ export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setO
                 disabled={offset === 0}
                 className="btn btn-sm btn-outline-dark"
                 onClick={() => {
-                  setOffset(offset - NUM_RESULTS_PER_PAGE);
+                  setOffset(offset - limit);
                 }}
               >
                 Previous
@@ -72,17 +90,24 @@ export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setO
               <button
                 className="btn btn-sm btn-outline-dark"
                 onClick={() => {
-                  setOffset(offset + NUM_RESULTS_PER_PAGE);
+                  setOffset(offset + limit);
                 }}
               >
                 More
               </button>
             </div>
             <div className="d-flex align-items-center justify-content-center mt-2">
-              <span className="me-1">
-                Showing results {offset + 1} - {offset + NUM_RESULTS_PER_PAGE}
-              </span>
-              {/* <span className="badge bg-primary bg-opacity-25 text-primary">{hits.length}</span> */}
+              <span className="me-1">Page {Math.floor(offset / limit) + 1}</span>
+            </div>
+            <div className="d-flex align-items-center justify-content-center">
+              <button
+                className="btn btn-sm btn-link shadow-none"
+                onClick={() => {
+                  setOffset(0);
+                }}
+              >
+                Go to beginning
+              </button>
             </div>
           </Fragment>
         )}
@@ -98,12 +123,9 @@ interface NamespaceProps {
 export const NamespaceSearchResults: FC<NamespaceProps> = ({ hits }) => {
   if (hits.length === 0) {
     return (
-      <div
-        className="text-muted d-flex flex-column align-items-center justify-content-center"
-        style={{ minHeight: '50vh' }}
-      >
+      <div className="text-muted d-flex flex-column align-items-center justify-content-center py-4">
         <p className="mb-1">No namespaces found :(</p>
-        <p>Try lowering your score threshold</p>
+        <p>Try broadening your search</p>
       </div>
     );
   }

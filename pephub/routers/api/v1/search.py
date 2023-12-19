@@ -15,11 +15,7 @@ from ....dependencies import (
     get_namespace_access_list,
 )
 from ...models import SearchQuery
-from ....const import (
-    DEFAULT_QDRANT_COLLECTION_NAME,
-    QDRANT_SEARCH_LIMIT_FOR_NUM_RESULTS,
-    QDRANT_SEARCH_SCORE_THRESHOLD_FOR_NUM_RESULTS,
-)
+from ....const import DEFAULT_QDRANT_COLLECTION_NAME
 
 
 from dotenv import load_dotenv
@@ -68,21 +64,6 @@ async def search_for_pep(
         try:
             # get the embeding for the query
             query_vec = list(model.embed(query.query))[0]
-
-            # get the total number of possible results
-            # by setting the limit to a very high number
-            # this is pretty inefficient, but its the only way to get the total number of results
-            total_vector_results = len(
-                qdrant.search(
-                    collection_name=(
-                        query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
-                    ),
-                    query_vector=query_vec,
-                    limit=QDRANT_SEARCH_LIMIT_FOR_NUM_RESULTS,
-                    offset=0,
-                    score_threshold=QDRANT_SEARCH_SCORE_THRESHOLD_FOR_NUM_RESULTS,
-                )
-            )
 
             # get actual results using the limit and offset
             vector_results = qdrant.search(
@@ -151,9 +132,7 @@ async def search_for_pep(
                     "namespace_hits": namespace_hits,
                     "limit": limit,
                     "offset": offset,
-                    "total": total_vector_results
-                    + len(sql_results)
-                    + len(namespace_hits),
+                    "total": len(vector_results) + sql_results.count,
                 }
             )
         except Exception as e:

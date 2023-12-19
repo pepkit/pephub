@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from pepdbagent.models import UpdateItems
 from pepdbagent.const import DEFAULT_TAG
 
-from ..const import DEFAULT_PEP_SCHEMA
+from ..const import DEFAULT_PEP_SCHEMA, DEFAULT_QDRANT_SCORE_THRESHOLD
 
 
 class ProjectOptional(UpdateItems):
@@ -22,7 +22,7 @@ class SearchQuery(BaseModel):
     collection_name: Optional[str] = None
     limit: Optional[int] = 100
     offset: Optional[int] = 0
-    score_threshold: Optional[float] = 0.3
+    score_threshold: Optional[float] = DEFAULT_QDRANT_SCORE_THRESHOLD
 
 
 class RawValidationQuery(BaseModel):

@@ -20,7 +20,7 @@ export const SearchBar: FC<Props> = ({ value, setValue, onSearch }) => {
   const placeholder = useMemo(() => placeholders[Math.floor(Math.random() * placeholders.length)], []);
 
   return (
-    <div className="w-100 d-flex flex-row align-items-center shadow-sm rounded">
+    <div className="w-100 d-flex flex-row align-items-center shadow-sm rounded rounded-2">
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -34,7 +34,7 @@ export const SearchBar: FC<Props> = ({ value, setValue, onSearch }) => {
           }
         }}
         placeholder={placeholder}
-        className="form-control w-100 p-2 rounded border border-dark border rounded-1"
+        className="form-control w-100 p-2 rounded rounded rounded-2 border border-dark border rounded-1"
         type="text"
       />
     </div>

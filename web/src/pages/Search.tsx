@@ -1,4 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { R } from '@tanstack/react-query-devtools/build/legacy/devtools-ZdlRR-0P';
+import { off } from 'process';
 import { FC, Fragment, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -9,6 +11,8 @@ import { NamespaceSearchResults, ProjectSearchResults } from '../components/sear
 import { LoadingSpinner } from '../components/spinners/loading-spinner';
 import { useSearch } from '../hooks/queries/useSearch';
 import { useDebounce } from '../hooks/useDebounce';
+
+const RESULTS_PER_PAGE = 20;
 
 export const SearchPage: FC = () => {
   // search params
@@ -24,6 +28,7 @@ export const SearchPage: FC = () => {
     isFetching: isSearching,
     refetch,
   } = useSearch({
+    limit: RESULTS_PER_PAGE,
     q: searchDebounced,
     offset,
     autoRun: false,
@@ -35,12 +40,17 @@ export const SearchPage: FC = () => {
   };
 
   useEffect(() => {
+    // run search on mount (when the user navigates to this page from a link someone copied)
     setTimeout(() => {
       if (searchDebounced !== '') {
         runSearch();
       }
     }, 500);
   }, []);
+
+  useEffect(() => {
+    runSearch();
+  }, [offset]);
 
   return (
     <PageLayout title="Search">
@@ -66,12 +76,14 @@ export const SearchPage: FC = () => {
           <Fragment>
             {searchResults && !isSearching ? (
               <Fragment>
-                <p>
-                  Found <span className="fw-bold">{searchResults.total}</span> results for{' '}
-                  <span className="italic">{search}</span>
-                </p>
                 <NamespaceSearchResults hits={searchResults.namespace_hits} />
-                <ProjectSearchResults offset={offset} setOffset={setOffset} hits={searchResults.results} />
+                <ProjectSearchResults
+                  total={searchResults.total}
+                  limit={RESULTS_PER_PAGE}
+                  offset={offset}
+                  setOffset={setOffset}
+                  hits={searchResults.results}
+                />
               </Fragment>
             ) : (
               <Fragment>
