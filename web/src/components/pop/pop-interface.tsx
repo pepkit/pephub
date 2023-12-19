@@ -6,7 +6,6 @@ import { useMultiProjectAnnotation } from '../../hooks/queries/useMultiProjectAn
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { NamespaceSearchDropdown } from '../forms/components/namespace-search-dropdown';
 import { PepSearchDropdown } from '../forms/components/pep-search-dropdown';
-import { PepSelector } from '../forms/components/pep-selector';
 import { ProjectCardPlaceholder } from '../placeholders/project-card-placeholder';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 import { PopCard } from './pop-card';
@@ -47,13 +46,15 @@ export const PopInterface = ({ project }: Props) => {
         <div className="mt-3 border-top w-100"></div>
         <div className="px-2">
           <div className="d-flex flex-column">
-            {allProjectsInfo?.results.map((project) => (
-              <PopCard
-                currentPeps={peps?.items || []}
-                key={`${project.namespace}/${project.name}:${project.tag}`}
-                project={project}
-              />
-            ))}
+            {allProjectsInfo?.results.map((project: ProjectAnnotation | null) =>
+              project === null ? null : (
+                <PopCard
+                  currentPeps={peps?.items || []}
+                  key={`${project.namespace}/${project.name}:${project.tag}`}
+                  project={project}
+                />
+              ),
+            )}
           </div>
           <div className="d-flex flex-row align-items-center justify-content-center mt-3">
             {!isAddingNew ? (
