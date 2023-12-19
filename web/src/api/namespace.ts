@@ -11,7 +11,6 @@ export interface NamespaceResponse {
   namespace: string;
   number_of_projects: number;
   number_of_samples: number;
-  projects_endpoint: string;
 }
 
 export interface NamespaceProjectsResponse {
@@ -43,6 +42,13 @@ export interface BiggestNamespaces {
   number_of_namespaces: number;
   limit: number;
   results: BiggestNamespaceResults[];
+}
+
+interface NamespaceSearchResponse {
+  results: NamespaceResponse[];
+  count: number;
+  limit: number;
+  offset: number;
 }
 
 interface StarsResponse {
@@ -296,4 +302,10 @@ export const removeStar = (
     .then((res) => {
       return res;
     });
+};
+
+export const getAllNamespaces = (search?: string, limit?: number, offset?: number) => {
+  const query = constructQueryFromPaginationParams({ search, limit, offset });
+  const url = `${API_BASE}/search/namespaces?${query.toString()}`;
+  return axios.get<NamespaceSearchResponse>(url).then((res) => res.data);
 };

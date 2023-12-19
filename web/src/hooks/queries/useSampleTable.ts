@@ -8,7 +8,7 @@ export const useSampleTable = (namespace: string | undefined, project: string | 
   const query = useQuery({
     queryKey: [namespace, project, tag, 'samples'],
     queryFn: () => getSampleTable(namespace || '', project || '', tag, session.jwt || ''),
-    enabled: namespace !== undefined || project !== undefined,
+    enabled: namespace !== undefined && project !== undefined,
   });
   return query;
 };

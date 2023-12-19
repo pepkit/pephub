@@ -13,7 +13,6 @@ from fastapi import (
     Depends,
     Form,
     HTTPException,
-    Query,
 )
 from fastapi.responses import JSONResponse
 from peppy import Project
@@ -48,7 +47,6 @@ from ....const import (
 from ...models import ProjectRawModel, ProjectJsonRequest, FavoriteRequest
 
 from dotenv import load_dotenv
-from .base import api
 
 load_dotenv()
 
@@ -444,18 +442,3 @@ async def get_namespace_information(
     agent: PEPDatabaseAgent = Depends(get_db),
 ) -> ListOfNamespaceInfo:
     return agent.namespace.info(limit=limit)
-
-
-@namespaces.get(
-    "/projects_list",
-    summary="Get list of annotations for list of projects",
-    response_model=AnnotationList,
-)
-async def get_namespace_projects_list(
-    namespace_access: List[str] = Depends(get_namespace_access_list),
-    agent: PEPDatabaseAgent = Depends(get_db),
-    registry_paths: Annotated[List[str], Query()] = None,
-):
-    return agent.annotation.get_by_rp_list(
-        registry_paths=registry_paths, admin=namespace_access
-    )

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { offset } from 'handsontable/helpers/dom';
 
 import { Project, ProjectAnnotation, ProjectConfigResponse, Sample } from '../../types';
 
@@ -29,6 +30,13 @@ export interface DeleteProjectResponse {
   registry: string;
 }
 
+export interface MultiProjectResponse {
+  count: number;
+  results: ProjectAnnotation[];
+  offset: number;
+  limit: number;
+}
+
 export const getProject = (
   namespace: string,
   projectName: string,
@@ -54,6 +62,18 @@ export const getProjectAnnotation = (
     return axios.get<ProjectAnnotation>(url).then((res) => res.data);
   } else {
     return axios.get<ProjectAnnotation>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
+  }
+};
+
+export const getMultiProjectAnnotation = (registry_paths: string[], token: string | null = null) => {
+  const param = registry_paths.join(',');
+  const url = `${API_BASE}/projects?registry_paths=${param}`;
+  if (!token) {
+    return axios.get<MultiProjectResponse>(url).then((res) => res.data);
+  } else {
+    return axios
+      .get<MultiProjectResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
   }
 };
 

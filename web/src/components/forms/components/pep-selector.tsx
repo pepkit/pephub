@@ -1,9 +1,11 @@
 import { FC, useEffect, useState } from 'react';
 import Select, { MultiValue } from 'react-select';
+import { useDebounce } from 'usehooks-ts';
 
 import { ProjectAnnotation } from '../../../../types';
 import { useNamespaceProjects } from '../../../hooks/queries/useNamespaceProjects';
 import { useSession } from '../../../hooks/useSession';
+import { NamespaceSearchDropdown } from './namespace-search-dropdown';
 
 interface Props {
   value: ProjectAnnotation[];
@@ -17,9 +19,11 @@ const PepSelector: FC<Props> = ({ onChange, value }) => {
   const [namespace, setNamespace] = useState<string>(user?.login || '');
   const [cachedOptions, setCachedOptions] = useState<ProjectAnnotation[]>([]);
 
+  const searchDebounced = useDebounce<string>(search, 500);
+
   const { data: projects, isLoading } = useNamespaceProjects(namespace, {
     limit: 100,
-    search: search,
+    search: searchDebounced,
   });
 
   const mapOptions = (projects: ProjectAnnotation[]) => {
@@ -47,38 +51,37 @@ const PepSelector: FC<Props> = ({ onChange, value }) => {
 
   return (
     <div className="d-flex flex-row align-items-center">
-      <select
-        className="form-control w-25 me-1 border"
-        value={namespace}
-        onChange={(e) => setNamespace(e.target.value)}
-        disabled={isLoading}
-      >
-        <option value={user?.login}>{user?.login}</option>
-        {user?.orgs.map((org) => (
-          <option key={org}>{org}</option>
-        ))}
-      </select>
-      <Select
-        className="w-100"
-        isMulti
-        isLoading={isLoading}
-        inputValue={search}
-        value={value.map((v) => ({
-          label: `${v.namespace}/${v.name}:${v.tag}`,
-          value: `${v.namespace}/${v.name}:${v.tag}`,
-          annotation: v,
-        }))}
-        onInputChange={(newValue) => setSearch(newValue)}
-        options={mapOptions(cachedOptions)}
-        onChange={(newValue: MultiValue<{ label: string; value: string; annotation: ProjectAnnotation }>) => {
-          const mapped = newValue?.map((v) => v.annotation) || [];
-          onChange(mapped);
-        }}
-        placeholder={'Search'}
-        isClearable
-        menuPlacement="bottom"
-        controlShouldRenderValue={false}
-      />
+      <div className="w-25 me-1">
+        <NamespaceSearchDropdown
+          value={namespace}
+          onChange={(value) => {
+            setNamespace(value);
+          }}
+        />
+      </div>
+      <div className="w-75">
+        <Select
+          className="w-100"
+          isMulti
+          isLoading={isLoading}
+          inputValue={search}
+          value={value.map((v) => ({
+            label: `${v.namespace}/${v.name}:${v.tag}`,
+            value: `${v.namespace}/${v.name}:${v.tag}`,
+            annotation: v,
+          }))}
+          onInputChange={(newValue) => setSearch(newValue)}
+          options={mapOptions(projects?.items || [])}
+          onChange={(newValue: MultiValue<{ label: string; value: string; annotation: ProjectAnnotation }>) => {
+            const mapped = newValue?.map((v) => v.annotation) || [];
+            onChange(mapped);
+          }}
+          placeholder={'Search'}
+          isClearable
+          menuPlacement="bottom"
+          controlShouldRenderValue={false}
+        />
+      </div>
     </div>
   );
 };

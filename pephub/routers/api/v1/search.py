@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from pepdbagent import PEPDatabaseAgent
+from pepdbagent.models import ListOfNamespaceInfo
 
 from fastembed.embedding import FlagEmbedding as Embedding
 from qdrant_client import QdrantClient
@@ -14,7 +15,11 @@ from ....dependencies import (
     get_namespace_access_list,
 )
 from ...models import SearchQuery
-from ....const import DEFAULT_QDRANT_COLLECTION_NAME
+from ....const import (
+    DEFAULT_QDRANT_COLLECTION_NAME,
+    QDRANT_SEARCH_LIMIT_FOR_NUM_RESULTS,
+    QDRANT_SEARCH_SCORE_THRESHOLD_FOR_NUM_RESULTS,
+)
 
 
 from dotenv import load_dotenv
@@ -22,6 +27,25 @@ from dotenv import load_dotenv
 load_dotenv()
 
 search = APIRouter(prefix="/api/v1/search", tags=["search"])
+
+
+@search.get("/namespaces", summary="Search for namespaces")
+async def search_for_namespaces(
+    limit: Optional[int] = 1_000,
+    query: Optional[str] = "",
+    offset: Optional[int] = 0,
+    agent: PEPDatabaseAgent = Depends(get_db),
+) -> ListOfNamespaceInfo:
+    res = agent.namespace.get(limit=limit, query=query or "", offset=offset)
+
+    return JSONResponse(
+        content={
+            "results": [r.model_dump() for r in res.results],
+            "count": res.count,
+            "limit": limit,
+            "offset": offset,
+        }
+    )
 
 
 # perform a search
@@ -42,7 +66,25 @@ async def search_for_pep(
     score_threshold = query.score_threshold
     if qdrant is not None:
         try:
+            # get the embeding for the query
             query_vec = list(model.embed(query.query))[0]
+
+            # get the total number of possible results
+            # by setting the limit to a very high number
+            # this is pretty inefficient, but its the only way to get the total number of results
+            total_vector_results = len(
+                qdrant.search(
+                    collection_name=(
+                        query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
+                    ),
+                    query_vector=query_vec,
+                    limit=QDRANT_SEARCH_LIMIT_FOR_NUM_RESULTS,
+                    offset=0,
+                    score_threshold=QDRANT_SEARCH_SCORE_THRESHOLD_FOR_NUM_RESULTS,
+                )
+            )
+
+            # get actual results using the limit and offset
             vector_results = qdrant.search(
                 collection_name=(
                     query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME
@@ -52,6 +94,8 @@ async def search_for_pep(
                 offset=offset,
                 score_threshold=score_threshold,
             )
+
+            # get sql results using the limit and offset
             sql_results = agent.annotation.get(
                 query=query.query,
                 limit=limit,
@@ -59,6 +103,8 @@ async def search_for_pep(
                 namespace=None,
                 admin=namespace_access,
             )
+
+            # map the results to the format we want
             vector_results_mapped = [r.model_dump() for r in vector_results]
             sql_results_mapped = [
                 {
@@ -102,6 +148,9 @@ async def search_for_pep(
                     "namespace_hits": namespace_hits,
                     "limit": limit,
                     "offset": offset,
+                    "total": total_vector_results
+                    + len(sql_results)
+                    + len(namespace_hits),
                 }
             )
         except Exception as e:

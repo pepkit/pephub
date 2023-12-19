@@ -4,11 +4,12 @@ import { ProgressBar } from 'react-bootstrap';
 import { SearchHit } from '../../../types';
 import { GitHubAvatar } from '../../components/badges/github-avatar';
 
+export const NUM_RESULTS_PER_PAGE = 10;
+
 interface SearchResultProps {
   hits: SearchHit[];
   offset: number;
   setOffset: (offset: number) => void;
-  numResultsPerPage: number;
 }
 
 const HitCard = ({ hit }: { hit: SearchHit }) => {
@@ -24,8 +25,10 @@ const HitCard = ({ hit }: { hit: SearchHit }) => {
         <a className="underline-none" href={`/${namespace}/${project}?tag=${tag}`}>
           <h5 className="fw-bold">{hit.payload.registry}</h5>
         </a>
-        <div className="w-25">
-          <ProgressBar variant="success" now={hit.score * 100} label={`${hit_score * 100}%`} />
+        <div className="w-25 d-flex justify-content-end">
+          <div className="w-50">
+            <ProgressBar className="text-xs" variant="success" now={hit.score * 100} label={`${hit_score * 100}%`} />
+          </div>
         </div>
       </div>
       <p className="truncate text-secondary" style={{ fontSize: '0.9rem' }}>
@@ -35,7 +38,7 @@ const HitCard = ({ hit }: { hit: SearchHit }) => {
   );
 };
 
-export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setOffset, numResultsPerPage }) => {
+export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setOffset }) => {
   if (hits.length === 0)
     return (
       <div
@@ -50,7 +53,7 @@ export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setO
     <div>
       <br />
       <h2 className="fw-bold">Projects</h2>
-      {hits.map((hit, i) => (
+      {hits.slice(offset, offset + NUM_RESULTS_PER_PAGE).map((hit, i) => (
         <HitCard hit={hit} key={i} />
       ))}
       <div className="mt-3">
@@ -61,7 +64,7 @@ export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setO
                 disabled={offset === 0}
                 className="btn btn-sm btn-outline-dark"
                 onClick={() => {
-                  setOffset(offset - numResultsPerPage);
+                  setOffset(offset - NUM_RESULTS_PER_PAGE);
                 }}
               >
                 Previous
@@ -69,7 +72,7 @@ export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setO
               <button
                 className="btn btn-sm btn-outline-dark"
                 onClick={() => {
-                  setOffset(offset + numResultsPerPage);
+                  setOffset(offset + NUM_RESULTS_PER_PAGE);
                 }}
               >
                 More
@@ -77,7 +80,7 @@ export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setO
             </div>
             <div className="d-flex align-items-center justify-content-center mt-2">
               <span className="me-1">
-                Showing results {offset + 1} - {offset + numResultsPerPage}
+                Showing results {offset + 1} - {offset + NUM_RESULTS_PER_PAGE}
               </span>
               {/* <span className="badge bg-primary bg-opacity-25 text-primary">{hits.length}</span> */}
             </div>

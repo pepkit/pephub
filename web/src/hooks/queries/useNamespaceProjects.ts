@@ -9,7 +9,7 @@ export const useNamespaceProjects = (namespace: string | undefined, params: Pagi
   const query = useQuery({
     queryKey: [namespace, params, session.jwt],
     queryFn: () => getNamespaceProjects(namespace || '', session.jwt, params),
-    enabled: namespace !== undefined,
+    enabled: namespace !== undefined && namespace !== '',
   });
   return query;
 };

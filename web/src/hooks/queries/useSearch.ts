@@ -5,29 +5,26 @@ import { useSession } from '../useSession';
 
 const DEFAULT_LIMIT = 10;
 const DEFAULT_OFFSET = 0;
-const DEFAULT_SCORE_THRESHOLD = 0.5;
 const DEFAULT_AUTO_RUN = false;
+const SCORE_THRESHOLD = 0.73;
+export const SEARCH_LIMIT = 1000;
 
 interface SearchParams {
   q: string;
-  limit?: number;
   offset?: number;
-  scoreThreshold?: number;
   autoRun?: boolean;
 }
 
 export const useSearch = (params: SearchParams) => {
   const session = useSession();
-  const { q, limit, offset, scoreThreshold, autoRun } = params;
+  const { q, offset, autoRun } = params;
 
-  const _limit = limit || DEFAULT_LIMIT;
   const _offset = offset || DEFAULT_OFFSET;
-  const _scoreThreshold = scoreThreshold || DEFAULT_SCORE_THRESHOLD;
   const _autoRun = autoRun || DEFAULT_AUTO_RUN;
 
   const query = useQuery({
-    queryKey: ['search', q, limit, offset, scoreThreshold],
-    queryFn: () => search(q, _limit, _offset, _scoreThreshold, session.jwt || ''),
+    queryKey: ['search', q, offset],
+    queryFn: () => search(q, SEARCH_LIMIT, _offset, SCORE_THRESHOLD, session.jwt || ''),
     enabled: _autoRun && q !== '', // only run if autoRun is true and q is not empty
     refetchOnWindowFocus: false,
     placeholderData: keepPreviousData,

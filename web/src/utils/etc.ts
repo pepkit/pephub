@@ -63,7 +63,7 @@ export const constructQueryFromPaginationParams = (params: PaginationParams): UR
   // construct query based on search, offset, and limit
   const query = new URLSearchParams();
   if (search) {
-    query.set('q', search);
+    query.set('query', search);
   }
   if (offset) {
     query.set('offset', offset.toString());

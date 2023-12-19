@@ -11,6 +11,7 @@ export interface SearchResult {
   namespace_hits: string[];
   limit: number;
   offset: number;
+  total: number;
 }
 
 export const search = (

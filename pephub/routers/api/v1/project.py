@@ -2,8 +2,8 @@ import eido
 import yaml
 import pandas as pd
 import peppy
-from typing import Callable, Literal, Union, Optional
-from fastapi import APIRouter, Depends
+from typing import Callable, Literal, Union, Optional, List, Annotated
+from fastapi import APIRouter, Depends, Query
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
@@ -18,7 +18,7 @@ from peppy.const import (
 
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import ProjectUniqueNameError
-from pepdbagent.models import AnnotationModel
+from pepdbagent.models import AnnotationModel, AnnotationList
 
 from dotenv import load_dotenv
 
@@ -39,11 +39,34 @@ from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS
 
 load_dotenv()
 
+projects = APIRouter(
+    prefix="/api/v1/projects",
+    tags=["projects"],
+)
 project = APIRouter(
     prefix="/api/v1/projects/{namespace}/{project}",
     tags=["project"],
     dependencies=[Depends(verify_user_can_read_project)],
 )
+
+
+@projects.get(
+    "",
+    summary="Get list of annotations for list of projects",
+    response_model=AnnotationList,
+)
+async def get_namespace_projects_list(
+    namespace_access: List[str] = Depends(get_namespace_access_list),
+    agent: PEPDatabaseAgent = Depends(get_db),
+    registry_paths: Annotated[str, Query()] = None,
+):
+    paths = registry_paths.split(",") if registry_paths else None
+    if paths is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Please provide a list of registry paths to fetch annotations for.",
+        )
+    return agent.annotation.get_by_rp_list(registry_paths=paths, admin=namespace_access)
 
 
 @project.get("", summary="Fetch a PEP")
