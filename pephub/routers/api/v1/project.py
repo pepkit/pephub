@@ -186,7 +186,7 @@ async def update_a_pep(
             if sample_table_index_col not in sample:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Sample table does not contain column '{sample_table_index_col}'. Please check sample table",
+                    detail=f"Sample table does not contain sample index column: '{sample_table_index_col}'. Please check sample table",
                 )
             if (
                 sample[sample_table_index_col] is None
