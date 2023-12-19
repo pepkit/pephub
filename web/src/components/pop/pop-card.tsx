@@ -1,24 +1,23 @@
 import { FC, useState } from 'react';
 
-import { ProjectAnnotation } from '../../../types';
+import { ProjectAnnotation, Sample } from '../../../types';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
+import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { MarkdownToText } from '../markdown/render';
-import { DeletePEPModal } from '../modals/delete-pep';
 import { ForkPEPModal } from '../modals/fork-pep';
-import { ProjectCardDropdown } from './project-card-dropdown';
+import { PopCardDropdown } from './pop-card-dropdown';
 
 interface Props {
   project: ProjectAnnotation;
+  currentPeps: Sample[];
 }
 
-export const ProjectCard: FC<Props> = ({ project }) => {
+export const PopCard: FC<Props> = ({ project, currentPeps }) => {
   const { user } = useSession();
   const { data: stars } = useNamespaceStars(user?.login, {}, true); // only fetch stars if the namespace is the user's
 
-  // state
-  const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -55,12 +54,12 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             </span>
           ) : null}
         </div>
-        <ProjectCardDropdown
+        <PopCardDropdown
+          currentPeps={currentPeps}
           project={project}
           isStarred={!!isStarred}
           copied={copied}
           setCopied={setCopied}
-          setShowDeletePEPModal={setShowDeletePEPModal}
           setShowForkPEPModal={setShowForkPEPModal}
         />
       </div>
@@ -107,13 +106,6 @@ export const ProjectCard: FC<Props> = ({ project }) => {
       <ForkPEPModal
         show={showForkPEPModal}
         onHide={() => setShowForkPEPModal(false)}
-        project={project.name}
-        namespace={project.namespace}
-        tag={project.tag}
-      />
-      <DeletePEPModal
-        show={showDeletePEPModal}
-        onHide={() => setShowDeletePEPModal(false)}
         project={project.name}
         namespace={project.namespace}
         tag={project.tag}

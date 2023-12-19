@@ -45,7 +45,7 @@ export const NamespacePage: FC = () => {
   const searchDebounced = useDebounce<string>(search, 500);
 
   // data fetching
-  const { data: _, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace);
+  const { data: namespaceInfo, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace);
   const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, {
     limit,
     offset,
@@ -162,7 +162,7 @@ export const NamespacePage: FC = () => {
             </p>
           )}
           <p className="mb-0">
-            <span className="fw-bold">Total projects: {numberWithCommas(projects?.count || 0)}</span>{' '}
+            <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.number_of_projects || 0)}</span>{' '}
           </p>
         </>
         {user && namespace === user?.login ? (

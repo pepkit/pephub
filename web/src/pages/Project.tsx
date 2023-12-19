@@ -17,8 +17,6 @@ import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { SampleTable } from '../components/tables/sample-table';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
-import { useSampleTableMutation } from '../hooks/mutations/useSampleTableMutation';
-import { useSubsampleTableMutation } from '../hooks/mutations/useSubsampleTableMutation';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
@@ -147,8 +145,7 @@ export const ProjectPage: FC = () => {
 
   // mutations for updating config and samples on the server
   const configMutation = useConfigMutation(namespace || '', project || '', tag, newProjectConfig);
-  const sampleTableMutation = useSampleTableMutation(namespace || '', project || '', tag, newProjectSamples);
-  const subsampleTableMutation = useSubsampleTableMutation(namespace || '', project || '', tag, newProjectSubsamples);
+
   const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', project || '', tag, {
     config: newProjectConfig,
     samples: newProjectSamples,
@@ -387,20 +384,13 @@ export const ProjectPage: FC = () => {
                           <button
                             disabled={
                               configMutation.isPending ||
-                              sampleTableMutation.isPending ||
-                              subsampleTableMutation.isPending ||
                               totalProjectMutation.isPending ||
                               !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
                             }
                             onClick={() => handleTotalProjectChange()}
                             className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
                           >
-                            {configMutation.isPending ||
-                            sampleTableMutation.isPending ||
-                            subsampleTableMutation.isPending ||
-                            totalProjectMutation.isPending
-                              ? 'Saving...'
-                              : 'Save'}
+                            {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
                           </button>
                           <button
                             className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
