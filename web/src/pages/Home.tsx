@@ -53,7 +53,7 @@ function Home() {
               <div className="d-flex flex-row align-items-center flex-wrap">
                 {user ? (
                   <a href={`/${user.login}`}>
-                    <MotionButton className="mt-1 btn btn-dark btn-lg me-3">
+                    <MotionButton className="btn btn-dark btn-lg me-3">
                       <span className="d-flex flex-row align-items-center">
                         <img className="me-1" src="/pep.svg" height="30px" />
                         My PEPs
