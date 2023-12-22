@@ -16,3 +16,4 @@ aiofiles
 pyjwt[crypto]
 coloredlogs
 fastembed
+psycopg2
