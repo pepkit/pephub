@@ -1,7 +1,7 @@
 import { PageLayout } from '../components/layout/page-layout';
 
 <PageLayout fullWidth>
-  <div className="mx-5" style={{ height: '80vh' }}>  
+  <div className="mx-5">
     # PEPhub
 
     PEPhub is database, web interface and API for sharing, retrieving, and validating PEPs.
@@ -11,5 +11,113 @@ import { PageLayout } from '../components/layout/page-layout';
     PEPs serve as a standardized format for running workflows using tools such as [Snakemake](https://snakemake.readthedocs.io/en/stable/), [Common Workflow Language](https://www.commonwl.org/), [Looper](http://looper.databio.org/en/latest/), and other workflow systems.
     For further details about PEP and its usage, please visit: [http://pep.databio.org/en/latest/](http://pep.databio.org/en/latest/)
 
+    ### Validation
+
+    PEPhub offers automated project validation through EIDO. Users can specify a schema to which the PEP should adhere. All schemas are available on the official website: [https://schema.databio.org/](https://schema.databio.org/). Schemas are particularly useful before running pipelines, as validation provides essential information about PEP compatibility with specific pipelines and highlights any errors in the PEP structure.
+
+
+    ### Search
+    PEPhub has semantic search functionality. The vector database is populated with important information extracted from the PEP config file. Through the search capability, users can efficiently locate projects, POPs, and Namespaces related to the string they provide.
+
+
+    ### Authorization
+    One of the key features of PEPhub is the empowerment of users to submit and edit their own PEPs. To facilitate this, we have implemented a robust user authorization system. Users are required to authenticate via GitHub to access PEPhub.
+
+    Once authorized, users gain access to a range of features, including the ability to upload, modify, and delete PEPs, and star projects. Authorized users can also designate projects as private, ensuring that only they have visibility, with restricted access for others.
+
+    Moreover, users have the capability to modify projects within organizational namespaces, which correspond to the GitHub organizations they belong to. This feature facilitates collaborative efforts within organizational groups.
+
+    ### PEP of PEPs (POP)
+    The PEP of PEPs, often referred to as a Project of Projects or simply POP, is a specialized project that encompasses multiple projects as samples. Essentially, a POP can be thought of as a grouping of PEPs, allowing users to organize projects for various purposes. This approach offers several advantages: all PEPs related to a specific topic can be consolidated in one central location, streamlining organization and accessibility.
+
+
+    ### GEO data
+    PEPhub has a namespace called GEO. This namespace contains projects from [Gene Expression Omnibus](https://www.ncbi.nlm.nih.gov/geo/) that are downloaded and processed using [GEOfetch](https://geofetch.databio.org/en/latest/). GEOfetch produces a standardized PEP sample table with GSM (GEO sample) and a YAML config that has metadata from GSE (GEO project). Nearly 99% of projects are downloaded to PEPhub. Users can utilize the namespace search to find projects by accession ID and description.
+    GEO namespace link: [https://pephub.databio.org/geo](https://pephub.databio.org/geo).
+    PEPhub doesn't store actual files in the database. Because of this, if you want to download files, there are two options:
+
+     - Use links to the files that are stored in the project sample table.
+     - Use geofetch on a local machine to download these files.
+    Example: `geofetch -i GSE95654 --processed`, where `--processed` indicates that you want to download processed data, not SRA. More information about PEP can be found on the official website [GEOfetch](https://geofetch.databio.org/en/latest/).
+
+    ----
+
+    # PEPHubClient (phc)
+
+    PEPhub provides an additional command-line tool and Python API, connecting Python to the PEPhub. The dedicated Python package for this integration is called PEPHubClient, and it is compatible with Linux, Windows, and Mac systems.
+
+    Key features of PEPHubClient include:
+    - **Authorization**: Users can log in to PEPhub using PEPHubClient, enabling the loading of private projects and the ability to upload projects to PEPhub.
+    - **Load and Download**: PEPHubClient facilitates the loading and downloading of PEPs directly from PEPhub.
+    - **Push**: Users can push PEPs from their local environment to PEPhub.
+
+    ### How to install
+
+    PEPHubClient is available on PyPI, and the source code can be accessed on GitHub: [https://github.com/pepkit/pephubclient](https://github.com/pepkit/pephubclient)
+
+    To install PEPHubClient, use the following command:
+    `pip install pephubclient`
+
+
+    ### Pephubclient as command-line tool
+
+    pephubclient is avaliable in CLI as `phc`
+
+    ```
+    $ phc --help
+
+     Usage: pephubclient [OPTIONS] COMMAND [ARGS]...
+
+    ╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────╮
+    │ --version             -v                                                                                        │
+    │ --install-completion            Install completion for the current shell.                                       │
+    │ --show-completion               Show completion for the current shell, to copy it or customize the              │
+    │                                 installation.                                                                   │
+    │ --help                          Show this message and exit.                                                     │
+    ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    ╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────╮
+    │ login               Login to PEPhub                                                                             │
+    │ logout              Logout                                                                                      │
+    │ pull                Download and save project locally.                                                          │
+    │ push                Upload/update project in PEPhub                                                             │
+    ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    ```
+
+    #### Simple example:
+
+    1. Loign to pephub using next command _(This step can be skipped if you downloading public project)_
+    `phc login`
+    2. Download project using registry path copied from pephub
+    `phc databio/example:default`
+    3. Logout
+    `phc logout`
+
+
+
+    ### Pephubclient as Python API
+
+    ```python
+    from pephubclient import PEPHubClient
+
+    # initiate pephubclient object
+
+    phc = PEPHubClient()
+
+    # load pep as peppy.Project object
+
+    example_pep = phc.load_project("databio/example:default")
+    print(example_pep)
+
+    # Printed:
+    ## Project
+    ## 6 samples: 4-1_11102016, 3-1_11102016, 2-2_11102016, 2-1_11102016, 8-3_11152016, 8-1_11152016
+    ## Sections: pep_version, sample_table, name, description
+
+    # To upload project use next command:
+    phc.upload(example_pep, namespace="databio", name="example", force=True)
+
+    ```
+
+    You can find more information about pephubclient of github page. [https://github.com/pepkit/pephubclient](https://github.com/pepkit/pephubclient)
   </div>
 </PageLayout>
