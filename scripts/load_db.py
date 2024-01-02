@@ -1,7 +1,7 @@
 import argparse
 import os
 from tqdm import tqdm
-from pepdbagent import Connection
+from pepdbagent import PEPDatabaseAgent as Connection
 import peppy
 
 from utils import is_valid_namespace, is_valid_project, extract_project_file_name
@@ -76,6 +76,7 @@ pagent = Connection(
 # get file path
 FILE_PATH = args.files
 
+
 # traverse directory
 for name in tqdm(os.listdir(FILE_PATH), desc="Uploading repository", leave=True):
     # build a path to the namespace
@@ -95,4 +96,6 @@ for name in tqdm(os.listdir(FILE_PATH), desc="Uploading repository", leave=True)
                 p = peppy.Project(
                     f"{path_to_proj}/{extract_project_file_name(path_to_proj)}"
                 )
-                pagent.upload_project(p, name)
+                pagent.project.create(
+                    p, name, p.name, description=f"Uploaded from, {path_to_proj}"
+                )

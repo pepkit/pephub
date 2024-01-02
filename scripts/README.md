@@ -1,10 +1,13 @@
 # pephub scripts
+
 These are useful scripts for pephub. They provide utilities to manage the interface between PEPs, a PEP database, and PEPhub. Read below about each script.
 
 ### `load_db.py`
-This will help you load a database of PEPs from a directory of PEPs.
+
+This will help you load a database of PEPs from a directory of PEPs. Note, that a namespace is **required** for each PEP. This is the name of the folder that the PEP is in. For example, if you have a PEP in `peps/ChangLab/PEP_1`, then the namespace is `ChangLab`. If you have a PEP in `peps/demo/basic`, then the namespace is `demo`. The namespace is used to identify the PEP in the database.
 
 **Usage:**
+
 ```console
 python load_db.py \
 --username $POSTGRES_USERNAME \
