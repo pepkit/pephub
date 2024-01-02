@@ -43,9 +43,10 @@ def build_argparser() -> argparse.ArgumentParser:
         help="Hostname of postgresql instance",
     )
     parser.add_argument(
-        "-b", "--database", dest="name", default="pep-base-sql", help="Database name"
+        "-b", "--database", dest="name", default="pep-db", help="Database name"
     )
-    parser.add_argument("files", type=str, help="Path to PEPs to upload.")
+    parser.add_argument("--files", type=str, help="Path to PEPs to upload.")
+    parser.add_argument("--force", action="store_true", help="Force overwrite")
     return parser
 
 
@@ -76,26 +77,40 @@ pagent = Connection(
 # get file path
 FILE_PATH = args.files
 
-
+failed_project_list = []
 # traverse directory
-for name in tqdm(os.listdir(FILE_PATH), desc="Uploading repository", leave=True):
+for namespace in tqdm(os.listdir(FILE_PATH), desc="Uploading repository", leave=True):
     # build a path to the namespace
-    path_to_namespace = f"{FILE_PATH}/{name}"
-    name = name.lower()
+    path_to_namespace = f"{FILE_PATH}/{namespace}"
+    namespace = namespace.lower()
 
     if is_valid_namespace(path_to_namespace):
         # traverse projects
-        for proj in tqdm(
-            os.listdir(path_to_namespace), desc=f"Uploading {name}", leave=True
+        for proj_name in tqdm(
+            os.listdir(path_to_namespace), desc=f"Uploading {namespace}", leave=True
         ):
             # build path to project
-            path_to_proj = f"{path_to_namespace}/{proj}"
-            proj = proj.lower()
-
+            path_to_proj = f"{path_to_namespace}/{proj_name}"
+            proj_name = proj_name.lower()
+            print(f"Uploading: {path_to_proj}")
             if is_valid_project(path_to_proj):
-                p = peppy.Project(
-                    f"{path_to_proj}/{extract_project_file_name(path_to_proj)}"
-                )
-                pagent.project.create(
-                    p, name, p.name, description=f"Uploaded from, {path_to_proj}"
-                )
+                try:
+                    project_dict = peppy.Project(
+                        f"{path_to_proj}/{extract_project_file_name(path_to_proj)}"
+                    )
+                    pagent.project.create(
+                        project=project_dict,
+                        namespace=namespace,
+                        name=proj_name,
+                        description=f"Uploaded from, {path_to_proj}",
+                        overwrite=args.force,
+                    )
+                except Exception as e:
+                    print(f"Failed to load project: {path_to_proj}")
+                    failed_project_list.append(path_to_proj)
+                    continue
+
+if failed_project_list:
+    print("Failed to upload the following projects:")
+    for proj in failed_project_list:
+        print(f"# -- {proj}")

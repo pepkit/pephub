@@ -308,7 +308,7 @@ async def upload_raw_pep(
         ff = project_dict.model_dump(by_alias=True)
         p_project = peppy.Project().from_dict(ff)
 
-        p_project.name = name
+        p_project.namespace = name
         p_project.description = description
 
     except Exception as e:
@@ -320,7 +320,7 @@ async def upload_raw_pep(
         agent.project.create(
             p_project,
             namespace=namespace,
-            name=p_project.name,
+            name=p_project.namespace,
             tag=tag,
             description=description,
             is_private=is_private,
@@ -330,15 +330,15 @@ async def upload_raw_pep(
         )
     except ProjectUniqueNameError:
         raise HTTPException(
-            detail=f"Project '{namespace}/{p_project.name}:{tag}' already exists in namespace",
+            detail=f"Project '{namespace}/{p_project.namespace}:{tag}' already exists in namespace",
             status_code=400,
         )
     return JSONResponse(
         content={
             "namespace": namespace,
-            "name": p_project.name,
+            "name": p_project.namespace,
             "tag": tag,
-            "registry_path": f"{namespace}/{p_project.name}:{tag}",
+            "registry_path": f"{namespace}/{p_project.namespace}:{tag}",
         },
         status_code=202,
     )
