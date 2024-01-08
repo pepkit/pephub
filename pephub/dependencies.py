@@ -189,7 +189,7 @@ def get_namespace_access_list(
         access_rights.extend(orgs)
         return access_rights
     else:
-        return None
+        return []
 
 
 def get_project(

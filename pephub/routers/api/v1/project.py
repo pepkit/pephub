@@ -3,7 +3,7 @@ import yaml
 import pandas as pd
 import peppy
 from typing import Callable, Literal, Union, Optional, List, Annotated
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Body
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse, PlainTextResponse
 from peppy import Project
@@ -371,7 +371,7 @@ async def get_pep_samples(
             return JSONResponse(
                 {
                     "count": df.shape[0],
-                    "items": df.to_dict(orient="records"),
+                    "items": df.replace({pd.NA: None}).to_dict(orient="records"),
                 }
             )
         else:
@@ -412,8 +412,20 @@ async def get_pep_config(
     )
 
 
-@project.get("/samples/{sample_name}")
-async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project)):
+@project.get(
+    "/samples/{sample_name}",
+    summary="Get a particular sample",
+)
+async def get_sample(
+    namespace: str,
+    project: str,
+    sample_name: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    raw: Optional[bool] = False,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+    proj_annotation: AnnotationModel = Depends(get_project_annotation),
+):
     """
     Get a particular sample from a certain project and namespace
 
@@ -425,10 +437,148 @@ async def get_sample(sample_name: str, proj: peppy.Project = Depends(get_project
         project: example
         namespace: databio
     """
-    if sample_name not in get_project_sample_names(proj):
-        raise HTTPException(status_code=404, detail=f"sample '{sample_name}' not found")
-    sample = proj.get_sample(sample_name)
-    return sample
+    if proj_annotation.is_private and namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="Project does not exist or you do not have permission to view it.",
+            status_code=404,
+        )
+    if raw:
+        sample_dict = agent.sample.get(
+            namespace, project, tag=tag, sample_name=sample_name, raw=True
+        )
+    else:
+        sample_dict = agent.sample.get(
+            namespace, project, tag=tag, sample_name=sample_name, raw=False
+        ).to_dict()
+    if sample_dict:
+        return sample_dict
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Sample '{sample_name}' not found in project '{namespace}/{project}:{tag}'",
+        )
+
+
+@project.patch(
+    "/samples/{sample_name}",
+    summary="Update particular sample in a project",
+)
+async def update_sample(
+    namespace: str,
+    project: str,
+    sample_name: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    update_dict: dict = Body(...),
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+):
+    """
+    Update a particular sample from a certain project and namespace.
+    """
+    if namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="You do not have permission to update this project.",
+            status_code=401,
+        )
+    try:
+        agent.sample.update(
+            namespace,
+            name=project,
+            tag=tag,
+            sample_name=sample_name,
+            update_dict=update_dict,
+        )
+        return JSONResponse(
+            content={
+                "message": "Sample updated.",
+                "registry": f"{namespace}/{project}:{tag}",
+            },
+            status_code=202,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not update sample. Server error: {e}",
+        )
+
+
+@project.post(
+    "/samples/{sample_name}",
+    summary="Upload sample to a project",
+)
+async def upload_sample(
+    namespace: str,
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    sample_dict: dict = Body(...),
+    overwrite: Optional[bool] = False,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+):
+    """
+    Upload a particular sample to a certain project and namespace.
+    """
+    if namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="You do not have permission to upload this sample.",
+            status_code=401,
+        )
+    try:
+        agent.sample.add(
+            namespace,
+            name=project,
+            tag=tag,
+            sample_dict=sample_dict,
+            overwrite=overwrite,
+        )
+        return JSONResponse(
+            content={
+                "message": "Sample uploaded successfully.",
+                "registry": f"{namespace}/{project}:{tag}",
+            },
+            status_code=202,
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not upload sample. Server error!",
+        )
+
+
+@project.delete(
+    "/samples/{sample_name}",
+    summary="Delete sample from the project",
+)
+async def delete_sample(
+    namespace: str,
+    project: str,
+    sample_name: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+):
+    """
+    Delete a particular sample from a certain project and namespace.
+    """
+    if namespace not in list_of_admins:
+        raise HTTPException(
+            detail="You do not have permission to delete this sample.",
+            status_code=401,
+        )
+    try:
+        agent.sample.delete(namespace, name=project, tag=tag, sample_name=sample_name)
+        return JSONResponse(
+            content={
+                "message": "Sample deleted successfully.",
+                "registry": f"{namespace}/{project}:{tag}",
+            },
+            status_code=202,
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not delete sample. Server error!",
+        )
 
 
 @project.get("/subsamples")
