@@ -437,9 +437,9 @@ async def get_sample(
         project: example
         namespace: databio
     """
-    if proj_annotation.is_private and namespace not in (list_of_admins or []):
+    if proj_annotation.is_private and namespace not in list_of_admins:
         raise HTTPException(
-            detail="Project does not exist or you do not have permission to view it.",
+            detail="Project does not exist.",
             status_code=404,
         )
     if raw:
@@ -475,7 +475,7 @@ async def update_sample(
     """
     Update a particular sample from a certain project and namespace.
     """
-    if namespace not in (list_of_admins or []):
+    if namespace not in list_of_admins:
         raise HTTPException(
             detail="You do not have permission to update this project.",
             status_code=401,
@@ -518,7 +518,7 @@ async def upload_sample(
     """
     Upload a particular sample to a certain project and namespace.
     """
-    if namespace not in (list_of_admins or []):
+    if namespace not in list_of_admins:
         raise HTTPException(
             detail="You do not have permission to upload this sample.",
             status_code=401,
@@ -601,7 +601,7 @@ async def get_subsamples(
         try:
             subsamples = pd.DataFrame(
                 proj[SUBSAMPLE_RAW_LIST_KEY][0]
-            )  # TODO: this seems like a bug @Alex can you check this?
+            )  # TODO: update this enpoint, so that it has access to all subsample tables
         except IndexError:
             subsamples = pd.DataFrame()
         if download:
