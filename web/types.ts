@@ -11,6 +11,7 @@ export interface ProjectAnnotation {
   pep_schema: string;
   pop: boolean;
   stars_number: number;
+  forked_from?: string;
 }
 
 export interface ProjectConfigResponse {

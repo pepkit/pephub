@@ -5,8 +5,11 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 // css
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'handsontable/dist/handsontable.full.min.css';
+// Language
 // handsontable stuff
 import { registerAllModules } from 'handsontable/registry';
+import * as Prism from 'prismjs';
+import 'prismjs/components/prism-python';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
@@ -25,6 +28,8 @@ import { SearchPage } from './pages/Search';
 import { EidoValidator } from './pages/Validator';
 
 registerAllModules();
+
+Prism.highlightAll();
 
 const queryClient = new QueryClient({
   defaultOptions: {

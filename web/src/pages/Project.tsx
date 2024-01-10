@@ -1,5 +1,6 @@
 import { FC, Fragment, MouseEvent, forwardRef, useEffect, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
+import { set } from 'react-hook-form';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
@@ -16,8 +17,11 @@ import { ProjectPageheaderPlaceholder } from '../components/placeholders/project
 import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { SampleTable } from '../components/tables/sample-table';
+import { useAddStar } from '../hooks/mutations/useAddStar';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
+import { useRemoveStar } from '../hooks/mutations/useRemoveStar';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
+import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
@@ -67,6 +71,15 @@ export const ProjectPage: FC = () => {
   let [searchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
   const fork = searchParams.get('fork');
+
+  // users stars - determine if they have this PEP starred
+  const { data: userStars } = useNamespaceStars(user?.login || '', {}, true);
+  const isStarred = userStars?.results
+    .map((star) => `${star.namespace}/${star.name}:${star.tag}`)
+    .includes(`${namespace}/${project}:${tag}`);
+
+  const starAddMutation = useAddStar(user?.login || '', namespace!, project!, tag);
+  const starRemoveMutation = useRemoveStar(user?.login || '', namespace!, project!, tag);
 
   // fetch data
   const {
@@ -207,9 +220,11 @@ export const ProjectPage: FC = () => {
             <Breadcrumb.Item active>
               {project}:{tag}
             </Breadcrumb.Item>
-            {projectInfo?.is_private ? (
-              <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
-            ) : null}
+            {projectInfo?.is_private && (
+              <li>
+                <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
+              </li>
+            )}
           </Breadcrumb>
           <div className="ms-2 mb-1">
             <a className="text-decoration-none" href={`https://schema.databio.org/#/${projectHash}`}>
@@ -217,60 +232,100 @@ export const ProjectPage: FC = () => {
             </a>
           </div>
         </div>
-        <div className="d-flex flex-row align-items-start btn-g">
+        <div className="d-flex flex-row align-items-center gap-1">
+          <div className="d-flex flex-row align-items-center">
+            <div className="border border-dark shadow-sm rounded-1 px-2 d-flex align-items-center">
+              <span className="text-sm fw-bold">{`${projectInfo?.namespace}/${projectInfo?.name}:${
+                projectInfo?.tag || 'default'
+              }`}</span>
+              <button
+                className="btn btn-sm btn-link-dark shadow-none ms-1 pe-0"
+                onClick={() => {
+                  copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
+                  setCopied(true);
+                  setTimeout(() => {
+                    setCopied(false);
+                  }, 1000);
+                }}
+              >
+                {copied ? <i className="bi bi-check"></i> : <i className="bi bi-clipboard" />}
+              </button>
+            </div>
+          </div>
+          <Dropdown>
+            <Dropdown.Toggle size="sm" variant="dark">
+              <i className="bi bi-gear-fill me-1"></i>
+              More
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}>
+                <i className="bi bi-file-earmark-zip me-1"></i>
+                Download
+              </Dropdown.Item>
+              <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
+                <i className="bi bi-hdd-rack me-1"></i>
+                API
+              </Dropdown.Item>
+              <Fragment>
+                {user && (
+                  <Fragment>
+                    <Dropdown.Item onClick={() => setShowForkPEPModal(true)}>
+                      <i className="me-1 bi bi-bezier2"></i>
+                      Fork
+                    </Dropdown.Item>
+                    <Dropdown.Item disabled>
+                      <i className="me-1 bi bi-plus-circle"></i>
+                      Add to POP
+                    </Dropdown.Item>
+                  </Fragment>
+                )}
+              </Fragment>
+              <Fragment>
+                {user && projectInfo && canEdit(user, projectInfo) && (
+                  <Fragment>
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
+                      <i className="me-1 bi bi-pencil-square"></i>
+                      Edit
+                    </Dropdown.Item>
+                    <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
+                      <i className="me-1 bi bi-trash3"></i>
+                      Delete
+                    </Dropdown.Item>
+                  </Fragment>
+                )}
+              </Fragment>
+            </Dropdown.Menu>
+          </Dropdown>
           <button
-            className="me-1 btn btn-sm btn-outline-dark"
-            onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}
+            className="btn btn-outline-dark btn-sm"
+            disabled={starAddMutation.isPending || starRemoveMutation.isPending}
           >
-            <i className="bi bi-file-earmark-zip me-1"></i>
-            Download
+            {isStarred ? (
+              <Fragment>
+                <span className="text-primary" onClick={() => starRemoveMutation.mutate()}>
+                  <i className="me-1 bi bi-star-fill"></i>
+                  Star
+                </span>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <span
+                  onClick={() => {
+                    starAddMutation.mutate();
+                  }}
+                >
+                  <i className="me-1 bi bi-star"></i>
+                  Star
+                </span>
+              </Fragment>
+            )}
           </button>
-          <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowAPIEndpointsModal(true)}>
-            <i className="bi bi-hdd-rack me-1"></i>
-            API
-          </button>
-          {user && (
-            <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowForkPEPModal(true)}>
-              <i className="me-1 bi bi-bezier2"></i>
-              Fork
-            </button>
-          )}
-          {user && projectInfo && canEdit(user, projectInfo) && (
-            <>
-              <button className="me-1 btn btn-sm btn-outline-dark" onClick={() => setShowEditMetaMetadataModal(true)}>
-                <i className="me-1 bi bi-pencil-square"></i>
-                Edit
-              </button>
-              <button className="me-1 btn btn-sm btn-danger" onClick={() => setShowDeletePEPModal(true)}>
-                <i className="me-1 bi bi-trash3"></i>
-                Delete
-              </button>
-            </>
-          )}
         </div>
       </div>
       <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100">
         <div className="w-25">
           <Markdown>{projectInfo?.description || 'No description'}</Markdown>
-        </div>
-        <div className="d-flex flex-row align-items-center">
-          <div className="border border-dark shadow-sm rounded px-2 d-flex align-items-center">
-            <span className="text-sm fw-bold">{`${projectInfo?.namespace}/${projectInfo?.name}:${
-              projectInfo?.tag || 'default'
-            }`}</span>
-            <button
-              className="btn btn-sm btn-link-dark shadow-none ms-1"
-              onClick={() => {
-                copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
-                setCopied(true);
-                setTimeout(() => {
-                  setCopied(false);
-                }, 1000);
-              }}
-            >
-              {copied ? <i className="bi bi-check"></i> : <i className="bi bi-clipboard" />}
-            </button>
-          </div>
         </div>
       </div>
       <div className="px-4">
@@ -284,7 +339,23 @@ export const ProjectPage: FC = () => {
               <span className="mx-1">Updated:</span>
               <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
             </span>
-            <span className="">{projectInfo?.digest}</span>
+            <span className="">
+              <span className="me-2 p-1 border rounded fw-bold">
+                {projectInfo?.forked_from && (
+                  <Fragment>
+                    <i className="bi bi-bezier2"></i>
+                    <span className="ms-1">Forked from</span>
+                    <a
+                      className="text-decoration-none ms-1"
+                      href={`/${projectInfo?.forked_from.replace(':', '?tag=')}`}
+                    >
+                      {projectInfo?.forked_from}
+                    </a>
+                  </Fragment>
+                )}
+              </span>
+              {projectInfo?.digest}
+            </span>
           </small>
         </div>
       </div>
