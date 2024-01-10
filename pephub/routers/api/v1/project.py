@@ -2,6 +2,7 @@ import eido
 import yaml
 import pandas as pd
 import peppy
+import logging
 from typing import Callable, Literal, Union, Optional, List, Annotated
 from fastapi import APIRouter, Depends, Query, Body
 from fastapi.exceptions import HTTPException
@@ -17,8 +18,12 @@ from peppy.const import (
 )
 
 from pepdbagent import PEPDatabaseAgent
-from pepdbagent.exceptions import ProjectUniqueNameError
-from pepdbagent.models import AnnotationModel, AnnotationList
+from pepdbagent.exceptions import (
+    ProjectUniqueNameError,
+    SampleAlreadyInView,
+    SampleNotFoundError,
+)
+from pepdbagent.models import AnnotationModel, AnnotationList, CreateViewDictModel
 
 from dotenv import load_dotenv
 
@@ -36,6 +41,7 @@ from ....dependencies import (
 )
 from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS
 
+_LOGGER = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -739,3 +745,233 @@ async def get_project_annotation(
     Get project annotation from a certain project and namespace
     """
     return proj_annotation
+
+
+#### Views ####
+@project.get(
+    "/views",
+    summary="get list of views for a project",
+    tags=["views"],
+    response_model=List[str],  # TODO: rethink response model
+)
+def get_views(
+    namespace: str,
+    project: str,
+    tag: str = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    return agent.annotation.get_views(namespace, project, tag=tag)
+
+
+@project.get(
+    "/{view}",
+    summary="Fetch a project view",
+    response_model=ProjectRawModel,
+    tags=["views"],
+)
+async def get_view_of_the_project(
+    namespace: str,
+    project: str,
+    view: str,
+    tag: str = DEFAULT_TAG,
+    raw: bool = True,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    """
+    Fetch a view of the project.
+    """
+    if raw:
+        return ProjectRawModel(
+            **agent.view.get(
+                namespace=namespace,
+                name=project,
+                view_name=view,
+                tag=tag,
+                raw=raw,
+            )
+        )
+    else:
+        return ProjectRawModel(
+            **agent.view.get(
+                namespace=namespace,
+                name=project,
+                view_name=view,
+                tag=tag,
+                raw=raw,
+            ).to_dict()
+        )
+
+
+@project.post(
+    "/{view}",
+    summary="Create a view",
+    tags=["views"],
+)
+async def create_view_of_the_project(
+    namespace: str,
+    project: str,
+    view: str,
+    tag: str = DEFAULT_TAG,
+    description: str = "",
+    sample_names: List[str] = None,
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    """
+    Create a view of the project.
+    """
+    # if namespace not in namespace_access_list:
+    #     raise HTTPException(
+    #         detail="You do not have permission to create this view.",
+    #         status_code=401,
+    #     )
+    try:
+        agent.view.create(
+            view_name=view,
+            description=description,
+            view_dict=CreateViewDictModel(
+                project_namespace=namespace,
+                project_name=project,
+                project_tag=tag,
+                sample_list=sample_names,
+            ),
+        )
+    except Exception as e:
+        _LOGGER.error(f"Could not create view. Error: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not create view. Server error",
+        )
+    return JSONResponse(
+        content={
+            "message": "View created successfully.",
+            "registry": f"{namespace}/{project}:{tag}",
+        },
+        status_code=202,
+    )
+
+
+@project.post(
+    "/{view}/{sample_name}",
+    summary="Add sample to the view",
+    tags=["views"],
+)
+async def add_sample_to_view(
+    namespace: str,
+    project: str,
+    view: str,
+    sample_name: str,
+    tag: str = DEFAULT_TAG,
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    # if namespace not in namespace_access_list:
+    #     raise HTTPException(
+    #         detail="You do not have permission to add sample to this view.",
+    #         status_code=401,
+    #     )
+    try:
+        agent.view.add_sample(
+            namespace=namespace,
+            name=project,
+            tag=tag,
+            view_name=view,
+            sample_name=sample_name,
+        )
+    except SampleAlreadyInView:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Sample '{sample_name}' already in view '{view}'",
+        )
+    except SampleNotFoundError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Sample '{sample_name}' not found in project '{namespace}/{project}:{tag}'",
+        )
+    return JSONResponse(
+        content={
+            "message": "Sample added to view successfully.",
+            "registry": f"{namespace}/{project}:{tag}",
+        },
+        status_code=202,
+    )
+
+
+@project.delete(
+    "/{view}/{sample_name}",
+    summary="Delete sample from the view",
+    tags=["views"],
+)
+def delete_sample_from_view(
+    namespace: str,
+    project: str,
+    view: str,
+    sample_name: str,
+    tag: str = DEFAULT_TAG,
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    # if namespace not in namespace_access_list:
+    #     raise HTTPException(
+    #         detail="You do not have permission to delete sample from this view.",
+    #         status_code=401,
+    #     )
+    try:
+        agent.view.remove_sample(
+            namespace=namespace,
+            name=project,
+            tag=tag,
+            view_name=view,
+            sample_name=sample_name,
+        )
+    except SampleNotFoundError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Sample '{sample_name}' not found in view '{view}'",
+        )
+    return JSONResponse(
+        content={
+            "message": "Sample deleted from view successfully.",
+            "registry": f"{namespace}/{project}:{tag}",
+        },
+        status_code=202,
+    )
+
+
+@project.delete(
+    "/{view}",
+    summary="Delete a view",
+    tags=["views"],
+)
+def delete_view(
+    namespace: str,
+    project: str,
+    view: str,
+    tag: str = DEFAULT_TAG,
+    namespace_access_list: List[str] = Depends(get_namespace_access_list),
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    if namespace not in namespace_access_list:
+        raise HTTPException(
+            detail="You do not have permission to delete this view.",
+            status_code=401,
+        )
+    try:
+        agent.view.delete(
+            project_namespace=namespace,
+            project_name=project,
+            project_tag=tag,
+            view_name=view,
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not delete view. Server error!",
+        )
+    return JSONResponse(
+        content={
+            "message": "View deleted successfully.",
+            "registry": f"{namespace}/{project}:{tag}",
+        },
+        status_code=202,
+    )
