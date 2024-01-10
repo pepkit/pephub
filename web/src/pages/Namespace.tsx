@@ -169,7 +169,7 @@ export const NamespacePage: FC = () => {
           <div className="mt-3">
             <NamespaceViewSelector
               numPeps={projects?.count || 0}
-              numStars={stars?.results.length || 0}
+              numStars={stars?.length || 0}
               view={view}
               setView={setView}
             />
@@ -219,7 +219,7 @@ export const NamespacePage: FC = () => {
         ) : (
           // render stars in namespace
           <Fragment>
-            {stars?.results.length === 0 ? (
+            {stars?.length === 0 ? (
               <div className="text-center mt-5">
                 <p className="fst-italic text-muted">No stars found. Star some projects and they will show up here!</p>
                 <i className="text-muted text-4xl bi bi-stars mt-4"></i>
@@ -227,8 +227,8 @@ export const NamespacePage: FC = () => {
             ) : (
               <div className="mt-3">
                 <StarFilterBar search={starSearch} setSearch={setStarSearch} />
-                {stars?.results
-                  .filter(
+                {stars
+                  ?.filter(
                     (star) =>
                       star.description.toLowerCase().includes(starSearch.toLowerCase()) ||
                       star.name.toLowerCase().includes(starSearch.toLowerCase()),

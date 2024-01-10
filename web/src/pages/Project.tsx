@@ -74,9 +74,9 @@ export const ProjectPage: FC = () => {
 
   // users stars - determine if they have this PEP starred
   const { data: userStars } = useNamespaceStars(user?.login || '', {}, true);
-  const isStarred = userStars?.results
-    .map((star) => `${star.namespace}/${star.name}:${star.tag}`)
-    .includes(`${namespace}/${project}:${tag}`);
+  const isStarred =
+    userStars?.map((star) => `${star.namespace}/${star.name}:${star.tag}`).includes(`${namespace}/${project}:${tag}`) ||
+    [];
 
   const starAddMutation = useAddStar(user?.login || '', namespace!, project!, tag);
   const starRemoveMutation = useRemoveStar(user?.login || '', namespace!, project!, tag);
