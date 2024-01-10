@@ -76,7 +76,7 @@ export const ProjectPage: FC = () => {
   const { data: userStars } = useNamespaceStars(user?.login || '', {}, true);
   const isStarred =
     userStars?.map((star) => `${star.namespace}/${star.name}:${star.tag}`).includes(`${namespace}/${project}:${tag}`) ||
-    [];
+    false;
 
   const starAddMutation = useAddStar(user?.login || '', namespace!, project!, tag);
   const starRemoveMutation = useRemoveStar(user?.login || '', namespace!, project!, tag);
@@ -300,21 +300,24 @@ export const ProjectPage: FC = () => {
           <button
             className="btn btn-outline-dark btn-sm"
             disabled={starAddMutation.isPending || starRemoveMutation.isPending}
+            onClick={() => {
+              if (isStarred) {
+                starRemoveMutation.mutate();
+              } else {
+                starAddMutation.mutate();
+              }
+            }}
           >
             {isStarred ? (
               <Fragment>
-                <span className="text-primary" onClick={() => starRemoveMutation.mutate()}>
+                <span className="text-primary">
                   <i className="me-1 bi bi-star-fill"></i>
                   Star
                 </span>
               </Fragment>
             ) : (
               <Fragment>
-                <span
-                  onClick={() => {
-                    starAddMutation.mutate();
-                  }}
-                >
+                <span>
                   <i className="me-1 bi bi-star"></i>
                   Star
                 </span>

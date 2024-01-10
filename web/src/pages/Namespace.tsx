@@ -21,7 +21,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
-type View = 'peps' | 'stars';
+type View = 'peps' | 'stars' | 'pops';
 
 export const NamespacePage: FC = () => {
   // get view out of url its a query param
@@ -179,7 +179,6 @@ export const NamespacePage: FC = () => {
           <div className="my-3 border-bottom border-grey"></div>
         )}
         {/* Render projects  in namespace */}
-
         {view === 'peps' ? (
           <Fragment>
             <div className="mt-3"></div>
@@ -199,7 +198,47 @@ export const NamespacePage: FC = () => {
               {projectsIsLoading || projects === undefined ? (
                 <ProjectListPlaceholder />
               ) : (
-                projects.items.map((project, i) => <ProjectCard key={i} project={project} />)
+                projects.items
+                  .filter((project) => project.pop === false)
+                  .map((project, i) => <ProjectCard key={i} project={project} />)
+              )}
+              <>
+                {projects?.count && projects?.count > limit ? (
+                  <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
+                ) : null}
+              </>
+              {/* no projects exists */}
+              <div>
+                {projects?.items.length === 0 ? (
+                  <div className="text-center">
+                    <p className="text-muted">No projects found</p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </Fragment>
+        ) : view === 'pops' ? (
+          <Fragment>
+            <div className="mt-3"></div>
+            <NamespacePageSearchBar
+              namespace={namespace || ''}
+              search={search}
+              setSearch={setSearch}
+              limit={limit}
+              setLimit={setLimit}
+              orderBy={orderBy}
+              setOrderBy={setOrderBy}
+              order={order}
+              setOrder={setOrder}
+            />
+            <div className="my-3"></div>
+            <div className="mt-3">
+              {projectsIsLoading || projects === undefined ? (
+                <ProjectListPlaceholder />
+              ) : (
+                projects.items
+                  .filter((project) => project.pop === true)
+                  .map((project, i) => <ProjectCard key={i} project={project} />)
               )}
               <>
                 {projects?.count && projects?.count > limit ? (
