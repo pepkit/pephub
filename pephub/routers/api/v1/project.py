@@ -23,7 +23,7 @@ from pepdbagent.exceptions import (
     SampleAlreadyInView,
     SampleNotFoundError,
 )
-from pepdbagent.models import AnnotationModel, AnnotationList, CreateViewDictModel
+from pepdbagent.models import AnnotationModel, AnnotationList, CreateViewDictModel, ProjectViews
 
 from dotenv import load_dotenv
 
@@ -752,7 +752,7 @@ async def get_project_annotation(
     "/views",
     summary="get list of views for a project",
     tags=["views"],
-    response_model=List[str],  # TODO: rethink response model
+    response_model=ProjectViews,
 )
 def get_views(
     namespace: str,
@@ -760,13 +760,13 @@ def get_views(
     tag: str = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
-    return agent.annotation.get_views(namespace, project, tag=tag)
+    return agent.view.get_views_annotation(namespace, project, tag=tag)
 
 
 @project.get(
-    "/{view}",
+    "/views/{view}",
     summary="Fetch a project view",
-    response_model=ProjectRawModel,
+    response_model=Union[ProjectRawModel, dict],
     tags=["views"],
 )
 async def get_view_of_the_project(
@@ -791,19 +791,17 @@ async def get_view_of_the_project(
             )
         )
     else:
-        return ProjectRawModel(
-            **agent.view.get(
+        return agent.view.get(
                 namespace=namespace,
                 name=project,
                 view_name=view,
                 tag=tag,
                 raw=raw,
             ).to_dict()
-        )
 
 
 @project.post(
-    "/{view}",
+    "/views/{view}",
     summary="Create a view",
     tags=["views"],
 )
@@ -820,11 +818,11 @@ async def create_view_of_the_project(
     """
     Create a view of the project.
     """
-    # if namespace not in namespace_access_list:
-    #     raise HTTPException(
-    #         detail="You do not have permission to create this view.",
-    #         status_code=401,
-    #     )
+    if namespace not in namespace_access_list:
+        raise HTTPException(
+            detail="You do not have permission to create this view.",
+            status_code=401,
+        )
     try:
         agent.view.create(
             view_name=view,
@@ -850,9 +848,32 @@ async def create_view_of_the_project(
         status_code=202,
     )
 
+@project.get(
+    "/views/{view}/zip",
+    summary="Zip a view",
+    tags=["views"],
+)
+async def zip_view_of_the_view(
+    namespace: str,
+    project: str,
+    view: str,
+    tag: str = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    """
+    Zip a view of the project.
+    """
+    return zip_pep(agent.view.get(
+            namespace=namespace,
+            name=project,
+            view_name=view,
+            tag=tag,
+            raw=False,
+    ))
+
 
 @project.post(
-    "/{view}/{sample_name}",
+    "/views/{view}/{sample_name}",
     summary="Add sample to the view",
     tags=["views"],
 )
@@ -865,11 +886,11 @@ async def add_sample_to_view(
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
-    # if namespace not in namespace_access_list:
-    #     raise HTTPException(
-    #         detail="You do not have permission to add sample to this view.",
-    #         status_code=401,
-    #     )
+    if namespace not in namespace_access_list:
+        raise HTTPException(
+            detail="You do not have permission to add sample to this view.",
+            status_code=401,
+        )
     try:
         agent.view.add_sample(
             namespace=namespace,
@@ -898,7 +919,7 @@ async def add_sample_to_view(
 
 
 @project.delete(
-    "/{view}/{sample_name}",
+    "/views/{view}/{sample_name}",
     summary="Delete sample from the view",
     tags=["views"],
 )
@@ -911,11 +932,11 @@ def delete_sample_from_view(
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
-    # if namespace not in namespace_access_list:
-    #     raise HTTPException(
-    #         detail="You do not have permission to delete sample from this view.",
-    #         status_code=401,
-    #     )
+    if namespace not in namespace_access_list:
+        raise HTTPException(
+            detail="You do not have permission to delete sample from this view.",
+            status_code=401,
+        )
     try:
         agent.view.remove_sample(
             namespace=namespace,
@@ -939,7 +960,7 @@ def delete_sample_from_view(
 
 
 @project.delete(
-    "/{view}",
+    "/views/{view}",
     summary="Delete a view",
     tags=["views"],
 )
