@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 
-type View = 'peps' | 'stars' | 'pops';
+type View = 'peps' | 'stars';
 
 interface Props {
   view: View;
@@ -59,7 +59,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
             {props.numPeps}
           </span>
         </Selector>
-        <Selector
+        {/* <Selector
           onMouseEnter={() => {
             if (props.view === 'pops') {
               setPopcornVariant('white');
@@ -81,7 +81,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
           <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
             {props.numStars}
           </span>
-        </Selector>
+        </Selector> */}
         <Selector {...props} view="stars" active={props.view === 'stars'}>
           <i className="bi bi-star me-2"></i>
           Stars
