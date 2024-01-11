@@ -6,33 +6,47 @@ import { useNamespaceProjects } from '../../../hooks/queries/useNamespaceProject
 
 interface Props {
   namespace: string;
-  value: string;
+  value: string | undefined;
   onChange: (value: string) => void;
+  projectNameOnly?: boolean;
+  type?: 'pep' | 'pop';
 }
 
 export const PepSearchDropdown = (props: Props) => {
   const { value, onChange, namespace } = props;
+
+  // value always has the format: namespace/project:tag
+  // so we need to split it to get the namespace, project, and tag
+  const namespaceFromValue = value?.split('/')[0] || '';
+  const [projectName, tag] = value?.split('/')[1].split(':') || '';
+
   const limit = 100;
   const offset = 0;
   const [search, setSearch] = useState<string>('');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
-  const { data: namespaces, isLoading } = useNamespaceProjects(namespace, {
+  const { data: projects, isLoading } = useNamespaceProjects(namespace, {
     limit,
     offset,
     search: searchDebounced,
+    type: props.type,
   });
 
-  const selectedNamespace = namespaces?.items.find((v) => v.namespace === value);
+  const selectedProject = projects?.items.find(
+    (v) => v.namespace === namespaceFromValue && v.name === projectName && v.tag === tag,
+  );
+
   let selectValue;
-  if (selectedNamespace) {
+  if (selectedProject !== undefined) {
     selectValue = {
-      label: selectedNamespace.namespace,
-      value: selectedNamespace.namespace,
+      label: props.projectNameOnly
+        ? `${selectedProject.name}:${selectedProject.tag}`
+        : `${selectedProject.namespace}/${selectedProject.name}:${selectedProject.tag}`,
+      value: `${selectedProject.namespace}/${selectedProject.name}:${selectedProject.tag}`,
     };
   } else {
-    selectValue = undefined;
+    selectValue = null;
   }
 
   return (
@@ -46,13 +60,12 @@ export const PepSearchDropdown = (props: Props) => {
         onChange(newValue?.value || '');
       }}
       options={
-        namespaces?.items.map((n) => ({
-          label: `${n.namespace}/${n.name}:${n.tag}`,
+        projects?.items.map((n) => ({
+          label: props.projectNameOnly ? `${n.name}:${n.tag}` : `${n.namespace}/${n.name}:${n.tag}`,
           value: `${n.namespace}/${n.name}:${n.tag}`,
         })) || []
       }
-      placeholder="Search"
-      isClearable
+      placeholder="Search for PEPs"
       menuPlacement="bottom"
       controlShouldRenderValue={true}
     />

@@ -9,6 +9,7 @@ import { SchemaTag } from '../components/forms/components/shema-tag';
 import { PageLayout } from '../components/layout/page-layout';
 import { ProjectDataNav } from '../components/layout/project-data-nav';
 import { Markdown } from '../components/markdown/render';
+import { AddToPOPModal } from '../components/modals/add-to-pop';
 import { DeletePEPModal } from '../components/modals/delete-pep';
 import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { ForkPEPModal } from '../components/modals/fork-pep';
@@ -97,6 +98,7 @@ export const ProjectPage: FC = () => {
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
+  const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // state for editing config, samples, and subsamples
@@ -235,9 +237,11 @@ export const ProjectPage: FC = () => {
         <div className="d-flex flex-row align-items-center gap-1">
           <div className="d-flex flex-row align-items-center">
             <div className="border border-dark shadow-sm rounded-1 px-2 d-flex align-items-center">
-              <span className="text-sm fw-bold">{`${projectInfo?.namespace}/${projectInfo?.name}:${
-                projectInfo?.tag || 'default'
-              }`}</span>
+              <span className="text-sm fw-bold">
+                {projectInfo
+                  ? `${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`
+                  : 'Loading'}
+              </span>
               <button
                 className="btn btn-sm btn-link-dark shadow-none ms-1 pe-0"
                 onClick={() => {
@@ -273,7 +277,7 @@ export const ProjectPage: FC = () => {
                       <i className="me-1 bi bi-bezier2"></i>
                       Fork
                     </Dropdown.Item>
-                    <Dropdown.Item disabled>
+                    <Dropdown.Item onClick={() => setShowAddToPOPModal(true)}>
                       <i className="me-1 bi bi-plus-circle"></i>
                       Add to POP
                     </Dropdown.Item>
@@ -555,6 +559,15 @@ export const ProjectPage: FC = () => {
         namespace={namespace || ''}
         project={project || ''}
         description={projectInfo?.description || ''}
+        tag={tag}
+      />
+      <AddToPOPModal
+        show={showAddToPOPModal}
+        onHide={() => {
+          setShowAddToPOPModal(false);
+        }}
+        namespace={namespace!}
+        project={project!}
         tag={tag}
       />
     </PageLayout>

@@ -76,8 +76,12 @@ export const getNamespaceProjects = (
   namespace: string,
   token: string | null = null,
   { search, offset, limit, orderBy, order }: PaginationParams,
+  type?: 'pep' | 'pop',
 ) => {
   const query = constructQueryFromPaginationParams({ search, offset, limit, orderBy, order });
+  if (type) {
+    query.append('pep_type', type);
+  }
   const url = `${API_BASE}/namespaces/${namespace}/projects?${query.toString()}`;
   if (!token) {
     return axios.get<NamespaceProjectsResponse>(url).then((res) => res.data);
