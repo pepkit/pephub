@@ -153,25 +153,27 @@ export const ProjectMetaEditForm: FC<Props> = ({
           )}
         />
       </div>
-      <button
-        onClick={() => {
-          onCancel();
-          resetForm();
-        }}
-        type="button"
-        className="btn btn-outline-dark me-1"
-      >
-        Cancel
-      </button>
-      <button
-        onClick={() => mutation.mutate()}
-        id="metadata-save-btn"
-        disabled={(!isDirty && isValid) || mutation.isPending}
-        type="button"
-        className="btn btn-success me-1"
-      >
-        {mutation.isPending ? 'Saving...' : 'Save'}
-      </button>
+      <div className="d-flex flex-row align-items-center justify-content-end">
+        <button
+          onClick={() => {
+            onCancel();
+            resetForm();
+          }}
+          type="button"
+          className="btn btn-outline-dark me-1"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => mutation.mutate()}
+          id="metadata-save-btn"
+          disabled={(!isDirty && isValid) || mutation.isPending}
+          type="button"
+          className="btn btn-success me-1"
+        >
+          {mutation.isPending ? 'Saving...' : 'Save'}
+        </button>
+      </div>
     </form>
   );
 };
