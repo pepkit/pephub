@@ -1,6 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { R } from '@tanstack/react-query-devtools/build/legacy/devtools-ZdlRR-0P';
-import { off } from 'process';
 import { FC, Fragment, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
