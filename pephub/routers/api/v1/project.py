@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 
 
 from ...models import ProjectOptional, ProjectRawModel, ForkRequest
-from ....helpers import zip_conv_result, get_project_sample_names, zip_pep
+from ....helpers import zip_conv_result, zip_pep
 from ....dependencies import (
     get_db,
     get_project,
@@ -541,7 +541,7 @@ async def upload_sample(
     except Exception:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not upload sample. Server error!",
+            detail="Could not upload sample. Server error!",
         )
 
 
@@ -577,7 +577,7 @@ async def delete_sample(
     except Exception:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not delete sample. Server error!",
+            detail="Could not delete sample. Server error!",
         )
 
 

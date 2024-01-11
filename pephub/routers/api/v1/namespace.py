@@ -31,9 +31,7 @@ from typing_extensions import Annotated
 from ....dependencies import (
     get_db,
     get_namespace_info,
-    get_user_from_session_info,
     read_authorization_header,
-    get_organizations_from_session_info,
     get_namespace_access_list,
     verify_user_can_write_namespace,
 )
