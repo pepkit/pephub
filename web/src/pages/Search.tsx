@@ -39,14 +39,16 @@ export const SearchPage: FC = () => {
   useEffect(() => {
     // run search on mount (when the user navigates to this page from a link someone copied)
     setTimeout(() => {
-      if (searchDebounced !== '') {
+      if (!!searchDebounced) {
         runSearch();
       }
     }, 500);
   }, []);
 
   useEffect(() => {
-    runSearch();
+    if (!!searchDebounced) {
+      runSearch();
+    }
   }, [offset]);
 
   return (

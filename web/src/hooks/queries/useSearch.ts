@@ -28,7 +28,7 @@ export const useSearch = (params: SearchParams) => {
   const query = useQuery({
     queryKey: ['search', q, offset],
     queryFn: () => search(q, _limit, _offset, _scoreThreshold, session.jwt || ''),
-    enabled: _autoRun && q !== '', // only run if autoRun is true and q is not empty
+    enabled: _autoRun && !!q, // only run if autoRun is true and q is not empty
     refetchOnWindowFocus: false,
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 5, // 5 minutes
