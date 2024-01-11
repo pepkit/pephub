@@ -48,7 +48,7 @@ const Selector = (props: SelectorProps) => {
 };
 
 export const NamespaceViewSelector: FC<Props> = (props) => {
-  const [popcornVariant, setPopcornVariant] = useState<'primary' | 'white'>('primary');
+  // const [popcornVariant, setPopcornVariant] = useState<'primary' | 'white'>('primary');
   return (
     <div className="d-flex flex-row align-items-center">
       <div>

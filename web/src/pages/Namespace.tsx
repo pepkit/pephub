@@ -22,6 +22,7 @@ import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
 type View = 'peps' | 'stars';
+const MAX_SAMPLE_COUNT = 5_000;
 
 export const NamespacePage: FC = () => {
   // get view out of url its a query param
@@ -55,6 +56,8 @@ export const NamespacePage: FC = () => {
     search: searchDebounced,
   });
   const { data: stars, isLoading: starsIsLoading } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
+
+  const projectsFiltered = projects?.items.filter((p) => p.number_of_samples < MAX_SAMPLE_COUNT) || [];
 
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
@@ -198,7 +201,7 @@ export const NamespacePage: FC = () => {
               {projectsIsLoading || projects === undefined ? (
                 <ProjectListPlaceholder />
               ) : (
-                projects?.items.map((project, i) => <ProjectCard key={i} project={project} />)
+                projectsFiltered.map((project, i) => <ProjectCard key={i} project={project} />)
               )}
               <Fragment>
                 {/* pagination */}
@@ -208,7 +211,7 @@ export const NamespacePage: FC = () => {
               </Fragment>
               {/* no projects exists */}
               <div>
-                {projects?.items.length === 0 ? (
+                {projectsFiltered.length === 0 ? (
                   <div className="text-center">
                     <p className="text-muted">No projects found</p>
                   </div>
