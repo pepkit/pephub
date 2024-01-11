@@ -13,9 +13,14 @@ export const useRemoveStar = (namespace: string, star_namespace: string, star_pr
   const mutation = useMutation({
     mutationFn: () => removeStar(namespace, star_namespace, star_project, star_tag, session.jwt || ''),
     onSuccess: () => {
-      //   toast.success('Project successfully deleted.');
-      queryClient.invalidateQueries({
-        queryKey: [namespace, 'stars'],
+      // queryClient.invalidateQueries({
+      //   queryKey: [namespace, 'stars'],
+      // });
+      queryClient.setQueryData([namespace, 'stars'], (oldData: any) => {
+        // NOTE: this wont pull all data from the newly added star, but it will add its identifier it to the list
+        return oldData.filter(
+          (star: any) => star.namespace !== star_namespace || star.name !== star_project || star.tag !== star_tag,
+        );
       });
     },
     onError: (err: AxiosError) => {

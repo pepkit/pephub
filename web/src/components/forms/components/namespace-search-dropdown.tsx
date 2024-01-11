@@ -51,7 +51,7 @@ export const NamespaceSearchDropdown = (props: Props) => {
           value: n.namespace,
         })) || []
       }
-      placeholder="Search"
+      placeholder="Search for namespaces"
       isClearable
       menuPlacement="bottom"
       controlShouldRenderValue={true}

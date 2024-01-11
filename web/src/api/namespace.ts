@@ -51,7 +51,7 @@ interface NamespaceSearchResponse {
   offset: number;
 }
 
-interface StarsResponse {
+export interface StarsResponse {
   count: number;
   limit: number;
   offset: number;
@@ -76,8 +76,12 @@ export const getNamespaceProjects = (
   namespace: string,
   token: string | null = null,
   { search, offset, limit, orderBy, order }: PaginationParams,
+  type?: 'pep' | 'pop',
 ) => {
   const query = constructQueryFromPaginationParams({ search, offset, limit, orderBy, order });
+  if (type) {
+    query.append('pep_type', type);
+  }
   const url = `${API_BASE}/namespaces/${namespace}/projects?${query.toString()}`;
   if (!token) {
     return axios.get<NamespaceProjectsResponse>(url).then((res) => res.data);
@@ -96,9 +100,15 @@ export const getNamespaceStars = (
   const query = constructQueryFromPaginationParams({ search, offset, limit, orderBy, order });
   const url = `${API_BASE}/namespaces/${namespace}/stars?${query.toString()}`;
   if (!token) {
-    return axios.get<StarsResponse>(url).then((res) => res.data);
+    return axios
+      .get<StarsResponse>(url)
+      .then((res) => res.data)
+      .then((data) => data.results);
   } else {
-    return axios.get<StarsResponse>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
+    return axios
+      .get<StarsResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data)
+      .then((data) => data.results);
   }
 };
 

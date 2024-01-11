@@ -22,6 +22,7 @@ import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
 type View = 'peps' | 'stars';
+const MAX_SAMPLE_COUNT = 5_000;
 
 export const NamespacePage: FC = () => {
   // get view out of url its a query param
@@ -55,6 +56,8 @@ export const NamespacePage: FC = () => {
     search: searchDebounced,
   });
   const { data: stars, isLoading: starsIsLoading } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
+
+  const projectsFiltered = projects?.items.filter((p) => p.number_of_samples < MAX_SAMPLE_COUNT) || [];
 
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
@@ -169,7 +172,7 @@ export const NamespacePage: FC = () => {
           <div className="mt-3">
             <NamespaceViewSelector
               numPeps={projects?.count || 0}
-              numStars={stars?.results.length || 0}
+              numStars={stars?.length || 0}
               view={view}
               setView={setView}
             />
@@ -179,7 +182,6 @@ export const NamespacePage: FC = () => {
           <div className="my-3 border-bottom border-grey"></div>
         )}
         {/* Render projects  in namespace */}
-
         {view === 'peps' ? (
           <Fragment>
             <div className="mt-3"></div>
@@ -199,16 +201,17 @@ export const NamespacePage: FC = () => {
               {projectsIsLoading || projects === undefined ? (
                 <ProjectListPlaceholder />
               ) : (
-                projects.items.map((project, i) => <ProjectCard key={i} project={project} />)
+                projectsFiltered.map((project, i) => <ProjectCard key={i} project={project} />)
               )}
-              <>
+              <Fragment>
+                {/* pagination */}
                 {projects?.count && projects?.count > limit ? (
                   <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
                 ) : null}
-              </>
+              </Fragment>
               {/* no projects exists */}
               <div>
-                {projects?.items.length === 0 ? (
+                {projectsFiltered.length === 0 ? (
                   <div className="text-center">
                     <p className="text-muted">No projects found</p>
                   </div>
@@ -219,7 +222,7 @@ export const NamespacePage: FC = () => {
         ) : (
           // render stars in namespace
           <Fragment>
-            {stars?.results.length === 0 ? (
+            {stars?.length === 0 ? (
               <div className="text-center mt-5">
                 <p className="fst-italic text-muted">No stars found. Star some projects and they will show up here!</p>
                 <i className="text-muted text-4xl bi bi-stars mt-4"></i>
@@ -227,8 +230,8 @@ export const NamespacePage: FC = () => {
             ) : (
               <div className="mt-3">
                 <StarFilterBar search={starSearch} setSearch={setStarSearch} />
-                {stars?.results
-                  .filter(
+                {stars
+                  ?.filter(
                     (star) =>
                       star.description.toLowerCase().includes(starSearch.toLowerCase()) ||
                       star.name.toLowerCase().includes(starSearch.toLowerCase()),

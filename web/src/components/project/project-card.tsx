@@ -22,7 +22,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const isStarred = stars?.results.find(
+  const isStarred = stars?.find(
     (star) => star.namespace === project.namespace && star.name === project.name && star.tag === project.tag,
   );
 

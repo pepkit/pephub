@@ -1,6 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { R } from '@tanstack/react-query-devtools/build/legacy/devtools-ZdlRR-0P';
-import { off } from 'process';
 import { FC, Fragment, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -42,14 +39,16 @@ export const SearchPage: FC = () => {
   useEffect(() => {
     // run search on mount (when the user navigates to this page from a link someone copied)
     setTimeout(() => {
-      if (searchDebounced !== '') {
+      if (!!searchDebounced) {
         runSearch();
       }
     }, 500);
   }, []);
 
   useEffect(() => {
-    runSearch();
+    if (!!searchDebounced) {
+      runSearch();
+    }
   }, [offset]);
 
   return (
