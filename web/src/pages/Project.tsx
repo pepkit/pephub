@@ -347,8 +347,8 @@ export const ProjectPage: FC = () => {
               <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
             </span>
             <span className="">
-              <span className="me-2 p-1 border rounded fw-bold">
-                {projectInfo?.forked_from && (
+              {projectInfo?.forked_from && (
+                <span className="me-2 p-1 border rounded fw-bold">
                   <Fragment>
                     <i className="bi bi-bezier2"></i>
                     <span className="ms-1">Forked from</span>
@@ -359,8 +359,8 @@ export const ProjectPage: FC = () => {
                       {projectInfo?.forked_from}
                     </a>
                   </Fragment>
-                )}
-              </span>
+                </span>
+              )}
               {projectInfo?.digest}
             </span>
           </small>
