@@ -168,7 +168,7 @@ async def create_pep(
     tag: str = Form(DEFAULT_TAG),
     description: Union[str, None] = Form(None),
     pep_schema: str = Form(DEFAULT_PEP_SCHEMA),
-    files: Optional[List[UploadFile]] = File(
+    files: List[UploadFile] = File(
         None  # let the file upload be optional. dont send a file? We instantiate with blank
     ),
     agent: PEPDatabaseAgent = Depends(get_db),
