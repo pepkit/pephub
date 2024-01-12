@@ -23,7 +23,12 @@ from pepdbagent.exceptions import (
     SampleAlreadyInView,
     SampleNotFoundError,
 )
-from pepdbagent.models import AnnotationModel, AnnotationList, CreateViewDictModel, ProjectViews
+from pepdbagent.models import (
+    AnnotationModel,
+    AnnotationList,
+    CreateViewDictModel,
+    ProjectViews,
+)
 
 from dotenv import load_dotenv
 
@@ -792,12 +797,12 @@ async def get_view_of_the_project(
         )
     else:
         return agent.view.get(
-                namespace=namespace,
-                name=project,
-                view_name=view,
-                tag=tag,
-                raw=raw,
-            ).to_dict()
+            namespace=namespace,
+            name=project,
+            view_name=view,
+            tag=tag,
+            raw=raw,
+        ).to_dict()
 
 
 @project.post(
@@ -848,6 +853,7 @@ async def create_view_of_the_project(
         status_code=202,
     )
 
+
 @project.get(
     "/views/{view}/zip",
     summary="Zip a view",
@@ -863,13 +869,15 @@ async def zip_view_of_the_view(
     """
     Zip a view of the project.
     """
-    return zip_pep(agent.view.get(
+    return zip_pep(
+        agent.view.get(
             namespace=namespace,
             name=project,
             view_name=view,
             tag=tag,
             raw=False,
-    ))
+        )
+    )
 
 
 @project.post(
