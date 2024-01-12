@@ -100,6 +100,7 @@ export const ProjectPage: FC = () => {
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false); // let users toggle between PEP and POP interfaces
 
   // state for editing config, samples, and subsamples
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
@@ -285,6 +286,17 @@ export const ProjectPage: FC = () => {
                 )}
               </Fragment>
               <Fragment>
+                {projectInfo?.pop && (
+                  <Fragment>
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={() => setForceTraditionalInterface(!forceTraditionalInterface)}>
+                      <i className="me-1 bi bi-layout-text-sidebar-reverse"></i>
+                      {forceTraditionalInterface ? 'View as POP' : 'View as PEP'}
+                    </Dropdown.Item>
+                  </Fragment>
+                )}
+              </Fragment>
+              <Fragment>
                 {user && projectInfo && canEdit(user, projectInfo) && (
                   <Fragment>
                     <Dropdown.Divider />
@@ -366,7 +378,7 @@ export const ProjectPage: FC = () => {
           </small>
         </div>
       </div>
-      {projectInfo?.pop ? (
+      {projectInfo?.pop && !forceTraditionalInterface ? (
         <PopInterface project={projectInfo} />
       ) : (
         <Fragment>

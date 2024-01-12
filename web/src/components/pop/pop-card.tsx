@@ -2,7 +2,6 @@ import { FC, useState } from 'react';
 
 import { ProjectAnnotation, Sample } from '../../../types';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
-import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { MarkdownToText } from '../markdown/render';

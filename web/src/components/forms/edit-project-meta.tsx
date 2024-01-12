@@ -1,8 +1,10 @@
 import { FC, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
 import { useProject } from '../../hooks/queries/useProject';
+import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { MarkdownEditor } from '../markdown/edit';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 import { SchemaTooltip } from './tooltips/form-tooltips';
@@ -75,6 +77,10 @@ export const ProjectMetaEditForm: FC<Props> = ({
     isPop: projectInfo?.pop === newPop ? undefined : newPop,
   };
 
+  // grab the sample table to warn the user if they wont be able to swap
+  // to a POP
+  const { data: sampleTable } = useSampleTable(namespace, name, tag);
+
   const mutation = useEditProjectMetaMutation(namespace, name, tag, onSubmit, onFailedSubmit, metadata);
 
   // reset form if project info changes
@@ -90,6 +96,24 @@ export const ProjectMetaEditForm: FC<Props> = ({
       pop: projectInfo?.pop,
     });
   }, [projectInfo]);
+
+  useEffect(() => {
+    if (newPop === true) {
+      if (sampleTable && sampleTable.items.length > 0) {
+        // check all samples have namespace, name, and tag attributes
+        const hasNamespace = sampleTable.items.every((sample) => sample.namespace);
+        const hasName = sampleTable.items.every((sample) => sample.name);
+        const hasTag = sampleTable.items.every((sample) => sample.tag);
+        if (!hasNamespace || !hasName || !hasTag) {
+          toast.error(
+            'Cannot convert this PEP to a POP because the sample table does not have namespace, name, and tag attributes',
+          );
+          // toggle back to false
+          setValue('pop', false);
+        }
+      }
+    }
+  }, [newPop]);
 
   return (
     <form>

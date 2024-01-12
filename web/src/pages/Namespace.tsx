@@ -42,6 +42,7 @@ export const NamespacePage: FC = () => {
   const [search, setSearch] = useState(urlParams.get('search') || '');
   const [orderBy, setOrderBy] = useState(urlParams.get('orderBy') || 'update_date');
   const [order, setOrder] = useState(urlParams.get('order') || 'asc');
+  const [popsOnly, setPopsOnly] = useState(urlParams.get('popsOnly') === 'true' ? true : false);
 
   const searchDebounced = useDebounce<string>(search, 500);
 
@@ -54,6 +55,7 @@ export const NamespacePage: FC = () => {
     // @ts-ignore - just for now, I know this will work fine
     order: order || 'asc',
     search: searchDebounced,
+    type: popsOnly ? 'pop' : undefined,
   });
   const { data: stars, isLoading: starsIsLoading } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
@@ -169,15 +171,31 @@ export const NamespacePage: FC = () => {
           </p>
         </>
         {user && namespace === user?.login ? (
-          <div className="mt-3">
-            <NamespaceViewSelector
-              numPeps={projects?.count || 0}
-              numStars={stars?.length || 0}
-              view={view}
-              setView={setView}
-            />
+          <Fragment>
+            <div className="mt-3 d-flex flex-row align-items-center justify-content-between">
+              <NamespaceViewSelector
+                numPeps={projects?.count || 0}
+                numStars={stars?.length || 0}
+                view={view}
+                setView={setView}
+              />
+              <div className="form-check form-switch">
+                <input
+                  checked={popsOnly}
+                  onChange={(e) => setPopsOnly(e.target.checked)}
+                  className="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="pop-only-toggle"
+                />
+                <label className="form-check-label">
+                  <img src="/popcorn-black.svg" height="15px" width="15px" alt="Popcorn icon" className="me-1" />
+                  POPs only
+                </label>
+              </div>
+            </div>
             <div className="my-1 border-bottom border-grey"></div>
-          </div>
+          </Fragment>
         ) : (
           <div className="my-3 border-bottom border-grey"></div>
         )}
