@@ -1,6 +1,8 @@
 import { FC } from 'react';
 import { Modal } from 'react-bootstrap';
 
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+
 interface Props {
   namespace: string;
   project: string;
@@ -19,7 +21,7 @@ export const ProjectAPIEndpointsModal: FC<Props> = ({ namespace, project, tag, s
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
           <span className="fw-bold me-1">Project:</span>
-          <a href={`/api/v1/projects/${namespace}/${project}?tag=${tag}`}>
+          <a href={`${API_HOST}/api/v1/projects/${namespace}/${project}?tag=${tag}`}>
             <code>
               /api/v1/projects/{namespace}/{project}?tag={tag}
             </code>
@@ -28,7 +30,7 @@ export const ProjectAPIEndpointsModal: FC<Props> = ({ namespace, project, tag, s
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
           <span className="fw-bold me-1">Samples:</span>
-          <a href={`/api/v1/projects/${namespace}/${project}/samples?tag=${tag}`}>
+          <a href={`${API_HOST}/api/v1/projects/${namespace}/${project}/samples?tag=${tag}`}>
             <code>
               /api/v1/projects/{namespace}/{project}/samples?tag={tag}
             </code>
@@ -46,7 +48,7 @@ export const ProjectAPIEndpointsModal: FC<Props> = ({ namespace, project, tag, s
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
           <span className="fw-bold me-1">Subsamples:</span>
-          <a href={`/api/v1/projects/${namespace}/${project}/subsamples?tag=${tag}`}>
+          <a href={`${API_HOST}/api/v1/projects/${namespace}/${project}/subsamples?tag=${tag}`}>
             <code>
               /api/v1/projects/{namespace}/{project}/subsamples?tag={tag}
             </code>

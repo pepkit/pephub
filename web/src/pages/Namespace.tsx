@@ -121,7 +121,7 @@ export const NamespacePage: FC = () => {
         {/* breadcrumbs */}
         <div className="fw-bold mt-2">
           <Breadcrumb>
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/">home</Breadcrumb.Item>
             <Breadcrumb.Item active>{namespace}</Breadcrumb.Item>
           </Breadcrumb>
         </div>

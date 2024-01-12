@@ -218,7 +218,7 @@ export const ProjectPage: FC = () => {
       <div className="d-flex flex-row align-items-center justify-content-between px-4 mb-2 mt-4">
         <div className="d-flex flex-row align-items-center">
           <Breadcrumb className="fw-bold mt-1">
-            <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+            <Breadcrumb.Item href="/">home</Breadcrumb.Item>
             <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
             <Breadcrumb.Item active>
               {project}:{tag}

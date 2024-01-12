@@ -126,6 +126,18 @@ async def get_a_pep(
             del proj_dict["description"]
         except KeyError:
             pass
+    # default to is_private from annotation
+    if hasattr(proj, "is_private") and hasattr(proj_annotation, "is_private"):
+        try:
+            del proj_dict["is_private"]
+        except KeyError:
+            pass
+    # default to pop from annotation
+    if hasattr(proj, "pop") and hasattr(proj_annotation, "pop"):
+        try:
+            del proj_dict["pop"]
+        except KeyError:
+            pass
 
     return dict(
         **proj_dict,
