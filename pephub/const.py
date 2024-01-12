@@ -110,6 +110,7 @@ VALID_UPDATE_KEYS = [
     "private",
     "description",
     "pep_schema",
+    "pop",
 ]
 
 

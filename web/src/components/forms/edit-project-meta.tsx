@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
@@ -20,6 +20,7 @@ interface FormValues extends Props {
   description: string;
   isPrivate: boolean;
   pep_schema: string;
+  pop: boolean;
 }
 
 export const ProjectMetaEditForm: FC<Props> = ({
@@ -46,6 +47,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
       isPrivate: projectInfo?.is_private,
       tag: tag,
       pep_schema: projectInfo?.pep_schema || 'pep/2.1.0',
+      pop: projectInfo?.pop || false,
     },
   });
 
@@ -61,6 +63,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
   const newDescription = watch('description');
   const newIsPrivate = watch('isPrivate');
   const newSchema = watch('pep_schema');
+  const newPop = watch('pop');
 
   // check if things are changed - only send those that are
   const metadata = {
@@ -69,9 +72,24 @@ export const ProjectMetaEditForm: FC<Props> = ({
     newDescription: projectInfo?.description === newDescription ? undefined : newDescription,
     newIsPrivate: projectInfo?.is_private === newIsPrivate ? undefined : newIsPrivate,
     newSchema: projectInfo?.pep_schema === newSchema ? undefined : newSchema,
+    isPop: projectInfo?.pop === newPop ? undefined : newPop,
   };
 
   const mutation = useEditProjectMetaMutation(namespace, name, tag, onSubmit, onFailedSubmit, metadata);
+
+  // reset form if project info changes
+  // this is necessary because projectInfo is
+  // fetched after the form is rendered
+  useEffect(() => {
+    resetForm({
+      name: projectInfo?.name,
+      description: projectInfo?.description,
+      isPrivate: projectInfo?.is_private,
+      tag: projectInfo?.tag,
+      pep_schema: projectInfo?.pep_schema,
+      pop: projectInfo?.pop,
+    });
+  }, [projectInfo]);
 
   return (
     <form>
@@ -86,6 +104,12 @@ export const ProjectMetaEditForm: FC<Props> = ({
           role="switch"
           id="is-private-toggle"
         />
+      </div>
+      <div className="mb-3 form-check form-switch">
+        <label className="form-check-label" htmlFor="is-pop-toggle">
+          POP
+        </label>
+        <input {...register('pop')} className="form-check-input" type="checkbox" role="switch" id="is-pop-toggle" />
       </div>
       <div className="mb-3">
         <label htmlFor="project-name" className="form-label">

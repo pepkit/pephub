@@ -75,6 +75,7 @@ export interface Project {
   sample_table_indx: string;
   sample_attributes: string[];
   pep_schema: string;
+  pop: boolean;
 }
 
 export interface SearchHit {

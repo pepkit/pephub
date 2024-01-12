@@ -291,7 +291,10 @@ async def update_a_pep(
             #     status_code=400,
             #     detail=f"Invalid update key: {k}",
             # )
-
+    # add params to new_raw_project if update_dict is not empty
+    if len(update_dict) > 0:
+        for k, v in update_dict.items():
+            new_raw_project["_config"][k] = v
     agent.project.update(
         dict(project=Project().from_dict(new_raw_project), **update_dict),
         namespace,
@@ -847,7 +850,7 @@ async def create_view_of_the_project(
         _LOGGER.error(f"Could not create view. Error: {e}")
         raise HTTPException(
             status_code=400,
-            detail=f"Could not create view. Server error",
+            detail="Could not create view. Server error",
         )
     return JSONResponse(
         content={
@@ -999,7 +1002,7 @@ def delete_view(
     except Exception:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not delete view. Server error!",
+            detail="Could not delete view. Server error!",
         )
     return JSONResponse(
         content={
