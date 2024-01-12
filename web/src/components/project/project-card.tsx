@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, Fragment, useState } from 'react';
 
 import { ProjectAnnotation } from '../../../types';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
@@ -100,7 +100,18 @@ export const ProjectCard: FC<Props> = ({ project }) => {
               <span className="mx-1">Updated:</span>
               <span id="project-update-date">{dateStringToDateTime(project.last_update_date)}</span>
             </span>
-            <span className="me-5">{project.digest}</span>
+            <span className="me-3">{project.digest}</span>
+            {project?.forked_from && (
+              <span className="p-1 border rounded fw-bold">
+                <Fragment>
+                  <i className="bi bi-bezier2"></i>
+                  <span className="ms-1">Forked from</span>
+                  <a className="text-decoration-none ms-1" href={`/${project?.forked_from.replace(':', '?tag=')}`}>
+                    {project?.forked_from}
+                  </a>
+                </Fragment>
+              </span>
+            )}
           </small>
         </div>
       </div>
