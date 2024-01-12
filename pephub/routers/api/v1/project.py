@@ -705,6 +705,8 @@ async def fork_pep_to_namespace(
     fork_request: ForkRequest,
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
     agent: PEPDatabaseAgent = Depends(get_db),
+    description: Optional[str] = "",
+    private: Optional[bool] = False,
 ):
     """
     Fork a project for a particular namespace you have write access to.
@@ -723,6 +725,8 @@ async def fork_pep_to_namespace(
             fork_namespace=fork_to,
             fork_name=fork_name,
             fork_tag=fork_tag,
+            description=description or proj_annotation.description,
+            private=private or proj_annotation.is_private,
         )
 
     except ProjectUniqueNameError as _:
