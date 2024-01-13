@@ -16,18 +16,28 @@ const SchemaDropdown: FC<Props> = ({ value, onChange }) => {
     value: schema,
   }));
 
+  const valueForSelect = options.find((option) => option.value === value);
+
   return (
-    <div>
+    <div className="d-flex flex-row align-items-center gap-1">
       <Select
         options={options}
-        value={options.find((option) => option.value === value)}
+        value={valueForSelect}
         onChange={(newValue: SingleValue<{ label: string; value: string }>) => {
           onChange(newValue?.value || '');
         }}
         placeholder={isLoading ? 'Fetching schemas...' : 'Assign a schema...'}
         isClearable
         menuPlacement="top"
+        className="w-100"
       />
+      <a
+        target="_blank"
+        href={`https://schema.databio.org/${value}.yaml`}
+        className="btn btn-outline-secondary opacity-50"
+      >
+        <i className="bi bi-download" />
+      </a>
     </div>
   );
 };

@@ -147,7 +147,7 @@ sample_table: samples.csv
         <Controller
           control={control}
           name="pep_schema"
-          render={({ field: { onChange, value } }) => (
+          render={({ field: { value } }) => (
             <SchemaDropdown
               value={value}
               onChange={(schema) => {

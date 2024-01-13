@@ -11,6 +11,7 @@ import { useValidation } from '../../hooks/queries/useValidation';
 import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { FileDropZone } from './components/file-dropzone';
+import { SchemaDropdown } from './components/schemas-databio-dropdown';
 
 interface ValidatorFormInputs {
   pepFiles?: FileList;
@@ -34,7 +35,6 @@ interface ValidatorFormProps {
 export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, defaultSchemaRegistryPath }) => {
   const { user, login } = useSession();
   const { data: projects } = useNamespaceProjects(user?.login, {});
-  const { data: schemas } = useSchemas();
 
   // instantiate form
   const {
@@ -98,18 +98,6 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
     // just take the first file they give
     params.schema_file = schemaFile && schemaFile.length > 0 ? schemaFile[0] : undefined;
   }
-
-  // only enable if one of the PEP options is selected and
-  // one of the schema options is selected
-  // if (useExistingPEP && useExistingSchema) {
-  //   params.enabled = !!pepRegistryPath && !!schemaRegistryPath;
-  // } else if (!!useExistingPEP && !useExistingSchema) {
-  //   params.enabled = !!pepRegistryPath && (!!schemaPasteValue || !!schemaFile);
-  // } else if (!useExistingPEP && useExistingSchema) {
-  //   params.enabled = !!pepFiles && !!schemaRegistryPath;
-  // } else {
-  //   params.enabled = !!pepFiles && (!!schemaPasteValue || !!schemaFile);
-  // }
 
   // validator hook
   const { data: result, error, isFetching: isValidating, refetch } = useValidation(params);
@@ -252,13 +240,14 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
                   name="schemaRegistryPath"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      {...field}
-                      isClearable
-                      placeholder="Select a schema"
-                      className="mt-2"
-                      // @ts-ignore
-                      options={schemas ? Object.keys(schemas).map((schema) => ({ value: schema, label: schema })) : []}
+                    <SchemaDropdown
+                      value={field.value?.value || undefined}
+                      onChange={(schema) => {
+                        setFormValue('schemaRegistryPath', {
+                          value: schema,
+                          label: schema,
+                        });
+                      }}
                     />
                   )}
                 />
