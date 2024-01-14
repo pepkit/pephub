@@ -6,7 +6,7 @@ import { useSession } from '../useSession';
 const DEFAULT_LIMIT = 10;
 const DEFAULT_OFFSET = 0;
 const DEFAULT_AUTO_RUN = false;
-const DEFAULT_SCORE_THRESHOLD = 0.73;
+const DEFAULT_SCORE_THRESHOLD = 0.65;
 
 interface SearchParams {
   q: string;
