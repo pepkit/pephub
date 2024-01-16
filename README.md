@@ -189,3 +189,4 @@ docker run -p 6333:6333 \
 ```
 
 _Note: If you wish to run the development environment with a pubic database, curate your `.env` file as such._
+
