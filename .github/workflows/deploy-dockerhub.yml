@@ -25,5 +25,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          context: '{{defaultContext}}:mysubdir'
-          tags: databio/pephub:latest
+          context: '{{defaultContext}}:deployment/Dockerhub'
+          tags:
+            - databio/pephub:latest
+            - databio/pephub:${{github.ref_name}}
