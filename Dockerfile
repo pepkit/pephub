@@ -1,25 +1,4 @@
 # -------------
-# BUILD FRONTEND
-# -------------
-FROM node:16 as build
-
-WORKDIR /src
-
-COPY web/package.json ./
-COPY web/* ./
-COPY web/public ./public
-
-# remove any .env files that made it in somehow...
-RUN rm -f .env
-RUN rm -f .env.local
-RUN rm -f .env.*
-
-RUN npm install --silent
-
-# build
-RUN npm run build
-
-# -------------
 # BUILD BACKEND
 # -------------
 FROM python:3.10-slim
@@ -37,7 +16,6 @@ EXPOSE 80
 WORKDIR /app
 COPY . /app
 
-COPY --from=build /src/dist web/dist/
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements/requirements-all.txt --no-cache-dir
 
