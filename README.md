@@ -52,7 +52,7 @@ docker run -p 6333:6333 \
 
 ## Running
 
-_pephub_ is configured to be run a few different ways. Regardless of how you run it, however, pephub requires many configuration parameters to function. Configuration settings are supplied to pephub through environment variables to allow for flexible development and deployment. The following settings are **required** to run pephub. While pephub has built-in defaults for these settings, you should provide them youself to ensure compatability:
+_pephub_ may be run in several ways. In every case, pephub requires configuration. Configuration settings are supplied to pephub through environment variables. The following settings are **required**. While pephub has built-in defaults for these settings, you should provide them to ensure compatability:
 
 - `POSTGRES_HOST`: The hostname of the PEPhub database server
 - `POSTGRES_DB`: The name of the database inside the postgres server
@@ -67,12 +67,12 @@ You must set these environment variables prior to running PEPhub. We've provided
 
 You can read more about server settings and configuration [here](docs/server-settings.md).
 
-## Development:
+## Development
 
-PEPhub consists of a FatsAPI backend, and a React frontend. to get started with development, there are three things you need to do:
+PEPhub consists of a FastAPI backend, and a React frontend. To get started with development, there are three things you need to do:
 
 **1. Ensure database is set up and running.**  
-See [here](#1-database-setup) if you've not setup a database.
+See [here](#1-database-setup) if you've not set up a database.
 
 **2. Start pephub.**  
 You can run pephub natively using the following:
@@ -81,7 +81,7 @@ You can run pephub natively using the following:
 uvicorn pephub.main:app --reload
 ```
 
-_pephub_ should now be running at http://localhost:8000.
+The _pephub_ API should now be running at http://localhost:8000.
 
 **3. Start the React development server:**
 
