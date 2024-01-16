@@ -68,7 +68,7 @@ export const getNamespaceInfo = (namespace: string, token: string | null = null)
 };
 
 export const getBiggestNamespaces = (limit: number) => {
-  const url = `${API_BASE}/namespace/info?limit=${limit}`; // note the trailing slash
+  const url = `${API_BASE}/namespaces/info?limit=${limit}`; // note the trailing slash
   return axios.get<BiggestNamespaces>(url).then((res) => res.data);
 };
 
