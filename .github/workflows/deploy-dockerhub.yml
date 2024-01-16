@@ -29,6 +29,4 @@ jobs:
         with:
           push: true
           file: deployment/dockerhub/Dockerfile
-          tags:
-            - databio/pephub:latest
-            - databio/pephub:${{ github.ref_name }}
+          tags: databio/pephub:latest, databio/pephub:${{ github.ref_name }}
