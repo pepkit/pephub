@@ -73,15 +73,3 @@ app.include_router(api_projects)
 app.include_router(api_search)
 app.include_router(auth_router)
 app.include_router(eido_router)
-
-# mount ui
-app.add_middleware(SPA)
-
-# app.add_middleware(EnvironmentMiddleware)
-try:
-    app.mount("/", StaticFiles(directory=SPA_PATH, html=True), name="spa")
-except RuntimeError as re:
-    _LOGGER_PEPHUB.warning(f"SPA not found: {re}. SPA will not be available.")
-    _LOGGER_PEPHUB.warning(
-        "If this is intentional, ignore this message. Otherwise, you may need to build the spa inside web/ (cd web && npm run build)"
-    )
