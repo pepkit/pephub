@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from ._version import __version__ as server_v
-from .const import PKG_NAME, TAGS_METADATA
+from .const import PKG_NAME, TAGS_METADATA, ALL_VERSIONS
 from .routers.api.v1.base import api as api_base
 from .routers.api.v1.namespace import (
     namespace as api_namespace,
@@ -71,3 +71,15 @@ app.include_router(api_projects)
 app.include_router(api_search)
 app.include_router(auth_router)
 app.include_router(eido_router)
+
+
+# base
+@app.get("/")
+async def api_base():
+    """
+    Base API endpoint.
+    """
+    return {
+        **ALL_VERSIONS,
+        "message": "Welcome to the PEPHub API.",
+    }
