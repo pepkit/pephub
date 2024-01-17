@@ -1,12 +1,14 @@
-# pephub.databio.org
-This is the publically available instance of [PEPhub](https://github.com/pepkit/pephub) provided by the Sheffield lab. You can view the deployed instance at https://pephub.databio.org
+# Deploying
+
+This is the publicly available instance of [PEPhub](https://github.com/pepkit/pephub) provided by the Sheffield lab. You can view the deployed instance at https://pephub.databio.org
 
 ## Development
+
 ### Build the container
+
 ```
 docker build -t pephub.databio.org .
 ```
-
 
 ### Run
 
@@ -24,7 +26,7 @@ The basic steps are:
 source /home/nsheff/code/pephub/environment/production.env
 ```
 
-2. Run with docker: 
+2. Run with docker:
 
 ```
 docker run --rm -p 80:80 \
@@ -45,4 +47,3 @@ docker run --rm -p 80:80 \
 ```
 
 3. Visit http://localhost:80 to view the server.
-
