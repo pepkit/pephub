@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.11.4] - 01-22-2024
+
+### Fixed
+- Downloading zip files
+
+
 ## [0.11.2] - 01-17-2024
 
 ### Added
