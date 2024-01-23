@@ -1,6 +1,8 @@
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+
 export const downloadZip = (namespace: string, project: string, tag: string, jwt: string | undefined | null) => {
   const completeName = `${namespace}-${project}-${tag}`;
-  fetch(`/api/v1/projects/${namespace}/${project}/zip?tag=${tag}`, {
+  fetch(`${API_HOST}/api/v1/projects/${namespace}/${project}/zip?tag=${tag}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
