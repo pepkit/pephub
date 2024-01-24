@@ -17,6 +17,7 @@ export const useAddStar = (namespace: string, star_namespace: string, star_proje
         // NOTE: this wont pull all data from the newly added star, but it will add its identifier it to the list
         return [...oldData, { namespace: star_namespace, name: star_project, tag: star_tag }];
       });
+      queryClient.invalidateQueries({ queryKey: [namespace, 'stars'] });
     },
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown
