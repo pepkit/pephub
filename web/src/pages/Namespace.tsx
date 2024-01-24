@@ -209,6 +209,7 @@ export const NamespacePage: FC = () => {
               setOrderBy={setOrderBy}
               order={order}
               setOrder={setOrder}
+              setOffset={setOffset}
             />
             <div className="my-3"></div>
             <div className="mt-3">
