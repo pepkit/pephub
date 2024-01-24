@@ -218,6 +218,14 @@ export const NamespacePage: FC = () => {
             <div className="mt-3">
               {projectsIsLoading || projects === undefined ? (
                 <ProjectListPlaceholder />
+              ) : projectsFiltered.length === 0 ? (
+                <div>
+                  {projectsFiltered.length === 0 ? (
+                    <div className="text-center">
+                      <p className="text-muted">No projects found</p>
+                    </div>
+                  ) : null}
+                </div>
               ) : (
                 projectsFiltered.map((project, i) => <ProjectCard key={i} project={project} />)
               )}
@@ -227,14 +235,6 @@ export const NamespacePage: FC = () => {
                   <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
                 ) : null}
               </Fragment>
-              {/* no projects exists */}
-              <div>
-                {projectsFiltered.length === 0 ? (
-                  <div className="text-center">
-                    <p className="text-muted">No projects found</p>
-                  </div>
-                ) : null}
-              </div>
             </div>
           </Fragment>
         ) : (
