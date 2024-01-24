@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { ProjectAnnotation } from '../../../types';
 import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
@@ -22,7 +23,7 @@ export const PopInterface = ({ project }: Props) => {
   );
 
   const [addToPopNamespace, setAddToPopNamespace] = useState<string>('');
-  const [addToPopRegistry, setAddToPopRegistry] = useState<string>('');
+  const [addToPopRegistry, setAddToPopRegistry] = useState<string | undefined>(undefined);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
 
   const sampleTableMutation = useSampleTableMutation(namespace, name, tag);
@@ -97,6 +98,10 @@ export const PopInterface = ({ project }: Props) => {
                     <button
                       className="btn btn-md btn-success"
                       onClick={() => {
+                        if (addToPopRegistry === undefined) {
+                          toast.error('Please select a PEP to add to the POP.');
+                          return;
+                        }
                         let newPeps = peps?.items || [];
                         const [newNamespace, newPojectNameAndTag] = addToPopRegistry.split('/');
                         const [newProjectName, newProjectTag] = newPojectNameAndTag.split(':');
