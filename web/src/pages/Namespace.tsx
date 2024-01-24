@@ -14,14 +14,13 @@ import { StarFilterBar } from '../components/namespace/star-filter-bar';
 import { NamespaceViewSelector } from '../components/namespace/view-selector';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
 import { ProjectCard } from '../components/project/project-card';
-import { useNamespaceInfo } from '../hooks/queries/useNamespaceInfo';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useDebounce } from '../hooks/useDebounce';
 import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
-type View = 'peps' | 'stars';
+type View = 'peps' | 'pops' | 'stars';
 const MAX_SAMPLE_COUNT = 5_000;
 
 export const NamespacePage: FC = () => {
@@ -42,12 +41,25 @@ export const NamespacePage: FC = () => {
   const [search, setSearch] = useState(urlParams.get('search') || '');
   const [orderBy, setOrderBy] = useState(urlParams.get('orderBy') || 'update_date');
   const [order, setOrder] = useState(urlParams.get('order') || 'asc');
-  const [popsOnly, setPopsOnly] = useState(urlParams.get('popsOnly') === 'true' ? true : false);
+
+  // state
+  const [showAddPEPModal, setShowAddPEPModal] = useState(false);
+  const [showEndpointsModal, setShowEndpointsModal] = useState(false);
+  const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
+  const [starSearch, setStarSearch] = useState<string>(urlParams.get('starSearch') || '');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
   // data fetching
-  const { data: namespaceInfo, isLoading: namespaceInfoIsLoading, error } = useNamespaceInfo(namespace);
+  const {
+    data: namespaceInfo,
+    isLoading: namespaceInfoIsLoading,
+    error,
+  } = useNamespaceProjects(namespace, {
+    limit: 0,
+  });
+  const { data: popsInfo } = useNamespaceProjects(namespace, { type: 'pop', limit: 0 });
+  const { data: pepsInfo } = useNamespaceProjects(namespace, { type: 'pep', limit: 0 });
   const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, {
     limit,
     offset,
@@ -55,17 +67,14 @@ export const NamespacePage: FC = () => {
     // @ts-ignore - just for now, I know this will work fine
     order: order || 'asc',
     search: searchDebounced,
-    type: popsOnly ? 'pop' : undefined,
+    type: view === 'pops' ? 'pop' : 'pep',
   });
   const { data: stars, isLoading: starsIsLoading } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   const projectsFiltered = projects?.items.filter((p) => p.number_of_samples < MAX_SAMPLE_COUNT) || [];
 
-  // state
-  const [showAddPEPModal, setShowAddPEPModal] = useState(false);
-  const [showEndpointsModal, setShowEndpointsModal] = useState(false);
-  const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
-  const [starSearch, setStarSearch] = useState<string>(urlParams.get('starSearch') || '');
+  console.log(stars);
+  console.log(view);
 
   // update url when search changes
   useEffect(() => {
@@ -167,32 +176,19 @@ export const NamespacePage: FC = () => {
             </p>
           )}
           <p className="mb-0">
-            <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.number_of_projects || 0)}</span>{' '}
+            <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}
           </p>
         </>
         {user && namespace === user?.login ? (
           <Fragment>
-            <div className="mt-3 d-flex flex-row align-items-center justify-content-between">
+            <div className="mt-3 d-flex">
               <NamespaceViewSelector
-                numPeps={projects?.count || 0}
+                numPeps={pepsInfo?.count || 0}
+                numPops={popsInfo?.count || 0}
                 numStars={stars?.length || 0}
                 view={view}
                 setView={setView}
               />
-              <div className="form-check form-switch">
-                <input
-                  checked={popsOnly}
-                  onChange={(e) => setPopsOnly(e.target.checked)}
-                  className="form-check-input"
-                  type="checkbox"
-                  role="switch"
-                  id="pop-only-toggle"
-                />
-                <label className="form-check-label">
-                  <img src="/popcorn-black.svg" height="15px" width="15px" alt="Popcorn icon" className="me-1" />
-                  POPs only
-                </label>
-              </div>
             </div>
             <div className="my-1 border-bottom border-grey"></div>
           </Fragment>
@@ -200,7 +196,7 @@ export const NamespacePage: FC = () => {
           <div className="my-3 border-bottom border-grey"></div>
         )}
         {/* Render projects  in namespace */}
-        {view === 'peps' ? (
+        {['peps', 'pops'].includes(view) ? (
           <Fragment>
             <div className="mt-3"></div>
             <NamespacePageSearchBar
@@ -213,11 +209,20 @@ export const NamespacePage: FC = () => {
               setOrderBy={setOrderBy}
               order={order}
               setOrder={setOrder}
+              setOffset={setOffset}
             />
             <div className="my-3"></div>
             <div className="mt-3">
               {projectsIsLoading || projects === undefined ? (
                 <ProjectListPlaceholder />
+              ) : projectsFiltered.length === 0 ? (
+                <div>
+                  {projectsFiltered.length === 0 ? (
+                    <div className="text-center">
+                      <p className="text-muted">No projects found</p>
+                    </div>
+                  ) : null}
+                </div>
               ) : (
                 projectsFiltered.map((project, i) => <ProjectCard key={i} project={project} />)
               )}
@@ -227,14 +232,6 @@ export const NamespacePage: FC = () => {
                   <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
                 ) : null}
               </Fragment>
-              {/* no projects exists */}
-              <div>
-                {projectsFiltered.length === 0 ? (
-                  <div className="text-center">
-                    <p className="text-muted">No projects found</p>
-                  </div>
-                ) : null}
-              </div>
             </div>
           </Fragment>
         ) : (

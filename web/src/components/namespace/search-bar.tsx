@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { set } from 'react-hook-form';
 
 interface Props {
   namespace: string;
@@ -10,6 +11,7 @@ interface Props {
   setLimit: (limit: number) => void;
   setOrderBy: (orderBy: string) => void;
   setOrder: (order: string) => void;
+  setOffset: (offset: number) => void;
 }
 
 export const NamespacePageSearchBar: FC<Props> = ({
@@ -22,6 +24,7 @@ export const NamespacePageSearchBar: FC<Props> = ({
   setOrderBy,
   order,
   setOrder,
+  setOffset,
 }) => {
   return (
     <div className="flex-row d-flex align-items-center" style={{ position: 'relative' }}>
@@ -31,7 +34,10 @@ export const NamespacePageSearchBar: FC<Props> = ({
         </span>
         <input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setOffset(0);
+          }}
           id="search-bar"
           type="text"
           className="form-control w-60"

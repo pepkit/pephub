@@ -71,7 +71,7 @@ export const AddToPOPModal: FC<Props> = (props) => {
         {
           sample_name: `${namespaceToAdd}/${projectToAdd}:${tagToAdd}`,
           namespace: namespaceToAdd,
-          project: projectToAdd,
+          name: projectToAdd,
           tag: tagToAdd,
         },
       ],
