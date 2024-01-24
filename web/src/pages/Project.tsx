@@ -30,7 +30,7 @@ import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { dateStringToDate, dateStringToDateTime } from '../utils/dates';
-import { copyToClipboard, getOS } from '../utils/etc';
+import { copyToClipboard, getOS, numberWithCommas } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
 
@@ -328,7 +328,10 @@ export const ProjectPage: FC = () => {
               <Fragment>
                 <span className="text-primary">
                   <i className="me-1 bi bi-star-fill"></i>
-                  Star
+                  Starred
+                  <span className="px-2 border border-dark rounded-pill text-dark ms-1 bg-dark bg-opacity-10">
+                    {numberWithCommas(projectInfo?.stars_number || 0)}
+                  </span>
                 </span>
               </Fragment>
             ) : (
@@ -336,6 +339,9 @@ export const ProjectPage: FC = () => {
                 <span>
                   <i className="me-1 bi bi-star"></i>
                   Star
+                  <span className="px-2 border border-dark rounded-pill text-dark ms-1 bg-dark bg-opacity-10">
+                    {numberWithCommas(projectInfo?.stars_number || 0)}
+                  </span>
                 </span>
               </Fragment>
             )}
