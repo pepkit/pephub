@@ -304,10 +304,10 @@ async def update_a_pep(
             #     status_code=400,
             #     detail=f"Invalid update key: {k}",
             # )
-    # add params to new_raw_project if update_dict is not empty
-    if len(update_dict) > 0:
-        for k, v in update_dict.items():
-            new_raw_project["_config"][k] = v
+    # # add params to new_raw_project if update_dict is not empty
+    # if len(update_dict) > 0:
+    #     for k, v in update_dict.items():
+    #         new_raw_project["_config"][k] = v
     agent.project.update(
         dict(project=Project().from_dict(new_raw_project), **update_dict),
         namespace,
