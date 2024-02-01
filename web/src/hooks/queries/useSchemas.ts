@@ -5,7 +5,12 @@ import { SchemaResults } from '../../../types';
 
 const fetchSchemas = async () => {
   const { data } = await axios.get<SchemaResults>('https://schema.databio.org/list.json');
-  return data;
+  // strip all schemas/ from the keys
+  const stripped = Object.keys(data).reduce((acc, key) => {
+    acc[key.replace('schemas/', '')] = data[key];
+    return acc;
+  }, {} as SchemaResults);
+  return stripped;
 };
 
 export const useSchemas = () => {
