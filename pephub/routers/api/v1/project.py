@@ -1,6 +1,7 @@
 import eido
 import yaml
 import pandas as pd
+import numpy as np
 import peppy
 import logging
 from typing import Callable, Literal, Union, Optional, List, Annotated
@@ -397,7 +398,7 @@ async def get_pep_samples(
             return JSONResponse(
                 {
                     "count": df.shape[0],
-                    "items": df.replace({pd.NA: None}).to_dict(orient="records"),
+                    "items": df.replace({np.nan: None}).to_dict(orient="records"),
                 }
             )
         else:
