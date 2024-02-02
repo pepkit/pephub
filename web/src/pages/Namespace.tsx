@@ -6,6 +6,7 @@ import { GitHubAvatar } from '../components/badges/github-avatar';
 import { PageLayout } from '../components/layout/page-layout';
 import { Pagination } from '../components/layout/pagination';
 import { AddPEPModal } from '../components/modals/add-pep';
+import { DownloadGeo } from '../components/modals/download-geo';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePagePlaceholder } from '../components/namespace/namespace-page-placeholder';
@@ -45,6 +46,7 @@ export const NamespacePage: FC = () => {
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
+  const [showGeoDownloadModal, setShowGeoDownloadModal] = useState(false);
   const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
   const [starSearch, setStarSearch] = useState<string>(urlParams.get('starSearch') || '');
 
@@ -72,9 +74,6 @@ export const NamespacePage: FC = () => {
   const { data: stars, isLoading: starsIsLoading } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   const projectsFiltered = projects?.items.filter((p) => p.number_of_samples < MAX_SAMPLE_COUNT) || [];
-
-  console.log(stars);
-  console.log(view);
 
   // update url when search changes
   useEffect(() => {
@@ -143,6 +142,17 @@ export const NamespacePage: FC = () => {
               <i className="bi bi-hdd-rack me-1"></i>
               API
             </button>
+            {namespace === 'geo' && (
+              <button
+                className="btn btn-sm btn-dark"
+                onClick={() => {
+                  setShowGeoDownloadModal(true);
+                }}
+              >
+                <i className="bi bi-download me-1"></i>
+                Download
+              </button>
+            )}
             {user?.login === namespace || user?.orgs.includes(namespace || '') ? (
               <Fragment>
                 <button
@@ -264,6 +274,7 @@ export const NamespacePage: FC = () => {
           show={showEndpointsModal}
           onHide={() => setShowEndpointsModal(false)}
         />
+        <DownloadGeo show={showGeoDownloadModal} onHide={() => setShowGeoDownloadModal(false)} />
       </PageLayout>
     );
   }
