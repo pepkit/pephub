@@ -23,6 +23,10 @@ from pepdbagent.exceptions import (
     ProjectUniqueNameError,
     SampleAlreadyInView,
     SampleNotFoundError,
+    ViewNotFoundError,
+    ProjectNotFoundError,
+    ViewAlreadyExistsError,
+    SampleAlreadyExistsError,
 )
 from pepdbagent.models import (
     AnnotationModel,
@@ -504,8 +508,8 @@ async def update_sample(
     """
     if namespace not in list_of_admins:
         raise HTTPException(
-            detail="You do not have permission to update this project.",
-            status_code=401,
+            detail="Sample does not exist, or you do not have permission to update this sample.",
+            status_code=404,
         )
     try:
         agent.sample.update(
@@ -522,10 +526,10 @@ async def update_sample(
             },
             status_code=202,
         )
-    except Exception as e:
+    except SampleNotFoundError:
         raise HTTPException(
-            status_code=400,
-            detail=f"Could not update sample. Server error: {e}",
+            status_code=404,
+            detail="Sample does not exist, or you do not have permission to update this sample.",
         )
 
 
@@ -565,10 +569,17 @@ async def upload_sample(
             },
             status_code=202,
         )
-    except Exception:
+
+    except SampleAlreadyExistsError:
+        raise HTTPException(
+            status_code=409,
+            detail="Sample already exists in project. Use 'overwrite' parameter to overwrite.",
+        )
+
+    except Exception as e:
         raise HTTPException(
             status_code=400,
-            detail="Could not upload sample. Server error!",
+            detail=f"Could not upload sample. Server error",
         )
 
 
@@ -600,6 +611,11 @@ async def delete_sample(
                 "registry": f"{namespace}/{project}:{tag}",
             },
             status_code=202,
+        )
+    except SampleNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="Sample not found in project.",
         )
     except Exception:
         raise HTTPException(
@@ -805,24 +821,30 @@ async def get_view_of_the_project(
     """
     Fetch a view of the project.
     """
-    if raw:
-        return ProjectRawModel(
-            **agent.view.get(
+    try:
+        if raw:
+            return ProjectRawModel(
+                **agent.view.get(
+                    namespace=namespace,
+                    name=project,
+                    view_name=view,
+                    tag=tag,
+                    raw=raw,
+                )
+            )
+        else:
+            return agent.view.get(
                 namespace=namespace,
                 name=project,
                 view_name=view,
                 tag=tag,
                 raw=raw,
-            )
+            ).to_dict()
+    except ViewNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"View '{view}' not found in project '{namespace}/{project}:{tag}'",
         )
-    else:
-        return agent.view.get(
-            namespace=namespace,
-            name=project,
-            view_name=view,
-            tag=tag,
-            raw=raw,
-        ).to_dict()
 
 
 @project.post(
@@ -859,10 +881,20 @@ async def create_view_of_the_project(
                 sample_list=sample_names,
             ),
         )
-    except Exception as e:
+    except SampleNotFoundError as e:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Sample '{e}' not found in project '{namespace}/{project}:{tag}'",
+        )
+    except ProjectNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Project '{namespace}/{project}:{tag}' not found",
+        )
+    except ViewAlreadyExistsError as e:
         _LOGGER.error(f"Could not create view. Error: {e}")
         raise HTTPException(
-            status_code=400,
+            status_code=409,
             detail="Could not create view. Server error",
         )
     return JSONResponse(
@@ -929,12 +961,12 @@ async def add_sample_to_view(
         )
     except SampleAlreadyInView:
         raise HTTPException(
-            status_code=400,
+            status_code=409,
             detail=f"Sample '{sample_name}' already in view '{view}'",
         )
     except SampleNotFoundError:
         raise HTTPException(
-            status_code=400,
+            status_code=404,
             detail=f"Sample '{sample_name}' not found in project '{namespace}/{project}:{tag}'",
         )
     return JSONResponse(
@@ -975,8 +1007,13 @@ def delete_sample_from_view(
         )
     except SampleNotFoundError:
         raise HTTPException(
-            status_code=400,
+            status_code=404,
             detail=f"Sample '{sample_name}' not found in view '{view}'",
+        )
+    except ViewNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"View '{view}' not found in project '{namespace}/{project}:{tag}'",
         )
     return JSONResponse(
         content={
@@ -1011,6 +1048,11 @@ def delete_view(
             project_name=project,
             project_tag=tag,
             view_name=view,
+        )
+    except ViewNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"View '{view}' not found in project '{namespace}/{project}:{tag}'",
         )
     except Exception:
         raise HTTPException(
