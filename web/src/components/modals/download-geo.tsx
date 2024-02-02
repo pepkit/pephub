@@ -26,9 +26,11 @@ export const DownloadGeo: FC<Props> = ({ show, onHide }) => {
         </p>
       </Modal.Body>
       <Modal.Footer>
-        <button type="button" className="btn btn-dark">
-          Yes, download
-        </button>
+        <a href="https://cloud2.databio.org/pephub/2024-01-29-pephub-geo.tar">
+          <button type="button" className="btn btn-dark">
+            Yes, download
+          </button>
+        </a>
         <button type="button" className="btn btn-outline-dark" onClick={onHide}>
           Nevemind
         </button>

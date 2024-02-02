@@ -35,6 +35,7 @@ import { downloadZip } from '../utils/project';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
+const MAX_DESC_HEIGHT = 200;
 interface CustomToggleProps {
   children?: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
@@ -173,8 +174,10 @@ export const ProjectPage: FC = () => {
   };
 
   const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
-
   const projectDataRef = useRef<HTMLDivElement>(null);
+  const projectDescriptionRef = useRef<HTMLDivElement>(null);
+  const showMoreButton = projectDescriptionRef.current?.clientHeight! >= 200;
+  const [showMoreDescription, setShowMoreDescription] = useState(false);
 
   // on save handler
   useEffect(() => {
@@ -216,7 +219,7 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       <div>
-        <div className="d-flex flex-row align-items-center justify-content-between px-4 mb-2 mt-4">
+        <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
           <div className="d-flex flex-row align-items-center">
             <Breadcrumb className="fw-bold mt-1">
               <Breadcrumb.Item href="/">home</Breadcrumb.Item>
@@ -238,14 +241,14 @@ export const ProjectPage: FC = () => {
           </div>
           <div className="d-flex flex-row align-items-center gap-1">
             <div className="d-flex flex-row align-items-center">
-              <div className="border border-dark shadow-sm rounded-1 px-2 d-flex align-items-center">
+              <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
                 <span className="text-sm fw-bold">
                   {projectInfo
                     ? `${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`
                     : 'Loading'}
                 </span>
                 <button
-                  className="btn btn-sm btn-link-dark shadow-none ms-1 pe-0"
+                  className="btn btn-sm btn-link-dark shadow-none ms-1 pe-2"
                   onClick={() => {
                     copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
                     setCopied(true);
@@ -349,11 +352,40 @@ export const ProjectPage: FC = () => {
             </button>
           </div>
         </div>
-        <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100">
-          <div className="w-100" style={{ maxHeight: '200px', overflow: 'scroll' }}>
+        <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100 border-bottom">
+          <div ref={projectDescriptionRef} className="w-100" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
             <Markdown>{projectInfo?.description || 'No description'}</Markdown>
           </div>
         </div>
+        {showMoreButton && (
+          <div className="d-flex flex-row justify-content-center mb-2 translate-y-1-up">
+            {showMoreDescription ? (
+              <button
+                className="btn btn-sm btn-dark rounded-pill"
+                onClick={() => {
+                  projectDescriptionRef.current?.style.setProperty('max-height', `${MAX_DESC_HEIGHT}px`);
+                  projectDescriptionRef.current?.style.setProperty('overflow', 'hidden');
+                  setShowMoreDescription(false);
+                }}
+              >
+                <i className="bi bi-arrow-up" />
+                Less
+              </button>
+            ) : (
+              <button
+                className="btn btn-sm btn-dark rounded-pill"
+                onClick={() => {
+                  projectDescriptionRef.current?.style.removeProperty('max-height');
+                  projectDescriptionRef.current?.style.removeProperty('overflow');
+                  setShowMoreDescription(true);
+                }}
+              >
+                <i className="bi bi-arrow-down" />
+                More
+              </button>
+            )}
+          </div>
+        )}
         <div className="px-4">
           <div className="d-flex flex-row align-items-center text-muted mt-1">
             <small className="d-flex flex-row align-items-center justify-content-between w-100">

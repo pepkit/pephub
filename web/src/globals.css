@@ -504,3 +504,7 @@ body {
     display: none !important;
   }
 }
+
+.translate-y-1-up {
+  transform: translateY(-1rem);
+}
