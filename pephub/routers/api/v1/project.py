@@ -623,8 +623,8 @@ async def get_subsamples(
         project: example
         namespace: databio
     """
-    subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
-    if subsamples is not None:
+    subsamples = proj.to_dict(extended=True, orient="records")[SUBSAMPLE_RAW_LIST_KEY]
+    if subsamples:
         try:
             subsamples = pd.DataFrame(
                 proj[SUBSAMPLE_RAW_LIST_KEY][0]
