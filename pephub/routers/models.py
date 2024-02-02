@@ -12,7 +12,6 @@ class ProjectOptional(UpdateItems):
     project_config_yaml: Optional[str] = None
     description: Optional[str] = None
     subsample_tables: Optional[List[List[dict]]] = None
-    pop: Optional[bool] = None
 
     model_config = ConfigDict(populate_by_name=True)
 

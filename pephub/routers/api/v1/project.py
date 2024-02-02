@@ -1,6 +1,7 @@
 import eido
 import yaml
 import pandas as pd
+import numpy as np
 import peppy
 import logging
 from typing import Callable, Literal, Union, Optional, List, Annotated
@@ -303,10 +304,10 @@ async def update_a_pep(
             #     status_code=400,
             #     detail=f"Invalid update key: {k}",
             # )
-    # add params to new_raw_project if update_dict is not empty
-    if len(update_dict) > 0:
-        for k, v in update_dict.items():
-            new_raw_project["_config"][k] = v
+    # # add params to new_raw_project if update_dict is not empty
+    # if len(update_dict) > 0:
+    #     for k, v in update_dict.items():
+    #         new_raw_project["_config"][k] = v
     agent.project.update(
         dict(project=Project().from_dict(new_raw_project), **update_dict),
         namespace,
@@ -397,7 +398,7 @@ async def get_pep_samples(
             return JSONResponse(
                 {
                     "count": df.shape[0],
-                    "items": df.replace({pd.NA: None}).to_dict(orient="records"),
+                    "items": df.replace({np.nan: None}).to_dict(orient="records"),
                 }
             )
         else:
@@ -622,8 +623,8 @@ async def get_subsamples(
         project: example
         namespace: databio
     """
-    subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
-    if subsamples is not None:
+    subsamples = proj.to_dict(extended=True, orient="records")[SUBSAMPLE_RAW_LIST_KEY]
+    if subsamples:
         try:
             subsamples = pd.DataFrame(
                 proj[SUBSAMPLE_RAW_LIST_KEY][0]
