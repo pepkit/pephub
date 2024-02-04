@@ -3,7 +3,7 @@ import { FC } from 'react';
 import { useApiBase } from '../../hooks/queries/useApiBase';
 import { getOS } from '../../utils/etc';
 import { StatusCircle } from '../badges/status-circles';
-import { Nav } from './nav';
+import { Nav } from './nav/nav';
 import { SEO } from './seo';
 
 interface Props {
