@@ -32,7 +32,7 @@ export const DownloadGeo: FC<Props> = ({ show, onHide }) => {
           </button>
         </a>
         <button type="button" className="btn btn-outline-dark" onClick={onHide}>
-          Nevemind
+          Nevermind
         </button>
       </Modal.Footer>
     </Modal>
