@@ -189,22 +189,17 @@ export const NamespacePage: FC = () => {
             <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}
           </p>
         </>
-        {user && namespace === user?.login ? (
-          <Fragment>
-            <div className="mt-3 d-flex">
-              <NamespaceViewSelector
-                numPeps={pepsInfo?.count || 0}
-                numPops={popsInfo?.count || 0}
-                numStars={stars?.length || 0}
-                view={view}
-                setView={setView}
-              />
-            </div>
-            <div className="my-1 border-bottom border-grey"></div>
-          </Fragment>
-        ) : (
-          <div className="my-3 border-bottom border-grey"></div>
-        )}
+        <div className="mt-3 d-flex">
+          <NamespaceViewSelector
+            numPeps={pepsInfo?.count || 0}
+            numPops={popsInfo?.count || 0}
+            numStars={stars?.length || 0}
+            view={view}
+            setView={setView}
+            enableStars={namespace === user?.login}
+          />
+        </div>
+        <div className="my-1 border-bottom border-grey"></div>
         {/* Render projects  in namespace */}
         {['peps', 'pops'].includes(view) ? (
           <Fragment>

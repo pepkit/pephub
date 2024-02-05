@@ -8,13 +8,12 @@ type Props = {
   view: View;
   numPeps: number;
   numPops: number;
-  numStars: number;
+  numStars?: number;
   setView: (view: View) => void;
+  enableStars?: boolean;
 };
 
 export const NamespaceViewSelector: FC<Props> = (props) => {
-  // const [popcornVariant, setPopcornVariant] = useState<'primary' | 'white'>('primary');
-
   const handleNavSelect = (eventKey: string | null) => {
     props.setView(eventKey as View);
   };
@@ -52,21 +51,23 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
             )}
           </Nav.Link>
         </Nav.Item>
-        <Nav.Item accessKey="stars">
-          <Nav.Link eventKey="stars">
-            <i className="bi bi-star me-2"></i>
-            Stars
-            {props.view === 'stars' ? (
-              <span className="text-sm ms-2 rounded-pill border border-light px-2 bg-light bg-opacity-10">
-                {props.numStars}
-              </span>
-            ) : (
-              <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
-                {props.numStars}
-              </span>
-            )}
-          </Nav.Link>
-        </Nav.Item>
+        {props.enableStars && (
+          <Nav.Item accessKey="stars">
+            <Nav.Link eventKey="stars">
+              <i className="bi bi-star me-2"></i>
+              Stars
+              {props.view === 'stars' ? (
+                <span className="text-sm ms-2 rounded-pill border border-light px-2 bg-light bg-opacity-10">
+                  {props.numStars}
+                </span>
+              ) : (
+                <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+                  {props.numStars}
+                </span>
+              )}
+            </Nav.Link>
+          </Nav.Item>
+        )}
       </Nav>
     </div>
   );
