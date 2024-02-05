@@ -579,7 +579,7 @@ async def upload_sample(
     except Exception as e:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not upload sample. Server error: {e}",
+            detail=f"Could not upload sample. Server error!",
         )
 
 
