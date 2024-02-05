@@ -1,6 +1,5 @@
 import { FC, Fragment } from 'react';
 
-import { useSession } from '../../../hooks/useSession';
 import { NavDesktop } from './nav-desktop';
 import { NavLogo } from './nav-logo';
 import { MobileNav } from './nav-mobile';

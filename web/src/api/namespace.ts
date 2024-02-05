@@ -261,7 +261,7 @@ export const submitPop = (
     });
 };
 
-export const starRepository = (
+export const starProject = (
   namespace: string,
   star_namespace: string,
   star_project: string,

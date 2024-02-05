@@ -13,29 +13,23 @@ import { copyToClipboard } from '../../utils/etc';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 
 interface Props {
-  currentPeps: Sample[];
   project: ProjectAnnotation;
   isStarred: boolean;
   copied: boolean;
   setCopied: (copied: boolean) => void;
   setShowForkPEPModal: (show: boolean) => void;
+  setShowRemovePEPModal: (show: boolean) => void;
 }
 
 export const PopCardDropdown: FC<Props> = (props) => {
   let { namespace, project: name } = useParams();
-  // get tag from query params
-  const [searchParams] = useSearchParams();
-  const tag = searchParams.get('tag') || 'default';
 
-  // const { data: currentPeps } = useSampleTable(namespace!, name!, tag);
-
-  const { project, isStarred, copied, currentPeps, setCopied, setShowForkPEPModal } = props;
+  const { project, isStarred, copied, setCopied, setShowForkPEPModal, setShowRemovePEPModal } = props;
 
   const { user } = useSession();
 
   const starAddMutation = useAddStar(user?.login || '', project.namespace, project.name, project.tag);
   const starRemoveMutation = useRemoveStar(user?.login || '', project.namespace, project.name, project.tag);
-  const sampleTableMutation = useSampleTableMutation(namespace!, name!, tag);
 
   return (
     <Dropdown as={ButtonGroup}>
@@ -58,7 +52,7 @@ export const PopCardDropdown: FC<Props> = (props) => {
             <div className="d-flex align-items-center">
               <i className="text-primary bi bi-star-fill me-1"></i>
               <span className="text-primary">
-                {starRemoveMutation.isPending || sampleTableMutation.isPending ? (
+                {starRemoveMutation.isPending ? (
                   <Fragment>
                     {copied ? 'Copied!' : 'Star'}
                     <LoadingSpinner className="w-4 h-4 spin ms-1 mb-tiny fill-secondary" />
@@ -74,7 +68,7 @@ export const PopCardDropdown: FC<Props> = (props) => {
             <div className="d-flex align-items-center">
               <i className="bi bi-star me-1"></i>
               <span>
-                {starRemoveMutation.isPending || sampleTableMutation.isPending ? (
+                {starRemoveMutation.isPending ? (
                   <Fragment>
                     {copied ? 'Copied!' : 'Star'}
                     <LoadingSpinner className="w-4 h-4 spin ms-1 mb-tiny fill-secondary" />
@@ -124,11 +118,7 @@ export const PopCardDropdown: FC<Props> = (props) => {
             <Dropdown.Divider />
             <Dropdown.Item
               onClick={() => {
-                sampleTableMutation.mutate(
-                  currentPeps.filter(
-                    (pep) => pep.sample_name !== `${project.namespace}/${project.name}:${project.tag}`,
-                  ),
-                );
+                setShowRemovePEPModal(true);
               }}
               className="text-danger"
             >

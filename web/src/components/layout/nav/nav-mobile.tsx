@@ -5,6 +5,7 @@ import { useSession } from '../../../hooks/useSession';
 import { GitHubAvatar } from '../../badges/github-avatar';
 
 export const MobileNav = () => {
+  const API_HOST = import.meta.env.VITE_API_HOST || '';
   const { login, user, logout } = useSession();
   return (
     <Dropdown className="me-3">
@@ -81,7 +82,7 @@ export const MobileNav = () => {
             <Dropdown.Divider />
           </Fragment>
         )}
-        <Dropdown.Item href="/api/v1/docs">
+        <Dropdown.Item href={`${API_HOST}/api/v1/docs`}>
           <i className="bi bi-book me-2" />
           API docs
         </Dropdown.Item>
@@ -96,6 +97,10 @@ export const MobileNav = () => {
         <Dropdown.Item href="/about">
           <i className="bi bi-info-circle me-2" />
           About
+        </Dropdown.Item>
+        <Dropdown.Item href="/search">
+          <i className="bi bi-search me-2" />
+          Search
         </Dropdown.Item>
         <Dropdown.Divider />
         {user ? (
