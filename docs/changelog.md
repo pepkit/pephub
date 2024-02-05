@@ -5,16 +5,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [0.11.5] - 02-02-2024
 
 ### Fixed
+
 - POP updated
 - Bug in updating project config file
 - Subsample endpoint
-- 
+- Lots more UI bugs that include some security vulnerabilities and stability issues
 
 ## [0.11.4] - 01-22-2024
 
 ### Fixed
-- Downloading zip files
 
+- Downloading zip files
 
 ## [0.11.2] - 01-17-2024
 
