@@ -73,7 +73,6 @@ export const RemovePEPFromPOPModal: FC<Props> = ({
       <Modal.Footer>
         <button
           onClick={() => {
-            debugger;
             sampleTableMutation.mutate(
               currentPeps.filter((pep) => pep.sample_name !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}`),
               {
