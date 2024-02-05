@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
-import { StarsResponse, starRepository } from '../../api/namespace';
+import { StarsResponse, starProject } from '../../api/namespace';
 import { extractErrorMessage } from '../../utils/etc';
 import { useSession } from '../useSession';
 
@@ -11,12 +11,18 @@ export const useAddStar = (namespace: string, star_namespace: string, star_proje
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => starRepository(namespace, star_namespace, star_project, star_tag, session.jwt || ''),
+    mutationFn: () => {
+      if (namespace === '') {
+        toast.error('Please ensure that you are logged in before starring a project');
+      }
+      return starProject(namespace, star_namespace, star_project, star_tag, session.jwt || '');
+    },
     onSuccess: () => {
       queryClient.setQueryData([namespace, 'stars'], (oldData: StarsResponse['results']) => {
         // NOTE: this wont pull all data from the newly added star, but it will add its identifier it to the list
         return [...oldData, { namespace: star_namespace, name: star_project, tag: star_tag }];
       });
+      queryClient.invalidateQueries({ queryKey: [namespace, 'stars'] });
     },
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown

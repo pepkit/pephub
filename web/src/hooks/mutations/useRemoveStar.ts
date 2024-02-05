@@ -22,6 +22,7 @@ export const useRemoveStar = (namespace: string, star_namespace: string, star_pr
           (star: any) => star.namespace !== star_namespace || star.name !== star_project || star.tag !== star_tag,
         );
       });
+      queryClient.invalidateQueries({ queryKey: [namespace, 'stars'] });
     },
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown

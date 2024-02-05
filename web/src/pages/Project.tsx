@@ -1,6 +1,5 @@
-import { FC, Fragment, MouseEvent, forwardRef, useEffect, useState } from 'react';
+import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
-import { set } from 'react-hook-form';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
@@ -30,12 +29,14 @@ import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
 import { useSession } from '../hooks/useSession';
 import { dateStringToDate, dateStringToDateTime } from '../utils/dates';
-import { copyToClipboard, getOS } from '../utils/etc';
+import { copyToClipboard, getOS, numberWithCommas } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
 
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
+const MAX_DESC_HEIGHT = 200;
+const MAX_SAMPLE_COUNT = 5_000;
 interface CustomToggleProps {
   children?: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
@@ -174,6 +175,10 @@ export const ProjectPage: FC = () => {
   };
 
   const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
+  const projectDataRef = useRef<HTMLDivElement>(null);
+  const projectDescriptionRef = useRef<HTMLDivElement>(null);
+  const showMoreButton = projectDescriptionRef.current?.clientHeight! >= MAX_DESC_HEIGHT;
+  const [showMoreDescription, setShowMoreDescription] = useState(false);
 
   // on save handler
   useEffect(() => {
@@ -214,168 +219,204 @@ export const ProjectPage: FC = () => {
 
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
-      {/* breadcrumbs */}
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 mb-2 mt-4">
-        <div className="d-flex flex-row align-items-center">
-          <Breadcrumb className="fw-bold mt-1">
-            <Breadcrumb.Item href="/">home</Breadcrumb.Item>
-            <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
-            <Breadcrumb.Item active>
-              {project}:{tag}
-            </Breadcrumb.Item>
-            {projectInfo?.is_private && (
-              <li>
-                <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
-              </li>
-            )}
-          </Breadcrumb>
-          <div className="ms-2 mb-1">
-            <a className="text-decoration-none" href={`https://schema.databio.org/#/${projectHash}`}>
-              <SchemaTag schema={projectInfo?.pep_schema} />
-            </a>
-          </div>
-        </div>
-        <div className="d-flex flex-row align-items-center gap-1">
+      <div>
+        <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
           <div className="d-flex flex-row align-items-center">
-            <div className="border border-dark shadow-sm rounded-1 px-2 d-flex align-items-center">
-              <span className="text-sm fw-bold">
-                {projectInfo
-                  ? `${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`
-                  : 'Loading'}
-              </span>
-              <button
-                className="btn btn-sm btn-link-dark shadow-none ms-1 pe-0"
-                onClick={() => {
-                  copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
-                  setCopied(true);
-                  setTimeout(() => {
-                    setCopied(false);
-                  }, 1000);
-                }}
-              >
-                {copied ? <i className="bi bi-check"></i> : <i className="bi bi-clipboard" />}
-              </button>
+            <Breadcrumb className="fw-bold mt-1">
+              <Breadcrumb.Item href="/">home</Breadcrumb.Item>
+              <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
+              <Breadcrumb.Item active>
+                {project}:{tag}
+              </Breadcrumb.Item>
+              {projectInfo?.is_private && (
+                <li>
+                  <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
+                </li>
+              )}
+            </Breadcrumb>
+            <div className="ms-2 mb-1">
+              <a className="text-decoration-none" href={`https://schema.databio.org/#/${projectHash}`}>
+                <SchemaTag schema={projectInfo?.pep_schema} />
+              </a>
             </div>
           </div>
-          <Dropdown>
-            <Dropdown.Toggle size="sm" variant="dark">
-              <i className="bi bi-gear-fill me-1"></i>
-              More
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}>
-                <i className="bi bi-file-earmark-zip me-1"></i>
-                Download
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
-                <i className="bi bi-hdd-rack me-1"></i>
-                API
-              </Dropdown.Item>
-              <Fragment>
-                {user && (
-                  <Fragment>
-                    <Dropdown.Item onClick={() => setShowForkPEPModal(true)}>
-                      <i className="me-1 bi bi-bezier2"></i>
-                      Fork
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => setShowAddToPOPModal(true)}>
-                      <i className="me-1 bi bi-plus-circle"></i>
-                      Add to POP
-                    </Dropdown.Item>
-                  </Fragment>
-                )}
-              </Fragment>
-              <Fragment>
-                {projectInfo?.pop && (
-                  <Fragment>
-                    <Dropdown.Divider />
-                    <Dropdown.Item onClick={() => setForceTraditionalInterface(!forceTraditionalInterface)}>
-                      <i className="me-1 bi bi-layout-text-sidebar-reverse"></i>
-                      {forceTraditionalInterface ? 'View as POP' : 'View as PEP'}
-                    </Dropdown.Item>
-                  </Fragment>
-                )}
-              </Fragment>
-              <Fragment>
-                {user && projectInfo && canEdit(user, projectInfo) && (
-                  <Fragment>
-                    <Dropdown.Divider />
-                    <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
-                      <i className="me-1 bi bi-pencil-square"></i>
-                      Edit
-                    </Dropdown.Item>
-                    <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
-                      <i className="me-1 bi bi-trash3"></i>
-                      Delete
-                    </Dropdown.Item>
-                  </Fragment>
-                )}
-              </Fragment>
-            </Dropdown.Menu>
-          </Dropdown>
-          <button
-            className="btn btn-outline-dark btn-sm"
-            disabled={starAddMutation.isPending || starRemoveMutation.isPending}
-            onClick={() => {
-              if (isStarred) {
-                starRemoveMutation.mutate();
-              } else {
-                starAddMutation.mutate();
-              }
-            }}
-          >
-            {isStarred ? (
-              <Fragment>
-                <span className="text-primary">
-                  <i className="me-1 bi bi-star-fill"></i>
-                  Star
+          <div className="d-flex flex-row align-items-center gap-1">
+            <div className="d-flex flex-row align-items-center">
+              <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
+                <span className="text-sm fw-bold">
+                  {projectInfo
+                    ? `${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`
+                    : 'Loading'}
                 </span>
-              </Fragment>
-            ) : (
-              <Fragment>
-                <span>
-                  <i className="me-1 bi bi-star"></i>
-                  Star
-                </span>
-              </Fragment>
-            )}
-          </button>
-        </div>
-      </div>
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100">
-        <div className="w-25">
-          <Markdown>{projectInfo?.description || 'No description'}</Markdown>
-        </div>
-      </div>
-      <div className="px-4">
-        <div className="d-flex flex-row align-items-center text-muted mt-1">
-          <small className="d-flex flex-row align-items-center justify-content-between w-100">
-            <span className="me-3">
-              <i className="bi bi-calendar3"></i>
-              <span className="mx-1">Created:</span>
-              <span id="project-submission-date">{dateStringToDate(projectInfo?.submission_date || '')}</span>
-              <i className="ms-4 bi bi-calendar3"></i>
-              <span className="mx-1">Updated:</span>
-              <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
-            </span>
-            <span className="">
-              {projectInfo?.forked_from && (
-                <span className="me-2 p-1 border rounded fw-bold">
-                  <Fragment>
-                    <i className="bi bi-bezier2"></i>
-                    <span className="ms-1">Forked from</span>
-                    <a
-                      className="text-decoration-none ms-1"
-                      href={`/${projectInfo?.forked_from.replace(':', '?tag=')}`}
-                    >
-                      {projectInfo?.forked_from}
-                    </a>
-                  </Fragment>
-                </span>
+                <button
+                  className="btn btn-sm btn-link-dark shadow-none ms-1 pe-2"
+                  onClick={() => {
+                    copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
+                    setCopied(true);
+                    setTimeout(() => {
+                      setCopied(false);
+                    }, 1000);
+                  }}
+                >
+                  {copied ? <i className="bi bi-check"></i> : <i className="bi bi-clipboard" />}
+                </button>
+              </div>
+            </div>
+            <Dropdown>
+              <Dropdown.Toggle size="sm" variant="dark">
+                <i className="bi bi-gear-fill me-1"></i>
+                More
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}>
+                  <i className="bi bi-file-earmark-zip me-1"></i>
+                  Download
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
+                  <i className="bi bi-hdd-rack me-1"></i>
+                  API
+                </Dropdown.Item>
+                <Fragment>
+                  {user && (
+                    <Fragment>
+                      <Dropdown.Item onClick={() => setShowForkPEPModal(true)}>
+                        <i className="me-1 bi bi-bezier2"></i>
+                        Fork
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={() => setShowAddToPOPModal(true)}>
+                        <i className="me-1 bi bi-plus-circle"></i>
+                        Add to POP
+                      </Dropdown.Item>
+                    </Fragment>
+                  )}
+                </Fragment>
+                <Fragment>
+                  {projectInfo?.pop && (
+                    <Fragment>
+                      <Dropdown.Divider />
+                      <Dropdown.Item onClick={() => setForceTraditionalInterface(!forceTraditionalInterface)}>
+                        <i className="me-1 bi bi-layout-text-sidebar-reverse"></i>
+                        {forceTraditionalInterface ? 'View as POP' : 'View as PEP'}
+                      </Dropdown.Item>
+                    </Fragment>
+                  )}
+                </Fragment>
+                <Fragment>
+                  {user && projectInfo && canEdit(user, projectInfo) && (
+                    <Fragment>
+                      <Dropdown.Divider />
+                      <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
+                        <i className="me-1 bi bi-pencil-square"></i>
+                        Edit
+                      </Dropdown.Item>
+                      <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
+                        <i className="me-1 bi bi-trash3"></i>
+                        Delete
+                      </Dropdown.Item>
+                    </Fragment>
+                  )}
+                </Fragment>
+              </Dropdown.Menu>
+            </Dropdown>
+            <button
+              className="btn btn-outline-dark btn-sm"
+              disabled={starAddMutation.isPending || starRemoveMutation.isPending}
+              onClick={() => {
+                if (isStarred) {
+                  starRemoveMutation.mutate();
+                } else {
+                  starAddMutation.mutate();
+                }
+              }}
+            >
+              {isStarred ? (
+                <Fragment>
+                  <span className="text-primary">
+                    <i className="me-1 bi bi-star-fill"></i>
+                    Starred
+                    <span className="px-2 border border-dark rounded-pill text-dark ms-1 bg-dark bg-opacity-10">
+                      {numberWithCommas(projectInfo?.stars_number || 0)}
+                    </span>
+                  </span>
+                </Fragment>
+              ) : (
+                <Fragment>
+                  <span>
+                    <i className="me-1 bi bi-star"></i>
+                    Star
+                    <span className="px-2 border border-dark rounded-pill text-dark ms-1 bg-dark bg-opacity-10">
+                      {numberWithCommas(projectInfo?.stars_number || 0)}
+                    </span>
+                  </span>
+                </Fragment>
               )}
-              {projectInfo?.digest}
-            </span>
-          </small>
+            </button>
+          </div>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100 border-bottom">
+          <div ref={projectDescriptionRef} className="w-100" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
+            <Markdown>{projectInfo?.description || 'No description'}</Markdown>
+          </div>
+        </div>
+        {showMoreButton && (
+          <div className="d-flex flex-row justify-content-center mb-2 translate-y-1-up">
+            {showMoreDescription ? (
+              <button
+                className="btn btn-sm btn-dark rounded-pill"
+                onClick={() => {
+                  projectDescriptionRef.current?.style.setProperty('max-height', `${MAX_DESC_HEIGHT}px`);
+                  projectDescriptionRef.current?.style.setProperty('overflow', 'hidden');
+                  setShowMoreDescription(false);
+                }}
+              >
+                <i className="bi bi-arrow-up" />
+                Less
+              </button>
+            ) : (
+              <button
+                className="btn btn-sm btn-dark rounded-pill"
+                onClick={() => {
+                  projectDescriptionRef.current?.style.removeProperty('max-height');
+                  projectDescriptionRef.current?.style.removeProperty('overflow');
+                  setShowMoreDescription(true);
+                }}
+              >
+                <i className="bi bi-arrow-down" />
+                More
+              </button>
+            )}
+          </div>
+        )}
+        <div className="px-4">
+          <div className="d-flex flex-row align-items-center text-muted mt-1">
+            <small className="d-flex flex-row align-items-center justify-content-between w-100">
+              <span className="me-3">
+                <i className="bi bi-calendar3"></i>
+                <span className="mx-1">Created:</span>
+                <span id="project-submission-date">{dateStringToDate(projectInfo?.submission_date || '')}</span>
+                <i className="ms-4 bi bi-calendar3"></i>
+                <span className="mx-1">Updated:</span>
+                <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
+              </span>
+              <span className="">
+                {projectInfo?.forked_from && (
+                  <span className="me-2 p-1 border rounded fw-bold">
+                    <Fragment>
+                      <i className="bi bi-bezier2"></i>
+                      <span className="ms-1">Forked from</span>
+                      <a
+                        className="text-decoration-none ms-1"
+                        href={`/${projectInfo?.forked_from.replace(':', '?tag=')}`}
+                      >
+                        {projectInfo?.forked_from}
+                      </a>
+                    </Fragment>
+                  </span>
+                )}
+                {projectInfo?.digest}
+              </span>
+            </small>
+          </div>
         </div>
       </div>
       {projectInfo?.pop && !forceTraditionalInterface ? (
@@ -503,11 +544,11 @@ export const ProjectPage: FC = () => {
           </div>
           <div className="row gx-0 h-100">
             <div className="col-12">
-              <div>
+              <div ref={projectDataRef}>
                 {projectView === 'samples' ? (
                   <SampleTable
-                    // fill to the rest of the screen minus 300px
-                    height={window.innerHeight - 300}
+                    // fill to the rest of the screen minus the offset of the project data
+                    height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                     readOnly={!(projectInfo && canEdit(user, projectInfo))}
                     data={newProjectSamples || []}
                     onChange={(value) => setNewProjectSamples(value)}
@@ -515,9 +556,11 @@ export const ProjectPage: FC = () => {
                 ) : projectView === 'subsamples' ? (
                   <>
                     <SampleTable
-                      // fill to the rest of the screen minus 300px
-                      height={window.innerHeight - 300}
-                      readOnly={!(projectInfo && canEdit(user, projectInfo))}
+                      // fill to the rest of the screen minus the offset of the project data
+                      height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                      readOnly={
+                        !(projectInfo && canEdit(user, projectInfo)) || newProjectSamples?.length >= MAX_SAMPLE_COUNT
+                      }
                       data={newProjectSubsamples || []}
                       onChange={(value) => setNewProjectSubsamples(value)}
                     />
