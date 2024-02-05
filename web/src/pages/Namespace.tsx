@@ -22,7 +22,6 @@ import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
 type View = 'peps' | 'pops' | 'stars';
-const MAX_SAMPLE_COUNT = 5_000;
 
 export const NamespacePage: FC = () => {
   // get view out of url its a query param
@@ -73,7 +72,8 @@ export const NamespacePage: FC = () => {
   });
   const { data: stars, isLoading: starsIsLoading } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
-  const projectsFiltered = projects?.items.filter((p) => p.number_of_samples < MAX_SAMPLE_COUNT) || [];
+  // left over from when we were filtering on sample number
+  const projectsFiltered = projects?.items.filter((p) => p.number_of_samples) || [];
 
   // update url when search changes
   useEffect(() => {

@@ -36,6 +36,7 @@ import { downloadZip } from '../utils/project';
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
 const MAX_DESC_HEIGHT = 200;
+const MAX_SAMPLE_COUNT = 5_000;
 interface CustomToggleProps {
   children?: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
@@ -557,7 +558,9 @@ export const ProjectPage: FC = () => {
                     <SampleTable
                       // fill to the rest of the screen minus the offset of the project data
                       height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                      readOnly={!(projectInfo && canEdit(user, projectInfo))}
+                      readOnly={
+                        !(projectInfo && canEdit(user, projectInfo)) || newProjectSamples?.length >= MAX_SAMPLE_COUNT
+                      }
                       data={newProjectSubsamples || []}
                       onChange={(value) => setNewProjectSubsamples(value)}
                     />
