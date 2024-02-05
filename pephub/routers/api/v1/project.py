@@ -27,6 +27,7 @@ from pepdbagent.exceptions import (
     ProjectNotFoundError,
     ViewAlreadyExistsError,
     SampleAlreadyExistsError,
+    SampleNotInViewError,
 )
 from pepdbagent.models import (
     AnnotationModel,
@@ -896,7 +897,7 @@ async def create_view_of_the_project(
         _LOGGER.error(f"Could not create view. Error: {e}")
         raise HTTPException(
             status_code=409,
-            detail="Could not create view. Server error",
+            detail="Could not create view",
         )
     return JSONResponse(
         content={
@@ -1006,7 +1007,7 @@ def delete_sample_from_view(
             view_name=view,
             sample_name=sample_name,
         )
-    except SampleNotFoundError:
+    except SampleNotInViewError:
         raise HTTPException(
             status_code=404,
             detail=f"Sample '{sample_name}' not found in view '{view}'",
