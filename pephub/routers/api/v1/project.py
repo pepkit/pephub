@@ -639,7 +639,12 @@ async def get_subsamples(
         project: example
         namespace: databio
     """
-    subsamples = proj.to_dict(extended=True, orient="records")[SUBSAMPLE_RAW_LIST_KEY]
+    if isinstance(proj, dict):
+        subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
+    else:
+        subsamples = proj.to_dict(extended=True, orient="records")[
+            SUBSAMPLE_RAW_LIST_KEY
+        ]
     if subsamples:
         try:
             subsamples = pd.DataFrame(
