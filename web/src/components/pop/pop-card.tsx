@@ -6,18 +6,23 @@ import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { MarkdownToText } from '../markdown/render';
 import { ForkPEPModal } from '../modals/fork-pep';
+import { RemovePEPFromPOPModal } from '../modals/remove-pep-from-pop';
 import { PopCardDropdown } from './pop-card-dropdown';
 
 interface Props {
+  parentNamespace: string;
+  parentName: string;
+  parentTag: string;
   project: ProjectAnnotation;
   currentPeps: Sample[];
 }
 
-export const PopCard: FC<Props> = ({ project, currentPeps }) => {
+export const PopCard: FC<Props> = ({ project, currentPeps, parentName, parentNamespace, parentTag }) => {
   const { user } = useSession();
   const { data: stars } = useNamespaceStars(user?.login, {}, true); // only fetch stars if the namespace is the user's
 
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
+  const [showRemovePEPModal, setShowRemovePEPModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const isStarred = stars?.find(
@@ -54,12 +59,12 @@ export const PopCard: FC<Props> = ({ project, currentPeps }) => {
           ) : null}
         </div>
         <PopCardDropdown
-          currentPeps={currentPeps}
           project={project}
           isStarred={!!isStarred}
           copied={copied}
           setCopied={setCopied}
           setShowForkPEPModal={setShowForkPEPModal}
+          setShowRemovePEPModal={setShowRemovePEPModal}
         />
       </div>
       <div>
@@ -108,6 +113,17 @@ export const PopCard: FC<Props> = ({ project, currentPeps }) => {
         project={project.name}
         namespace={project.namespace}
         tag={project.tag}
+      />
+      <RemovePEPFromPOPModal
+        show={showRemovePEPModal}
+        onHide={() => setShowRemovePEPModal(false)}
+        currentPeps={currentPeps}
+        projectToRemove={project.name}
+        namespaceToRemove={project.namespace}
+        tagToRemove={project.tag}
+        namespaceToRemoveFrom={parentNamespace}
+        projectToRemoveFrom={parentName}
+        tagToRemoveFrom={parentTag}
       />
     </div>
   );

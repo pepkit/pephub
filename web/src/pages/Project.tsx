@@ -176,7 +176,7 @@ export const ProjectPage: FC = () => {
   const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
   const projectDataRef = useRef<HTMLDivElement>(null);
   const projectDescriptionRef = useRef<HTMLDivElement>(null);
-  const showMoreButton = projectDescriptionRef.current?.clientHeight! >= 200;
+  const showMoreButton = projectDescriptionRef.current?.clientHeight! >= MAX_DESC_HEIGHT;
   const [showMoreDescription, setShowMoreDescription] = useState(false);
 
   // on save handler

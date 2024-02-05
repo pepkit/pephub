@@ -51,6 +51,9 @@ export const PopInterface = ({ project }: Props) => {
               {allProjectsInfo?.results.map((project: ProjectAnnotation | null) =>
                 project === null ? null : (
                   <PopCard
+                    parentNamespace={namespace}
+                    parentName={name}
+                    parentTag={tag}
                     currentPeps={peps?.items || []}
                     key={`${project.namespace}/${project.name}:${project.tag}`}
                     project={project}
