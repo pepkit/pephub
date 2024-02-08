@@ -2,7 +2,7 @@
 </p>
 
 <p align="center">
-  <a href="https://pephub.databio.org"><img src="docs/imgs/pephub_logo_big.svg" alt="PEPhub"></a>
+  <a href="https://pephub.databio.org"><img src="./docs/imgs/pephub_logo_big.svg" alt="PEPhub"></a>
 </p>
 
 **PEPhub** is a biological metadata server that lets you view, store, and share your sample metadata in form of [PEPs](https://pep.databio.org/en/latest/). It has 3 components: 1) a _database_ where PEPs are stored; 2) an _API_ to programmatically read and write PEPs in the database; and 3) a web-based _user interface_ to view and manage these PEPs via a front-end.
