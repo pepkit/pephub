@@ -2,6 +2,18 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.11.6] - 02-08-2024
+
+### Fixed
+
+- Docs and docs links
+- Bug in handsontable
+- Response errors in samples and views
+
+### Added
+
+- Namespace endpoint
+
 ## [0.11.5] - 02-02-2024
 
 ### Fixed
