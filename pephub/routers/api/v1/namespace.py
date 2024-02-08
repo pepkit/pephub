@@ -24,7 +24,12 @@ from pepdbagent.exceptions import (
     ProjectNotInFavorites,
 )
 from pepdbagent.const import DEFAULT_LIMIT_INFO
-from pepdbagent.models import ListOfNamespaceInfo, Namespace, AnnotationList
+from pepdbagent.models import (
+    ListOfNamespaceInfo,
+    Namespace,
+    AnnotationList,
+    NamespaceStats,
+)
 from typing import Literal
 from typing_extensions import Annotated
 
@@ -440,3 +445,15 @@ async def get_namespace_information(
     agent: PEPDatabaseAgent = Depends(get_db),
 ) -> ListOfNamespaceInfo:
     return agent.namespace.info(limit=limit)
+
+
+@namespaces.get(
+    "/stats",
+    summary="Get statistics about each namespace",
+    response_model=NamespaceStats,
+)
+async def get_namespace_information(
+    agent: PEPDatabaseAgent = Depends(get_db),
+    namespace: Optional[str] = None,
+):
+    return agent.namespace.stats(namespace=namespace)
