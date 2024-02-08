@@ -22,9 +22,15 @@ from pepdbagent.exceptions import (
     ProjectUniqueNameError,
     ProjectAlreadyInFavorites,
     ProjectNotInFavorites,
+    NamespaceNotFoundError,
 )
 from pepdbagent.const import DEFAULT_LIMIT_INFO
-from pepdbagent.models import ListOfNamespaceInfo, Namespace, AnnotationList
+from pepdbagent.models import (
+    ListOfNamespaceInfo,
+    Namespace,
+    AnnotationList,
+    NamespaceStats,
+)
 from typing import Literal
 from typing_extensions import Annotated
 
@@ -440,3 +446,26 @@ async def get_namespace_information(
     agent: PEPDatabaseAgent = Depends(get_db),
 ) -> ListOfNamespaceInfo:
     return agent.namespace.info(limit=limit)
+
+
+@namespaces.get(
+    "/stats",
+    summary="Get statistics about each namespace",
+    response_model=NamespaceStats,
+)
+async def get_namespace_information(
+    agent: PEPDatabaseAgent = Depends(get_db),
+    namespace: Optional[str] = None,
+):
+    try:
+        return agent.namespace.stats(namespace=namespace)
+    except NamespaceNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Namespace '{namespace}' not found.",
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error. Unexpected return value. Error: 500",
+        )

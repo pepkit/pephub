@@ -134,25 +134,19 @@ export const NavDesktop = () => {
         </div>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-        <a className="nav-link" href={`${API_HOST}/api/v1/docs`}>
-          <i className="me-1 bi bi-journal"></i>
-          API docs
-        </a>
-      </li>
-      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="https://github.com/pepkit/pephub" target="_blank">
-          <i className="me-1 bi bi-github"></i>
+          <i className="me-1 bi bi-github text-base"></i>
           GitHub
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="/validate">
-          <i className="bi bi-check2-circle me-1"></i>Validation
+          <i className="bi bi-check2-circle me-1 text-base"></i>Validation
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-        <a className="nav-link" href="/about">
-          <i className="bi bi-info-circle me-1"></i>About
+        <a className="nav-link" href="https://pep.databio.org/pephub">
+          <i className="bi bi-info-circle me-1 text-base"></i>Docs
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">

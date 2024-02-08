@@ -82,10 +82,6 @@ export const MobileNav = () => {
             <Dropdown.Divider />
           </Fragment>
         )}
-        <Dropdown.Item href={`${API_HOST}/api/v1/docs`}>
-          <i className="bi bi-book me-2" />
-          API docs
-        </Dropdown.Item>
         <Dropdown.Item href="https://github.com/pepkit/pephub">
           <i className="bi bi-github me-2" />
           GitHub
@@ -94,13 +90,13 @@ export const MobileNav = () => {
           <i className="bi bi-check-circle me-2" />
           Validation
         </Dropdown.Item>
-        <Dropdown.Item href="/about">
-          <i className="bi bi-info-circle me-2" />
-          About
-        </Dropdown.Item>
         <Dropdown.Item href="/search">
           <i className="bi bi-search me-2" />
           Search
+        </Dropdown.Item>
+        <Dropdown.Item href="/about">
+          <i className="bi bi-info-circle me-2" />
+          Docs
         </Dropdown.Item>
         <Dropdown.Divider />
         {user ? (
