@@ -1,5 +1,6 @@
 import { HotTable } from '@handsontable/react';
 import { FC } from 'react';
+import Handsontable from 'handsontable';
 
 import { Sample } from '../../../types';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
@@ -44,6 +45,12 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
           height={height || tableHeight}
           readOnly={readOnly}
           colHeaders={true}
+          colWidths={200}
+          rowHeights={23}
+          renderer={(instance, td, row, col, prop, value, cellProperties) => {
+            Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+            td.innerHTML = `<div class="truncated">${value || '' }</div>`
+          }}
           dropdownMenu={true}
           hiddenColumns={{
             indicators: true,
