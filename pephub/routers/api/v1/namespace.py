@@ -22,6 +22,7 @@ from pepdbagent.exceptions import (
     ProjectUniqueNameError,
     ProjectAlreadyInFavorites,
     ProjectNotInFavorites,
+    NamespaceNotFoundError,
 )
 from pepdbagent.const import DEFAULT_LIMIT_INFO
 from pepdbagent.models import (
@@ -456,4 +457,15 @@ async def get_namespace_information(
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace: Optional[str] = None,
 ):
-    return agent.namespace.stats(namespace=namespace)
+    try:
+        return agent.namespace.stats(namespace=namespace)
+    except NamespaceNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Namespace '{namespace}' not found.",
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error. Unexpected return value. Error: 500",
+        )
