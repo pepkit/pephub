@@ -534,7 +534,7 @@ body {
 }
 
 .handsontable .truncated {
-  max-width: 500px;
+  max-width: 300px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -542,4 +542,5 @@ body {
 
 .handsontable .expanded {
     white-space: normal;
+    overflow: visible;
 }
