@@ -45,11 +45,14 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
           height={height || tableHeight}
           readOnly={readOnly}
           colHeaders={true}
-          colWidths={200}
-          rowHeights={23}
           renderer={(instance, td, row, col, prop, value, cellProperties) => {
             Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
             td.innerHTML = `<div class="truncated">${value || '' }</div>`
+            td.addEventListener('click', function (event) {
+                if (event.target.classList.contains('truncated')) {
+                    event.target.classList.toggle('expanded');
+                }
+            });
           }}
           dropdownMenu={true}
           hiddenColumns={{
