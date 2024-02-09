@@ -49,8 +49,9 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
             Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
             td.innerHTML = `<div class="truncated">${value || '' }</div>`
             td.addEventListener('click', function (event) {
-                if (event.target.classList.contains('truncated')) {
-                    event.target.classList.toggle('expanded');
+                const innerDiv = td.querySelector('.truncated');
+                if (innerDiv && event.target === innerDiv) {
+                    innerDiv.classList.toggle('expanded');
                 }
             });
           }}
