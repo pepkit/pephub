@@ -393,7 +393,7 @@ export const ProjectPage: FC = () => {
               <span className="me-3">
                 <i className="bi bi-calendar3"></i>
                 <span className="mx-1">Created:</span>
-                <span id="project-submission-date">{dateStringToDate(projectInfo?.submission_date || '')}</span>
+                <span id="project-submission-date">{dateStringToDateTime(projectInfo?.submission_date || '')}</span>
                 <i className="ms-4 bi bi-calendar3"></i>
                 <span className="mx-1">Updated:</span>
                 <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
