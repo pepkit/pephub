@@ -532,3 +532,15 @@ body {
 .list-none {
   list-style: none;
 }
+
+.handsontable .truncated {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.handsontable .expanded {
+    white-space: normal;
+    overflow: visible;
+}
