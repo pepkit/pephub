@@ -277,3 +277,20 @@ export const getProjectViews = (
       .then((res) => res.data);
   }
 };
+
+export const getView = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  viewName: string,
+  token: string | null = null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/views/${viewName}?tag=${tag}&raw=false`;
+  if (!token) {
+    return axios.get<ProjectViewAnnotation>(url).then((res) => res.data);
+  } else {
+    return axios
+      .get<ProjectViewAnnotation>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
+  }
+};

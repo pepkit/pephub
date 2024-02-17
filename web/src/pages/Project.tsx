@@ -28,6 +28,7 @@ import { useProjectViews } from '../hooks/queries/useProjectViews';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
+import { useView } from '../hooks/queries/useView';
 import { useSession } from '../hooks/useSession';
 import { dateStringToDate, dateStringToDateTime } from '../utils/dates';
 import { copyToClipboard, getOS, numberWithCommas } from '../utils/etc';
@@ -71,9 +72,12 @@ export const ProjectPage: FC = () => {
   // project = project?.toLowerCase();
 
   // get tag from url
-  let [searchParams] = useSearchParams();
+  let [searchParams, setSearchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
   const fork = searchParams.get('fork');
+
+  // view selection
+  const [view, setView] = useState(searchParams.get('view') || undefined);
 
   // users stars - determine if they have this PEP starred
   const { data: userStars } = useNamespaceStars(user?.login || '', {}, true);
@@ -94,6 +98,13 @@ export const ProjectPage: FC = () => {
   const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(namespace, project || '', tag);
   const { data: projectViews, isLoading: projectViewsIsLoading } = useProjectViews(namespace, project || '', tag);
+  const { data: viewData, isLoading: viewDataIsLoading } = useView({
+    namespace,
+    project,
+    tag,
+    view,
+    enabled: view !== undefined,
+  });
 
   // state
   const [projectView, setProjectView] = useState<ProjectView>('samples');
@@ -322,17 +333,39 @@ export const ProjectPage: FC = () => {
             </Dropdown>
             <select
               disabled={projectViewsIsLoading || projectViews?.views.length === 0}
-              className="form-select form-select-sm w-25"
-              value={tag}
+              className="border border-dark form-select form-select-sm w-25"
+              value={view}
+              onChange={(e) => {
+                if (e.target.value !== undefined && e.target.value !== 'None') {
+                  setView(e.target.value);
+                  setSearchParams(
+                    new URLSearchParams({
+                      ...searchParams,
+                      view: e.target.value,
+                    }),
+                  );
+                } else {
+                  setView(undefined);
+                  searchParams.delete('view');
+                  setSearchParams(
+                    new URLSearchParams({
+                      ...searchParams,
+                    }),
+                  );
+                }
+              }}
             >
               {projectViews?.views.length === 0 ? (
                 <option value="default">No views</option>
               ) : (
-                projectViews?.views.map((view, index) => (
-                  <option key={index} value={view.name}>
-                    {view.name}
-                  </option>
-                ))
+                <Fragment>
+                  <option value={undefined}>None</option>
+                  {projectViews?.views.map((view, index) => (
+                    <option key={index} value={view.name}>
+                      {view.name}
+                    </option>
+                  ))}
+                </Fragment>
               )}
             </select>
             <button
@@ -567,7 +600,8 @@ export const ProjectPage: FC = () => {
                     // fill to the rest of the screen minus the offset of the project data
                     height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                     readOnly={!(projectInfo && canEdit(user, projectInfo))}
-                    data={newProjectSamples || []}
+                    // @ts-ignore: TODO: fix this, the model is just messed up
+                    data={view !== undefined ? viewData._samples : newProjectSamples || []}
                     onChange={(value) => setNewProjectSamples(value)}
                   />
                 ) : projectView === 'subsamples' ? (
