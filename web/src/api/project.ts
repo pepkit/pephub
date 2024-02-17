@@ -270,10 +270,10 @@ export const getProjectViews = (
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}/views?tag=${tag}`;
   if (!token) {
-    return axios.get<ProjectViewAnnotation>(url).then((res) => res.data);
+    return axios.get<ProjectViewsResponse>(url).then((res) => res.data);
   } else {
     return axios
-      .get<ProjectViewAnnotation>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .get<ProjectViewsResponse>(url, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => res.data);
   }
 };

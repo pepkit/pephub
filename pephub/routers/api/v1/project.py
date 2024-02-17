@@ -573,10 +573,10 @@ async def upload_sample(
             detail="Sample already exists in project. Use 'overwrite' parameter to overwrite.",
         )
 
-    except Exception as e:
+    except Exception as _:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not upload sample. Server error!",
+            detail="Could not upload sample. Server error!",
         )
 
 

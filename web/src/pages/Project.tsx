@@ -223,7 +223,7 @@ export const ProjectPage: FC = () => {
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       <div>
         <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
-          <div className="d-flex flex-row align-items-center">
+          <div className="d-flex flex-row align-items-center w-75">
             <Breadcrumb className="fw-bold mt-1">
               <Breadcrumb.Item href="/">home</Breadcrumb.Item>
               <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
@@ -242,7 +242,7 @@ export const ProjectPage: FC = () => {
               </a>
             </div>
           </div>
-          <div className="d-flex flex-row align-items-center gap-1">
+          <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100">
             <div className="d-flex flex-row align-items-center">
               <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
                 <span className="text-sm fw-bold">
@@ -320,6 +320,21 @@ export const ProjectPage: FC = () => {
                 </Fragment>
               </Dropdown.Menu>
             </Dropdown>
+            <select
+              disabled={projectViewsIsLoading || projectViews?.views.length === 0}
+              className="form-select form-select-sm w-25"
+              value={tag}
+            >
+              {projectViews?.views.length === 0 ? (
+                <option value="default">No views</option>
+              ) : (
+                projectViews?.views.map((view, index) => (
+                  <option key={index} value={view.name}>
+                    {view.name}
+                  </option>
+                ))
+              )}
+            </select>
             <button
               className="btn btn-outline-dark btn-sm"
               disabled={starAddMutation.isPending || starRemoveMutation.isPending}
