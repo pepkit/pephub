@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { offset } from 'handsontable/helpers/dom';
 
-import { Project, ProjectAnnotation, ProjectConfigResponse, Sample } from '../../types';
+import { Project, ProjectAnnotation, ProjectConfigResponse, ProjectViewAnnotation, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -35,6 +35,13 @@ export interface MultiProjectResponse {
   results: ProjectAnnotation[];
   offset: number;
   limit: number;
+}
+
+export interface ProjectViewsResponse {
+  namespace: string;
+  project: string;
+  tag: string;
+  views: ProjectViewAnnotation[];
 }
 
 export const getProject = (
@@ -253,4 +260,20 @@ export const editTotalProject = (
   }
 
   return axios.patch(url, requestBody, { headers: { Authorization: `Bearer ${token}` } });
+};
+
+export const getProjectViews = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null = null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/views?tag=${tag}`;
+  if (!token) {
+    return axios.get<ProjectViewAnnotation>(url).then((res) => res.data);
+  } else {
+    return axios
+      .get<ProjectViewAnnotation>(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.data);
+  }
 };

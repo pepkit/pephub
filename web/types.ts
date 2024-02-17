@@ -111,3 +111,9 @@ export interface BiggestNamespaceResults {
   namespace: string;
   number_of_projects: number;
 }
+
+export interface ProjectViewAnnotation {
+  name: string;
+  description?: string;
+  number_of_samples: number;
+}

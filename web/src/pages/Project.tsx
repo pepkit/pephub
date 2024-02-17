@@ -24,6 +24,7 @@ import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjec
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
+import { useProjectViews } from '../hooks/queries/useProjectViews';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
@@ -92,6 +93,7 @@ export const ProjectPage: FC = () => {
   const { data: projectSamples } = useSampleTable(namespace, project, tag);
   const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(namespace, project || '', tag);
+  const { data: projectViews, isLoading: projectViewsIsLoading } = useProjectViews(namespace, project || '', tag);
 
   // state
   const [projectView, setProjectView] = useState<ProjectView>('samples');
