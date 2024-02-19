@@ -12,11 +12,14 @@ interface SampleTableQuery {
 
 export const useSampleTable = (sampleTableQuery: SampleTableQuery) => {
   const { namespace, project, tag, enabled } = sampleTableQuery;
+
+  const enableQuery = enabled && !!namespace && !!project && !!tag;
+
   const session = useSession();
   const query = useQuery({
     queryKey: [namespace, project, tag, 'samples'],
     queryFn: () => getSampleTable(namespace || '', project || '', tag, session.jwt || ''),
-    enabled: enabled && namespace !== undefined && project !== undefined,
+    enabled: enableQuery === undefined ? false : enableQuery,
   });
   return query;
 };

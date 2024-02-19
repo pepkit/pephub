@@ -1,5 +1,6 @@
 import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
+import { set } from 'react-hook-form';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../types';
@@ -31,7 +32,7 @@ import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
 import { useView } from '../hooks/queries/useView';
 import { useSession } from '../hooks/useSession';
-import { dateStringToDate, dateStringToDateTime } from '../utils/dates';
+import { dateStringToDateTime } from '../utils/dates';
 import { copyToClipboard, getOS, numberWithCommas } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
@@ -104,7 +105,7 @@ export const ProjectPage: FC = () => {
     namespace,
     project,
     tag,
-    enabled: fetchSampleTable,
+    enabled: projectInfo === undefined ? false : fetchSampleTable,
   });
   const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(namespace, project || '', tag);
@@ -124,9 +125,7 @@ export const ProjectPage: FC = () => {
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
-  const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(
-    projectInfo === undefined ? false : !fetchSampleTable,
-  );
+  const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false); // let users toggle between PEP and POP interfaces
 
@@ -168,6 +167,12 @@ export const ProjectPage: FC = () => {
       }
     }
   }, [fork]);
+
+  useEffect(() => {
+    if (projectInfo !== undefined) {
+      setShowLargeSampleTableModal(!fetchSampleTable);
+    }
+  }, [fetchSampleTable, projectInfo]);
 
   // check if config or samples are dirty
   const configIsDirty = newProjectConfig !== projectConfig?.config;
