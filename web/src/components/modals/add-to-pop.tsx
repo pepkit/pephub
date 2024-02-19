@@ -1,14 +1,12 @@
 import { AxiosError } from 'axios';
 import { FC, Fragment, useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
-import { set } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { useSession } from '../../hooks/useSession';
 import { extractErrorMessage } from '../../utils/etc';
-import { NamespaceSearchDropdown } from '../forms/components/namespace-search-dropdown';
 import { PepSearchDropdown } from '../forms/components/pep-search-dropdown';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 
@@ -35,7 +33,11 @@ export const AddToPOPModal: FC<Props> = (props) => {
   const [projectName, tag] = project?.split('/')[1].split(':') || [undefined, undefined];
 
   // I run data validation in the actual button click, so im not doing it here
-  const { data: currentSampleTable } = useSampleTable(namespace, projectName!, tag);
+  const { data: currentSampleTable } = useSampleTable({
+    namespace,
+    project: projectName!,
+    tag: tag,
+  });
   const sampleTableMutation = useSampleTableMutation(namespace, projectName!, tag!);
 
   const onCancel = () => {

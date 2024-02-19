@@ -13,6 +13,7 @@ import { DeletePEPModal } from '../components/modals/delete-pep';
 import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { ForkPEPModal } from '../components/modals/fork-pep';
 import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpoints';
+import { LargeSampleTableModal } from '../components/modals/sample-table-too-large';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
@@ -94,7 +95,17 @@ export const ProjectPage: FC = () => {
     isLoading: projectInfoIsLoading,
     error,
   } = useProjectAnnotation(namespace, project || '', tag);
-  const { data: projectSamples } = useSampleTable(namespace, project, tag);
+
+  // is the sample table too big to fetch?
+  const fetchSampleTable = projectInfo?.number_of_samples ? projectInfo.number_of_samples <= MAX_SAMPLE_COUNT : false;
+  // const fetchSampleTable = false; // testing only
+
+  const { data: projectSamples } = useSampleTable({
+    namespace,
+    project,
+    tag,
+    enabled: fetchSampleTable,
+  });
   const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(namespace, project || '', tag);
   const { data: projectViews, isLoading: projectViewsIsLoading } = useProjectViews(namespace, project || '', tag);
@@ -113,6 +124,9 @@ export const ProjectPage: FC = () => {
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
+  const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(
+    projectInfo === undefined ? false : !fetchSampleTable,
+  );
   const [copied, setCopied] = useState(false);
   const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false); // let users toggle between PEP and POP interfaces
 
@@ -601,7 +615,7 @@ export const ProjectPage: FC = () => {
                     height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                     readOnly={!(projectInfo && canEdit(user, projectInfo))}
                     // @ts-ignore: TODO: fix this, the model is just messed up
-                    data={view !== undefined ? viewData._samples : newProjectSamples || []}
+                    data={view !== undefined ? viewData?._samples || [] : newProjectSamples || []}
                     onChange={(value) => setNewProjectSamples(value)}
                   />
                 ) : projectView === 'subsamples' ? (
@@ -675,6 +689,11 @@ export const ProjectPage: FC = () => {
         namespace={namespace!}
         project={project!}
         tag={tag}
+      />
+      <LargeSampleTableModal
+        namespace={namespace}
+        show={showLargeSampleTableModal}
+        onHide={() => setShowLargeSampleTableModal(false)}
       />
     </PageLayout>
   );

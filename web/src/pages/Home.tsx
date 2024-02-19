@@ -34,7 +34,11 @@ function Home() {
   const limit = 3;
   const { data: largestNamespaces } = useBiggestNamespace(limit);
 
-  const { data: exampleSamples } = useSampleTable('databio', 'example', 'default');
+  const { data: exampleSamples } = useSampleTable({
+    namespace: 'databio',
+    project: 'example',
+    tag: 'default',
+  });
 
   return (
     <PageLayout>
