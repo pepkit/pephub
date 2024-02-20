@@ -38,6 +38,7 @@ function Home() {
     namespace: 'databio',
     project: 'example',
     tag: 'default',
+    enabled: true,
   });
 
   return (

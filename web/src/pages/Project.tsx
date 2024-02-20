@@ -143,7 +143,7 @@ export const ProjectPage: FC = () => {
     pep_registry: `${namespace}/${project}:${tag}`,
     schema: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
     schema_registry: projectInfo?.pep_schema,
-    enabled: namespace && project && tag && projectInfo ? true : false,
+    enabled: namespace && project && tag && projectInfo === undefined ? false : fetchSampleTable,
   });
 
   const runValidation = () => {
