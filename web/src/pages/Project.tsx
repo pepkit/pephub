@@ -585,7 +585,8 @@ export const ProjectPage: FC = () => {
                             disabled={
                               configMutation.isPending ||
                               totalProjectMutation.isPending ||
-                              !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
+                              !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
+                              !fetchSampleTable
                             }
                             onClick={() => handleTotalProjectChange()}
                             className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
