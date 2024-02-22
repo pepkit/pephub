@@ -353,43 +353,6 @@ export const ProjectPage: FC = () => {
                 </Fragment>
               </Dropdown.Menu>
             </Dropdown>
-            <select
-              disabled={projectViewsIsLoading || projectViews?.views.length === 0}
-              className="border border-dark form-select form-select-sm w-25"
-              value={view}
-              onChange={(e) => {
-                if (e.target.value !== undefined && e.target.value !== 'None') {
-                  setView(e.target.value);
-                  setSearchParams(
-                    new URLSearchParams({
-                      ...searchParams,
-                      view: e.target.value,
-                    }),
-                  );
-                } else {
-                  setView(undefined);
-                  searchParams.delete('view');
-                  setSearchParams(
-                    new URLSearchParams({
-                      ...searchParams,
-                    }),
-                  );
-                }
-              }}
-            >
-              {projectViews?.views.length === 0 ? (
-                <option value="default">No views</option>
-              ) : (
-                <Fragment>
-                  <option value={undefined}>None</option>
-                  {projectViews?.views.map((view, index) => (
-                    <option key={index} value={view.name}>
-                      {view.name}
-                    </option>
-                  ))}
-                </Fragment>
-              )}
-            </select>
             <button
               className="btn btn-outline-dark btn-sm"
               disabled={starAddMutation.isPending || starRemoveMutation.isPending}
@@ -502,11 +465,15 @@ export const ProjectPage: FC = () => {
               <>
                 <div className="flex-row d-flex align-items-end justify-content-between mx-3">
                   <ProjectDataNav
-                    projectView={projectView}
-                    setProjectView={(view) => setProjectView(view)}
+                    pageView={projectView}
+                    setPageView={(view) => setProjectView(view)}
                     configIsDirty={configIsDirty}
                     samplesIsDirty={samplesIsDirty}
                     subsamplesIsDirty={subsamplesIsDirty}
+                    projectViewIsLoading={projectViewsIsLoading}
+                    projectViews={projectViews}
+                    projectView={view}
+                    setProjectView={setView}
                   />
                   {/* no matter what, only render if belonging to the user */}
                   {user && projectInfo && canEdit(user, projectInfo) ? (
