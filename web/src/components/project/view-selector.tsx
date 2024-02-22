@@ -1,13 +1,10 @@
+import { Fragment } from 'react';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip, { TooltipProps } from 'react-bootstrap/Tooltip';
 import { useSearchParams } from 'react-router-dom';
-import ReactSelect, { OptionProps } from 'react-select';
+import ReactSelect from 'react-select';
 
 import { ProjectViewsResponse } from '../../api/project';
-
-type ViewOption = {
-  view: string;
-  description: string;
-  value: string;
-};
 
 interface Props {
   projectViewsIsLoading: boolean;
@@ -20,76 +17,61 @@ export const ViewSelector = (props: Props) => {
   const { projectViewsIsLoading, projectViews, view, setView } = props;
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const renderTooltip = (props: TooltipProps) => (
+    <Tooltip id="button-tooltip" {...props}>
+      A project view is a way to subset your sample table in a way that is more manageable for viewing in the browser.
+      To learn more about vierws, and how to create them, visit the{' '}
+      <a href="https://pep.databio.org/pephub/">API documentation.</a>
+    </Tooltip>
+  );
+
   return (
-    // <select
-    //   disabled={projectViewsIsLoading || projectViews?.views.length === 0}
-    //   className="border border-dark form-select form-select-sm w-25"
-    //   value={view}
-    //   onChange={(e) => {
-    //     if (e.target.value !== undefined && e.target.value !== 'None') {
-    //       setView(e.target.value);
-    //       setSearchParams(
-    //         new URLSearchParams({
-    //           ...searchParams,
-    //           view: e.target.value,
-    //         }),
-    //       );
-    //     } else {
-    //       setView(undefined);
-    //       searchParams.delete('view');
-    //       setSearchParams(
-    //         new URLSearchParams({
-    //           ...searchParams,
-    //         }),
-    //       );
-    //     }
-    //   }}
-    // >
-    //   {projectViews?.views.length === 0 ? (
-    //     <option value="default">No views</option>
-    //   ) : (
-    //     <Fragment>
-    //       <option value={undefined}>Default view</option>
-    //       {projectViews?.views.map((view, index) => (
-    //         <option key={index} value={view.name}>
-    //           {view.name}
-    //         </option>
-    //       ))}
-    //     </Fragment>
-    //   )}
-    // </select>
-    <ReactSelect
-      className="w-25 top-z rounded"
-      options={
-        projectViews?.views.map((view) => ({
-          view: view.name,
-          description: view.description || 'No description',
-          value: view.name,
-          label: `${view.name} | ${view.description || 'No description'}`,
-        })) || []
-      }
-      onChange={(selectedOption) => {
-        if (selectedOption === null) {
-          setView(undefined);
-          searchParams.delete('view');
-          setSearchParams(
-            new URLSearchParams({
-              ...searchParams,
-            }),
-          );
-        } else {
-          setView(selectedOption.value);
-          setSearchParams(
-            new URLSearchParams({
-              ...searchParams,
-              view: selectedOption.value,
-            }),
-          );
-        }
-      }}
-      isClearable
-      placeholder="Select a view"
-      value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
-    />
+    <Fragment>
+      <div className="d-flex flex-row align-items-center justify-content-end w-25">
+        <ReactSelect
+          className="top-z rounded w-100"
+          options={
+            projectViews?.views.map((view) => ({
+              view: view.name,
+              description: view.description || 'No description',
+              value: view.name,
+              label: `${view.name} | ${view.description || 'No description'}`,
+            })) || []
+          }
+          onChange={(selectedOption) => {
+            if (selectedOption === null) {
+              setView(undefined);
+              searchParams.delete('view');
+              setSearchParams(
+                new URLSearchParams({
+                  ...searchParams,
+                }),
+              );
+            } else {
+              setView(selectedOption.value);
+              setSearchParams(
+                new URLSearchParams({
+                  ...searchParams,
+                  view: selectedOption.value,
+                }),
+              );
+            }
+          }}
+          isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
+          isClearable
+          placeholder={
+            projectViewsIsLoading
+              ? 'Loading views...'
+              : projectViews?.views.length === 0
+              ? 'No views available'
+              : 'Select a view'
+          }
+          value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
+        />
+        <OverlayTrigger placement="left" delay={{ show: 250, hide: 2000 }} overlay={renderTooltip}>
+          <i className="bi bi-info-circle ms-2"></i>
+        </OverlayTrigger>
+      </div>
+    </Fragment>
   );
 };

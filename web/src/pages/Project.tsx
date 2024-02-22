@@ -477,7 +477,7 @@ export const ProjectPage: FC = () => {
                   />
                   {/* no matter what, only render if belonging to the user */}
                   {user && projectInfo && canEdit(user, projectInfo) ? (
-                    <div className="d-flex flex-row align-items-center">
+                    <div className="d-flex flex-row align-items-center w-25 justify-content-end">
                       {/* <ValidationTooltip /> */}
                       {projectInfo?.pep_schema ? (
                         <div className="d-flex flex-row align-items-center mb-1 me-4">
