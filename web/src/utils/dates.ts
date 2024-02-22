@@ -1,6 +1,6 @@
 export const dateStringToDateTime = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleString();
+  return date.toLocaleString('default', { month: 'long', year: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second:'numeric'});
 };
 
 export const dateStringToDate = (dateString: string) => {

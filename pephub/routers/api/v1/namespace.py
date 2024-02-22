@@ -453,7 +453,7 @@ async def get_namespace_information(
     summary="Get statistics about each namespace",
     response_model=NamespaceStats,
 )
-async def get_namespace_information(
+async def get_namespace_stats(
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace: Optional[str] = None,
 ):
@@ -467,5 +467,5 @@ async def get_namespace_information(
     except Exception:
         raise HTTPException(
             status_code=500,
-            detail=f"Internal server error. Unexpected return value. Error: 500",
+            detail="Internal server error. Unexpected return value. Error: 500",
         )

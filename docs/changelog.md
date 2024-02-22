@@ -4,6 +4,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.11.6] - 02-08-2024
 
+- Added interface for selecting and viewing project views
+- optimized loading of very large sample tables
+
+## [0.11.6] - 02-08-2024
+
 ### Fixed
 
 - Docs and docs links

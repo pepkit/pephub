@@ -79,7 +79,11 @@ export const ProjectMetaEditForm: FC<Props> = ({
 
   // grab the sample table to warn the user if they wont be able to swap
   // to a POP
-  const { data: sampleTable } = useSampleTable(namespace, name, tag);
+  const { data: sampleTable } = useSampleTable({
+    namespace,
+    project: name,
+    tag,
+  });
 
   const mutation = useEditProjectMetaMutation(namespace, name, tag, onSubmit, onFailedSubmit, metadata);
 

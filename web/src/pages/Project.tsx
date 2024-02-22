@@ -1,6 +1,7 @@
 import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
 import { StatusIcon } from '../components/badges/status-icons';
@@ -13,6 +14,7 @@ import { DeletePEPModal } from '../components/modals/delete-pep';
 import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
 import { ForkPEPModal } from '../components/modals/fork-pep';
 import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpoints';
+import { LargeSampleTableModal } from '../components/modals/sample-table-too-large';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
@@ -24,11 +26,13 @@ import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjec
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
+import { useProjectViews } from '../hooks/queries/useProjectViews';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
+import { useView } from '../hooks/queries/useView';
 import { useSession } from '../hooks/useSession';
-import { dateStringToDate, dateStringToDateTime } from '../utils/dates';
+import { dateStringToDateTime } from '../utils/dates';
 import { copyToClipboard, getOS, numberWithCommas } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
@@ -62,6 +66,9 @@ export const ProjectPage: FC = () => {
   // user info
   const { user, jwt, login } = useSession();
 
+  // auto-dismiss popup for large sample tables
+  const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
+
   // os info
   const os = getOS();
 
@@ -70,9 +77,12 @@ export const ProjectPage: FC = () => {
   // project = project?.toLowerCase();
 
   // get tag from url
-  let [searchParams] = useSearchParams();
+  let [searchParams, setSearchParams] = useSearchParams();
   const tag = searchParams.get('tag') || 'default';
   const fork = searchParams.get('fork');
+
+  // view selection
+  const [view, setView] = useState(searchParams.get('view') || undefined);
 
   // users stars - determine if they have this PEP starred
   const { data: userStars } = useNamespaceStars(user?.login || '', {}, true);
@@ -89,9 +99,27 @@ export const ProjectPage: FC = () => {
     isLoading: projectInfoIsLoading,
     error,
   } = useProjectAnnotation(namespace, project || '', tag);
-  const { data: projectSamples } = useSampleTable(namespace, project, tag);
+
+  // is the sample table too big to fetch?
+  const fetchSampleTable = projectInfo?.number_of_samples ? projectInfo.number_of_samples <= MAX_SAMPLE_COUNT : false;
+  // const fetchSampleTable = false; // testing only
+
+  const { data: projectSamples } = useSampleTable({
+    namespace,
+    project,
+    tag,
+    enabled: projectInfo === undefined ? false : fetchSampleTable,
+  });
   const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag);
   const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(namespace, project || '', tag);
+  const { data: projectViews, isLoading: projectViewsIsLoading } = useProjectViews(namespace, project || '', tag);
+  const { data: viewData, isLoading: viewDataIsLoading } = useView({
+    namespace,
+    project,
+    tag,
+    view,
+    enabled: view !== undefined,
+  });
 
   // state
   const [projectView, setProjectView] = useState<ProjectView>('samples');
@@ -100,6 +128,7 @@ export const ProjectPage: FC = () => {
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
+  const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false); // let users toggle between PEP and POP interfaces
 
@@ -117,7 +146,7 @@ export const ProjectPage: FC = () => {
     pep_registry: `${namespace}/${project}:${tag}`,
     schema: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
     schema_registry: projectInfo?.pep_schema,
-    enabled: namespace && project && tag && projectInfo ? true : false,
+    enabled: namespace && project && tag && projectInfo === undefined ? false : fetchSampleTable,
   });
 
   const runValidation = () => {
@@ -141,6 +170,12 @@ export const ProjectPage: FC = () => {
       }
     }
   }, [fork]);
+
+  useEffect(() => {
+    if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
+      setShowLargeSampleTableModal(!fetchSampleTable);
+    }
+  }, [fetchSampleTable, projectInfo]);
 
   // check if config or samples are dirty
   const configIsDirty = newProjectConfig !== projectConfig?.config;
@@ -221,7 +256,7 @@ export const ProjectPage: FC = () => {
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       <div>
         <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
-          <div className="d-flex flex-row align-items-center">
+          <div className="d-flex flex-row align-items-center w-75">
             <Breadcrumb className="fw-bold mt-1">
               <Breadcrumb.Item href="/">home</Breadcrumb.Item>
               <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
@@ -240,7 +275,7 @@ export const ProjectPage: FC = () => {
               </a>
             </div>
           </div>
-          <div className="d-flex flex-row align-items-center gap-1">
+          <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100">
             <div className="d-flex flex-row align-items-center">
               <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
                 <span className="text-sm fw-bold">
@@ -393,7 +428,7 @@ export const ProjectPage: FC = () => {
               <span className="me-3">
                 <i className="bi bi-calendar3"></i>
                 <span className="mx-1">Created:</span>
-                <span id="project-submission-date">{dateStringToDate(projectInfo?.submission_date || '')}</span>
+                <span id="project-submission-date">{dateStringToDateTime(projectInfo?.submission_date || '')}</span>
                 <i className="ms-4 bi bi-calendar3"></i>
                 <span className="mx-1">Updated:</span>
                 <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
@@ -430,15 +465,19 @@ export const ProjectPage: FC = () => {
               <>
                 <div className="flex-row d-flex align-items-end justify-content-between mx-3">
                   <ProjectDataNav
-                    projectView={projectView}
-                    setProjectView={(view) => setProjectView(view)}
+                    pageView={projectView}
+                    setPageView={(view) => setProjectView(view)}
                     configIsDirty={configIsDirty}
                     samplesIsDirty={samplesIsDirty}
                     subsamplesIsDirty={subsamplesIsDirty}
+                    projectViewIsLoading={projectViewsIsLoading}
+                    projectViews={projectViews}
+                    projectView={view}
+                    setProjectView={setView}
                   />
                   {/* no matter what, only render if belonging to the user */}
                   {user && projectInfo && canEdit(user, projectInfo) ? (
-                    <div className="d-flex flex-row align-items-center">
+                    <div className="d-flex flex-row align-items-center w-25 justify-content-end">
                       {/* <ValidationTooltip /> */}
                       {projectInfo?.pep_schema ? (
                         <div className="d-flex flex-row align-items-center mb-1 me-4">
@@ -516,7 +555,8 @@ export const ProjectPage: FC = () => {
                             disabled={
                               configMutation.isPending ||
                               totalProjectMutation.isPending ||
-                              !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
+                              !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
+                              !fetchSampleTable
                             }
                             onClick={() => handleTotalProjectChange()}
                             className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
@@ -550,7 +590,8 @@ export const ProjectPage: FC = () => {
                     // fill to the rest of the screen minus the offset of the project data
                     height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                     readOnly={!(projectInfo && canEdit(user, projectInfo))}
-                    data={newProjectSamples || []}
+                    // @ts-ignore: TODO: fix this, the model is just messed up
+                    data={view !== undefined ? viewData?._samples || [] : newProjectSamples || []}
                     onChange={(value) => setNewProjectSamples(value)}
                   />
                 ) : projectView === 'subsamples' ? (
@@ -624,6 +665,11 @@ export const ProjectPage: FC = () => {
         namespace={namespace!}
         project={project!}
         tag={tag}
+      />
+      <LargeSampleTableModal
+        namespace={namespace}
+        show={showLargeSampleTableModal}
+        onHide={() => setShowLargeSampleTableModal(false)}
       />
     </PageLayout>
   );

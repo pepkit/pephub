@@ -19,7 +19,11 @@ interface Props {
 export const PopInterface = ({ project }: Props) => {
   const { namespace, name, tag } = project;
   const { user } = useSession();
-  const { data: peps, isFetching: gettingProjectList } = useSampleTable(namespace, name, tag);
+  const { data: peps, isFetching: gettingProjectList } = useSampleTable({
+    namespace,
+    project: name,
+    tag,
+  });
   const { data: allProjectsInfo, isFetching: isLoading } = useMultiProjectAnnotation(
     peps?.items.map((p) => `${p.namespace}/${p.name}:${p.tag}`),
   );
