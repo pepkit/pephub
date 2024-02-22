@@ -1,7 +1,7 @@
 import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
-import { set } from 'react-hook-form';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
 import { StatusIcon } from '../components/badges/status-icons';
@@ -65,6 +65,9 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
 export const ProjectPage: FC = () => {
   // user info
   const { user, jwt, login } = useSession();
+
+  // auto-dismiss popup for large sample tables
+  const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
 
   // os info
   const os = getOS();
@@ -169,7 +172,7 @@ export const ProjectPage: FC = () => {
   }, [fork]);
 
   useEffect(() => {
-    if (projectInfo !== undefined) {
+    if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
       setShowLargeSampleTableModal(!fetchSampleTable);
     }
   }, [fetchSampleTable, projectInfo]);
