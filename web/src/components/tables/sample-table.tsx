@@ -59,7 +59,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
           hiddenColumns={{
             indicators: true,
           }}
-          minCols={5}
+          minCols={2}
           minRows={minRows || 50}
           contextMenu={[
             'row_above',
