@@ -59,7 +59,7 @@ export const ViewSelector = (props: Props) => {
     //   )}
     // </select>
     <ReactSelect
-      className="w-25 top-z border border-dark rounded"
+      className="w-25 top-z rounded"
       options={
         projectViews?.views.map((view) => ({
           view: view.name,
