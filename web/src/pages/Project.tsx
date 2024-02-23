@@ -1,7 +1,7 @@
 import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
-import { set } from 'react-hook-form';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
 import { StatusIcon } from '../components/badges/status-icons';
@@ -65,6 +65,9 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
 export const ProjectPage: FC = () => {
   // user info
   const { user, jwt, login } = useSession();
+
+  // auto-dismiss popup for large sample tables
+  const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
 
   // os info
   const os = getOS();
@@ -143,7 +146,7 @@ export const ProjectPage: FC = () => {
     pep_registry: `${namespace}/${project}:${tag}`,
     schema: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
     schema_registry: projectInfo?.pep_schema,
-    enabled: namespace && project && tag && projectInfo ? true : false,
+    enabled: namespace && project && tag && projectInfo === undefined ? false : fetchSampleTable,
   });
 
   const runValidation = () => {
@@ -169,7 +172,7 @@ export const ProjectPage: FC = () => {
   }, [fork]);
 
   useEffect(() => {
-    if (projectInfo !== undefined) {
+    if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
       setShowLargeSampleTableModal(!fetchSampleTable);
     }
   }, [fetchSampleTable, projectInfo]);
@@ -350,43 +353,6 @@ export const ProjectPage: FC = () => {
                 </Fragment>
               </Dropdown.Menu>
             </Dropdown>
-            <select
-              disabled={projectViewsIsLoading || projectViews?.views.length === 0}
-              className="border border-dark form-select form-select-sm w-25"
-              value={view}
-              onChange={(e) => {
-                if (e.target.value !== undefined && e.target.value !== 'None') {
-                  setView(e.target.value);
-                  setSearchParams(
-                    new URLSearchParams({
-                      ...searchParams,
-                      view: e.target.value,
-                    }),
-                  );
-                } else {
-                  setView(undefined);
-                  searchParams.delete('view');
-                  setSearchParams(
-                    new URLSearchParams({
-                      ...searchParams,
-                    }),
-                  );
-                }
-              }}
-            >
-              {projectViews?.views.length === 0 ? (
-                <option value="default">No views</option>
-              ) : (
-                <Fragment>
-                  <option value={undefined}>None</option>
-                  {projectViews?.views.map((view, index) => (
-                    <option key={index} value={view.name}>
-                      {view.name}
-                    </option>
-                  ))}
-                </Fragment>
-              )}
-            </select>
             <button
               className="btn btn-outline-dark btn-sm"
               disabled={starAddMutation.isPending || starRemoveMutation.isPending}
@@ -499,15 +465,19 @@ export const ProjectPage: FC = () => {
               <>
                 <div className="flex-row d-flex align-items-end justify-content-between mx-3">
                   <ProjectDataNav
-                    projectView={projectView}
-                    setProjectView={(view) => setProjectView(view)}
+                    pageView={projectView}
+                    setPageView={(view) => setProjectView(view)}
                     configIsDirty={configIsDirty}
                     samplesIsDirty={samplesIsDirty}
                     subsamplesIsDirty={subsamplesIsDirty}
+                    projectViewIsLoading={projectViewsIsLoading}
+                    projectViews={projectViews}
+                    projectView={view}
+                    setProjectView={setView}
                   />
                   {/* no matter what, only render if belonging to the user */}
                   {user && projectInfo && canEdit(user, projectInfo) ? (
-                    <div className="d-flex flex-row align-items-center">
+                    <div className="d-flex flex-row align-items-center w-25 justify-content-end">
                       {/* <ValidationTooltip /> */}
                       {projectInfo?.pep_schema ? (
                         <div className="d-flex flex-row align-items-center mb-1 me-4">
@@ -585,7 +555,8 @@ export const ProjectPage: FC = () => {
                             disabled={
                               configMutation.isPending ||
                               totalProjectMutation.isPending ||
-                              !(configIsDirty || samplesIsDirty || subsamplesIsDirty)
+                              !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
+                              !fetchSampleTable
                             }
                             onClick={() => handleTotalProjectChange()}
                             className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"

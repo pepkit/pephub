@@ -2,6 +2,10 @@ body {
   overflow: scroll; /* Show scrollbars */
 }
 
+.top-z {
+  z-index: 1000;
+}
+
 /* from tailwinds mb-0.5 */
 .mb-tiny {
   margin-bottom: 0.125rem;
@@ -286,6 +290,38 @@ body {
   fill: #343a40;
 }
 
+.hover-bg-primary:hover {
+  background-color: #7ab9fd84;
+}
+
+.hover-bg-secondary:hover {
+  background-color: #6c757d;
+}
+
+.hover-bg-success:hover {
+  background-color: #28a745;
+}
+
+.hover-bg-info:hover {
+  background-color: #17a2b8;
+}
+
+.hover-bg-warning:hover {
+  background-color: #ffc107;
+}
+
+.hover-bg-danger:hover {
+  background-color: #dc3545;
+}
+
+.hover-bg-light:hover {
+  background-color: #f8f9fa;
+}
+
+.hover-bg-dark:hover {
+  background-color: #343a40;
+}
+
 .w-4 {
   width: 1rem;
 }
@@ -541,6 +577,6 @@ body {
 }
 
 .handsontable .expanded {
-    white-space: normal;
-    overflow: visible;
+  white-space: normal;
+  overflow: visible;
 }

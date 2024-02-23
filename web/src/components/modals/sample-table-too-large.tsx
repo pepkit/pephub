@@ -1,5 +1,7 @@
 import { FC } from 'react';
-import { Modal } from 'react-bootstrap';
+import { FormCheck, Modal } from 'react-bootstrap';
+
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 interface Props {
   show: boolean;
@@ -8,6 +10,7 @@ interface Props {
 }
 
 export const LargeSampleTableModal: FC<Props> = ({ show, onHide, namespace }) => {
+  const [_, setHideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
   return (
     <Modal
       centered
@@ -33,16 +36,28 @@ export const LargeSampleTableModal: FC<Props> = ({ show, onHide, namespace }) =>
           Use the dropdown in the top right to select a view, or use the API directly to fetch slices of the sample
           table.
         </p>
+        <form>
+          <input
+            type="checkbox"
+            id="dont-show-again"
+            className="form-check-input"
+            onChange={(e) => {
+              if (e.target.checked) {
+                setHideLargeSampleTableModal('true');
+              } else {
+                setHideLargeSampleTableModal('false');
+              }
+            }}
+          />
+          <label htmlFor="dont-show-again" className="ms-1 form-check-label">
+            Don't show this message again
+          </label>
+        </form>
       </Modal.Body>
       <Modal.Footer>
         <button onClick={onHide} type="button" className="btn btn-dark">
           Dismiss
         </button>
-        <a href={namespace ? `/${namespace}` : '/'}>
-          <button type="button" className="btn btn-outline-dark" onClick={onHide}>
-            Back
-          </button>
-        </a>
       </Modal.Footer>
     </Modal>
   );

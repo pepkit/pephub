@@ -1,26 +1,34 @@
 import { FC } from 'react';
 
-type ProjectView = 'samples' | 'subsamples' | 'config';
+import { ProjectViewAnnotation } from '../../../types';
+import { ProjectViewsResponse } from '../../api/project';
+import { ViewSelector } from '../project/view-selector';
+
+type PageView = 'samples' | 'subsamples' | 'config';
 
 interface NavProps {
-  projectView: string;
-  setProjectView: (view: ProjectView) => void;
+  pageView: string;
+  setPageView: (view: PageView) => void;
   samplesIsDirty: boolean;
   subsamplesIsDirty: boolean;
   configIsDirty: boolean;
+  projectViewIsLoading: boolean;
+  projectViews: ProjectViewsResponse | undefined;
+  projectView: string | undefined;
+  setProjectView: (view: string | undefined) => void;
 }
 
 interface ViewButtonProps {
-  view: ProjectView;
-  setProjectView: (view: ProjectView) => void;
+  view: PageView;
+  setPageView: (view: PageView) => void;
   icon: string;
   text: string;
   isDirty: boolean;
 }
 
-const ViewButton: FC<ViewButtonProps> = ({ view, setProjectView, icon, text, isDirty }) => (
+const ViewButton: FC<ViewButtonProps> = ({ view, setPageView, icon, text, isDirty }) => (
   <div>
-    <button onClick={() => setProjectView(view)} className="border-0 bg-transparent mr-4">
+    <button onClick={() => setPageView(view)} className="border-0 bg-transparent mr-4">
       <span className="text-xs">
         <i className="bi bi-circle-fill ms-1 text-transparent"></i>
       </span>
@@ -41,24 +49,28 @@ const ViewButton: FC<ViewButtonProps> = ({ view, setProjectView, icon, text, isD
 );
 
 export const ProjectDataNav: FC<NavProps> = ({
-  projectView,
-  setProjectView,
+  pageView,
+  setPageView,
   samplesIsDirty,
   subsamplesIsDirty,
   configIsDirty,
+  projectViewIsLoading,
+  projectViews,
+  projectView,
+  setProjectView,
 }) => {
   return (
-    <div className="d-flex flex-row align-items-center">
+    <div className="w-100 d-flex flex-row align-items-center">
       <div
         className={
-          projectView === 'samples'
+          pageView === 'samples'
             ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2 text-muted'
             : 'px-2 py-1'
         }
       >
         <ViewButton
           view="samples"
-          setProjectView={setProjectView}
+          setPageView={setPageView}
           icon="bi bi-table me-2"
           text="Samples"
           isDirty={samplesIsDirty}
@@ -66,14 +78,14 @@ export const ProjectDataNav: FC<NavProps> = ({
       </div>
       <div
         className={
-          projectView === 'subsamples'
+          pageView === 'subsamples'
             ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2'
             : 'px-2 py-1'
         }
       >
         <ViewButton
           view="subsamples"
-          setProjectView={setProjectView}
+          setPageView={setPageView}
           icon="bi bi-grid-3x3-gap-fill me-2"
           text="Subsamples"
           isDirty={subsamplesIsDirty}
@@ -81,19 +93,25 @@ export const ProjectDataNav: FC<NavProps> = ({
       </div>
       <div
         className={
-          projectView === 'config'
+          pageView === 'config'
             ? 'border border-grey border-bottom-0 rounded-top shadow-sm bg-solid px-1 py-2'
             : 'px-2 py-1'
         }
       >
         <ViewButton
           view="config"
-          setProjectView={setProjectView}
+          setPageView={setPageView}
           icon="bi bi-filetype-yml me-2"
           text="Config"
           isDirty={configIsDirty}
         />
       </div>
+      <ViewSelector
+        projectViewsIsLoading={projectViewIsLoading}
+        projectViews={projectViews}
+        view={projectView}
+        setView={setProjectView}
+      />
     </div>
   );
 };
