@@ -44,6 +44,8 @@ from ....helpers import zip_conv_result, zip_pep
 from ....dependencies import (
     get_db,
     get_project,
+    get_config,
+    get_subsamples,
     get_project_annotation,
     get_namespace_access_list,
     verify_user_can_fork,
@@ -413,29 +415,21 @@ async def get_pep_samples(
 
 @project.get("/config", summary="Get project configuration file")
 async def get_pep_config(
-    proj: Union[peppy.Project, dict] = Depends(get_project),
+    config: dict = Depends(get_config),
     format: Optional[Literal["JSON", "String"]] = "JSON",
-    raw: Optional[bool] = False,
 ):
     """
     Get project configuration file from a certain project and namespace
-
-    Don't have a namespace or project?
 
     Use the following:
 
         project: example
         namespace: databio
+        tag: default
     """
-    if raw:
-        proj_config = proj[CONFIG_KEY]
-    else:
-        proj_config = proj.to_dict(extended=True, orient="records")[CONFIG_KEY]
-    if format == "JSON":
-        return JSONResponse(proj_config)
     return JSONResponse(
         {
-            "config": yaml.dump(proj_config, sort_keys=False),
+            "config": yaml.dump(config, sort_keys=False),
         }
     )
 

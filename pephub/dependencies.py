@@ -208,6 +208,36 @@ def get_project(
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
 
+def get_config(
+    namespace: str,
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+) -> Dict[str, Any]:
+    try:
+        config = agent.project.get_config(namespace, project, tag)
+        yield config
+    except ProjectNotFoundError:
+        raise HTTPException(
+            404,
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+        )
+
+def get_subsamples(
+    namespace: str,
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+) -> Dict[str, Any]:
+    try:
+        subsamples = agent.project.get_subsamples(namespace, project, tag)
+        yield subsamples
+    except ProjectNotFoundError:
+        raise HTTPException(
+            404,
+            f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
+        )
+
 
 def get_project_annotation(
     namespace: str,
