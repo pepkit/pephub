@@ -550,31 +550,33 @@ export const ProjectPage: FC = () => {
                         </div>
                       )}
                       <div className="px-1">
-                        <>
-                          <button
-                            disabled={
-                              configMutation.isPending ||
-                              totalProjectMutation.isPending ||
-                              !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
-                              !fetchSampleTable
-                            }
-                            onClick={() => handleTotalProjectChange()}
-                            className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
-                          >
-                            {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
-                          </button>
-                          <button
-                            className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
-                            onClick={() => {
-                              resetConfig();
-                              resetSamples();
-                              resetSubsamples();
-                            }}
-                            disabled={!(configIsDirty || samplesIsDirty || subsamplesIsDirty)}
-                          >
-                            Discard
-                          </button>
-                        </>
+                        {fetchSampleTable && (
+                          <Fragment>
+                            <button
+                              disabled={
+                                configMutation.isPending ||
+                                totalProjectMutation.isPending ||
+                                !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
+                                !fetchSampleTable
+                              }
+                              onClick={() => handleTotalProjectChange()}
+                              className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                            >
+                              {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
+                            </button>
+                            <button
+                              className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
+                              onClick={() => {
+                                resetConfig();
+                                resetSamples();
+                                resetSubsamples();
+                              }}
+                              disabled={!(configIsDirty || samplesIsDirty || subsamplesIsDirty)}
+                            >
+                              Discard
+                            </button>
+                          </Fragment>
+                        )}
                       </div>
                     </div>
                   ) : null}
