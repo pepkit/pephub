@@ -208,6 +208,7 @@ def get_project(
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
 
+
 def get_config(
     namespace: str,
     project: str,
@@ -222,6 +223,7 @@ def get_config(
             404,
             f"PEP '{namespace}/{project}:{tag or DEFAULT_TAG}' does not exist in database. Did you spell it correctly?",
         )
+
 
 def get_subsamples(
     namespace: str,
