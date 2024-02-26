@@ -228,7 +228,7 @@ export const ProjectPage: FC = () => {
           break;
       }
       // check for ctrl+s, ignore if fetchsampletable is false
-      if (ctrlKey && e.key === 's' && fetchSampleTable) {
+      if (ctrlKey && e.key === 's' && fetchSampleTable && !view) {
         e.preventDefault();
         if (configIsDirty || samplesIsDirty || subsamplesIsDirty) {
           handleTotalProjectChange();
@@ -551,14 +551,15 @@ export const ProjectPage: FC = () => {
                         </div>
                       )}
                       <div className="px-1">
-                        {fetchSampleTable && (
+                        {fetchSampleTable && !view && (
                           <Fragment>
                             <button
                               disabled={
                                 configMutation.isPending ||
                                 totalProjectMutation.isPending ||
                                 !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
-                                !fetchSampleTable
+                                !fetchSampleTable ||
+                                !!view
                               }
                               onClick={() => handleTotalProjectChange()}
                               className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
