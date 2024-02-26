@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import ReactSelect from 'react-select';
 
 import { ProjectViewsResponse } from '../../api/project';
+import { search } from '../../api/search';
 
 interface Props {
   projectViewsIsLoading: boolean;
@@ -39,22 +40,15 @@ export const ViewSelector = (props: Props) => {
             })) || []
           }
           onChange={(selectedOption) => {
+            debugger;
             if (selectedOption === null) {
               setView(undefined);
               searchParams.delete('view');
-              setSearchParams(
-                new URLSearchParams({
-                  ...searchParams,
-                }),
-              );
+              setSearchParams(searchParams);
             } else {
               setView(selectedOption.value);
-              setSearchParams(
-                new URLSearchParams({
-                  ...searchParams,
-                  view: selectedOption.value,
-                }),
-              );
+              searchParams.set('view', selectedOption.value);
+              setSearchParams(searchParams);
             }
           }}
           isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}

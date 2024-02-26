@@ -1,6 +1,6 @@
 import { FC, Fragment, useEffect, useState } from 'react';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { GitHubAvatar } from '../components/badges/github-avatar';
 import { PageLayout } from '../components/layout/page-layout';
@@ -24,9 +24,8 @@ import { numberWithCommas } from '../utils/etc';
 type View = 'peps' | 'pops' | 'stars';
 
 export const NamespacePage: FC = () => {
-  // get view out of url its a query param
-  const urlParams = new URLSearchParams(window.location.search);
-  const viewFromUrl = urlParams.get('view') as View;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewFromUrl = searchParams.get('view') as View;
 
   // get namespace from url
   let { namespace } = useParams();
@@ -36,18 +35,18 @@ export const NamespacePage: FC = () => {
   const { user } = useSession();
 
   // pagination
-  const [limit, setLimit] = useState(urlParams.get('limit') ? parseInt(urlParams.get('limit')!) : 10);
-  const [offset, setOffset] = useState(urlParams.get('offset') ? parseInt(urlParams.get('offset')!) : 0);
-  const [search, setSearch] = useState(urlParams.get('search') || '');
-  const [orderBy, setOrderBy] = useState(urlParams.get('orderBy') || 'update_date');
-  const [order, setOrder] = useState(urlParams.get('order') || 'asc');
+  const [limit, setLimit] = useState(searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10);
+  const [offset, setOffset] = useState(searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0);
+  const [search, setSearch] = useState(searchParams.get('search') || '');
+  const [orderBy, setOrderBy] = useState(searchParams.get('orderBy') || 'update_date');
+  const [order, setOrder] = useState(searchParams.get('order') || 'asc');
 
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
   const [showGeoDownloadModal, setShowGeoDownloadModal] = useState(false);
   const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
-  const [starSearch, setStarSearch] = useState<string>(urlParams.get('starSearch') || '');
+  const [starSearch, setStarSearch] = useState<string>(searchParams.get('starSearch') || '');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
@@ -74,31 +73,6 @@ export const NamespacePage: FC = () => {
 
   // left over from when we were filtering on sample number
   const projectsFiltered = projects?.items.filter((p) => p.number_of_samples) || [];
-
-  // update url when search changes
-  useEffect(() => {
-    if (typeof window !== 'undefined' && search === '') {
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.delete('search');
-      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
-    } else if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.set('search', search);
-      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
-    }
-  }, [search]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && starSearch === '') {
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.delete('starSearch');
-      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
-    } else if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.set('starSearch', starSearch);
-      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
-    }
-  }, [starSearch]);
 
   if (namespaceInfoIsLoading || starsIsLoading) {
     return (

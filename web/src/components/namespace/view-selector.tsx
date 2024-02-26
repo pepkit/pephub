@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import Nav from 'react-bootstrap/Nav';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useSearchParams } from 'react-router-dom';
 
 type View = 'peps' | 'pops' | 'stars';
 
@@ -14,7 +14,13 @@ type Props = {
 };
 
 export const NamespaceViewSelector: FC<Props> = (props) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const handleNavSelect = (eventKey: string | null) => {
+    if (eventKey === null) {
+      return;
+    }
+    searchParams.set('view', eventKey);
+    setSearchParams(searchParams);
     props.setView(eventKey as View);
   };
 
