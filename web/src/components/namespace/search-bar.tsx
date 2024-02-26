@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { set } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 
 interface Props {
   namespace: string;
@@ -26,6 +27,7 @@ export const NamespacePageSearchBar: FC<Props> = ({
   setOrder,
   setOffset,
 }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   return (
     <div className="flex-row d-flex align-items-center" style={{ position: 'relative' }}>
       <div className="input-group shadow-sm">
@@ -37,6 +39,12 @@ export const NamespacePageSearchBar: FC<Props> = ({
           onChange={(e) => {
             setSearch(e.target.value);
             setOffset(0);
+            if (e.target.value === '') {
+              searchParams.delete('search');
+            } else {
+              searchParams.set('search', e.target.value);
+            }
+            setSearchParams(searchParams);
           }}
           id="search-bar"
           type="text"
@@ -47,9 +55,8 @@ export const NamespacePageSearchBar: FC<Props> = ({
           value={limit}
           onChange={(e) => {
             setLimit(parseInt(e.target.value));
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set('limit', e.target.value);
-            window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+            searchParams.set('limit', e.target.value);
+            setSearchParams(searchParams);
           }}
           className="form-control form-select"
         >
@@ -64,10 +71,8 @@ export const NamespacePageSearchBar: FC<Props> = ({
             const [orderBy, order] = e.target.value.split('+');
             setOrderBy(orderBy);
             setOrder(order);
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set('orderBy', orderBy);
-            urlParams.set('order', order);
-            window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+            searchParams.set('orderBy', orderBy);
+            setSearchParams(searchParams);
           }}
           className="form-control form-select"
         >
