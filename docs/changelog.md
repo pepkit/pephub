@@ -2,7 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
-## [0.11.6] - 02-08-2024
+## [0.11.6] - 02-26-2024
+
+- Fix some bugs introduced as a result of the last release:
+  - tag's were being removed from the URL params when selecting a project view
+  - stabilized query params along the way on the namespace page
+
+## [0.11.7] - 02-22-2024
 
 - Added interface for selecting and viewing project views
 - optimized loading of very large sample tables
