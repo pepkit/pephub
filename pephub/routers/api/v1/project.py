@@ -616,8 +616,8 @@ async def delete_sample(
 
 
 @project.get("/subsamples")
-async def get_subsamples(
-    proj: peppy.Project = Depends(get_project),
+async def get_subsamples_endpoint(
+    subsamples: peppy.Project = Depends(get_subsamples),
     download: bool = False,
 ):
     """
@@ -630,16 +630,11 @@ async def get_subsamples(
         project: example
         namespace: databio
     """
-    if isinstance(proj, dict):
-        subsamples = proj[SUBSAMPLE_RAW_LIST_KEY]
-    else:
-        subsamples = proj.to_dict(extended=True, orient="records")[
-            SUBSAMPLE_RAW_LIST_KEY
-        ]
+
     if subsamples:
         try:
             subsamples = pd.DataFrame(
-                proj[SUBSAMPLE_RAW_LIST_KEY][0]
+                subsamples[0]
             )  # TODO: update this enpoint, so that it has access to all subsample tables
         except IndexError:
             subsamples = pd.DataFrame()
@@ -855,6 +850,7 @@ async def create_view_of_the_project(
     tag: str = DEFAULT_TAG,
     description: str = "",
     sample_names: List[str] = None,
+    no_fail: bool = False,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
@@ -869,6 +865,7 @@ async def create_view_of_the_project(
     try:
         agent.view.create(
             view_name=view,
+            no_fail=no_fail,
             description=description,
             view_dict=CreateViewDictModel(
                 project_namespace=namespace,
