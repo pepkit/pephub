@@ -227,7 +227,8 @@ export const ProjectPage: FC = () => {
           ctrlKey = e.ctrlKey;
           break;
       }
-      if (ctrlKey && e.key === 's') {
+      // check for ctrl+s, ignore if fetchsampletable is false
+      if (ctrlKey && e.key === 's' && fetchSampleTable) {
         e.preventDefault();
         if (configIsDirty || samplesIsDirty || subsamplesIsDirty) {
           handleTotalProjectChange();
