@@ -21,7 +21,7 @@ export const ViewSelector = (props: Props) => {
   const renderTooltip = (props: TooltipProps) => (
     <Tooltip id="button-tooltip" {...props}>
       A project view is a way to subset your sample table in a way that is more manageable for viewing in the browser.
-      To learn more about vierws, and how to create them, visit the{' '}
+      To learn more about views, and how to create them, visit the{' '}
       <a href="https://pep.databio.org/pephub/">API documentation.</a>
     </Tooltip>
   );
