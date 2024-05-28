@@ -14,6 +14,7 @@ from .routers.api.v1.namespace import (
 from .routers.api.v1.project import project as api_project, projects as api_projects
 from .routers.api.v1.user import user as api_user
 from .routers.api.v1.search import search as api_search
+from .routers.api.v1.ws import ws as ws_router
 from .routers.auth.base import auth as auth_router
 from .routers.eido.eido import router as eido_router
 
@@ -69,6 +70,7 @@ app.include_router(api_namespaces)
 app.include_router(api_project)
 app.include_router(api_projects)
 app.include_router(api_search)
+app.include_router(ws_router)
 app.include_router(auth_router)
 app.include_router(eido_router)
 

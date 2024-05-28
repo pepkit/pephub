@@ -14,12 +14,24 @@ interface Props {
   height?: number;
   minRows?: number;
   stretchH?: 'none' | 'all' | 'last';
+  onCellClick?: (event: MouseEvent, coords: Handsontable.CellCoords, TD: HTMLTableCellElement) => void;
+  onChangeCallback?: (changes: Handsontable.CellChange[]) => void;
 }
 /**
  * This table is meant to handle csv strings, so just pass in
  * the csv string and it will handle the rest
  */
-export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height, minRows, stretchH, className }) => {
+export const SampleTable: FC<Props> = ({
+  data,
+  readOnly = false,
+  onChange,
+  height,
+  minRows,
+  stretchH,
+  className,
+  onCellClick,
+  onChangeCallback,
+}) => {
   // parse the list of objects into rows
   const rows = sampleListToArrays(data);
   const ROW_HEIGHT = 23; // px
@@ -40,21 +52,26 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
     <>
       <div className={tableClassName}>
         <HotTable
+          afterOnCellMouseDown={(event, coords, TD) => {
+            if (onCellClick) {
+              onCellClick(event, coords, TD);
+            }
+          }}
           data={rows.length > 0 ? rows : [[]]}
           stretchH={stretchH || 'all'}
           height={height || tableHeight}
           readOnly={readOnly}
           colHeaders={true}
-          renderer={(instance, td, row, col, prop, value, cellProperties) => {
-            Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
-            td.innerHTML = `<div class="truncated">${value || ''}</div>`;
-            td.addEventListener('click', function (event) {
-              const innerDiv = td.querySelector('.truncated');
-              if (innerDiv && event.target === innerDiv) {
-                innerDiv.classList.toggle('expanded');
-              }
-            });
-          }}
+          // renderer={(instance, td, row, col, prop, value, cellProperties) => {
+          //   Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+          //   td.innerHTML = `<div class="truncated">${value || ''}</div>`;
+          //   td.addEventListener('click', function (event) {
+          //     const innerDiv = td.querySelector('.truncated');
+          //     if (innerDiv && event.target === innerDiv) {
+          //       innerDiv.classList.toggle('expanded');
+          //     }
+          //   });
+          // }}
           dropdownMenu={true}
           hiddenColumns={{
             indicators: true,
@@ -91,6 +108,10 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
                 rows[row][col] = newVal;
               });
               onChange(arraysToSampleList(rows));
+
+              if (onChangeCallback) {
+                onChangeCallback(changes);
+              }
             }
           }}
           afterRemoveCol={(index, amount) => {
@@ -108,6 +129,18 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
               onChange(arraysToSampleList(rows));
             }
           }}
+          cell={[
+            {
+              row: 1,
+              col: 1,
+              className: 'border border-primary border-2',
+              // place div on top of cell -- can render the current user's name here
+              renderer: (hotInstance, td, row, col, prop, value, cellProperties) => {
+                td.innerText = value;
+                return td;
+              },
+            },
+          ]}
         />
       </div>
     </>

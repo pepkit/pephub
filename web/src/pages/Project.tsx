@@ -1,6 +1,8 @@
+import { CellCoords } from 'handsontable';
 import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
 import { useParams, useSearchParams } from 'react-router-dom';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
@@ -65,9 +67,42 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
 export const ProjectPage: FC = () => {
   // user info
   const { user, jwt, login } = useSession();
+  const loggedIn = user !== null;
 
   // auto-dismiss popup for large sample tables
   const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
+
+  // web socket for tracking users online
+  const socketUrl = `${import.meta.env.VITE_API_HOST}/api/v1/ws`;
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(socketUrl);
+  const [messageHistory, setMessageHistory] = useState<MessageEvent<any>[]>([]);
+
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: 'Connecting',
+    [ReadyState.OPEN]: 'Open',
+    [ReadyState.CLOSING]: 'Closing',
+    [ReadyState.CLOSED]: 'Closed',
+    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+  }[readyState];
+
+  useEffect(() => {
+    if (user !== null) {
+      sendJsonMessage({ type: 'connect', user: user.login });
+    }
+
+    return () => {
+      if (user !== null) {
+        sendJsonMessage({ type: 'disconnect', user: user.login });
+      }
+    };
+  }, [loggedIn]);
+
+  useEffect(() => {
+    if (lastJsonMessage !== null) {
+      console.log(lastJsonMessage);
+      setMessageHistory((prev) => prev.concat(lastJsonMessage));
+    }
+  }, [lastJsonMessage]);
 
   // os info
   const os = getOS();
@@ -389,6 +424,29 @@ export const ProjectPage: FC = () => {
             </button>
           </div>
         </div>
+        {/* <div className="my-2">
+          <code>
+            {messageHistory.map((message, index) => (
+              <div key={index}>{JSON.stringify(message)}</div>
+            ))}
+          </code>
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={() => {
+              sendJsonMessage({ type: 'message', user: user?.login, message: 'Hello World!' });
+            }}
+          >
+            Send Message
+          </button>
+          <button
+            className="btn btn-sm btn-danger ms-2"
+            onClick={() => {
+              setMessageHistory([]);
+            }}
+          >
+            Clear
+          </button>
+        </div> */}
         <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100 border-bottom">
           <div ref={projectDescriptionRef} className="w-100" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
             <Markdown>{projectInfo?.description || 'No description'}</Markdown>
@@ -597,9 +655,23 @@ export const ProjectPage: FC = () => {
                     // @ts-ignore: TODO: fix this, the model is just messed up
                     data={view !== undefined ? viewData?._samples || [] : newProjectSamples || []}
                     onChange={(value) => setNewProjectSamples(value)}
+                    onCellClick={(event, coords, TD) => {
+                      sendJsonMessage({
+                        type: 'cell_click',
+                        user: user?.login,
+                        cell: { row: coords.row, col: coords.col },
+                      });
+                    }}
+                    onChangeCallback={(changes) => {
+                      sendJsonMessage({
+                        type: 'cell_change',
+                        user: user?.login,
+                        cell: changes,
+                      });
+                    }}
                   />
                 ) : projectView === 'subsamples' ? (
-                  <>
+                  <Fragment>
                     <SampleTable
                       // fill to the rest of the screen minus the offset of the project data
                       height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
@@ -609,7 +681,7 @@ export const ProjectPage: FC = () => {
                       data={newProjectSubsamples || []}
                       onChange={(value) => setNewProjectSubsamples(value)}
                     />
-                  </>
+                  </Fragment>
                 ) : (
                   <div className="border border-t">
                     <ProjectConfigEditor
