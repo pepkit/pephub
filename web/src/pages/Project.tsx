@@ -1,11 +1,14 @@
 import { CellCoords } from 'handsontable';
 import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
+import { set } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import { useParams, useSearchParams } from 'react-router-dom';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
+import { GitHubAvatar } from '../components/badges/github-avatar';
 import { StatusIcon } from '../components/badges/status-icons';
 import { SchemaTag } from '../components/forms/components/shema-tag';
 import { PageLayout } from '../components/layout/page-layout';
@@ -72,38 +75,6 @@ export const ProjectPage: FC = () => {
   // auto-dismiss popup for large sample tables
   const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
 
-  // web socket for tracking users online
-  const socketUrl = `${import.meta.env.VITE_API_HOST}/api/v1/ws`;
-  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(socketUrl);
-  const [messageHistory, setMessageHistory] = useState<MessageEvent<any>[]>([]);
-
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Open',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Closed',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-  }[readyState];
-
-  useEffect(() => {
-    if (user !== null) {
-      sendJsonMessage({ type: 'connect', user: user.login });
-    }
-
-    return () => {
-      if (user !== null) {
-        sendJsonMessage({ type: 'disconnect', user: user.login });
-      }
-    };
-  }, [loggedIn]);
-
-  useEffect(() => {
-    if (lastJsonMessage !== null) {
-      console.log(lastJsonMessage);
-      setMessageHistory((prev) => prev.concat(lastJsonMessage));
-    }
-  }, [lastJsonMessage]);
-
   // os info
   const os = getOS();
 
@@ -134,6 +105,63 @@ export const ProjectPage: FC = () => {
     isLoading: projectInfoIsLoading,
     error,
   } = useProjectAnnotation(namespace, project || '', tag);
+
+  // web socket for tracking users online
+  const socketUrl = `${import.meta.env.VITE_API_HOST}/ws/${projectInfo?.digest}`;
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(socketUrl, {}, projectInfo !== undefined);
+
+  const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (user !== null) {
+      sendJsonMessage({ type: 'connect', user: user.login });
+    } else {
+      sendJsonMessage({ type: 'connect', user: 'anonymous' });
+    }
+
+    return () => {
+      if (user !== null) {
+        sendJsonMessage({ type: 'disconnect', user: user.login });
+      } else {
+        sendJsonMessage({ type: 'disconnect', user: 'anonymous' });
+      }
+    };
+  }, [loggedIn]);
+
+  useEffect(() => {
+    if (lastJsonMessage !== null) {
+      switch (lastJsonMessage.type) {
+        case 'message':
+          toast.success(`${lastJsonMessage?.user || 'Anonymous'}: ${lastJsonMessage.message}`);
+          break;
+        case 'connect':
+          toast.success(`${lastJsonMessage?.user || 'Anonymous'} connected!`);
+          break;
+        case 'disconnect':
+          toast.success(`${lastJsonMessage?.user || 'Anonymous'} disconnected!`);
+        case 'cell_click':
+          toast.success(
+            `${lastJsonMessage?.user || 'Anonymous'} clicked on cell ${lastJsonMessage.cell.row}, ${
+              lastJsonMessage.cell.col
+            }`,
+          );
+          break;
+        case 'cell_change':
+          toast.success(`${lastJsonMessage?.user || 'Anonymous'} changed a cell`);
+          break;
+        default:
+          break;
+      }
+
+      // sync using `sync_data` in message
+      // {"user": connection.user, "websocket": connection.websocket}
+      // for connection in self.active_connections[pep_digest].values()
+      const sync_data = lastJsonMessage.sync_data;
+      if (sync_data) {
+        setConnectedUsers(sync_data.map((connection: any) => connection.user));
+      }
+    }
+  }, [lastJsonMessage]);
 
   // is the sample table too big to fetch?
   const fetchSampleTable = projectInfo?.number_of_samples ? projectInfo.number_of_samples <= MAX_SAMPLE_COUNT : false;
@@ -291,6 +319,20 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       <div>
+        <div className="mx-4 mt-4">
+          <label className="text-muted">Connected Users</label>
+          <div className="d-flex flex-row align-items-center">
+            {connectedUsers.map((user, index) => (
+              <span key={index} className="me-1">
+                {user === 'anonymous' ? (
+                  <GitHubAvatar namespace={'khoroshevskyi'} height={25} width={25} />
+                ) : (
+                  <GitHubAvatar namespace={user} height={25} width={25} />
+                )}
+              </span>
+            ))}
+          </div>
+        </div>
         <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
           <div className="d-flex flex-row align-items-center w-75">
             <Breadcrumb className="fw-bold mt-1">
