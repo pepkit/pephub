@@ -6,7 +6,14 @@ import { Sample } from '../../../types';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { addClassesToRows } from './hooks-callbacks';
 
-interface Props {
+type CellHighlight = {
+  user: string;
+  row: number;
+  col: number;
+  color?: string;
+};
+
+type Props = {
   className?: string;
   data: Sample[];
   onChange?: (rows: Sample[]) => void;
@@ -16,7 +23,8 @@ interface Props {
   stretchH?: 'none' | 'all' | 'last';
   onCellClick?: (event: MouseEvent, coords: Handsontable.CellCoords, TD: HTMLTableCellElement) => void;
   onChangeCallback?: (changes: Handsontable.CellChange[]) => void;
-}
+  highlightCells?: CellHighlight[];
+};
 /**
  * This table is meant to handle csv strings, so just pass in
  * the csv string and it will handle the rest
@@ -31,6 +39,7 @@ export const SampleTable: FC<Props> = ({
   className,
   onCellClick,
   onChangeCallback,
+  highlightCells,
 }) => {
   // parse the list of objects into rows
   const rows = sampleListToArrays(data);
@@ -47,6 +56,8 @@ export const SampleTable: FC<Props> = ({
   if (className) {
     tableClassName += ` ${className}`;
   }
+
+  console.log('highlightCells', highlightCells);
 
   return (
     <>
@@ -129,18 +140,32 @@ export const SampleTable: FC<Props> = ({
               onChange(arraysToSampleList(rows));
             }
           }}
-          cell={[
-            {
-              row: 1,
-              col: 1,
-              className: 'border border-primary border-2',
-              // place div on top of cell -- can render the current user's name here
+          // cell={[
+          //   {
+          //     row: 1,
+          //     col: 1,
+          //     className: 'border border-primary border-2',
+          //     // place div on top of cell -- can render the current user's name here
+          //     renderer: (hotInstance, td, row, col, prop, value, cellProperties) => {
+          //       td.innerText = value;
+          //       return td;
+          //     },
+          //   },
+          // ]}
+          cell={highlightCells?.map((cell) => {
+            return {
+              row: cell.row,
+              col: cell.col,
               renderer: (hotInstance, td, row, col, prop, value, cellProperties) => {
                 td.innerText = value;
+                td.style.backgroundColor = cell.color || 'yellow';
+                // td.style.border = `1px solid ${cell.color || 'yellow'}`;
+                // td.style.borderColor = cell.color || 'yellow';
+                td.style.opacity = '0.25';
                 return td;
               },
-            },
-          ]}
+            };
+          })}
         />
       </div>
     </>

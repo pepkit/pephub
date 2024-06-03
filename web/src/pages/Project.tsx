@@ -1,13 +1,12 @@
-import { CellCoords } from 'handsontable';
 import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
-import { Breadcrumb, Dropdown } from 'react-bootstrap';
-import { set } from 'react-hook-form';
+import { Breadcrumb, Dropdown, OverlayTrigger } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 import { useParams, useSearchParams } from 'react-router-dom';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import useWebSocket from 'react-use-websocket';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
+import { DefaultUserAvatar } from '../components/badges/default-user';
 import { GitHubAvatar } from '../components/badges/github-avatar';
 import { StatusIcon } from '../components/badges/status-icons';
 import { SchemaTag } from '../components/forms/components/shema-tag';
@@ -23,6 +22,7 @@ import { LargeSampleTableModal } from '../components/modals/sample-table-too-lar
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
+import { COLORS } from '../components/tables/constants';
 import { SampleTable } from '../components/tables/sample-table';
 import { useAddStar } from '../hooks/mutations/useAddStar';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
@@ -111,6 +111,8 @@ export const ProjectPage: FC = () => {
   const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(socketUrl, {}, projectInfo !== undefined);
 
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+  const [userCoords, setUserCoords] = useState<{ [key: string]: { row: number; col: number } }>({});
+  const [colorMap, setColorMap] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (user !== null) {
@@ -139,6 +141,7 @@ export const ProjectPage: FC = () => {
           break;
         case 'disconnect':
           toast.success(`${lastJsonMessage?.user || 'Anonymous'} disconnected!`);
+          break;
         case 'cell_click':
           toast.success(
             `${lastJsonMessage?.user || 'Anonymous'} clicked on cell ${lastJsonMessage.cell.row}, ${
@@ -154,11 +157,39 @@ export const ProjectPage: FC = () => {
       }
 
       // sync using `sync_data` in message
-      // {"user": connection.user, "websocket": connection.websocket}
+      // [{"user": connection.user, "coords": [row, col]}, ...]
       // for connection in self.active_connections[pep_digest].values()
       const sync_data = lastJsonMessage.sync_data;
+
       if (sync_data) {
+        const coords: { [key: string]: { row: number; col: number } } = {};
+        sync_data.forEach((connection: any) => {
+          coords[connection.user] = { row: connection.coords[0], col: connection.coords[1] };
+        });
+        setUserCoords(coords);
         setConnectedUsers(sync_data.map((connection: any) => connection.user));
+
+        // assign color if not already assigned
+        const colors = Object.keys(colorMap);
+        sync_data.forEach((connection: any) => {
+          if (!colors.includes(connection.user)) {
+            const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            setColorMap((prev) => ({ ...prev, [connection.user]: color }));
+          }
+        });
+
+        // remove disconnected users
+        const currentUsers = sync_data.map((connection: any) => connection.user);
+        const currentColors = Object.keys(colorMap);
+        currentColors.forEach((user) => {
+          if (!currentUsers.includes(user)) {
+            setColorMap((prev) => {
+              const newColors = { ...prev };
+              delete newColors[user];
+              return newColors;
+            });
+          }
+        });
       }
     }
   }, [lastJsonMessage]);
@@ -321,15 +352,26 @@ export const ProjectPage: FC = () => {
       <div>
         <div className="mx-4 mt-4">
           <label className="text-muted">Connected Users</label>
-          <div className="d-flex flex-row align-items-center">
+          <div className="d-flex flex-row align-items-center gap-1">
             {connectedUsers.map((user, index) => (
-              <span key={index} className="me-1">
-                {user === 'anonymous' ? (
-                  <GitHubAvatar namespace={'khoroshevskyi'} height={25} width={25} />
-                ) : (
-                  <GitHubAvatar namespace={user} height={25} width={25} />
-                )}
-              </span>
+              <OverlayTrigger
+                key={index}
+                placement="top"
+                overlay={
+                  <div className="bg-dark text-light border border-dark rounded p-1">
+                    <span>{user}</span>
+                  </div>
+                }
+              >
+                <span>
+                  {/* take advantage of the fact that GitHub accounts cannot have a space... thereore it was assigned on the server */}
+                  {user.includes(' ') ? (
+                    <DefaultUserAvatar height={25} width={25} />
+                  ) : (
+                    <GitHubAvatar namespace={user} height={25} width={25} />
+                  )}
+                </span>
+              </OverlayTrigger>
             ))}
           </div>
         </div>
@@ -711,6 +753,9 @@ export const ProjectPage: FC = () => {
                         cell: changes,
                       });
                     }}
+                    highlightCells={Object.keys(userCoords).map((user) => {
+                      return { user, ...userCoords[user], color: colorMap[user] };
+                    })}
                   />
                 ) : projectView === 'subsamples' ? (
                   <Fragment>

@@ -25,27 +25,16 @@ async def websocket_endpoint(pep_digest: str, websocket: WebSocket):
             if data["type"] == "connect":
                 manager.connect(data["user"], websocket, pep_digest)
                 await manager.broadcast(data, pep_digest)
-            elif data["type"] == "disconnect":
-                await manager.disconnect(data["user"], pep_digest)
+            elif data["type"] == "cell_click":
+                manager.user_coords[pep_digest][hash(websocket)] = [
+                    data["cell"]["row"],
+                    data["cell"]["col"],
+                ]
                 await manager.broadcast(data, pep_digest)
             else:
                 await manager.broadcast(data, pep_digest)
-    except WebSocketDisconnect:
-        print("websocket disconnected")
-
-
-# @ws.websocket("/ws/{spreadsheet_id}/join")
-# async def join_room(websocket: WebSocket, spreadsheet_id: str):
-#     await manager.connect(websocket, spreadsheet_id, user)
-#     await manager.broadcast(f"{user} joined the room.", spreadsheet_id)
-
-
-# @ws.websocket("/ws/{spreadsheet_id}/leave")
-# async def leave_room(websocket: WebSocket, spreadsheet_id: str):
-#     manager.disconnect(websocket, spreadsheet_id)
-#     await manager.broadcast(f"{user} left the room.", spreadsheet_id)
-
-# @ws.websocket("/ws/{spreadsheet_id}/sync")
-# async def sync_data(websocket: WebSocket, spreadsheet_id: str):
-#     spreadsheet_data = get_spreadsheet_data(spreadsheet_id)
-#     await websocket.send_text(json.dumps(spreadsheet_data))
+    except (
+        WebSocketDisconnect
+    ):  # this acts as a disconnect event, like when a user closes the tab
+        manager.disconnect(websocket, pep_digest)
+        await manager.broadcast({"type": "disconnect"}, pep_digest)
