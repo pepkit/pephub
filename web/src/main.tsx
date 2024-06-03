@@ -49,7 +49,6 @@ const router = createBrowserRouter([
     path: '/validate',
     element: <EidoValidator />,
   },
-
   {
     path: '/login/success',
     element: <LoginSuccessPage />,
