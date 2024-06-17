@@ -1,38 +1,28 @@
 import { Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
-import { Breadcrumb, Dropdown } from 'react-bootstrap';
+import { Dropdown } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
 import { StatusIcon } from '../components/badges/status-icons';
-import { SchemaTag } from '../components/forms/components/shema-tag';
 import { PageLayout } from '../components/layout/page-layout';
 import { ProjectDataNav } from '../components/layout/project-data-nav';
-import { Markdown } from '../components/markdown/render';
-import { AddToPOPModal } from '../components/modals/add-to-pop';
-import { DeletePEPModal } from '../components/modals/delete-pep';
-import { EditMetaMetadataModal } from '../components/modals/edit-meta-metadata';
-import { ForkPEPModal } from '../components/modals/fork-pep';
-import { ProjectAPIEndpointsModal } from '../components/modals/project-api-endpoints';
 import { LargeSampleTableModal } from '../components/modals/sample-table-too-large';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
+import { ProjectDescription } from '../components/project/project-page-description';
+import { ProjectHeaderBar } from '../components/project/project-page-header-bar';
 import { SampleTable } from '../components/tables/sample-table';
 import { useProjectPage } from '../contexts/project-page-context';
-import { useAddStar } from '../hooks/mutations/useAddStar';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
-import { useRemoveStar } from '../hooks/mutations/useRemoveStar';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useView } from '../hooks/queries/useView';
 import { useSession } from '../hooks/useSession';
 import { dateStringToDateTime } from '../utils/dates';
-import { copyToClipboard, getOS, numberWithCommas } from '../utils/etc';
+import { getOS } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
-import { downloadZip } from '../utils/project';
-
-const MAX_DESC_HEIGHT = 200;
 
 interface CustomToggleProps {
   children?: React.ReactNode;
@@ -80,15 +70,17 @@ export const ProjectPage = () => {
     projectValidationQuery,
     shouldFetchSampleTable,
     pageView,
+    forceTraditionalInterface,
     MAX_SAMPLE_COUNT,
   } = useProjectPage();
 
-  const { starsQuery, addStarMutation, removeStarMutation } = useNamespaceStars(user?.login || '/', {}, true);
+  const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true);
 
-  const isStarred = starsQuery.data?.find(
-    (star) =>
-      star.namespace === projectAnnotationQuery.data?.namespace && star.name === projectAnnotationQuery.data?.name,
-  );
+  const isStarred =
+    starsQuery.data?.find(
+      (star) =>
+        star.namespace === projectAnnotationQuery.data?.namespace && star.name === projectAnnotationQuery.data?.name,
+    ) !== undefined;
 
   // pull out data for easier access
   const projectInfo = projectAnnotationQuery.data;
@@ -98,13 +90,8 @@ export const ProjectPage = () => {
   const projectViews = projectViewsQuery.data?.views || [];
   const validationResult = projectValidationQuery.data;
 
-  // get fork from url
-  const fork = searchParams.get('fork');
-
   // view selection
   const [view, setView] = useState(searchParams.get('view') || undefined);
-
-  // users stars - determine if they have this PEP starred
 
   const { data: viewData } = useView({
     namespace,
@@ -115,14 +102,7 @@ export const ProjectPage = () => {
   });
 
   // local state
-  const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
-  const [showForkPEPModal, setShowForkPEPModal] = useState(false);
-  const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
-  const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
-  const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
   const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false); // let users toggle between PEP and POP interfaces
 
   // state for editing config, samples, and subsamples
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
@@ -139,17 +119,6 @@ export const ProjectPage = () => {
     setNewProjectSamples(samples);
     setNewProjectSubsamples(subsamples);
   }, [projectAnnotationQuery, subSampleTableQuery, subSampleTableQuery]);
-
-  // watch for the fork query param to open the fork modal
-  useEffect(() => {
-    if (fork) {
-      if (user) {
-        setShowForkPEPModal(true);
-      } else {
-        login();
-      }
-    }
-  }, [fork]);
 
   useEffect(() => {
     if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
@@ -189,11 +158,7 @@ export const ProjectPage = () => {
     runValidation();
   };
 
-  const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
   const projectDataRef = useRef<HTMLDivElement>(null);
-  const projectDescriptionRef = useRef<HTMLDivElement>(null);
-  const showMoreButton = projectDescriptionRef.current?.clientHeight! >= MAX_DESC_HEIGHT;
-  const [showMoreDescription, setShowMoreDescription] = useState(false);
 
   // on save handler
   useEffect(() => {
@@ -236,185 +201,8 @@ export const ProjectPage = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
       <div>
-        <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
-          <div className="d-flex flex-row align-items-center w-75">
-            <Breadcrumb className="fw-bold mt-1">
-              <Breadcrumb.Item href="/">home</Breadcrumb.Item>
-              <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
-              <Breadcrumb.Item active>
-                {projectName}:{tag}
-              </Breadcrumb.Item>
-              {projectInfo?.is_private && (
-                <li>
-                  <span className="border py-1 ms-2 badge rounded-pill border-danger text-danger">Private</span>
-                </li>
-              )}
-            </Breadcrumb>
-            <div className="ms-2 mb-1">
-              <a className="text-decoration-none" href={`https://schema.databio.org/#/${projectHash}`}>
-                <SchemaTag schema={projectInfo?.pep_schema} />
-              </a>
-            </div>
-          </div>
-          <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100">
-            <div className="d-flex flex-row align-items-center">
-              <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
-                <span className="text-sm fw-bold">
-                  {projectAnnotationQuery.data
-                    ? `${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`
-                    : 'Loading'}
-                </span>
-                <button
-                  className="btn btn-sm btn-link-dark shadow-none ms-1 pe-2"
-                  onClick={() => {
-                    copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
-                    setCopied(true);
-                    setTimeout(() => {
-                      setCopied(false);
-                    }, 1000);
-                  }}
-                >
-                  {copied ? <i className="bi bi-check"></i> : <i className="bi bi-clipboard" />}
-                </button>
-              </div>
-            </div>
-            <Dropdown>
-              <Dropdown.Toggle size="sm" variant="dark">
-                <i className="bi bi-gear-fill me-1"></i>
-                More
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item onClick={() => downloadZip(namespace, projectName, tag, jwt)}>
-                  <i className="bi bi-file-earmark-zip me-1"></i>
-                  Download
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => setShowAPIEndpointsModal(true)}>
-                  <i className="bi bi-hdd-rack me-1"></i>
-                  API
-                </Dropdown.Item>
-                <Fragment>
-                  {user && (
-                    <Fragment>
-                      <Dropdown.Item onClick={() => setShowForkPEPModal(true)}>
-                        <i className="me-1 bi bi-bezier2"></i>
-                        Fork
-                      </Dropdown.Item>
-                      <Dropdown.Item onClick={() => setShowAddToPOPModal(true)}>
-                        <i className="me-1 bi bi-plus-circle"></i>
-                        Add to POP
-                      </Dropdown.Item>
-                    </Fragment>
-                  )}
-                </Fragment>
-                <Fragment>
-                  {projectInfo?.pop && (
-                    <Fragment>
-                      <Dropdown.Divider />
-                      <Dropdown.Item onClick={() => setForceTraditionalInterface(!forceTraditionalInterface)}>
-                        <i className="me-1 bi bi-layout-text-sidebar-reverse"></i>
-                        {forceTraditionalInterface ? 'View as POP' : 'View as PEP'}
-                      </Dropdown.Item>
-                    </Fragment>
-                  )}
-                </Fragment>
-                <Fragment>
-                  {user && projectInfo && canEdit(user, projectInfo) && (
-                    <Fragment>
-                      <Dropdown.Divider />
-                      <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
-                        <i className="me-1 bi bi-pencil-square"></i>
-                        Edit
-                      </Dropdown.Item>
-                      <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
-                        <i className="me-1 bi bi-trash3"></i>
-                        Delete
-                      </Dropdown.Item>
-                    </Fragment>
-                  )}
-                </Fragment>
-              </Dropdown.Menu>
-            </Dropdown>
-            <button
-              className="btn btn-outline-dark btn-sm"
-              disabled={addStarMutation.isPending || removeStarMutation.isPending}
-              onClick={() => {
-                if (!user) {
-                  login();
-                  return;
-                }
-                if (isStarred) {
-                  removeStarMutation.mutate({
-                    namespaceToRemove: projectInfo?.namespace!,
-                    projectNameToRemove: projectInfo?.name!,
-                    projectTagToRemove: projectInfo?.tag!,
-                  });
-                } else {
-                  addStarMutation.mutate({
-                    namespaceToStar: projectInfo?.namespace!,
-                    projectNameToStar: projectInfo?.name!,
-                    projectTagToStar: projectInfo?.tag!,
-                  });
-                }
-              }}
-            >
-              {isStarred ? (
-                <Fragment>
-                  <span className="text-primary">
-                    <i className="me-1 bi bi-star-fill"></i>
-                    Starred
-                    <span className="px-2 border border-dark rounded-pill text-dark ms-1 bg-dark bg-opacity-10">
-                      {numberWithCommas(projectInfo?.stars_number || 0)}
-                    </span>
-                  </span>
-                </Fragment>
-              ) : (
-                <Fragment>
-                  <span>
-                    <i className="me-1 bi bi-star"></i>
-                    Star
-                    <span className="px-2 border border-dark rounded-pill text-dark ms-1 bg-dark bg-opacity-10">
-                      {numberWithCommas(projectInfo?.stars_number || 0)}
-                    </span>
-                  </span>
-                </Fragment>
-              )}
-            </button>
-          </div>
-        </div>
-        <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100 border-bottom">
-          <div ref={projectDescriptionRef} className="w-100" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
-            <Markdown>{projectInfo?.description || 'No description'}</Markdown>
-          </div>
-        </div>
-        {showMoreButton && (
-          <div className="d-flex flex-row justify-content-center mb-2 translate-y-1-up">
-            {showMoreDescription ? (
-              <button
-                className="btn btn-sm btn-dark rounded-pill"
-                onClick={() => {
-                  projectDescriptionRef.current?.style.setProperty('max-height', `${MAX_DESC_HEIGHT}px`);
-                  projectDescriptionRef.current?.style.setProperty('overflow', 'hidden');
-                  setShowMoreDescription(false);
-                }}
-              >
-                <i className="bi bi-arrow-up" />
-                Less
-              </button>
-            ) : (
-              <button
-                className="btn btn-sm btn-dark rounded-pill"
-                onClick={() => {
-                  projectDescriptionRef.current?.style.removeProperty('max-height');
-                  projectDescriptionRef.current?.style.removeProperty('overflow');
-                  setShowMoreDescription(true);
-                }}
-              >
-                <i className="bi bi-arrow-down" />
-                More
-              </button>
-            )}
-          </div>
-        )}
+        <ProjectHeaderBar isStarred={isStarred} />
+        <ProjectDescription />
         <div className="px-4">
           <div className="d-flex flex-row align-items-center text-muted mt-1">
             <small className="d-flex flex-row align-items-center justify-content-between w-100">
@@ -619,45 +407,6 @@ export const ProjectPage = () => {
         </Fragment>
       )}
       {/* Modals */}
-      <EditMetaMetadataModal
-        show={showEditMetaMetadataModal}
-        onHide={() => setShowEditMetaMetadataModal(false)}
-        namespace={namespace}
-        project={projectName}
-        tag={tag}
-      />
-      <ProjectAPIEndpointsModal
-        show={showAPIEndpointsModal}
-        onHide={() => setShowAPIEndpointsModal(false)}
-        namespace={namespace || ''}
-        project={projectName}
-        tag={tag}
-      />
-      <DeletePEPModal
-        show={showDeletePEPModal}
-        onHide={() => setShowDeletePEPModal(false)}
-        namespace={namespace}
-        project={projectName}
-        tag={tag}
-        redirect={`/${user?.login}`}
-      />
-      <ForkPEPModal
-        show={showForkPEPModal}
-        onHide={() => setShowForkPEPModal(false)}
-        namespace={namespace}
-        project={projectName}
-        description={projectInfo?.description || 'No description'}
-        tag={tag}
-      />
-      <AddToPOPModal
-        show={showAddToPOPModal}
-        onHide={() => {
-          setShowAddToPOPModal(false);
-        }}
-        namespace={namespace!}
-        project={projectName}
-        tag={tag}
-      />
       <LargeSampleTableModal
         namespace={namespace}
         show={showLargeSampleTableModal}

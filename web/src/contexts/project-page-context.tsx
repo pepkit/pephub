@@ -29,6 +29,8 @@ const ProjectPageContext = createContext<{
   shouldFetchSampleTable?: boolean;
   pageView: ProjectPageView;
   setPageView: React.Dispatch<React.SetStateAction<ProjectPageView>>;
+  forceTraditionalInterface: boolean;
+  setForceTraditionalInterface: React.Dispatch<React.SetStateAction<boolean>>;
   MAX_SAMPLE_COUNT: number;
   // @ts-expect-error - its fine to start with undefined
 }>(undefined);
@@ -73,9 +75,6 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
   // PROJECT VIEWS
   const projectViewsQuery = useProjectViews(namespace, projectName, tag);
 
-  // GENERAL STATE
-  const [pageView, setPageView] = useState<ProjectPageView>('samples');
-
   // PROJECT VALIDATION
   const projectValidationQuery = useValidation({
     pepRegistry: `${namespace}/${projectName}:${tag}`,
@@ -84,6 +83,10 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
     enabled:
       namespace && projectName && tag && projectAnnotationQuery.data === undefined ? false : shouldFetchSampleTable,
   });
+
+  // GENERAL STATE
+  const [pageView, setPageView] = useState<ProjectPageView>('samples');
+  const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false);
 
   return (
     <ProjectPageContext.Provider
@@ -100,6 +103,8 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
         shouldFetchSampleTable,
         pageView,
         setPageView,
+        forceTraditionalInterface,
+        setForceTraditionalInterface,
         MAX_SAMPLE_COUNT,
       }}
     >
