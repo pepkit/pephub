@@ -122,10 +122,23 @@ export const ProjectMetaEditForm: FC<Props> = ({
   const [checkProjectNameText, setCheckProjectNameText] = useState(false);
   const [checkProjectTagText, setCheckProjectTagText] = useState(false);
   const checkChar = (e) => {
+    console.log(e.key)
     if (!/[0-9a-zA-Z_-]/.test(e.key)) {
       e.preventDefault();
       if (e.target.id === 'project-name') {
         setCheckProjectNameText(true);
+      }
+      if (e.target.id === 'project-tag') {
+        setCheckProjectTagText(true);
+      }
+    }
+  };
+  const checkPaste = (e) => {
+    console.log(e.clipboardData.getData('text'))
+    if (/[^0-9a-zA-Z_-]/.test(e.clipboardData.getData('text'))) {
+      e.preventDefault();
+      if (e.target.id === 'project-name') {
+      setCheckProjectNameText(true);
       }
       if (e.target.id === 'project-tag') {
         setCheckProjectTagText(true);
@@ -165,6 +178,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-name"
           aria-describedby="pep-name-help"
           onKeyDown={(e)=>checkChar(e)}
+          onPaste={(e)=>checkPaste(e)}
         />
         { checkProjectNameText ? <p style = {{fontSize: '12px', color: 'gray', paddingTop: '2px' }}>Project Name must contain only alphanumeric characters, '-', or '_'.</p> : null }
       </div>
@@ -201,6 +215,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-tag"
           aria-describedby="pep-name-help"
           onKeyDown={(e)=>checkChar(e)}
+          onPaste={(e)=>checkPaste(e)}
         />
         { checkProjectTagText ? <p style = {{fontSize: '12px', color: 'gray', paddingTop: '2px' }}>Project Tag must contain only alphanumeric characters, '-', or '_'.</p> : null }
       </div>
