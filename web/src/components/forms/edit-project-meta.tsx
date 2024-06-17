@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState, setState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -119,6 +119,20 @@ export const ProjectMetaEditForm: FC<Props> = ({
     }
   }, [newPop]);
 
+  const [checkProjectNameText, setCheckProjectNameText] = useState(false);
+  const [checkProjectTagText, setCheckProjectTagText] = useState(false);
+  const checkChar = (e) => {
+    if (!/[0-9a-zA-Z_-]/.test(e.key)) {
+      e.preventDefault();
+      if (e.target.id === 'project-name') {
+        setCheckProjectNameText(true);
+      }
+      if (e.target.id === 'project-tag') {
+        setCheckProjectTagText(true);
+      }
+    }
+  };
+  
   return (
     <form>
       <div className="mb-3 form-check form-switch">
@@ -150,7 +164,9 @@ export const ProjectMetaEditForm: FC<Props> = ({
           className="form-control"
           id="project-name"
           aria-describedby="pep-name-help"
+          onKeyDown={(e)=>checkChar(e)}
         />
+        { checkProjectNameText ? <p style = {{fontSize: '12px', color: 'gray', paddingTop: '2px' }}>Project Name must contain only alphanumeric characters, '-', or '_'.</p> : null }
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
@@ -184,7 +200,9 @@ export const ProjectMetaEditForm: FC<Props> = ({
           className="form-control"
           id="project-tag"
           aria-describedby="pep-name-help"
+          onKeyDown={(e)=>checkChar(e)}
         />
+        { checkProjectTagText ? <p style = {{fontSize: '12px', color: 'gray', paddingTop: '2px' }}>Project Tag must contain only alphanumeric characters, '-', or '_'.</p> : null }
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
