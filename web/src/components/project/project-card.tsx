@@ -15,7 +15,9 @@ interface Props {
 
 export const ProjectCard: FC<Props> = ({ project }) => {
   const { user } = useSession();
-  const { data: stars } = useNamespaceStars(user?.login, {}, true); // only fetch stars if the namespace is the user's
+
+  const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
+  const stars = starsQuery.data;
 
   // state
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);

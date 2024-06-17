@@ -16,9 +16,10 @@ import { Toaster } from 'react-hot-toast';
 // routing
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
+// custom contexts
+import { ProjectPageProvider } from './contexts/project-page-context';
 import './globals.css';
-import { About } from './pages/About';
-import Home from './pages/Home';
+import { Home } from './pages/Home';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
@@ -60,7 +61,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/:namespace/:project',
-    element: <ProjectPage />,
+    element: (
+      <ProjectPageProvider>
+        <ProjectPage />
+      </ProjectPageProvider>
+    ),
   },
 ]);
 

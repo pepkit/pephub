@@ -7,8 +7,8 @@ const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
 export interface ValidationParams {
-  pep_registry?: string | null;
-  pep_files?: FileList | null;
+  pepRegistry?: string | null;
+  pepFiles?: FileList | null;
   schema?: string | null;
   schema_file?: File | null;
   schema_registry?: string | null;
@@ -16,16 +16,16 @@ export interface ValidationParams {
 }
 
 const runValidation = async (params: ValidationParams) => {
-  const { pep_registry, pep_files, schema, schema_registry } = params;
+  const { pepRegistry, pepFiles, schema, schema_registry } = params;
 
   // create form data
   const formData = new FormData();
 
   // PEP things
-  formData.append('pep_registry', pep_registry || '');
-  if (pep_files) {
-    for (let i = 0; i < pep_files.length; i++) {
-      formData.append('pep_files', pep_files[i]);
+  formData.append('pep_registry', pepRegistry || '');
+  if (pepFiles) {
+    for (let i = 0; i < pepFiles.length; i++) {
+      formData.append('pep_files', pepFiles[i]);
     }
   }
 
@@ -43,9 +43,9 @@ const runValidation = async (params: ValidationParams) => {
 };
 
 export const useValidation = (params: ValidationParams) => {
-  const { pep_registry, pep_files, schema, schema_registry, enabled } = params;
+  const { pepRegistry, pepFiles, schema, schema_registry, enabled } = params;
   return useQuery({
-    queryKey: ['validation', pep_registry, pep_files, schema, schema_registry],
+    queryKey: ['validation', pepRegistry, pepFiles, schema, schema_registry],
     queryFn: () => runValidation(params),
     enabled: enabled,
     refetchOnWindowFocus: false,

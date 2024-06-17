@@ -4,12 +4,11 @@ import Tooltip, { TooltipProps } from 'react-bootstrap/Tooltip';
 import { useSearchParams } from 'react-router-dom';
 import ReactSelect from 'react-select';
 
-import { ProjectViewsResponse } from '../../api/project';
-import { search } from '../../api/search';
+import { ProjectViewAnnotation } from '../../../types';
 
 interface Props {
   projectViewsIsLoading: boolean;
-  projectViews: ProjectViewsResponse | undefined;
+  projectViews: ProjectViewAnnotation[] | undefined;
   view: string | undefined;
   setView: (view: string | undefined) => void;
 }
@@ -32,7 +31,7 @@ export const ViewSelector = (props: Props) => {
         <ReactSelect
           className="top-z rounded w-100"
           options={
-            projectViews?.views.map((view) => ({
+            projectViews?.map((view) => ({
               view: view.name,
               description: view.description || 'No description',
               value: view.name,
@@ -51,12 +50,12 @@ export const ViewSelector = (props: Props) => {
               setSearchParams(searchParams);
             }
           }}
-          isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
+          isDisabled={projectViews?.length === 0 || projectViewsIsLoading}
           isClearable
           placeholder={
             projectViewsIsLoading
               ? 'Loading views...'
-              : projectViews?.views.length === 0
+              : projectViews?.length === 0
               ? 'No views available'
               : 'Select a view'
           }

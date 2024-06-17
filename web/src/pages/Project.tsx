@@ -1,6 +1,6 @@
-import { FC, Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
+import { Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
@@ -19,17 +19,12 @@ import { ProjectPageheaderPlaceholder } from '../components/placeholders/project
 import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
 import { SampleTable } from '../components/tables/sample-table';
+import { useProjectPage } from '../contexts/project-page-context';
 import { useAddStar } from '../hooks/mutations/useAddStar';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
 import { useRemoveStar } from '../hooks/mutations/useRemoveStar';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
-import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
-import { useProjectConfig } from '../hooks/queries/useProjectConfig';
-import { useProjectViews } from '../hooks/queries/useProjectViews';
-import { useSampleTable } from '../hooks/queries/useSampleTable';
-import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
-import { useValidation } from '../hooks/queries/useValidation';
 import { useView } from '../hooks/queries/useView';
 import { useSession } from '../hooks/useSession';
 import { dateStringToDateTime } from '../utils/dates';
@@ -37,10 +32,8 @@ import { copyToClipboard, getOS, numberWithCommas } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
 import { downloadZip } from '../utils/project';
 
-type ProjectView = 'samples' | 'subsamples' | 'config';
-
 const MAX_DESC_HEIGHT = 200;
-const MAX_SAMPLE_COUNT = 5_000;
+
 interface CustomToggleProps {
   children?: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
@@ -62,9 +55,11 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
   </a>
 ));
 
-export const ProjectPage: FC = () => {
+export const ProjectPage = () => {
   // user info
   const { user, jwt, login } = useSession();
+
+  const [searchParams] = useSearchParams();
 
   // auto-dismiss popup for large sample tables
   const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
@@ -72,57 +67,54 @@ export const ProjectPage: FC = () => {
   // os info
   const os = getOS();
 
-  let { namespace, project } = useParams();
-  namespace = namespace?.toLowerCase();
-  // project = project?.toLowerCase();
+  // project page context state
+  const {
+    namespace,
+    projectName,
+    tag,
+    projectAnnotationQuery,
+    sampleTableQuery,
+    subSampleTableQuery,
+    projectConfigQuery,
+    projectViewsQuery,
+    projectValidationQuery,
+    shouldFetchSampleTable,
+    pageView,
+    MAX_SAMPLE_COUNT,
+  } = useProjectPage();
 
-  // get tag from url
-  let [searchParams, setSearchParams] = useSearchParams();
-  const tag = searchParams.get('tag') || 'default';
+  const { starsQuery, addStarMutation, removeStarMutation } = useNamespaceStars(user?.login || '/', {}, true);
+
+  const isStarred = starsQuery.data?.find(
+    (star) =>
+      star.namespace === projectAnnotationQuery.data?.namespace && star.name === projectAnnotationQuery.data?.name,
+  );
+
+  // pull out data for easier access
+  const projectInfo = projectAnnotationQuery.data;
+  const projectConfig = projectConfigQuery.data;
+  const samples = sampleTableQuery?.data?.items || [];
+  const subsamples = subSampleTableQuery.data?.items || [];
+  const projectViews = projectViewsQuery.data?.views || [];
+  const validationResult = projectValidationQuery.data;
+
+  // get fork from url
   const fork = searchParams.get('fork');
 
   // view selection
   const [view, setView] = useState(searchParams.get('view') || undefined);
 
   // users stars - determine if they have this PEP starred
-  const { data: userStars } = useNamespaceStars(user?.login || '', {}, true);
-  const isStarred =
-    userStars?.map((star) => `${star.namespace}/${star.name}:${star.tag}`).includes(`${namespace}/${project}:${tag}`) ||
-    false;
 
-  const starAddMutation = useAddStar(user?.login || '', namespace!, project!, tag);
-  const starRemoveMutation = useRemoveStar(user?.login || '', namespace!, project!, tag);
-
-  // fetch data
-  const {
-    data: projectInfo,
-    isLoading: projectInfoIsLoading,
-    error,
-  } = useProjectAnnotation(namespace, project || '', tag);
-
-  // is the sample table too big to fetch?
-  const fetchSampleTable = projectInfo?.number_of_samples ? projectInfo.number_of_samples <= MAX_SAMPLE_COUNT : false;
-  // const fetchSampleTable = false; // testing only
-
-  const { data: projectSamples } = useSampleTable({
+  const { data: viewData } = useView({
     namespace,
-    project,
-    tag,
-    enabled: projectInfo === undefined ? false : fetchSampleTable,
-  });
-  const { data: projectSubsamples } = useSubsampleTable(namespace, project, tag);
-  const { data: projectConfig, isLoading: projectConfigIsLoading } = useProjectConfig(namespace, project || '', tag);
-  const { data: projectViews, isLoading: projectViewsIsLoading } = useProjectViews(namespace, project || '', tag);
-  const { data: viewData, isLoading: viewDataIsLoading } = useView({
-    namespace,
-    project,
+    project: projectName,
     tag,
     view,
     enabled: view !== undefined,
   });
 
-  // state
-  const [projectView, setProjectView] = useState<ProjectView>('samples');
+  // local state
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
@@ -134,31 +126,19 @@ export const ProjectPage: FC = () => {
 
   // state for editing config, samples, and subsamples
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
-  const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(projectSamples?.items || []);
-  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(projectSubsamples?.items || []);
-
-  const {
-    data: validationResult,
-    isLoading: isValidationLoading,
-    isFetching: isValidationFetching,
-    refetch,
-  } = useValidation({
-    pep_registry: `${namespace}/${project}:${tag}`,
-    schema: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
-    schema_registry: projectInfo?.pep_schema,
-    enabled: namespace && project && tag && projectInfo === undefined ? false : fetchSampleTable,
-  });
+  const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(samples);
+  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(subSampleTableQuery.data?.items || []);
 
   const runValidation = () => {
-    refetch();
+    projectValidationQuery.refetch();
   };
 
   // watch for query changes to update newProjectConfig and newProjectSamples
   useEffect(() => {
     setNewProjectConfig(projectConfig?.config || '');
-    setNewProjectSamples(projectSamples?.items || []);
-    setNewProjectSubsamples(projectSubsamples?.items || []);
-  }, [projectConfig, projectSamples, projectSubsamples]);
+    setNewProjectSamples(samples);
+    setNewProjectSubsamples(subsamples);
+  }, [projectAnnotationQuery, subSampleTableQuery, subSampleTableQuery]);
 
   // watch for the fork query param to open the fork modal
   useEffect(() => {
@@ -173,32 +153,32 @@ export const ProjectPage: FC = () => {
 
   useEffect(() => {
     if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
-      setShowLargeSampleTableModal(!fetchSampleTable);
+      setShowLargeSampleTableModal(!shouldFetchSampleTable);
     }
-  }, [fetchSampleTable, projectInfo]);
+  }, [shouldFetchSampleTable, projectAnnotationQuery.data]);
 
   // check if config or samples are dirty
   const configIsDirty = newProjectConfig !== projectConfig?.config;
 
   // use JSON stringify to compare arrays
-  const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(projectSamples?.items || []);
-  const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(projectSubsamples?.items || []);
+  const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(samples);
+  const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(subsamples);
 
   // reset config and samples
   const resetConfig = () => {
     setNewProjectConfig(projectConfig?.config || '');
   };
   const resetSamples = () => {
-    setNewProjectSamples(projectSamples?.items || []);
+    setNewProjectSamples(samples);
   };
   const resetSubsamples = () => {
-    setNewProjectSubsamples(projectSubsamples?.items || []);
+    setNewProjectSubsamples(subsamples);
   };
 
   // mutations for updating config and samples on the server
-  const configMutation = useConfigMutation(namespace || '', project || '', tag, newProjectConfig);
+  const configMutation = useConfigMutation(namespace || '', projectName || '', tag, newProjectConfig);
 
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', project || '', tag, {
+  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', projectName || '', tag, {
     config: newProjectConfig,
     samples: newProjectSamples,
     subsamples: newProjectSubsamples,
@@ -228,7 +208,7 @@ export const ProjectPage: FC = () => {
           break;
       }
       // check for ctrl+s, ignore if fetchsampletable is false
-      if (ctrlKey && e.key === 's' && fetchSampleTable && !view) {
+      if (ctrlKey && e.key === 's' && shouldFetchSampleTable && !view) {
         e.preventDefault();
         if (configIsDirty || samplesIsDirty || subsamplesIsDirty) {
           handleTotalProjectChange();
@@ -237,9 +217,9 @@ export const ProjectPage: FC = () => {
     });
   }, []);
 
-  if (error) {
+  if (projectAnnotationQuery.error) {
     return (
-      <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
+      <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
         <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
           <h1 className="fw-bold">Error 😫</h1>
           <p className="text-muted fst-italic">An error occured fetching the project... Are you sure it exists?</p>
@@ -254,7 +234,7 @@ export const ProjectPage: FC = () => {
   }
 
   return (
-    <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
+    <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
       <div>
         <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
           <div className="d-flex flex-row align-items-center w-75">
@@ -262,7 +242,7 @@ export const ProjectPage: FC = () => {
               <Breadcrumb.Item href="/">home</Breadcrumb.Item>
               <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
               <Breadcrumb.Item active>
-                {project}:{tag}
+                {projectName}:{tag}
               </Breadcrumb.Item>
               {projectInfo?.is_private && (
                 <li>
@@ -280,7 +260,7 @@ export const ProjectPage: FC = () => {
             <div className="d-flex flex-row align-items-center">
               <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
                 <span className="text-sm fw-bold">
-                  {projectInfo
+                  {projectAnnotationQuery.data
                     ? `${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`
                     : 'Loading'}
                 </span>
@@ -304,7 +284,7 @@ export const ProjectPage: FC = () => {
                 More
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                <Dropdown.Item onClick={() => downloadZip(namespace || '', project || '', tag, jwt)}>
+                <Dropdown.Item onClick={() => downloadZip(namespace, projectName, tag, jwt)}>
                   <i className="bi bi-file-earmark-zip me-1"></i>
                   Download
                 </Dropdown.Item>
@@ -356,12 +336,24 @@ export const ProjectPage: FC = () => {
             </Dropdown>
             <button
               className="btn btn-outline-dark btn-sm"
-              disabled={starAddMutation.isPending || starRemoveMutation.isPending}
+              disabled={addStarMutation.isPending || removeStarMutation.isPending}
               onClick={() => {
+                if (!user) {
+                  login();
+                  return;
+                }
                 if (isStarred) {
-                  starRemoveMutation.mutate();
+                  removeStarMutation.mutate({
+                    namespaceToRemove: projectInfo?.namespace!,
+                    projectNameToRemove: projectInfo?.name!,
+                    projectTagToRemove: projectInfo?.tag!,
+                  });
                 } else {
-                  starAddMutation.mutate();
+                  addStarMutation.mutate({
+                    namespaceToStar: projectInfo?.namespace!,
+                    projectNameToStar: projectInfo?.name!,
+                    projectTagToStar: projectInfo?.tag!,
+                  });
                 }
               }}
             >
@@ -460,18 +452,16 @@ export const ProjectPage: FC = () => {
       ) : (
         <Fragment>
           <div className="mt-2 px-2">
-            {projectInfoIsLoading || projectInfo === undefined ? (
+            {projectAnnotationQuery.isFetching || projectInfo === undefined ? (
               <ProjectPageheaderPlaceholder />
             ) : (
               <>
                 <div className="flex-row d-flex align-items-end justify-content-between mx-3">
                   <ProjectDataNav
-                    pageView={projectView}
-                    setPageView={(view) => setProjectView(view)}
                     configIsDirty={configIsDirty}
                     samplesIsDirty={samplesIsDirty}
                     subsamplesIsDirty={subsamplesIsDirty}
-                    projectViewIsLoading={projectViewsIsLoading}
+                    projectViewIsLoading={projectViewsQuery.isFetching}
                     projectViews={projectViews}
                     projectView={view}
                     setProjectView={setView}
@@ -482,10 +472,8 @@ export const ProjectPage: FC = () => {
                       {/* <ValidationTooltip /> */}
                       {projectInfo?.pep_schema ? (
                         <div className="d-flex flex-row align-items-center mb-1 me-4">
-                          {isValidationLoading || isValidationFetching ? (
-                            <>
-                              <span>Validating...</span>
-                            </>
+                          {projectValidationQuery.isLoading || projectValidationQuery.isFetching ? (
+                            <span>Validating...</span>
                           ) : validationResult?.valid ? (
                             <>
                               <Dropdown>
@@ -551,14 +539,14 @@ export const ProjectPage: FC = () => {
                         </div>
                       )}
                       <div className="px-1">
-                        {fetchSampleTable && !view && (
+                        {shouldFetchSampleTable && !view && (
                           <Fragment>
                             <button
                               disabled={
                                 configMutation.isPending ||
                                 totalProjectMutation.isPending ||
                                 !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
-                                !fetchSampleTable ||
+                                !shouldFetchSampleTable ||
                                 !!view
                               }
                               onClick={() => handleTotalProjectChange()}
@@ -589,7 +577,7 @@ export const ProjectPage: FC = () => {
           <div className="row gx-0 h-100">
             <div className="col-12">
               <div ref={projectDataRef}>
-                {projectView === 'samples' ? (
+                {pageView === 'samples' ? (
                   <SampleTable
                     // fill to the rest of the screen minus the offset of the project data
                     height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
@@ -598,7 +586,7 @@ export const ProjectPage: FC = () => {
                     data={view !== undefined ? viewData?._samples || [] : newProjectSamples || []}
                     onChange={(value) => setNewProjectSamples(value)}
                   />
-                ) : projectView === 'subsamples' ? (
+                ) : pageView === 'subsamples' ? (
                   <>
                     <SampleTable
                       // fill to the rest of the screen minus the offset of the project data
@@ -615,7 +603,7 @@ export const ProjectPage: FC = () => {
                     <ProjectConfigEditor
                       readOnly={!(projectInfo && canEdit(user, projectInfo))}
                       value={
-                        projectConfigIsLoading
+                        projectConfigQuery.isLoading
                           ? 'Loading.'
                           : projectConfig?.config
                           ? newProjectConfig
@@ -634,31 +622,31 @@ export const ProjectPage: FC = () => {
       <EditMetaMetadataModal
         show={showEditMetaMetadataModal}
         onHide={() => setShowEditMetaMetadataModal(false)}
-        namespace={namespace || ''}
-        project={project || ''}
+        namespace={namespace}
+        project={projectName}
         tag={tag}
       />
       <ProjectAPIEndpointsModal
         show={showAPIEndpointsModal}
         onHide={() => setShowAPIEndpointsModal(false)}
         namespace={namespace || ''}
-        project={project || ''}
+        project={projectName}
         tag={tag}
       />
       <DeletePEPModal
         show={showDeletePEPModal}
         onHide={() => setShowDeletePEPModal(false)}
-        namespace={namespace || ''}
-        project={project || ''}
+        namespace={namespace}
+        project={projectName}
         tag={tag}
         redirect={`/${user?.login}`}
       />
       <ForkPEPModal
         show={showForkPEPModal}
         onHide={() => setShowForkPEPModal(false)}
-        namespace={namespace || ''}
-        project={project || ''}
-        description={projectInfo?.description || ''}
+        namespace={namespace}
+        project={projectName}
+        description={projectInfo?.description || 'No description'}
         tag={tag}
       />
       <AddToPOPModal
@@ -667,7 +655,7 @@ export const ProjectPage: FC = () => {
           setShowAddToPOPModal(false);
         }}
         namespace={namespace!}
-        project={project!}
+        project={projectName}
         tag={tag}
       />
       <LargeSampleTableModal

@@ -58,6 +58,18 @@ export interface StarsResponse {
   results: ProjectAnnotation[];
 }
 
+interface AddStarResponse {
+  namespace: string;
+  registry_path: string;
+  message: string;
+}
+
+interface RemoveStarResponse {
+  message: string;
+  registry: string;
+  namespace: string;
+}
+
 export const getNamespaceInfo = (namespace: string, token: string | null = null) => {
   const url = `${API_BASE}/namespaces/${namespace}/`; // note the trailing slash
   if (!token) {
@@ -270,7 +282,7 @@ export const starProject = (
 ) => {
   const url = `${API_BASE}/namespaces/${namespace}/stars`;
   return axios
-    .post(
+    .post<AddStarResponse>(
       url,
       {
         namespace: star_namespace,
@@ -298,7 +310,7 @@ export const removeStar = (
 ) => {
   const url = `${API_BASE}/namespaces/${namespace}/stars`;
   return axios
-    .delete(url, {
+    .delete<RemoveStarResponse>(url, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
