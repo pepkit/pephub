@@ -1,18 +1,17 @@
-import { Fragment, MouseEvent, forwardRef, useEffect, useRef, useState } from 'react';
-import { Dropdown } from 'react-bootstrap';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
-import { StatusIcon } from '../components/badges/status-icons';
 import { PageLayout } from '../components/layout/page-layout';
-import { ProjectDataNav } from '../components/layout/project-data-nav';
 import { LargeSampleTableModal } from '../components/modals/sample-table-too-large';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { PopInterface } from '../components/pop/pop-interface';
 import { ProjectConfigEditor } from '../components/project/project-config';
+import { ProjectInfoFooter } from '../components/project/project-info-footer';
 import { ProjectDescription } from '../components/project/project-page-description';
 import { ProjectHeaderBar } from '../components/project/project-page-header-bar';
+import { ProjectValidationAndEditButtons } from '../components/project/project-validation-and-edit-buttons';
 import { SampleTable } from '../components/tables/sample-table';
 import { useProjectPage } from '../contexts/project-page-context';
 import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
@@ -20,34 +19,12 @@ import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjec
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useView } from '../hooks/queries/useView';
 import { useSession } from '../hooks/useSession';
-import { dateStringToDateTime } from '../utils/dates';
 import { getOS } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
 
-interface CustomToggleProps {
-  children?: React.ReactNode;
-  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-}
-
-const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ children, onClick }, ref) => (
-  <a
-    href=""
-    ref={ref}
-    onClick={(e) => {
-      e.preventDefault();
-      if (onClick) {
-        onClick(e);
-      }
-    }}
-    className="text-decoration-none"
-  >
-    {children}
-  </a>
-));
-
 export const ProjectPage = () => {
   // user info
-  const { user, jwt, login } = useSession();
+  const { user } = useSession();
 
   const [searchParams] = useSearchParams();
 
@@ -66,7 +43,6 @@ export const ProjectPage = () => {
     sampleTableQuery,
     subSampleTableQuery,
     projectConfigQuery,
-    projectViewsQuery,
     projectValidationQuery,
     shouldFetchSampleTable,
     pageView,
@@ -87,8 +63,6 @@ export const ProjectPage = () => {
   const projectConfig = projectConfigQuery.data;
   const samples = sampleTableQuery?.data?.items || [];
   const subsamples = subSampleTableQuery.data?.items || [];
-  const projectViews = projectViewsQuery.data?.views || [];
-  const validationResult = projectValidationQuery.data;
 
   // view selection
   const [view, setView] = useState(searchParams.get('view') || undefined);
@@ -132,20 +106,6 @@ export const ProjectPage = () => {
   // use JSON stringify to compare arrays
   const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(samples);
   const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(subsamples);
-
-  // reset config and samples
-  const resetConfig = () => {
-    setNewProjectConfig(projectConfig?.config || '');
-  };
-  const resetSamples = () => {
-    setNewProjectSamples(samples);
-  };
-  const resetSubsamples = () => {
-    setNewProjectSubsamples(subsamples);
-  };
-
-  // mutations for updating config and samples on the server
-  const configMutation = useConfigMutation(namespace || '', projectName || '', tag, newProjectConfig);
 
   const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', projectName || '', tag, {
     config: newProjectConfig,
@@ -200,41 +160,9 @@ export const ProjectPage = () => {
 
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
-      <div>
-        <ProjectHeaderBar isStarred={isStarred} />
-        <ProjectDescription />
-        <div className="px-4">
-          <div className="d-flex flex-row align-items-center text-muted mt-1">
-            <small className="d-flex flex-row align-items-center justify-content-between w-100">
-              <span className="me-3">
-                <i className="bi bi-calendar3"></i>
-                <span className="mx-1">Created:</span>
-                <span id="project-submission-date">{dateStringToDateTime(projectInfo?.submission_date || '')}</span>
-                <i className="ms-4 bi bi-calendar3"></i>
-                <span className="mx-1">Updated:</span>
-                <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
-              </span>
-              <span className="">
-                {projectInfo?.forked_from && (
-                  <span className="me-2 p-1 border rounded fw-bold">
-                    <Fragment>
-                      <i className="bi bi-bezier2"></i>
-                      <span className="ms-1">Forked from</span>
-                      <a
-                        className="text-decoration-none ms-1"
-                        href={`/${projectInfo?.forked_from.replace(':', '?tag=')}`}
-                      >
-                        {projectInfo?.forked_from}
-                      </a>
-                    </Fragment>
-                  </span>
-                )}
-                {projectInfo?.digest}
-              </span>
-            </small>
-          </div>
-        </div>
-      </div>
+      <ProjectHeaderBar isStarred={isStarred} />
+      <ProjectDescription />
+      <ProjectInfoFooter />
       {projectInfo?.pop && !forceTraditionalInterface ? (
         <PopInterface project={projectInfo} />
       ) : (
@@ -243,123 +171,19 @@ export const ProjectPage = () => {
             {projectAnnotationQuery.isFetching || projectInfo === undefined ? (
               <ProjectPageheaderPlaceholder />
             ) : (
-              <>
-                <div className="flex-row d-flex align-items-end justify-content-between mx-3">
-                  <ProjectDataNav
-                    configIsDirty={configIsDirty}
-                    samplesIsDirty={samplesIsDirty}
-                    subsamplesIsDirty={subsamplesIsDirty}
-                    projectViewIsLoading={projectViewsQuery.isFetching}
-                    projectViews={projectViews}
-                    projectView={view}
-                    setProjectView={setView}
-                  />
-                  {/* no matter what, only render if belonging to the user */}
-                  {user && projectInfo && canEdit(user, projectInfo) ? (
-                    <div className="d-flex flex-row align-items-center w-25 justify-content-end">
-                      {/* <ValidationTooltip /> */}
-                      {projectInfo?.pep_schema ? (
-                        <div className="d-flex flex-row align-items-center mb-1 me-4">
-                          {projectValidationQuery.isLoading || projectValidationQuery.isFetching ? (
-                            <span>Validating...</span>
-                          ) : validationResult?.valid ? (
-                            <>
-                              <Dropdown>
-                                <div className="d-flex align-items-center">
-                                  <Dropdown.Toggle as={ValiationToggle}>
-                                    <StatusIcon className="text-2xl cursor-pointer" variant="success" />
-                                  </Dropdown.Toggle>
-                                  <span className="text-success">Valid</span>
-                                </div>
-                                <Dropdown.Menu className="border border-dark shadow-lg">
-                                  <Dropdown.Header className="text-success">
-                                    Your PEP is valid against {projectInfo?.pep_schema}
-                                  </Dropdown.Header>
-                                </Dropdown.Menu>
-                              </Dropdown>
-                            </>
-                          ) : (
-                            <>
-                              <Dropdown>
-                                <div className="d-flex align-items-center">
-                                  <Dropdown.Toggle as={ValiationToggle}>
-                                    <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
-                                  </Dropdown.Toggle>
-                                  <span className="text-danger">Invalid</span>
-                                </div>
-                                <Dropdown.Menu className="border border-dark shadow-lg">
-                                  <Dropdown.Header>
-                                    {validationResult?.error_type === 'Schema' ? (
-                                      <span className="text-danger">Schema is invalid</span>
-                                    ) : (
-                                      <>
-                                        <span className="text-danger fw-bold">
-                                          Your PEP is invalid against {projectInfo?.pep_schema}
-                                        </span>
-                                        <p className="mb-0 fw-bold">
-                                          <span className="text-danger">
-                                            Errors found in {validationResult?.error_type}
-                                            {': '}
-                                          </span>
-                                        </p>
-                                        {validationResult?.errors.map((error, index) => (
-                                          <Dropdown.Header className="text-danger" key={index}>
-                                            <i className="bi bi bi-exclamation-triangle me-2"></i>
-                                            {error}
-                                          </Dropdown.Header>
-                                        ))}
-                                      </>
-                                    )}
-                                  </Dropdown.Header>
-                                </Dropdown.Menu>
-                              </Dropdown>
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="d-flex flex-row align-items-center mb-1 me-4">
-                          <>
-                            <div className="d-flex align-items-center">
-                              <StatusIcon className="text-2xl" variant="warning" />
-                              <span>Add schema to PEP to validate</span>
-                            </div>
-                          </>
-                        </div>
-                      )}
-                      <div className="px-1">
-                        {shouldFetchSampleTable && !view && (
-                          <Fragment>
-                            <button
-                              disabled={
-                                configMutation.isPending ||
-                                totalProjectMutation.isPending ||
-                                !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
-                                !shouldFetchSampleTable ||
-                                !!view
-                              }
-                              onClick={() => handleTotalProjectChange()}
-                              className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
-                            >
-                              {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
-                            </button>
-                            <button
-                              className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
-                              onClick={() => {
-                                resetConfig();
-                                resetSamples();
-                                resetSubsamples();
-                              }}
-                              disabled={!(configIsDirty || samplesIsDirty || subsamplesIsDirty)}
-                            >
-                              Discard
-                            </button>
-                          </Fragment>
-                        )}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </>
+              <ProjectValidationAndEditButtons
+                newProjectSamples={newProjectSamples}
+                newProjectSubsamples={newProjectSubsamples}
+                newProjectConfig={newProjectConfig}
+                view={view}
+                setView={setView}
+                setNewProjectConfig={setNewProjectConfig}
+                setNewProjectSamples={setNewProjectSamples}
+                setNewProjectSubsamples={setNewProjectSubsamples}
+                configIsDirty={configIsDirty}
+                samplesIsDirty={samplesIsDirty}
+                subsamplesIsDirty={subsamplesIsDirty}
+              />
             )}
           </div>
           <div className="row gx-0 h-100">

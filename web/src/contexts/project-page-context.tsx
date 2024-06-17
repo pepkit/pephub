@@ -26,7 +26,7 @@ const ProjectPageContext = createContext<{
   projectConfigQuery: ReturnType<typeof useProjectConfig>;
   projectViewsQuery: ReturnType<typeof useProjectViews>;
   projectValidationQuery: ReturnType<typeof useValidation>;
-  shouldFetchSampleTable?: boolean;
+  shouldFetchSampleTable: boolean;
   pageView: ProjectPageView;
   setPageView: React.Dispatch<React.SetStateAction<ProjectPageView>>;
   forceTraditionalInterface: boolean;
