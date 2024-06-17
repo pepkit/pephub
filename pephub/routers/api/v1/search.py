@@ -60,6 +60,7 @@ async def search_for_pep(
     limit = query.limit
     offset = query.offset
     score_threshold = query.score_threshold
+
     if qdrant is not None:
         try:
             # get the embeding for the query
