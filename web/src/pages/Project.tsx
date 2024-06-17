@@ -14,7 +14,6 @@ import { ProjectHeaderBar } from '../components/project/project-page-header-bar'
 import { ProjectValidationAndEditButtons } from '../components/project/project-validation-and-edit-buttons';
 import { SampleTable } from '../components/tables/sample-table';
 import { useProjectPage } from '../contexts/project-page-context';
-import { useConfigMutation } from '../hooks/mutations/useConfigMutation';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useView } from '../hooks/queries/useView';
