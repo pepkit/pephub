@@ -119,32 +119,24 @@ export const ProjectMetaEditForm: FC<Props> = ({
     }
   }, [newPop]);
 
-  const [checkProjectNameText, setCheckProjectNameText] = useState(false);
-  const [checkProjectTagText, setCheckProjectTagText] = useState(false);
-  const checkChar = (e) => {
-    console.log(e.key)
-    if (!/[0-9a-zA-Z_-]/.test(e.key)) {
-      e.preventDefault();
-      if (e.target.id === 'project-name') {
-        setCheckProjectNameText(true);
-      }
-      if (e.target.id === 'project-tag') {
-        setCheckProjectTagText(true);
-      }
+  const [badName, setBadName] = useState(false);
+  const [badTag, setBadTag] = useState(false);
+
+  useEffect(() => {
+    if (/[^0-9a-zA-Z_-]/.test(newName)) {
+      setBadName(true);
+    } else {
+      setBadName(false);
     }
-  };
-  const checkPaste = (e) => {
-    console.log(e.clipboardData.getData('text'))
-    if (/[^0-9a-zA-Z_-]/.test(e.clipboardData.getData('text'))) {
-      e.preventDefault();
-      if (e.target.id === 'project-name') {
-      setCheckProjectNameText(true);
-      }
-      if (e.target.id === 'project-tag') {
-        setCheckProjectTagText(true);
-      }
+  }, [newName]);
+
+  useEffect(() => {
+    if (/[^0-9a-zA-Z_-]/.test(newTag)) {
+      setBadTag(true);
+    } else {
+      setBadTag(false);
     }
-  };
+  }, [newTag]);
   
   return (
     <form>
@@ -177,10 +169,8 @@ export const ProjectMetaEditForm: FC<Props> = ({
           className="form-control"
           id="project-name"
           aria-describedby="pep-name-help"
-          onKeyDown={(e)=>checkChar(e)}
-          onPaste={(e)=>checkPaste(e)}
         />
-        { checkProjectNameText ? <p style = {{fontSize: '12px', color: 'gray', paddingTop: '2px' }}>Project Name must contain only alphanumeric characters, '-', or '_'.</p> : null }
+        { badName ? <p className = 'text-secondary pt-1' style = {{fontSize: '.75em'}}>Project Name must contain only alphanumeric characters, '-', or '_'.</p> : null }
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
@@ -214,10 +204,8 @@ export const ProjectMetaEditForm: FC<Props> = ({
           className="form-control"
           id="project-tag"
           aria-describedby="pep-name-help"
-          onKeyDown={(e)=>checkChar(e)}
-          onPaste={(e)=>checkPaste(e)}
         />
-        { checkProjectTagText ? <p style = {{fontSize: '12px', color: 'gray', paddingTop: '2px' }}>Project Tag must contain only alphanumeric characters, '-', or '_'.</p> : null }
+        { badTag ? <p className = 'text-secondary pt-1' style = {{fontSize: '.75em'}}>Project Tag must contain only alphanumeric characters, '-', or '_'.</p> : null }
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
@@ -252,7 +240,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
         <button
           onClick={() => mutation.mutate()}
           id="metadata-save-btn"
-          disabled={(!isDirty && isValid) || mutation.isPending}
+          disabled={(!isDirty && isValid || badName || badTag) || mutation.isPending}
           type="button"
           className="btn btn-success me-1"
         >
