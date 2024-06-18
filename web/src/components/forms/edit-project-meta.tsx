@@ -119,22 +119,30 @@ export const ProjectMetaEditForm: FC<Props> = ({
     }
   }, [newPop]);
 
-  const [badName, setBadName] = useState(false);
-  const [badTag, setBadTag] = useState(false);
+  const [badName, setBadName] = useState(null);
+  const [badTag, setBadTag] = useState(null);
 
   useEffect(() => {
-    if (/[^0-9a-zA-Z_-]/.test(newName)) {
-      setBadName(true);
+    if (newName) {
+      if (/[^0-9a-zA-Z_-]/.test(newName)) {
+        setBadName("Project Name must contain only alphanumeric characters, '-', or '_'.");
+      } else {
+        setBadName(null);
+      }
     } else {
-      setBadName(false);
+      setBadName("Project Name must not be empty.");
     }
   }, [newName]);
 
   useEffect(() => {
-    if (/[^0-9a-zA-Z_-]/.test(newTag)) {
-      setBadTag(true);
+    if (newTag) {
+      if (/[^0-9a-zA-Z_-]/.test(newTag)) {
+        setBadTag("Project Tag must contain only alphanumeric characters, '-', or '_'.");
+      } else {
+        setBadTag(null);
+      }
     } else {
-      setBadTag(false);
+      setBadTag("Project Tag must not be empty.");
     }
   }, [newTag]);
   
@@ -170,7 +178,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-name"
           aria-describedby="pep-name-help"
         />
-        { badName ? <p className = 'text-secondary pt-1' style = {{fontSize: '.75em'}}>Project Name must contain only alphanumeric characters, '-', or '_'.</p> : null }
+        { badName ? <p className = 'text-secondary pt-1' style = {{fontSize: '.75em'}}>{ badName }</p> : null }
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
@@ -205,7 +213,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-tag"
           aria-describedby="pep-name-help"
         />
-        { badTag ? <p className = 'text-secondary pt-1' style = {{fontSize: '.75em'}}>Project Tag must contain only alphanumeric characters, '-', or '_'.</p> : null }
+        { badTag ? <p className = 'text-secondary pt-1' style = {{fontSize: '.75em'}}>{ badTag }</p> : null }
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
