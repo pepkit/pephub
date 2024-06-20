@@ -1,6 +1,6 @@
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
-import { FC } from 'react';
+import { FC, useRef } from 'react';
 
 import { Sample } from '../../../types';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
@@ -36,80 +36,86 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
     tableClassName += ` ${className}`;
   }
 
+  // create a ref to the hot table,
+  // this lets us call methods on the table
+  const hotRef = useRef<HotTable>(null);
+
   return (
-    <>
-      <div className={tableClassName}>
-        <HotTable
-          data={rows.length > 0 ? rows : [[]]}
-          stretchH={stretchH || 'all'}
-          height={height || tableHeight}
-          readOnly={readOnly}
-          colHeaders={true}
-          renderer={(instance, td, row, col, prop, value, cellProperties) => {
-            Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
-            td.innerHTML = `<div class="truncated">${value || ''}</div>`;
-            td.addEventListener('click', function (event) {
-              const innerDiv = td.querySelector('.truncated');
-              if (innerDiv && event.target === innerDiv) {
-                innerDiv.classList.toggle('expanded');
-              }
+    <div className={tableClassName}>
+      <HotTable
+        ref={hotRef}
+        data={rows.length > 0 ? rows : [[]]}
+        stretchH={stretchH || 'all'}
+        height={height || tableHeight}
+        readOnly={readOnly}
+        colHeaders={true}
+        renderer={(instance, td, row, col, prop, value, cellProperties) => {
+          Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+          td.innerHTML = `<div class="truncated">${value || ''}</div>`;
+          td.addEventListener('click', function (event) {
+            const innerDiv = td.querySelector('.truncated');
+            if (innerDiv && event.target === innerDiv) {
+              innerDiv.classList.toggle('expanded');
+            }
+          });
+        }}
+        dropdownMenu={true}
+        hiddenColumns={{
+          indicators: true,
+        }}
+        minCols={2}
+        minRows={minRows || 50}
+        contextMenu={[
+          'row_above',
+          'row_below',
+          '---------',
+          'col_left',
+          'col_right',
+          '---------',
+          'remove_row',
+          'remove_col',
+          '---------',
+          'alignment',
+          '---------',
+          'copy',
+          'cut',
+        ]}
+        multiColumnSorting={true}
+        filters={true}
+        rowHeaders={true}
+        beforeRenderer={addClassesToRows}
+        manualRowMove={true}
+        licenseKey="non-commercial-and-evaluation"
+        manualColumnResize
+        afterChange={(changes) => {
+          if (changes && onChange) {
+            changes.forEach((change) => {
+              const [row, col, _, newVal] = change;
+              // @ts-ignore - we know that col is a number
+              rows[row][col] = newVal;
             });
-          }}
-          dropdownMenu={true}
-          hiddenColumns={{
-            indicators: true,
-          }}
-          minCols={2}
-          minRows={minRows || 50}
-          contextMenu={[
-            'row_above',
-            'row_below',
-            '---------',
-            'col_left',
-            'col_right',
-            '---------',
-            'remove_row',
-            'remove_col',
-            '---------',
-            'alignment',
-            '---------',
-            'copy',
-            'cut',
-          ]}
-          multiColumnSorting={true}
-          filters={true}
-          rowHeaders={true}
-          beforeRenderer={addClassesToRows}
-          manualRowMove={true}
-          licenseKey="non-commercial-and-evaluation"
-          manualColumnResize
-          afterChange={(changes) => {
-            if (changes && onChange) {
-              changes.forEach((change) => {
-                const [row, col, _, newVal] = change;
-                // @ts-ignore - we know that col is a number
-                rows[row][col] = newVal;
-              });
-              onChange(arraysToSampleList(rows));
-            }
-          }}
-          afterRemoveCol={(index, amount) => {
-            // remove all values at the specified index from "rows"
-            rows.forEach((row) => {
-              row.splice(index, 0);
-            });
-            if (onChange) {
-              onChange(arraysToSampleList(rows));
-            }
-          }}
-          afterRemoveRow={(index, amount) => {
-            rows.splice(index, 0);
-            if (onChange) {
-              onChange(arraysToSampleList(rows));
-            }
-          }}
-        />
-      </div>
-    </>
+            onChange(arraysToSampleList(rows));
+          }
+        }}
+        afterRemoveCol={(index, amount) => {
+          // remove all values at the specified index from "rows"
+          rows.forEach((row) => {
+            row.splice(index, 0);
+          });
+          if (onChange) {
+            onChange(arraysToSampleList(rows));
+          }
+        }}
+        afterRemoveRow={(index, amount) => {
+          rows.splice(index, 0);
+          if (onChange) {
+            onChange(arraysToSampleList(rows));
+          }
+        }}
+        afterFilter={(k) => {
+          console.log(hotRef.current?.hotInstance?.getData());
+        }}
+      />
+    </div>
   );
 };

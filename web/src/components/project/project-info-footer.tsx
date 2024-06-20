@@ -32,7 +32,6 @@ export const ProjectInfoFooter = () => {
                 </Fragment>
               </span>
             )}
-            {projectInfo?.digest}
           </span>
         </small>
       </div>
