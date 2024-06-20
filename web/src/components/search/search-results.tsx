@@ -1,8 +1,9 @@
-import { FC, Fragment } from 'react';
-import { ProgressBar } from 'react-bootstrap';
+import { FC, Fragment, useRef } from 'react';
+import { OverlayTrigger, ProgressBar } from 'react-bootstrap';
 
 import { SearchHit } from '../../../types';
 import { GitHubAvatar } from '../../components/badges/github-avatar';
+import { isEllipsisActive } from '../../utils/etc';
 
 export const NUM_RESULTS_PER_PAGE = 10;
 
@@ -21,6 +22,8 @@ const HitCard = ({ hit }: { hit: SearchHit }) => {
   // round to 2 decimal places
   let hit_score = Math.round(hit.score * 100) / 100;
 
+  const descriptionRef = useRef<HTMLElement>(null);
+
   return (
     <div className="border-bottom border-dark border-2 mt-2 p-1">
       <div className="d-flex flex-row align-items-center justify-content-between">
@@ -33,9 +36,33 @@ const HitCard = ({ hit }: { hit: SearchHit }) => {
           </div>
         </div>
       </div>
-      <p className="truncate text-secondary" style={{ fontSize: '0.9rem' }}>
-        {hit.payload.description}
-      </p>
+      <OverlayTrigger
+        placement="top"
+        overlay={
+          isEllipsisActive(descriptionRef.current) && hit.payload.description ? (
+            <div
+              className="p-2 rounded bg-dark text-white text-xs"
+              style={{
+                maxWidth: '800px',
+              }}
+            >
+              <p className="m-0">{hit.payload.description}</p>
+            </div>
+          ) : (
+            <></>
+          )
+        }
+        delay={{ show: 250, hide: 400 }}
+      >
+        <p
+          // @ts-ignore
+          ref={descriptionRef}
+          className="text-secondary line-clamp cursor"
+          style={{ fontSize: '0.9rem' }}
+        >
+          {hit.payload.description}
+        </p>
+      </OverlayTrigger>
     </div>
   );
 };

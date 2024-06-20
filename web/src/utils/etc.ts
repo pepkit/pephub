@@ -83,3 +83,10 @@ export const constructQueryFromPaginationParams = (params: PaginationParams): UR
   }
   return query;
 };
+
+export const isEllipsisActive = (element: HTMLElement | null): boolean => {
+  if (!element) {
+    return false;
+  }
+  return element.offsetWidth < element.scrollWidth;
+};
