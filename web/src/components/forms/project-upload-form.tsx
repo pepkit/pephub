@@ -37,6 +37,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
     setValue,
     formState: { isValid, errors },
   } = useForm<FromFileInputs>({
+    mode: 'onChange',
     defaultValues: {
       is_private: false,
       pep_schema: 'pep/2.1.0',
@@ -109,15 +110,23 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           {...register('name', {
             required: true,
             pattern: {
-              value: /^\S+$/,
-              message: 'No spaces allowed.',
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "Project Name must contain only alphanumeric characters, '-', or '_'.",
             },
           })}
         />
         <span className="mx-1 mb-1">:</span>
-        <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag')} />
+        <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag', {
+          required: false,
+            pattern: {
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "Project Tag must contain only alphanumeric characters, '-', or '_'.",
+            },
+          })}
+        />
       </span>
-      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
+      <ErrorMessage errors={errors} name="name" render={({ message }) => message ? (<p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
+      <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{message}</p>): null} />
       <textarea
         id="description"
         className="form-control mt-3"

@@ -119,32 +119,8 @@ export const ProjectMetaEditForm: FC<Props> = ({
     }
   }, [newPop]);
 
-  const [badName, setBadName] = useState(null);
-  const [badTag, setBadTag] = useState(null);
-
-  useEffect(() => {
-    if (newName) {
-      if (/[^0-9a-zA-Z_-]/.test(newName)) {
-        setBadName("Project Name must contain only alphanumeric characters, '-', or '_'.");
-      } else {
-        setBadName(null);
-      }
-    } else {
-      setBadName("Project Name must not be empty.");
-    }
-  }, [newName]);
-
-  useEffect(() => {
-    if (newTag) {
-      if (/[^0-9a-zA-Z_-]/.test(newTag)) {
-        setBadTag("Project Tag must contain only alphanumeric characters, '-', or '_'.");
-      } else {
-        setBadTag(null);
-      }
-    } else {
-      setBadTag("Project Tag must not be empty.");
-    }
-  }, [newTag]);
+  const isBadName = newName ? (/[^0-9a-zA-Z_-]/.test(newName) ? "Project Name must contain only alphanumeric characters, '-', or '_'." : null) : "Project Name must not be empty."
+  const isBadTag = newTag ? (/[^0-9a-zA-Z_-]/.test(newTag) ? "Project Tag must contain only alphanumeric characters, '-', or '_'." : null) : "Project Tag must not be empty."
   
   return (
     <form>
@@ -178,7 +154,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-name"
           aria-describedby="pep-name-help"
         />
-        { badName ? <p className = 'text-secondary pt-1' style = {{fontSize: '.75em'}}>{ badName }</p> : null }
+        { isBadName ? <p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{ isBadName }</p> : null }
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
@@ -213,7 +189,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
           id="project-tag"
           aria-describedby="pep-name-help"
         />
-        { badTag ? <p className = 'text-secondary pt-1' style = {{fontSize: '.75em'}}>{ badTag }</p> : null }
+        { isBadTag ? <p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{ isBadTag }</p> : null }
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
@@ -248,7 +224,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
         <button
           onClick={() => mutation.mutate()}
           id="metadata-save-btn"
-          disabled={(!isDirty && isValid || badName || badTag) || mutation.isPending}
+          disabled={(!isDirty && isValid || isBadName || isBadTag) || mutation.isPending}
           type="button"
           className="btn btn-success me-1"
         >
