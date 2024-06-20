@@ -1,5 +1,4 @@
 import { ErrorMessage } from '@hookform/error-message';
-import { FC } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -27,7 +26,8 @@ interface Props {
   defaultNamespace?: string;
 }
 
-export const BlankProjectForm: FC<Props> = ({ onHide, defaultNamespace }) => {
+export const BlankProjectForm = (props: Props) => {
+  const { onHide, defaultNamespace } = props;
   // get user innfo
   const { user } = useSession();
 
@@ -99,38 +99,47 @@ sample_table: samples.csv
           Private
         </label>
       </div>
-      <span className="fs-4 d-flex align-items-center">
-        <select
-          id="blank-namespace-select"
-          className="form-select w-75"
-          aria-label="Namespace selection"
-          {...register('namespace', { required: true })}
-        >
-          <option value={user?.login}>{user?.login}</option>
-          {user?.orgs.map((org) => (
-            <option key={org} value={org}>
-              {org}
-            </option>
-          ))}
-        </select>
-        <span className="mx-1 mb-1">/</span>
-        <input
-          // dont allow any whitespace
-          {...register('project_name', {
-            required: true,
-            pattern: {
-              value: /^\S+$/,
-              message: 'No spaces allowed.',
-            },
-          })}
-          id="blank-project-name"
-          type="text"
-          className="form-control"
-          placeholder="name"
-        />
-        <span className="mx-1 mb-1">:</span>
+      <div className="namespace-name-tag-container">
+        <label className="fw-bold text-sm">Namespace *</label>
+        <label className="fw-bold text-sm">Name *</label>
+        <label className="fw-bold text-sm">Tag</label>
+      </div>
+      <div className="namespace-name-tag-container fs-4 w-full ">
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <select
+            id="blank-namespace-select"
+            className="form-select"
+            aria-label="Namespace selection"
+            {...register('namespace', { required: true })}
+          >
+            <option value={user?.login}>{user?.login}</option>
+            {user?.orgs.map((org) => (
+              <option key={org} value={org}>
+                {org}
+              </option>
+            ))}
+          </select>
+          <span className="mx-1 mb-1">/</span>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <input
+            // dont allow any whitespace
+            {...register('project_name', {
+              required: true,
+              pattern: {
+                value: /^\S+$/,
+                message: 'No spaces allowed.',
+              },
+            })}
+            id="blank-project-name"
+            type="text"
+            className="form-control"
+            placeholder="name"
+          />
+          <span className="mx-1 mb-1">:</span>
+        </div>
         <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
-      </span>
+      </div>
       <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="blank_description"
@@ -159,7 +168,7 @@ sample_table: samples.csv
       </div>
       <Tabs defaultActiveKey="samples" id="blank-project-tabs" className="mt-3">
         <Tab eventKey="samples" title="Samples">
-          <div className="p-2 border border-top-1">
+          <div className="p-2 -1">
             <SampleTable
               height={300}
               data={sampleTable}
@@ -170,7 +179,7 @@ sample_table: samples.csv
           </div>
         </Tab>
         <Tab eventKey="config" title="Config">
-          <div className="p-1 border border-top-0">
+          <div className="p-1 -0">
             <ProjectConfigEditor
               value={configYAML}
               setValue={(data) => {
