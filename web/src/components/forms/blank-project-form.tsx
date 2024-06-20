@@ -104,7 +104,7 @@ sample_table: samples.csv
         <label className="fw-bold text-sm">Name *</label>
         <label className="fw-bold text-sm">Tag</label>
       </div>
-      <div className="namespace-name-tag-container fs-4 w-full ">
+      <div className="namespace-name-tag-container fs-4 w-full">
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
           <select
             id="blank-namespace-select"
