@@ -157,7 +157,7 @@ export const NamespaceSearchResults: FC<NamespaceProps> = ({ hits }) => {
     );
   }
   return (
-    <>
+    <Fragment>
       <h2 className="fw-bold">Namespaces</h2>
       {hits.map((hit) => (
         <div key={hit} className="d-flex flex-row align-items-center mt-2">
@@ -167,6 +167,6 @@ export const NamespaceSearchResults: FC<NamespaceProps> = ({ hits }) => {
           </a>
         </div>
       ))}
-    </>
+    </Fragment>
   );
 };
