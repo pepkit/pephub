@@ -6,7 +6,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { Sample } from '../../../types';
 import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
 import { useSession } from '../../hooks/useSession';
-import { GitHubAvatar } from '../badges/github-avatar';
 import { ProjectConfigEditor } from '../project/project-config';
 import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
@@ -130,16 +129,42 @@ sample_table: samples.csv
           placeholder="name"
         />
         <span className="mx-1 mb-1">:</span>
-        <input {...register('tag', {
-          required: false,
+        <input
+          {...register('tag', {
+            required: false,
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
               message: "Project Tag must contain only alphanumeric characters, '-', or '_'.",
             },
-        })} id="blank_tag" type="text" className="form-control" placeholder="default" />
+          })}
+          id="blank_tag"
+          type="text"
+          className="form-control"
+          placeholder="default"
+        />
       </span>
-      <ErrorMessage errors={errors} name="project_name" render={({ message }) => message ? (<p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
-      <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
+      <ErrorMessage
+        errors={errors}
+        name="project_name"
+        render={({ message }) =>
+          message ? (
+            <p className="text-secondary pt-1" style={{ fontSize: '.75em' }}>
+              {message}
+            </p>
+          ) : null
+        }
+      />
+      <ErrorMessage
+        errors={errors}
+        name="tag"
+        render={({ message }) =>
+          message ? (
+            <p className="text-secondary pt-1" style={{ fontSize: '.75em' }}>
+              {message}
+            </p>
+          ) : null
+        }
+      />
       <textarea
         id="blank_description"
         className="form-control mt-3"
