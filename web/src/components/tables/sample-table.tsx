@@ -1,7 +1,7 @@
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-import { FC } from 'react';
+import { useRef } from 'react';
 
 import { Sample } from '../../../types';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
@@ -39,10 +39,15 @@ export const SampleTable = (props: Props) => {
     tableClassName += ` ${className}`;
   }
 
+  const hotRef = useRef<HotTable>(null);
+
+  const PH_ID_COL_NAME = 'ph_id';
+
   return (
     <>
       <div className={tableClassName}>
         <HotTable
+          ref={hotRef}
           data={rows.length > 0 ? rows : [[]]}
           stretchH={stretchH || 'all'}
           height={height || tableHeight}
@@ -61,7 +66,25 @@ export const SampleTable = (props: Props) => {
           dropdownMenu={true}
           hiddenColumns={{
             indicators: true,
-            // columns: [numColumns - 1],
+            columns: [numColumns - 1],
+          }}
+          afterPaste={(_, coords) => {
+            const row1 = hotRef.current?.hotInstance?.getDataAtRow(0);
+            let phIdIndex;
+            if (row1 === undefined) {
+              // this occurs when the table is empty
+              phIdIndex = -1;
+            } else {
+              phIdIndex = row1?.indexOf(PH_ID_COL_NAME) || -1;
+            }
+            const startRow = coords[0].startRow;
+            const endRow = coords[0].endRow;
+
+            if (phIdIndex !== -1) {
+              for (let row = startRow; row <= endRow; row++) {
+                hotRef?.current?.hotInstance?.setDataAtCell(row, phIdIndex, null);
+              }
+            }
           }}
           minCols={2}
           minRows={minRows || 50}
@@ -94,13 +117,7 @@ export const SampleTable = (props: Props) => {
                 // @ts-ignore - we know that col is a number
                 rows[row][col] = newVal;
               });
-              // debugger;
-              // scrub last column (ph_id) to set as null
-              changes.forEach((change) => {
-                if (change[1] == changes.length - 1) {
-                  change[change.length - 1] = null;
-                }
-              });
+
               // debugger;
               onChange(arraysToSampleList(rows));
             }
