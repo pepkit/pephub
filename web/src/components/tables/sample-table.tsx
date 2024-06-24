@@ -1,7 +1,7 @@
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
-import { FC } from 'react';
 import 'handsontable/dist/handsontable.full.css';
+import { FC } from 'react';
 
 import { Sample } from '../../../types';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
@@ -20,7 +20,8 @@ interface Props {
  * This table is meant to handle csv strings, so just pass in
  * the csv string and it will handle the rest
  */
-export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, height, minRows, stretchH, className }) => {
+export const SampleTable = (props: Props) => {
+  const { data, readOnly = false, onChange, height, minRows, stretchH, className } = props;
   // parse the list of objects into rows
   const rows = sampleListToArrays(data);
   const ROW_HEIGHT = 23; // px
@@ -93,6 +94,14 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
                 // @ts-ignore - we know that col is a number
                 rows[row][col] = newVal;
               });
+              // debugger;
+              // scrub last column (ph_id) to set as null
+              changes.forEach((change) => {
+                if (change[1] == changes.length - 1) {
+                  change[change.length - 1] = null;
+                }
+              });
+              // debugger;
               onChange(arraysToSampleList(rows));
             }
           }}

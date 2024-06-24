@@ -13,3 +13,4 @@ requests
 pyjwt[crypto]
 coloredlogs
 fastembed
+numpy<2.0.0
