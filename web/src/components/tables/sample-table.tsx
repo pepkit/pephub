@@ -1,6 +1,7 @@
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import { FC } from 'react';
+import 'handsontable/dist/handsontable.full.css';
 
 import { Sample } from '../../../types';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
@@ -23,6 +24,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
   // parse the list of objects into rows
   const rows = sampleListToArrays(data);
   const ROW_HEIGHT = 23; // px
+  const numColumns = rows.length > 0 ? rows[0].length : 0;
 
   // compute table height based on number of rows
   // or the minRows prop if it is provided
@@ -58,6 +60,7 @@ export const SampleTable: FC<Props> = ({ data, readOnly = false, onChange, heigh
           dropdownMenu={true}
           hiddenColumns={{
             indicators: true,
+            // columns: [numColumns - 1],
           }}
           minCols={2}
           minRows={minRows || 50}

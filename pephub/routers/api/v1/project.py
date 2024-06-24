@@ -185,14 +185,14 @@ async def update_a_pep(
             status_code=401,
         )
 
-    current_project = agent.project.get(namespace, project, tag=tag)
-    raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
-    new_raw_project = raw_peppy_project.copy()
+    # current_project = agent.project.get(namespace, project, tag=tag)
+    # raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
+    new_raw_project = {}
 
     # sample table update
     if updated_project.sample_table is not None:
         new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
-        new_raw_project[CONFIG_KEY] = dict(current_project.config)
+        # new_raw_project[CONFIG_KEY] = dict(current_project.config)
 
         if updated_project.project_config_yaml is not None:
             try:
@@ -206,10 +206,10 @@ async def update_a_pep(
             sample_table_index_col = yaml_dict.get(
                 SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
             )
-        else:
-            sample_table_index_col = current_project.config.get(
-                SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
-            )
+        # else:
+        #     sample_table_index_col = current_project.config.get(
+        #         SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
+        #     )
 
         # check all sample names are something other than
         # None or an empty string
@@ -230,7 +230,7 @@ async def update_a_pep(
 
     # subsample table update
     if updated_project.subsample_tables is not None:
-        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = updated_project.subsample_tables
+        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = updated_project.subsample_tables if list(updated_project.subsample_tables[0][0].values())[0] else None
 
     if updated_project.description:
         new_raw_project["_config"]["description"] = updated_project.description
@@ -259,7 +259,7 @@ async def update_a_pep(
         except Exception as e:
             raise HTTPException(
                 status_code=400,
-                detail=f"Could not create PEP from provided yaml. Error: {e}",
+                detail=f"Could not create PEP from provided data. Error: {e}",
             )
 
         try:
@@ -285,9 +285,10 @@ async def update_a_pep(
         )
 
         # grab latest project and return to user
-        raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
+        if not new_raw_project:
+            new_raw_project = agent.project.get(namespace, project, tag=tag, raw=True)
         return {
-            "project": raw_peppy_project,
+            "project": new_raw_project,
             "project_annotation": agent.annotation.get(
                 namespace, project, tag=tag, admin=list_of_admins
             ),
@@ -322,7 +323,8 @@ async def update_a_pep(
     # update tag and project values
     project = updated_project.name or project
     tag = updated_project.tag or tag
-    raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
+
+    # raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
 
     return JSONResponse(
         content={
@@ -416,7 +418,7 @@ async def get_pep_samples(
 @project.get("/config", summary="Get project configuration file")
 async def get_pep_config(
     config: dict = Depends(get_config),
-    format: Optional[Literal["JSON", "String"]] = "JSON",
+    # format: Optional[Literal["JSON", "String"]] = "JSON",
 ):
     """
     Get project configuration file from a certain project and namespace

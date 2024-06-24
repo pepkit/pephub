@@ -108,7 +108,7 @@ agent = PEPDatabaseAgent(
 embedding_model = Embedding(
     model_name=os.getenv("HF_MODEL", DEFAULT_HF_MODEL), max_length=512
 )
-
+# embedding_model = None
 
 def generate_random_auth_code() -> str:
     """
@@ -198,9 +198,10 @@ def get_project(
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
     raw: bool = False,
+    with_ids: Optional[bool] = True, # TODO: change it to false
 ) -> Union[peppy.Project, Dict[str, Any]]:
     try:
-        proj = agent.project.get(namespace, project, tag, raw=raw)
+        proj = agent.project.get(namespace, project, tag, raw=raw, with_id=with_ids)
         yield proj
     except ProjectNotFoundError:
         raise HTTPException(
