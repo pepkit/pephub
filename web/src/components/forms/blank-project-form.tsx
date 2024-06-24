@@ -148,7 +148,7 @@ sample_table: samples.csv
         name="project_name"
         render={({ message }) =>
           message ? (
-            <p className="text-secondary pt-1" style={{ fontSize: '.75em' }}>
+            <p className="text-danger pt-1" style={{ fontSize: '.75em' }}>
               {message}
             </p>
           ) : null
@@ -159,7 +159,7 @@ sample_table: samples.csv
         name="tag"
         render={({ message }) =>
           message ? (
-            <p className="text-secondary pt-1" style={{ fontSize: '.75em' }}>
+            <p className="text-danger pt-1" style={{ fontSize: '.75em' }}>
               {message}
             </p>
           ) : null

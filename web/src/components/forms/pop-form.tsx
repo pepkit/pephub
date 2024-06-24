@@ -123,8 +123,8 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           })}
         id="blank_tag" type="text" className="form-control" placeholder="default" />
       </span>
-      <ErrorMessage errors={errors} name="project_name" render={({ message }) => message ? (<p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
-      <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
+      <ErrorMessage errors={errors} name="project_name" render={({ message }) => message ? (<p className='text-danger pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
+      <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-danger pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
       <textarea
         id="blank_description"
         className="form-control mt-3"

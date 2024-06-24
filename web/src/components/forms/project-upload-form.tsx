@@ -125,8 +125,8 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           })}
         />
       </span>
-      <ErrorMessage errors={errors} name="name" render={({ message }) => message ? (<p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
-      <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-secondary pt-1' style={{fontSize: '.75em'}}>{message}</p>): null} />
+      <ErrorMessage errors={errors} name="name" render={({ message }) => message ? (<p className='text-danger pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
+      <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-danger pt-1' style={{fontSize: '.75em'}}>{message}</p>): null} />
       <textarea
         id="description"
         className="form-control mt-3"
