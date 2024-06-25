@@ -40,7 +40,7 @@ import { downloadZip } from '../utils/project';
 type ProjectView = 'samples' | 'subsamples' | 'config';
 
 const MAX_DESC_HEIGHT = 200;
-const MAX_SAMPLE_COUNT = 5_000;
+const MAX_SAMPLE_COUNT = 55_000;
 interface CustomToggleProps {
   children?: React.ReactNode;
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
