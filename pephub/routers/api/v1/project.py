@@ -230,7 +230,11 @@ async def update_a_pep(
 
     # subsample table update
     if updated_project.subsample_tables is not None:
-        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = updated_project.subsample_tables if list(updated_project.subsample_tables[0][0].values())[0] else None
+        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = (
+            updated_project.subsample_tables
+            if list(updated_project.subsample_tables[0][0].values())[0]
+            else None
+        )
 
     if updated_project.description:
         new_raw_project["_config"]["description"] = updated_project.description

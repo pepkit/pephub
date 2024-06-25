@@ -110,6 +110,7 @@ embedding_model = Embedding(
 )
 # embedding_model = None
 
+
 def generate_random_auth_code() -> str:
     """
     Generate a random 32-digit code.
@@ -198,7 +199,7 @@ def get_project(
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
     raw: bool = False,
-    with_ids: Optional[bool] = True, # TODO: change it to false
+    with_ids: Optional[bool] = True,  # TODO: change it to false
 ) -> Union[peppy.Project, Dict[str, Any]]:
     try:
         proj = agent.project.get(namespace, project, tag, raw=raw, with_id=with_ids)
