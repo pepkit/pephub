@@ -173,7 +173,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
             },
           })}
         />
-        <ErrorMessage errors={errors} name="name" render={({ message }) => message ? (<p className='text-danger pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
+        <ErrorMessage errors={errors} name="name" render={({ message }) => message ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
@@ -218,7 +218,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
             },
           })}
         />
-        <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-danger pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
+        <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">

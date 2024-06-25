@@ -24,6 +24,21 @@ interface Props {
   defaultNamespace?: string;
 }
 
+const CombinedErrorMessage = ({ errors }) => {
+  const nameError = errors.name?.message;
+  const tagError = errors.tag?.message;
+
+  if (nameError && tagError) {
+    return (
+      <p className='text-danger text-xs pt-1'>
+        Project Name and Tag must contain only alphanumeric characters, '-', or '_'.
+      </p>
+    );
+  }
+
+  return null;
+};
+
 export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user info
   const { user } = useSession();
@@ -108,7 +123,10 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           placeholder="name"
           // dont allow any whitespace
           {...register('name', {
-            required: true,
+            required: {
+              value: true,
+              message: "Project Name must not be empty.",
+            },
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
               message: "Project Name must contain only alphanumeric characters, '-', or '_'.",
@@ -125,8 +143,9 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           })}
         />
       </span>
-      <ErrorMessage errors={errors} name="name" render={({ message }) => message ? (<p className='text-danger pt-1' style={{fontSize: '.75em'}}>{message}</p>) : null} />
-      <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-danger pt-1' style={{fontSize: '.75em'}}>{message}</p>): null} />
+      <CombinedErrorMessage errors={errors} />
+      <ErrorMessage errors={errors} name="name" render={({ message }) => message && !errors.tag ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
+      <ErrorMessage errors={errors} name="tag" render={({ message }) => message && !errors.name ? (<p className='text-danger text-xs pt-1'>{message}</p>): null} />
       <textarea
         id="description"
         className="form-control mt-3"

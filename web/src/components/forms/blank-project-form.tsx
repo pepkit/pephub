@@ -26,6 +26,21 @@ interface Props {
   defaultNamespace?: string;
 }
 
+const CombinedErrorMessage = ({ errors }) => {
+  const nameError = errors.project_name?.message;
+  const tagError = errors.tag?.message;
+
+  if (nameError && tagError) {
+    return (
+      <p className='text-danger text-xs pt-1'>
+        Project Name and Tag must contain only alphanumeric characters, '-', or '_'.
+      </p>
+    );
+  }
+
+  return null;
+};
+
 export const BlankProjectForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user innfo
   const { user } = useSession();
@@ -115,18 +130,21 @@ sample_table: samples.csv
         </select>
         <span className="mx-1 mb-1">/</span>
         <input
+          id="blank-project-name"
+          type="text"
+          className="form-control"
+          placeholder="name"
           // dont allow any whitespace
           {...register('project_name', {
-            required: true,
+            required: {
+              value: true,
+              message: "Project Name must not be empty.",
+            },
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
               message: "Project Name must contain only alphanumeric characters, '-', or '_'.",
             },
           })}
-          id="blank-project-name"
-          type="text"
-          className="form-control"
-          placeholder="name"
         />
         <span className="mx-1 mb-1">:</span>
         <input
@@ -143,12 +161,13 @@ sample_table: samples.csv
           placeholder="default"
         />
       </span>
+      <CombinedErrorMessage errors={errors} />
       <ErrorMessage
         errors={errors}
         name="project_name"
         render={({ message }) =>
-          message ? (
-            <p className="text-danger pt-1" style={{ fontSize: '.75em' }}>
+          message && !errors.tag ? (
+            <p className="text-danger text-xs pt-1">
               {message}
             </p>
           ) : null
@@ -158,8 +177,8 @@ sample_table: samples.csv
         errors={errors}
         name="tag"
         render={({ message }) =>
-          message ? (
-            <p className="text-danger pt-1" style={{ fontSize: '.75em' }}>
+          message && !errors.project_name ? (
+            <p className="text-danger text-xs pt-1">
               {message}
             </p>
           ) : null
