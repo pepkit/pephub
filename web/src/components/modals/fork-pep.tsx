@@ -24,14 +24,31 @@ interface ForkProjectInputs {
 }
 
 const CombinedErrorMessage = ({ errors }) => {
-  const projectError = errors.project?.message;
+  const nameError = errors.project?.message;
   const tagError = errors.tag?.message;
+  let msg = null
 
-  if (projectError && tagError) {
+  if (nameError == 'empty' && !tagError) {
+    msg = "Project Name must not be empty."
+  } else if (nameError == 'invalid' && !tagError) {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'empty' && tagError == 'invalid') {
+    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'invalid' && tagError == 'invalid') {
+    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'empty' && tagError == 'empty') {
+    msg = "Project Name and Tag must not be empty."
+  } else if (nameError == 'invalid' && tagError == 'empty') {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_' and Tag must not be empty."
+  } else if (!nameError && tagError == 'empty') {
+    msg = "Project Tag must not be empty."
+  } else if (!nameError && tagError == 'invalid') {
+    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'."
+  }
+
+  if (nameError || tagError) {
     return (
-      <p className='text-danger pt-1 text-xs'>
-        Project Name and Tag must contain only alphanumeric characters, '-', or '_'.
-      </p>
+      <p className='text-danger text-xs pt-1'>{ msg }</p>
     );
   }
 
@@ -72,17 +89,6 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
     projectDescription,
     onHide,
   );
-
-  const isBadName = projectName
-    ? /[^0-9a-zA-Z_-]/.test(projectName)
-      ? "Project Name must contain only alphanumeric characters, '-', or '_'."
-      : null
-    : 'Project Name must not be empty.';
-  const isBadTag = projectTag
-    ? /[^0-9a-zA-Z_-]/.test(projectTag)
-      ? "Project Tag must contain only alphanumeric characters, '-', or '_'."
-      : null
-    : 'Project Tag must not be empty.';
 
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
@@ -126,11 +132,11 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
               {...register('project', {
                 required: {
                   value: true,
-                  message: "Project Name must not be empty.",
+                  message: "empty",
                 },
                 pattern: {
                   value: /^[a-zA-Z0-9_-]+$/,
-                  message: "Project Name must contain only alphanumeric characters, '-', or '_'.",
+                  message: "invalid",
                 },
               })}
             />
@@ -143,18 +149,16 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
               {...register('tag', {
                 required: {
                   value: true,
-                  message: "Project Tag must not be empty.",
+                  message: "empty",
                 },
                 pattern: {
                   value: /^[a-zA-Z0-9_-]+$/,
-                  message: "Project Tag must contain only alphanumeric characters, '-', or '_'.",
+                  message: "invalid",
                 },
               })}
             />
           </span>
           <CombinedErrorMessage errors={errors} />
-          <ErrorMessage errors={errors} name="project" render={({ message }) => message && !errors.tag ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
-          <ErrorMessage errors={errors} name="tag" render={({ message }) => message && !errors.project ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
           <p className="mt-1 lh-sm text-muted" style={{ fontSize: '0.9rem' }}>
             {' '}
             By default, forks are named the same as their original project. You can customize the name to distinguish it
@@ -184,7 +188,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
         </button>
         <button
           onClick={() => mutation.mutate()}
-          disabled={!isValid || isBadName || isBadTag || mutation.isPending}
+          disabled={!isValid || errors.project?.message || errors.tag?.message || mutation.isPending}
           id="fork-submit-btn"
           type="submit"
           className="btn btn-success"

@@ -27,12 +27,23 @@ interface Props {
 const CombinedErrorMessage = ({ errors }) => {
   const nameError = errors.name?.message;
   const tagError = errors.tag?.message;
+  let msg = null
 
-  if (nameError && tagError) {
+  if (nameError == 'empty' && !tagError) {
+    msg = "Project Name must not be empty."
+  } else if (nameError == 'invalid' && !tagError) {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'empty' && tagError == 'invalid') {
+    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'invalid' && tagError == 'invalid') {
+    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (!nameError && tagError == 'invalid') {
+    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'."
+  }
+
+  if (nameError || tagError) {
     return (
-      <p className='text-danger text-xs pt-1'>
-        Project Name and Tag must contain only alphanumeric characters, '-', or '_'.
-      </p>
+      <p className='text-danger text-xs pt-1'>{ msg }</p>
     );
   }
 
@@ -125,11 +136,11 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           {...register('name', {
             required: {
               value: true,
-              message: "Project Name must not be empty.",
+              message: "empty",
             },
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
-              message: "Project Name must contain only alphanumeric characters, '-', or '_'.",
+              message: "invalid",
             },
           })}
         />
@@ -138,14 +149,12 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           required: false,
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
-              message: "Project Tag must contain only alphanumeric characters, '-', or '_'.",
+              message: "invalid",
             },
           })}
         />
       </span>
       <CombinedErrorMessage errors={errors} />
-      <ErrorMessage errors={errors} name="name" render={({ message }) => message && !errors.tag ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
-      <ErrorMessage errors={errors} name="tag" render={({ message }) => message && !errors.name ? (<p className='text-danger text-xs pt-1'>{message}</p>): null} />
       <textarea
         id="description"
         className="form-control mt-3"

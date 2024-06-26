@@ -121,17 +121,6 @@ export const ProjectMetaEditForm: FC<Props> = ({
     }
   }, [newPop]);
 
-  const isBadName = newName
-    ? /[^0-9a-zA-Z_-]/.test(newName)
-      ? "Project Name must contain only alphanumeric characters, '-', or '_'."
-      : null
-    : 'Project Name must not be empty.';
-  const isBadTag = newTag
-    ? /[^0-9a-zA-Z_-]/.test(newTag)
-      ? "Project Tag must contain only alphanumeric characters, '-', or '_'."
-      : null
-    : 'Project Tag must not be empty.';
-
   return (
     <form>
       <div className="mb-3 form-check form-switch">
@@ -253,7 +242,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
         <button
           onClick={() => mutation.mutate()}
           id="metadata-save-btn"
-          disabled={(!isDirty && isValid) || isBadName || isBadTag || mutation.isPending}
+          disabled={(!isDirty && isValid) || errors.name?.message || errors.tag?.message || mutation.isPending}
           type="button"
           className="btn btn-success me-1"
         >
