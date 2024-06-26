@@ -256,7 +256,7 @@ export const ProjectPage: FC = () => {
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
       <div>
-        <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
+        <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-3">
           <div className="d-flex flex-row align-items-center w-75">
             <Breadcrumb className="fw-bold mt-1">
               <Breadcrumb.Item href="/">home</Breadcrumb.Item>
@@ -285,7 +285,7 @@ export const ProjectPage: FC = () => {
                     : 'Loading'}
                 </span>
                 <button
-                  className="btn btn-sm btn-link-dark shadow-none ms-1 pe-2"
+                  className="btn btn-sm btn-link-dark border-0 shadow-none ms-1 pe-2"
                   onClick={() => {
                     copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
                     setCopied(true);
@@ -389,7 +389,7 @@ export const ProjectPage: FC = () => {
             </button>
           </div>
         </div>
-        <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100 border-bottom">
+        <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100">
           <div ref={projectDescriptionRef} className="w-100" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
             <Markdown>{projectInfo?.description || 'No description'}</Markdown>
           </div>
@@ -423,7 +423,7 @@ export const ProjectPage: FC = () => {
             )}
           </div>
         )}
-        <div className="px-4">
+        <div className="px-4 pb-3 border-bottom shadow-sm">
           <div className="d-flex flex-row align-items-center text-muted mt-1">
             <small className="d-flex flex-row align-items-center justify-content-between w-100">
               <span className="me-3">
@@ -433,10 +433,13 @@ export const ProjectPage: FC = () => {
                 <i className="ms-4 bi bi-calendar3"></i>
                 <span className="mx-1">Updated:</span>
                 <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
+                <i className="ms-4 bi bi-123"></i>
+                <span className="mx-1">Sample Count:</span>
+                <span id="project-update-date">{ projectInfo?.number_of_samples }</span>
               </span>
               <span className="">
                 {projectInfo?.forked_from && (
-                  <span className="me-2 p-1 border rounded fw-bold">
+                  <span className="p-1 border rounded fw-bold">
                     <Fragment>
                       <i className="bi bi-bezier2"></i>
                       <span className="ms-1">Forked from</span>
@@ -449,7 +452,7 @@ export const ProjectPage: FC = () => {
                     </Fragment>
                   </span>
                 )}
-                {projectInfo?.digest}
+                {/*{projectInfo?.digest}*/}
               </span>
             </small>
           </div>
@@ -459,12 +462,12 @@ export const ProjectPage: FC = () => {
         <PopInterface project={projectInfo} />
       ) : (
         <Fragment>
-          <div className="mt-2 px-2">
+          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F668', height: '3.5em'}}>
             {projectInfoIsLoading || projectInfo === undefined ? (
               <ProjectPageheaderPlaceholder />
             ) : (
               <>
-                <div className="flex-row d-flex align-items-end justify-content-between mx-3">
+                <div className="h-100 flex-row d-flex align-items-end justify-content-between mx-3">
                   <ProjectDataNav
                     pageView={projectView}
                     setPageView={(view) => setProjectView(view)}
@@ -478,10 +481,10 @@ export const ProjectPage: FC = () => {
                   />
                   {/* no matter what, only render if belonging to the user */}
                   {user && projectInfo && canEdit(user, projectInfo) ? (
-                    <div className="d-flex flex-row align-items-center w-25 justify-content-end">
+                    <div className="h-100 d-flex flex-row align-items-center w-25 justify-content-end">
                       {/* <ValidationTooltip /> */}
                       {projectInfo?.pep_schema ? (
-                        <div className="d-flex flex-row align-items-center mb-1 me-4">
+                        <div className="d-flex flex-row align-items-center me-4">
                           {isValidationLoading || isValidationFetching ? (
                             <>
                               <span>Validating...</span>
@@ -505,7 +508,7 @@ export const ProjectPage: FC = () => {
                           ) : (
                             <>
                               <Dropdown>
-                                <div className="d-flex align-items-center">
+                                <div className="h-100 d-flex align-items-center">
                                   <Dropdown.Toggle as={ValiationToggle}>
                                     <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
                                   </Dropdown.Toggle>
@@ -541,7 +544,7 @@ export const ProjectPage: FC = () => {
                           )}
                         </div>
                       ) : (
-                        <div className="d-flex flex-row align-items-center mb-1 me-4">
+                        <div className="d-flex flex-row align-items-center me-4">
                           <>
                             <div className="d-flex align-items-center">
                               <StatusIcon className="text-2xl" variant="warning" />
@@ -550,7 +553,7 @@ export const ProjectPage: FC = () => {
                           </>
                         </div>
                       )}
-                      <div className="px-1">
+                      <div className="ps-1">
                         {fetchSampleTable && !view && (
                           <Fragment>
                             <button
@@ -562,12 +565,12 @@ export const ProjectPage: FC = () => {
                                 !!view
                               }
                               onClick={() => handleTotalProjectChange()}
-                              className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                              className="fst-italic btn btn-sm btn-success me-1 border-dark"
                             >
                               {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
                             </button>
                             <button
-                              className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
+                              className="fst-italic btn btn-sm btn-outline-dark bg-white"
                               onClick={() => {
                                 resetConfig();
                                 resetSamples();

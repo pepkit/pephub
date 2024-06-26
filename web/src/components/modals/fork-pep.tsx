@@ -1,3 +1,4 @@
+import { ErrorMessage } from '@hookform/error-message';
 import { FC } from 'react';
 import { Modal } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
@@ -22,6 +23,38 @@ interface ForkProjectInputs {
   is_private: boolean;
 }
 
+const CombinedErrorMessage = ({ errors }) => {
+  const nameError = errors.project?.message;
+  const tagError = errors.tag?.message;
+  let msg = null
+
+  if (nameError == 'empty' && !tagError) {
+    msg = "Project Name must not be empty."
+  } else if (nameError == 'invalid' && !tagError) {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'empty' && tagError == 'invalid') {
+    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'invalid' && tagError == 'invalid') {
+    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'empty' && tagError == 'empty') {
+    msg = "Project Name and Tag must not be empty."
+  } else if (nameError == 'invalid' && tagError == 'empty') {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_' and Tag must not be empty."
+  } else if (!nameError && tagError == 'empty') {
+    msg = "Project Tag must not be empty."
+  } else if (!nameError && tagError == 'invalid') {
+    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'."
+  }
+
+  if (nameError || tagError) {
+    return (
+      <p className='text-danger text-xs pt-1'>{ msg }</p>
+    );
+  }
+
+  return null;
+};
+
 export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, show, onHide }) => {
   const { user } = useSession();
 
@@ -30,8 +63,9 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
     reset: resetForm,
     register,
     watch,
-    formState: { isValid },
+    formState: { isValid, errors },
   } = useForm<ForkProjectInputs>({
+    mode: 'onChange',
     defaultValues: {
       namespace: user?.login,
       project: project,
@@ -91,19 +125,40 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
             </select>
             <span className="mx-1 mb-1">/</span>
             <input
-              {...register('project', { required: true })}
+              // {...register('project', { required: true })}
               type="text"
               className="form-control"
               placeholder="project name"
+              {...register('project', {
+                required: {
+                  value: true,
+                  message: "empty",
+                },
+                pattern: {
+                  value: /^[a-zA-Z0-9_-]+$/,
+                  message: "invalid",
+                },
+              })}
             />
             <span className="mx-1 mb-1">:</span>
             <input
-              {...register('tag', { required: true })}
+              // {...register('tag', { required: true })}
               type="text"
               className="form-control"
               placeholder="default"
+              {...register('tag', {
+                required: {
+                  value: true,
+                  message: "empty",
+                },
+                pattern: {
+                  value: /^[a-zA-Z0-9_-]+$/,
+                  message: "invalid",
+                },
+              })}
             />
           </span>
+          <CombinedErrorMessage errors={errors} />
           <p className="mt-1 lh-sm text-muted" style={{ fontSize: '0.9rem' }}>
             {' '}
             By default, forks are named the same as their original project. You can customize the name to distinguish it
@@ -133,7 +188,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
         </button>
         <button
           onClick={() => mutation.mutate()}
-          disabled={!isValid || mutation.isPending}
+          disabled={!isValid || errors.project?.message || errors.tag?.message || mutation.isPending}
           id="fork-submit-btn"
           type="submit"
           className="btn btn-success"

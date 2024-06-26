@@ -24,6 +24,32 @@ interface Props {
   defaultNamespace?: string;
 }
 
+const CombinedErrorMessage = ({ errors }) => {
+  const nameError = errors.name?.message;
+  const tagError = errors.tag?.message;
+  let msg = null
+
+  if (nameError == 'empty' && !tagError) {
+    msg = "Project Name must not be empty."
+  } else if (nameError == 'invalid' && !tagError) {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'empty' && tagError == 'invalid') {
+    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'invalid' && tagError == 'invalid') {
+    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (!nameError && tagError == 'invalid') {
+    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'."
+  }
+
+  if (nameError || tagError) {
+    return (
+      <p className='text-danger text-xs pt-1'>{ msg }</p>
+    );
+  }
+
+  return null;
+};
+
 export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user info
   const { user } = useSession();
@@ -37,6 +63,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
     setValue,
     formState: { isValid, errors },
   } = useForm<FromFileInputs>({
+    mode: 'onChange',
     defaultValues: {
       is_private: false,
       pep_schema: 'pep/2.1.0',
@@ -107,17 +134,27 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           placeholder="name"
           // dont allow any whitespace
           {...register('name', {
-            required: true,
+            required: {
+              value: true,
+              message: "empty",
+            },
             pattern: {
-              value: /^\S+$/,
-              message: 'No spaces allowed.',
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "invalid",
             },
           })}
         />
         <span className="mx-1 mb-1">:</span>
-        <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag')} />
+        <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag', {
+          required: false,
+            pattern: {
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "invalid",
+            },
+          })}
+        />
       </span>
-      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors} />
       <textarea
         id="description"
         className="form-control mt-3"

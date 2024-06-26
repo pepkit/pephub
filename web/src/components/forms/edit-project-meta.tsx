@@ -1,3 +1,4 @@
+import { ErrorMessage } from '@hookform/error-message';
 import { FC, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -41,8 +42,9 @@ export const ProjectMetaEditForm: FC<Props> = ({
     control,
     setValue,
     reset: resetForm,
-    formState: { isValid, isDirty },
+    formState: { isValid, isDirty, errors },
   } = useForm<FormValues>({
+    mode: 'onChange',
     defaultValues: {
       name: name,
       description: projectInfo?.description || '',
@@ -144,13 +146,23 @@ export const ProjectMetaEditForm: FC<Props> = ({
           Project Name
         </label>
         <input
-          {...register('name')}
           placeholder="Project name"
           type="text"
           className="form-control"
           id="project-name"
           aria-describedby="pep-name-help"
+          {...register('name', {
+            required: {
+              value: true,
+              message: "Project Name must not be empty.",
+            },
+            pattern: {
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "Project Name must contain only alphanumeric characters, '-', or '_'.",
+            },
+          })}
         />
+        <ErrorMessage errors={errors} name="name" render={({ message }) => message ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
@@ -179,12 +191,23 @@ export const ProjectMetaEditForm: FC<Props> = ({
           Project Tag
         </label>
         <input
-          {...register('tag')}
+          // {...register('tag')}
           type="text"
           className="form-control"
           id="project-tag"
           aria-describedby="pep-name-help"
+          {...register('tag', {
+            required: {
+              value: true,
+              message: "Project Tag must not be empty.",
+            },
+            pattern: {
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "Project Tag must contain only alphanumeric characters, '-', or '_'.",
+            },
+          })}
         />
+        <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
@@ -219,7 +242,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
         <button
           onClick={() => mutation.mutate()}
           id="metadata-save-btn"
-          disabled={(!isDirty && isValid) || mutation.isPending}
+          disabled={(!isDirty && isValid) || errors.name?.message || errors.tag?.message || mutation.isPending}
           type="button"
           className="btn btn-success me-1"
         >

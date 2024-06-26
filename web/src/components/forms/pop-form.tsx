@@ -22,6 +22,32 @@ interface Props {
   defaultNamespace?: string;
 }
 
+const CombinedErrorMessage = ({ errors }) => {
+  const nameError = errors.project_name?.message;
+  const tagError = errors.tag?.message;
+  let msg = null
+
+  if (nameError == 'empty' && !tagError) {
+    msg = "Project Name must not be empty."
+  } else if (nameError == 'invalid' && !tagError) {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'empty' && tagError == 'invalid') {
+    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (nameError == 'invalid' && tagError == 'invalid') {
+    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'."
+  } else if (!nameError && tagError == 'invalid') {
+    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'."
+  }
+
+  if (nameError || tagError) {
+    return (
+      <p className='text-danger text-xs pt-1'>{ msg }</p>
+    );
+  }
+
+  return null;
+};
+
 export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   // get user innfo
   const { user } = useSession();
@@ -35,6 +61,7 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
     control,
     formState: { isValid, errors },
   } = useForm<POPInputs>({
+    mode: 'onChange',
     defaultValues: {
       is_private: false,
       namespace: defaultNamespace || user?.login || '',
@@ -99,23 +126,33 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
         </select>
         <span className="mx-1 mb-1">/</span>
         <input
-          // dont allow any whitespace
-          {...register('project_name', {
-            required: true,
-            pattern: {
-              value: /^\S+$/,
-              message: 'No spaces allowed.',
-            },
-          })}
           id="blank-project-name"
           type="text"
           className="form-control"
           placeholder="name"
+          // dont allow any whitespace
+          {...register('project_name', {
+            required: {
+              value: true,
+              message: "empty",
+            },
+            pattern: {
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "invalid",
+            },
+          })}
         />
         <span className="mx-1 mb-1">:</span>
-        <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
+        <input {...register('tag', {
+          required: false,
+            pattern: {
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "invalid",
+            },
+          })}
+        id="blank_tag" type="text" className="form-control" placeholder="default" />
       </span>
-      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors} />
       <textarea
         id="blank_description"
         className="form-control mt-3"
