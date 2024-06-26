@@ -255,10 +255,10 @@ export const ProjectPage: FC = () => {
 
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${project}`}>
-      <div>
-        <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-3">
+      <div className='shadow-sm pt-2'>
+        <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2">
           <div className="d-flex flex-row align-items-center w-75">
-            <Breadcrumb className="fw-bold mt-1">
+            <Breadcrumb className="fw-bold pt-2">
               <Breadcrumb.Item href="/">home</Breadcrumb.Item>
               <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
               <Breadcrumb.Item active>
@@ -270,13 +270,13 @@ export const ProjectPage: FC = () => {
                 </li>
               )}
             </Breadcrumb>
-            <div className="ms-2 mb-1">
+            <div className="ms-2">
               <a className="text-decoration-none" href={`https://schema.databio.org/#/${projectHash}`}>
                 <SchemaTag schema={projectInfo?.pep_schema} />
               </a>
             </div>
           </div>
-          <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100">
+          <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100 pt-2">
             <div className="d-flex flex-row align-items-center">
               <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
                 <span className="text-sm fw-bold">
@@ -423,7 +423,7 @@ export const ProjectPage: FC = () => {
             )}
           </div>
         )}
-        <div className="px-4 pb-3 border-bottom shadow-sm">
+        <div className="px-4 pb-3 border-bottom">
           <div className="d-flex flex-row align-items-center text-muted mt-1">
             <small className="d-flex flex-row align-items-center justify-content-between w-100">
               <span className="me-3">
