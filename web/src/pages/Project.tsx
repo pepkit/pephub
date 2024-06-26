@@ -462,7 +462,7 @@ export const ProjectPage: FC = () => {
         <PopInterface project={projectInfo} />
       ) : (
         <Fragment>
-          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F670', height: '3.75em'}}>
+          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F670', height: '3.5em'}}>
             {projectInfoIsLoading || projectInfo === undefined ? (
               <ProjectPageheaderPlaceholder />
             ) : (
