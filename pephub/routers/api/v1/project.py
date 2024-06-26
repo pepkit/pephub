@@ -236,19 +236,16 @@ async def update_a_pep(
             else None
         )
 
-    if updated_project.description:
-        new_raw_project["_config"]["description"] = updated_project.description
-
-    # project config update
-    if updated_project.project_config_yaml is not None:
-        try:
-            yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
-        except yaml.scanner.ScannerError as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Could not parse provided yaml. Error: {e}",
-            )
-        new_raw_project[CONFIG_KEY] = yaml_dict
+    # # project config update
+    # if updated_project.project_config_yaml is not None:
+    #     try:
+    #         yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
+    #     except yaml.scanner.ScannerError as e:
+    #         raise HTTPException(
+    #             status_code=400,
+    #             detail=f"Could not parse provided yaml. Error: {e}",
+    #         )
+    #     new_raw_project[CONFIG_KEY] = yaml_dict
 
     # run the validation if either the sample table or project config is updated
     if any(
@@ -299,43 +296,25 @@ async def update_a_pep(
             "message": "Project updated successfully",
         }
 
-    # update "meta meta data"
-    update_dict = {}  # dict used to pass to the `db.update_item` function
-    for k, v in updated_project.model_dump(exclude_unset=True).items():
-        # is the value an attribute of the peppy project?
-        if k in new_raw_project:
-            new_raw_project[k] = v
-        # otherwise is it a valid update key?
-        elif k in VALID_UPDATE_KEYS:
-            update_dict[k] = v
-        else:
-            print(f"Invalid update key: {k}")
-            continue
-            # raising HTTPException causes problems downstream with web apps.
-            # raise HTTPException(
-            #     status_code=400,
-            #     detail=f"Invalid update key: {k}",
-            # )
+    update_dict = updated_project.model_dump(exclude_unset=True, exclude={"sample_table", "project_config_yaml", "subsample_tables"})
+    if new_raw_project:
+        update_dict.update(project=Project.from_dict(new_raw_project))
     agent.project.update(
-        dict(project=Project().from_dict(new_raw_project), **update_dict),
+        update_dict,
         namespace,
         project,
         tag,
     )
 
-    # fetch latest project and return to user
-    # update tag and project values
+    # fetch latest name and tag
     project = updated_project.name or project
     tag = updated_project.tag or tag
-
-    # raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
 
     return JSONResponse(
         content={
             "message": "PEP updated",
-            # "project": raw_peppy_project,
             "registry": f"{namespace}/{project}:{tag}",
-            "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}",
+            "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}?tag={tag}",
             "project": updated_project.model_dump(),
         },
         status_code=202,

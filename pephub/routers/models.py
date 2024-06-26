@@ -10,7 +10,6 @@ class ProjectOptional(UpdateItems):
     # sample table is a list of JSON objects
     sample_table: Optional[List[dict]] = None
     project_config_yaml: Optional[str] = None
-    description: Optional[str] = None
     subsample_tables: Optional[List[List[dict]]] = None
 
     model_config = ConfigDict(populate_by_name=True)
