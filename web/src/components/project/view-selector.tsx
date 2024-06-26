@@ -28,7 +28,7 @@ export const ViewSelector = (props: Props) => {
 
   return (
     <Fragment>
-      <div className="d-flex flex-row align-items-center justify-content-end w-25">
+      <div className="ps-3 d-flex flex-row align-items-center justify-content-end w-25">
         <ReactSelect
           className="top-z rounded w-100"
           options={

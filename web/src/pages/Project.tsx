@@ -462,12 +462,12 @@ export const ProjectPage: FC = () => {
         <PopInterface project={projectInfo} />
       ) : (
         <Fragment>
-          <div className="mt-3 px-2">
+          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F670', height: '3.75em'}}>
             {projectInfoIsLoading || projectInfo === undefined ? (
               <ProjectPageheaderPlaceholder />
             ) : (
               <>
-                <div className="flex-row d-flex align-items-end justify-content-between mx-3">
+                <div className="h-100 flex-row d-flex align-items-end justify-content-between mx-3">
                   <ProjectDataNav
                     pageView={projectView}
                     setPageView={(view) => setProjectView(view)}
@@ -481,10 +481,10 @@ export const ProjectPage: FC = () => {
                   />
                   {/* no matter what, only render if belonging to the user */}
                   {user && projectInfo && canEdit(user, projectInfo) ? (
-                    <div className="d-flex flex-row align-items-center w-25 justify-content-end">
+                    <div className="h-100 d-flex flex-row align-items-center w-25 justify-content-end">
                       {/* <ValidationTooltip /> */}
                       {projectInfo?.pep_schema ? (
-                        <div className="d-flex flex-row align-items-center mb-1 me-4">
+                        <div className="d-flex flex-row align-items-center me-4">
                           {isValidationLoading || isValidationFetching ? (
                             <>
                               <span>Validating...</span>
@@ -508,7 +508,7 @@ export const ProjectPage: FC = () => {
                           ) : (
                             <>
                               <Dropdown>
-                                <div className="d-flex align-items-center">
+                                <div className="h-100 d-flex align-items-center">
                                   <Dropdown.Toggle as={ValiationToggle}>
                                     <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
                                   </Dropdown.Toggle>
@@ -544,7 +544,7 @@ export const ProjectPage: FC = () => {
                           )}
                         </div>
                       ) : (
-                        <div className="d-flex flex-row align-items-center mb-1 me-4">
+                        <div className="d-flex flex-row align-items-center me-4">
                           <>
                             <div className="d-flex align-items-center">
                               <StatusIcon className="text-2xl" variant="warning" />
@@ -565,12 +565,12 @@ export const ProjectPage: FC = () => {
                                 !!view
                               }
                               onClick={() => handleTotalProjectChange()}
-                              className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                              className="fst-italic btn btn-sm btn-success me-1 border-dark"
                             >
                               {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
                             </button>
                             <button
-                              className="fst-italic btn btn-sm btn-outline-dark mb-1"
+                              className="fst-italic btn btn-sm btn-outline-dark"
                               onClick={() => {
                                 resetConfig();
                                 resetSamples();
