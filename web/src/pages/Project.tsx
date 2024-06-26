@@ -462,7 +462,7 @@ export const ProjectPage: FC = () => {
         <PopInterface project={projectInfo} />
       ) : (
         <Fragment>
-          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F670', height: '3.5em'}}>
+          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F668', height: '3.5em'}}>
             {projectInfoIsLoading || projectInfo === undefined ? (
               <ProjectPageheaderPlaceholder />
             ) : (
@@ -570,7 +570,7 @@ export const ProjectPage: FC = () => {
                               {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
                             </button>
                             <button
-                              className="fst-italic btn btn-sm btn-outline-dark"
+                              className="fst-italic btn btn-sm btn-outline-dark bg-white"
                               onClick={() => {
                                 resetConfig();
                                 resetSamples();
