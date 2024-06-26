@@ -276,7 +276,7 @@ export const ProjectPage: FC = () => {
               </a>
             </div>
           </div>
-          <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100">
+          <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100 pt-2">
             <div className="d-flex flex-row align-items-center">
               <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
                 <span className="text-sm fw-bold">
