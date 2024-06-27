@@ -159,14 +159,16 @@ export const ProjectPage = () => {
 
   return (
     <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
-      <ProjectHeaderBar isStarred={isStarred} />
-      <ProjectDescription />
-      <ProjectInfoFooter />
+      <div className="shadow-sm pt-2">
+        <ProjectHeaderBar isStarred={isStarred} />
+        <ProjectDescription />
+        <ProjectInfoFooter />
+      </div> 
       {projectInfo?.pop && !forceTraditionalInterface ? (
         <PopInterface project={projectInfo} />
       ) : (
         <Fragment>
-          <div className="mt-2 px-2">
+          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F640', height: '3.5em'}}>
             {projectAnnotationQuery.isFetching || projectInfo === undefined ? (
               <ProjectPageheaderPlaceholder />
             ) : (

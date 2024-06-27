@@ -62,9 +62,9 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   }, [fork]);
 
   return (
-    <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-2 mt-4">
+    <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-1">
       <div className="d-flex flex-row align-items-center w-75">
-        <Breadcrumb className="fw-bold mt-1">
+        <Breadcrumb className="fw-bold pt-2">
           <Breadcrumb.Item href="/">home</Breadcrumb.Item>
           <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
           <Breadcrumb.Item active>
@@ -77,7 +77,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
           )}
         </Breadcrumb>
       </div>
-      <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100">
+      <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100 pt-2">
         <div className="d-flex flex-row align-items-center">
           <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">
@@ -86,7 +86,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
                 : 'Loading'}
             </span>
             <button
-              className="btn btn-sm btn-link-dark shadow-none ms-1 pe-2"
+              className="btn btn-sm btn-link-dark shadow-none ms-1 pe-2 border-0"
               onClick={() => {
                 copyToClipboard(`${projectInfo?.namespace}/${projectInfo?.name}:${projectInfo?.tag || 'default'}`);
                 setCopied(true);
