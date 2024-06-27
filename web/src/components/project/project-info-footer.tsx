@@ -9,7 +9,7 @@ export const ProjectInfoFooter = () => {
   const projectInfo = projectAnnotationQuery.data;
 
   return (
-    <div className="px-4">
+    <div className="px-4 pb-3 border-bottom">
       <div className="d-flex flex-row align-items-center text-muted mt-1">
         <small className="d-flex flex-row align-items-center justify-content-between w-100">
           <span className="me-3">
@@ -19,10 +19,13 @@ export const ProjectInfoFooter = () => {
             <i className="ms-4 bi bi-calendar3"></i>
             <span className="mx-1">Updated:</span>
             <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
+            <i className="ms-4 bi bi-123"></i>
+            <span className="mx-1">Sample Count:</span>
+            <span id="project-update-date">{projectInfo?.number_of_samples}</span>
           </span>
           <span className="">
             {projectInfo?.forked_from && (
-              <span className="me-2 p-1 border rounded fw-bold">
+              <span className="p-1 border rounded fw-bold">
                 <Fragment>
                   <i className="bi bi-bezier2"></i>
                   <span className="ms-1">Forked from</span>
@@ -32,6 +35,7 @@ export const ProjectInfoFooter = () => {
                 </Fragment>
               </span>
             )}
+            {/*{projectInfo?.digest}*/}
           </span>
         </small>
       </div>

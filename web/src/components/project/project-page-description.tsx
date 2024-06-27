@@ -16,7 +16,7 @@ export const ProjectDescription = () => {
 
   return (
     <Fragment>
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100 border-bottom">
+      <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100">
         <div ref={projectDescriptionRef} className="w-100" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
           <Markdown>{projectInfo?.description || 'No description'}</Markdown>
         </div>

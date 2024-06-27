@@ -121,7 +121,7 @@ export const SampleTable = (props: Props) => {
             onChange(arraysToSampleList(rows));
           }
         }}
-        afterRemoveCol={(index, amount) => {
+        afterRemoveCol={(index, _amount) => {
           // remove all values at the specified index from "rows"
           rows.forEach((row) => {
             row.splice(index, 0);

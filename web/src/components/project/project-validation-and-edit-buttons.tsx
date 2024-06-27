@@ -111,16 +111,16 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
 
   return (
     <Fragment>
-      <div className="flex-row d-flex align-items-end justify-content-between mx-3">
+      <div className="h-100 flex-row d-flex align-items-end justify-content-between mx-3">
         <ProjectDataNav
           configIsDirty={configIsDirty}
           samplesIsDirty={samplesIsDirty}
           subsamplesIsDirty={subsamplesIsDirty}
           projectViewIsLoading={projectViewsQuery.isFetching}
-          projectViews={projectViews}
           projectView={view}
           setProjectView={setView}
         />
+
         {/* no matter what, only render if belonging to the user */}
         {user && projectInfo && canEdit(user, projectInfo) ? (
           <div className="d-flex flex-row align-items-center w-25 justify-content-end">

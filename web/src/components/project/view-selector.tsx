@@ -4,23 +4,25 @@ import Tooltip, { TooltipProps } from 'react-bootstrap/Tooltip';
 import { useSearchParams } from 'react-router-dom';
 import ReactSelect from 'react-select';
 
-import { ProjectViewAnnotation } from '../../../types';
+import { useProjectPage } from '../../contexts/project-page-context';
 
-interface Props {
-  projectViewsIsLoading: boolean;
-  projectViews: ProjectViewAnnotation[] | undefined;
+type ViewSelectorProps = {
   view: string | undefined;
   setView: (view: string | undefined) => void;
-}
+};
 
-export const ViewSelector = (props: Props) => {
-  const { projectViewsIsLoading, projectViews, view, setView } = props;
+export const ViewSelector = (props: ViewSelectorProps) => {
+  const { view, setView } = props;
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { projectViewsQuery } = useProjectPage();
+  const projectViewsIsLoading = projectViewsQuery.isLoading;
+  const projectViews = projectViewsQuery.data;
 
   const renderTooltip = (props: TooltipProps) => (
     <Tooltip id="button-tooltip" {...props}>
       A project view is a way to subset your sample table in a way that is more manageable for viewing in the browser.
-      To learn more about views, and how to create them, visit the{' '}
+      To learn more about vierws, and how to create them, visit the{' '}
       <a href="https://pep.databio.org/pephub/">API documentation.</a>
     </Tooltip>
   );
@@ -31,7 +33,7 @@ export const ViewSelector = (props: Props) => {
         <ReactSelect
           className="top-z rounded w-100"
           options={
-            projectViews?.map((view) => ({
+            projectViews?.views.map((view) => ({
               view: view.name,
               description: view.description || 'No description',
               value: view.name,
@@ -50,12 +52,12 @@ export const ViewSelector = (props: Props) => {
               setSearchParams(searchParams);
             }
           }}
-          isDisabled={projectViews?.length === 0 || projectViewsIsLoading}
+          isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
           isClearable
           placeholder={
             projectViewsIsLoading
               ? 'Loading views...'
-              : projectViews?.length === 0
+              : projectViews?.views.length === 0
               ? 'No views available'
               : 'Select a view'
           }

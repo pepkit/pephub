@@ -162,7 +162,6 @@ export const ProjectPage = () => {
       <ProjectHeaderBar isStarred={isStarred} />
       <ProjectDescription />
       <ProjectInfoFooter />
-
       {projectInfo?.pop && !forceTraditionalInterface ? (
         <PopInterface project={projectInfo} />
       ) : (
