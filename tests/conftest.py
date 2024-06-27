@@ -1,10 +1,10 @@
 import os
-import pytest
-from peppy import Project
-import yaml
 import tempfile
+
+import pytest
 import requests
 from pepdbagent import PEPDatabaseAgent
+from peppy import Project
 
 
 @pytest.fixture

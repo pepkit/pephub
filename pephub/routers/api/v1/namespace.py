@@ -1,56 +1,45 @@
-import tempfile
-import shutil
 import json
-from typing import List, Optional, Union
+import shutil
+import tempfile
+from typing import List, Literal, Optional, Union
 
 import peppy
-
-from fastapi import (
-    APIRouter,
-    File,
-    UploadFile,
-    Request,
-    Depends,
-    Form,
-    HTTPException,
-)
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
-from peppy import Project
-from peppy.const import DESC_KEY, NAME_KEY
 from pepdbagent import PEPDatabaseAgent
+from pepdbagent.const import DEFAULT_LIMIT_INFO
 from pepdbagent.exceptions import (
-    ProjectUniqueNameError,
+    NamespaceNotFoundError,
     ProjectAlreadyInFavorites,
     ProjectNotInFavorites,
-    NamespaceNotFoundError,
+    ProjectUniqueNameError,
 )
-from pepdbagent.const import DEFAULT_LIMIT_INFO
 from pepdbagent.models import (
+    AnnotationList,
     ListOfNamespaceInfo,
     Namespace,
-    AnnotationList,
     NamespaceStats,
 )
-from typing import Literal
+from peppy import Project
+from peppy.const import DESC_KEY, NAME_KEY
 from typing_extensions import Annotated
 
-from ....dependencies import (
-    get_db,
-    get_namespace_info,
-    read_authorization_header,
-    get_namespace_access_list,
-    verify_user_can_write_namespace,
-)
-from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ....const import (
-    DEFAULT_TAG,
     BLANK_PEP_CONFIG,
     BLANK_PEP_SAMPLE_TABLE,
     DEFAULT_PEP_SCHEMA,
+    DEFAULT_TAG,
 )
-from ...models import ProjectRawModel, ProjectJsonRequest, FavoriteRequest
-
-from dotenv import load_dotenv
+from ....dependencies import (
+    get_db,
+    get_namespace_access_list,
+    get_namespace_info,
+    read_authorization_header,
+    verify_user_can_write_namespace,
+)
+from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
+from ...models import FavoriteRequest, ProjectJsonRequest, ProjectRawModel
 
 load_dotenv()
 

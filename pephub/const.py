@@ -1,14 +1,15 @@
 import logging
 import os
-import pandas as pd
-from ._version import __version__ as pephub_version
-from peppy import __version__ as peppy_version
-from peppy.const import PEP_LATEST_VERSION
 from platform import python_version
+from secrets import token_hex
+
+import pandas as pd
 from fastapi import __version__ as fastapi_version
 from pepdbagent import __version__ as pepdbagent_version
+from peppy import __version__ as peppy_version
+from peppy.const import PEP_LATEST_VERSION
 
-from secrets import token_hex
+from ._version import __version__ as pephub_version
 
 PKG_NAME = "pephub"
 DATA_REPO = "https://github.com/pepkit/data.pephub.git"

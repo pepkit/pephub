@@ -1,16 +1,16 @@
-import eido
-import yaml
-import peppy
 import logging
 
+import eido
+import peppy
+import yaml
 from fastapi.exceptions import HTTPException
 from peppy import Project
 from peppy.const import (
-    SAMPLE_RAW_DICT_KEY,
     CONFIG_KEY,
-    SUBSAMPLE_RAW_LIST_KEY,
-    SAMPLE_TABLE_INDEX_KEY,
     SAMPLE_NAME_ATTR,
+    SAMPLE_RAW_DICT_KEY,
+    SAMPLE_TABLE_INDEX_KEY,
+    SUBSAMPLE_RAW_LIST_KEY,
 )
 
 _LOGGER = logging.getLogger(__name__)

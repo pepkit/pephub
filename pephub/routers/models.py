@@ -1,7 +1,8 @@
-from typing import Optional, List, Dict
-from pydantic import BaseModel, Field, ConfigDict
-from pepdbagent.models import UpdateItems
+from typing import List, Optional
+
 from pepdbagent.const import DEFAULT_TAG
+from pepdbagent.models import UpdateItems
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..const import DEFAULT_PEP_SCHEMA, DEFAULT_QDRANT_SCORE_THRESHOLD
 
