@@ -8,7 +8,7 @@ import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useValidation } from '../hooks/queries/useValidation';
 
-const MAX_SAMPLE_COUNT = 5_000;
+const MAX_SAMPLE_COUNT = 20_000;
 
 type ProjectPageView = 'samples' | 'subsamples' | 'config';
 
