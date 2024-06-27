@@ -197,7 +197,7 @@ def get_project(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-    with_ids: Optional[bool] = True,  # TODO: change it to false
+    with_ids: Optional[bool] = False,
 ) -> Dict[str, Any]:
     try:
         proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_ids)
