@@ -1,6 +1,6 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { FC } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { ProjectAnnotation } from '../../../types';
 import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
@@ -22,27 +22,30 @@ interface Props {
   defaultNamespace?: string;
 }
 
-const CombinedErrorMessage = ({ errors }) => {
+type CombinedErrorMessageProps = {
+  errors: FieldErrors<POPInputs>;
+};
+
+const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
+  const { errors } = props;
   const nameError = errors.project_name?.message;
   const tagError = errors.tag?.message;
-  let msg = null
+  let msg = null;
 
   if (nameError == 'empty' && !tagError) {
-    msg = "Project Name must not be empty."
+    msg = 'Project Name must not be empty.';
   } else if (nameError == 'invalid' && !tagError) {
-    msg = "Project Name must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
   } else if (nameError == 'empty' && tagError == 'invalid') {
-    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'.";
   } else if (nameError == 'invalid' && tagError == 'invalid') {
-    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'.";
   } else if (!nameError && tagError == 'invalid') {
-    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'.";
   }
 
   if (nameError || tagError) {
-    return (
-      <p className='text-danger text-xs pt-1'>{ msg }</p>
-    );
+    return <p className="text-danger text-xs pt-1">{msg}</p>;
   }
 
   return null;
@@ -134,23 +137,28 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           {...register('project_name', {
             required: {
               value: true,
-              message: "empty",
+              message: 'empty',
             },
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
-              message: "invalid",
+              message: 'invalid',
             },
           })}
         />
         <span className="mx-1 mb-1">:</span>
-        <input {...register('tag', {
-          required: false,
+        <input
+          {...register('tag', {
+            required: false,
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
-              message: "invalid",
+              message: 'invalid',
             },
           })}
-        id="blank_tag" type="text" className="form-control" placeholder="default" />
+          id="blank_tag"
+          type="text"
+          className="form-control"
+          placeholder="default"
+        />
       </span>
       <CombinedErrorMessage errors={errors} />
       <textarea

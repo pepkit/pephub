@@ -1,6 +1,6 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { FC, useRef } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 import { useSession } from '../../hooks/useSession';
@@ -24,27 +24,30 @@ interface Props {
   defaultNamespace?: string;
 }
 
-const CombinedErrorMessage = ({ errors }) => {
+type CombinedErrorMessageProps = {
+  errors: FieldErrors<FromFileInputs>;
+};
+
+const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
+  const { errors } = props;
   const nameError = errors.name?.message;
   const tagError = errors.tag?.message;
-  let msg = null
+  let msg = null;
 
   if (nameError == 'empty' && !tagError) {
-    msg = "Project Name must not be empty."
+    msg = 'Project Name must not be empty.';
   } else if (nameError == 'invalid' && !tagError) {
-    msg = "Project Name must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
   } else if (nameError == 'empty' && tagError == 'invalid') {
-    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'.";
   } else if (nameError == 'invalid' && tagError == 'invalid') {
-    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'.";
   } else if (!nameError && tagError == 'invalid') {
-    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'.";
   }
 
   if (nameError || tagError) {
-    return (
-      <p className='text-danger text-xs pt-1'>{ msg }</p>
-    );
+    return <p className="text-danger text-xs pt-1">{msg}</p>;
   }
 
   return null;
@@ -136,20 +139,25 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           {...register('name', {
             required: {
               value: true,
-              message: "empty",
+              message: 'empty',
             },
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
-              message: "invalid",
+              message: 'invalid',
             },
           })}
         />
         <span className="mx-1 mb-1">:</span>
-        <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag', {
-          required: false,
+        <input
+          id="tag"
+          type="text"
+          className="form-control"
+          placeholder="default"
+          {...register('tag', {
+            required: false,
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
-              message: "invalid",
+              message: 'invalid',
             },
           })}
         />
