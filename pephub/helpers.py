@@ -1,68 +1,68 @@
 from datetime import date
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict, Any
 from fastapi import Response, UploadFile
 from fastapi.exceptions import HTTPException
 
-from os.path import basename
 import zipfile
 import io
 import yaml
 
-import peppy
-from peppy.const import SAMPLE_DF_KEY
+import pandas as pd
+
+from peppy.const import (
+    CONFIG_KEY,
+    NAME_KEY,
+    CFG_SAMPLE_TABLE_KEY,
+    CFG_SUBSAMPLE_TABLE_KEY,
+    SAMPLE_RAW_DICT_KEY,
+    SUBSAMPLE_RAW_LIST_KEY,
+)
 
 
-def get_project_sample_names(proj: peppy.Project) -> List[str]:
-    """
-    Given a peppy.Project instance, return a list of it's sample names
-    """
-    return map(lambda s: s["sample_name"], proj.samples)
-
-
-def zip_pep(project: peppy.Project) -> Response:
+def zip_pep(project:  Dict[str, Any]) -> Response:
     """
     Zip a project up to download
+
     :param project: peppy project to zip
     """
+
     content_to_zip = {}
+    config = project[CONFIG_KEY]
+    project_name = config[NAME_KEY]
 
-    if project.config:
-        prj_cof_file = project.config_file or "config.yaml"
-        cfg_filename_base = basename(prj_cof_file)
-        content_to_zip[cfg_filename_base] = yaml.dump(project.config, indent=4)
+    if project[SAMPLE_RAW_DICT_KEY] is not None:
+        config[CFG_SAMPLE_TABLE_KEY] = ["sample_table.csv"]
+        content_to_zip["sample_table.csv"] = pd.DataFrame(
+            project[SAMPLE_RAW_DICT_KEY]
+        ).to_csv(index=False)
 
-    if project.sample_table is not None:
-        sample_table_filename = basename(
-            project.to_dict().get("sample_table", "sample_table.csv")
-        )
-        content_to_zip[sample_table_filename] = project[SAMPLE_DF_KEY].to_csv(
-            index=False
-        )
-
-    if project.subsample_table is not None:
-        if not isinstance(project.subsample_table, list):
-            subsample_table_filename = basename(
-                project.to_dict().get("subsample_table", "subsample_table.csv")
-            )
-            content_to_zip[subsample_table_filename] = project.subsample_table.to_csv(
-                index=False
-            )
+    if project[SUBSAMPLE_RAW_LIST_KEY] is not None:
+        if not isinstance(project[SUBSAMPLE_RAW_LIST_KEY], list):
+            config[CFG_SUBSAMPLE_TABLE_KEY] = ["subsample_table1.csv"]
+            content_to_zip["subsample_table1.csv"] = pd.DataFrame(
+                project[SUBSAMPLE_RAW_LIST_KEY]
+            ).to_csv(index=False)
         else:
-            subsample_table_filenames = project.to_dict().get(
-                "subsample_table", "subsample_table.csv"
-            )
-            for sstable, sstable_filename in zip(
-                project.subsample_table, subsample_table_filenames
-            ):
-                subsample_table_filename = basename(sstable_filename)
-                content_to_zip[subsample_table_filename] = sstable.to_csv(index=False)
+            config[CFG_SUBSAMPLE_TABLE_KEY] = []
+            for number, file in enumerate(project[SUBSAMPLE_RAW_LIST_KEY]):
+                file_name = f"subsample_table{number + 1}.csv"
+                config[CFG_SUBSAMPLE_TABLE_KEY].append(file_name)
+                content_to_zip[file_name] = pd.DataFrame(file).to_csv(index=False)
 
-    zip_filename = project.name or f"downloaded_pep_{date.today()}"
+    content_to_zip[f"{project_name}_config.yaml"] = yaml.dump(config, indent=4)
+
+    zip_filename = project_name or f"downloaded_pep_{date.today()}"
     return zip_conv_result(content_to_zip, filename=zip_filename)
 
 
-def zip_conv_result(conv_result: dict, filename: str = "conversion_result.zip"):
-    """ """
+def zip_conv_result(conv_result: dict, filename: str = "project.zip") -> Response:
+    """
+    Given a dictionary of converted results, zip them up and return a response
+
+    :param conv_result: dictionary of converted results
+    :param filename: name of the zip
+    return Response: response object
+    """
     mf = io.BytesIO()
 
     with zipfile.ZipFile(mf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:

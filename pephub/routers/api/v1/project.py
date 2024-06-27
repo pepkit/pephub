@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import peppy
 import logging
-from typing import Callable, Union, Optional, List, Annotated
+from typing import Callable, Union, Optional, List, Annotated, Dict, Any
 from fastapi import APIRouter, Depends, Query, Body
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -48,6 +48,7 @@ from ....dependencies import (
     DEFAULT_TAG,
 )
 from ....const import SAMPLE_CONVERSION_FUNCTIONS
+from ...models import ProjectRawRequest
 from .helpers import verify_updated_project
 
 _LOGGER = logging.getLogger(__name__)
@@ -84,10 +85,11 @@ async def get_namespace_projects_list(
     return agent.annotation.get_by_rp_list(registry_paths=paths, admin=namespace_access)
 
 
-@project.get("", summary="Fetch a PEP")
+@project.get("",
+             summary="Fetch a PEP",
+             response_model=ProjectRawRequest)
 async def get_a_pep(
-    proj: Union[peppy.Project, dict] = Depends(get_project),
-    proj_annotation: AnnotationModel = Depends(get_project_annotation),
+    proj: dict = Depends(get_project),
 ):
     """
     Fetch a PEP from a certain namespace
@@ -100,56 +102,56 @@ async def get_a_pep(
         namespace: databio
 
     """
-    if not isinstance(proj, peppy.Project):
-        try:
-            raw_project = ProjectRawModel(**proj)
-        except Exception:
-            raise HTTPException(500, "Unexpected project error!")
+    try:
+        raw_project = ProjectRawModel(**proj)
         return raw_project.model_dump(by_alias=False)
-    samples = [s.to_dict() for s in proj.samples]
-    sample_table_index = proj.sample_table_index
+    except Exception:
+        raise HTTPException(500, "Unexpected project error!")
 
-    # this assumes the first sample's attributes
-    # is representative of all samples attributes
-    # -- is this the case?
-    sample_attributes = proj._samples[0]._attributes
-
-    proj_dict = proj.to_dict()
-    proj_annotation_dict = proj_annotation.model_dump()
-
-    # default to name from annotation
-    if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
-        try:
-            del proj_dict["name"]
-        except KeyError:
-            pass
-
-    # default to description from annotation
-    if hasattr(proj, "description") and hasattr(proj_annotation, "description"):
-        try:
-            del proj_dict["description"]
-        except KeyError:
-            pass
-    # default to is_private from annotation
-    if hasattr(proj, "is_private") and hasattr(proj_annotation, "is_private"):
-        try:
-            del proj_dict["is_private"]
-        except KeyError:
-            pass
-    # default to pop from annotation
-    if hasattr(proj, "pop") and hasattr(proj_annotation, "pop"):
-        try:
-            del proj_dict["pop"]
-        except KeyError:
-            pass
-
-    return dict(
-        **proj_dict,
-        **proj_annotation_dict,
-        samples=samples,
-        sample_table_indx=sample_table_index,
-        sample_attributes=sample_attributes,
-    )
+    # samples = [s.to_dict() for s in proj.samples]
+    # sample_table_index = proj.sample_table_index
+    #
+    # # this assumes the first sample's attributes
+    # # is representative of all samples attributes
+    # # -- is this the case?
+    # sample_attributes = proj._samples[0]._attributes
+    #
+    # proj_dict = proj.to_dict()
+    # proj_annotation_dict = proj_annotation.model_dump()
+    #
+    # # default to name from annotation
+    # if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
+    #     try:
+    #         del proj_dict["name"]
+    #     except KeyError:
+    #         pass
+    #
+    # # default to description from annotation
+    # if hasattr(proj, "description") and hasattr(proj_annotation, "description"):
+    #     try:
+    #         del proj_dict["description"]
+    #     except KeyError:
+    #         pass
+    # # default to is_private from annotation
+    # if hasattr(proj, "is_private") and hasattr(proj_annotation, "is_private"):
+    #     try:
+    #         del proj_dict["is_private"]
+    #     except KeyError:
+    #         pass
+    # # default to pop from annotation
+    # if hasattr(proj, "pop") and hasattr(proj_annotation, "pop"):
+    #     try:
+    #         del proj_dict["pop"]
+    #     except KeyError:
+    #         pass
+    #
+    # return dict(
+    #     **proj_dict,
+    #     **proj_annotation_dict,
+    #     samples=samples,
+    #     sample_table_indx=sample_table_index,
+    #     sample_attributes=sample_attributes,
+    # )
 
 
 @project.patch(
@@ -256,7 +258,7 @@ async def delete_a_pep(
 
 @project.get("/samples")
 async def get_pep_samples(
-    proj: peppy.Project = Depends(get_project),
+    proj: dict = Depends(get_project),
     format: Optional[str] = None,
     raw: Optional[bool] = True,
 ):
@@ -544,7 +546,7 @@ async def get_subsamples_endpoint(
 
 @project.get("/convert")
 async def convert_pep(
-    proj: peppy.Project = Depends(get_project),
+    proj: dict = Depends(get_project),
     filter: Optional[str] = "basic",
     format: Optional[str] = "plain",
 ):
@@ -575,7 +577,8 @@ async def convert_pep(
         )
 
     # generate result
-    conv_result = eido.run_filter(proj, filter, verbose=False)
+    peppy_project = peppy.Project.from_dict(proj)
+    conv_result = eido.run_filter(peppy_project, filter, verbose=False)
 
     if format == "plain":
         return_str = "\n".join([conv_result[k] for k in conv_result])
@@ -589,7 +592,7 @@ async def convert_pep(
 
 
 @project.get("/zip")
-async def zip_pep_for_download(proj: peppy.Project = Depends(get_project)):
+async def zip_pep_for_download(proj: Dict[str, Any] = Depends(get_project)):
     """
     Zip a pep
 

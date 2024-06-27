@@ -1,6 +1,5 @@
 import os
 
-import peppy
 import pydantic
 import jwt
 import json
@@ -138,7 +137,7 @@ def read_authorization_header(Authorization: str = Header(None)) -> Union[dict, 
     """
     Reads and decodes a JWT, returning the decoded variables.
 
-    @param session_info_encoded: JWT provided via FastAPI injection from the API cookie.
+    :param Authorization: JWT provided via FastAPI injection from the API cookie.
     """
     if Authorization is None:
         return None
@@ -198,11 +197,10 @@ def get_project(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-    raw: bool = False,
     with_ids: Optional[bool] = True,  # TODO: change it to false
-) -> Union[peppy.Project, Dict[str, Any]]:
+) -> Dict[str, Any]:
     try:
-        proj = agent.project.get(namespace, project, tag, raw=raw, with_id=with_ids)
+        proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_ids)
         yield proj
     except ProjectNotFoundError:
         raise HTTPException(
