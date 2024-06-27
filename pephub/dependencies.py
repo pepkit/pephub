@@ -314,51 +314,6 @@ def verify_user_can_read_project(
             )
 
 
-def verify_user_can_write_project(
-    project: str,
-    namespace: str,
-    tag: Optional[str] = DEFAULT_TAG,
-    project_annotation: AnnotationModel = Depends(get_project_annotation),
-    session_info: Union[dict, None] = Depends(read_authorization_header),
-    orgs: List = Depends(get_organizations_from_session_info),
-):
-    """
-    Authorization flow for writing a project to the database.
-
-    See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#writing-peps
-    """
-    if project_annotation.is_private:
-        if session_info is None:  # user not logged in
-            # raise 404 since we don't want to reveal that the project exists
-            raise HTTPException(
-                404, f"Project, '{namespace}/{project}:{tag}', not found."
-            )
-        elif any(
-            [
-                session_info["login"] != namespace
-                and namespace
-                not in orgs,  # user doesnt own namespace or is not member of organization
-            ]
-        ):
-            # raise 404 since we don't want to reveal that the project exists
-            raise HTTPException(
-                404, f"Project, '{namespace}/{project}:{tag}', not found."
-            )
-    else:
-        # AUTHENTICATION REQUIRED
-        if session_info is None:
-            raise HTTPException(
-                401,
-                "Please authenticate before editing project.",
-            )
-        # AUTHORIZATION REQUIRED
-        if session_info["login"] != namespace and namespace not in orgs:
-            raise HTTPException(
-                403,
-                "The current authenticated user does not have permission to edit this project.",
-            )
-
-
 def verify_user_can_fork(
     fork_request: ForkRequest,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
@@ -439,15 +394,3 @@ def get_namespace_info(
             number_of_projects=0,
             number_of_samples=0,
         )
-
-
-def verify_namespace_exists(namespace: str):
-    try:
-        yield agent.namespace.get(query=namespace).results[0]
-    except IndexError:
-        raise HTTPException(
-            404,
-            f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
-        )
-    else:
-        yield namespace
