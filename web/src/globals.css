@@ -1,5 +1,6 @@
 body {
-  overflow: scroll; /* Show scrollbars */
+  /* overflow: scroll; /* Show scrollbars */
+  overflow: auto;
 }
 
 .top-z {

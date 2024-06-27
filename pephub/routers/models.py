@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 from pydantic import BaseModel, Field, ConfigDict
 from pepdbagent.models import UpdateItems
 from pepdbagent.const import DEFAULT_TAG

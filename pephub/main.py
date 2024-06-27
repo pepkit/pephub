@@ -51,6 +51,14 @@ app = FastAPI(
     tags=TAGS_METADATA,
 )
 
+# import logfire
+# from .dependencies import agent
+# logfire.configure()
+# from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+# SQLAlchemyInstrumentor().instrument(engine=agent.connection)
+#
+# # logfire.instrument_fastapi(app)
+
 # CORS is required for the validation HTML SPA to work externally
 origins = ["*"]
 app.add_middleware(
