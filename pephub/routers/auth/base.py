@@ -1,35 +1,34 @@
-import os
 import json
-import jinja2
-import requests
+import os
 import time
 from typing import Union
-from fastapi import APIRouter, Request, Header, BackgroundTasks, Depends
-from fastapi.responses import RedirectResponse
-from fastapi.exceptions import HTTPException
-from fastapi.templating import Jinja2Templates
+
+import jinja2
+import requests
 from dotenv import load_dotenv
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
+from fastapi.exceptions import HTTPException
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 
-
+from ...const import (
+    AUTH_CODE_EXPIRATION,
+    BASE_TEMPLATES_PATH,
+    CALLBACK_ENDPOINT,
+    JWT_SECRET,
+)
 from ...dependencies import (
     CLIAuthSystem,
     generate_random_auth_code,
     generate_random_device_code,
     read_authorization_header,
 )
-
 from ...helpers import build_authorization_url
-from ...const import (
-    BASE_TEMPLATES_PATH,
-    JWT_SECRET,
-    AUTH_CODE_EXPIRATION,
-    CALLBACK_ENDPOINT,
-)
 from ..models import (
-    TokenExchange,
-    InitializeDeviceCodeResponse,
     GitHubAppConfig,
+    InitializeDeviceCodeResponse,
     JWTDeviceTokenResponse,
+    TokenExchange,
 )
 
 load_dotenv()

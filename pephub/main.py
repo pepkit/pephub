@@ -1,19 +1,18 @@
 import logging
-import coloredlogs
 
+import coloredlogs
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from ._version import __version__ as server_v
-from .const import PKG_NAME, TAGS_METADATA, ALL_VERSIONS
+from .const import ALL_VERSIONS, PKG_NAME, TAGS_METADATA
 from .routers.api.v1.base import api as api_base
-from .routers.api.v1.namespace import (
-    namespace as api_namespace,
-    namespaces as api_namespaces,
-)
-from .routers.api.v1.project import project as api_project, projects as api_projects
-from .routers.api.v1.user import user as api_user
+from .routers.api.v1.namespace import namespace as api_namespace
+from .routers.api.v1.namespace import namespaces as api_namespaces
+from .routers.api.v1.project import project as api_project
+from .routers.api.v1.project import projects as api_projects
 from .routers.api.v1.search import search as api_search
+from .routers.api.v1.user import user as api_user
 from .routers.auth.base import auth as auth_router
 from .routers.eido.eido import router as eido_router
 

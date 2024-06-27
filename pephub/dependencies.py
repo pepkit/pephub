@@ -1,42 +1,39 @@
-import os
-
-import peppy
-import pydantic
-import jwt
 import json
-import requests
 import logging
-
-from secrets import token_hex
-from dotenv import load_dotenv
-from typing import Union, List, Optional, Dict, Any
+import os
 from datetime import datetime, timedelta
+from secrets import token_hex
+from typing import Any, Dict, List, Optional, Union
 
+import jwt
+import pydantic
+import requests
+from dotenv import load_dotenv
 from fastapi import Depends, Header
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
-from pydantic import BaseModel
+from fastembed.embedding import FlagEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.exceptions import ProjectNotFoundError
 from pepdbagent.models import AnnotationModel, Namespace
+from pydantic import BaseModel
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
-from fastembed.embedding import FlagEmbedding as Embedding
 
-from .routers.models import ForkRequest
 from .const import (
+    DEFAULT_HF_MODEL,
+    DEFAULT_POSTGRES_DB,
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
     DEFAULT_POSTGRES_PORT,
     DEFAULT_POSTGRES_USER,
-    DEFAULT_POSTGRES_DB,
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
-    DEFAULT_HF_MODEL,
     JWT_EXPIRATION,
     JWT_SECRET,
 )
+from .routers.models import ForkRequest
 
 _LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
 
@@ -138,7 +135,7 @@ def read_authorization_header(Authorization: str = Header(None)) -> Union[dict, 
     """
     Reads and decodes a JWT, returning the decoded variables.
 
-    @param session_info_encoded: JWT provided via FastAPI injection from the API cookie.
+    :param Authorization: JWT provided via FastAPI injection from the API cookie.
     """
     if Authorization is None:
         return None
@@ -198,11 +195,10 @@ def get_project(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-    raw: bool = False,
-    with_ids: Optional[bool] = True,  # TODO: change it to false
-) -> Union[peppy.Project, Dict[str, Any]]:
+    with_ids: Optional[bool] = False,
+) -> Dict[str, Any]:
     try:
-        proj = agent.project.get(namespace, project, tag, raw=raw, with_id=with_ids)
+        proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_ids)
         yield proj
     except ProjectNotFoundError:
         raise HTTPException(
@@ -316,51 +312,6 @@ def verify_user_can_read_project(
             )
 
 
-def verify_user_can_write_project(
-    project: str,
-    namespace: str,
-    tag: Optional[str] = DEFAULT_TAG,
-    project_annotation: AnnotationModel = Depends(get_project_annotation),
-    session_info: Union[dict, None] = Depends(read_authorization_header),
-    orgs: List = Depends(get_organizations_from_session_info),
-):
-    """
-    Authorization flow for writing a project to the database.
-
-    See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#writing-peps
-    """
-    if project_annotation.is_private:
-        if session_info is None:  # user not logged in
-            # raise 404 since we don't want to reveal that the project exists
-            raise HTTPException(
-                404, f"Project, '{namespace}/{project}:{tag}', not found."
-            )
-        elif any(
-            [
-                session_info["login"] != namespace
-                and namespace
-                not in orgs,  # user doesnt own namespace or is not member of organization
-            ]
-        ):
-            # raise 404 since we don't want to reveal that the project exists
-            raise HTTPException(
-                404, f"Project, '{namespace}/{project}:{tag}', not found."
-            )
-    else:
-        # AUTHENTICATION REQUIRED
-        if session_info is None:
-            raise HTTPException(
-                401,
-                "Please authenticate before editing project.",
-            )
-        # AUTHORIZATION REQUIRED
-        if session_info["login"] != namespace and namespace not in orgs:
-            raise HTTPException(
-                403,
-                "The current authenticated user does not have permission to edit this project.",
-            )
-
-
 def verify_user_can_fork(
     fork_request: ForkRequest,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
@@ -441,15 +392,3 @@ def get_namespace_info(
             number_of_projects=0,
             number_of_samples=0,
         )
-
-
-def verify_namespace_exists(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
-    try:
-        yield agent.namespace.get(query=namespace).results[0]
-    except IndexError:
-        raise HTTPException(
-            404,
-            f"Namespace '{namespace}' does not exist in database. Did you spell it correctly?",
-        )
-    else:
-        yield namespace

@@ -1,6 +1,7 @@
 import os
-import yaml
 import pathlib
+
+import yaml
 
 
 def is_valid_namespace(path: str) -> bool:

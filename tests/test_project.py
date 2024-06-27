@@ -1,13 +1,17 @@
-import sys, os
+import os
+import sys
+
 import jwt
 import pytest
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + "/../")
 from unittest.mock import Mock
+
 from fastapi.testclient import TestClient
-from pephub.main import app
+
 from pephub.dependencies import CLIAuthSystem
+from pephub.main import app
 
 client = TestClient(app)
 from fastapi.exceptions import HTTPException
