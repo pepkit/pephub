@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { FC } from 'react';
 import { Modal } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
+import { FieldErrors, useForm } from 'react-hook-form';
 
 import { useForkMutation } from '../../hooks/mutations/useForkMutation';
 import { useSession } from '../../hooks/useSession';
@@ -23,33 +23,36 @@ interface ForkProjectInputs {
   is_private: boolean;
 }
 
-const CombinedErrorMessage = ({ errors }) => {
+type CombinedErrorMessageProps = {
+  errors: FieldErrors<ForkProjectInputs>;
+};
+
+const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
+  const { errors } = props;
   const nameError = errors.project?.message;
   const tagError = errors.tag?.message;
-  let msg = null
+  let msg = null;
 
   if (nameError == 'empty' && !tagError) {
-    msg = "Project Name must not be empty."
+    msg = 'Project Name must not be empty.';
   } else if (nameError == 'invalid' && !tagError) {
-    msg = "Project Name must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
   } else if (nameError == 'empty' && tagError == 'invalid') {
-    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'.";
   } else if (nameError == 'invalid' && tagError == 'invalid') {
-    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'.";
   } else if (nameError == 'empty' && tagError == 'empty') {
-    msg = "Project Name and Tag must not be empty."
+    msg = 'Project Name and Tag must not be empty.';
   } else if (nameError == 'invalid' && tagError == 'empty') {
-    msg = "Project Name must contain only alphanumeric characters, '-', or '_' and Tag must not be empty."
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_' and Tag must not be empty.";
   } else if (!nameError && tagError == 'empty') {
-    msg = "Project Tag must not be empty."
+    msg = 'Project Tag must not be empty.';
   } else if (!nameError && tagError == 'invalid') {
-    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'."
+    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'.";
   }
 
   if (nameError || tagError) {
-    return (
-      <p className='text-danger text-xs pt-1'>{ msg }</p>
-    );
+    return <p className="text-danger text-xs pt-1">{msg}</p>;
   }
 
   return null;
@@ -132,11 +135,11 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
               {...register('project', {
                 required: {
                   value: true,
-                  message: "empty",
+                  message: 'empty',
                 },
                 pattern: {
                   value: /^[a-zA-Z0-9_-]+$/,
-                  message: "invalid",
+                  message: 'invalid',
                 },
               })}
             />
@@ -149,11 +152,11 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
               {...register('tag', {
                 required: {
                   value: true,
-                  message: "empty",
+                  message: 'empty',
                 },
                 pattern: {
                   value: /^[a-zA-Z0-9_-]+$/,
-                  message: "invalid",
+                  message: 'invalid',
                 },
               })}
             />
@@ -188,7 +191,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
         </button>
         <button
           onClick={() => mutation.mutate()}
-          disabled={!isValid || errors.project?.message || errors.tag?.message || mutation.isPending}
+          disabled={!isValid || !!errors.project?.message || !!errors.tag?.message || !!mutation.isPending}
           id="fork-submit-btn"
           type="submit"
           className="btn btn-success"

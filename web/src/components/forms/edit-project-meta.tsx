@@ -154,7 +154,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
           {...register('name', {
             required: {
               value: true,
-              message: "Project Name must not be empty.",
+              message: 'Project Name must not be empty.',
             },
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
@@ -162,7 +162,11 @@ export const ProjectMetaEditForm: FC<Props> = ({
             },
           })}
         />
-        <ErrorMessage errors={errors} name="name" render={({ message }) => message ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
+        <ErrorMessage
+          errors={errors}
+          name="name"
+          render={({ message }) => (message ? <p className="text-danger text-xs pt-1">{message}</p> : null)}
+        />
       </div>
       <div className="mb-3">
         <label htmlFor="schema-tag" className="form-label">
@@ -199,7 +203,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
           {...register('tag', {
             required: {
               value: true,
-              message: "Project Tag must not be empty.",
+              message: 'Project Tag must not be empty.',
             },
             pattern: {
               value: /^[a-zA-Z0-9_-]+$/,
@@ -207,7 +211,11 @@ export const ProjectMetaEditForm: FC<Props> = ({
             },
           })}
         />
-        <ErrorMessage errors={errors} name="tag" render={({ message }) => message ? (<p className='text-danger text-xs pt-1'>{message}</p>) : null} />
+        <ErrorMessage
+          errors={errors}
+          name="tag"
+          render={({ message }) => (message ? <p className="text-danger text-xs pt-1">{message}</p> : null)}
+        />
       </div>
       <div className="mb-3">
         <label htmlFor="project-description" className="form-label">
@@ -242,7 +250,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
         <button
           onClick={() => mutation.mutate()}
           id="metadata-save-btn"
-          disabled={(!isDirty && isValid) || errors.name?.message || errors.tag?.message || mutation.isPending}
+          disabled={(!isDirty && isValid) || !!errors.name?.message || !!errors.tag?.message || mutation.isPending}
           type="button"
           className="btn btn-success me-1"
         >
