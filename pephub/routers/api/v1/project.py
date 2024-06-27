@@ -106,51 +106,6 @@ async def get_a_pep(
     except Exception:
         raise HTTPException(500, "Unexpected project error!")
 
-    # samples = [s.to_dict() for s in proj.samples]
-    # sample_table_index = proj.sample_table_index
-    #
-    # # this assumes the first sample's attributes
-    # # is representative of all samples attributes
-    # # -- is this the case?
-    # sample_attributes = proj._samples[0]._attributes
-    #
-    # proj_dict = proj.to_dict()
-    # proj_annotation_dict = proj_annotation.model_dump()
-    #
-    # # default to name from annotation
-    # if hasattr(proj, "name") and hasattr(proj_annotation, "name"):
-    #     try:
-    #         del proj_dict["name"]
-    #     except KeyError:
-    #         pass
-    #
-    # # default to description from annotation
-    # if hasattr(proj, "description") and hasattr(proj_annotation, "description"):
-    #     try:
-    #         del proj_dict["description"]
-    #     except KeyError:
-    #         pass
-    # # default to is_private from annotation
-    # if hasattr(proj, "is_private") and hasattr(proj_annotation, "is_private"):
-    #     try:
-    #         del proj_dict["is_private"]
-    #     except KeyError:
-    #         pass
-    # # default to pop from annotation
-    # if hasattr(proj, "pop") and hasattr(proj_annotation, "pop"):
-    #     try:
-    #         del proj_dict["pop"]
-    #     except KeyError:
-    #         pass
-    #
-    # return dict(
-    #     **proj_dict,
-    #     **proj_annotation_dict,
-    #     samples=samples,
-    #     sample_table_indx=sample_table_index,
-    #     sample_attributes=sample_attributes,
-    # )
-
 
 @project.patch(
     "",
