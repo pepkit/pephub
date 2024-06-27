@@ -25,20 +25,11 @@ interface ViewButtonProps {
   color: string;
 }
 
-const ViewButton: FC<ViewButtonProps> = ({ view, setPageView, icon, text, isDirty, bold, color }) => (
-  <div className="h-100">
-    <button onClick={() => setPageView(view)} className={'h-100 border-0 bg-transparent mr-4' + bold + color}>
-      <span className="text-xs">
-        <i className="bi bi-circle-fill ms-1 text-transparent"></i>
-      </span>
-      <i className={icon}></i>
-      {text}
-      {isDirty ? (
-        <span className="text-xs">
-          <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
-        </span>
-      ) : (
-        //  spacer
+const ViewButton: FC<ViewButtonProps> = ({ view, icon, text, isDirty, bold, color }) => {
+  const { setPageView } = useProjectPage();
+  return (
+    <div className="h-100">
+      <button onClick={() => setPageView(view)} className={'h-100 border-0 bg-transparent mr-4' + bold + color}>
         <span className="text-xs">
           <i className="bi bi-circle-fill ms-1 text-transparent"></i>
         </span>
@@ -68,7 +59,7 @@ export const ProjectDataNav: FC<NavProps> = ({
   projectView,
   setProjectView,
 }) => {
-  const { pageView } = useProjectPage();
+  const { pageView, setPageView } = useProjectPage();
 
   return (
     <div className="h-100 w-100 d-flex flex-row align-items-center">
@@ -79,7 +70,6 @@ export const ProjectDataNav: FC<NavProps> = ({
       >
         <ViewButton
           view="samples"
-          setPageView={setPageView}
           icon="bi bi-table me-2"
           text="Samples"
           isDirty={samplesIsDirty}
@@ -104,7 +94,6 @@ export const ProjectDataNav: FC<NavProps> = ({
       <div className={pageView === 'config' ? 'border-0 px-1 h-100 text-muted bg-white shadow-sm' : 'px-1 h-100'}>
         <ViewButton
           view="config"
-          setPageView={setPageView}
           icon="bi bi-filetype-yml me-2"
           text="Config"
           isDirty={configIsDirty}

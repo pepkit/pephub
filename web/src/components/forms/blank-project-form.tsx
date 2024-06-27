@@ -54,7 +54,8 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   return null;
 };
 
-export const BlankProjectForm: FC<Props> = ({ onHide, defaultNamespace }) => {
+export const BlankProjectForm = (props: Props) => {
+  const { onHide, defaultNamespace } = props;
   // get user innfo
   const { user } = useSession();
 
