@@ -41,7 +41,9 @@ async def verify_updated_project(updated_project) -> peppy.Project:
         SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
     )
 
-    await check_sample_names(new_raw_project[SAMPLE_RAW_DICT_KEY], sample_table_index_col)
+    await check_sample_names(
+        new_raw_project[SAMPLE_RAW_DICT_KEY], sample_table_index_col
+    )
 
     # subsample table update
     if updated_project.subsample_tables is not None:
@@ -61,9 +63,7 @@ async def verify_updated_project(updated_project) -> peppy.Project:
 
     try:
         # validate project (it will also validate samples)
-        eido.validate_project(
-            new_project, "http://schema.databio.org/pep/2.1.0.yaml"
-        )
+        eido.validate_project(new_project, "http://schema.databio.org/pep/2.1.0.yaml")
     except Exception as _:
         raise HTTPException(
             status_code=400,
@@ -79,11 +79,11 @@ async def check_sample_names(sample_list: list, sample_table_index_col: str) -> 
             raise HTTPException(
                 status_code=400,
                 detail="Sample table does not contain sample index column: "
-                       f"'{sample_table_index_col}'. Please check sample table",
+                f"'{sample_table_index_col}'. Please check sample table",
             )
         if (
-                sample[sample_table_index_col] is None
-                or sample[sample_table_index_col] == ""
+            sample[sample_table_index_col] is None
+            or sample[sample_table_index_col] == ""
         ):
             raise HTTPException(
                 status_code=400,

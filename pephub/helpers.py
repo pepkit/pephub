@@ -19,7 +19,7 @@ from peppy.const import (
 )
 
 
-def zip_pep(project:  Dict[str, Any]) -> Response:
+def zip_pep(project: Dict[str, Any]) -> Response:
     """
     Zip a project up to download
 

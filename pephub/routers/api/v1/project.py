@@ -85,9 +85,7 @@ async def get_namespace_projects_list(
     return agent.annotation.get_by_rp_list(registry_paths=paths, admin=namespace_access)
 
 
-@project.get("",
-             summary="Fetch a PEP",
-             response_model=ProjectRawRequest)
+@project.get("", summary="Fetch a PEP", response_model=ProjectRawRequest)
 async def get_a_pep(
     proj: dict = Depends(get_project),
 ):
@@ -194,7 +192,10 @@ async def update_a_pep(
     else:
         new_project = None
 
-    update_dict = updated_project.model_dump(exclude_unset=True, exclude={"sample_table", "project_config_yaml", "subsample_tables"})
+    update_dict = updated_project.model_dump(
+        exclude_unset=True,
+        exclude={"sample_table", "project_config_yaml", "subsample_tables"},
+    )
     if new_project:
         update_dict.update(project=new_project)
         new_name = new_project.name or project
