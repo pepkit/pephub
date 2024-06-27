@@ -1,26 +1,23 @@
 import { FC } from 'react';
 
 import { ProjectViewAnnotation } from '../../../types';
-import { ProjectViewsResponse } from '../../api/project';
+import { useProjectPage } from '../../contexts/project-page-context';
 import { ViewSelector } from '../project/view-selector';
 
 type PageView = 'samples' | 'subsamples' | 'config';
 
 interface NavProps {
-  pageView: string;
-  setPageView: (view: PageView) => void;
   samplesIsDirty: boolean;
   subsamplesIsDirty: boolean;
   configIsDirty: boolean;
   projectViewIsLoading: boolean;
-  projectViews: ProjectViewsResponse | undefined;
+  projectViews: ProjectViewAnnotation[] | undefined;
   projectView: string | undefined;
   setProjectView: (view: string | undefined) => void;
 }
 
 interface ViewButtonProps {
   view: PageView;
-  setPageView: (view: PageView) => void;
   icon: string;
   text: string;
   isDirty: boolean;
@@ -45,14 +42,24 @@ const ViewButton: FC<ViewButtonProps> = ({ view, setPageView, icon, text, isDirt
         <span className="text-xs">
           <i className="bi bi-circle-fill ms-1 text-transparent"></i>
         </span>
-      )}
-    </button>
-  </div>
-);
+        <i className={icon}></i>
+        {text}
+        {isDirty ? (
+          <span className="text-xs">
+            <i className="bi bi-circle-fill ms-1 text-primary-light"></i>
+          </span>
+        ) : (
+          //  spacer
+          <span className="text-xs">
+            <i className="bi bi-circle-fill ms-1 text-transparent"></i>
+          </span>
+        )}
+      </button>
+    </div>
+  );
+};
 
 export const ProjectDataNav: FC<NavProps> = ({
-  pageView,
-  setPageView,
   samplesIsDirty,
   subsamplesIsDirty,
   configIsDirty,
@@ -61,6 +68,8 @@ export const ProjectDataNav: FC<NavProps> = ({
   projectView,
   setProjectView,
 }) => {
+  const { pageView } = useProjectPage();
+
   return (
     <div className="h-100 w-100 d-flex flex-row align-items-center">
       <div
@@ -85,7 +94,6 @@ export const ProjectDataNav: FC<NavProps> = ({
       >
         <ViewButton
           view="subsamples"
-          setPageView={setPageView}
           icon="bi bi-grid-3x3-gap-fill me-2"
           text="Subsamples"
           isDirty={subsamplesIsDirty}

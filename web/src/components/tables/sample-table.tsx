@@ -38,7 +38,7 @@ export const SampleTable = (props: Props) => {
   if (className) {
     tableClassName += ` ${className}`;
   }
-
+    
   const hotRef = useRef<HotTable>(null);
 
   const PH_ID_COL_NAME = 'ph_id';
@@ -121,24 +121,65 @@ export const SampleTable = (props: Props) => {
               // debugger;
               onChange(arraysToSampleList(rows));
             }
-          }}
-          afterRemoveCol={(index, amount) => {
-            // remove all values at the specified index from "rows"
-            rows.forEach((row) => {
-              row.splice(index, 0);
+          });
+        }}
+        dropdownMenu={true}
+        hiddenColumns={{
+          indicators: true,
+        }}
+        minCols={2}
+        minRows={minRows || 50}
+        contextMenu={[
+          'row_above',
+          'row_below',
+          '---------',
+          'col_left',
+          'col_right',
+          '---------',
+          'remove_row',
+          'remove_col',
+          '---------',
+          'alignment',
+          '---------',
+          'copy',
+          'cut',
+        ]}
+        multiColumnSorting={true}
+        filters={true}
+        rowHeaders={true}
+        beforeRenderer={addClassesToRows}
+        manualRowMove={true}
+        licenseKey="non-commercial-and-evaluation"
+        manualColumnResize
+        afterChange={(changes) => {
+          if (changes && onChange) {
+            changes.forEach((change) => {
+              const [row, col, _, newVal] = change;
+              // @ts-ignore - we know that col is a number
+              rows[row][col] = newVal;
             });
-            if (onChange) {
-              onChange(arraysToSampleList(rows));
-            }
-          }}
-          afterRemoveRow={(index, amount) => {
-            rows.splice(index, 0);
-            if (onChange) {
-              onChange(arraysToSampleList(rows));
-            }
-          }}
-        />
-      </div>
-    </>
+            onChange(arraysToSampleList(rows));
+          }
+        }}
+        afterRemoveCol={(index, amount) => {
+          // remove all values at the specified index from "rows"
+          rows.forEach((row) => {
+            row.splice(index, 0);
+          });
+          if (onChange) {
+            onChange(arraysToSampleList(rows));
+          }
+        }}
+        afterRemoveRow={(index, amount) => {
+          rows.splice(index, 0);
+          if (onChange) {
+            onChange(arraysToSampleList(rows));
+          }
+        }}
+        afterFilter={(k) => {
+          console.log(hotRef.current?.hotInstance?.getData());
+        }}
+      />
+    </div>
   );
 };

@@ -425,6 +425,7 @@ async def remove_from_stars(
         return JSONResponse(
             content={
                 "message": "PEP was removed from favorites.",
+                "namespace": namespace,
                 "registry": f"{project.namespace}/{project.name}:{project.tag}",
             },
             status_code=202,

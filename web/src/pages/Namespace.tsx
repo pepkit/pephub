@@ -1,4 +1,4 @@
-import { FC, Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -23,8 +23,8 @@ import { numberWithCommas } from '../utils/etc';
 
 type View = 'peps' | 'pops' | 'stars';
 
-export const NamespacePage: FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+export const NamespacePage = () => {
+  const [searchParams] = useSearchParams();
   const viewFromUrl = searchParams.get('view') as View;
 
   // get namespace from url
@@ -69,12 +69,14 @@ export const NamespacePage: FC = () => {
     search: searchDebounced,
     type: view === 'pops' ? 'pop' : 'pep',
   });
-  const { data: stars, isLoading: starsIsLoading } = useNamespaceStars(namespace, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
+
+  const { starsQuery } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
+  const stars = starsQuery.data;
 
   // left over from when we were filtering on sample number
   const projectsFiltered = projects?.items.filter((p) => p.number_of_samples) || [];
 
-  if (namespaceInfoIsLoading || starsIsLoading) {
+  if (namespaceInfoIsLoading || starsQuery.isLoading) {
     return (
       <PageLayout title={namespace}>
         <NamespacePagePlaceholder />

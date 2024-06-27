@@ -385,6 +385,20 @@ body {
   border-bottom: '10px solid #343a40' !important;
 }
 
+/* blank pep grid */
+.namespace-name-tag-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+}
+
+/* line clamp search hit description */
+.line-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* landing container full page height, but only on desktop */
 @media (min-width: 768px) {
   .h80 {

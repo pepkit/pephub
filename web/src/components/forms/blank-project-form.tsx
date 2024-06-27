@@ -1,5 +1,4 @@
 import { ErrorMessage } from '@hookform/error-message';
-import { FC } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
@@ -128,6 +127,7 @@ sample_table: samples.csv
           Private
         </label>
       </div>
+
       <span className="fs-4 d-flex align-items-center">
         <select
           id="blank-namespace-select"
@@ -203,7 +203,7 @@ sample_table: samples.csv
       </div>
       <Tabs defaultActiveKey="samples" id="blank-project-tabs" className="mt-3">
         <Tab eventKey="samples" title="Samples">
-          <div className="p-2 border border-top-1">
+          <div className="p-2 -1">
             <SampleTable
               height={300}
               data={sampleTable}
@@ -214,7 +214,7 @@ sample_table: samples.csv
           </div>
         </Tab>
         <Tab eventKey="config" title="Config">
-          <div className="p-1 border border-top-0">
+          <div className="p-1 -0">
             <ProjectConfigEditor
               value={configYAML}
               setValue={(data) => {
