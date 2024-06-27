@@ -443,7 +443,7 @@ def get_namespace_info(
         )
 
 
-def verify_namespace_exists(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+def verify_namespace_exists(namespace: str):
     try:
         yield agent.namespace.get(query=namespace).results[0]
     except IndexError:

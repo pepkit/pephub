@@ -4,18 +4,13 @@ import pandas as pd
 import numpy as np
 import peppy
 import logging
-from typing import Callable, Literal, Union, Optional, List, Annotated
+from typing import Callable, Union, Optional, List, Annotated
 from fastapi import APIRouter, Depends, Query, Body
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse, PlainTextResponse
-from peppy import Project
 from peppy.const import (
     SAMPLE_RAW_DICT_KEY,
-    CONFIG_KEY,
     SAMPLE_DF_KEY,
-    SUBSAMPLE_RAW_LIST_KEY,
-    SAMPLE_TABLE_INDEX_KEY,
-    SAMPLE_NAME_ATTR,
 )
 
 from pepdbagent import PEPDatabaseAgent
@@ -52,7 +47,8 @@ from ....dependencies import (
     verify_user_can_read_project,
     DEFAULT_TAG,
 )
-from ....const import SAMPLE_CONVERSION_FUNCTIONS, VALID_UPDATE_KEYS
+from ....const import SAMPLE_CONVERSION_FUNCTIONS
+from .helpers import verify_updated_project
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -178,127 +174,30 @@ async def update_a_pep(
         project: example
         namespace: databio
     """
-    # if not logged in, they cant update
     if namespace not in (list_of_admins or []):
         raise HTTPException(
             detail="You do not have permission to update this project.",
             status_code=401,
         )
 
-    # current_project = agent.project.get(namespace, project, tag=tag)
-    # raw_peppy_project = agent.project.get(namespace, project, tag=tag, raw=True)
-    new_raw_project = {}
-
-    # sample table update
-    if updated_project.sample_table is not None:
-        new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
-        # new_raw_project[CONFIG_KEY] = dict(current_project.config)
-
-        if updated_project.project_config_yaml is not None:
-            try:
-                yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
-            except yaml.scanner.ScannerError as e:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Could not parse provided yaml. Error: {e}",
-                )
-
-            sample_table_index_col = yaml_dict.get(
-                SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
-            )
-        # else:
-        #     sample_table_index_col = current_project.config.get(
-        #         SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
-        #     )
-
-        # check all sample names are something other than
-        # None or an empty string
-        for sample in new_raw_project[SAMPLE_RAW_DICT_KEY]:
-            if sample_table_index_col not in sample:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Sample table does not contain sample index column: '{sample_table_index_col}'. Please check sample table",
-                )
-            if (
-                sample[sample_table_index_col] is None
-                or sample[sample_table_index_col] == ""
-            ):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Sample name cannot be None or an empty string. Please check sample table",
-                )
-
-    # subsample table update
-    if updated_project.subsample_tables is not None:
-        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = (
-            updated_project.subsample_tables
-            if list(updated_project.subsample_tables[0][0].values())[0]
-            else None
-        )
-
-    # # project config update
-    # if updated_project.project_config_yaml is not None:
-    #     try:
-    #         yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
-    #     except yaml.scanner.ScannerError as e:
-    #         raise HTTPException(
-    #             status_code=400,
-    #             detail=f"Could not parse provided yaml. Error: {e}",
-    #         )
-    #     new_raw_project[CONFIG_KEY] = yaml_dict
-
     # run the validation if either the sample table or project config is updated
     if any(
         [
-            updated_project.project_config_yaml is not None,
-            updated_project.sample_table is not None,
-            updated_project.subsample_tables is not None,
+            updated_project.project_config_yaml,
+            updated_project.sample_table,
+            updated_project.subsample_tables,
         ]
     ):
-        try:
-            new_project = Project().from_dict(new_raw_project)
-        except Exception as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Could not create PEP from provided data. Error: {e}",
-            )
-
-        try:
-            # validate project (it will also validate samples)
-            eido.validate_project(
-                new_project, "http://schema.databio.org/pep/2.1.0.yaml"
-            )
-        except Exception as _:
-            raise HTTPException(
-                status_code=400,
-                detail="Could not validate PEP. Please check your PEP and try again.",
-            )
-
-        # if we get through all samples, then update project in the database
-        agent.project.update(
-            {
-                "project": new_project,
-                "pep_schema": updated_project.pep_schema,
-            },
-            namespace,
-            project,
-            tag,
-        )
-
-        # grab latest project and return to user
-        if not new_raw_project:
-            new_raw_project = agent.project.get(namespace, project, tag=tag, raw=True)
-        return {
-            "project": new_raw_project,
-            "project_annotation": agent.annotation.get(
-                namespace, project, tag=tag, admin=list_of_admins
-            ),
-            "message": "Project updated successfully",
-        }
+        new_project = await verify_updated_project(updated_project)
+    else:
+        new_project = None
 
     update_dict = updated_project.model_dump(exclude_unset=True, exclude={"sample_table", "project_config_yaml", "subsample_tables"})
-    if new_raw_project:
-        update_dict.update(project=Project.from_dict(new_raw_project))
+    if new_project:
+        update_dict.update(project=new_project)
+        new_name = new_project.name or project
+    else:
+        new_name = project
     agent.project.update(
         update_dict,
         namespace,
@@ -307,14 +206,14 @@ async def update_a_pep(
     )
 
     # fetch latest name and tag
-    project = updated_project.name or project
+    new_name = updated_project.name or new_name
     tag = updated_project.tag or tag
 
     return JSONResponse(
         content={
             "message": "PEP updated",
-            "registry": f"{namespace}/{project}:{tag}",
-            "api_endpoint": f"/api/v1/namespaces/{namespace}/{project}?tag={tag}",
+            "registry": f"{namespace}/{new_name}:{tag}",
+            "api_endpoint": f"/api/v1/namespaces/{namespace}/{new_name}?tag={tag}",
             "project": updated_project.model_dump(),
         },
         status_code=202,
@@ -359,7 +258,7 @@ async def delete_a_pep(
 async def get_pep_samples(
     proj: peppy.Project = Depends(get_project),
     format: Optional[str] = None,
-    raw: Optional[bool] = False,
+    raw: Optional[bool] = True,
 ):
     """
     Get samples from a certain project and namespace
@@ -428,7 +327,7 @@ async def get_sample(
     project: str,
     sample_name: str,
     tag: Optional[str] = DEFAULT_TAG,
-    raw: Optional[bool] = False,
+    raw: Optional[bool] = True,
     agent: PEPDatabaseAgent = Depends(get_db),
     list_of_admins: Optional[list] = Depends(get_namespace_access_list),
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
@@ -449,17 +348,18 @@ async def get_sample(
             detail="Project does not exist.",
             status_code=404,
         )
-    if raw:
-        sample_dict = agent.sample.get(
-            namespace, project, tag=tag, sample_name=sample_name, raw=True
-        )
-    else:
-        sample_dict = agent.sample.get(
-            namespace, project, tag=tag, sample_name=sample_name, raw=False
-        ).to_dict()
-    if sample_dict:
+    try:
+        if raw:
+            sample_dict = agent.sample.get(
+                namespace, project, tag=tag, sample_name=sample_name, raw=True
+            )
+        else:
+            sample_dict = agent.sample.get(
+                namespace, project, tag=tag, sample_name=sample_name, raw=False
+            ).to_dict()
+
         return sample_dict
-    else:
+    except SampleNotFoundError:
         raise HTTPException(
             status_code=404,
             detail=f"Sample '{sample_name}' not found in project '{namespace}/{project}:{tag}'",
