@@ -123,10 +123,10 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
 
         {/* no matter what, only render if belonging to the user */}
         {user && projectInfo && canEdit(user, projectInfo) ? (
-          <div className="d-flex flex-row align-items-center w-25 justify-content-end">
+          <div className="h-100 d-flex flex-row align-items-center w-25 justify-content-end">
             {/* <ValidationTooltip /> */}
             {projectInfo?.pep_schema ? (
-              <div className="d-flex flex-row align-items-center mb-1 me-4">
+              <div className="d-flex flex-row align-items-center me-4">
                 {projectValidationQuery.isLoading || projectValidationQuery.isFetching ? (
                   <span>Validating...</span>
                 ) : validationResult?.valid ? (
@@ -189,7 +189,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                 </>
               </div>
             )}
-            <div className="px-1">
+            <div className="ps-1">
               {shouldFetchSampleTable && !view && (
                 <Fragment>
                   <button
@@ -201,12 +201,12 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                       !!view
                     }
                     onClick={() => handleTotalProjectChange()}
-                    className="fst-italic btn btn-sm btn-success me-1 mb-1 border-dark"
+                    className="fst-italic btn btn-sm btn-success me-1 border-dark"
                   >
                     {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
                   </button>
                   <button
-                    className="fst-italic btn btn-sm btn-outline-dark me-1 mb-1"
+                    className="fst-italic btn btn-sm btn-outline-dark bg-white"
                     onClick={() => {
                       resetConfig();
                       resetSamples();
