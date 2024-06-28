@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Dict, List
 
-import jwt
+import secrets
+
 from pydantic import BaseModel
 
 from .const import JWT_SECRET
@@ -36,9 +37,9 @@ class DeveloperKeyHandler:
 
         namespace: str
         """
-        return self._keys.get(namespace)
+        return self._keys.get(namespace) or []
 
-    def remove_key(self, namespace: str, key: str):
+    def remove_key(self, namespace: str, last_five_chars: str):
         """
         Remove a key from the handler for a given namespace/user
 
@@ -46,7 +47,9 @@ class DeveloperKeyHandler:
         :param key: key to remove
         """
         if namespace in self._keys:
-            self._keys[namespace] = [k for k in self._keys[namespace] if k.key != key]
+            self._keys[namespace] = [
+                key for key in self._keys[namespace] if key.key[-5:] != last_five_chars
+            ]
 
     def mint_key_for_namespace(
         self, namespace: str, session_info: dict
@@ -56,6 +59,8 @@ class DeveloperKeyHandler:
 
         :param namespace: namespace for the key
         """
+        salt = secrets.token_hex(32)
+        session_info["salt"] = salt
         expiry = datetime.utcnow() + timedelta(seconds=self._default_exp)
         new_key = CLIAuthSystem.jwt_encode_user_data(session_info, exp=expiry)
         key = DeveloperKey(

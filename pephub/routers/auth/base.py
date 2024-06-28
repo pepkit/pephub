@@ -8,7 +8,7 @@ import requests
 from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from ...const import (
@@ -29,6 +29,7 @@ from ..models import (
     InitializeDeviceCodeResponse,
     JWTDeviceTokenResponse,
     TokenExchange,
+    RevokeRequest,
 )
 from ...developer_keys import DeveloperKeyHandler
 
@@ -77,9 +78,8 @@ def get_user_keys(session_info: Union[dict, None] = Depends(read_authorization_h
         for key in keys:
             key.key = key.key[:5] + "*" * 10 + key.key[-5:]
 
-        return {
-            "keys": keys,
-        }
+        return {"keys": keys}
+
     else:
         raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -89,19 +89,23 @@ def mint_user_key(
     session_info: Union[dict, None] = Depends(read_authorization_header),
 ):
     if session_info:
-        key = dev_key_handler.mint_key_for_namespace(session_info["login"])
-        return key
+        key = dev_key_handler.mint_key_for_namespace(
+            session_info["login"], session_info=session_info
+        )
+        return {"key": key}
     else:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @auth.delete("/user/keys")
 def delete_user_key(
-    key: str,
+    revoke_request: RevokeRequest,
     session_info: Union[dict, None] = Depends(read_authorization_header),
 ):
     if session_info:
-        dev_key_handler.remove_key(session_info["login"], key)
+        dev_key_handler.remove_key(
+            session_info["login"], revoke_request.last_five_chars
+        )
         return {"message": "Key deleted successfully."}
     else:
         raise HTTPException(status_code=401, detail="Invalid token")

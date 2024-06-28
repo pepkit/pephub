@@ -88,3 +88,7 @@ class ProjectJsonRequest(BaseModel):
     overwrite: bool = False
     pep_schema: Optional[str] = DEFAULT_PEP_SCHEMA
     pop: Optional[bool] = None
+
+
+class RevokeRequest(BaseModel):
+    last_five_chars: str
