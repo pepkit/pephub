@@ -82,8 +82,8 @@ class CLIAuthSystem:
             )
 
     @staticmethod
-    def jwt_encode_user_data(user_data: dict) -> str:
-        exp = datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
+    def jwt_encode_user_data(user_data: dict, exp: datetime = None) -> str:
+        exp = exp or datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
         encoded_user_data = jwt.encode(
             {**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256"
         )

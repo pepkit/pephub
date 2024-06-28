@@ -30,11 +30,13 @@ from ..models import (
     JWTDeviceTokenResponse,
     TokenExchange,
 )
+from ...developer_keys import DeveloperKeyHandler
 
 load_dotenv()
 
 CODE_EXCHANGE = {}
 DEVICE_CODES = {}
+dev_key_handler = DeveloperKeyHandler()
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_TEMPLATES_PATH))
@@ -64,6 +66,45 @@ def delete_device_code_after(code: str, expiration: int = AUTH_CODE_EXPIRATION):
     """
     time.sleep(expiration)
     DEVICE_CODES.pop(code, None)
+
+
+@auth.get("/user/keys")
+def get_user_keys(session_info: Union[dict, None] = Depends(read_authorization_header)):
+    if session_info:
+        keys = dev_key_handler.get_keys_for_namespace(session_info["login"])
+
+        # obfuscate the keys -- we never want to show the full key
+        for key in keys:
+            key.key = key.key[:5] + "*" * 10 + key.key[-5:]
+
+        return {
+            "keys": keys,
+        }
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+@auth.post("/user/keys")
+def mint_user_key(
+    session_info: Union[dict, None] = Depends(read_authorization_header),
+):
+    if session_info:
+        key = dev_key_handler.mint_key_for_namespace(session_info["login"])
+        return key
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+@auth.delete("/user/keys")
+def delete_user_key(
+    key: str,
+    session_info: Union[dict, None] = Depends(read_authorization_header),
+):
+    if session_info:
+        dev_key_handler.remove_key(session_info["login"], key)
+        return {"message": "Key deleted successfully."}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @auth.get("/login", response_class=RedirectResponse)
@@ -127,6 +168,10 @@ def callback(
         u["organizations_url"],
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
+
+    # append the github access_token to the user data
+    u["gh_access_token"] = x["access_token"]
+    u["gh_refresh_token"] = x["refresh_token"]
 
     # encode the token
     token = CLIAuthSystem.jwt_encode_user_data(

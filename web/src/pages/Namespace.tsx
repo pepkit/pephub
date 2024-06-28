@@ -6,6 +6,7 @@ import { GitHubAvatar } from '../components/badges/github-avatar';
 import { PageLayout } from '../components/layout/page-layout';
 import { Pagination } from '../components/layout/pagination';
 import { AddPEPModal } from '../components/modals/add-pep';
+import { DeveloperSettingsModal } from '../components/modals/developer-settings-modal';
 import { DownloadGeo } from '../components/modals/download-geo';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
@@ -45,6 +46,7 @@ export const NamespacePage = () => {
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
   const [showGeoDownloadModal, setShowGeoDownloadModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
   const [starSearch, setStarSearch] = useState<string>(searchParams.get('starSearch') || '');
 
@@ -113,8 +115,8 @@ export const NamespacePage = () => {
           <h1 id="namespace-header" className="fw-bold">
             <GitHubAvatar namespace={namespace} height={60} width={60} /> {namespace}
           </h1>
-          <div className="d-flex flex-row align-items-center">
-            <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark me-1">
+          <div className="d-flex flex-row align-items-center gap-1">
+            <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark">
               <i className="bi bi-hdd-rack me-1"></i>
               API
             </button>
@@ -127,6 +129,12 @@ export const NamespacePage = () => {
               >
                 <i className="bi bi-download me-1"></i>
                 Download
+              </button>
+            )}
+            {user?.login === namespace && (
+              <button className="btn btn-sm btn-dark" onClick={() => setShowSettingsModal(true)}>
+                <i className="bi bi-gear me-1"></i>
+                Settings
               </button>
             )}
             {user?.login === namespace || user?.orgs.includes(namespace || '') ? (
@@ -246,6 +254,7 @@ export const NamespacePage = () => {
           onHide={() => setShowEndpointsModal(false)}
         />
         <DownloadGeo show={showGeoDownloadModal} onHide={() => setShowGeoDownloadModal(false)} />
+        <DeveloperSettingsModal show={showSettingsModal} onHide={() => setShowSettingsModal(false)} />
       </PageLayout>
     );
   }
