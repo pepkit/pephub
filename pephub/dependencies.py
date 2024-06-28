@@ -9,7 +9,7 @@ import jwt
 import pydantic
 import requests
 from dotenv import load_dotenv
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Query
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from fastembed.embedding import FlagEmbedding as Embedding
@@ -195,7 +195,11 @@ def get_project(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-    with_id: Optional[bool] = False,
+    with_id: Optional[bool] = Query(
+        False,
+        description="Return the project with the samples pephub_id",
+        include_in_schema=False,
+    ),
 ) -> Dict[str, Any]:
     try:
         proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_id)
