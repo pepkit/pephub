@@ -399,7 +399,7 @@ def get_namespace_info(
         )
 
 
-@cached(TTLCache(maxsize=100, ttl=5*60))
+@cached(TTLCache(maxsize=100, ttl=5 * 60))
 def get_pepdb_namespace_info(limit: int = 10) -> ListOfNamespaceInfo:
     """
     Get the information on the biggest namespaces in the database.
