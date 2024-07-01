@@ -14,3 +14,4 @@ pyjwt[crypto]
 coloredlogs
 fastembed
 numpy<2.0.0
+cachetools>=4.2.4

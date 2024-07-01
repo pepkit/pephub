@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timedelta
 from secrets import token_hex
 from typing import Any, Dict, List, Optional, Union
+from cachetools import cached, TTLCache
 
 import jwt
 import pydantic
@@ -16,7 +17,7 @@ from fastembed.embedding import FlagEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.exceptions import ProjectNotFoundError
-from pepdbagent.models import AnnotationModel, Namespace
+from pepdbagent.models import AnnotationModel, Namespace, ListOfNamespaceInfo
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
@@ -396,3 +397,11 @@ def get_namespace_info(
             number_of_projects=0,
             number_of_samples=0,
         )
+
+
+@cached(TTLCache(maxsize=100, ttl=5*60))
+def get_pepdb_namespace_info(limit: int = 10) -> ListOfNamespaceInfo:
+    """
+    Get the information on the biggest namespaces in the database.
+    """
+    return agent.namespace.info(limit=limit)
