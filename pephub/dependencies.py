@@ -201,7 +201,7 @@ def get_project(
         description="Return the project with the samples pephub_id",
         include_in_schema=False,
     ),
-) -> Generator[Dict[str, Any]]:
+) -> Dict[str, Any]:
     try:
         proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_id)
         yield proj
@@ -217,7 +217,7 @@ def get_config(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> Generator[Dict[str, Any]]:
+) -> Dict[str, Any]:
     try:
         config = agent.project.get_config(namespace, project, tag)
         yield config
@@ -233,7 +233,7 @@ def get_subsamples(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> Generator[Dict[str, Any]]:
+) -> Dict[str, Any]:
     try:
         subsamples = agent.project.get_subsamples(namespace, project, tag)
         yield subsamples
@@ -250,7 +250,7 @@ def get_project_annotation(
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
-) -> Generator[AnnotationModel]:
+) -> AnnotationModel:
     try:
         anno = agent.annotation.get(
             namespace, project, tag, admin=namespace_access_list
@@ -320,7 +320,7 @@ def verify_user_can_read_project(
 def verify_user_can_fork(
     fork_request: ForkRequest,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
-) -> Generator[bool]:
+) -> bool:
     fork_namespace = fork_request.fork_to
     if fork_namespace in (namespace_access_list or []):
         yield
@@ -344,7 +344,7 @@ def get_qdrant_enabled() -> bool:
 
 def get_qdrant(
     qdrant_enabled: bool = Depends(get_qdrant_enabled),
-) -> Generator[Union[QdrantClient, None]]:
+) -> Union[QdrantClient, None]:
     """
     Return connection to qdrant client
     """
@@ -383,7 +383,7 @@ def get_namespace_info(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-) -> Generator[Namespace]:
+) -> Namespace:
     """
     Get the information on a namespace, if it exists.
     """
