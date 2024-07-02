@@ -196,7 +196,7 @@ def get_project(
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
     with_id: Optional[bool] = False,
-) -> Dict[str, Any]:
+) -> Dict[str, Any]:  # type: ignore
     try:
         proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_id)
         yield proj
@@ -212,7 +212,7 @@ def get_config(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> Dict[str, Any]:
+) -> Dict[str, Any]:  # type: ignore
     try:
         config = agent.project.get_config(namespace, project, tag)
         yield config
@@ -228,7 +228,7 @@ def get_subsamples(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> Dict[str, Any]:
+) -> Dict[str, Any]:  # type: ignore # type: ignore
     try:
         subsamples = agent.project.get_subsamples(namespace, project, tag)
         yield subsamples
@@ -245,7 +245,7 @@ def get_project_annotation(
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
-) -> AnnotationModel:
+) -> AnnotationModel:  # type: ignore
     try:
         anno = agent.annotation.get(
             namespace, project, tag, admin=namespace_access_list
@@ -315,7 +315,7 @@ def verify_user_can_read_project(
 def verify_user_can_fork(
     fork_request: ForkRequest,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
-) -> bool:
+) -> bool:  # type: ignore
     fork_namespace = fork_request.fork_to
     if fork_namespace in (namespace_access_list or []):
         yield
@@ -339,7 +339,7 @@ def get_qdrant_enabled() -> bool:
 
 def get_qdrant(
     qdrant_enabled: bool = Depends(get_qdrant_enabled),
-) -> Union[QdrantClient, None]:
+) -> Union[QdrantClient, None]:  # type: ignore
     """
     Return connection to qdrant client
     """
@@ -378,7 +378,7 @@ def get_namespace_info(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-) -> Namespace:
+) -> Namespace:  # type: ignore
     """
     Get the information on a namespace, if it exists.
     """

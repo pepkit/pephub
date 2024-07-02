@@ -30,7 +30,7 @@ class DeveloperKeyHandler:
         """
         if namespace not in self._keys:
             self._keys[namespace] = []
-        if len(self._keys[namespace]) > MAX_NEW_KEYS:
+        if len(self._keys[namespace]) >= MAX_NEW_KEYS:
             raise HTTPException(
                 status_code=400,
                 detail="You have reached the maximum number of keys allowed",
