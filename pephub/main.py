@@ -3,9 +3,13 @@ import logging
 import coloredlogs
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
 
 from ._version import __version__ as server_v
 from .const import ALL_VERSIONS, PKG_NAME, TAGS_METADATA
+from .limiter import limiter, _custom_rate_limit_exceeded_handler
 from .routers.api.v1.base import api as api_base
 from .routers.api.v1.namespace import namespace as api_namespace
 from .routers.api.v1.namespace import namespaces as api_namespaces
@@ -57,6 +61,11 @@ app = FastAPI(
 # SQLAlchemyInstrumentor().instrument(engine=agent.connection)
 #
 # # logfire.instrument_fastapi(app)
+
+# rate limiting
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _custom_rate_limit_exceeded_handler)
 
 # CORS is required for the validation HTML SPA to work externally
 origins = ["*"]

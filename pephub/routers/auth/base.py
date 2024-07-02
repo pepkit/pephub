@@ -8,8 +8,10 @@ import requests
 from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+from ...limiter import limiter
 
 from ...const import (
     AUTH_CODE_EXPIRATION,
@@ -85,7 +87,9 @@ def get_user_keys(session_info: Union[dict, None] = Depends(read_authorization_h
 
 
 @auth.post("/user/keys")
+@limiter.limit("5/minute")
 def mint_user_key(
+    request: Request,
     session_info: Union[dict, None] = Depends(read_authorization_header),
 ):
     if session_info:

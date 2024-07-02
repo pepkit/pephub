@@ -3,9 +3,10 @@ from typing import Dict, List
 
 import secrets
 
+from fastapi import HTTPException
 from pydantic import BaseModel
 
-from .const import JWT_SECRET
+from .const import MAX_NEW_KEYS
 from .dependencies import CLIAuthSystem
 
 
@@ -29,6 +30,11 @@ class DeveloperKeyHandler:
         """
         if namespace not in self._keys:
             self._keys[namespace] = []
+        if len(self._keys[namespace]) > MAX_NEW_KEYS:
+            raise HTTPException(
+                status_code=400,
+                detail="You have reached the maximum number of keys allowed",
+            )
         self._keys[namespace].append(key)
 
     def get_keys_for_namespace(self, namespace: str) -> List[DeveloperKey]:
