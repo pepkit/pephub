@@ -7,7 +7,7 @@ import { Sample } from '../../../types';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { addClassesToRows } from './hooks-callbacks';
 
-interface Props {
+type Props = {
   className?: string;
   data: Sample[];
   onChange?: (rows: Sample[]) => void;
@@ -15,7 +15,7 @@ interface Props {
   height?: number;
   minRows?: number;
   stretchH?: 'none' | 'all' | 'last';
-}
+};
 /**
  * This table is meant to handle csv strings, so just pass in
  * the csv string and it will handle the rest
