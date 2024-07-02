@@ -29,7 +29,7 @@ const MotionButton: FC<MotionButtonProps> = ({ children, className, onClick }) =
   </motion.button>
 );
 
-function Home() {
+export function Home() {
   const { user, login } = useSession();
   const limit = 3;
   const { data: largestNamespaces } = useBiggestNamespace(limit);

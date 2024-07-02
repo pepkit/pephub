@@ -6,21 +6,34 @@ import { StarsResponse, starProject } from '../../api/namespace';
 import { extractErrorMessage } from '../../utils/etc';
 import { useSession } from '../useSession';
 
-export const useAddStar = (namespace: string, star_namespace: string, star_project: string, star_tag: string) => {
+type AddStarMutation = {
+  namespaceToStar: string;
+  projectNameToStar: string;
+  projectTagToStar: string;
+};
+
+export const useAddStar = (addToNamespace: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => {
-      if (namespace === '') {
+    mutationFn: (data: AddStarMutation) => {
+      const { namespaceToStar, projectNameToStar, projectTagToStar } = data;
+      if (addToNamespace === '') {
         toast.error('Please ensure that you are logged in before starring a project');
       }
-      return starProject(namespace, star_namespace, star_project, star_tag, session.jwt || '');
+      return starProject(addToNamespace, namespaceToStar, projectNameToStar, projectTagToStar, session.jwt || '');
     },
-    onSuccess: () => {
-      queryClient.setQueryData([namespace, 'stars'], (oldData: StarsResponse['results']) => {
+    onSuccess: ({ data }) => {
+      const { namespace, registry_path } = data;
+
+      const namespaceToStar = registry_path.split('/')[0];
+      const projectNameToStar = registry_path.split('/')[1];
+      const projectTagToStar = registry_path.split(':')[1];
+
+      queryClient.setQueryData([addToNamespace, 'stars'], (oldData: StarsResponse['results']) => {
         // NOTE: this wont pull all data from the newly added star, but it will add its identifier it to the list
-        return [...oldData, { namespace: star_namespace, name: star_project, tag: star_tag }];
+        return [...oldData, { namespace: namespaceToStar, name: projectNameToStar, tag: projectTagToStar }];
       });
       queryClient.invalidateQueries({ queryKey: [namespace, 'stars'] });
     },

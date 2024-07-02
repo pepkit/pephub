@@ -4,19 +4,20 @@ import Tooltip, { TooltipProps } from 'react-bootstrap/Tooltip';
 import { useSearchParams } from 'react-router-dom';
 import ReactSelect from 'react-select';
 
-import { ProjectViewsResponse } from '../../api/project';
-import { search } from '../../api/search';
+import { useProjectPage } from '../../contexts/project-page-context';
 
-interface Props {
-  projectViewsIsLoading: boolean;
-  projectViews: ProjectViewsResponse | undefined;
+type ViewSelectorProps = {
   view: string | undefined;
   setView: (view: string | undefined) => void;
-}
+};
 
-export const ViewSelector = (props: Props) => {
-  const { projectViewsIsLoading, projectViews, view, setView } = props;
+export const ViewSelector = (props: ViewSelectorProps) => {
+  const { view, setView } = props;
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { projectViewsQuery } = useProjectPage();
+  const projectViewsIsLoading = projectViewsQuery.isLoading;
+  const projectViews = projectViewsQuery.data;
 
   const renderTooltip = (props: TooltipProps) => (
     <Tooltip id="button-tooltip" {...props}>
@@ -28,7 +29,7 @@ export const ViewSelector = (props: Props) => {
 
   return (
     <Fragment>
-      <div className="d-flex flex-row align-items-center justify-content-end w-25">
+      <div className="ps-3 d-flex flex-row align-items-center justify-content-end w-25">
         <ReactSelect
           className="top-z rounded w-100"
           options={

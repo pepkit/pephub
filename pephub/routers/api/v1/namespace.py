@@ -1,56 +1,46 @@
-import tempfile
-import shutil
 import json
-from typing import List, Optional, Union
+import shutil
+import tempfile
+from typing import List, Literal, Optional, Union
 
 import peppy
-
-from fastapi import (
-    APIRouter,
-    File,
-    UploadFile,
-    Request,
-    Depends,
-    Form,
-    HTTPException,
-)
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
-from peppy import Project
-from peppy.const import DESC_KEY, NAME_KEY
 from pepdbagent import PEPDatabaseAgent
+from pepdbagent.const import DEFAULT_LIMIT_INFO
 from pepdbagent.exceptions import (
-    ProjectUniqueNameError,
+    NamespaceNotFoundError,
     ProjectAlreadyInFavorites,
     ProjectNotInFavorites,
-    NamespaceNotFoundError,
+    ProjectUniqueNameError,
 )
-from pepdbagent.const import DEFAULT_LIMIT_INFO
 from pepdbagent.models import (
+    AnnotationList,
     ListOfNamespaceInfo,
     Namespace,
-    AnnotationList,
     NamespaceStats,
 )
-from typing import Literal
+from peppy import Project
+from peppy.const import DESC_KEY, NAME_KEY
 from typing_extensions import Annotated
 
-from ....dependencies import (
-    get_db,
-    get_namespace_info,
-    read_authorization_header,
-    get_namespace_access_list,
-    verify_user_can_write_namespace,
-)
-from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ....const import (
-    DEFAULT_TAG,
     BLANK_PEP_CONFIG,
     BLANK_PEP_SAMPLE_TABLE,
     DEFAULT_PEP_SCHEMA,
+    DEFAULT_TAG,
 )
-from ...models import ProjectRawModel, ProjectJsonRequest, FavoriteRequest
-
-from dotenv import load_dotenv
+from ....dependencies import (
+    get_db,
+    get_namespace_access_list,
+    get_namespace_info,
+    read_authorization_header,
+    verify_user_can_write_namespace,
+    get_pepdb_namespace_info,
+)
+from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
+from ...models import FavoriteRequest, ProjectJsonRequest, ProjectRawModel
 
 load_dotenv()
 
@@ -61,7 +51,6 @@ namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"
 @namespace.get(
     "/",
     summary="Fetch details about a particular namespace.",
-    # dependencies=[Depends(verify_namespace_exists)],
 )
 async def get_namespace(
     request: Request,
@@ -91,10 +80,8 @@ async def get_namespace_projects(
     agent: PEPDatabaseAgent = Depends(get_db),
     limit: int = 10,
     offset: int = 0,
-    # user=Depends(get_user_from_session_info),
     query: str = None,
     session_info: dict = Depends(read_authorization_header),
-    # user_orgs: List[str] = Depends(get_organizations_from_session_info),
     namespace_access: List[str] = Depends(get_namespace_access_list),
     order_by: str = "update_date",
     order_desc: bool = False,
@@ -425,6 +412,7 @@ async def remove_from_stars(
         return JSONResponse(
             content={
                 "message": "PEP was removed from favorites.",
+                "namespace": namespace,
                 "registry": f"{project.namespace}/{project.name}:{project.tag}",
             },
             status_code=202,
@@ -443,9 +431,8 @@ async def remove_from_stars(
 )
 async def get_namespace_information(
     limit: Optional[int] = DEFAULT_LIMIT_INFO,
-    agent: PEPDatabaseAgent = Depends(get_db),
 ) -> ListOfNamespaceInfo:
-    return agent.namespace.info(limit=limit)
+    return get_pepdb_namespace_info(limit)
 
 
 @namespaces.get(

@@ -28,8 +28,8 @@ export const PopCardDropdown: FC<Props> = (props) => {
 
   const { user } = useSession();
 
-  const starAddMutation = useAddStar(user?.login || '', project.namespace, project.name, project.tag);
-  const starRemoveMutation = useRemoveStar(user?.login || '', project.namespace, project.name, project.tag);
+  const starAddMutation = useAddStar(user?.login || '');
+  const starRemoveMutation = useRemoveStar(user?.login || '');
 
   return (
     <Dropdown as={ButtonGroup}>
@@ -41,9 +41,17 @@ export const PopCardDropdown: FC<Props> = (props) => {
           if (!user) {
             toast.error('You must be logged in to star a project!');
           } else if (isStarred) {
-            starRemoveMutation.mutate();
+            starRemoveMutation.mutate({
+              namespaceToRemove: project.namespace,
+              projectNameToRemove: project.name,
+              projectTagToRemove: project.tag,
+            });
           } else {
-            starAddMutation.mutate();
+            starAddMutation.mutate({
+              namespaceToStar: project.namespace,
+              projectNameToStar: project.name,
+              projectTagToStar: project.tag,
+            });
           }
         }}
       >
@@ -52,6 +60,7 @@ export const PopCardDropdown: FC<Props> = (props) => {
             <div className="d-flex align-items-center">
               <i className="text-primary bi bi-star-fill me-1"></i>
               <span className="text-primary">
+                s
                 {starRemoveMutation.isPending ? (
                   <Fragment>
                     {copied ? 'Copied!' : 'Star'}

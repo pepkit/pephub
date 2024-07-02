@@ -79,11 +79,11 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
 
   // populate params based on form data for the PEP
   if (useExistingPEP) {
-    params.pep_registry = pepRegistryPath?.value;
-    params.pep_files = undefined;
+    params.pepRegistry = pepRegistryPath?.value;
+    params.pepFiles = undefined;
   } else {
-    params.pep_registry = undefined;
-    params.pep_files = pepFiles;
+    params.pepRegistry = undefined;
+    params.pepFiles = pepFiles;
   }
 
   // populate params based on form data for the schema

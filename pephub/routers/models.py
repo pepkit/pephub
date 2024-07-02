@@ -1,7 +1,8 @@
-from typing import Optional, List
-from pydantic import BaseModel, Field, ConfigDict
-from pepdbagent.models import UpdateItems
+from typing import List, Optional
+
 from pepdbagent.const import DEFAULT_TAG
+from pepdbagent.models import UpdateItems
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..const import DEFAULT_PEP_SCHEMA, DEFAULT_QDRANT_SCORE_THRESHOLD
 
@@ -10,7 +11,6 @@ class ProjectOptional(UpdateItems):
     # sample table is a list of JSON objects
     sample_table: Optional[List[dict]] = None
     project_config_yaml: Optional[str] = None
-    description: Optional[str] = None
     subsample_tables: Optional[List[List[dict]]] = None
 
     model_config = ConfigDict(populate_by_name=True)
