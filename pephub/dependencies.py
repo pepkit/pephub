@@ -3,20 +3,21 @@ import logging
 import os
 from datetime import datetime, timedelta
 from secrets import token_hex
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Union
+from cachetools import cached, TTLCache
 
 import jwt
 import pydantic
 import requests
 from dotenv import load_dotenv
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Query
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from fastembed.embedding import FlagEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.exceptions import ProjectNotFoundError
-from pepdbagent.models import AnnotationModel, Namespace
+from pepdbagent.models import AnnotationModel, Namespace, ListOfNamespaceInfo
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException
@@ -195,8 +196,12 @@ def get_project(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-    with_id: Optional[bool] = False,
-) -> Dict[str, Any]:  # type: ignore
+    with_id: Optional[bool] = Query(
+        False,
+        description="Return the project with the samples pephub_id",
+        include_in_schema=False,
+    ),
+) -> Dict[str, Any]: # type: ignore
     try:
         proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_id)
         yield proj
@@ -392,3 +397,11 @@ def get_namespace_info(
             number_of_projects=0,
             number_of_samples=0,
         )
+
+
+@cached(TTLCache(maxsize=100, ttl=5 * 60))
+def get_pepdb_namespace_info(limit: int = 10) -> ListOfNamespaceInfo:
+    """
+    Get the information on the biggest namespaces in the database.
+    """
+    return agent.namespace.info(limit=limit)
