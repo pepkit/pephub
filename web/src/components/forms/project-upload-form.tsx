@@ -164,7 +164,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
         <Controller
           control={control}
           name="pep_schema"
-          render={({ field: { onChange, value } }) => (
+          render={({ field: { value } }) => (
             <SchemaDropdown
               value={value}
               onChange={(schema) => {
