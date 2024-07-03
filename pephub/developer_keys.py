@@ -10,9 +10,6 @@ from .helpers import jwt_encode_user_data
 from .const import MAX_NEW_KEYS
 
 
-# this is a duplicate of the function in pephub/dependencies/CliAuthSystem because of circular imports
-
-
 class DeveloperKey(BaseModel):
     key: str
     created_at: str
