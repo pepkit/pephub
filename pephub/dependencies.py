@@ -199,7 +199,7 @@ def get_project(
         description="Return the project with the samples pephub_id",
         include_in_schema=False,
     ),
-) -> Dict[str, Any]: # type: ignore
+) -> Dict[str, Any]:  # type: ignore
     try:
         proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_id)
         yield proj
