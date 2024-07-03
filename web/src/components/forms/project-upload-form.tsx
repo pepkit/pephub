@@ -1,6 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { FC, useRef } from 'react';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 import { useSession } from '../../hooks/useSession';
@@ -203,7 +204,11 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
       )}
       <div className="mt-2">
         <button
-          onClick={() =>
+          onClick={() => {
+            if (projectName === '') {
+              toast.error('Could not create PEP. Project Name must not be empty.');
+              return;
+            }
             mutation.mutate(
               {
                 project: projectName,
@@ -219,8 +224,8 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
                   onHide();
                 },
               },
-            )
-          }
+            );
+          }}
           disabled={mutation.isPending}
           type="button"
           id="new-project-submit-btn"
@@ -229,7 +234,15 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           <i className="bi bi-plus-circle me-1"></i>
           {mutation.isPending ? 'Submitting...' : 'Submit'}
         </button>
-        <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
+        <button
+          type="button"
+          className="btn btn-outline-dark me-1"
+          data-bs-dismiss="modal"
+          onClick={() => {
+            resetForm();
+            onHide();
+          }}
+        >
           Cancel
         </button>
       </div>
