@@ -33,13 +33,12 @@ from ..models import (
     TokenExchange,
     RevokeRequest,
 )
-from ...developer_keys import DeveloperKeyHandler
+from ...developer_keys import dev_key_handler
 
 load_dotenv()
 
 CODE_EXCHANGE = {}
 DEVICE_CODES = {}
-dev_key_handler = DeveloperKeyHandler()
 
 templates = Jinja2Templates(directory=BASE_TEMPLATES_PATH)
 je = jinja2.Environment(loader=jinja2.FileSystemLoader(BASE_TEMPLATES_PATH))

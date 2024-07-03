@@ -6,8 +6,11 @@ import secrets
 from fastapi import HTTPException
 from pydantic import BaseModel
 
+from .helpers import jwt_encode_user_data
 from .const import MAX_NEW_KEYS
-from .dependencies import CLIAuthSystem
+
+
+# this is a duplicate of the function in pephub/dependencies/CliAuthSystem because of circular imports
 
 
 class DeveloperKey(BaseModel):
@@ -20,6 +23,7 @@ class DeveloperKeyHandler:
     def __init__(self, default_exp: int = 30 * 24 * 60 * 60):
         self._keys: Dict[str, List[DeveloperKey]] = {}
         self._default_exp = default_exp
+        self._bad_jwts = []
 
     def add_key(self, namespace: str, key: DeveloperKey):
         """
@@ -56,6 +60,7 @@ class DeveloperKeyHandler:
             self._keys[namespace] = [
                 key for key in self._keys[namespace] if key.key[-5:] != last_five_chars
             ]
+            self._bad_jwts.append(last_five_chars)
 
     def mint_key_for_namespace(
         self, namespace: str, session_info: dict
@@ -68,7 +73,7 @@ class DeveloperKeyHandler:
         salt = secrets.token_hex(32)
         session_info["salt"] = salt
         expiry = datetime.utcnow() + timedelta(seconds=self._default_exp)
-        new_key = CLIAuthSystem.jwt_encode_user_data(session_info, exp=expiry)
+        new_key = jwt_encode_user_data(session_info, exp=expiry)
         key = DeveloperKey(
             key=new_key,
             created_at=datetime.utcnow().isoformat(),
@@ -76,3 +81,9 @@ class DeveloperKeyHandler:
         )
         self.add_key(namespace, key)
         return key
+
+    def is_key_bad(self, last_five_chars: str) -> bool:
+        return last_five_chars in self._bad_jwts
+
+
+dev_key_handler = DeveloperKeyHandler()

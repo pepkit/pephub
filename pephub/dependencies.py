@@ -30,10 +30,11 @@ from .const import (
     DEFAULT_POSTGRES_USER,
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
-    JWT_EXPIRATION,
     JWT_SECRET,
 )
+from .helpers import jwt_encode_user_data
 from .routers.models import ForkRequest
+from .developer_keys import dev_key_handler
 
 _LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
 
@@ -83,13 +84,7 @@ class CLIAuthSystem:
 
     @staticmethod
     def jwt_encode_user_data(user_data: dict, exp: datetime = None) -> str:
-        exp = exp or datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
-        encoded_user_data = jwt.encode(
-            {**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256"
-        )
-        if isinstance(encoded_user_data, bytes):
-            encoded_user_data = encoded_user_data.decode("utf-8")
-        return encoded_user_data
+        return jwt_encode_user_data(user_data, exp=exp)
 
 
 # database connection
@@ -131,19 +126,22 @@ def get_db() -> PEPDatabaseAgent:
     return agent
 
 
-def read_authorization_header(Authorization: str = Header(None)) -> Union[dict, None]:
+def read_authorization_header(authorization: str = Header(None)) -> Union[dict, None]:
     """
     Reads and decodes a JWT, returning the decoded variables.
 
     :param Authorization: JWT provided via FastAPI injection from the API cookie.
     """
-    if Authorization is None:
+    if authorization is None:
         return None
     else:
-        Authorization = Authorization.replace("Bearer ", "")
+        authorization = authorization.replace("Bearer ", "")
     try:
         # Python jwt.decode verifies content as well so this is safe.
-        session_info = jwt.decode(Authorization, JWT_SECRET, algorithms=["HS256"])
+        # check last 5 chars
+        if dev_key_handler.is_key_bad(authorization[-5:]):
+            raise HTTPException(401, "JWT has been revoked")
+        session_info = jwt.decode(authorization, JWT_SECRET, algorithms=["HS256"])
     except jwt.exceptions.InvalidSignatureError as e:
         _LOGGER_PEPHUB.error(e)
         return None

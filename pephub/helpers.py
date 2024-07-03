@@ -1,8 +1,9 @@
 import io
 import zipfile
-from datetime import date
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Tuple, Union
 
+import jwt
 import pandas as pd
 import yaml
 from fastapi import Response, UploadFile
@@ -15,6 +16,17 @@ from peppy.const import (
     SAMPLE_RAW_DICT_KEY,
     SUBSAMPLE_RAW_LIST_KEY,
 )
+from .const import JWT_EXPIRATION, JWT_SECRET
+
+
+def jwt_encode_user_data(user_data: dict, exp: datetime = None) -> str:
+    exp = exp or datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
+    encoded_user_data = jwt.encode(
+        {**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256"
+    )
+    if isinstance(encoded_user_data, bytes):
+        encoded_user_data = encoded_user_data.decode("utf-8")
+    return encoded_user_data
 
 
 def zip_pep(project: Dict[str, Any]) -> Response:
