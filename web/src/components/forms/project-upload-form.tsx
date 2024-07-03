@@ -221,7 +221,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
               },
             )
           }
-          disabled={!isValid}
+          disabled={mutation.isPending}
           type="button"
           id="new-project-submit-btn"
           className="btn btn-success me-1"
