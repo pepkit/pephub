@@ -88,3 +88,9 @@ class ProjectJsonRequest(BaseModel):
     overwrite: bool = False
     pep_schema: Optional[str] = DEFAULT_PEP_SCHEMA
     pop: Optional[bool] = None
+
+
+class CreateViewRequest(BaseModel):
+    description: Optional[str] = None
+    sample_names: List[str]
+    no_fail: Optional[bool]

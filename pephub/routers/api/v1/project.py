@@ -42,7 +42,13 @@ from ....dependencies import (
     verify_user_can_read_project,
 )
 from ....helpers import zip_conv_result, zip_pep
-from ...models import ForkRequest, ProjectOptional, ProjectRawModel, ProjectRawRequest
+from ...models import (
+    ForkRequest,
+    ProjectOptional,
+    ProjectRawModel,
+    ProjectRawRequest,
+    CreateViewRequest,
+)
 from .helpers import verify_updated_project
 
 _LOGGER = logging.getLogger(__name__)
@@ -685,10 +691,8 @@ async def create_view_of_the_project(
     namespace: str,
     project: str,
     view: str,
+    view_request: CreateViewRequest,
     tag: str = DEFAULT_TAG,
-    description: str = "",
-    sample_names: List[str] = None,
-    no_fail: bool = False,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
@@ -701,6 +705,9 @@ async def create_view_of_the_project(
             status_code=401,
         )
     try:
+        sample_names = view_request.sample_names
+        description = view_request.description
+        no_fail = view_request.no_fail
         agent.view.create(
             view_name=view,
             no_fail=no_fail,

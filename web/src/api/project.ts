@@ -294,3 +294,15 @@ export const getView = (
       .then((res) => res.data);
   }
 };
+
+export const addProjectView = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  viewName: string,
+  viewData: Sample[],
+  token: string | null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/views/${viewName}?tag=${tag}`;
+  return axios.post(url, viewData, { headers: { Authorization: `Bearer ${token}` } });
+};
