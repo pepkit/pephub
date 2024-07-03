@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Col, ListGroup, Modal, Row } from 'react-bootstrap';
 
+import { AccountView } from '../developer-settings/account-view';
 import { ApiKeyView } from '../developer-settings/api-key-view';
 
 type Props = {
@@ -32,10 +33,10 @@ export const DeveloperSettingsModal = (props: Props) => {
                 <i className="bi bi-person me-1"></i>
                 Account
               </ListGroup.Item>
-              <ListGroup.Item action onClick={() => setView('settings')}>
+              {/* <ListGroup.Item action onClick={() => setView('settings')}>
                 <i className="bi bi-gear me-1"></i>
                 Settings
-              </ListGroup.Item>
+              </ListGroup.Item> */}
             </ListGroup>
           </Col>
           <Col md={9}>
@@ -43,9 +44,7 @@ export const DeveloperSettingsModal = (props: Props) => {
               {view === 'api-keys' ? (
                 <ApiKeyView />
               ) : view === 'account' ? (
-                <div>
-                  <h1>Account View</h1>
-                </div>
+                <AccountView />
               ) : view === 'settings' ? (
                 <div>
                   <h1>Settings View</h1>
