@@ -83,21 +83,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   const pepSchema = watch('pep_schema');
   const fileDialogRef = useRef<() => void | null>(null);
 
-  const onSuccess = () => {
-    resetForm({}, { keepValues: false });
-    onHide();
-  };
-
-  const mutation = useUploadMutation(
-    namespace,
-    projectName,
-    tag,
-    isPrivate,
-    description,
-    uploadFiles,
-    pepSchema,
-    onSuccess,
-  );
+  const mutation = useUploadMutation(namespace);
 
   return (
     <form id="new-project-form" className="border-0 form-control">
@@ -217,7 +203,24 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
       )}
       <div className="mt-2">
         <button
-          onClick={() => mutation.mutate()}
+          onClick={() =>
+            mutation.mutate(
+              {
+                project: projectName,
+                tag,
+                isPrivate,
+                description,
+                files: uploadFiles,
+                pepSchema,
+              },
+              {
+                onSuccess: () => {
+                  resetForm({}, { keepValues: false });
+                  onHide();
+                },
+              },
+            )
+          }
           disabled={!isValid}
           type="button"
           id="new-project-submit-btn"
