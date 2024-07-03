@@ -683,15 +683,14 @@ async def get_view_of_the_project(
 
 
 @project.post(
-    "/views/{view}",
+    "/views",
     summary="Create a view",
     tags=["views"],
 )
 async def create_view_of_the_project(
     namespace: str,
     project: str,
-    view: str,
-    view_request: CreateViewRequest,
+    create_view_request: CreateViewRequest,
     tag: str = DEFAULT_TAG,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -705,11 +704,12 @@ async def create_view_of_the_project(
             status_code=401,
         )
     try:
-        sample_names = view_request.sample_names
-        description = view_request.description
-        no_fail = view_request.no_fail
+        view_name = create_view_request.view_name
+        sample_names = create_view_request.sample_names
+        description = create_view_request.description
+        no_fail = create_view_request.no_fail
         agent.view.create(
-            view_name=view,
+            view_name=view_name,
             no_fail=no_fail,
             description=description,
             view_dict=CreateViewDictModel(

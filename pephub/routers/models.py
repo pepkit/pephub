@@ -91,6 +91,7 @@ class ProjectJsonRequest(BaseModel):
 
 
 class CreateViewRequest(BaseModel):
-    description: Optional[str] = None
+    view_name: str
     sample_names: List[str]
+    description: Optional[str] = None
     no_fail: Optional[bool]
