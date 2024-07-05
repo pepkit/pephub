@@ -16,6 +16,5 @@ export const useSchema = (registry: string | undefined) => {
     queryKey: ['schema', registry],
     queryFn: () => fetchSchema(registry || ''),
     enabled: registry !== undefined && registry.length > 0,
-    refetchOnWindowFocus: false,
   });
 };

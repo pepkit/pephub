@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -141,6 +141,12 @@ export const ProjectPage = () => {
     });
   }, []);
 
+  const memoizedSetNewProjectSamples = useCallback((samples: Sample[]) => setNewProjectSamples(samples), []);
+  const memoizedSetNewProjectSubsamples = useCallback(
+    (subsamples: Sample[]) => setNewProjectSubsamples(subsamples),
+    [],
+  );
+
   if (projectAnnotationQuery.error) {
     return (
       <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
@@ -163,12 +169,12 @@ export const ProjectPage = () => {
         <ProjectHeaderBar isStarred={isStarred} />
         <ProjectDescription />
         <ProjectInfoFooter />
-      </div> 
+      </div>
       {projectInfo?.pop && !forceTraditionalInterface ? (
         <PopInterface project={projectInfo} />
       ) : (
         <Fragment>
-          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F640', height: '3.5em'}}>
+          <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
             {projectAnnotationQuery.isFetching || projectInfo === undefined ? (
               <ProjectPageheaderPlaceholder />
             ) : (
@@ -197,7 +203,7 @@ export const ProjectPage = () => {
                     readOnly={!(projectInfo && canEdit(user, projectInfo))}
                     // @ts-ignore: TODO: fix this, the model is just messed up
                     data={view !== undefined ? viewData?._samples || [] : newProjectSamples || []}
-                    onChange={(value) => setNewProjectSamples(value)}
+                    onChange={memoizedSetNewProjectSamples}
                   />
                 ) : pageView === 'subsamples' ? (
                   <>
@@ -208,7 +214,7 @@ export const ProjectPage = () => {
                         !(projectInfo && canEdit(user, projectInfo)) || newProjectSamples?.length >= MAX_SAMPLE_COUNT
                       }
                       data={newProjectSubsamples || []}
-                      onChange={(value) => setNewProjectSubsamples(value)}
+                      onChange={memoizedSetNewProjectSubsamples}
                     />
                   </>
                 ) : (

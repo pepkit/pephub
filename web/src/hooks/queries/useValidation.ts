@@ -48,7 +48,6 @@ export const useValidation = (params: ValidationParams) => {
     queryKey: ['validation', pepRegistry, pepFiles, schema, schema_registry],
     queryFn: () => runValidation(params),
     enabled: enabled,
-    refetchOnWindowFocus: false,
     retry: false,
   });
 };

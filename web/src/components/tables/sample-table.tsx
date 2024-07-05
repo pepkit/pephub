@@ -136,6 +136,7 @@ export const SampleTable = (props: Props) => {
             onChange(arraysToSampleList(rows));
           }
         }}
+        outsideClickDeselects={false}
       />
     </div>
   );

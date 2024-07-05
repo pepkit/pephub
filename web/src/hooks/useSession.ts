@@ -45,7 +45,6 @@ export const useSession = (): Session => {
       return response.json();
     },
     enabled: !!jwt,
-    refetchOnWindowFocus: true,
   });
 
   let decoded = null;
