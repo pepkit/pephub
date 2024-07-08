@@ -294,3 +294,8 @@ export const getView = (
       .then((res) => res.data);
   }
 };
+
+export const getProjectHistory = (namespace: string, name: string, tag: string, jwt: string | null) => {
+  const url = `${API_BASE}/projects/${namespace}/${name}/history?tag=${tag}`;
+  return axios.get(url, { headers: { Authorization: `Bearer ${jwt}` } });
+};

@@ -48,7 +48,6 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
 
   const projectInfo = projectAnnotationQuery.data;
-  const projectHash = projectInfo?.pep_schema?.replace(/\//g, '/#/');
 
   // watch for the fork query param to open the fork modal
   useEffect(() => {
@@ -142,6 +141,10 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
               {user && projectInfo && canEdit(user, projectInfo) && (
                 <Fragment>
                   <Dropdown.Divider />
+                  <Dropdown.Item onClick={() => {}}>
+                    <i className="me-1 bi bi-stopwatch" />
+                    History
+                  </Dropdown.Item>
                   <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
                     <i className="me-1 bi bi-pencil-square"></i>
                     Edit
