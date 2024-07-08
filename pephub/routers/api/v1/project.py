@@ -969,6 +969,55 @@ def get_project_history_by_id(
         )
 
 
+@project.post(
+    "/history/{history_id}/restore",
+    summary="Restore project history by id",
+)
+def restore_project_history_by_id(
+    namespace: str,
+    project: str,
+    history_id: int,
+    tag: str = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+    user_name: Optional[str] = Depends(get_user_from_session_info),
+):
+    """
+    Restore a project from history by id
+    """
+    if namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="History not found for this project",
+            status_code=404,
+        )
+    try:
+        agent.project.restore(
+            namespace,
+            project,
+            tag=tag,
+            history_id=history_id,
+            user_name=user_name,
+        )
+        return JSONResponse(
+            content={
+                "message": "Project restored.",
+                "registry": f"{namespace}/{project}:{tag}",
+            },
+            status_code=202,
+        )
+
+    except ProjectNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Project '{namespace}/{project}:{tag}' not found",
+        )
+    except HistoryNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"History '{history_id}' not found in project '{namespace}/{project}:{tag}'",
+        )
+
+
 @project.delete(
     "/history",
     summary="Delete all project history",
