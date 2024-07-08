@@ -13,21 +13,40 @@ interface TotalProjectChangeMutationProps {
   subsamples?: Sample[];
 }
 
-export const useTotalProjectChangeMutation = (
-  namespace: string,
-  project: string,
-  tag: string,
-  data: TotalProjectChangeMutationProps,
-) => {
+export const useTotalProjectChangeMutation = (namespace: string, project: string, tag: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => editTotalProject(namespace || '', project || '', tag, session.jwt || '', data),
-    onSuccess: () => {
+    mutationFn: (data: TotalProjectChangeMutationProps) => editTotalProject(namespace, project, tag, session.jwt, data),
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: [namespace, project, tag],
       });
+
+      // set the project config
+      queryClient.setQueryData([namespace, project, tag, 'config'], (_oldData: string) => {
+        return {
+          config: variables.config,
+        };
+      });
+
+      // set the sample table
+      queryClient.setQueryData([namespace, project, tag, 'samples'], (_oldData: Sample[]) => {
+        return {
+          count: variables.samples?.length,
+          items: variables.samples,
+        };
+      });
+
+      // set the subsample table
+      queryClient.setQueryData([namespace, project, tag, 'subsamples'], (_oldData: Sample[]) => {
+        return {
+          count: variables.subsamples?.length,
+          items: variables.subsamples,
+        };
+      });
+
       toast.success('Successfully updated the project!');
     },
     onError: (err: AxiosError) => {

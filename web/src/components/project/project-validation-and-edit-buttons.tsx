@@ -76,11 +76,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   } = useProjectPage();
 
   const configMutation = useConfigMutation(namespace, projectName, tag, newProjectConfig);
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag, {
-    config: newProjectConfig,
-    samples: newProjectSamples,
-    subsamples: newProjectSubsamples,
-  });
+  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   const projectInfo = projectAnnotationQuery.data;
   const projectConfig = projectConfigQuery.data;
@@ -105,8 +101,11 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   };
 
   const handleTotalProjectChange = async () => {
-    await totalProjectMutation.mutateAsync();
-    runValidation();
+    await totalProjectMutation.mutateAsync({
+      config: newProjectConfig,
+      samples: newProjectSamples,
+      subsamples: newProjectSubsamples,
+    });
   };
 
   return (
@@ -120,7 +119,6 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
           projectView={view}
           setProjectView={setView}
         />
-
         {/* no matter what, only render if belonging to the user */}
         {user && projectInfo && canEdit(user, projectInfo) ? (
           <div className="h-100 d-flex flex-row align-items-center w-25 justify-content-end">

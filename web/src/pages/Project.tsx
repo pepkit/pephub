@@ -106,15 +106,14 @@ export const ProjectPage = () => {
   const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(samples);
   const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(subsamples);
 
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', projectName || '', tag, {
-    config: newProjectConfig,
-    samples: newProjectSamples,
-    subsamples: newProjectSubsamples,
-  });
+  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag);
 
-  const handleTotalProjectChange = async () => {
-    await totalProjectMutation.mutateAsync();
-    runValidation();
+  const handleTotalProjectChange = () => {
+    totalProjectMutation.mutate({
+      config: newProjectConfig,
+      samples: newProjectSamples,
+      subsamples: newProjectSubsamples,
+    });
   };
 
   const projectDataRef = useRef<HTMLDivElement>(null);
@@ -122,23 +121,27 @@ export const ProjectPage = () => {
   // on save handler
   useEffect(() => {
     window.addEventListener('keydown', (e) => {
-      let ctrlKey = false;
+      let ctrlKeyPressed = false;
       switch (os) {
         case 'Mac OS':
-          ctrlKey = e.metaKey;
+          ctrlKeyPressed = e.metaKey;
           break;
         default:
-          ctrlKey = e.ctrlKey;
+          ctrlKeyPressed = e.ctrlKey;
           break;
       }
       // check for ctrl+s, ignore if fetchsampletable is false
-      if (ctrlKey && e.key === 's' && shouldFetchSampleTable && !view) {
+      if (ctrlKeyPressed && e.key === 's' && !view) {
         e.preventDefault();
         if (configIsDirty || samplesIsDirty || subsamplesIsDirty) {
           handleTotalProjectChange();
         }
       }
     });
+
+    return () => {
+      window.removeEventListener('keydown', () => {});
+    };
   }, []);
 
   const memoizedSetNewProjectSamples = useCallback((samples: Sample[]) => setNewProjectSamples(samples), []);
@@ -206,17 +209,15 @@ export const ProjectPage = () => {
                     onChange={memoizedSetNewProjectSamples}
                   />
                 ) : pageView === 'subsamples' ? (
-                  <>
-                    <SampleTable
-                      // fill to the rest of the screen minus the offset of the project data
-                      height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                      readOnly={
-                        !(projectInfo && canEdit(user, projectInfo)) || newProjectSamples?.length >= MAX_SAMPLE_COUNT
-                      }
-                      data={newProjectSubsamples || []}
-                      onChange={memoizedSetNewProjectSubsamples}
-                    />
-                  </>
+                  <SampleTable
+                    // fill to the rest of the screen minus the offset of the project data
+                    height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                    readOnly={
+                      !(projectInfo && canEdit(user, projectInfo)) || newProjectSamples?.length >= MAX_SAMPLE_COUNT
+                    }
+                    data={newProjectSubsamples || []}
+                    onChange={memoizedSetNewProjectSubsamples}
+                  />
                 ) : (
                   <div className="border border-t">
                     <ProjectConfigEditor
