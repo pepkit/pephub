@@ -20,12 +20,14 @@ from pepdbagent.exceptions import (
     SampleNotInViewError,
     ViewAlreadyExistsError,
     ViewNotFoundError,
+    HistoryNotFoundError,
 )
 from pepdbagent.models import (
     AnnotationList,
     AnnotationModel,
     CreateViewDictModel,
     ProjectViews,
+    HistoryAnnotationModel,
 )
 from peppy.const import SAMPLE_DF_KEY, SAMPLE_RAW_DICT_KEY
 
@@ -40,6 +42,7 @@ from ....dependencies import (
     get_subsamples,
     verify_user_can_fork,
     verify_user_can_read_project,
+    get_user_from_session_info,
 )
 from ....helpers import zip_conv_result, zip_pep
 from ...models import ForkRequest, ProjectOptional, ProjectRawModel, ProjectRawRequest
@@ -105,13 +108,14 @@ async def get_a_pep(
     "",
     summary="Update a PEP",
 )
-async def update_a_pep(
+async def update_pep(
     namespace: str,
     project: str,
     updated_project: ProjectOptional,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
     list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+    user_name: Optional[str] = Depends(get_user_from_session_info),
 ):
     """
     Update a PEP from a certain namespace
@@ -151,10 +155,11 @@ async def update_a_pep(
     else:
         new_name = project
     agent.project.update(
-        update_dict,
-        namespace,
-        project,
-        tag,
+        update_dict=update_dict,
+        namespace=namespace,
+        name=project,
+        tag=tag,
+        user=user_name,
     )
 
     # fetch latest name and tag
@@ -897,3 +902,104 @@ def delete_view(
         },
         status_code=202,
     )
+
+
+@project.get(
+    "/history",
+    summary="Get project history",
+    response_model=HistoryAnnotationModel,
+)
+def get_project_history(
+    namespace: str,
+    project: str,
+    tag: str = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+):
+    """
+    Get full project history
+    """
+    if namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="History not found for this project",
+            status_code=404,
+        )
+    return agent.project.get_history(namespace, project, tag=tag)
+
+
+@project.get(
+    "/history/{history_id}",
+    summary="Get project history by id",
+    response_model=ProjectRawModel,
+)
+def get_project_history_by_id(
+    namespace: str,
+    project: str,
+    history_id: int,
+    tag: str = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+):
+    """
+    Get a project dict from history by id
+    """
+    if namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="History not found",
+            status_code=404,
+        )
+    try:
+        return agent.project.get_project_from_history(
+            namespace,
+            project,
+            tag=tag,
+            history_id=history_id,
+            raw=True,
+        )
+
+    except ProjectNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Project '{namespace}/{project}:{tag}' not found",
+        )
+    except HistoryNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"History '{history_id}' not found in project '{namespace}/{project}:{tag}'",
+        )
+
+
+@project.delete(
+    "/history",
+    summary="Delete all project history",
+)
+def delete_full_history(
+    namespace: str,
+    project: str,
+    tag: str = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+):
+    """
+    Delete all project history
+    """
+    if namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="History not found for this project",
+            status_code=404,
+        )
+    try:
+        agent.project.delete_history(namespace, project, tag=tag)
+        return JSONResponse(
+            content={
+                "message": "History deleted.",
+                "registry": f"{namespace}/{project}:{tag}",
+            },
+            status_code=202,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not delete history. Server error.",
+        )
