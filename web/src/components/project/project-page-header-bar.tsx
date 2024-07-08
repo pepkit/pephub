@@ -14,6 +14,7 @@ import { copyToClipboard, numberWithCommas } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
 import { downloadZip } from '../../utils/project';
 import { SchemaTag } from '../forms/components/shema-tag';
+import { ProjectHistoryModal } from '../modals/project-history';
 
 type ProjectPageHeaderBarProps = {
   isStarred: boolean;
@@ -46,6 +47,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   const [showAPIEndpointsModal, setShowAPIEndpointsModal] = useState(false);
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
+  const [showProjectHistoryModal, setShowProjectHistoryModal] = useState(false);
 
   const projectInfo = projectAnnotationQuery.data;
 
@@ -141,7 +143,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
               {user && projectInfo && canEdit(user, projectInfo) && (
                 <Fragment>
                   <Dropdown.Divider />
-                  <Dropdown.Item onClick={() => {}}>
+                  <Dropdown.Item onClick={() => setShowProjectHistoryModal(true)}>
                     <i className="me-1 bi bi-stopwatch" />
                     History
                   </Dropdown.Item>
@@ -240,6 +242,13 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
           setShowAddToPOPModal(false);
         }}
         namespace={namespace!}
+        project={projectName}
+        tag={tag}
+      />
+      <ProjectHistoryModal
+        show={showProjectHistoryModal}
+        onHide={() => setShowProjectHistoryModal(false)}
+        namespace={namespace}
         project={projectName}
         tag={tag}
       />
