@@ -117,3 +117,9 @@ export interface ProjectViewAnnotation {
   description?: string;
   number_of_samples: number;
 }
+
+export type ProjectHistory = {
+  change_id: number;
+  change_date: string;
+  user: string;
+};

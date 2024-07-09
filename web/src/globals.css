@@ -595,3 +595,7 @@ body {
   white-space: normal;
   overflow: visible;
 }
+
+.viewing-history-border {
+  border: 4px solid #ed8936;
+}

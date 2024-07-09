@@ -1,7 +1,14 @@
 import axios from 'axios';
 import { offset } from 'handsontable/helpers/dom';
 
-import { Project, ProjectAnnotation, ProjectConfigResponse, ProjectViewAnnotation, Sample } from '../../types';
+import {
+  Project,
+  ProjectAnnotation,
+  ProjectConfigResponse,
+  ProjectHistory,
+  ProjectViewAnnotation,
+  Sample,
+} from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -43,6 +50,13 @@ export interface ProjectViewsResponse {
   tag: string;
   views: ProjectViewAnnotation[];
 }
+
+export type ProjectHistoryResponse = {
+  namespace: string;
+  name: string;
+  tag: string;
+  history: ProjectHistory[];
+};
 
 export const getProject = (
   namespace: string,
@@ -297,5 +311,7 @@ export const getView = (
 
 export const getProjectHistory = (namespace: string, name: string, tag: string, jwt: string | null) => {
   const url = `${API_BASE}/projects/${namespace}/${name}/history?tag=${tag}`;
-  return axios.get(url, { headers: { Authorization: `Bearer ${jwt}` } });
+  return axios
+    .get<ProjectHistoryResponse>(url, { headers: { Authorization: `Bearer ${jwt}` } })
+    .then((res) => res.data);
 };
