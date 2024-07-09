@@ -116,10 +116,17 @@ export interface ProjectViewAnnotation {
   name: string;
   description?: string;
   number_of_samples: number;
+  _samples: Sample[];
 }
 
-export type ProjectHistory = {
+export type ProjectAllHistory = {
   change_id: number;
   change_date: string;
   user: string;
+};
+
+export type ProjectHistory = {
+  _config: string;
+  _subsample_list: any[];
+  _sample_dict: Sample[];
 };

@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Modal } from 'react-bootstrap';
+import { set } from 'react-hook-form';
 
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useDeleteProjectHistory } from '../../hooks/mutations/useDeleteProjectHistory';
 import { dateStringToDateTime } from '../../utils/dates';
 
 type Props = {
@@ -15,8 +17,13 @@ type Props = {
 export const ProjectHistoryModal = (props: Props) => {
   const { show, namespace, project, tag, onHide } = props;
 
-  const { projectHistoryQuery } = useProjectPage();
-  const historyUpdates = projectHistoryQuery.data?.history || [];
+  const { projectAllHistoryQuery, setCurrentHistoryId } = useProjectPage();
+  const historyUpdates = projectAllHistoryQuery.data?.history || [];
+
+  const deleteProjectHistoryMutation = useDeleteProjectHistory(namespace, project, tag || 'default');
+
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [historyIdToDelete, setHistoryIdToDelete] = useState<number | null>(null);
 
   return (
     <Modal
@@ -38,7 +45,13 @@ export const ProjectHistoryModal = (props: Props) => {
               <th>Change ID</th>
               <th>Timestamp</th>
               <th>Author</th>
-              <th>Actions</th>
+              <th
+                style={{
+                  width: '400px',
+                }}
+              >
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="text-sm">
@@ -57,7 +70,56 @@ export const ProjectHistoryModal = (props: Props) => {
                 </td>
                 <td>
                   <span className="d-flex flex-row align-items-center">
-                    <button className="btn btn-outline-dark btn-sm me-1">View</button>
+                    <button
+                      className="btn btn-outline-dark btn-sm me-1"
+                      onClick={() => {
+                        setCurrentHistoryId(history.change_id);
+                        onHide();
+                      }}
+                    >
+                      View
+                    </button>
+                    {isConfirming && history.change_id === historyIdToDelete ? (
+                      <Fragment>
+                        <span className="d-flex flex-row align-items-center gap-2">
+                          <span className="fst-italic">Are you sure?</span>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => {
+                              setHistoryIdToDelete(null);
+                              setIsConfirming(false);
+                            }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            disabled={deleteProjectHistoryMutation.isPending}
+                            onClick={() => {
+                              deleteProjectHistoryMutation.mutate(history.change_id, {
+                                onSuccess: () => {
+                                  setHistoryIdToDelete(null);
+                                  setIsConfirming(false);
+                                },
+                              });
+                            }}
+                          >
+                            Yes, delete
+                          </button>
+                        </span>
+                      </Fragment>
+                    ) : (
+                      <button
+                        disabled={deleteProjectHistoryMutation.isPending && history.change_id === historyIdToDelete}
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => {
+                          setHistoryIdToDelete(history.change_id);
+                          setIsConfirming(true);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </span>
                 </td>
               </tr>

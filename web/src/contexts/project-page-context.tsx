@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
+import { useProjectAllHistory } from '../hooks/queries/useProjectAllHistory';
 import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useProjectHistory } from '../hooks/queries/useProjectHistory';
@@ -27,6 +28,7 @@ const ProjectPageContext = createContext<{
   projectConfigQuery: ReturnType<typeof useProjectConfig>;
   projectViewsQuery: ReturnType<typeof useProjectViews>;
   projectValidationQuery: ReturnType<typeof useValidation>;
+  projectAllHistoryQuery: ReturnType<typeof useProjectAllHistory>;
   projectHistoryQuery: ReturnType<typeof useProjectHistory>;
   shouldFetchSampleTable: boolean;
   pageView: ProjectPageView;
@@ -34,11 +36,13 @@ const ProjectPageContext = createContext<{
   forceTraditionalInterface: boolean;
   setForceTraditionalInterface: React.Dispatch<React.SetStateAction<boolean>>;
   MAX_SAMPLE_COUNT: number;
+  currentHistoryId: number | null;
+  setCurrentHistoryId: React.Dispatch<React.SetStateAction<number | null>>;
   // @ts-expect-error - its fine to start with undefined
 }>(undefined);
 
 export const ProjectPageProvider = ({ children }: ProviderProps) => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   let { namespace, project: projectName } = useParams();
   namespace = namespace?.toLowerCase();
@@ -49,6 +53,11 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
   }
 
   const tag = searchParams.get('tag') || 'default';
+
+  // GENERAL STATE
+  const [pageView, setPageView] = useState<ProjectPageView>('samples');
+  const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false);
+  const [currentHistoryId, setCurrentHistoryId] = useState<number | null>(null);
 
   // get state
   // PROJECT ANNOTATION
@@ -77,8 +86,11 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
   // PROJECT VIEWS
   const projectViewsQuery = useProjectViews(namespace, projectName, tag);
 
+  // PROJECT ALL HISTORY (list of all history updates for a project)
+  const projectAllHistoryQuery = useProjectAllHistory(namespace, projectName, tag);
+
   // PROJECT HISTORY
-  const projectHistoryQuery = useProjectHistory(namespace, projectName, tag);
+  const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
 
   // PROJECT VALIDATION
   const projectValidationQuery = useValidation({
@@ -89,9 +101,16 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
       namespace && projectName && tag && projectAnnotationQuery.data === undefined ? false : shouldFetchSampleTable,
   });
 
-  // GENERAL STATE
-  const [pageView, setPageView] = useState<ProjectPageView>('samples');
-  const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false);
+  // watch for changes to anything that might need to change search params
+  useEffect(() => {
+    if (currentHistoryId !== null) {
+      searchParams.set('history', currentHistoryId.toString());
+      setSearchParams(searchParams);
+    } else {
+      searchParams.delete('history');
+      setSearchParams(searchParams);
+    }
+  }, [currentHistoryId]);
 
   return (
     <ProjectPageContext.Provider
@@ -105,6 +124,7 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
         projectConfigQuery,
         projectViewsQuery,
         projectValidationQuery,
+        projectAllHistoryQuery,
         projectHistoryQuery,
         shouldFetchSampleTable,
         pageView,
@@ -112,6 +132,8 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
         forceTraditionalInterface,
         setForceTraditionalInterface,
         MAX_SAMPLE_COUNT,
+        currentHistoryId,
+        setCurrentHistoryId,
       }}
     >
       {children}
