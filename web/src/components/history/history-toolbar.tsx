@@ -1,12 +1,17 @@
 import { useState } from 'react';
 
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
+import { downloadHistoryZip } from '../../utils/project';
 import { RestoreFromHistoryModal } from '../modals/restore-from-history';
 
 export const HistoryToolbar = () => {
-  const { currentHistoryId, setCurrentHistoryId, projectAllHistoryQuery } = useProjectPage();
+  const { namespace, projectName, tag, currentHistoryId, setCurrentHistoryId, projectAllHistoryQuery } =
+    useProjectPage();
   const historyUpdates = projectAllHistoryQuery.data?.history;
+
+  const { jwt } = useSession();
 
   const [showRestoreModal, setShowRestoreModal] = useState(false);
 
@@ -23,15 +28,8 @@ export const HistoryToolbar = () => {
           setCurrentHistoryId(null);
         }}
       >
+        <i className="bi bi-x-circle me-1"></i>
         Exit
-      </button>
-      <button
-        className="btn btn-warning"
-        onClick={() => {
-          setShowRestoreModal(true);
-        }}
-      >
-        Restore
       </button>
       <select
         className="form-select w-25 shadow-lg border-warning"
@@ -46,6 +44,30 @@ export const HistoryToolbar = () => {
           </option>
         ))}
       </select>
+      <button
+        className="btn btn-warning"
+        onClick={() => {
+          setShowRestoreModal(true);
+        }}
+      >
+        <i className="bi bi-arrow-repeat me-1"></i>
+        Restore
+      </button>
+      <button
+        style={{
+          zIndex: 3000,
+        }}
+        className="btn btn-warning"
+        onClick={() => {
+          if (currentHistoryId === null) {
+            return;
+          }
+          downloadHistoryZip(namespace, projectName, tag, currentHistoryId, jwt);
+        }}
+      >
+        <i className="bi bi-download me-1"></i>
+        Download
+      </button>
       <RestoreFromHistoryModal
         show={showRestoreModal}
         onHide={() => {
