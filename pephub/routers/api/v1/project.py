@@ -1044,7 +1044,7 @@ def restore_project_history_by_id(
             project,
             tag=tag,
             history_id=history_id,
-            user_name=user_name,
+            user=user_name,
         )
         return JSONResponse(
             content={

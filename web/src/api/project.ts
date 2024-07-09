@@ -64,6 +64,11 @@ export type DeleteProjectHistoryResponse = {
   registry: string;
 };
 
+export type RestoreProjectFromHistoryResponse = {
+  message: string;
+  registry: string;
+};
+
 export const getProject = (
   namespace: string,
   projectName: string,
@@ -342,4 +347,15 @@ export const deleteProjectHistory = (
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${name}/history/${historyId}?tag=${tag}`;
   return axios.delete<DeleteProjectResponse>(url, { headers: { Authorization: `Bearer ${jwt}` } });
+};
+
+export const restoreProjectFromHistory = (
+  namespace: string,
+  name: string,
+  tag: string,
+  jwt: string | null,
+  historyId: number,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${name}/history/${historyId}/restore?tag=${tag}`;
+  return axios.post<RestoreProjectFromHistoryResponse>(url, {}, { headers: { Authorization: `Bearer ${jwt}` } });
 };

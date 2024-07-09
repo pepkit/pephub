@@ -55,75 +55,85 @@ export const ProjectHistoryModal = (props: Props) => {
             </tr>
           </thead>
           <tbody className="text-sm">
-            {historyUpdates.map((history) => (
-              <tr key={history.change_id}>
-                <td>
-                  <span className="h-100 d-flex flex-row align-items-center">{history.change_id}</span>
-                </td>
-                <td>
-                  <span className="h-100 d-flex flex-row align-items-center">
-                    {dateStringToDateTime(history.change_date)}
-                  </span>
-                </td>
-                <td>
-                  <span className="h-100 d-flex flex-row align-items-center">{history.user}</span>
-                </td>
-                <td>
-                  <span className="d-flex flex-row align-items-center">
-                    <button
-                      className="btn btn-outline-dark btn-sm me-1"
-                      onClick={() => {
-                        setCurrentHistoryId(history.change_id);
-                        onHide();
-                      }}
-                    >
-                      View
-                    </button>
-                    {isConfirming && history.change_id === historyIdToDelete ? (
-                      <Fragment>
-                        <span className="d-flex flex-row align-items-center gap-2">
-                          <span className="fst-italic">Are you sure?</span>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => {
-                              setHistoryIdToDelete(null);
-                              setIsConfirming(false);
-                            }}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            className="btn btn-sm btn-danger"
-                            disabled={deleteProjectHistoryMutation.isPending}
-                            onClick={() => {
-                              deleteProjectHistoryMutation.mutate(history.change_id, {
-                                onSuccess: () => {
-                                  setHistoryIdToDelete(null);
-                                  setIsConfirming(false);
-                                },
-                              });
-                            }}
-                          >
-                            Yes, delete
-                          </button>
-                        </span>
-                      </Fragment>
-                    ) : (
+            {historyUpdates.length > 0 ? (
+              historyUpdates.map((history) => (
+                <tr key={history.change_id}>
+                  <td>
+                    <span className="h-100 d-flex flex-row align-items-center">{history.change_id}</span>
+                  </td>
+                  <td>
+                    <span className="h-100 d-flex flex-row align-items-center">
+                      {dateStringToDateTime(history.change_date)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="h-100 d-flex flex-row align-items-center">{history.user}</span>
+                  </td>
+                  <td>
+                    <span className="d-flex flex-row align-items-center">
                       <button
-                        disabled={deleteProjectHistoryMutation.isPending && history.change_id === historyIdToDelete}
-                        className="btn btn-outline-danger btn-sm"
+                        className="btn btn-outline-dark btn-sm me-1"
                         onClick={() => {
-                          setHistoryIdToDelete(history.change_id);
-                          setIsConfirming(true);
+                          setCurrentHistoryId(history.change_id);
+                          onHide();
                         }}
                       >
-                        Delete
+                        View
                       </button>
-                    )}
-                  </span>
+                      {isConfirming && history.change_id === historyIdToDelete ? (
+                        <Fragment>
+                          <span className="d-flex flex-row align-items-center gap-2">
+                            <span className="fst-italic">Are you sure?</span>
+                            <button
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => {
+                                setHistoryIdToDelete(null);
+                                setIsConfirming(false);
+                              }}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              disabled={deleteProjectHistoryMutation.isPending}
+                              onClick={() => {
+                                deleteProjectHistoryMutation.mutate(history.change_id, {
+                                  onSuccess: () => {
+                                    setHistoryIdToDelete(null);
+                                    setIsConfirming(false);
+                                  },
+                                });
+                              }}
+                            >
+                              Yes, delete
+                            </button>
+                          </span>
+                        </Fragment>
+                      ) : (
+                        <button
+                          disabled={deleteProjectHistoryMutation.isPending && history.change_id === historyIdToDelete}
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => {
+                            setHistoryIdToDelete(history.change_id);
+                            setIsConfirming(true);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4}>
+                  <div className="d-flex flex-column align-items-center justify-content-center">
+                    <p className="mt-3 text-muted fst-italic">No project history</p>
+                  </div>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </Modal.Body>
