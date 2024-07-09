@@ -19,7 +19,7 @@ export const ProjectInfoFooter = () => {
             <i className="ms-4 bi bi-calendar3"></i>
             <span className="mx-1">Updated:</span>
             <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
-            <i className="ms-4 bi bi-123"></i>
+            <i className="ms-4 bi bi-arrows-expand"></i>
             <span className="mx-1">Sample Count:</span>
             <span id="project-update-date">{projectInfo?.number_of_samples}</span>
           </span>

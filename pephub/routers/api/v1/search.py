@@ -1,24 +1,21 @@
 from typing import List, Optional
 
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+from fastembed.embedding import FlagEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.models import ListOfNamespaceInfo
-
-from fastembed.embedding import FlagEmbedding as Embedding
 from qdrant_client import QdrantClient
 
+from ....const import DEFAULT_QDRANT_COLLECTION_NAME
 from ....dependencies import (
     get_db,
+    get_namespace_access_list,
     get_qdrant,
     get_sentence_transformer,
-    get_namespace_access_list,
 )
 from ...models import SearchQuery
-from ....const import DEFAULT_QDRANT_COLLECTION_NAME
-
-
-from dotenv import load_dotenv
 
 load_dotenv()
 

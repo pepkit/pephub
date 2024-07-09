@@ -1,16 +1,15 @@
-import jinja2
-import eido
+from platform import python_version
 
+import eido
+import jinja2
+from dotenv import load_dotenv
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from starlette.templating import Jinja2Templates
 from peppy import __version__ as peppy_version
-from platform import python_version
-from dotenv import load_dotenv
+from starlette.templating import Jinja2Templates
 
 from ..._version import __version__ as pephub_version
 from ...const import EIDO_TEMPLATES_PATH
-
 
 load_dotenv()
 

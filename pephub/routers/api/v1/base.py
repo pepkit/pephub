@@ -1,9 +1,7 @@
+from dotenv import load_dotenv
 from fastapi import APIRouter
 
 from ....const import ALL_VERSIONS
-
-
-from dotenv import load_dotenv
 
 load_dotenv()
 

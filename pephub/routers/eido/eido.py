@@ -1,21 +1,20 @@
-import eido
-import requests
-import tempfile
-import peppy
 import shutil
-import yaml
+import tempfile
+from typing import List, Optional, Tuple
 
-from fastapi import UploadFile, Form, APIRouter, Depends
+import eido
+import peppy
+import requests
+import yaml
+from fastapi import APIRouter, Depends, Form, UploadFile
 from fastapi.exceptions import HTTPException
-from starlette.requests import Request
-from starlette.responses import JSONResponse
-from typing import List, Tuple, Optional
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.utils import registry_path_converter
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
+from ...dependencies import DEFAULT_TAG, get_db
 from ...helpers import parse_user_file_upload, split_upload_files_on_init_file
-from ...dependencies import get_db, DEFAULT_TAG
-
 
 schemas_url = "https://schema.databio.org/list.json"
 schemas_to_test = requests.get(schemas_url).json()

@@ -1,48 +1,64 @@
 import axios from 'axios';
-import { offset } from 'handsontable/helpers/dom';
 
 import { Project, ProjectAnnotation, ProjectConfigResponse, ProjectViewAnnotation, Sample } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
-interface ProjectUpdateItems {
+type ProjectUpdateItems = {
   project_value?: Project | null;
   tag?: string | null;
   is_private?: boolean | null;
   name?: string | null;
   pep_schema?: string | null;
-}
+};
 
-interface ProjectUpdateMetadata extends ProjectUpdateItems {
+type ProjectUpdateMetadata = ProjectUpdateItems & {
   sample_table?: Sample[] | null;
   project_config_yaml?: string | null;
   description?: string | null;
   subsample_list?: string[] | null;
-}
-export interface SampleTableResponse {
+};
+export type SampleTableResponse = {
   count: number;
   items: Sample[];
-}
+};
 
-export interface DeleteProjectResponse {
+export type DeleteProjectResponse = {
   message: string;
   registry: string;
-}
+};
 
-export interface MultiProjectResponse {
+export type MultiProjectResponse = {
   count: number;
   results: ProjectAnnotation[];
   offset: number;
   limit: number;
-}
+};
 
-export interface ProjectViewsResponse {
+export type ProjectViewsResponse = {
   namespace: string;
   project: string;
   tag: string;
   views: ProjectViewAnnotation[];
-}
+};
+
+export type CreateProjectViewRequest = {
+  description?: string;
+  viewName: string;
+  sampleNames: string[];
+  noFail?: boolean;
+};
+
+export type CreateProjectViewResponse = {
+  message: string;
+  registry: string;
+};
+
+export type DeleteProjectViewResponse = {
+  message: string;
+  registry: string;
+};
 
 export const getProject = (
   namespace: string,
@@ -90,7 +106,7 @@ export const getSampleTable = (
   tag: string = 'default',
   token: string | null = null,
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}&raw=true`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/samples?tag=${tag}&raw=true&with_id=true`;
   if (!token) {
     return axios.get<SampleTableResponse>(url).then((res) => res.data);
   } else {
@@ -293,4 +309,35 @@ export const getView = (
       .get<ProjectViewAnnotation>(url, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => res.data);
   }
+};
+
+export const addProjectView = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  token: string | null,
+  params: CreateProjectViewRequest,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/views?tag=${tag}`;
+  return axios.post<CreateProjectViewResponse>(
+    url,
+    {
+      description: params.description,
+      sample_names: params.sampleNames,
+      no_fail: params.noFail,
+      view_name: params.viewName,
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+};
+
+export const deleteProjectView = (
+  namespace: string,
+  projectName: string,
+  tag: string = 'default',
+  viewName: string,
+  token: string | null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/views/${viewName}?tag=${tag}`;
+  return axios.delete<DeleteProjectViewResponse>(url, { headers: { Authorization: `Bearer ${token}` } });
 };

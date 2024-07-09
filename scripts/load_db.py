@@ -1,10 +1,10 @@
 import argparse
 import os
-from tqdm import tqdm
-from pepdbagent import PEPDatabaseAgent as Connection
-import peppy
 
-from utils import is_valid_namespace, is_valid_project, extract_project_file_name
+import peppy
+from pepdbagent import PEPDatabaseAgent as Connection
+from tqdm import tqdm
+from utils import extract_project_file_name, is_valid_namespace, is_valid_project
 
 
 def build_argparser() -> argparse.ArgumentParser:
@@ -105,7 +105,7 @@ for namespace in tqdm(os.listdir(FILE_PATH), desc="Uploading repository", leave=
                         description=f"Uploaded from, {path_to_proj}",
                         overwrite=args.force,
                     )
-                except Exception as e:
+                except Exception:
                     print(f"Failed to load project: {path_to_proj}")
                     failed_project_list.append(path_to_proj)
                     continue
