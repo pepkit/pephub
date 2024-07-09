@@ -1066,6 +1066,50 @@ def restore_project_history_by_id(
         )
 
 
+@project.get(
+    "/history/{history_id}/zip",
+    summary="Zip a project history by id",
+)
+def get_zip_snapshot(
+    namespace: str,
+    project: str,
+    history_id: int,
+    tag: str = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+):
+    """
+    Get a project dict from history by id
+    """
+    if namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="History not found",
+            status_code=404,
+        )
+    try:
+
+        return zip_pep(
+            agent.project.get_project_from_history(
+                namespace,
+                project,
+                tag=tag,
+                history_id=history_id,
+                raw=True,
+            )
+        )
+
+    except ProjectNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Project '{namespace}/{project}:{tag}' not found",
+        )
+    except HistoryNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"History '{history_id}' not found in project '{namespace}/{project}:{tag}'",
+        )
+
+
 @project.delete(
     "/history",
     summary="Delete all project history",
