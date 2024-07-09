@@ -4,7 +4,9 @@ import { set } from 'react-hook-form';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useDeleteProjectHistory } from '../../hooks/mutations/useDeleteProjectHistory';
+import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
+import { downloadHistoryZip } from '../../utils/project';
 
 type Props = {
   show: boolean;
@@ -18,6 +20,7 @@ export const ProjectHistoryModal = (props: Props) => {
   const { show, namespace, project, tag, onHide } = props;
 
   const { projectAllHistoryQuery, setCurrentHistoryId } = useProjectPage();
+  const { jwt } = useSession();
   const historyUpdates = projectAllHistoryQuery.data?.history || [];
 
   const deleteProjectHistoryMutation = useDeleteProjectHistory(namespace, project, tag || 'default');
@@ -70,15 +73,23 @@ export const ProjectHistoryModal = (props: Props) => {
                     <span className="h-100 d-flex flex-row align-items-center">{history.user}</span>
                   </td>
                   <td>
-                    <span className="d-flex flex-row align-items-center">
+                    <span className="d-flex flex-row align-items-center gap-1">
                       <button
-                        className="btn btn-outline-dark btn-sm me-1"
+                        className="btn btn-sm btn-outline-dark"
+                        onClick={() => {
+                          downloadHistoryZip(namespace, project, tag || 'default', history.change_id, jwt);
+                        }}
+                      >
+                        <i className="bi bi-download"></i>
+                      </button>
+                      <button
+                        className="btn btn-outline-dark btn-sm"
                         onClick={() => {
                           setCurrentHistoryId(history.change_id);
                           onHide();
                         }}
                       >
-                        View
+                        <i className="bi bi-eye"></i>
                       </button>
                       {isConfirming && history.change_id === historyIdToDelete ? (
                         <Fragment>
@@ -118,7 +129,7 @@ export const ProjectHistoryModal = (props: Props) => {
                             setIsConfirming(true);
                           }}
                         >
-                          Delete
+                          <i className="bi bi-trash3"></i>
                         </button>
                       )}
                     </span>
