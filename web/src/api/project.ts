@@ -1,7 +1,15 @@
 import axios from 'axios';
 import { offset } from 'handsontable/helpers/dom';
 
-import { Project, ProjectAnnotation, ProjectConfigResponse, ProjectViewAnnotation, Sample } from '../../types';
+import {
+  Project,
+  ProjectAllHistory,
+  ProjectAnnotation,
+  ProjectConfigResponse,
+  ProjectHistory,
+  ProjectViewAnnotation,
+  Sample,
+} from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -43,6 +51,23 @@ export interface ProjectViewsResponse {
   tag: string;
   views: ProjectViewAnnotation[];
 }
+
+export type ProjectAllHistoryResponse = {
+  namespace: string;
+  name: string;
+  tag: string;
+  history: ProjectAllHistory[];
+};
+
+export type DeleteProjectHistoryResponse = {
+  message: string;
+  registry: string;
+};
+
+export type RestoreProjectFromHistoryResponse = {
+  message: string;
+  registry: string;
+};
 
 export const getProject = (
   namespace: string,
@@ -293,4 +318,44 @@ export const getView = (
       .get<ProjectViewAnnotation>(url, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => res.data);
   }
+};
+
+export const getProjectAllHistory = (namespace: string, name: string, tag: string, jwt: string | null) => {
+  const url = `${API_BASE}/projects/${namespace}/${name}/history?tag=${tag}`;
+  return axios
+    .get<ProjectAllHistoryResponse>(url, { headers: { Authorization: `Bearer ${jwt}` } })
+    .then((res) => res.data);
+};
+
+export const getProjectHistory = (
+  namespace: string,
+  name: string,
+  tag: string,
+  jwt: string | null,
+  historyId: number | null,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${name}/history/${historyId}?tag=${tag}`;
+  return axios.get<ProjectHistory>(url, { headers: { Authorization: `Bearer ${jwt}` } }).then((res) => res.data);
+};
+
+export const deleteProjectHistory = (
+  namespace: string,
+  name: string,
+  tag: string,
+  jwt: string | null,
+  historyId: number,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${name}/history/${historyId}?tag=${tag}`;
+  return axios.delete<DeleteProjectResponse>(url, { headers: { Authorization: `Bearer ${jwt}` } });
+};
+
+export const restoreProjectFromHistory = (
+  namespace: string,
+  name: string,
+  tag: string,
+  jwt: string | null,
+  historyId: number,
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${name}/history/${historyId}/restore?tag=${tag}`;
+  return axios.post<RestoreProjectFromHistoryResponse>(url, {}, { headers: { Authorization: `Bearer ${jwt}` } });
 };

@@ -45,7 +45,13 @@ from ....dependencies import (
     get_user_from_session_info,
 )
 from ....helpers import zip_conv_result, zip_pep
-from ...models import ForkRequest, ProjectOptional, ProjectRawModel, ProjectRawRequest
+from ...models import (
+    ForkRequest,
+    ProjectOptional,
+    ProjectRawModel,
+    ProjectRawRequest,
+    ProjectHistoryResponse,
+)
 from .helpers import verify_updated_project
 
 _LOGGER = logging.getLogger(__name__)
@@ -930,7 +936,7 @@ def get_project_history(
 @project.get(
     "/history/{history_id}",
     summary="Get project history by id",
-    response_model=ProjectRawModel,
+    response_model=ProjectHistoryResponse,
 )
 def get_project_history_by_id(
     namespace: str,
@@ -949,13 +955,17 @@ def get_project_history_by_id(
             status_code=404,
         )
     try:
-        return agent.project.get_project_from_history(
+        project_at_history = agent.project.get_project_from_history(
             namespace,
             project,
             tag=tag,
             history_id=history_id,
             raw=True,
+            with_id=True,
         )
+        # convert the config to a yaml string
+        project_at_history["_config"] = yaml.dump(project_at_history["_config"])
+        return project_at_history
 
     except ProjectNotFoundError:
         raise HTTPException(
@@ -966,6 +976,44 @@ def get_project_history_by_id(
         raise HTTPException(
             status_code=404,
             detail=f"History '{history_id}' not found in project '{namespace}/{project}:{tag}'",
+        )
+
+
+@project.delete(
+    "/history/{history_id}",
+    summary="delete project history by id",
+    response_model=ProjectHistoryResponse,
+)
+def delete_project_history_by_id(
+    namespace: str,
+    project: str,
+    history_id: int,
+    tag: str = DEFAULT_TAG,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+):
+    """
+    Delete a project from history by id
+    """
+    if namespace not in (list_of_admins or []):
+        raise HTTPException(
+            detail="History not found for this project",
+            status_code=404,
+        )
+    try:
+        agent.project.delete_history(namespace, project, tag=tag, history_id=history_id)
+        return JSONResponse(
+            content={
+                "message": "History deleted.",
+                "registry": f"{namespace}/{project}:{tag}",
+            },
+            status_code=202,
+        )
+
+    except Exception as _e:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not delete history. Server error.",
         )
 
 
@@ -1091,8 +1139,8 @@ def delete_full_history(
             status_code=202,
         )
 
-    except Exception as e:
+    except Exception as _e:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not delete history. Server error.",
+            detail="Could not delete history. Server error.",
         )

@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { Sample } from '../../types';
+import { HistoryInfoBox } from '../components/history/history-info-box';
+import { HistoryToolbar } from '../components/history/history-toolbar';
 import { PageLayout } from '../components/layout/page-layout';
 import { LargeSampleTableModal } from '../components/modals/sample-table-too-large';
 import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
@@ -47,6 +49,8 @@ export const ProjectPage = () => {
     pageView,
     forceTraditionalInterface,
     MAX_SAMPLE_COUNT,
+    currentHistoryId,
+    projectHistoryQuery,
   } = useProjectPage();
 
   const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true);
@@ -62,6 +66,7 @@ export const ProjectPage = () => {
   const projectConfig = projectConfigQuery.data;
   const samples = sampleTableQuery?.data?.items || [];
   const subsamples = subSampleTableQuery.data?.items || [];
+  const projectHistoryView = projectHistoryQuery.data;
 
   // view selection
   const [view, setView] = useState(searchParams.get('view') || undefined);
@@ -141,6 +146,49 @@ export const ProjectPage = () => {
     });
   }, []);
 
+  // add class to body for a border
+  useEffect(() => {
+    if (currentHistoryId !== null) {
+      document.body.classList.add('viewing-history-border');
+      document.body.classList.add('border-warning');
+    } else {
+      document.body.classList.remove('viewing-history-border');
+      document.body.classList.remove('border-warning');
+    }
+    return () => {
+      document.body.classList.remove('viewing-history-border');
+      document.body.classList.remove('border-warning');
+    };
+  }, [currentHistoryId]);
+
+  // dedicated functions to get proper data for the project page
+  // (easier to read and understand the code)
+  const determineWhichSamplesToShow = () => {
+    if (currentHistoryId !== null) {
+      return projectHistoryView?._sample_dict || [];
+    } else if (view !== undefined) {
+      return viewData?._samples || [];
+    } else {
+      return newProjectSamples;
+    }
+  };
+
+  const determineWhichSubsamplesToShow = () => {
+    if (currentHistoryId !== null) {
+      return projectHistoryView?._subsample_list || [];
+    } else {
+      return newProjectSubsamples || [];
+    }
+  };
+
+  const determineWhichConfigToShow = () => {
+    if (currentHistoryId !== null) {
+      return projectHistoryView?._config || '';
+    } else {
+      return newProjectConfig || '';
+    }
+  };
+
   if (projectAnnotationQuery.error) {
     return (
       <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
@@ -158,85 +206,89 @@ export const ProjectPage = () => {
   }
 
   return (
-    <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
-      <div className="shadow-sm pt-2">
-        <ProjectHeaderBar isStarred={isStarred} />
-        <ProjectDescription />
-        <ProjectInfoFooter />
-      </div> 
-      {projectInfo?.pop && !forceTraditionalInterface ? (
-        <PopInterface project={projectInfo} />
-      ) : (
+    <div className="position-relative">
+      {currentHistoryId !== null && (
         <Fragment>
-          <div className="pt-0 px-2" style={{backgroundColor: '#EFF3F640', height: '3.5em'}}>
-            {projectAnnotationQuery.isFetching || projectInfo === undefined ? (
-              <ProjectPageheaderPlaceholder />
-            ) : (
-              <ProjectValidationAndEditButtons
-                newProjectSamples={newProjectSamples}
-                newProjectSubsamples={newProjectSubsamples}
-                newProjectConfig={newProjectConfig}
-                view={view}
-                setView={setView}
-                setNewProjectConfig={setNewProjectConfig}
-                setNewProjectSamples={setNewProjectSamples}
-                setNewProjectSubsamples={setNewProjectSubsamples}
-                configIsDirty={configIsDirty}
-                samplesIsDirty={samplesIsDirty}
-                subsamplesIsDirty={subsamplesIsDirty}
-              />
-            )}
+          <HistoryInfoBox />
+          <div className="position-absolute top-0 start-0 w-100">
+            <HistoryToolbar />
           </div>
-          <div className="row gx-0 h-100">
-            <div className="col-12">
-              <div ref={projectDataRef}>
-                {pageView === 'samples' ? (
-                  <SampleTable
-                    // fill to the rest of the screen minus the offset of the project data
-                    height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                    readOnly={!(projectInfo && canEdit(user, projectInfo))}
-                    // @ts-ignore: TODO: fix this, the model is just messed up
-                    data={view !== undefined ? viewData?._samples || [] : newProjectSamples || []}
-                    onChange={(value) => setNewProjectSamples(value)}
-                  />
-                ) : pageView === 'subsamples' ? (
-                  <>
+        </Fragment>
+      )}
+      <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
+        <div className="shadow-sm pt-2">
+          <ProjectHeaderBar isStarred={isStarred} />
+          <ProjectDescription />
+          <ProjectInfoFooter />
+        </div>
+        {projectInfo?.pop && !forceTraditionalInterface ? (
+          <PopInterface project={projectInfo} />
+        ) : (
+          <Fragment>
+            <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
+              {projectAnnotationQuery.isFetching || projectInfo === undefined ? (
+                <ProjectPageheaderPlaceholder />
+              ) : (
+                <ProjectValidationAndEditButtons
+                  newProjectSamples={newProjectSamples}
+                  newProjectSubsamples={newProjectSubsamples}
+                  newProjectConfig={newProjectConfig}
+                  view={view}
+                  setView={setView}
+                  setNewProjectConfig={setNewProjectConfig}
+                  setNewProjectSamples={setNewProjectSamples}
+                  setNewProjectSubsamples={setNewProjectSubsamples}
+                  configIsDirty={configIsDirty}
+                  samplesIsDirty={samplesIsDirty}
+                  subsamplesIsDirty={subsamplesIsDirty}
+                />
+              )}
+            </div>
+            <div className="row gx-0 h-100">
+              <div className="col-12">
+                <div ref={projectDataRef}>
+                  {pageView === 'samples' ? (
+                    <SampleTable
+                      // fill to the rest of the screen minus the offset of the project data
+                      height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                      readOnly={!(projectInfo && canEdit(user, projectInfo)) || currentHistoryId !== null}
+                      // @ts-ignore: TODO: fix this, the model is just messed up
+                      data={determineWhichSamplesToShow()}
+                      onChange={(value) => setNewProjectSamples(value)}
+                    />
+                  ) : pageView === 'subsamples' ? (
                     <SampleTable
                       // fill to the rest of the screen minus the offset of the project data
                       height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                       readOnly={
-                        !(projectInfo && canEdit(user, projectInfo)) || newProjectSamples?.length >= MAX_SAMPLE_COUNT
+                        !(projectInfo && canEdit(user, projectInfo)) ||
+                        newProjectSamples?.length >= MAX_SAMPLE_COUNT ||
+                        currentHistoryId !== null
                       }
                       data={newProjectSubsamples || []}
                       onChange={(value) => setNewProjectSubsamples(value)}
                     />
-                  </>
-                ) : (
-                  <div className="border border-t">
-                    <ProjectConfigEditor
-                      readOnly={!(projectInfo && canEdit(user, projectInfo))}
-                      value={
-                        projectConfigQuery.isLoading
-                          ? 'Loading.'
-                          : projectConfig?.config
-                          ? newProjectConfig
-                          : 'No config file found.'
-                      }
-                      setValue={(value) => setNewProjectConfig(value)}
-                    />
-                  </div>
-                )}
+                  ) : (
+                    <div className="border border-t">
+                      <ProjectConfigEditor
+                        readOnly={!(projectInfo && canEdit(user, projectInfo)) || currentHistoryId !== null}
+                        value={determineWhichConfigToShow()}
+                        setValue={(value) => setNewProjectConfig(value)}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </Fragment>
-      )}
-      {/* Modals */}
-      <LargeSampleTableModal
-        namespace={namespace}
-        show={showLargeSampleTableModal}
-        onHide={() => setShowLargeSampleTableModal(false)}
-      />
-    </PageLayout>
+          </Fragment>
+        )}
+        {/* Modals */}
+        <LargeSampleTableModal
+          namespace={namespace}
+          show={showLargeSampleTableModal}
+          onHide={() => setShowLargeSampleTableModal(false)}
+        />
+      </PageLayout>
+    </div>
   );
 };
