@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink, useSearchParams } from 'react-router-dom';
 
@@ -28,7 +29,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
     <div className="p-1 namespace-nav">
       <Nav variant="pills" defaultActiveKey={props.view} onSelect={handleNavSelect}>
         <Nav.Item>
-          <Nav.Link eventKey="peps" className="px-2 py-1 mx-1 bg-opacity-25">
+          <Nav.Link eventKey="peps" className="px-2 py-1 me-1">
             <i className="bi bi-file-earmark-text me-1"></i>
             PEPs
             {props.view === 'peps' ? (
@@ -43,7 +44,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link eventKey="pops" className="px-2 py-1 mx-1 bg-opacity-25">
+          <Nav.Link eventKey="pops" className="px-2 py-1 me-1">
             <i className="bi bi-balloon me-1"></i>
             POPs
             {props.view === 'pops' ? (
@@ -59,7 +60,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
         </Nav.Item>
         {props.enableStars && (
           <Nav.Item accessKey="stars">
-            <Nav.Link eventKey="stars" className="px-2 py-1 mx-1 bg-opacity-25">
+            <Nav.Link eventKey="stars" className="px-2 py-1 me-1">
               <i className="bi bi-star me-2"></i>
               Stars
               {props.view === 'stars' ? (
