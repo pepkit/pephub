@@ -70,6 +70,10 @@ interface RemoveStarResponse {
   namespace: string;
 }
 
+type DeleteAllPepsResponse = {
+  message: string;
+};
+
 export const getNamespaceInfo = (namespace: string, token: string | null = null) => {
   const url = `${API_BASE}/namespaces/${namespace}/`; // note the trailing slash
   if (!token) {
@@ -330,4 +334,13 @@ export const getAllNamespaces = (search?: string, limit?: number, offset?: numbe
   const query = constructQueryFromPaginationParams({ search, limit, offset });
   const url = `${API_BASE}/search/namespaces?${query.toString()}`;
   return axios.get<NamespaceSearchResponse>(url).then((res) => res.data);
+};
+
+export const deleteAllPepsFromNamespace = (namespace: string, token: string | null) => {
+  const url = `${API_BASE}/namespaces/${namespace}`;
+  return axios.delete<DeleteAllPepsResponse>(url, {
+    headers: {
+      Authorization: `Bearer ${token || 'NOTAUTHORIZED'}`,
+    },
+  });
 };

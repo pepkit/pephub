@@ -1,9 +1,9 @@
 import json
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from secrets import token_hex
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from cachetools import cached, TTLCache
 
 import jwt
@@ -31,10 +31,11 @@ from .const import (
     DEFAULT_POSTGRES_USER,
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
-    JWT_EXPIRATION,
     JWT_SECRET,
 )
+from .helpers import jwt_encode_user_data
 from .routers.models import ForkRequest
+from .developer_keys import dev_key_handler
 
 _LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
 
@@ -83,14 +84,8 @@ class CLIAuthSystem:
             )
 
     @staticmethod
-    def jwt_encode_user_data(user_data: dict) -> str:
-        exp = datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
-        encoded_user_data = jwt.encode(
-            {**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256"
-        )
-        if isinstance(encoded_user_data, bytes):
-            encoded_user_data = encoded_user_data.decode("utf-8")
-        return encoded_user_data
+    def jwt_encode_user_data(user_data: dict, exp: datetime = None) -> str:
+        return jwt_encode_user_data(user_data, exp=exp)
 
 
 # database connection
@@ -132,19 +127,22 @@ def get_db() -> PEPDatabaseAgent:
     return agent
 
 
-def read_authorization_header(Authorization: str = Header(None)) -> Union[dict, None]:
+def read_authorization_header(authorization: str = Header(None)) -> Union[dict, None]:
     """
     Reads and decodes a JWT, returning the decoded variables.
 
     :param Authorization: JWT provided via FastAPI injection from the API cookie.
     """
-    if Authorization is None:
+    if authorization is None:
         return None
     else:
-        Authorization = Authorization.replace("Bearer ", "")
+        authorization = authorization.replace("Bearer ", "")
     try:
         # Python jwt.decode verifies content as well so this is safe.
-        session_info = jwt.decode(Authorization, JWT_SECRET, algorithms=["HS256"])
+        # check last 5 chars
+        if dev_key_handler.is_key_bad(authorization[-5:]):
+            raise HTTPException(401, "JWT has been revoked")
+        session_info = jwt.decode(authorization, JWT_SECRET, algorithms=["HS256"])
     except jwt.exceptions.InvalidSignatureError as e:
         _LOGGER_PEPHUB.error(e)
         return None
@@ -201,7 +199,7 @@ def get_project(
         description="Return the project with the samples pephub_id",
         include_in_schema=False,
     ),
-) -> Dict[str, Any]:
+) -> Dict[str, Any]:  # type: ignore
     try:
         proj = agent.project.get(namespace, project, tag, raw=True, with_id=with_id)
         yield proj
@@ -217,7 +215,7 @@ def get_config(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> Dict[str, Any]:
+) -> Dict[str, Any]:  # type: ignore
     try:
         config = agent.project.get_config(namespace, project, tag)
         yield config
@@ -233,7 +231,7 @@ def get_subsamples(
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> Dict[str, Any]:
+) -> Dict[str, Any]:  # type: ignore # type: ignore
     try:
         subsamples = agent.project.get_subsamples(namespace, project, tag)
         yield subsamples
@@ -250,7 +248,7 @@ def get_project_annotation(
     tag: Optional[str] = DEFAULT_TAG,
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
-) -> AnnotationModel:
+) -> AnnotationModel:  # type: ignore
     try:
         anno = agent.annotation.get(
             namespace, project, tag, admin=namespace_access_list
@@ -320,7 +318,7 @@ def verify_user_can_read_project(
 def verify_user_can_fork(
     fork_request: ForkRequest,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
-) -> bool:
+) -> bool:  # type: ignore
     fork_namespace = fork_request.fork_to
     if fork_namespace in (namespace_access_list or []):
         yield
@@ -344,7 +342,7 @@ def get_qdrant_enabled() -> bool:
 
 def get_qdrant(
     qdrant_enabled: bool = Depends(get_qdrant_enabled),
-) -> Union[QdrantClient, None]:
+) -> Union[QdrantClient, None]:  # type: ignore
     """
     Return connection to qdrant client
     """
@@ -383,7 +381,7 @@ def get_namespace_info(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
     user: str = Depends(get_user_from_session_info),
-) -> Namespace:
+) -> Namespace:  # type: ignore
     """
     Get the information on a namespace, if it exists.
     """
