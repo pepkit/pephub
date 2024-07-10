@@ -100,3 +100,9 @@ class ProjectJsonRequest(BaseModel):
 
 class RevokeRequest(BaseModel):
     last_five_chars: str
+
+
+class DeveloperKey(BaseModel):
+    key: str
+    created_at: str
+    expires: str

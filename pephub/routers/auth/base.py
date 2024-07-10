@@ -8,7 +8,7 @@ import requests
 from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from ...limiter import limiter
@@ -109,7 +109,7 @@ def delete_user_key(
         dev_key_handler.remove_key(
             session_info["login"], revoke_request.last_five_chars
         )
-        return {"message": "Key deleted successfully."}
+        return JSONResponse({"message": "Key deleted successfully."}, status_code=202)
     else:
         raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -175,10 +175,6 @@ def callback(
         u["organizations_url"],
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
-
-    # append the github access_token to the user data
-    u["gh_access_token"] = x["access_token"]
-    u["gh_refresh_token"] = x["refresh_token"]
 
     # encode the token
     token = CLIAuthSystem.jwt_encode_user_data(
