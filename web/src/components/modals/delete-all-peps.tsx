@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { m } from 'framer-motion';
 import { Fragment, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import toast from 'react-hot-toast';
@@ -78,7 +79,14 @@ export const DeleteAllPepsModal = (props: Props) => {
         >
           Nevermind
         </button>
-        <button disabled={confirmText !== `${namespace}`} type="button" className="btn btn-danger">
+        <button
+          onClick={() => {
+            mutation.mutate();
+          }}
+          disabled={confirmText !== `${namespace}`}
+          type="button"
+          className="btn btn-danger"
+        >
           {mutation.isPending ? (
             <Fragment>
               <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>

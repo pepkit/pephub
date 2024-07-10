@@ -21,9 +21,10 @@ export const NamespacePagePlaceholder = () => {
           </div>
         </Placeholder>
         {/* replace buttons */}
-        <div className="w-25">
-          <Placeholder.Button variant="outline-dark" className="ms-1" xs={4} />
-          <Placeholder.Button variant="success" className="ms-1" xs={4} />
+        <div className="w-50 d-flex flex-row align-items-center gap-1">
+          <Placeholder.Button size="sm" variant="outline-dark" className="ms-1" xs={4} />
+          <Placeholder.Button size="sm" variant="dark" className="ms-1" xs={4} />
+          <Placeholder.Button size="sm" variant="success" className="ms-1" xs={4} />
         </div>
       </div>
       <div className="mt-3">
