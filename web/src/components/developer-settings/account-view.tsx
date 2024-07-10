@@ -1,8 +1,14 @@
+import { useState } from 'react';
+
 import { useSession } from '../../hooks/useSession';
 import { GitHubAvatar } from '../badges/github-avatar';
+import { DeleteAllPepsModal } from '../modals/delete-all-peps';
 
 export const AccountView = () => {
   const { user } = useSession();
+
+  const [showDeleteAllPepsModal, setShowDeleteAllPepsModal] = useState(false);
+
   return (
     <div className="d-flex flex-column p-2">
       <div>
@@ -30,11 +36,12 @@ export const AccountView = () => {
             View on Github
           </button>
         </a>
-        <button disabled className="btn btn-sm btn-danger">
+        <button onClick={() => setShowDeleteAllPepsModal(true)} className="btn btn-sm btn-danger">
           <i className="bi bi-trash me-2"></i>
           Clear all PEPs
         </button>
       </div>
+      <DeleteAllPepsModal show={showDeleteAllPepsModal} onHide={() => setShowDeleteAllPepsModal(false)} />
     </div>
   );
 };

@@ -14,6 +14,7 @@ from pepdbagent.exceptions import (
     ProjectAlreadyInFavorites,
     ProjectNotInFavorites,
     ProjectUniqueNameError,
+    UserNotFoundError,
 )
 from pepdbagent.models import (
     AnnotationList,
@@ -35,6 +36,7 @@ from ....dependencies import (
     get_db,
     get_namespace_access_list,
     get_namespace_info,
+    get_user_from_session_info,
     read_authorization_header,
     verify_user_can_write_namespace,
     get_pepdb_namespace_info,
@@ -456,3 +458,35 @@ async def get_namespace_stats(
             status_code=500,
             detail="Internal server error. Unexpected return value. Error: 500",
         )
+
+
+@namespace.delete(
+    "/",
+    summary="Delete user projects and stars from pephub",
+)
+def remove_user(
+    namespace: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    user_name: str = Depends(get_user_from_session_info),
+):
+    """
+    Delete user related projects and stars from pephub
+    """
+    if user_name != namespace:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied. You can only delete your own namespace.",
+        )
+    try:
+        agent.user.delete(namespace)
+    except UserNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Namespace '{namespace}' not found.",
+        )
+    return JSONResponse(
+        content={
+            "message": f"Namespace {namespace} has been deleted.",
+        },
+        status_code=202,
+    )
