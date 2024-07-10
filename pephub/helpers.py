@@ -20,6 +20,12 @@ from .const import JWT_EXPIRATION, JWT_SECRET
 
 
 def jwt_encode_user_data(user_data: dict, exp: datetime = None) -> str:
+    """
+    Encode user data into a JWT token.
+
+    :param user_data: user data to encode
+    :param exp: expiration time for the token
+    """
     exp = exp or datetime.utcnow() + timedelta(minutes=JWT_EXPIRATION)
     encoded_user_data = jwt.encode(
         {**user_data, "exp": exp}, JWT_SECRET, algorithm="HS256"

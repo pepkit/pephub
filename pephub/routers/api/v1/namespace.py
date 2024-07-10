@@ -40,7 +40,6 @@ from ....dependencies import (
     read_authorization_header,
     verify_user_can_write_namespace,
     get_pepdb_namespace_info,
-    get_user_from_session_info,
 )
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...models import FavoriteRequest, ProjectJsonRequest, ProjectRawModel

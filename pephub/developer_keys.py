@@ -37,7 +37,7 @@ class DeveloperKeyHandler:
         """
         Get all the keys for a given namespace
 
-        namespace: str
+        :param namespace: namespace for the key
         """
         return self._keys.get(namespace) or []
 
