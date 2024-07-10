@@ -30,6 +30,8 @@ export const DeleteAllPepsModal = (props: Props) => {
       queryClient.invalidateQueries({
         queryKey: [user?.login],
       });
+      // just reload the whole thing
+      window.location.reload();
     },
     onError: (err: AxiosError) => {
       const errorMessage = extractErrorMessage(err);
