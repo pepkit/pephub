@@ -4,7 +4,7 @@ import { useProjectPage } from '../../contexts/project-page-context';
 import { dateStringToDateTime } from '../../utils/dates';
 
 export const ProjectInfoFooter = () => {
-  const { projectAnnotationQuery } = useProjectPage();
+  const { projectAnnotationQuery, currentHistoryId, projectHistoryQuery, projectAllHistoryQuery } = useProjectPage();
 
   const projectInfo = projectAnnotationQuery.data;
 
@@ -18,10 +18,21 @@ export const ProjectInfoFooter = () => {
             <span id="project-submission-date">{dateStringToDateTime(projectInfo?.submission_date || '')}</span>
             <i className="ms-4 bi bi-calendar3"></i>
             <span className="mx-1">Updated:</span>
-            <span id="project-update-date">{dateStringToDateTime(projectInfo?.last_update_date || '')}</span>
+            <span id="project-update-date">
+              {currentHistoryId !== null
+                ? dateStringToDateTime(
+                    projectAllHistoryQuery.data?.history.find((h) => h.change_id === currentHistoryId)?.change_date ||
+                      '',
+                  )
+                : dateStringToDateTime(projectInfo?.last_update_date || '')}
+            </span>
             <i className="ms-4 bi bi-arrows-expand"></i>
             <span className="mx-1">Sample Count:</span>
-            <span id="project-update-date">{projectInfo?.number_of_samples}</span>
+            <span id="project-update-date">
+              {currentHistoryId !== null
+                ? projectHistoryQuery.data?._sample_dict.length
+                : projectInfo?.number_of_samples}
+            </span>
           </span>
           <span className="">
             {projectInfo?.forked_from && (

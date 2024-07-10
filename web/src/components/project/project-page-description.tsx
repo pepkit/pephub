@@ -1,4 +1,5 @@
 import { Fragment, useRef, useState } from 'react';
+import YAML from 'yaml';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { Markdown } from '../markdown/render';
@@ -6,7 +7,7 @@ import { Markdown } from '../markdown/render';
 const MAX_DESC_HEIGHT = 200;
 
 export const ProjectDescription = () => {
-  const { projectAnnotationQuery } = useProjectPage();
+  const { projectAnnotationQuery, currentHistoryId, projectHistoryQuery } = useProjectPage();
 
   const projectDescriptionRef = useRef<HTMLDivElement>(null);
   const showMoreButton = projectDescriptionRef.current?.clientHeight! >= MAX_DESC_HEIGHT;
@@ -18,7 +19,11 @@ export const ProjectDescription = () => {
     <Fragment>
       <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100">
         <div ref={projectDescriptionRef} className="w-100" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
-          <Markdown>{projectInfo?.description || 'No description'}</Markdown>
+          <Markdown>
+            {currentHistoryId !== null
+              ? YAML.parse(projectHistoryQuery.data?._config || '')?.description || 'No description'
+              : projectInfo?.description || 'No description'}
+          </Markdown>
         </div>
       </div>
       {showMoreButton && (

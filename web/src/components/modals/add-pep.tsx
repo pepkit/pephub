@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { Modal, Tab, Tabs } from 'react-bootstrap';
 
 import { BlankProjectForm } from '../forms/blank-project-form';
@@ -11,7 +10,8 @@ interface Props {
   onHide: () => void;
 }
 
-export const AddPEPModal: FC<Props> = ({ show, onHide, defaultNamespace }) => {
+export const AddPEPModal = (props: Props) => {
+  const { show, onHide, defaultNamespace } = props;
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
       <Modal.Header closeButton>

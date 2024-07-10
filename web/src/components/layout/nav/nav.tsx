@@ -11,7 +11,7 @@ export const Nav: FC = () => {
       <nav
         className="d-flex flex-row align-items-center justify-content-between w-100 py-2 border-bottom"
         aria-label="navbar"
-        style={{ backgroundColor: '#EFF3F6' }}
+        // style={{ backgroundColor: '#EFF3F6' }}
       >
         <div className="d-flex flex-row align-items-center px-4">
           <NavLogo />

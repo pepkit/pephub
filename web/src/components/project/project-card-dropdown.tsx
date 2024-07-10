@@ -114,7 +114,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
         ) : (
           <Dropdown.Item disabled>Fork (log in to fork)</Dropdown.Item>
         )}
-        {user && user.login === project.namespace && (
+        {user && user.orgs.includes(project.namespace) && (
           <Fragment>
             <Dropdown.Divider />
             <Dropdown.Item
