@@ -71,6 +71,14 @@ class ProjectRawModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class ProjectHistoryResponse(BaseModel):
+    config: str = Field(alias="_config")
+    subsample_list: Optional[list] = Field(alias="_subsample_list", default=None)
+    sample_list: list[dict] = Field(alias="_sample_dict")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class ProjectRawRequest(BaseModel):
     config: dict
     subsample_list: Optional[List[List[dict]]] = None
