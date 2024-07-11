@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { useProjectAllHistory } from '../hooks/queries/useProjectAllHistory';
@@ -56,8 +56,19 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
 
   // GENERAL STATE
   const [pageView, setPageView] = useState<ProjectPageView>('samples');
+  const pageViewStateMemoized = useMemo(() => {
+    return { pageView, setPageView };
+  }, [pageView]);
+
   const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false);
+  const forceTraditionalInterfaceMemoized = useMemo(() => {
+    return { forceTraditionalInterface, setForceTraditionalInterface };
+  }, [forceTraditionalInterface]);
+
   const [currentHistoryId, setCurrentHistoryId] = useState<number | null>(null);
+  const currentHistoryIdMemoized = useMemo(() => {
+    return { currentHistoryId, setCurrentHistoryId };
+  }, [currentHistoryId]);
 
   // get state
   // PROJECT ANNOTATION
@@ -112,33 +123,48 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
     }
   }, [currentHistoryId]);
 
-  return (
-    <ProjectPageContext.Provider
-      value={{
-        namespace,
-        projectName,
-        tag,
-        projectAnnotationQuery,
-        sampleTableQuery,
-        subSampleTableQuery,
-        projectConfigQuery,
-        projectViewsQuery,
-        projectValidationQuery,
-        projectAllHistoryQuery,
-        projectHistoryQuery,
-        shouldFetchSampleTable,
-        pageView,
-        setPageView,
-        forceTraditionalInterface,
-        setForceTraditionalInterface,
-        MAX_SAMPLE_COUNT,
-        currentHistoryId,
-        setCurrentHistoryId,
-      }}
-    >
-      {children}
-    </ProjectPageContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      namespace,
+      projectName,
+      tag,
+      projectAnnotationQuery,
+      sampleTableQuery,
+      subSampleTableQuery,
+      projectConfigQuery,
+      projectViewsQuery,
+      projectValidationQuery,
+      projectAllHistoryQuery,
+      projectHistoryQuery,
+      shouldFetchSampleTable,
+      pageView,
+      setPageView,
+      forceTraditionalInterface,
+      setForceTraditionalInterface,
+      MAX_SAMPLE_COUNT,
+      currentHistoryId,
+      setCurrentHistoryId,
+    }),
+    [
+      namespace,
+      projectName,
+      tag,
+      projectAnnotationQuery,
+      sampleTableQuery,
+      subSampleTableQuery,
+      projectConfigQuery,
+      projectViewsQuery,
+      projectValidationQuery,
+      projectAllHistoryQuery,
+      projectHistoryQuery,
+      shouldFetchSampleTable,
+      pageView,
+      forceTraditionalInterface,
+      currentHistoryId,
+    ],
   );
+
+  return <ProjectPageContext.Provider value={contextValue}>{children}</ProjectPageContext.Provider>;
 };
 
 export const useProjectPage = () => {

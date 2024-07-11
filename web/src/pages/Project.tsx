@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -48,7 +48,6 @@ export const ProjectPage = () => {
     shouldFetchSampleTable,
     pageView,
     forceTraditionalInterface,
-    MAX_SAMPLE_COUNT,
     currentHistoryId,
     projectHistoryQuery,
   } = useProjectPage();
@@ -90,6 +89,20 @@ export const ProjectPage = () => {
   const runValidation = () => {
     projectValidationQuery.refetch();
   };
+
+  const sampleData = useMemo(() => {
+    if (currentHistoryId !== null) {
+      return projectHistoryView?._sample_dict || [];
+    }
+    return viewData ? viewData._samples || [] : newProjectSamples || [];
+  }, [currentHistoryId, projectHistoryView?._sample_dict, viewData, newProjectSamples]);
+
+  const subsampleData = useMemo(() => {
+    if (currentHistoryId !== null) {
+      return projectHistoryView?._subsample_list || [];
+    }
+    return newProjectSubsamples || [];
+  }, [currentHistoryId, projectHistoryView, newProjectSubsamples]);
 
   // watch for query changes to update newProjectConfig and newProjectSamples
   useEffect(() => {
@@ -170,34 +183,6 @@ export const ProjectPage = () => {
     };
   }, [currentHistoryId]);
 
-  // dedicated functions to get proper data for the project page
-  // (easier to read and understand the code)
-  const determineWhichSamplesToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._sample_dict || [];
-    } else if (view !== undefined) {
-      return viewData?._samples || [];
-    } else {
-      return newProjectSamples;
-    }
-  };
-
-  const determineWhichSubsamplesToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._subsample_list || [];
-    } else {
-      return newProjectSubsamples || [];
-    }
-  };
-
-  const determineWhichConfigToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._config || '';
-    } else {
-      return newProjectConfig || '';
-    }
-  };
-
   if (projectAnnotationQuery.error) {
     return (
       <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
@@ -256,32 +241,20 @@ export const ProjectPage = () => {
             <div className="row gx-0 h-100">
               <div className="col-12">
                 <div ref={projectDataRef}>
-                  {pageView === 'samples' ? (
+                  {pageView === 'samples' || pageView === 'subsamples' ? (
                     <SampleTable
                       // fill to the rest of the screen minus the offset of the project data
                       height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                       readOnly={!(projectInfo && canEdit(user, projectInfo)) || currentHistoryId !== null}
                       // @ts-ignore: TODO: fix this, the model is just messed up
-                      data={determineWhichSamplesToShow()}
-                      onChange={memoizedSetNewProjectSamples}
-                    />
-                  ) : pageView === 'subsamples' ? (
-                    <SampleTable
-                      // fill to the rest of the screen minus the offset of the project data
-                      height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                      readOnly={
-                        !(projectInfo && canEdit(user, projectInfo)) ||
-                        newProjectSamples?.length >= MAX_SAMPLE_COUNT ||
-                        currentHistoryId !== null
-                      }
-                      data={newProjectSubsamples || []}
-                      onChange={memoizedSetNewProjectSubsamples}
+                      data={pageView === 'samples' ? sampleData : subsampleData}
+                      onChange={pageView === 'samples' ? memoizedSetNewProjectSamples : memoizedSetNewProjectSubsamples}
                     />
                   ) : (
                     <div className="border border-t">
                       <ProjectConfigEditor
                         readOnly={!(projectInfo && canEdit(user, projectInfo)) || currentHistoryId !== null}
-                        value={determineWhichConfigToShow()}
+                        value={currentHistoryId !== null ? projectHistoryView?._config || '' : newProjectConfig || ''}
                         setValue={(value) => setNewProjectConfig(value)}
                       />
                     </div>
