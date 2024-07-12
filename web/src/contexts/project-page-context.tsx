@@ -1,10 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import { useProjectAllHistory } from '../hooks/queries/useProjectAllHistory';
 import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../hooks/queries/useProjectConfig';
-import { useProjectHistory } from '../hooks/queries/useProjectHistory';
 import { useProjectViews } from '../hooks/queries/useProjectViews';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
@@ -28,8 +26,6 @@ const ProjectPageContext = createContext<{
   projectConfigQuery: ReturnType<typeof useProjectConfig>;
   projectViewsQuery: ReturnType<typeof useProjectViews>;
   projectValidationQuery: ReturnType<typeof useValidation>;
-  projectAllHistoryQuery: ReturnType<typeof useProjectAllHistory>;
-  projectHistoryQuery: ReturnType<typeof useProjectHistory>;
   shouldFetchSampleTable: boolean;
   pageView: ProjectPageView;
   setPageView: React.Dispatch<React.SetStateAction<ProjectPageView>>;
@@ -86,12 +82,6 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
   // PROJECT VIEWS
   const projectViewsQuery = useProjectViews(namespace, projectName, tag);
 
-  // PROJECT ALL HISTORY (list of all history updates for a project)
-  const projectAllHistoryQuery = useProjectAllHistory(namespace, projectName, tag);
-
-  // PROJECT HISTORY
-  const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
-
   // PROJECT VALIDATION
   const projectValidationQuery = useValidation({
     pepRegistry: `${namespace}/${projectName}:${tag}`,
@@ -124,8 +114,6 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
         projectConfigQuery,
         projectViewsQuery,
         projectValidationQuery,
-        projectAllHistoryQuery,
-        projectHistoryQuery,
         shouldFetchSampleTable,
         pageView,
         setPageView,

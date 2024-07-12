@@ -1,14 +1,17 @@
 import { useState } from 'react';
 
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useProjectAllHistory } from '../../hooks/queries/useProjectAllHistory';
 import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { downloadHistoryZip } from '../../utils/project';
 import { RestoreFromHistoryModal } from '../modals/restore-from-history';
 
 export const HistoryToolbar = () => {
-  const { namespace, projectName, tag, currentHistoryId, setCurrentHistoryId, projectAllHistoryQuery } =
-    useProjectPage();
+  const { namespace, projectName, tag, currentHistoryId, setCurrentHistoryId } = useProjectPage();
+
+  const projectAllHistoryQuery = useProjectAllHistory(namespace, projectName, tag);
+
   const historyUpdates = projectAllHistoryQuery.data?.history;
 
   const { jwt } = useSession();

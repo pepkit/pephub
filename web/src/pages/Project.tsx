@@ -18,6 +18,7 @@ import { SampleTable } from '../components/tables/sample-table';
 import { useProjectPage } from '../contexts/project-page-context';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
+import { useProjectHistory } from '../hooks/queries/useProjectHistory';
 import { useView } from '../hooks/queries/useView';
 import { useSession } from '../hooks/useSession';
 import { getOS } from '../utils/etc';
@@ -50,9 +51,9 @@ export const ProjectPage = () => {
     forceTraditionalInterface,
     MAX_SAMPLE_COUNT,
     currentHistoryId,
-    projectHistoryQuery,
   } = useProjectPage();
 
+  const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
   const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true);
 
   const isStarred =

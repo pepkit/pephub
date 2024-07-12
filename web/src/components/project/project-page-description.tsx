@@ -2,16 +2,20 @@ import { Fragment, useRef, useState } from 'react';
 import YAML from 'yaml';
 
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useProjectHistory } from '../../hooks/queries/useProjectHistory';
 import { Markdown } from '../markdown/render';
 
 const MAX_DESC_HEIGHT = 200;
 
 export const ProjectDescription = () => {
-  const { projectAnnotationQuery, currentHistoryId, projectHistoryQuery } = useProjectPage();
+  const { namespace, projectName, tag, projectAnnotationQuery, currentHistoryId } = useProjectPage();
 
   const projectDescriptionRef = useRef<HTMLDivElement>(null);
+
   const showMoreButton = projectDescriptionRef.current?.clientHeight! >= MAX_DESC_HEIGHT;
   const [showMoreDescription, setShowMoreDescription] = useState(false);
+
+  const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
 
   const projectInfo = projectAnnotationQuery.data;
 

@@ -4,6 +4,7 @@ import { set } from 'react-hook-form';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useDeleteProjectHistory } from '../../hooks/mutations/useDeleteProjectHistory';
+import { useProjectAllHistory } from '../../hooks/queries/useProjectAllHistory';
 import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { downloadHistoryZip } from '../../utils/project';
@@ -19,8 +20,11 @@ type Props = {
 export const ProjectHistoryModal = (props: Props) => {
   const { show, namespace, project, tag, onHide } = props;
 
-  const { projectAllHistoryQuery, setCurrentHistoryId } = useProjectPage();
+  const { setCurrentHistoryId } = useProjectPage();
   const { jwt } = useSession();
+
+  const projectAllHistoryQuery = useProjectAllHistory(namespace, project, tag || 'default');
+
   const historyUpdates = projectAllHistoryQuery.data?.history || [];
 
   const deleteProjectHistoryMutation = useDeleteProjectHistory(namespace, project, tag || 'default');
