@@ -10,8 +10,6 @@ import { useValidation } from '../hooks/queries/useValidation';
 
 const MAX_SAMPLE_COUNT = 25_000;
 
-type ProjectPageView = 'samples' | 'subsamples' | 'config';
-
 type ProviderProps = {
   children: React.ReactNode;
 };
@@ -27,8 +25,6 @@ const ProjectPageContext = createContext<{
   projectViewsQuery: ReturnType<typeof useProjectViews>;
   projectValidationQuery: ReturnType<typeof useValidation>;
   shouldFetchSampleTable: boolean;
-  pageView: ProjectPageView;
-  setPageView: React.Dispatch<React.SetStateAction<ProjectPageView>>;
   forceTraditionalInterface: boolean;
   setForceTraditionalInterface: React.Dispatch<React.SetStateAction<boolean>>;
   MAX_SAMPLE_COUNT: number;
@@ -51,7 +47,6 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
   const tag = searchParams.get('tag') || 'default';
 
   // GENERAL STATE
-  const [pageView, setPageView] = useState<ProjectPageView>('samples');
   const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false);
   const [currentHistoryId, setCurrentHistoryId] = useState<number | null>(null);
 
@@ -115,8 +110,6 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
         projectViewsQuery,
         projectValidationQuery,
         shouldFetchSampleTable,
-        pageView,
-        setPageView,
         forceTraditionalInterface,
         setForceTraditionalInterface,
         MAX_SAMPLE_COUNT,

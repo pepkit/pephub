@@ -20,6 +20,7 @@ import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjec
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useProjectHistory } from '../hooks/queries/useProjectHistory';
 import { useView } from '../hooks/queries/useView';
+import { useProjectPageView } from '../hooks/stores/useProjectPageView';
 import { useSession } from '../hooks/useSession';
 import { getOS } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
@@ -47,11 +48,12 @@ export const ProjectPage = () => {
     projectConfigQuery,
     projectValidationQuery,
     shouldFetchSampleTable,
-    pageView,
     forceTraditionalInterface,
     MAX_SAMPLE_COUNT,
     currentHistoryId,
   } = useProjectPage();
+
+  const { pageView } = useProjectPageView();
 
   const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
   const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true);

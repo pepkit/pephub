@@ -20,6 +20,7 @@ export const useSampleTable = (sampleTableQuery: SampleTableQuery) => {
     queryKey: [namespace, project, tag, 'samples'],
     queryFn: () => getSampleTable(namespace || '', project || '', tag, session.jwt || ''),
     enabled: enableQuery === undefined ? false : enableQuery,
+    refetchOnWindowFocus: false,
   });
   return query;
 };

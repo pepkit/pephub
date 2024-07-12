@@ -1,6 +1,6 @@
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-import { useProjectPage } from '../../contexts/project-page-context';
+import { useProjectPageView } from '../../hooks/stores/useProjectPageView';
 import { ViewSelector } from '../project/view-selector';
 
 type PageView = 'samples' | 'subsamples' | 'config';
@@ -51,7 +51,9 @@ const ViewButton = (props: ViewButtonProps) => {
 
 export const ProjectDataNav = (props: NavProps) => {
   const { samplesIsDirty, subsamplesIsDirty, configIsDirty, projectView, setProjectView } = props;
-  const { pageView, setPageView } = useProjectPage();
+
+  const { pageView, setPageView } = useProjectPageView();
+
   return (
     <div className="h-100 w-100 d-flex flex-row align-items-center">
       <div className="mx-2">
