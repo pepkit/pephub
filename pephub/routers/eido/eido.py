@@ -83,7 +83,7 @@ async def validate(
     if pep_registry is not None:
         namespace, name, tag = registry_path_converter(pep_registry)
         tag = tag or DEFAULT_TAG
-        p = agent.project.get(namespace, name, tag)
+        p = agent.project.get(namespace, name, tag, raw=False)
     else:
         init_file = parse_user_file_upload(pep_files)
         init_file, other_files = split_upload_files_on_init_file(pep_files, init_file)

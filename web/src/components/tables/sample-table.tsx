@@ -57,6 +57,15 @@ export const SampleTable = (props: Props) => {
 
   const PH_ID_COL_NAME = 'ph_id';
 
+  // Get the data in the first row
+  const firstRowData = hotRef.current?.hotInstance?.getDataAtRow(0);
+
+  // Check if the last column in the first row is 'ph_id'
+  if (firstRowData && firstRowData[firstRowData.length - 1] !== 'ph_id') {
+    // If not, set it
+    hotRef.current?.hotInstance?.setDataAtCell(0, firstRowData.length - 1, 'ph_id');
+  }
+
   return (
     <HotTable
       ref={hotRef}
