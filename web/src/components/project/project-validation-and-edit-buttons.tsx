@@ -6,6 +6,11 @@ import { useProjectPage } from '../../contexts/project-page-context';
 import { useConfigMutation } from '../../hooks/mutations/useConfigMutation';
 import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
+import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
+import { useProjectViews } from '../../hooks/queries/useProjectViews';
+import { useSampleTable } from '../../hooks/queries/useSampleTable';
+import { useSubsampleTable } from '../../hooks/queries/useSubsampleTable';
+import { useValidation } from '../../hooks/queries/useValidation';
 import { useSession } from '../../hooks/useSession';
 import { canEdit } from '../../utils/permissions';
 import { StatusIcon } from '../badges/status-icons';
@@ -65,17 +70,21 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
 
   const { user } = useSession();
 
-  const {
+  const { namespace, projectName, tag, shouldFetchSampleTable } = useProjectPage();
+
+  const projectConfigQuery = useProjectConfig(namespace, projectName, tag);
+  const projectValidationQuery = useValidation({
+    pepRegistry: `${namespace}/${projectName}:${tag}`,
+    schema: projectAnnotationQuery.data?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
+  });
+  const projectViewsQuery = useProjectViews(namespace, projectName, tag);
+  const sampleTableQuery = useSampleTable({
     namespace,
-    projectName,
+    project: projectName,
     tag,
-    shouldFetchSampleTable,
-    projectConfigQuery,
-    projectViewsQuery,
-    projectValidationQuery,
-    sampleTableQuery,
-    subSampleTableQuery,
-  } = useProjectPage();
+    enabled: projectAnnotationQuery.data === undefined ? false : shouldFetchSampleTable,
+  });
+  const subSampleTableQuery = useSubsampleTable(namespace, projectName, tag);
 
   const configMutation = useConfigMutation(namespace, projectName, tag, newProjectConfig);
   const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag, {
