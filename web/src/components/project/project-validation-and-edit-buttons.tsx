@@ -5,6 +5,7 @@ import { Sample } from '../../../types';
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useConfigMutation } from '../../hooks/mutations/useConfigMutation';
 import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
+import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useSession } from '../../hooks/useSession';
 import { canEdit } from '../../utils/permissions';
 import { StatusIcon } from '../badges/status-icons';
@@ -16,6 +17,7 @@ type CustomToggleProps = {
 };
 
 type ProjectValidationAndEditButtonsProps = {
+  projectAnnotationQuery: ReturnType<typeof useProjectAnnotation>;
   newProjectConfig: string;
   newProjectSamples: Sample[];
   newProjectSubsamples: Sample[];
@@ -47,6 +49,7 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
 
 export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditButtonsProps) => {
   const {
+    projectAnnotationQuery,
     newProjectSamples,
     newProjectSubsamples,
     newProjectConfig,
@@ -67,7 +70,6 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
     projectName,
     tag,
     shouldFetchSampleTable,
-    projectAnnotationQuery,
     projectConfigQuery,
     projectViewsQuery,
     projectValidationQuery,

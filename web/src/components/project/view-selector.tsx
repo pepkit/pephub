@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import ReactSelect from 'react-select';
 
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useProjectViews } from '../../hooks/queries/useProjectViews';
 
 type ViewSelectorProps = {
   view: string | undefined;
@@ -15,7 +16,9 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const { view, setView } = props;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { projectViewsQuery } = useProjectPage();
+  const { namespace, projectName, tag } = useProjectPage();
+  const projectViewsQuery = useProjectViews(namespace, projectName, tag);
+
   const projectViewsIsLoading = projectViewsQuery.isLoading;
   const projectViews = projectViewsQuery.data;
 

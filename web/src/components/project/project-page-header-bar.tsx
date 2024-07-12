@@ -9,6 +9,7 @@ import { ForkPEPModal } from '../../components/modals/fork-pep';
 import { ProjectAPIEndpointsModal } from '../../components/modals/project-api-endpoints';
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
+import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useSession } from '../../hooks/useSession';
 import { copyToClipboard, numberWithCommas } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
@@ -30,14 +31,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   const fork = searchParams.get('fork');
 
   // get project info
-  const {
-    namespace,
-    projectName,
-    tag,
-    projectAnnotationQuery,
-    forceTraditionalInterface,
-    setForceTraditionalInterface,
-  } = useProjectPage();
+  const { namespace, projectName, tag, forceTraditionalInterface, setForceTraditionalInterface } = useProjectPage();
 
   const { addStarMutation, removeStarMutation } = useNamespaceStars(user?.login || '/', {}, namespace === user?.login);
 
@@ -49,6 +43,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
   const [showProjectHistoryModal, setShowProjectHistoryModal] = useState(false);
 
+  const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
   const projectInfo = projectAnnotationQuery.data;
 
   // watch for the fork query param to open the fork modal

@@ -2,12 +2,16 @@ import { Fragment } from 'react';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useProjectAllHistory } from '../../hooks/queries/useProjectAllHistory';
+import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useProjectHistory } from '../../hooks/queries/useProjectHistory';
+import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { dateStringToDateTime } from '../../utils/dates';
 
 export const ProjectInfoFooter = () => {
-  const { projectAnnotationQuery, currentHistoryId, namespace, projectName, tag } = useProjectPage();
+  const { namespace, projectName, tag } = useProjectPage();
+  const { currentHistoryId } = useCurrentHistoryId();
 
+  const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
   const projectAllHistoryQuery = useProjectAllHistory(namespace, projectName, tag);
   const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
 

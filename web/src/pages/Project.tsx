@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -18,8 +18,14 @@ import { SampleTable } from '../components/tables/sample-table';
 import { useProjectPage } from '../contexts/project-page-context';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
+import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
+import { useProjectConfig } from '../hooks/queries/useProjectConfig';
 import { useProjectHistory } from '../hooks/queries/useProjectHistory';
+import { useSampleTable } from '../hooks/queries/useSampleTable';
+import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
+import { useValidation } from '../hooks/queries/useValidation';
 import { useView } from '../hooks/queries/useView';
+import { useCurrentHistoryId } from '../hooks/stores/useCurrentHistoryId';
 import { useProjectPageView } from '../hooks/stores/useProjectPageView';
 import { useSession } from '../hooks/useSession';
 import { getOS } from '../utils/etc';
@@ -38,25 +44,30 @@ export const ProjectPage = () => {
   const os = getOS();
 
   // project page context state
-  const {
-    namespace,
-    projectName,
-    tag,
-    projectAnnotationQuery,
-    sampleTableQuery,
-    subSampleTableQuery,
-    projectConfigQuery,
-    projectValidationQuery,
-    shouldFetchSampleTable,
-    forceTraditionalInterface,
-    MAX_SAMPLE_COUNT,
-    currentHistoryId,
-  } = useProjectPage();
+  const { namespace, projectName, tag, shouldFetchSampleTable, forceTraditionalInterface } = useProjectPage();
+
+  const { currentHistoryId } = useCurrentHistoryId();
 
   const { pageView } = useProjectPageView();
 
   const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
   const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true);
+
+  const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
+  const projectConfigQuery = useProjectConfig(namespace, projectName, tag);
+  const sampleTableQuery = useSampleTable({
+    namespace,
+    project: projectName,
+    tag,
+    enabled: shouldFetchSampleTable,
+  });
+  const subSampleTableQuery = useSubsampleTable(namespace, projectName, tag);
+  const projectValidationQuery = useValidation({
+    pepRegistry: `${namespace}/${projectName}:${tag}`,
+    schema: projectAnnotationQuery.data?.pep_schema || 'pep/2.0.0',
+    schema_registry: projectAnnotationQuery.data?.pep_schema,
+    enabled: shouldFetchSampleTable,
+  });
 
   const isStarred =
     starsQuery.data?.find(
@@ -86,10 +97,9 @@ export const ProjectPage = () => {
   const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
 
   // state for editing config, samples, and subsamples
-  const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
-  const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(samples);
-  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(subSampleTableQuery.data?.items || []);
-
+  const [newProjectConfig, setNewProjectConfig] = useState('');
+  const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>([]);
+  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>([]);
   const runValidation = () => {
     projectValidationQuery.refetch();
   };
@@ -99,7 +109,7 @@ export const ProjectPage = () => {
     setNewProjectConfig(projectConfig?.config || '');
     setNewProjectSamples(samples);
     setNewProjectSubsamples(subsamples);
-  }, [projectAnnotationQuery, subSampleTableQuery, subSampleTableQuery]);
+  }, [projectAnnotationQuery.data, subSampleTableQuery.data, projectConfigQuery.data]);
 
   useEffect(() => {
     if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
@@ -164,34 +174,6 @@ export const ProjectPage = () => {
     };
   }, [currentHistoryId]);
 
-  // dedicated functions to get proper data for the project page
-  // (easier to read and understand the code)
-  const determineWhichSamplesToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._sample_dict || [];
-    } else if (view !== undefined) {
-      return viewData?._samples || [];
-    } else {
-      return newProjectSamples;
-    }
-  };
-
-  const determineWhichSubsamplesToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._subsample_list || [];
-    } else {
-      return newProjectSubsamples || [];
-    }
-  };
-
-  const determineWhichConfigToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._config || '';
-    } else {
-      return newProjectConfig || '';
-    }
-  };
-
   if (projectAnnotationQuery.error) {
     return (
       <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
@@ -233,6 +215,7 @@ export const ProjectPage = () => {
                 <ProjectPageheaderPlaceholder />
               ) : (
                 <ProjectValidationAndEditButtons
+                  projectAnnotationQuery={projectAnnotationQuery}
                   newProjectSamples={newProjectSamples}
                   newProjectSubsamples={newProjectSubsamples}
                   newProjectConfig={newProjectConfig}
@@ -250,32 +233,37 @@ export const ProjectPage = () => {
             <div className="row gx-0 h-100">
               <div className="col-12">
                 <div ref={projectDataRef}>
-                  {pageView === 'samples' ? (
+                  {pageView === 'samples' || pageView === 'subsamples' ? (
                     <SampleTable
                       // fill to the rest of the screen minus the offset of the project data
                       height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                       readOnly={!(projectInfo && canEdit(user, projectInfo)) || currentHistoryId !== null}
                       // @ts-ignore: TODO: fix this, the model is just messed up
-                      data={determineWhichSamplesToShow()}
-                      onChange={(value) => setNewProjectSamples(value)}
-                    />
-                  ) : pageView === 'subsamples' ? (
-                    <SampleTable
-                      // fill to the rest of the screen minus the offset of the project data
-                      height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                      readOnly={
-                        !(projectInfo && canEdit(user, projectInfo)) ||
-                        newProjectSamples?.length >= MAX_SAMPLE_COUNT ||
-                        currentHistoryId !== null
+                      data={
+                        pageView === 'samples'
+                          ? view !== undefined
+                            ? viewData?._samples
+                            : currentHistoryId !== null
+                            ? projectHistoryView?._sample_dict
+                            : newProjectSamples
+                          : currentHistoryId !== null
+                          ? projectHistoryView?._subsample_list
+                          : newProjectSubsamples
                       }
-                      data={newProjectSubsamples || []}
-                      onChange={(value) => setNewProjectSubsamples(value)}
+                      onChange={(value) => {
+                        console.log('value', value);
+                        if (pageView === 'samples') {
+                          setNewProjectSamples(value);
+                        } else {
+                          setNewProjectSubsamples(value);
+                        }
+                      }}
                     />
                   ) : (
                     <div className="border border-t">
                       <ProjectConfigEditor
                         readOnly={!(projectInfo && canEdit(user, projectInfo)) || currentHistoryId !== null}
-                        value={determineWhichConfigToShow()}
+                        value={currentHistoryId !== null ? projectHistoryView?._config || '' : newProjectConfig || ''}
                         setValue={(value) => setNewProjectConfig(value)}
                       />
                     </div>

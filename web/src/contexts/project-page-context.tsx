@@ -18,7 +18,6 @@ const ProjectPageContext = createContext<{
   namespace: string;
   projectName: string;
   tag: string;
-  projectAnnotationQuery: ReturnType<typeof useProjectAnnotation>;
   sampleTableQuery?: ReturnType<typeof useSampleTable>;
   subSampleTableQuery: ReturnType<typeof useSubsampleTable>;
   projectConfigQuery: ReturnType<typeof useProjectConfig>;
@@ -28,13 +27,11 @@ const ProjectPageContext = createContext<{
   forceTraditionalInterface: boolean;
   setForceTraditionalInterface: React.Dispatch<React.SetStateAction<boolean>>;
   MAX_SAMPLE_COUNT: number;
-  currentHistoryId: number | null;
-  setCurrentHistoryId: React.Dispatch<React.SetStateAction<number | null>>;
   // @ts-expect-error - its fine to start with undefined
 }>(undefined);
 
 export const ProjectPageProvider = ({ children }: ProviderProps) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   let { namespace, project: projectName } = useParams();
   namespace = namespace?.toLowerCase();
@@ -48,7 +45,6 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
 
   // GENERAL STATE
   const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false);
-  const [currentHistoryId, setCurrentHistoryId] = useState<number | null>(null);
 
   // get state
   // PROJECT ANNOTATION
@@ -86,24 +82,12 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
       namespace && projectName && tag && projectAnnotationQuery.data === undefined ? false : shouldFetchSampleTable,
   });
 
-  // watch for changes to anything that might need to change search params
-  useEffect(() => {
-    if (currentHistoryId !== null) {
-      searchParams.set('history', currentHistoryId.toString());
-      setSearchParams(searchParams);
-    } else {
-      searchParams.delete('history');
-      setSearchParams(searchParams);
-    }
-  }, [currentHistoryId]);
-
   return (
     <ProjectPageContext.Provider
       value={{
         namespace,
         projectName,
         tag,
-        projectAnnotationQuery,
         sampleTableQuery,
         subSampleTableQuery,
         projectConfigQuery,
@@ -113,8 +97,6 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
         forceTraditionalInterface,
         setForceTraditionalInterface,
         MAX_SAMPLE_COUNT,
-        currentHistoryId,
-        setCurrentHistoryId,
       }}
     >
       {children}
