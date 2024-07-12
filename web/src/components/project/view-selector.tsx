@@ -63,7 +63,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
           }
           value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
         />
-        <OverlayTrigger placement="left" delay={{ show: 250, hide: 2000 }} overlay={renderTooltip}>
+        <OverlayTrigger placement="right" delay={{ show: 250, hide: 2000 }} overlay={renderTooltip}>
           <i className="bi bi-info-circle ms-2"></i>
         </OverlayTrigger>
       </div>
