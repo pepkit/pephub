@@ -113,54 +113,50 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           Private
         </label>
       </div>
-      <span className="fs-4 d-flex align-items-center">
-        <select
-          id="blank-namespace-select"
-          className="form-select w-75"
-          aria-label="Namespace selection"
-          {...register('namespace', { required: true })}
-        >
-          <option value={user?.login}>{user?.login}</option>
-          {user?.orgs.map((org) => (
-            <option key={org} value={org}>
-              {org}
-            </option>
-          ))}
-        </select>
-        <span className="mx-1 mb-1">/</span>
-        <input
-          id="blank-project-name"
-          type="text"
-          className="form-control"
-          placeholder="name"
-          // dont allow any whitespace
-          {...register('project_name', {
-            required: {
-              value: true,
-              message: 'empty',
-            },
-            pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'invalid',
-            },
-          })}
-        />
-        <span className="mx-1 mb-1">:</span>
-        <input
-          {...register('tag', {
-            required: false,
-            pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'invalid',
-            },
-          })}
-          id="blank_tag"
-          type="text"
-          className="form-control"
-          placeholder="default"
-        />
-      </span>
-      <CombinedErrorMessage errors={errors} />
+      <div className="namespace-name-tag-container">
+        <label className="fw-bold text-sm">Namespace *</label>
+        <label className="fw-bold text-sm">Name *</label>
+        <label className="fw-bold text-sm">Tag</label>
+      </div>
+      <div className="namespace-name-tag-container fs-4">
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <select
+            id="blank-namespace-select"
+            className="form-select"
+            aria-label="Namespace selection"
+            {...register('namespace', { required: true })}
+          >
+            <option value={user?.login}>{user?.login}</option>
+            {user?.orgs.map((org) => (
+              <option key={org} value={org}>
+                {org}
+              </option>
+            ))}
+          </select>
+          <span className="mx-1 mb-1">/</span>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <input
+            // dont allow any whitespace
+            {...register('project_name', {
+              required: true,
+              pattern: {
+                value: /^\S+$/,
+                message: 'No spaces allowed.',
+              },
+            })}
+            id="blank-project-name"
+            type="text"
+            className="form-control"
+            placeholder="name"
+          />
+          <span className="mx-1 mb-1">:</span>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
+        </div>
+      </div>
+      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="blank_description"
         className="form-control mt-3"
