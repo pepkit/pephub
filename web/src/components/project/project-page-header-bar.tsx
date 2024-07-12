@@ -8,9 +8,9 @@ import { EditMetaMetadataModal } from '../../components/modals/edit-meta-metadat
 import { ForkPEPModal } from '../../components/modals/fork-pep';
 import { ProjectAPIEndpointsModal } from '../../components/modals/project-api-endpoints';
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../contexts/session-context';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
-import { useSession } from '../../hooks/useSession';
 import { copyToClipboard, numberWithCommas } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
 import { downloadZip } from '../../utils/project';

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getUserApiKeys } from '../../api/auth';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 export const useUserApiKeys = () => {
   const { user, jwt } = useSession();

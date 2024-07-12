@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getSampleTable } from '../../api/project';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 interface SampleTableQuery {
   namespace?: string;

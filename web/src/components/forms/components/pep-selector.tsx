@@ -3,8 +3,8 @@ import Select, { MultiValue } from 'react-select';
 import { useDebounce } from 'usehooks-ts';
 
 import { ProjectAnnotation } from '../../../../types';
+import { useSession } from '../../../contexts/session-context';
 import { useNamespaceProjects } from '../../../hooks/queries/useNamespaceProjects';
-import { useSession } from '../../../hooks/useSession';
 import { NamespaceSearchDropdown } from './namespace-search-dropdown';
 
 interface Props {

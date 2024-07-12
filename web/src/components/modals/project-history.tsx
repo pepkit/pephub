@@ -3,10 +3,10 @@ import { Modal } from 'react-bootstrap';
 import { set } from 'react-hook-form';
 
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../contexts/session-context';
 import { useDeleteProjectHistory } from '../../hooks/mutations/useDeleteProjectHistory';
 import { useProjectAllHistory } from '../../hooks/queries/useProjectAllHistory';
 import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
-import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { downloadHistoryZip } from '../../utils/project';
 

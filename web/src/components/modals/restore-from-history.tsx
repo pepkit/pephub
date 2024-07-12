@@ -5,8 +5,8 @@ import toast from 'react-hot-toast';
 
 import { restoreProjectFromHistory } from '../../api/project';
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../contexts/session-context';
 import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
-import { useSession } from '../../hooks/useSession';
 import { extractErrorMessage } from '../../utils/etc';
 
 type Props = {

@@ -18,6 +18,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 // custom contexts
 import { ProjectPageProvider } from './contexts/project-page-context';
+import { SessionProvider } from './contexts/session-context';
 import './globals.css';
 import { Home } from './pages/Home';
 import { LoginSuccessPage } from './pages/LoginSuccess';
@@ -74,9 +75,11 @@ const App: React.FC = () => {
     <React.StrictMode>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-          <Toaster position="top-right" reverseOrder={false} gutter={8} toastOptions={{ duration: 3000 }} />
-          <ReactQueryDevtools initialIsOpen={false} />
+          <SessionProvider>
+            <RouterProvider router={router} />
+            <Toaster position="top-right" reverseOrder={false} gutter={8} toastOptions={{ duration: 3000 }} />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </SessionProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </React.StrictMode>

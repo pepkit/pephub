@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
 import { deleteProjectHistory } from '../../api/project';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
 export const useDeleteProjectHistory = (namespace: string, projectName: string, tag: string = 'default') => {
   const { jwt } = useSession();

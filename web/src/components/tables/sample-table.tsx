@@ -25,7 +25,6 @@ export const SampleTable = (props: Props) => {
   // parse the list of objects into rows
   const rows = sampleListToArrays(data);
   const ROW_HEIGHT = 23; // px
-  const numColumns = rows.length > 0 ? rows[0].length : 0;
 
   // compute table height based on number of rows
   // or the minRows prop if it is provided
@@ -55,8 +54,6 @@ export const SampleTable = (props: Props) => {
     });
   }
 
-  const PH_ID_COL_NAME = 'ph_id';
-
   return (
     <HotTable
       ref={hotRef}
@@ -76,28 +73,6 @@ export const SampleTable = (props: Props) => {
         });
       }}
       dropdownMenu={true}
-      hiddenColumns={{
-        indicators: true,
-        columns: [numColumns - 1],
-      }}
-      afterPaste={(_, coords) => {
-        const row1 = hotRef.current?.hotInstance?.getDataAtRow(0);
-        let phIdIndex;
-        if (row1 === undefined) {
-          // this occurs when the table is empty
-          phIdIndex = -1;
-        } else {
-          phIdIndex = row1?.indexOf(PH_ID_COL_NAME) || -1;
-        }
-        const startRow = coords[0].startRow;
-        const endRow = coords[0].endRow;
-
-        if (phIdIndex !== -1) {
-          for (let row = startRow; row <= endRow; row++) {
-            hotRef?.current?.hotInstance?.setDataAtCell(row, phIdIndex, null);
-          }
-        }
-      }}
       minCols={2}
       minRows={minRows || 50}
       contextMenu={[
@@ -130,7 +105,6 @@ export const SampleTable = (props: Props) => {
             rows[row][col] = newVal;
           });
 
-          // debugger;
           onChange(arraysToSampleList(rows));
         }
       }}

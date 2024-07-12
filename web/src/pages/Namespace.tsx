@@ -16,10 +16,10 @@ import { StarFilterBar } from '../components/namespace/star-filter-bar';
 import { NamespaceViewSelector } from '../components/namespace/view-selector';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
 import { ProjectCard } from '../components/project/project-card';
+import { useSession } from '../contexts/session-context';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useDebounce } from '../hooks/useDebounce';
-import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
 type View = 'peps' | 'pops' | 'stars';

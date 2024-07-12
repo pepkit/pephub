@@ -3,9 +3,9 @@ import { FC } from 'react';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { ProjectAnnotation } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
 import { usePopCreateMutation } from '../../hooks/mutations/usePopCreateMutation';
-import { useSession } from '../../hooks/useSession';
 import { PepSelector } from './components/pep-selector';
 
 interface POPInputs {

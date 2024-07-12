@@ -3,10 +3,10 @@ import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
 import { ProjectAnnotation } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useAddStar } from '../../hooks/mutations/useAddStar';
 import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
-import { useSession } from '../../hooks/useSession';
 import { copyToClipboard } from '../../utils/etc';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 

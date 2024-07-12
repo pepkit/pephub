@@ -4,11 +4,11 @@ import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 
+import { useSession } from '../../contexts/session-context';
 import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
 import { useSchemas } from '../../hooks/queries/useSchemas';
 import { ValidationParams } from '../../hooks/queries/useValidation';
 import { useValidation } from '../../hooks/queries/useValidation';
-import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';

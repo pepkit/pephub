@@ -4,41 +4,40 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { forkProject } from '../../api/project';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
-export const useForkMutation = (
-  namespace: string,
-  project: string,
-  tag: string,
-  forkTo: string,
-  forkName: string,
-  forkTag?: string,
-  forkDescription?: string,
-  onHide?: () => void,
-) => {
+type NewFork = {
+  forkTo: string;
+  forkName: string;
+  forkTag?: string;
+  forkDescription?: string;
+  onHide?: () => void;
+};
+
+export const useForkMutation = (namespace: string, project: string, tag: string) => {
   const navigate = useNavigate();
 
   const queryClient = useQueryClient();
   const session = useSession();
 
   return useMutation({
-    mutationFn: () =>
+    mutationFn: (data: NewFork) =>
       forkProject(namespace, project, tag, session.jwt, {
-        forkTo: forkTo,
-        forkName: forkName,
-        forkTag: forkTag,
-        forkDescription: forkDescription,
+        forkTo: data.forkTo,
+        forkName: data.forkName,
+        forkTag: data.forkTag,
+        forkDescription: data.forkDescription,
       }),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       toast.success('Project successully forked!');
       queryClient.invalidateQueries({
-        queryKey: [forkTo],
+        queryKey: [variables.forkTo],
       });
-      if (onHide) {
-        onHide();
+      if (variables.onHide) {
+        variables.onHide();
       }
-      navigate(`/${forkTo}/${forkName.toLowerCase()}?tag=${forkTag}`);
+      navigate(`/${variables.forkTo}/${variables.forkName.toLowerCase()}?tag=${variables.forkTag}`);
     },
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown

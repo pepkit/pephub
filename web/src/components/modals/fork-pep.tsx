@@ -3,8 +3,8 @@ import { FC } from 'react';
 import { Modal } from 'react-bootstrap';
 import { FieldErrors, useForm } from 'react-hook-form';
 
+import { useSession } from '../../contexts/session-context';
 import { useForkMutation } from '../../hooks/mutations/useForkMutation';
-import { useSession } from '../../hooks/useSession';
 
 interface Props {
   namespace: string;

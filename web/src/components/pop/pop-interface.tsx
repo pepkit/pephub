@@ -2,10 +2,10 @@ import { Fragment, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { ProjectAnnotation } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
 import { useMultiProjectAnnotation } from '../../hooks/queries/useMultiProjectAnnotation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
-import { useSession } from '../../hooks/useSession';
 import { NamespaceSearchDropdown } from '../forms/components/namespace-search-dropdown';
 import { PepSearchDropdown } from '../forms/components/pep-search-dropdown';
 import { ProjectCardPlaceholder } from '../placeholders/project-card-placeholder';

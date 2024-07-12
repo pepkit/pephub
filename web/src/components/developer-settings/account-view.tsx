@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useSession } from '../../hooks/useSession';
+import { useSession } from '../../contexts/session-context';
 import { GitHubAvatar } from '../badges/github-avatar';
 import { DeleteAllPepsModal } from '../modals/delete-all-peps';
 

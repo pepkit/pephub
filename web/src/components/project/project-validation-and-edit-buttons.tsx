@@ -3,6 +3,7 @@ import { Dropdown } from 'react-bootstrap';
 
 import { Sample } from '../../../types';
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../contexts/session-context';
 import { useConfigMutation } from '../../hooks/mutations/useConfigMutation';
 import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
@@ -11,7 +12,6 @@ import { useProjectViews } from '../../hooks/queries/useProjectViews';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../../hooks/queries/useSubsampleTable';
 import { useValidation } from '../../hooks/queries/useValidation';
-import { useSession } from '../../hooks/useSession';
 import { canEdit } from '../../utils/permissions';
 import { StatusIcon } from '../badges/status-icons';
 import { ProjectDataNav } from '../layout/project-data-nav';
@@ -86,16 +86,11 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   });
   const subSampleTableQuery = useSubsampleTable(namespace, projectName, tag);
 
-  const configMutation = useConfigMutation(namespace, projectName, tag, newProjectConfig);
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag, {
-    config: newProjectConfig,
-    samples: newProjectSamples,
-    subsamples: newProjectSubsamples,
-  });
+  const configMutation = useConfigMutation(namespace, projectName, tag);
+  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   const projectInfo = projectAnnotationQuery.data;
   const projectConfig = projectConfigQuery.data;
-  const projectViews = projectViewsQuery?.data?.views || [];
   const validationResult = projectValidationQuery.data;
   const samples = sampleTableQuery?.data?.items || [];
   const subsamples = subSampleTableQuery.data?.items || [];
@@ -116,7 +111,11 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   };
 
   const handleTotalProjectChange = async () => {
-    await totalProjectMutation.mutateAsync();
+    await totalProjectMutation.mutateAsync({
+      config: newProjectConfig,
+      samples: newProjectSamples,
+      subsamples: newProjectSubsamples,
+    });
     runValidation();
   };
 

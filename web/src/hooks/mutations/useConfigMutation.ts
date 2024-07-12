@@ -3,15 +3,15 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { editProjectConfig } from '../../api/project';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
-export const useConfigMutation = (namespace: string, project: string, tag: string, newProjectConfig: string) => {
+export const useConfigMutation = (namespace: string, project: string, tag: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => editProjectConfig(namespace || '', project || '', tag, session.jwt || '', newProjectConfig),
+    mutationFn: (newProjectConfig: string) => editProjectConfig(namespace, project, tag, session.jwt, newProjectConfig),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [namespace, project, tag],

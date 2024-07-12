@@ -3,8 +3,8 @@ import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { Sample } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
-import { useSession } from '../../hooks/useSession';
 import { ProjectConfigEditor } from '../project/project-config';
 import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';

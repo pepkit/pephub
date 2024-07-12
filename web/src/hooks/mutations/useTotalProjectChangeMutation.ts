@@ -4,26 +4,21 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
 import { editTotalProject } from '../../api/project';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
-interface TotalProjectChangeMutationProps {
+type TotalProjectChangeMutationProps = {
   config?: string;
   samples?: Sample[];
   subsamples?: Sample[];
-}
+};
 
-export const useTotalProjectChangeMutation = (
-  namespace: string,
-  project: string,
-  tag: string,
-  data: TotalProjectChangeMutationProps,
-) => {
+export const useTotalProjectChangeMutation = (namespace: string, project: string, tag: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => editTotalProject(namespace || '', project || '', tag, session.jwt || '', data),
+    mutationFn: (data: TotalProjectChangeMutationProps) => editTotalProject(namespace, project, tag, session.jwt, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [namespace, project, tag],

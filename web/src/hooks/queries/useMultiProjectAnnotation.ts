@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getMultiProjectAnnotation } from '../../api/project';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 export const useMultiProjectAnnotation = (registry_paths: string[] | undefined) => {
   const session = useSession();

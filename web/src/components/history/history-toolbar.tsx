@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../contexts/session-context';
 import { useProjectAllHistory } from '../../hooks/queries/useProjectAllHistory';
 import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
-import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { downloadHistoryZip } from '../../utils/project';
 import { RestoreFromHistoryModal } from '../modals/restore-from-history';

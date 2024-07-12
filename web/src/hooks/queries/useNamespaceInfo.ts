@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getNamespaceInfo } from '../../api/namespace';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 export const useNamespaceInfo = (namespace: string | undefined) => {
   const session = useSession();

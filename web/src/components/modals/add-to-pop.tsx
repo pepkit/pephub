@@ -3,9 +3,9 @@ import { FC, Fragment, useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
+import { useSession } from '../../contexts/session-context';
 import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
-import { useSession } from '../../hooks/useSession';
 import { extractErrorMessage } from '../../utils/etc';
 import { PepSearchDropdown } from '../forms/components/pep-search-dropdown';
 import { LoadingSpinner } from '../spinners/loading-spinner';

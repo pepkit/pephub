@@ -1,8 +1,8 @@
 import { FC, Fragment, useState } from 'react';
 
 import { ProjectAnnotation } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
-import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { MarkdownToText } from '../markdown/render';
 import { DeletePEPModal } from '../modals/delete-pep';

@@ -1,7 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-
-import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
 
 const MAX_SAMPLE_COUNT = 25_000;
 
@@ -36,15 +34,8 @@ export const ProjectPageProvider = ({ children }: ProviderProps) => {
   // GENERAL STATE
   const [forceTraditionalInterface, setForceTraditionalInterface] = useState(false);
 
-  // get state
-  // PROJECT ANNOTATION
-  const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
-
   // DECIDE IF WE SHOULD FETCH SAMPLE TABLE
-  let shouldFetchSampleTable = false;
-  if (projectAnnotationQuery.data?.number_of_samples) {
-    shouldFetchSampleTable = projectAnnotationQuery.data.number_of_samples <= MAX_SAMPLE_COUNT;
-  }
+  let shouldFetchSampleTable = true;
 
   return (
     <ProjectPageContext.Provider

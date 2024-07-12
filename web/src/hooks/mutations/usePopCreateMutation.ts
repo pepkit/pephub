@@ -3,44 +3,43 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
-import { submitPop, submitProjectJSON } from '../../api/namespace';
+import { submitPop } from '../../api/namespace';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
-export const usePopCreateMutation = (
-  namespace: string,
-  projectName: string,
-  tag: string,
-  isPrivate: boolean,
-  description: string,
-  pepSchema: string,
-  peps: Sample[],
-  onSuccess?: () => void,
-) => {
+type NewPop = {
+  isPrivate: boolean;
+  description: string;
+  pepSchema: string;
+  peps: Sample[];
+  onSuccess?: () => void;
+};
+
+export const usePopCreateMutation = (namespace: string, projectName: string, tag: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () =>
+    mutationFn: (newPop: NewPop) =>
       submitPop(
         {
           namespace: namespace,
           name: projectName,
           tag: tag,
-          is_private: isPrivate,
-          description: description,
-          pep_schema: pepSchema,
-          peps: peps,
+          is_private: newPop.isPrivate,
+          description: newPop.description,
+          pep_schema: newPop.pepSchema,
+          peps: newPop.peps,
         },
         session.jwt || '',
       ),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: [namespace],
       });
       toast.success('Project successfully uploaded!');
-      if (onSuccess) {
-        onSuccess();
+      if (variables.onSuccess) {
+        variables.onSuccess();
       }
     },
     onError: (err: AxiosError) => {

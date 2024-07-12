@@ -16,6 +16,7 @@ import { ProjectHeaderBar } from '../components/project/project-page-header-bar'
 import { ProjectValidationAndEditButtons } from '../components/project/project-validation-and-edit-buttons';
 import { SampleTable } from '../components/tables/sample-table';
 import { useProjectPage } from '../contexts/project-page-context';
+import { useSession } from '../contexts/session-context';
 import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
@@ -27,7 +28,6 @@ import { useValidation } from '../hooks/queries/useValidation';
 import { useView } from '../hooks/queries/useView';
 import { useCurrentHistoryId } from '../hooks/stores/useCurrentHistoryId';
 import { useProjectPageView } from '../hooks/stores/useProjectPageView';
-import { useSession } from '../hooks/useSession';
 import { getOS } from '../utils/etc';
 import { canEdit } from '../utils/permissions';
 
@@ -96,20 +96,15 @@ export const ProjectPage = () => {
   // local state
   const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
 
+  console.log('why is this not working?');
+
   // state for editing config, samples, and subsamples
-  const [newProjectConfig, setNewProjectConfig] = useState('');
-  const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>([]);
-  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>([]);
+  const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
+  const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(samples);
+  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(subsamples);
   const runValidation = () => {
     projectValidationQuery.refetch();
   };
-
-  // watch for query changes to update newProjectConfig and newProjectSamples
-  useEffect(() => {
-    setNewProjectConfig(projectConfig?.config || '');
-    setNewProjectSamples(samples);
-    setNewProjectSubsamples(subsamples);
-  }, [projectAnnotationQuery.data, subSampleTableQuery.data, projectConfigQuery.data]);
 
   useEffect(() => {
     if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
@@ -124,14 +119,14 @@ export const ProjectPage = () => {
   const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(samples);
   const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(subsamples);
 
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', projectName || '', tag, {
-    config: newProjectConfig,
-    samples: newProjectSamples,
-    subsamples: newProjectSubsamples,
-  });
+  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   const handleTotalProjectChange = async () => {
-    await totalProjectMutation.mutateAsync();
+    await totalProjectMutation.mutateAsync({
+      config: newProjectConfig,
+      samples: newProjectSamples,
+      subsamples: newProjectSubsamples,
+    });
     runValidation();
   };
 
@@ -173,6 +168,23 @@ export const ProjectPage = () => {
       document.body.classList.remove('border-warning');
     };
   }, [currentHistoryId]);
+
+  useEffect(() => {
+    setNewProjectConfig(projectConfig?.config || '');
+    setNewProjectSamples(samples);
+    setNewProjectSubsamples(subsamples);
+  }, []);
+
+  const onTableChange = useCallback(
+    (value: Sample[]) => {
+      if (pageView === 'samples') {
+        setNewProjectSamples(value);
+      } else {
+        setNewProjectSubsamples(value);
+      }
+    },
+    [pageView],
+  );
 
   if (projectAnnotationQuery.error) {
     return (
@@ -242,22 +254,15 @@ export const ProjectPage = () => {
                       data={
                         pageView === 'samples'
                           ? view !== undefined
-                            ? viewData?._samples
+                            ? viewData?._samples || []
                             : currentHistoryId !== null
-                            ? projectHistoryView?._sample_dict
-                            : newProjectSamples
+                            ? projectHistoryView?._sample_dict || []
+                            : newProjectSamples || []
                           : currentHistoryId !== null
-                          ? projectHistoryView?._subsample_list
-                          : newProjectSubsamples
+                          ? projectHistoryView?._subsample_list || []
+                          : newProjectSubsamples || []
                       }
-                      onChange={(value) => {
-                        console.log('value', value);
-                        if (pageView === 'samples') {
-                          setNewProjectSamples(value);
-                        } else {
-                          setNewProjectSubsamples(value);
-                        }
-                      }}
+                      onChange={onTableChange}
                     />
                   ) : (
                     <div className="border border-t">

@@ -4,11 +4,11 @@ import toast from 'react-hot-toast';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { ProjectAnnotation, Sample } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useAddStar } from '../../hooks/mutations/useAddStar';
 import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
 import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
-import { useSession } from '../../hooks/useSession';
 import { copyToClipboard } from '../../utils/etc';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 

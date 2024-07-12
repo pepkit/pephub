@@ -3,8 +3,8 @@ import { FC, useRef } from 'react';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
+import { useSession } from '../../contexts/session-context';
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
-import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { GitHubAvatar } from '../badges/github-avatar';
 import { FileDropZone } from './components/file-dropzone';

@@ -1,8 +1,8 @@
 import { FC, useState } from 'react';
 
 import { ProjectAnnotation, Sample } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
-import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { MarkdownToText } from '../markdown/render';
 import { ForkPEPModal } from '../modals/fork-pep';
