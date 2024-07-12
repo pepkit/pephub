@@ -3,43 +3,42 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { submitProjectFiles } from '../../api/namespace';
-import { extractError, extractErrorMessage } from '../../utils/etc';
+import { extractErrorMessage } from '../../utils/etc';
 import { useSession } from '../useSession';
 
-export const useUploadMutation = (
-  namespace: string,
-  project: string,
-  tag: string,
-  is_private: boolean,
-  description: string,
-  files: FileList,
-  pep_schema: string,
-  onSuccess?: () => void,
-) => {
+type PepUploadRequest = {
+  project: string;
+  tag: string;
+  isPrivate: boolean;
+  description: string;
+  files: FileList;
+  pepSchema: string;
+};
+
+export const useUploadMutation = (namespace: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () =>
-      submitProjectFiles(
+    mutationFn: (pepUploadRequest: PepUploadRequest) => {
+      const { project, tag, isPrivate, description, files, pepSchema } = pepUploadRequest;
+      return submitProjectFiles(
         {
           namespace: namespace,
           name: project,
           tag: tag,
-          is_private: is_private,
+          is_private: isPrivate,
           description: description,
           files: files,
-          pep_schema: pep_schema,
+          pep_schema: pepSchema,
         },
         session.jwt || '',
-      ),
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [namespace],
       });
-      if (onSuccess) {
-        onSuccess();
-      }
       toast.success('Project successfully uploaded!');
     },
     onError: (err: AxiosError) => {

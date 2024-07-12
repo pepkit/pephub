@@ -1,6 +1,7 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { FC, useRef } from 'react';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 import { useSession } from '../../hooks/useSession';
@@ -83,21 +84,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   const pepSchema = watch('pep_schema');
   const fileDialogRef = useRef<() => void | null>(null);
 
-  const onSuccess = () => {
-    resetForm({}, { keepValues: false });
-    onHide();
-  };
-
-  const mutation = useUploadMutation(
-    namespace,
-    projectName,
-    tag,
-    isPrivate,
-    description,
-    uploadFiles,
-    pepSchema,
-    onSuccess,
-  );
+  const mutation = useUploadMutation(namespace);
 
   return (
     <form id="new-project-form" className="border-0 form-control">
@@ -178,7 +165,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
         <Controller
           control={control}
           name="pep_schema"
-          render={({ field: { onChange, value } }) => (
+          render={({ field: { value } }) => (
             <SchemaDropdown
               value={value}
               onChange={(schema) => {
@@ -217,8 +204,29 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
       )}
       <div className="mt-2">
         <button
-          onClick={() => mutation.mutate()}
-          disabled={!isValid}
+          onClick={() => {
+            if (projectName === '') {
+              toast.error('Could not create PEP. Project Name must not be empty.');
+              return;
+            }
+            mutation.mutate(
+              {
+                project: projectName,
+                tag,
+                isPrivate,
+                description,
+                files: uploadFiles,
+                pepSchema,
+              },
+              {
+                onSuccess: () => {
+                  resetForm({}, { keepValues: false });
+                  onHide();
+                },
+              },
+            );
+          }}
+          disabled={mutation.isPending}
           type="button"
           id="new-project-submit-btn"
           className="btn btn-success me-1"
@@ -226,7 +234,15 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           <i className="bi bi-plus-circle me-1"></i>
           {mutation.isPending ? 'Submitting...' : 'Submit'}
         </button>
-        <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
+        <button
+          type="button"
+          className="btn btn-outline-dark me-1"
+          data-bs-dismiss="modal"
+          onClick={() => {
+            resetForm();
+            onHide();
+          }}
+        >
           Cancel
         </button>
       </div>
