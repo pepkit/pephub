@@ -169,14 +169,18 @@ export const ProjectPage = () => {
     };
   }, [currentHistoryId]);
 
+  // TODO: These are technically an anti-pattern, but I'm not sure how to fix it...
+  // set new project config and samples on load -- when the data is fetched and defined
   useEffect(() => {
     setNewProjectConfig(projectConfig?.config || '');
   }, [projectConfigQuery.data]);
 
+  // set new project samples and subsamples on load -- when the data is fetched and defined
   useEffect(() => {
     setNewProjectSamples(samples);
   }, [sampleTableQuery.data]);
 
+  // set new project samples and subsamples on load -- when the data is fetched and defined
   useEffect(() => {
     setNewProjectSubsamples(subsamples);
   }, [subSampleTableQuery.data]);
