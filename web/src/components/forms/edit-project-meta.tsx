@@ -14,8 +14,7 @@ interface Props {
   namespace: string;
   name: string;
   tag: string;
-  onSuccessfulSubmit?: () => void;
-  onFailedSubmit?: () => void;
+  onSubmit?: () => void;
   onCancel?: () => void;
 }
 
@@ -26,14 +25,9 @@ interface FormValues extends Props {
   pop: boolean;
 }
 
-export const ProjectMetaEditForm: FC<Props> = ({
-  namespace,
-  name,
-  tag,
-  onSuccessfulSubmit = () => {},
-  onFailedSubmit = () => {},
-  onCancel = () => {},
-}) => {
+export const ProjectMetaEditForm = (props: Props) => {
+  const { namespace, name, tag, onCancel, onSubmit } = props;
+
   const { data: projectInfo } = useProject(namespace, name, tag);
 
   const {
@@ -55,12 +49,6 @@ export const ProjectMetaEditForm: FC<Props> = ({
     },
   });
 
-  const onSubmit = () => {
-    onSuccessfulSubmit();
-    // reset form
-    resetForm({}, { keepValues: false });
-  };
-
   // watch form values to pass into mutation
   const newTag = watch('tag');
   const newName = watch('name');
@@ -68,16 +56,6 @@ export const ProjectMetaEditForm: FC<Props> = ({
   const newIsPrivate = watch('isPrivate');
   const newSchema = watch('pep_schema');
   const newPop = watch('pop');
-
-  // check if things are changed - only send those that are
-  const metadata = {
-    newName: projectInfo?.name === newName ? undefined : newName,
-    newTag: projectInfo?.tag === newTag ? undefined : newTag,
-    newDescription: projectInfo?.description === newDescription ? undefined : newDescription,
-    newIsPrivate: projectInfo?.is_private === newIsPrivate ? undefined : newIsPrivate,
-    newSchema: projectInfo?.pep_schema === newSchema ? undefined : newSchema,
-    isPop: projectInfo?.pop === newPop ? undefined : newPop,
-  };
 
   // grab the sample table to warn the user if they wont be able to swap
   // to a POP
@@ -87,7 +65,7 @@ export const ProjectMetaEditForm: FC<Props> = ({
     tag,
   });
 
-  const mutation = useEditProjectMetaMutation(namespace, name, tag, onSubmit, onFailedSubmit, metadata);
+  const { isPending: isSubmitting, submit } = useEditProjectMetaMutation(namespace, name, tag);
 
   // reset form if project info changes
   // this is necessary because projectInfo is
@@ -239,8 +217,8 @@ export const ProjectMetaEditForm: FC<Props> = ({
       <div className="d-flex flex-row align-items-center justify-content-end">
         <button
           onClick={() => {
-            onCancel();
             resetForm();
+            onCancel?.();
           }}
           type="button"
           className="btn btn-outline-dark me-1"
@@ -248,13 +226,30 @@ export const ProjectMetaEditForm: FC<Props> = ({
           Cancel
         </button>
         <button
-          onClick={() => mutation.mutate()}
+          onClick={() =>
+            submit(
+              {
+                newName: projectInfo?.name === newName ? undefined : newName,
+                newTag: projectInfo?.tag === newTag ? undefined : newTag,
+                newDescription: projectInfo?.description === newDescription ? undefined : newDescription,
+                newIsPrivate: projectInfo?.is_private === newIsPrivate ? undefined : newIsPrivate,
+                newSchema: projectInfo?.pep_schema === newSchema ? undefined : newSchema,
+                isPop: projectInfo?.pop === newPop ? undefined : newPop,
+              },
+              {
+                onSuccess: () => {
+                  onSubmit?.();
+                  resetForm({}, { keepValues: false });
+                },
+              },
+            )
+          }
           id="metadata-save-btn"
-          disabled={(!isDirty && isValid) || !!errors.name?.message || !!errors.tag?.message || mutation.isPending}
+          disabled={(!isDirty && isValid) || !!errors.name?.message || !!errors.tag?.message || isSubmitting}
           type="button"
           className="btn btn-success me-1"
         >
-          {mutation.isPending ? 'Saving...' : 'Save'}
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </div>
     </form>
