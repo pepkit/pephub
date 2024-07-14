@@ -8,24 +8,25 @@ import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
 
 type NewPop = {
+  projectName: string;
+  tag: string;
   isPrivate: boolean;
   description: string;
   pepSchema: string;
   peps: Sample[];
-  onSuccess?: () => void;
 };
 
-export const usePopCreateMutation = (namespace: string, projectName: string, tag: string) => {
+export const usePopCreateMutation = (namespace: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (newPop: NewPop) =>
       submitPop(
         {
           namespace: namespace,
-          name: projectName,
-          tag: tag,
+          name: newPop.projectName,
+          tag: newPop.tag,
           is_private: newPop.isPrivate,
           description: newPop.description,
           pep_schema: newPop.pepSchema,
@@ -33,14 +34,11 @@ export const usePopCreateMutation = (namespace: string, projectName: string, tag
         },
         session.jwt || '',
       ),
-    onSuccess: (_data, variables) => {
+    onSuccess: (_data) => {
       queryClient.invalidateQueries({
         queryKey: [namespace],
       });
       toast.success('Project successfully uploaded!');
-      if (variables.onSuccess) {
-        variables.onSuccess();
-      }
     },
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown
@@ -50,4 +48,9 @@ export const usePopCreateMutation = (namespace: string, projectName: string, tag
       });
     },
   });
+
+  return {
+    ...mutation,
+    submit: mutation.mutate,
+  };
 };

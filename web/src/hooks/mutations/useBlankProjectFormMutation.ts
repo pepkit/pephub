@@ -22,7 +22,7 @@ export const useBlankProjectFormMutation = (namespace: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: NewBlankProject) => {
       const { projectName, tag, isPrivate, description, config, pepSchema, sampleTable } = data;
       return submitProjectJSON(
@@ -56,4 +56,9 @@ export const useBlankProjectFormMutation = (namespace: string) => {
       });
     },
   });
+
+  return {
+    ...mutation,
+    submit: mutation.mutate,
+  };
 };

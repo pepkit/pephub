@@ -4,7 +4,6 @@ import { Dropdown } from 'react-bootstrap';
 import { Sample } from '../../../types';
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
-import { useConfigMutation } from '../../hooks/mutations/useConfigMutation';
 import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
@@ -86,7 +85,6 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   });
   const subSampleTableQuery = useSubsampleTable(namespace, projectName, tag);
 
-  const configMutation = useConfigMutation(namespace, projectName, tag);
   const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   const projectInfo = projectAnnotationQuery.data;
@@ -204,7 +202,6 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                 <Fragment>
                   <button
                     disabled={
-                      configMutation.isPending ||
                       totalProjectMutation.isPending ||
                       !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
                       !shouldFetchSampleTable ||
@@ -213,7 +210,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                     onClick={() => handleTotalProjectChange()}
                     className="fst-italic btn btn-sm btn-success me-1 border-dark"
                   >
-                    {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
+                    {totalProjectMutation.isPending ? 'Saving...' : 'Save'}
                   </button>
                   <button
                     className="fst-italic btn btn-sm btn-outline-dark bg-white"

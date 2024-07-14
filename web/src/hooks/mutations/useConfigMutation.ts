@@ -27,5 +27,8 @@ export const useConfigMutation = (namespace: string, project: string, tag: strin
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    editConfig: mutation.mutate,
+  };
 };

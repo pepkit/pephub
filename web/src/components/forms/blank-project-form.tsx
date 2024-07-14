@@ -101,17 +101,7 @@ sample_table: samples.csv
   const isPrivate = watch('is_private');
   const pepSchema = watch('pep_schema');
 
-  const mutation = useBlankProjectFormMutation(
-    namespace,
-    projectName,
-    tag,
-    isPrivate,
-    description,
-    configYAML,
-    pepSchema,
-    sampleTable,
-    onHide,
-  );
+  const { isPending: isSubmitting, submit } = useBlankProjectFormMutation(namespace);
 
   return (
     <form id="blank-project-form" className="border-0 form-control">
@@ -221,14 +211,25 @@ sample_table: samples.csv
       </Tabs>
       <div className="mt-3">
         <button
-          disabled={!isValid || mutation.isPending}
+          disabled={!isValid || isSubmitting}
           id="blank-project-submit-btn"
           className="btn btn-success me-1"
           type="button"
-          onClick={() => mutation.mutate()}
+          onClick={() =>
+            submit({
+              projectName,
+              tag,
+              isPrivate,
+              description,
+              config: configYAML,
+              pepSchema,
+              sampleTable,
+              onSuccess: onHide,
+            })
+          }
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isPending ? 'Submitting...' : 'Add'}
+          {isSubmitting ? 'Submitting...' : 'Add'}
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
           Cancel

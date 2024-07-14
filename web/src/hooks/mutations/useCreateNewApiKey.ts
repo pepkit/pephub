@@ -42,5 +42,8 @@ export const useCreateNewApiKey = (createNewKeyProps: CreateNewApiKeyMutationPro
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    createKey: mutation.mutate,
+  };
 };

@@ -8,24 +8,11 @@ import { NewApiKeyModal } from '../modals/new-api-key-modal';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 
 export const ApiKeyView = () => {
-  //   const testKeys = [
-  //     {
-  //       key_obfuscated: '*********_3456',
-  //       created_at: '2021-09-01T00:00:00Z',
-  //       expires: '2021-09-01T00:00:00Z',
-  //     },
-  //     {
-  //       key_obfuscated: '*********_3456',
-  //       created_at: '2021-09-01T00:00:00Z',
-  //       expires: '2021-09-01T00:00:00Z',
-  //     },
-  //   ];
-
   const [newkey, setNewKey] = useState<string>('');
   const [newKeyModalOpen, setNewKeyModalOpen] = useState<boolean>(false);
 
   const { data: keysResponse } = useUserApiKeys();
-  const createNewApiKey = useCreateNewApiKey({
+  const { isPending: isCreatingKey, createKey } = useCreateNewApiKey({
     onKeyCreated: (newKey) => {
       setNewKey(newKey);
       setNewKeyModalOpen(true);
@@ -86,12 +73,8 @@ export const ApiKeyView = () => {
       <div>
         {/* <h5 className="fw-bold">Create new:</h5> */}
         <div>
-          <button
-            onClick={() => createNewApiKey.mutate()}
-            className="btn btn-sm btn-success"
-            disabled={createNewApiKey.isPending}
-          >
-            {createNewApiKey.isPending ? (
+          <button onClick={() => createKey()} className="btn btn-sm btn-success" disabled={isCreatingKey}>
+            {isCreatingKey ? (
               <Fragment>
                 <LoadingSpinner className="w-4 h-4 spin me-2 mb-tiny fill-light" />
                 Creating new key...

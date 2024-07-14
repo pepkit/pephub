@@ -4,7 +4,6 @@ import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { ProjectAnnotation } from '../../../types';
 import { useSession } from '../../contexts/session-context';
-import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
 import { usePopCreateMutation } from '../../hooks/mutations/usePopCreateMutation';
 import { PepSelector } from './components/pep-selector';
 
@@ -80,23 +79,7 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   const isPrivate = watch('is_private');
   const peps = watch('peps');
 
-  const mutation = usePopCreateMutation(
-    namespace,
-    projectName,
-    tag,
-    isPrivate,
-    description,
-    'pep/2.1.0', // default schema for now
-    peps.map((pep) => {
-      return {
-        sample_name: `${pep.namespace}/${pep.name}:${pep.tag}`,
-        namespace: pep.namespace,
-        name: pep.name,
-        tag: pep.tag,
-      };
-    }),
-    onHide,
-  );
+  const { isPending: isSubmitting, submit } = usePopCreateMutation(namespace);
 
   return (
     <form id="blank-project-form" className="border-0 form-control">
@@ -212,14 +195,37 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
       ) : null}
       <div className="mt-3">
         <button
-          disabled={!isValid || mutation.isPending || peps.length === 0}
+          disabled={!isValid || isSubmitting || peps.length === 0}
           id="blank-project-submit-btn"
           className="btn btn-success me-1"
           type="button"
-          onClick={() => mutation.mutate()}
+          onClick={() =>
+            submit(
+              {
+                projectName,
+                tag,
+                isPrivate,
+                description,
+                pepSchema: 'pep/2.1.0', // default schema for now
+                peps: peps.map((pep) => {
+                  return {
+                    sample_name: `${pep.namespace}/${pep.name}:${pep.tag}`,
+                    namespace: pep.namespace,
+                    name: pep.name,
+                    tag: pep.tag,
+                  };
+                }),
+              },
+              {
+                onSuccess: () => {
+                  onHide();
+                },
+              },
+            )
+          }
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isPending ? 'Submitting...' : 'Add'}
+          {isSubmitting ? 'Submitting...' : 'Add'}
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
           Cancel
