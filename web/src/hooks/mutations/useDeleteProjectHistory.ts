@@ -9,7 +9,7 @@ import { extractErrorMessage } from '../../utils/etc';
 export const useDeleteProjectHistory = (namespace: string, projectName: string, tag: string = 'default') => {
   const { jwt } = useSession();
   const queryClient = useQueryClient();
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (historyId: number | null) => {
       if (historyId === null) {
         throw new Error('historyId is required');
@@ -26,4 +26,9 @@ export const useDeleteProjectHistory = (namespace: string, projectName: string, 
       toast.error(msg, { duration: 5000 });
     },
   });
+
+  return {
+    ...mutation,
+    deleteProjectHistory: mutation.mutate,
+  };
 };

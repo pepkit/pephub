@@ -28,7 +28,11 @@ export const ProjectHistoryModal = (props: Props) => {
 
   const historyUpdates = projectAllHistoryQuery.data?.history || [];
 
-  const deleteProjectHistoryMutation = useDeleteProjectHistory(namespace, project, tag || 'default');
+  const { isPending: isDeletingProjectHistory, deleteProjectHistory } = useDeleteProjectHistory(
+    namespace,
+    project,
+    tag || 'default',
+  );
 
   const [isConfirming, setIsConfirming] = useState(false);
   const [historyIdToDelete, setHistoryIdToDelete] = useState<number | null>(null);
@@ -111,9 +115,9 @@ export const ProjectHistoryModal = (props: Props) => {
                             </button>
                             <button
                               className="btn btn-sm btn-danger"
-                              disabled={deleteProjectHistoryMutation.isPending}
+                              disabled={isDeletingProjectHistory}
                               onClick={() => {
-                                deleteProjectHistoryMutation.mutate(history.change_id, {
+                                deleteProjectHistory(history.change_id, {
                                   onSuccess: () => {
                                     setHistoryIdToDelete(null);
                                     setIsConfirming(false);
@@ -127,7 +131,7 @@ export const ProjectHistoryModal = (props: Props) => {
                         </Fragment>
                       ) : (
                         <button
-                          disabled={deleteProjectHistoryMutation.isPending && history.change_id === historyIdToDelete}
+                          disabled={isDeletingProjectHistory && history.change_id === historyIdToDelete}
                           className="btn btn-outline-danger btn-sm"
                           onClick={() => {
                             setHistoryIdToDelete(history.change_id);
