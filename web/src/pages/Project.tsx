@@ -171,9 +171,15 @@ export const ProjectPage = () => {
 
   useEffect(() => {
     setNewProjectConfig(projectConfig?.config || '');
+  }, [projectConfigQuery.data]);
+
+  useEffect(() => {
     setNewProjectSamples(samples);
+  }, [sampleTableQuery.data]);
+
+  useEffect(() => {
     setNewProjectSubsamples(subsamples);
-  }, []);
+  }, [subSampleTableQuery.data]);
 
   const onTableChange = useCallback(
     (value: Sample[]) => {
