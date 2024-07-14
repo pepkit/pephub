@@ -12,7 +12,6 @@ type NewFork = {
   forkName: string;
   forkTag?: string;
   forkDescription?: string;
-  onHide?: () => void;
 };
 
 export const useForkMutation = (namespace: string, project: string, tag: string) => {
@@ -21,7 +20,7 @@ export const useForkMutation = (namespace: string, project: string, tag: string)
   const queryClient = useQueryClient();
   const session = useSession();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: NewFork) =>
       forkProject(namespace, project, tag, session.jwt, {
         forkTo: data.forkTo,
@@ -34,9 +33,6 @@ export const useForkMutation = (namespace: string, project: string, tag: string)
       queryClient.invalidateQueries({
         queryKey: [variables.forkTo],
       });
-      if (variables.onHide) {
-        variables.onHide();
-      }
       navigate(`/${variables.forkTo}/${variables.forkName.toLowerCase()}?tag=${variables.forkTag}`);
     },
     onError: (err: AxiosError) => {
@@ -47,4 +43,9 @@ export const useForkMutation = (namespace: string, project: string, tag: string)
       });
     },
   });
+
+  return {
+    ...mutation,
+    fork: mutation.mutate,
+  };
 };
