@@ -46,5 +46,8 @@ export const useDeleteMutation = (
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    deleteProject: mutation.mutate,
+  };
 };
