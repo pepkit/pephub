@@ -96,8 +96,6 @@ export const ProjectPage = () => {
   // local state
   const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
 
-  console.log('why is this not working?');
-
   // state for editing config, samples, and subsamples
   const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
   const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(samples);
