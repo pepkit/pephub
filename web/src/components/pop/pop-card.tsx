@@ -19,8 +19,7 @@ interface Props {
 
 export const PopCard: FC<Props> = ({ project, currentPeps, parentName, parentNamespace, parentTag }) => {
   const { user } = useSession();
-  const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
-  const stars = starsQuery.data;
+  const { data: stars } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
 
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showRemovePEPModal, setShowRemovePEPModal] = useState(false);

@@ -28,13 +28,13 @@ export const PopCardDropdown: FC<Props> = (props) => {
 
   const { user } = useSession();
 
-  const starAddMutation = useAddStar(user?.login || '');
+  const { isPending: isAddingStar, addStar } = useAddStar(user?.login || '');
   const starRemoveMutation = useRemoveStar(user?.login || '');
 
   return (
     <Dropdown as={ButtonGroup}>
       <Button
-        disabled={starAddMutation.isPending || starRemoveMutation.isPending}
+        disabled={isAddingStar || starRemoveMutation.isPending}
         variant="outline-dark"
         size="sm"
         onClick={() => {
@@ -47,7 +47,7 @@ export const PopCardDropdown: FC<Props> = (props) => {
               projectTagToRemove: project.tag,
             });
           } else {
-            starAddMutation.mutate({
+            addStar({
               namespaceToStar: project.namespace,
               projectNameToStar: project.name,
               projectTagToStar: project.tag,

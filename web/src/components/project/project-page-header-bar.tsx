@@ -9,6 +9,8 @@ import { ForkPEPModal } from '../../components/modals/fork-pep';
 import { ProjectAPIEndpointsModal } from '../../components/modals/project-api-endpoints';
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
+import { useAddStar } from '../../hooks/mutations/useAddStar';
+import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { copyToClipboard, numberWithCommas } from '../../utils/etc';
@@ -33,7 +35,8 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   // get project info
   const { namespace, projectName, tag, forceTraditionalInterface, setForceTraditionalInterface } = useProjectPage();
 
-  const { addStarMutation, removeStarMutation } = useNamespaceStars(user?.login || '/', {}, namespace === user?.login);
+  const { isPending: isAddingStar, addStar } = useAddStar(user?.login);
+  const { isPending: isRemovingStar, removeStar } = useRemoveStar(user?.login);
 
   const [copied, setCopied] = useState(false);
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
@@ -157,20 +160,20 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
         </Dropdown>
         <button
           className="btn btn-outline-dark btn-sm"
-          disabled={addStarMutation.isPending || removeStarMutation.isPending}
+          disabled={isAddingStar || isRemovingStar}
           onClick={() => {
             if (!user) {
               login();
               return;
             }
             if (isStarred) {
-              removeStarMutation.mutate({
+              removeStar({
                 namespaceToRemove: projectInfo?.namespace!,
                 projectNameToRemove: projectInfo?.name!,
                 projectTagToRemove: projectInfo?.tag!,
               });
             } else {
-              addStarMutation.mutate({
+              addStar({
                 namespaceToStar: projectInfo?.namespace!,
                 projectNameToStar: projectInfo?.name!,
                 projectTagToStar: projectInfo?.tag!,

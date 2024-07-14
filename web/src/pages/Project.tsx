@@ -51,7 +51,7 @@ export const ProjectPage = () => {
   const { pageView } = useProjectPageView();
 
   const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
-  const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true);
+  const { data: stars } = useNamespaceStars(user?.login || '/', {}, true);
 
   const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
   const projectConfigQuery = useProjectConfig(namespace, projectName, tag);
@@ -70,7 +70,7 @@ export const ProjectPage = () => {
   });
 
   const isStarred =
-    starsQuery.data?.find(
+    stars?.find(
       (star) =>
         star.namespace === projectAnnotationQuery.data?.namespace && star.name === projectAnnotationQuery.data?.name,
     ) !== undefined;

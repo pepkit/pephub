@@ -72,13 +72,12 @@ export const NamespacePage = () => {
     type: view === 'pops' ? 'pop' : 'pep',
   });
 
-  const { starsQuery } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
-  const stars = starsQuery.data;
+  const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   // left over from when we were filtering on sample number
   const projectsFiltered = projects?.items.filter((p) => p.number_of_samples) || [];
 
-  if (namespaceInfoIsLoading || starsQuery.isLoading) {
+  if (namespaceInfoIsLoading || starsAreLoading) {
     return (
       <PageLayout title={namespace}>
         <NamespacePagePlaceholder />
