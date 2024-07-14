@@ -84,7 +84,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   const pepSchema = watch('pep_schema');
   const fileDialogRef = useRef<() => void | null>(null);
 
-  const mutation = useUploadMutation(namespace);
+  const { isPending: isUploading, upload } = useUploadMutation(namespace);
 
   return (
     <form id="new-project-form" className="border-0 form-control">
@@ -205,7 +205,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
               toast.error('Could not create PEP. Project Name must not be empty.');
               return;
             }
-            mutation.mutate(
+            upload(
               {
                 project: projectName,
                 tag,
@@ -222,13 +222,13 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
               },
             );
           }}
-          disabled={mutation.isPending}
+          disabled={isUploading}
           type="button"
           id="new-project-submit-btn"
           className="btn btn-success me-1"
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isPending ? 'Submitting...' : 'Submit'}
+          {isUploading ? 'Submitting...' : 'Submit'}
         </button>
         <button
           type="button"
