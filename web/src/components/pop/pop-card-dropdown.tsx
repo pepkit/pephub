@@ -7,8 +7,6 @@ import { ProjectAnnotation, Sample } from '../../../types';
 import { useSession } from '../../contexts/session-context';
 import { useAddStar } from '../../hooks/mutations/useAddStar';
 import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
-import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
-import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { copyToClipboard } from '../../utils/etc';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 

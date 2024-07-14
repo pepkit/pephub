@@ -24,5 +24,8 @@ export const useSampleTableMutation = (namespace: string, project: string, tag: 
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    submit: mutation.mutate,
+  };
 };

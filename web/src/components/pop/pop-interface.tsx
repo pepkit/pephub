@@ -32,7 +32,7 @@ export const PopInterface = ({ project }: Props) => {
   const [addToPopRegistry, setAddToPopRegistry] = useState<string | undefined>(undefined);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
 
-  const sampleTableMutation = useSampleTableMutation(namespace, name, tag);
+  const { isPending: isSampleTablePending, submit } = useSampleTableMutation(namespace, name, tag);
 
   if (isLoading) {
     return (
@@ -121,11 +121,11 @@ export const PopInterface = ({ project }: Props) => {
                             name: newProjectName,
                             tag: newProjectTag,
                           });
-                          sampleTableMutation.mutate(newPeps);
+                          submit(newPeps);
                         }}
-                        disabled={addToPopNamespace === '' || addToPopRegistry === '' || sampleTableMutation.isPending}
+                        disabled={addToPopNamespace === '' || addToPopRegistry === '' || isSampleTablePending}
                       >
-                        {sampleTableMutation.isPending ? (
+                        {isSampleTablePending ? (
                           <Fragment>
                             <span className="d-flex flex-row align-items-center">
                               <LoadingSpinner className="w-4 h-4 spin me-1 fill-light" />
