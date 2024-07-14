@@ -18,7 +18,7 @@ export const ApiKeyView = () => {
       setNewKeyModalOpen(true);
     },
   });
-  const revokeApiKey = useRevokeApiKey();
+  const { isPending: isRevokingKey, revoke } = useRevokeApiKey();
   const testKeys = keysResponse?.keys;
 
   return (
@@ -43,14 +43,14 @@ export const ApiKeyView = () => {
               <div className="d-flex align-items-start">
                 <button
                   onClick={() =>
-                    revokeApiKey.mutate({
+                    revoke({
                       lastFiveChars: key.key.slice(-5),
                     })
                   }
                   className="btn btn-sm btn-danger"
-                  disabled={revokeApiKey.isPending}
+                  disabled={isRevokingKey}
                 >
-                  {revokeApiKey.isPending ? (
+                  {isRevokingKey ? (
                     <Fragment>
                       <LoadingSpinner className="w-4 h-4 spin me-2 mb-tiny fill-light" />
                       Revoking...

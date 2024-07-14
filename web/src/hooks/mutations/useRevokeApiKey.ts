@@ -37,5 +37,8 @@ export const useRevokeApiKey = () => {
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    revoke: mutation.mutate,
+  };
 };
