@@ -34,5 +34,8 @@ export const useTotalProjectChangeMutation = (namespace: string, project: string
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    submit: mutation.mutate,
+  };
 };

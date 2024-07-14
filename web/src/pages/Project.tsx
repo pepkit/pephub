@@ -119,15 +119,18 @@ export const ProjectPage = () => {
   const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(samples);
   const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(subsamples);
 
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag);
+  const { isPending: isUpdatingProject, submit: submitNewProject } = useTotalProjectChangeMutation(
+    namespace,
+    projectName,
+    tag,
+  );
 
-  const handleTotalProjectChange = async () => {
-    await totalProjectMutation.mutateAsync({
+  const handleTotalProjectChange = () => {
+    submitNewProject({
       config: newProjectConfig,
       samples: newProjectSamples,
       subsamples: newProjectSubsamples,
     });
-    runValidation();
   };
 
   const projectDataRef = useRef<HTMLDivElement>(null);

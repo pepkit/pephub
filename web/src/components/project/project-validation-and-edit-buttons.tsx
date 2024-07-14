@@ -85,7 +85,11 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   });
   const subSampleTableQuery = useSubsampleTable(namespace, projectName, tag);
 
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag);
+  const { isPending: isUpdatingProject, submit: submitNewProject } = useTotalProjectChangeMutation(
+    namespace,
+    projectName,
+    tag,
+  );
 
   const projectInfo = projectAnnotationQuery.data;
   const projectConfig = projectConfigQuery.data;
@@ -108,13 +112,12 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
     projectValidationQuery.refetch();
   };
 
-  const handleTotalProjectChange = async () => {
-    await totalProjectMutation.mutateAsync({
+  const handleTotalProjectChange = () => {
+    submitNewProject({
       config: newProjectConfig,
       samples: newProjectSamples,
       subsamples: newProjectSubsamples,
     });
-    runValidation();
   };
 
   return (
@@ -202,7 +205,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                 <Fragment>
                   <button
                     disabled={
-                      totalProjectMutation.isPending ||
+                      isUpdatingProject ||
                       !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
                       !shouldFetchSampleTable ||
                       !!view
@@ -210,7 +213,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                     onClick={() => handleTotalProjectChange()}
                     className="fst-italic btn btn-sm btn-success me-1 border-dark"
                   >
-                    {totalProjectMutation.isPending ? 'Saving...' : 'Save'}
+                    {isUpdatingProject ? 'Saving...' : 'Save'}
                   </button>
                   <button
                     className="fst-italic btn btn-sm btn-outline-dark bg-white"
