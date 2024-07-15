@@ -64,11 +64,7 @@ export const ProjectInterface = (props: Props) => {
   const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   const handleSubmit = () => {
-    submit({
-      config: newConfig,
-      samples: newSamples,
-      subsamples: newSubsamples,
-    });
+    submit(projectUpdates.getValues());
   };
 
   // on save handler
@@ -76,7 +72,7 @@ export const ProjectInterface = (props: Props) => {
     // os info
     const os = getOS();
 
-    window.addEventListener('keydown', (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       let ctrlKey = false;
       switch (os) {
         case 'Mac OS':
@@ -93,10 +89,12 @@ export const ProjectInterface = (props: Props) => {
           handleSubmit();
         }
       }
-    });
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('keydown', () => {});
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -152,6 +150,7 @@ export const ProjectInterface = (props: Props) => {
                 setValue={(val) => {
                   onChange(val);
                 }}
+                height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
               />
             )}
           />
