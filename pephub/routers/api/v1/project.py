@@ -273,7 +273,7 @@ async def get_pep_config(
         tag: default
     """
     return ConfigResponseModel(
-        config=config,
+        config=yaml.dump(config, sort_keys=False),
     )
 
 

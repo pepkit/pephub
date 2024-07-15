@@ -127,4 +127,4 @@ class SamplesResponseModel(BaseModel):
 
 
 class ConfigResponseModel(BaseModel):
-    config: dict
+    config: str
