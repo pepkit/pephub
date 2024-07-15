@@ -76,7 +76,7 @@ export const NamespacePage = () => {
   const stars = starsQuery.data;
 
   // left over from when we were filtering on sample number
-  const projectsFiltered = projects?.items.filter((p) => p.number_of_samples) || [];
+  const projectsFiltered = projects?.results?.filter((p) => p.number_of_samples) || [];
 
   if (namespaceInfoIsLoading || starsQuery.isLoading) {
     return (

@@ -40,9 +40,9 @@ const PepSelector: FC<Props> = ({ onChange, value }) => {
   // projects we've seen before, because it
   // changes each time we change namespace
   useEffect(() => {
-    if (projects?.items) {
+    if (projects?.results) {
       // see if any new projects are in the list
-      const newProjects = projects.items.filter((project) => !cachedOptions.find((p) => p.digest === project.digest));
+      const newProjects = projects.results.filter((project) => !cachedOptions.find((p) => p.digest === project.digest));
       if (newProjects.length > 0) {
         setCachedOptions([...cachedOptions, ...newProjects]);
       }
@@ -71,7 +71,7 @@ const PepSelector: FC<Props> = ({ onChange, value }) => {
             annotation: v,
           }))}
           onInputChange={(newValue) => setSearch(newValue)}
-          options={mapOptions(projects?.items || [])}
+          options={mapOptions(projects?.results || [])}
           onChange={(newValue: MultiValue<{ label: string; value: string; annotation: ProjectAnnotation }>) => {
             const mapped = newValue?.map((v) => v.annotation) || [];
             onChange(mapped);

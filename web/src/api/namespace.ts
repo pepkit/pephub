@@ -17,7 +17,7 @@ export interface NamespaceProjectsResponse {
   count: number;
   offset: number;
   limit: number;
-  items: ProjectAnnotation[];
+  results: ProjectAnnotation[];
 }
 
 export interface PaginationParams {
