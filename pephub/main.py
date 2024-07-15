@@ -15,7 +15,6 @@ from .routers.api.v1.namespace import namespaces as api_namespaces
 from .routers.api.v1.project import project as api_project
 from .routers.api.v1.project import projects as api_projects
 from .routers.api.v1.search import search as api_search
-from .routers.api.v1.user import user as api_user
 from .routers.auth.base import auth as auth_router
 from .routers.eido.eido import router as eido_router
 
@@ -78,7 +77,6 @@ app.add_middleware(
 
 # build routes
 app.include_router(api_base)
-app.include_router(api_user)
 app.include_router(api_namespace)
 app.include_router(api_namespaces)
 app.include_router(api_project)

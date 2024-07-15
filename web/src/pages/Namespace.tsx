@@ -75,7 +75,7 @@ export const NamespacePage = () => {
   const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   // left over from when we were filtering on sample number
-  const projectsFiltered = projects?.items.filter((p) => p.number_of_samples) || [];
+  const projectsFiltered = projects?.results?.filter((p) => p.number_of_samples) || [];
 
   if (namespaceInfoIsLoading || starsAreLoading) {
     return (

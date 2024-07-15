@@ -12,7 +12,7 @@ export interface NamespaceProjectsParams extends PaginationParams {
 export const useNamespaceProjects = (namespace: string | undefined, params: NamespaceProjectsParams) => {
   const session = useSession();
   const query = useQuery({
-    queryKey: [namespace, params, session.jwt],
+    queryKey: [namespace, params],
     queryFn: () => getNamespaceProjects(namespace || '', session.jwt, params, params.type),
     enabled: namespace !== undefined && namespace !== '',
   });
