@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from fastembed.embedding import FlagEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
-from pepdbagent.models import ListOfNamespaceInfo
+from pepdbagent.models import NamespaceList
 from qdrant_client import QdrantClient
 
 from ....const import DEFAULT_QDRANT_COLLECTION_NAME
@@ -22,23 +22,16 @@ load_dotenv()
 search = APIRouter(prefix="/api/v1/search", tags=["search"])
 
 
-@search.get("/namespaces", summary="Search for namespaces")
+@search.get(
+    "/namespaces", summary="Search for namespaces", response_model=NamespaceList
+)
 async def search_for_namespaces(
     limit: Optional[int] = 1_000,
     query: Optional[str] = "",
     offset: Optional[int] = 0,
     agent: PEPDatabaseAgent = Depends(get_db),
-) -> ListOfNamespaceInfo:
-    res = agent.namespace.get(limit=limit, query=query or "", offset=offset)
-
-    return JSONResponse(
-        content={
-            "results": [r.model_dump() for r in res.results],
-            "count": res.count,
-            "limit": limit,
-            "offset": offset,
-        }
-    )
+) -> NamespaceList:
+    return agent.namespace.get(limit=limit, query=query or "", offset=offset)
 
 
 # perform a search

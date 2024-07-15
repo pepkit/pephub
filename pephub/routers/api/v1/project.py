@@ -9,7 +9,7 @@ import yaml
 from dotenv import load_dotenv
 from fastapi import APIRouter, Body, Depends, Query
 from fastapi.exceptions import HTTPException
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, FileResponse
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import (
     ProjectNotFoundError,
@@ -51,6 +51,8 @@ from ...models import (
     ProjectRawModel,
     ProjectRawRequest,
     ProjectHistoryResponse,
+    SamplesResponseModel,
+    ConfigResponseModel,
 )
 from .helpers import verify_updated_project
 
@@ -217,7 +219,7 @@ async def delete_a_pep(
         )
 
 
-@project.get("/samples")
+@project.get("/samples", response_model=SamplesResponseModel)
 async def get_pep_samples(
     proj: dict = Depends(get_project),
     format: Optional[str] = None,
@@ -233,6 +235,10 @@ async def get_pep_samples(
         project: example
         namespace: databio
     """
+
+    if isinstance(proj, dict):
+        proj = peppy.Project.from_dict(proj)
+
     if format is not None:
         conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
         if conversion_func is not None:
@@ -245,25 +251,20 @@ async def get_pep_samples(
     else:
         if raw:
             df = pd.DataFrame(proj[SAMPLE_RAW_DICT_KEY])
-            return JSONResponse(
-                {
-                    "count": df.shape[0],
-                    "items": df.replace({np.nan: None}).to_dict(orient="records"),
-                }
+            return SamplesResponseModel(
+                count=df.shape[0],
+                items=df.replace({np.nan: None}).to_dict(orient="records"),
             )
         else:
-            return JSONResponse(
-                {
-                    "count": len(proj.samples),
-                    "items": [s.to_dict() for s in proj.samples],
-                }
+            return SamplesResponseModel(
+                count=len(proj.samples),
+                items=[s.to_dict() for s in proj.samples],
             )
 
 
 @project.get("/config", summary="Get project configuration file")
 async def get_pep_config(
     config: dict = Depends(get_config),
-    # format: Optional[Literal["JSON", "String"]] = "JSON",
 ):
     """
     Get project configuration file from a certain project and namespace
@@ -274,10 +275,8 @@ async def get_pep_config(
         namespace: databio
         tag: default
     """
-    return JSONResponse(
-        {
-            "config": yaml.dump(config, sort_keys=False),
-        }
+    return ConfigResponseModel(
+        config=config,
     )
 
 
@@ -463,7 +462,7 @@ async def delete_sample(
         )
 
 
-@project.get("/subsamples")
+@project.get("/subsamples", response_model=SamplesResponseModel)
 async def get_subsamples_endpoint(
     subsamples: peppy.Project = Depends(get_subsamples),
     download: bool = False,
@@ -489,19 +488,15 @@ async def get_subsamples_endpoint(
         if download:
             return subsamples.to_csv()
         else:
-            return JSONResponse(
-                {
-                    "count": subsamples.shape[0],
-                    "items": subsamples.to_dict(orient="records"),
-                }
+            return SamplesResponseModel(
+                count=subsamples.shape[0],
+                items=subsamples.to_dict(orient="records"),
             )
 
     else:
-        return JSONResponse(
-            {
-                "count": 0,
-                "items": [],
-            }
+        return SamplesResponseModel(
+            count=0,
+            items=[],
         )
 
 
@@ -552,7 +547,7 @@ async def convert_pep(
     return resp_obj
 
 
-@project.get("/zip")
+@project.get("/zip", response_class=FileResponse)
 async def zip_pep_for_download(proj: Dict[str, Any] = Depends(get_project)):
     """
     Zip a pep
@@ -618,7 +613,7 @@ async def fork_pep_to_namespace(
     )
 
 
-@project.get("/annotation")
+@project.get("/annotation", response_model=AnnotationModel)
 async def get_project_annotation(
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
 ):
@@ -752,6 +747,7 @@ async def create_view_of_the_project(
     "/views/{view}/zip",
     summary="Zip a view",
     tags=["views"],
+    response_class=FileResponse,
 )
 async def zip_view_of_the_view(
     namespace: str,
@@ -1069,6 +1065,7 @@ def restore_project_history_by_id(
 @project.get(
     "/history/{history_id}/zip",
     summary="Zip a project history by id",
+    response_class=FileResponse,
 )
 def get_zip_snapshot(
     namespace: str,

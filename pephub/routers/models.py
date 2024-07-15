@@ -119,3 +119,12 @@ class VersionResponseModel(BaseModel):
 
 class BaseEndpointResponseModel(VersionResponseModel):
     message: str
+
+
+class SamplesResponseModel(BaseModel):
+    count: int
+    items: list
+
+
+class ConfigResponseModel(BaseModel):
+    config: dict
