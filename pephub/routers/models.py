@@ -106,3 +106,16 @@ class DeveloperKey(BaseModel):
     key: str
     created_at: str
     expires: str
+
+
+class VersionResponseModel(BaseModel):
+    pephub_version: str
+    peppy_version: str
+    python_version: str
+    fastapi_version: str
+    pepdbagent_version: str
+    api_version: int
+
+
+class BaseEndpointResponseModel(VersionResponseModel):
+    message: str
