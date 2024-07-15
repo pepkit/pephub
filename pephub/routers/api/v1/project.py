@@ -235,10 +235,6 @@ async def get_pep_samples(
         project: example
         namespace: databio
     """
-
-    if isinstance(proj, dict):
-        proj = peppy.Project.from_dict(proj)
-
     if format is not None:
         conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
         if conversion_func is not None:
@@ -256,6 +252,7 @@ async def get_pep_samples(
                 items=df.replace({np.nan: None}).to_dict(orient="records"),
             )
         else:
+            proj = peppy.Project.from_dict(proj)
             return SamplesResponseModel(
                 count=len(proj.samples),
                 items=[s.to_dict() for s in proj.samples],
