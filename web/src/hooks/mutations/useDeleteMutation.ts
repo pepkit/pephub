@@ -4,8 +4,8 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { deleteProject } from '../../api/project';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
 export const useDeleteMutation = (
   namespace: string,
@@ -46,5 +46,8 @@ export const useDeleteMutation = (
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    deleteProject: mutation.mutate,
+  };
 };

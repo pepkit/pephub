@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { submitProjectFiles } from '../../api/namespace';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
 type PepUploadRequest = {
   project: string;
@@ -19,7 +19,7 @@ export const useUploadMutation = (namespace: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (pepUploadRequest: PepUploadRequest) => {
       const { project, tag, isPrivate, description, files, pepSchema } = pepUploadRequest;
       return submitProjectFiles(
@@ -49,4 +49,9 @@ export const useUploadMutation = (namespace: string) => {
       });
     },
   });
+
+  return {
+    ...mutation,
+    upload: mutation.mutate,
+  };
 };

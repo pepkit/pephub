@@ -1,11 +1,9 @@
 import { Fragment, MouseEvent, forwardRef } from 'react';
-import { Dropdown } from 'react-bootstrap';
 
-import { Sample } from '../../../types';
 import { useProjectPage } from '../../contexts/project-page-context';
-import { useConfigMutation } from '../../hooks/mutations/useConfigMutation';
-import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
-import { useSession } from '../../hooks/useSession';
+import { useSession } from '../../contexts/session-context';
+import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
+import { useValidation } from '../../hooks/queries/useValidation';
 import { canEdit } from '../../utils/permissions';
 import { StatusIcon } from '../badges/status-icons';
 import { ProjectDataNav } from '../layout/project-data-nav';
@@ -16,17 +14,10 @@ type CustomToggleProps = {
 };
 
 type ProjectValidationAndEditButtonsProps = {
-  newProjectConfig: string;
-  newProjectSamples: Sample[];
-  newProjectSubsamples: Sample[];
-  configIsDirty: boolean;
-  samplesIsDirty: boolean;
-  subsamplesIsDirty: boolean;
-  view: string | undefined;
-  setView: (view: string | undefined) => void;
-  setNewProjectConfig: (config: string) => void;
-  setNewProjectSamples: (samples: any) => void;
-  setNewProjectSubsamples: (subsamples: any) => void;
+  isDirty: boolean;
+  isUpdatingProject: boolean;
+  reset: () => void;
+  handleSubmit: () => void;
 };
 
 const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ children, onClick }, ref) => (
@@ -46,88 +37,31 @@ const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ chil
 ));
 
 export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditButtonsProps) => {
-  const {
-    newProjectSamples,
-    newProjectSubsamples,
-    newProjectConfig,
-    configIsDirty,
-    samplesIsDirty,
-    subsamplesIsDirty,
-    view,
-    setView,
-    setNewProjectConfig,
-    setNewProjectSamples,
-    setNewProjectSubsamples,
-  } = props;
-
+  const { isDirty, isUpdatingProject, reset, handleSubmit } = props;
   const { user } = useSession();
 
-  const {
-    namespace,
-    projectName,
-    tag,
-    shouldFetchSampleTable,
-    projectAnnotationQuery,
-    projectConfigQuery,
-    projectViewsQuery,
-    projectValidationQuery,
-    sampleTableQuery,
-    subSampleTableQuery,
-  } = useProjectPage();
+  const { namespace, projectName, tag } = useProjectPage();
 
-  const configMutation = useConfigMutation(namespace, projectName, tag, newProjectConfig);
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace, projectName, tag, {
-    config: newProjectConfig,
-    samples: newProjectSamples,
-    subsamples: newProjectSubsamples,
-  });
+  // const projectValidationQuery = useValidation({
+  //   pepRegistry: `${namespace}/${projectName}:${tag}`,
+  //   schema: projectAnnotationQuery.data?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
+  // });
+  const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
+  // const validationResult = projectValidationQuery.data;
 
-  const projectInfo = projectAnnotationQuery.data;
-  const projectConfig = projectConfigQuery.data;
-  const projectViews = projectViewsQuery?.data?.views || [];
-  const validationResult = projectValidationQuery.data;
-  const samples = sampleTableQuery?.data?.items || [];
-  const subsamples = subSampleTableQuery.data?.items || [];
-
-  // reset config and samples
-  const resetConfig = () => {
-    setNewProjectConfig(projectConfig?.config || '');
-  };
-  const resetSamples = () => {
-    setNewProjectSamples(samples);
-  };
-  const resetSubsamples = () => {
-    setNewProjectSubsamples(subsamples);
-  };
-
-  const runValidation = () => {
-    projectValidationQuery.refetch();
-  };
-
-  const handleTotalProjectChange = async () => {
-    await totalProjectMutation.mutateAsync();
-    runValidation();
-  };
+  const userHasOwnership = user && projectInfo && canEdit(user, projectInfo);
 
   return (
     <Fragment>
       <div className="h-100 flex-row d-flex align-items-end justify-content-between mx-3">
-        <ProjectDataNav
-          configIsDirty={configIsDirty}
-          samplesIsDirty={samplesIsDirty}
-          subsamplesIsDirty={subsamplesIsDirty}
-          projectViewIsLoading={projectViewsQuery.isFetching}
-          projectView={view}
-          setProjectView={setView}
-        />
-
+        <ProjectDataNav />
         {/* no matter what, only render if belonging to the user */}
-        {user && projectInfo && canEdit(user, projectInfo) ? (
+        {userHasOwnership ? (
           <div className="h-100 d-flex flex-row align-items-center w-25 justify-content-end">
             {/* <ValidationTooltip /> */}
             {projectInfo?.pep_schema ? (
               <div className="d-flex flex-row align-items-center me-4">
-                {projectValidationQuery.isLoading || projectValidationQuery.isFetching ? (
+                {/* {projectValidationQuery.isLoading || projectValidationQuery.isFetching ? (
                   <span>Validating...</span>
                 ) : validationResult?.valid ? (
                   <Dropdown>
@@ -177,7 +111,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                       </Dropdown.Header>
                     </Dropdown.Menu>
                   </Dropdown>
-                )}
+                )} */}
               </div>
             ) : (
               <div className="d-flex flex-row align-items-center mb-1 me-4">
@@ -190,34 +124,22 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
               </div>
             )}
             <div className="ps-1">
-              {shouldFetchSampleTable && !view && (
-                <Fragment>
-                  <button
-                    disabled={
-                      configMutation.isPending ||
-                      totalProjectMutation.isPending ||
-                      !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
-                      !shouldFetchSampleTable ||
-                      !!view
-                    }
-                    onClick={() => handleTotalProjectChange()}
-                    className="fst-italic btn btn-sm btn-success me-1 border-dark"
-                  >
-                    {configMutation.isPending || totalProjectMutation.isPending ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    className="fst-italic btn btn-sm btn-outline-dark bg-white"
-                    onClick={() => {
-                      resetConfig();
-                      resetSamples();
-                      resetSubsamples();
-                    }}
-                    disabled={!(configIsDirty || samplesIsDirty || subsamplesIsDirty)}
-                  >
-                    Discard
-                  </button>
-                </Fragment>
-              )}
+              <Fragment>
+                <button
+                  disabled={isUpdatingProject || !isDirty}
+                  onClick={() => handleSubmit()}
+                  className="fst-italic btn btn-sm btn-success me-1 border-dark"
+                >
+                  {isUpdatingProject ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  disabled={isUpdatingProject || !isDirty}
+                  className="fst-italic btn btn-sm btn-outline-dark bg-white"
+                  onClick={() => reset()}
+                >
+                  Discard
+                </button>
+              </Fragment>
             </div>
           </div>
         ) : null}

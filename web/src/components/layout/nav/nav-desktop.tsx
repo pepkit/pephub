@@ -3,7 +3,7 @@ import { Fragment, useState } from 'react';
 import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-import { useSession } from '../../../hooks/useSession';
+import { useSession } from '../../../contexts/session-context';
 import { getOS } from '../../../utils/etc';
 import { GitHubAvatar } from '../../badges/github-avatar';
 import { SearchBox } from '../search-box';

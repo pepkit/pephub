@@ -8,20 +8,20 @@ import { EditMetaMetadataModal } from '../../components/modals/edit-meta-metadat
 import { ForkPEPModal } from '../../components/modals/fork-pep';
 import { ProjectAPIEndpointsModal } from '../../components/modals/project-api-endpoints';
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../contexts/session-context';
+import { useAddStar } from '../../hooks/mutations/useAddStar';
+import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
-import { useSession } from '../../hooks/useSession';
+import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { copyToClipboard, numberWithCommas } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
 import { downloadZip } from '../../utils/project';
-import { SchemaTag } from '../forms/components/shema-tag';
 import { ProjectHistoryModal } from '../modals/project-history';
+import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
 
-type ProjectPageHeaderBarProps = {
-  isStarred: boolean;
-};
+type ProjectPageHeaderBarProps = {};
 
 export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
-  const { isStarred } = props;
   const { user, login, jwt } = useSession();
 
   const [searchParams] = useSearchParams();
@@ -30,17 +30,14 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   const fork = searchParams.get('fork');
 
   // get project info
-  const {
-    namespace,
-    projectName,
-    tag,
-    projectAnnotationQuery,
-    forceTraditionalInterface,
-    setForceTraditionalInterface,
-  } = useProjectPage();
+  const { namespace, projectName, tag, forceTraditionalInterface, setForceTraditionalInterface } = useProjectPage();
 
-  const { addStarMutation, removeStarMutation } = useNamespaceStars(user?.login || '/', {}, namespace === user?.login);
+  // add star and remove star mutations
+  const { data: stars } = useNamespaceStars(user?.login, {}, true);
+  const { isPending: isAddingStar, addStar } = useAddStar(user?.login);
+  const { isPending: isRemovingStar, removeStar } = useRemoveStar(user?.login);
 
+  // local state
   const [copied, setCopied] = useState(false);
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
@@ -49,7 +46,13 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
   const [showProjectHistoryModal, setShowProjectHistoryModal] = useState(false);
 
+  // queries
+  const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
   const projectInfo = projectAnnotationQuery.data;
+
+  // is starred?
+  const isStarred =
+    stars?.find((star) => star.namespace === projectInfo?.namespace && star.name === projectInfo?.name) !== undefined;
 
   // watch for the fork query param to open the fork modal
   useEffect(() => {
@@ -61,6 +64,11 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
       }
     }
   }, [fork]);
+
+  // if (true) {
+  if (projectAnnotationQuery.isLoading) {
+    return <ProjectHeaderBarPlaceholder />;
+  }
 
   return (
     <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-1">
@@ -162,20 +170,20 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
         </Dropdown>
         <button
           className="btn btn-outline-dark btn-sm"
-          disabled={addStarMutation.isPending || removeStarMutation.isPending}
+          disabled={isAddingStar || isRemovingStar}
           onClick={() => {
             if (!user) {
               login();
               return;
             }
             if (isStarred) {
-              removeStarMutation.mutate({
+              removeStar({
                 namespaceToRemove: projectInfo?.namespace!,
                 projectNameToRemove: projectInfo?.name!,
                 projectTagToRemove: projectInfo?.tag!,
               });
             } else {
-              addStarMutation.mutate({
+              addStar({
                 namespaceToStar: projectInfo?.namespace!,
                 projectNameToStar: projectInfo?.name!,
                 projectTagToStar: projectInfo?.tag!,

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { PaginationParams } from '../../api/namespace';
 import { getNamespaceProjects } from '../../api/namespace';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 // extend PaginationParams to include type
 export interface NamespaceProjectsParams extends PaginationParams {

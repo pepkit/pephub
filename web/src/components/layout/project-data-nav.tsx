@@ -1,18 +1,11 @@
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-import { useProjectPage } from '../../contexts/project-page-context';
+import { useProjectPageView } from '../../hooks/stores/useProjectPageView';
 import { ViewSelector } from '../project/view-selector';
 
 type PageView = 'samples' | 'subsamples' | 'config';
 
-type NavProps = {
-  samplesIsDirty: boolean;
-  subsamplesIsDirty: boolean;
-  configIsDirty: boolean;
-  projectViewIsLoading: boolean;
-  projectView: string | undefined;
-  setProjectView: (view: string | undefined) => void;
-};
+type NavProps = {};
 
 type ViewButtonProps = {
   view: PageView;
@@ -50,8 +43,10 @@ const ViewButton = (props: ViewButtonProps) => {
 };
 
 export const ProjectDataNav = (props: NavProps) => {
-  const { samplesIsDirty, subsamplesIsDirty, configIsDirty, projectView, setProjectView } = props;
-  const { pageView, setPageView } = useProjectPage();
+  const {} = props;
+
+  const { pageView, setPageView } = useProjectPageView();
+
   return (
     <div className="h-100 w-100 d-flex flex-row align-items-center">
       <div className="mx-2">
@@ -78,7 +73,7 @@ export const ProjectDataNav = (props: NavProps) => {
           setPageView={setPageView}
           icon="bi bi-table me-2"
           text="Samples"
-          isDirty={samplesIsDirty}
+          isDirty={false}
           bold={pageView === 'samples' ? ' fw-normal' : ' fw-light'}
           color={pageView === 'samples' ? ' text-dark' : ' text-muted'}
         />
@@ -93,7 +88,7 @@ export const ProjectDataNav = (props: NavProps) => {
           setPageView={setPageView}
           icon="bi bi-grid-3x3-gap-fill me-2"
           text="Subsamples"
-          isDirty={subsamplesIsDirty}
+          isDirty={false}
           bold={pageView === 'subsamples' ? ' fw-normal' : ' fw-light'}
           color={pageView === 'subsamples' ? ' text-dark' : ' text-muted'}
         />
@@ -104,12 +99,12 @@ export const ProjectDataNav = (props: NavProps) => {
           setPageView={setPageView}
           icon="bi bi-filetype-yml me-2"
           text="Config"
-          isDirty={configIsDirty}
+          isDirty={false}
           bold={pageView === 'config' ? ' fw-normal' : ' fw-light'}
           color={pageView === 'config' ? ' text-dark' : ' text-muted'}
         />
       </div>
-      <ViewSelector view={projectView} setView={setProjectView} />
+      <ViewSelector />
     </div>
   );
 };

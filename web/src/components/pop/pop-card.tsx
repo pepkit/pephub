@@ -1,8 +1,8 @@
 import { FC, useState } from 'react';
 
 import { ProjectAnnotation, Sample } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
-import { useSession } from '../../hooks/useSession';
 import { dateStringToDateTime } from '../../utils/dates';
 import { MarkdownToText } from '../markdown/render';
 import { ForkPEPModal } from '../modals/fork-pep';
@@ -19,8 +19,7 @@ interface Props {
 
 export const PopCard: FC<Props> = ({ project, currentPeps, parentName, parentNamespace, parentTag }) => {
   const { user } = useSession();
-  const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
-  const stars = starsQuery.data;
+  const { data: stars } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
 
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [showRemovePEPModal, setShowRemovePEPModal] = useState(false);

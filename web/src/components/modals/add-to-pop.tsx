@@ -3,9 +3,9 @@ import { FC, Fragment, useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
+import { useSession } from '../../contexts/session-context';
 import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
-import { useSession } from '../../hooks/useSession';
 import { extractErrorMessage } from '../../utils/etc';
 import { PepSearchDropdown } from '../forms/components/pep-search-dropdown';
 import { LoadingSpinner } from '../spinners/loading-spinner';
@@ -38,7 +38,7 @@ export const AddToPOPModal: FC<Props> = (props) => {
     project: projectName!,
     tag: tag,
   });
-  const sampleTableMutation = useSampleTableMutation(namespace, projectName!, tag!);
+  const { isPending: isSampleTablePending, submit } = useSampleTableMutation(namespace, projectName!, tag!);
 
   const onCancel = () => {
     setNamespace(user!.login);
@@ -67,7 +67,7 @@ export const AddToPOPModal: FC<Props> = (props) => {
     }
 
     // finally add the project to the pop if it passes all the checks
-    sampleTableMutation.mutate(
+    submit(
       [
         ...currentSampleTable.items,
         {
@@ -129,9 +129,9 @@ export const AddToPOPModal: FC<Props> = (props) => {
           <button
             onClick={onAdd}
             className="btn btn-success"
-            disabled={!projectName || !tag || !currentSampleTable || sampleTableMutation.isPending}
+            disabled={!projectName || !tag || !currentSampleTable || isSampleTablePending}
           >
-            {sampleTableMutation.isPending ? (
+            {isSampleTablePending ? (
               <Fragment>
                 <LoadingSpinner className="w-4 h-4 mb-1 me-1 spin fill-light" />
                 Add

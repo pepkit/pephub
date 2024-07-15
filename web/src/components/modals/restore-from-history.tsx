@@ -5,7 +5,8 @@ import toast from 'react-hot-toast';
 
 import { restoreProjectFromHistory } from '../../api/project';
 import { useProjectPage } from '../../contexts/project-page-context';
-import { useSession } from '../../hooks/useSession';
+import { useSession } from '../../contexts/session-context';
+import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { extractErrorMessage } from '../../utils/etc';
 
 type Props = {
@@ -19,7 +20,9 @@ export const RestoreFromHistoryModal = (props: Props) => {
   const queryClient = useQueryClient();
 
   const { jwt } = useSession();
-  const { namespace, projectName, tag, currentHistoryId: historyId, setCurrentHistoryId } = useProjectPage();
+  const { namespace, projectName, tag } = useProjectPage();
+
+  const { currentHistoryId: historyId, setCurrentHistoryId } = useCurrentHistoryId();
 
   const restoreProject = useMutation({
     mutationFn: () => {

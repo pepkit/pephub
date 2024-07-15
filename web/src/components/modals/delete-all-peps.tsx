@@ -6,7 +6,7 @@ import { Modal } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
 import { deleteAllPepsFromNamespace } from '../../api/namespace';
-import { useSession } from '../../hooks/useSession';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
 
 interface Props {

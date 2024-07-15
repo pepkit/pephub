@@ -6,9 +6,9 @@ import { PageLayout } from '../components/layout/page-layout';
 import { LandingInfoPlaceholder } from '../components/placeholders/landing-leaderboard';
 import { SampleTable } from '../components/tables/sample-table';
 import { GenericTooltip } from '../components/tooltips/generic-tooltip';
+import { useSession } from '../contexts/session-context';
 import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
-import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
 interface MotionButtonProps {

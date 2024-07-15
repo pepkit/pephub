@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getSampleTable } from '../../api/project';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 interface SampleTableQuery {
   namespace?: string;
@@ -20,6 +20,7 @@ export const useSampleTable = (sampleTableQuery: SampleTableQuery) => {
     queryKey: [namespace, project, tag, 'samples'],
     queryFn: () => getSampleTable(namespace || '', project || '', tag, session.jwt || ''),
     enabled: enableQuery === undefined ? false : enableQuery,
+    refetchOnWindowFocus: false,
   });
   return query;
 };

@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { createNewApiKey } from '../../api/auth';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
 type CreateNewApiKeyMutationProps = {
   onKeyCreated?: (newKey: string) => void;
@@ -42,5 +42,8 @@ export const useCreateNewApiKey = (createNewKeyProps: CreateNewApiKeyMutationPro
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    createKey: mutation.mutate,
+  };
 };

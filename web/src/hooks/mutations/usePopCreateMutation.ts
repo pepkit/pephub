@@ -3,45 +3,42 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
-import { submitPop, submitProjectJSON } from '../../api/namespace';
+import { submitPop } from '../../api/namespace';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
-export const usePopCreateMutation = (
-  namespace: string,
-  projectName: string,
-  tag: string,
-  isPrivate: boolean,
-  description: string,
-  pepSchema: string,
-  peps: Sample[],
-  onSuccess?: () => void,
-) => {
+type NewPop = {
+  projectName: string;
+  tag: string;
+  isPrivate: boolean;
+  description: string;
+  pepSchema: string;
+  peps: Sample[];
+};
+
+export const usePopCreateMutation = (namespace: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: () =>
+  const mutation = useMutation({
+    mutationFn: (newPop: NewPop) =>
       submitPop(
         {
           namespace: namespace,
-          name: projectName,
-          tag: tag,
-          is_private: isPrivate,
-          description: description,
-          pep_schema: pepSchema,
-          peps: peps,
+          name: newPop.projectName,
+          tag: newPop.tag,
+          is_private: newPop.isPrivate,
+          description: newPop.description,
+          pep_schema: newPop.pepSchema,
+          peps: newPop.peps,
         },
         session.jwt || '',
       ),
-    onSuccess: () => {
+    onSuccess: (_data) => {
       queryClient.invalidateQueries({
         queryKey: [namespace],
       });
       toast.success('Project successfully uploaded!');
-      if (onSuccess) {
-        onSuccess();
-      }
     },
     onError: (err: AxiosError) => {
       // extract out error message if it exists, else unknown
@@ -51,4 +48,9 @@ export const usePopCreateMutation = (
       });
     },
   });
+
+  return {
+    ...mutation,
+    submit: mutation.mutate,
+  };
 };

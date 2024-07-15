@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 
-import { useSession } from '../../../hooks/useSession';
+import { useSession } from '../../../contexts/session-context';
 
 export const NavLogo = () => {
   const { user } = useSession();

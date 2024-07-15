@@ -1,14 +1,20 @@
 import { useState } from 'react';
 
 import { useProjectPage } from '../../contexts/project-page-context';
-import { useSession } from '../../hooks/useSession';
+import { useSession } from '../../contexts/session-context';
+import { useProjectAllHistory } from '../../hooks/queries/useProjectAllHistory';
+import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { dateStringToDateTime } from '../../utils/dates';
 import { downloadHistoryZip } from '../../utils/project';
 import { RestoreFromHistoryModal } from '../modals/restore-from-history';
 
 export const HistoryToolbar = () => {
-  const { namespace, projectName, tag, currentHistoryId, setCurrentHistoryId, projectAllHistoryQuery } =
-    useProjectPage();
+  const { namespace, projectName, tag } = useProjectPage();
+
+  const { currentHistoryId, setCurrentHistoryId } = useCurrentHistoryId();
+
+  const projectAllHistoryQuery = useProjectAllHistory(namespace, projectName, tag);
+
   const historyUpdates = projectAllHistoryQuery.data?.history;
 
   const { jwt } = useSession();
@@ -19,7 +25,7 @@ export const HistoryToolbar = () => {
     <div
       className="d-flex flex-row align-items-center p-2 gap-2"
       style={{
-        zIndex: 3000,
+        zIndex: 4000,
       }}
     >
       <button

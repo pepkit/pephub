@@ -1,150 +1,51 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Fragment, useEffect, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
-import { Sample } from '../../types';
 import { HistoryInfoBox } from '../components/history/history-info-box';
 import { HistoryToolbar } from '../components/history/history-toolbar';
 import { PageLayout } from '../components/layout/page-layout';
 import { LargeSampleTableModal } from '../components/modals/sample-table-too-large';
-import { ProjectPageheaderPlaceholder } from '../components/placeholders/project-page-header';
 import { PopInterface } from '../components/pop/pop-interface';
-import { ProjectConfigEditor } from '../components/project/project-config';
-import { ProjectInfoFooter } from '../components/project/project-info-footer';
-import { ProjectDescription } from '../components/project/project-page-description';
-import { ProjectHeaderBar } from '../components/project/project-page-header-bar';
-import { ProjectValidationAndEditButtons } from '../components/project/project-validation-and-edit-buttons';
-import { SampleTable } from '../components/tables/sample-table';
+import { ProjectHeader } from '../components/project/project-header';
+import { ProjectInterface } from '../components/project/project-interface';
 import { useProjectPage } from '../contexts/project-page-context';
-import { useTotalProjectChangeMutation } from '../hooks/mutations/useTotalProjectChangeMutation';
-import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
-import { useView } from '../hooks/queries/useView';
-import { useSession } from '../hooks/useSession';
-import { getOS } from '../utils/etc';
-import { canEdit } from '../utils/permissions';
+import { useProjectAnnotation } from '../hooks/queries/useProjectAnnotation';
+import { useProjectConfig } from '../hooks/queries/useProjectConfig';
+import { useSampleTable } from '../hooks/queries/useSampleTable';
+import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
+import { useCurrentHistoryId } from '../hooks/stores/useCurrentHistoryId';
 
 export const ProjectPage = () => {
-  // user info
-  const { user } = useSession();
-
-  const [searchParams] = useSearchParams();
-
   // auto-dismiss popup for large sample tables
   const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
 
-  // os info
-  const os = getOS();
-
   // project page context state
-  const {
-    namespace,
-    projectName,
-    tag,
-    projectAnnotationQuery,
-    sampleTableQuery,
-    subSampleTableQuery,
-    projectConfigQuery,
-    projectValidationQuery,
-    shouldFetchSampleTable,
-    pageView,
-    forceTraditionalInterface,
-    MAX_SAMPLE_COUNT,
-    currentHistoryId,
-    projectHistoryQuery,
-  } = useProjectPage();
+  const { namespace, projectName, tag, shouldFetchSampleTable, forceTraditionalInterface } = useProjectPage();
 
-  const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true);
+  // get the value of which history id is being viewed
+  const { currentHistoryId } = useCurrentHistoryId();
 
-  const isStarred =
-    starsQuery.data?.find(
-      (star) =>
-        star.namespace === projectAnnotationQuery.data?.namespace && star.name === projectAnnotationQuery.data?.name,
-    ) !== undefined;
-
-  // pull out data for easier access
-  const projectInfo = projectAnnotationQuery.data;
-  const projectConfig = projectConfigQuery.data;
-  const samples = sampleTableQuery?.data?.items || [];
-  const subsamples = subSampleTableQuery.data?.items || [];
-  const projectHistoryView = projectHistoryQuery.data;
-
-  // view selection
-  const [view, setView] = useState(searchParams.get('view') || undefined);
-
-  const { data: viewData } = useView({
+  const projectConfigQuery = useProjectConfig(namespace, projectName, tag);
+  const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
+  const sampleTableQuery = useSampleTable({
     namespace,
     project: projectName,
     tag,
-    view,
-    enabled: view !== undefined,
+    enabled: shouldFetchSampleTable,
   });
+  const subSampleTableQuery = useSubsampleTable(namespace, projectName, tag);
+
+  // pull out data for easier access
+  const projectInfo = projectAnnotationQuery.data;
 
   // local state
   const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
-
-  // state for editing config, samples, and subsamples
-  const [newProjectConfig, setNewProjectConfig] = useState(projectConfig?.config || '');
-  const [newProjectSamples, setNewProjectSamples] = useState<Sample[]>(samples);
-  const [newProjectSubsamples, setNewProjectSubsamples] = useState<Sample[]>(subSampleTableQuery.data?.items || []);
-
-  const runValidation = () => {
-    projectValidationQuery.refetch();
-  };
-
-  // watch for query changes to update newProjectConfig and newProjectSamples
-  useEffect(() => {
-    setNewProjectConfig(projectConfig?.config || '');
-    setNewProjectSamples(samples);
-    setNewProjectSubsamples(subsamples);
-  }, [projectAnnotationQuery, subSampleTableQuery, subSampleTableQuery]);
 
   useEffect(() => {
     if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
       setShowLargeSampleTableModal(!shouldFetchSampleTable);
     }
-  }, [shouldFetchSampleTable, projectAnnotationQuery.data]);
-
-  // check if config or samples are dirty
-  const configIsDirty = newProjectConfig !== projectConfig?.config;
-
-  // use JSON stringify to compare arrays
-  const samplesIsDirty = JSON.stringify(newProjectSamples) !== JSON.stringify(samples);
-  const subsamplesIsDirty = JSON.stringify(newProjectSubsamples) !== JSON.stringify(subsamples);
-
-  const totalProjectMutation = useTotalProjectChangeMutation(namespace || '', projectName || '', tag, {
-    config: newProjectConfig,
-    samples: newProjectSamples,
-    subsamples: newProjectSubsamples,
-  });
-
-  const handleTotalProjectChange = async () => {
-    await totalProjectMutation.mutateAsync();
-    runValidation();
-  };
-
-  const projectDataRef = useRef<HTMLDivElement>(null);
-
-  // on save handler
-  useEffect(() => {
-    window.addEventListener('keydown', (e) => {
-      let ctrlKey = false;
-      switch (os) {
-        case 'Mac OS':
-          ctrlKey = e.metaKey;
-          break;
-        default:
-          ctrlKey = e.ctrlKey;
-          break;
-      }
-      // check for ctrl+s, ignore if fetchsampletable is false
-      if (ctrlKey && e.key === 's' && shouldFetchSampleTable && !view) {
-        e.preventDefault();
-        if (configIsDirty || samplesIsDirty || subsamplesIsDirty) {
-          handleTotalProjectChange();
-        }
-      }
-    });
-  }, []);
+  }, [shouldFetchSampleTable, projectInfo]);
 
   // add class to body for a border
   useEffect(() => {
@@ -160,34 +61,6 @@ export const ProjectPage = () => {
       document.body.classList.remove('border-warning');
     };
   }, [currentHistoryId]);
-
-  // dedicated functions to get proper data for the project page
-  // (easier to read and understand the code)
-  const determineWhichSamplesToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._sample_dict || [];
-    } else if (view !== undefined) {
-      return viewData?._samples || [];
-    } else {
-      return newProjectSamples;
-    }
-  };
-
-  const determineWhichSubsamplesToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._subsample_list || [];
-    } else {
-      return newProjectSubsamples || [];
-    }
-  };
-
-  const determineWhichConfigToShow = () => {
-    if (currentHistoryId !== null) {
-      return projectHistoryView?._config || '';
-    } else {
-      return newProjectConfig || '';
-    }
-  };
 
   if (projectAnnotationQuery.error) {
     return (
@@ -216,73 +89,18 @@ export const ProjectPage = () => {
         </Fragment>
       )}
       <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
-        <div className="shadow-sm pt-2">
-          <ProjectHeaderBar isStarred={isStarred} />
-          <ProjectDescription />
-          <ProjectInfoFooter />
-        </div>
+        <ProjectHeader />
         {projectInfo?.pop && !forceTraditionalInterface ? (
-          <PopInterface project={projectInfo} />
+          <PopInterface projectInfo={projectInfo} sampleTable={sampleTableQuery.data} />
         ) : (
-          <Fragment>
-            <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
-              {projectAnnotationQuery.isFetching || projectInfo === undefined ? (
-                <ProjectPageheaderPlaceholder />
-              ) : (
-                <ProjectValidationAndEditButtons
-                  newProjectSamples={newProjectSamples}
-                  newProjectSubsamples={newProjectSubsamples}
-                  newProjectConfig={newProjectConfig}
-                  view={view}
-                  setView={setView}
-                  setNewProjectConfig={setNewProjectConfig}
-                  setNewProjectSamples={setNewProjectSamples}
-                  setNewProjectSubsamples={setNewProjectSubsamples}
-                  configIsDirty={configIsDirty}
-                  samplesIsDirty={samplesIsDirty}
-                  subsamplesIsDirty={subsamplesIsDirty}
-                />
-              )}
-            </div>
-            <div className="row gx-0 h-100">
-              <div className="col-12">
-                <div ref={projectDataRef}>
-                  {pageView === 'samples' ? (
-                    <SampleTable
-                      // fill to the rest of the screen minus the offset of the project data
-                      height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                      readOnly={!(projectInfo && canEdit(user, projectInfo)) || currentHistoryId !== null}
-                      // @ts-ignore: TODO: fix this, the model is just messed up
-                      data={determineWhichSamplesToShow()}
-                      onChange={(value) => setNewProjectSamples(value)}
-                    />
-                  ) : pageView === 'subsamples' ? (
-                    <SampleTable
-                      // fill to the rest of the screen minus the offset of the project data
-                      height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                      readOnly={
-                        !(projectInfo && canEdit(user, projectInfo)) ||
-                        newProjectSamples?.length >= MAX_SAMPLE_COUNT ||
-                        currentHistoryId !== null
-                      }
-                      data={newProjectSubsamples || []}
-                      onChange={(value) => setNewProjectSubsamples(value)}
-                    />
-                  ) : (
-                    <div className="border border-t">
-                      <ProjectConfigEditor
-                        readOnly={!(projectInfo && canEdit(user, projectInfo)) || currentHistoryId !== null}
-                        value={determineWhichConfigToShow()}
-                        setValue={(value) => setNewProjectConfig(value)}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Fragment>
+          <ProjectInterface
+            key={`${projectAnnotationQuery.dataUpdatedAt}-${projectConfigQuery.dataUpdatedAt}-${sampleTableQuery.dataUpdatedAt}-${subSampleTableQuery.dataUpdatedAt}`}
+            projectInfo={projectAnnotationQuery.data}
+            projectConfig={projectConfigQuery.data}
+            sampleTable={sampleTableQuery.data}
+            subSampleTable={subSampleTableQuery.data}
+          />
         )}
-        {/* Modals */}
         <LargeSampleTableModal
           namespace={namespace}
           show={showLargeSampleTableModal}

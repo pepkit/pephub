@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { revokeApiKey } from '../../api/auth';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
 type RevokeRequest = {
   lastFiveChars: string;
@@ -37,5 +37,8 @@ export const useRevokeApiKey = () => {
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    revoke: mutation.mutate,
+  };
 };
