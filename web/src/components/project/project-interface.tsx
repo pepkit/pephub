@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { Sample } from '../../../types';
 import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../contexts/session-context';
 import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
@@ -14,6 +15,7 @@ import { useSubsampleTable } from '../../hooks/queries/useSubsampleTable';
 import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { useProjectPageView } from '../../hooks/stores/useProjectPageView';
 import { getOS } from '../../utils/etc';
+import { canEdit } from '../../utils/permissions';
 import { SampleTable } from '../tables/sample-table';
 import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
@@ -34,10 +36,12 @@ type ProjectUpdateFields = {
 export const ProjectInterface = (props: Props) => {
   const { projectConfig, sampleTable, subSampleTable } = props;
 
+  const { user } = useSession();
   const projectDataRef = useRef<HTMLDivElement>(null);
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
+  const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
 
   // get the value of which history id is being viewed
   const { currentHistoryId } = useCurrentHistoryId();
@@ -60,6 +64,8 @@ export const ProjectInterface = (props: Props) => {
   const newSamples = projectUpdates.watch('samples');
   const newSubsamples = projectUpdates.watch('subsamples');
   const newConfig = projectUpdates.watch('config');
+
+  const userCanEdit = projectInfo && canEdit(user, projectInfo);
 
   const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
 
@@ -118,6 +124,7 @@ export const ProjectInterface = (props: Props) => {
                 onChange={(samples) => {
                   onChange(samples);
                 }}
+                readOnly={!userCanEdit}
                 data={currentHistoryId ? historyData?._sample_dict || [] : newSamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
               />
@@ -135,7 +142,7 @@ export const ProjectInterface = (props: Props) => {
                 }}
                 data={currentHistoryId ? historyData?._subsample_list || [] : newSubsamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                readOnly={currentHistoryId !== null}
+                readOnly={!userCanEdit}
               />
             )}
           />
@@ -151,6 +158,7 @@ export const ProjectInterface = (props: Props) => {
                   onChange(val);
                 }}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                readOnly={!userCanEdit}
               />
             )}
           />

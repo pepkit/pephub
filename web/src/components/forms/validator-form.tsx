@@ -120,6 +120,7 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
     <>
       {/* Only in development mode  */}
       {/* render the params */}
+      {/* @ts-ignore */}
       {process.env.NODE_ENV === 'development' && (
         <div className="my-3">
           <pre>
@@ -159,7 +160,7 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
                       className="mt-2"
                       // @ts-ignore
                       options={
-                        projects?.items.map((project) => ({
+                        projects?.results.map((project) => ({
                           value: `${project.namespace}/${project.name}:${project.tag}`,
                           label: `${project.namespace}/${project.name}:${project.tag}`,
                         })) || []

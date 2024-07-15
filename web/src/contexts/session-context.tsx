@@ -69,12 +69,12 @@ export const SessionProvider = ({ children }: ProviderProps) => {
     [AUTH_BASE, buildClientRedirectUrl, window.location.href],
   );
 
-  // const logout = useCallback(() => {
-  //   setJwt(null);
-  //   // reload the page for UX
-  //   window.location.reload();
-  // }, [setJwt, JWT_STORE]);
-  const logout = () => {};
+  const logout = useCallback(() => {
+    setJwt(null);
+    // reload the page for UX
+    window.location.reload();
+  }, [setJwt, JWT_STORE]);
+  // const logout = () => {};
 
   // decode the session cookie
   if (jwt) {
