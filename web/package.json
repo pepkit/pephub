@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "generate-types": "npx openapi-typescript http:localhost:8000/openapi.json -o pephub-types.d.ts"
   },
   "dependencies": {
     "@handsontable/react": "^12.3.3",
