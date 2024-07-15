@@ -1,34 +1,34 @@
 import { ErrorMessage } from '@hookform/error-message';
-import { FC, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
-import { useProject } from '../../hooks/queries/useProject';
+import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { MarkdownEditor } from '../markdown/edit';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
 import { SchemaTooltip } from './tooltips/form-tooltips';
 
-interface Props {
-  namespace: string;
-  name: string;
+type FormValues = {
   tag: string;
-  onSubmit?: () => void;
-  onCancel?: () => void;
-}
-
-interface FormValues extends Props {
+  name: string;
   description: string;
   isPrivate: boolean;
   pep_schema: string;
   pop: boolean;
-}
+};
+
+type Props = {
+  projectInfo: ReturnType<typeof useProjectAnnotation>['data'];
+  isSubmitting: boolean;
+  canConvertToPop: boolean;
+  onSubmit: ReturnType<typeof useEditProjectMetaMutation>['submit'];
+  onCancel: () => void;
+};
 
 export const ProjectMetaEditForm = (props: Props) => {
-  const { namespace, name, tag, onCancel, onSubmit } = props;
-
-  const { data: projectInfo } = useProject(namespace, name, tag);
+  const { onCancel, onSubmit, projectInfo, isSubmitting, canConvertToPop } = props;
 
   const {
     register,
@@ -40,12 +40,12 @@ export const ProjectMetaEditForm = (props: Props) => {
   } = useForm<FormValues>({
     mode: 'onChange',
     defaultValues: {
-      name: name,
-      description: projectInfo?.description || '',
+      tag: projectInfo?.tag,
+      name: projectInfo?.name,
+      description: projectInfo?.description,
       isPrivate: projectInfo?.is_private,
-      tag: tag,
-      pep_schema: projectInfo?.pep_schema || 'pep/2.1.0',
-      pop: projectInfo?.pop || false,
+      pep_schema: projectInfo?.pep_schema,
+      pop: projectInfo?.pop,
     },
   });
 
@@ -57,44 +57,11 @@ export const ProjectMetaEditForm = (props: Props) => {
   const newSchema = watch('pep_schema');
   const newPop = watch('pop');
 
-  // grab the sample table to warn the user if they wont be able to swap
-  // to a POP
-  const { data: sampleTable } = useSampleTable({
-    namespace,
-    project: name,
-    tag,
-  });
-
-  const { isPending: isSubmitting, submit } = useEditProjectMetaMutation(namespace, name, tag);
-
-  // reset form if project info changes
-  // this is necessary because projectInfo is
-  // fetched after the form is rendered
-  useEffect(() => {
-    resetForm({
-      name: projectInfo?.name,
-      description: projectInfo?.description,
-      isPrivate: projectInfo?.is_private,
-      tag: projectInfo?.tag,
-      pep_schema: projectInfo?.pep_schema,
-      pop: projectInfo?.pop,
-    });
-  }, [projectInfo]);
-
   useEffect(() => {
     if (newPop === true) {
-      if (sampleTable && sampleTable.items.length > 0) {
-        // check all samples have namespace, name, and tag attributes
-        const hasNamespace = sampleTable.items.every((sample) => sample.namespace);
-        const hasName = sampleTable.items.every((sample) => sample.name);
-        const hasTag = sampleTable.items.every((sample) => sample.tag);
-        if (!hasNamespace || !hasName || !hasTag) {
-          toast.error(
-            'Cannot convert this PEP to a POP because the sample table does not have namespace, name, and tag attributes',
-          );
-          // toggle back to false
-          setValue('pop', false);
-        }
+      if (!canConvertToPop) {
+        toast.error('Cannot convert to POP. Please ensure all samples are annotated.');
+        setValue('pop', false);
       }
     }
   }, [newPop]);
@@ -227,7 +194,7 @@ export const ProjectMetaEditForm = (props: Props) => {
         </button>
         <button
           onClick={() =>
-            submit(
+            onSubmit(
               {
                 newName: projectInfo?.name === newName ? undefined : newName,
                 newTag: projectInfo?.tag === newTag ? undefined : newTag,
@@ -238,8 +205,8 @@ export const ProjectMetaEditForm = (props: Props) => {
               },
               {
                 onSuccess: () => {
-                  onSubmit?.();
                   resetForm({}, { keepValues: false });
+                  onCancel();
                 },
               },
             )
