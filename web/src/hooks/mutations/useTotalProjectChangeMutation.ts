@@ -19,7 +19,32 @@ export const useTotalProjectChangeMutation = (namespace: string, project: string
 
   const mutation = useMutation({
     mutationFn: (data: TotalProjectChangeMutationProps) => editTotalProject(namespace, project, tag, session.jwt, data),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      // perform an optimistic update -- this prevents a flicker
+      queryClient.setQueryData([namespace, project, tag, 'samples'], (oldData: any) => {
+        return {
+          ...oldData,
+          items: variables.samples,
+        };
+      });
+
+      // perform an optimistic update -- this prevents a flicker
+      queryClient.setQueryData([namespace, project, tag, 'subsamples'], (oldData: any) => {
+        return {
+          ...oldData,
+          items: variables.subsamples,
+        };
+      });
+
+      // perform an optimistic update -- this prevents a flicker
+      queryClient.setQueryData([namespace, project, tag, 'config'], (oldData: any) => {
+        return {
+          ...oldData,
+          config: variables.config,
+        };
+      });
+
+      // invalidate the query to refetch the data
       queryClient.invalidateQueries({
         queryKey: [namespace, project, tag],
       });

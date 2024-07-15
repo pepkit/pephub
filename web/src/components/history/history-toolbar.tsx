@@ -25,7 +25,7 @@ export const HistoryToolbar = () => {
     <div
       className="d-flex flex-row align-items-center p-2 gap-2"
       style={{
-        zIndex: 3000,
+        zIndex: 4000,
       }}
     >
       <button

@@ -5,14 +5,7 @@ import { ViewSelector } from '../project/view-selector';
 
 type PageView = 'samples' | 'subsamples' | 'config';
 
-type NavProps = {
-  samplesIsDirty: boolean;
-  subsamplesIsDirty: boolean;
-  configIsDirty: boolean;
-  projectViewIsLoading: boolean;
-  projectView: string | undefined;
-  setProjectView: (view: string | undefined) => void;
-};
+type NavProps = {};
 
 type ViewButtonProps = {
   view: PageView;
@@ -50,7 +43,7 @@ const ViewButton = (props: ViewButtonProps) => {
 };
 
 export const ProjectDataNav = (props: NavProps) => {
-  const { samplesIsDirty, subsamplesIsDirty, configIsDirty, projectView, setProjectView } = props;
+  const {} = props;
 
   const { pageView, setPageView } = useProjectPageView();
 
@@ -80,7 +73,7 @@ export const ProjectDataNav = (props: NavProps) => {
           setPageView={setPageView}
           icon="bi bi-table me-2"
           text="Samples"
-          isDirty={samplesIsDirty}
+          isDirty={false}
           bold={pageView === 'samples' ? ' fw-normal' : ' fw-light'}
           color={pageView === 'samples' ? ' text-dark' : ' text-muted'}
         />
@@ -95,7 +88,7 @@ export const ProjectDataNav = (props: NavProps) => {
           setPageView={setPageView}
           icon="bi bi-grid-3x3-gap-fill me-2"
           text="Subsamples"
-          isDirty={subsamplesIsDirty}
+          isDirty={false}
           bold={pageView === 'subsamples' ? ' fw-normal' : ' fw-light'}
           color={pageView === 'subsamples' ? ' text-dark' : ' text-muted'}
         />
@@ -106,12 +99,12 @@ export const ProjectDataNav = (props: NavProps) => {
           setPageView={setPageView}
           icon="bi bi-filetype-yml me-2"
           text="Config"
-          isDirty={configIsDirty}
+          isDirty={false}
           bold={pageView === 'config' ? ' fw-normal' : ' fw-light'}
           color={pageView === 'config' ? ' text-dark' : ' text-muted'}
         />
       </div>
-      <ViewSelector view={projectView} setView={setProjectView} />
+      <ViewSelector />
     </div>
   );
 };

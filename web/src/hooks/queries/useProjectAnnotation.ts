@@ -13,6 +13,8 @@ export const useProjectAnnotation = (
     queryKey: [namespace, project, tag, 'annotation'],
     queryFn: () => getProjectAnnotation(namespace || '', project || '', tag, session.jwt || ''),
     enabled: namespace !== undefined || project !== undefined,
+    // https://github.com/TanStack/query/discussions/1619#discussioncomment-275120
+    staleTime: 5000,
   });
   return query;
 };

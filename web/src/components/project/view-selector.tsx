@@ -6,17 +6,16 @@ import ReactSelect from 'react-select';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useProjectViews } from '../../hooks/queries/useProjectViews';
+import { useProjectSelectedView } from '../../hooks/stores/useProjectSelectedViewStore';
 
-type ViewSelectorProps = {
-  view: string | undefined;
-  setView: (view: string | undefined) => void;
-};
+type ViewSelectorProps = {};
 
 export const ViewSelector = (props: ViewSelectorProps) => {
-  const { view, setView } = props;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { namespace, projectName, tag } = useProjectPage();
+  const { view, setView } = useProjectSelectedView();
+
   const projectViewsQuery = useProjectViews(namespace, projectName, tag);
 
   const projectViewsIsLoading = projectViewsQuery.isLoading;
@@ -44,7 +43,6 @@ export const ViewSelector = (props: ViewSelectorProps) => {
             })) || []
           }
           onChange={(selectedOption) => {
-            debugger;
             if (selectedOption === null) {
               setView(undefined);
               searchParams.delete('view');

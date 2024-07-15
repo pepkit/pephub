@@ -6,6 +6,7 @@ import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useProjectHistory } from '../../hooks/queries/useProjectHistory';
 import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { dateStringToDateTime } from '../../utils/dates';
+import { ProjectInfoFooterPlaceholder } from './placeholders/project-info-footer-placeholder';
 
 export const ProjectInfoFooter = () => {
   const { namespace, projectName, tag } = useProjectPage();
@@ -16,6 +17,11 @@ export const ProjectInfoFooter = () => {
   const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
 
   const projectInfo = projectAnnotationQuery.data;
+
+  // if (true) {
+  if (projectAnnotationQuery.isLoading) {
+    return <ProjectInfoFooterPlaceholder />;
+  }
 
   return (
     <div className="px-4 pb-3 border-bottom">

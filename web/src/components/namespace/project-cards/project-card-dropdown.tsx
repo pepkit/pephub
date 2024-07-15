@@ -2,12 +2,12 @@ import { FC, Fragment } from 'react';
 import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
-import { ProjectAnnotation } from '../../../types';
-import { useSession } from '../../contexts/session-context';
-import { useAddStar } from '../../hooks/mutations/useAddStar';
-import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
-import { copyToClipboard } from '../../utils/etc';
-import { LoadingSpinner } from '../spinners/loading-spinner';
+import { ProjectAnnotation } from '../../../../types';
+import { useSession } from '../../../contexts/session-context';
+import { useAddStar } from '../../../hooks/mutations/useAddStar';
+import { useRemoveStar } from '../../../hooks/mutations/useRemoveStar';
+import { copyToClipboard } from '../../../utils/etc';
+import { LoadingSpinner } from '../../spinners/loading-spinner';
 
 interface Props {
   project: ProjectAnnotation;

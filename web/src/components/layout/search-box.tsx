@@ -20,7 +20,6 @@ export const SearchBox: FC<Props> = ({
   onClick,
   value,
   id,
-  type,
   className,
   placeholder,
   ariaLabel,
@@ -38,6 +37,9 @@ export const SearchBox: FC<Props> = ({
 
   return (
     <motion.input
+      style={{
+        zIndex: -1,
+      }}
       onKeyDown={onKeyDown}
       type="text"
       onFocus={handleFocus}

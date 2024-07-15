@@ -6,6 +6,7 @@ import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useProjectHistory } from '../../hooks/queries/useProjectHistory';
 import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { Markdown } from '../markdown/render';
+import { ProjectDescriptionPlaceholder } from './placeholders/project-description-placeholder';
 
 const MAX_DESC_HEIGHT = 200;
 
@@ -22,6 +23,11 @@ export const ProjectDescription = () => {
   const projectHistoryQuery = useProjectHistory(namespace, projectName, tag, currentHistoryId);
 
   const projectInfo = projectAnnotationQuery.data;
+
+  // if (true) {
+  if (projectAnnotationQuery.isLoading) {
+    return <ProjectDescriptionPlaceholder />;
+  }
 
   return (
     <Fragment>
