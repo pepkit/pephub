@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { StarsResponse, starProject } from '../../api/namespace';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
 type AddStarMutation = {
   namespaceToStar: string;
@@ -12,12 +12,15 @@ type AddStarMutation = {
   projectTagToStar: string;
 };
 
-export const useAddStar = (addToNamespace: string) => {
+export const useAddStar = (addToNamespace: string | undefined | null) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: (data: AddStarMutation) => {
+      if (!addToNamespace) {
+        throw new Error('Please ensure that you are logged in before starring a project');
+      }
       const { namespaceToStar, projectNameToStar, projectTagToStar } = data;
       if (addToNamespace === '') {
         toast.error('Please ensure that you are logged in before starring a project');
@@ -46,5 +49,8 @@ export const useAddStar = (addToNamespace: string) => {
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    addStar: mutation.mutate,
+  };
 };

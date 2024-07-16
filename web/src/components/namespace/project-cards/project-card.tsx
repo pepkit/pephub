@@ -1,12 +1,12 @@
 import { FC, Fragment, useState } from 'react';
 
-import { ProjectAnnotation } from '../../../types';
-import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
-import { useSession } from '../../hooks/useSession';
-import { dateStringToDateTime } from '../../utils/dates';
-import { MarkdownToText } from '../markdown/render';
-import { DeletePEPModal } from '../modals/delete-pep';
-import { ForkPEPModal } from '../modals/fork-pep';
+import { ProjectAnnotation } from '../../../../types';
+import { useSession } from '../../../contexts/session-context';
+import { useNamespaceStars } from '../../../hooks/queries/useNamespaceStars';
+import { dateStringToDateTime } from '../../../utils/dates';
+import { MarkdownToText } from '../../markdown/render';
+import { DeletePEPModal } from '../../modals/delete-pep';
+import { ForkPEPModal } from '../../modals/fork-pep';
 import { ProjectCardDropdown } from './project-card-dropdown';
 
 interface Props {
@@ -16,8 +16,7 @@ interface Props {
 export const ProjectCard: FC<Props> = ({ project }) => {
   const { user } = useSession();
 
-  const { starsQuery } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
-  const stars = starsQuery.data;
+  const { data: stars } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
 
   // state
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
@@ -31,8 +30,8 @@ export const ProjectCard: FC<Props> = ({ project }) => {
   return (
     <div
       id={`project-card-${project.namespace}/${project.name}:${project.tag}`}
-      className="w-100 border border-dark rounded shadow-sm p-2 mt-3"
-      style={{ backgroundColor: '#f6f8fa' }}
+      className="w-100 border border-dark rounded shadow-sm p-2 mt-3 bg-secondary bg-opacity-10"
+      // style={{ backgroundColor: '#f6f8fa' }}
     >
       <div className="d-flex flex-row align-items-start justify-content-between">
         <div className="d-flex flex-row align-items-center">

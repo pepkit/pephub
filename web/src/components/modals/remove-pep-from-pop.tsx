@@ -33,7 +33,7 @@ export const RemovePEPFromPOPModal: FC<Props> = ({
     setConfirmText('');
   };
 
-  const sampleTableMutation = useSampleTableMutation(
+  const { isPending: isSampleTablePending, submit } = useSampleTableMutation(
     namespaceToRemoveFrom!,
     projectToRemoveFrom!,
     tagToRemoveFrom || 'default',
@@ -73,7 +73,7 @@ export const RemovePEPFromPOPModal: FC<Props> = ({
       <Modal.Footer>
         <button
           onClick={() => {
-            sampleTableMutation.mutate(
+            submit(
               currentPeps.filter((pep) => pep.sample_name !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}`),
               {
                 onSuccess: () => {
@@ -83,13 +83,11 @@ export const RemovePEPFromPOPModal: FC<Props> = ({
               },
             );
           }}
-          disabled={
-            confirmText !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}` || sampleTableMutation.isPending
-          }
+          disabled={confirmText !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}` || isSampleTablePending}
           type="button"
           className="btn btn-danger"
         >
-          {sampleTableMutation.isPending ? 'Removing...' : 'Yes, remove'}
+          {isSampleTablePending ? 'Removing...' : 'Yes, remove'}
         </button>
       </Modal.Footer>
     </Modal>

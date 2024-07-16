@@ -1,8 +1,9 @@
 import { FC, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+
 import { exchangeCodeForToken } from '../api/auth';
 import { SEO } from '../components/layout/seo';
-import { useSession } from '../hooks/useSession';
+import { useSession } from '../contexts/session-context';
 
 export const LoginSuccessPage: FC = () => {
   const navigate = useNavigate();

@@ -1,29 +1,34 @@
 import { useQuery } from '@tanstack/react-query';
 import jwt_decode from 'jwt-decode';
-import { useCallback } from 'react';
+import React, { createContext, useCallback, useContext } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { User } from '../../types';
 import { buildClientRedirectUrl } from '../api/auth';
-import { useLocalStorage } from './useLocalStorage';
 
 const VITE_API_HOST = import.meta.env.VITE_API_HOST || '';
 const AUTH_BASE = `${VITE_API_HOST}/auth`;
 const JWT_STORE = 'pephub_session';
 
-interface LoginParams {
+type LoginParams = {
   next?: string;
-}
+};
 
-interface Session {
+type ProviderProps = {
+  children: React.ReactNode;
+};
+
+const SessionContext = createContext<{
   jwt: string | null;
   user: User | null;
   login: (params?: LoginParams) => void;
   logout: () => void;
   setJWT: (jwt: string | null) => void;
-}
+  // @ts-expect-error - its fine to start with undefined
+}>(undefined);
 
-export const useSession = (): Session => {
-  const [jwt, setJwt] = useLocalStorage(JWT_STORE, null);
+export const SessionProvider = ({ children }: ProviderProps) => {
+  const [jwt, setJwt] = useLocalStorage<string | null>(JWT_STORE, null);
 
   // hit endpoint to check if the session is valid
   // if not, clear the session
@@ -69,17 +74,32 @@ export const useSession = (): Session => {
     // reload the page for UX
     window.location.reload();
   }, [setJwt, JWT_STORE]);
+  // const logout = () => {};
 
   // decode the session cookie
   if (jwt) {
     decoded = jwt_decode(jwt) as User;
   }
 
-  return {
-    jwt,
-    user: decoded || null,
-    login,
-    logout,
-    setJWT: setJwt as (jwt: string | null) => void,
-  };
+  return (
+    <SessionContext.Provider
+      value={{
+        jwt,
+        user: decoded || null,
+        login,
+        logout,
+        setJWT: setJwt as (jwt: string | null) => void,
+      }}
+    >
+      {children}
+    </SessionContext.Provider>
+  );
+};
+
+export const useSession = () => {
+  const context = useContext(SessionContext);
+  if (context === undefined) {
+    throw new Error('useSession must be used within a SessionProvider');
+  }
+  return context;
 };

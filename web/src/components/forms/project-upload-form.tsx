@@ -1,9 +1,10 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { FC, useRef } from 'react';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
+import { useSession } from '../../contexts/session-context';
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
-import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { GitHubAvatar } from '../badges/github-avatar';
 import { FileDropZone } from './components/file-dropzone';
@@ -83,21 +84,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   const pepSchema = watch('pep_schema');
   const fileDialogRef = useRef<() => void | null>(null);
 
-  const onSuccess = () => {
-    resetForm({}, { keepValues: false });
-    onHide();
-  };
-
-  const mutation = useUploadMutation(
-    namespace,
-    projectName,
-    tag,
-    isPrivate,
-    description,
-    uploadFiles,
-    pepSchema,
-    onSuccess,
-  );
+  const { isPending: isUploading, upload } = useUploadMutation(namespace);
 
   return (
     <form id="new-project-form" className="border-0 form-control">
@@ -114,55 +101,51 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           Private
         </label>
       </div>
-      <span className="fs-4 d-flex align-items-center">
-        <select
-          id="namespace-select"
-          className="form-select w-75"
-          aria-label="Namespace selection"
-          {...register('namespace', { required: true })}
-        >
-          <option value={user?.login}>{user?.login}</option>
-          {user?.orgs.map((org) => (
-            <option key={org} value={org}>
-              <GitHubAvatar namespace={org} height={20} width={20} />
-              {org}
-            </option>
-          ))}
-        </select>
-        <span className="mx-1 mb-1">/</span>
-        <input
-          id="project-name"
-          type="text"
-          className="form-control"
-          placeholder="name"
-          // dont allow any whitespace
-          {...register('name', {
-            required: {
-              value: true,
-              message: 'empty',
-            },
-            pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'invalid',
-            },
-          })}
-        />
-        <span className="mx-1 mb-1">:</span>
-        <input
-          id="tag"
-          type="text"
-          className="form-control"
-          placeholder="default"
-          {...register('tag', {
-            required: false,
-            pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'invalid',
-            },
-          })}
-        />
-      </span>
-      <CombinedErrorMessage errors={errors} />
+      <div className="namespace-name-tag-container">
+        <label className="fw-bold text-sm">Namespace *</label>
+        <label className="fw-bold text-sm">Name *</label>
+        <label className="fw-bold text-sm">Tag</label>
+      </div>
+      <div className="namespace-name-tag-container fs-4">
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <select
+            id="namespace-select"
+            className="form-select"
+            aria-label="Namespace selection"
+            {...register('namespace', { required: true })}
+          >
+            <option value={user?.login}>{user?.login}</option>
+            {user?.orgs.map((org) => (
+              <option key={org} value={org}>
+                <GitHubAvatar namespace={org} height={20} width={20} />
+                {org}
+              </option>
+            ))}
+          </select>
+          <span className="mx-1 mb-1">/</span>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <input
+            id="project-name"
+            type="text"
+            className="form-control"
+            placeholder="name"
+            // dont allow any whitespace
+            {...register('name', {
+              required: true,
+              pattern: {
+                value: /^\S+$/,
+                message: 'No spaces allowed.',
+              },
+            })}
+          />
+          <span className="mx-1 mb-1">:</span>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag')} />
+        </div>
+      </div>
+      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="description"
         className="form-control mt-3"
@@ -178,7 +161,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
         <Controller
           control={control}
           name="pep_schema"
-          render={({ field: { onChange, value } }) => (
+          render={({ field: { value } }) => (
             <SchemaDropdown
               value={value}
               onChange={(schema) => {
@@ -217,16 +200,45 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
       )}
       <div className="mt-2">
         <button
-          onClick={() => mutation.mutate()}
-          disabled={!isValid}
+          onClick={() => {
+            if (projectName === '') {
+              toast.error('Could not create PEP. Project Name must not be empty.');
+              return;
+            }
+            upload(
+              {
+                project: projectName,
+                tag,
+                isPrivate,
+                description,
+                files: uploadFiles,
+                pepSchema,
+              },
+              {
+                onSuccess: () => {
+                  resetForm({}, { keepValues: false });
+                  onHide();
+                },
+              },
+            );
+          }}
+          disabled={isUploading}
           type="button"
           id="new-project-submit-btn"
           className="btn btn-success me-1"
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isPending ? 'Submitting...' : 'Submit'}
+          {isUploading ? 'Submitting...' : 'Submit'}
         </button>
-        <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
+        <button
+          type="button"
+          className="btn btn-outline-dark me-1"
+          data-bs-dismiss="modal"
+          onClick={() => {
+            resetForm();
+            onHide();
+          }}
+        >
           Cancel
         </button>
       </div>

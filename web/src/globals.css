@@ -3,6 +3,12 @@ body {
   overflow: auto;
 }
 
+.namespace-nav {
+  .nav-link.active {
+    background-color: #0080ffc8 !important;
+  }
+}
+
 .top-z {
   z-index: 1000;
 }
@@ -394,7 +400,6 @@ body {
 /* line clamp search hit description */
 .line-clamp {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -594,4 +599,8 @@ body {
 .handsontable .expanded {
   white-space: normal;
   overflow: visible;
+}
+
+.viewing-history-border {
+  border: 4px solid #ed8936;
 }

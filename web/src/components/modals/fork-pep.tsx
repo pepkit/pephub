@@ -3,8 +3,8 @@ import { FC } from 'react';
 import { Modal } from 'react-bootstrap';
 import { FieldErrors, useForm } from 'react-hook-form';
 
+import { useSession } from '../../contexts/session-context';
 import { useForkMutation } from '../../hooks/mutations/useForkMutation';
-import { useSession } from '../../hooks/useSession';
 
 interface Props {
   namespace: string;
@@ -82,16 +82,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
   const projectTag = watch('tag');
   const projectDescription = watch('description');
 
-  const mutation = useForkMutation(
-    namespace,
-    project,
-    tag,
-    projectNamespace,
-    projectName,
-    projectTag,
-    projectDescription,
-    onHide,
-  );
+  const { isPending: isForking, fork } = useForkMutation(namespace, project, tag);
 
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
@@ -190,13 +181,28 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
           Cancel
         </button>
         <button
-          onClick={() => mutation.mutate()}
-          disabled={!isValid || !!errors.project?.message || !!errors.tag?.message || !!mutation.isPending}
+          onClick={() =>
+            fork(
+              {
+                forkTo: projectNamespace,
+                forkName: projectName,
+                forkTag: projectTag,
+                forkDescription: projectDescription,
+              },
+              {
+                onSuccess: () => {
+                  onHide();
+                  resetForm();
+                },
+              },
+            )
+          }
+          disabled={!isValid || !!errors.project?.message || !!errors.tag?.message || !!isForking}
           id="fork-submit-btn"
           type="submit"
           className="btn btn-success"
         >
-          {mutation.isPending ? 'Forking...' : 'Fork'}
+          {isForking ? 'Forking...' : 'Fork'}
         </button>
       </Modal.Footer>
     </Modal>

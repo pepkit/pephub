@@ -5,6 +5,8 @@ import ReactSelect from 'react-select';
 import { useViewMutations } from '../../hooks/mutations/useViewMutations';
 import { useProjectPage } from '../../contexts/project-page-context';
 import { CreateProjectViewRequest } from '../../api/project';
+import { useProjectViews } from '../../hooks/queries/useProjectViews';
+import { useProjectSelectedView } from '../../hooks/stores/useProjectSelectedViewStore';
 
 interface Props {
   show: boolean;
@@ -13,12 +15,11 @@ interface Props {
 
 export const ViewOptionsModal: FC<Props> = ({ show, onHide }) => {
 
-  const { 
-    namespace,
-    projectName,
-    tag,
-    projectViewsQuery 
-  } = useProjectPage();
+  const { namespace, projectName, tag } = useProjectPage();
+  const { view, setView } = useProjectSelectedView();
+
+  const projectViewsQuery = useProjectViews(namespace, projectName, tag);
+  
   const projectViewsIsLoading = projectViewsQuery.isLoading;
   const projectViews = projectViewsQuery.data;
 

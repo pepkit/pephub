@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getProjectViews } from '../../api/project';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 export const useProjectViews = (
   namespace: string | undefined,

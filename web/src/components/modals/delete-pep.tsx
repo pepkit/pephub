@@ -19,7 +19,14 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
     setConfirmText('');
   };
 
-  const mutation = useDeleteMutation(namespace, project, tag || 'default', onHide, redirect, onSuccess);
+  const { isPending: isDeletingProject, deleteProject } = useDeleteMutation(
+    namespace,
+    project,
+    tag || 'default',
+    onHide,
+    redirect,
+    onSuccess,
+  );
 
   return (
     <Modal
@@ -54,12 +61,12 @@ export const DeletePEPModal: FC<Props> = ({ show, onHide, namespace, project, ta
       </Modal.Body>
       <Modal.Footer>
         <button
-          onClick={() => mutation.mutate()}
-          disabled={confirmText !== `${namespace}/${project}:${tag}` || mutation.isPending}
+          onClick={() => deleteProject()}
+          disabled={confirmText !== `${namespace}/${project}:${tag}` || isDeletingProject}
           type="button"
           className="btn btn-danger"
         >
-          {mutation.isPending ? 'Deleting...' : 'Yes, delete'}
+          {isDeletingProject ? 'Deleting...' : 'Yes, delete'}
         </button>
       </Modal.Footer>
     </Modal>

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
 import { CreateProjectViewRequest, addProjectView, deleteProjectView } from '../../api/project';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 export const useViewMutations = (namespace: string, project: string, tag: string) => {
   const { jwt } = useSession();

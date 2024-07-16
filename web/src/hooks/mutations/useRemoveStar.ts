@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 import { removeStar } from '../../api/namespace';
+import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
 
 type RemoveStarMutation = {
   namespaceToRemove: string;
@@ -12,12 +12,15 @@ type RemoveStarMutation = {
   projectTagToRemove: string;
 };
 
-export const useRemoveStar = (namespaceToAddTo: string) => {
+export const useRemoveStar = (namespaceToAddTo: string | undefined | null) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: (data: RemoveStarMutation) => {
+      if (!namespaceToAddTo) {
+        throw new Error('Please ensure that you are logged in before removing a star');
+      }
       const { namespaceToRemove, projectNameToRemove, projectTagToRemove } = data;
       return removeStar(
         namespaceToAddTo,
@@ -28,7 +31,6 @@ export const useRemoveStar = (namespaceToAddTo: string) => {
       );
     },
     onSuccess: ({ data }) => {
-      debugger;
       const { registry } = data;
       const namespaceToRemove = registry.split('/')[0];
       const projectNameToRemove = registry.split('/')[1];
@@ -55,5 +57,8 @@ export const useRemoveStar = (namespaceToAddTo: string) => {
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    removeStar: mutation.mutate,
+  };
 };

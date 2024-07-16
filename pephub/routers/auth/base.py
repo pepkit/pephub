@@ -8,8 +8,10 @@ import requests
 from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+
+from ...limiter import limiter
 
 from ...const import (
     AUTH_CODE_EXPIRATION,
@@ -29,10 +31,13 @@ from ..models import (
     InitializeDeviceCodeResponse,
     JWTDeviceTokenResponse,
     TokenExchange,
+    RevokeRequest,
 )
+from ...developer_keys import dev_key_handler
 
 load_dotenv()
 
+REDIRECT_CODES = {}
 CODE_EXCHANGE = {}
 DEVICE_CODES = {}
 
@@ -66,6 +71,50 @@ def delete_device_code_after(code: str, expiration: int = AUTH_CODE_EXPIRATION):
     DEVICE_CODES.pop(code, None)
 
 
+@auth.get("/user/keys")
+def get_user_keys(session_info: Union[dict, None] = Depends(read_authorization_header)):
+    if session_info:
+        keys = dev_key_handler.get_keys_for_namespace(session_info["login"])
+
+        # obfuscate the keys -- we never want to show the full key
+        for key in keys:
+            key.key = key.key[:5] + "*" * 10 + key.key[-5:]
+
+        return {"keys": keys}
+
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+@auth.post("/user/keys")
+@limiter.limit("5/minute")
+def mint_user_key(
+    request: Request,
+    session_info: Union[dict, None] = Depends(read_authorization_header),
+):
+    if session_info:
+        key = dev_key_handler.mint_key_for_namespace(
+            session_info["login"], session_info=session_info
+        )
+        return {"key": key}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+@auth.delete("/user/keys")
+def delete_user_key(
+    revoke_request: RevokeRequest,
+    session_info: Union[dict, None] = Depends(read_authorization_header),
+):
+    if session_info:
+        dev_key_handler.remove_key(
+            session_info["login"], revoke_request.last_five_chars
+        )
+        return JSONResponse({"message": "Key deleted successfully."}, status_code=202)
+    else:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
 @auth.get("/login", response_class=RedirectResponse)
 def login(
     client_redirect_uri: Union[str, None] = None,
@@ -77,7 +126,6 @@ def login(
     state = {
         "client_redirect_uri": client_redirect_uri,
         "client_finally_send_to": client_finally_send_to,
-        "secret": JWT_SECRET,
     }
     authorization_url = build_authorization_url(
         client_id=github_app_config.client_id,
@@ -95,11 +143,6 @@ def callback(
 ):
     # We should check the provided state here to confirm that we generated it
     state = json.loads(state)
-    if state["secret"] != JWT_SECRET:
-        raise HTTPException(
-            status_code=400,
-            detail="The provided state is invalid. Please try logging in again.",
-        )
     client_redirect_uri = state.get("client_redirect_uri")
     # Make a request to the following endpoint to receive an access token
     url = "https://github.com/login/oauth/access_token"

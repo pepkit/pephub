@@ -6,19 +6,20 @@ import { GitHubAvatar } from '../components/badges/github-avatar';
 import { PageLayout } from '../components/layout/page-layout';
 import { Pagination } from '../components/layout/pagination';
 import { AddPEPModal } from '../components/modals/add-pep';
+import { DeveloperSettingsModal } from '../components/modals/developer-settings-modal';
 import { DownloadGeo } from '../components/modals/download-geo';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePagePlaceholder } from '../components/namespace/namespace-page-placeholder';
+import { ProjectCard } from '../components/namespace/project-cards/project-card';
 import { NamespacePageSearchBar } from '../components/namespace/search-bar';
 import { StarFilterBar } from '../components/namespace/star-filter-bar';
 import { NamespaceViewSelector } from '../components/namespace/view-selector';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
-import { ProjectCard } from '../components/project/project-card';
+import { useSession } from '../contexts/session-context';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useDebounce } from '../hooks/useDebounce';
-import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
 
 type View = 'peps' | 'pops' | 'stars';
@@ -45,6 +46,7 @@ export const NamespacePage = () => {
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
   const [showGeoDownloadModal, setShowGeoDownloadModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
   const [starSearch, setStarSearch] = useState<string>(searchParams.get('starSearch') || '');
 
@@ -70,13 +72,12 @@ export const NamespacePage = () => {
     type: view === 'pops' ? 'pop' : 'pep',
   });
 
-  const { starsQuery } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
-  const stars = starsQuery.data;
+  const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   // left over from when we were filtering on sample number
-  const projectsFiltered = projects?.items.filter((p) => p.number_of_samples) || [];
+  const projectsFiltered = projects?.results?.filter((p) => p.number_of_samples) || [];
 
-  if (namespaceInfoIsLoading || starsQuery.isLoading) {
+  if (namespaceInfoIsLoading || starsAreLoading) {
     return (
       <PageLayout title={namespace}>
         <NamespacePagePlaceholder />
@@ -113,8 +114,8 @@ export const NamespacePage = () => {
           <h1 id="namespace-header" className="fw-bold">
             <GitHubAvatar namespace={namespace} height={60} width={60} /> {namespace}
           </h1>
-          <div className="d-flex flex-row align-items-center">
-            <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark me-1">
+          <div className="d-flex flex-row align-items-center gap-1">
+            <button onClick={() => setShowEndpointsModal(true)} className="btn btn-sm btn-outline-dark">
               <i className="bi bi-hdd-rack me-1"></i>
               API
             </button>
@@ -127,6 +128,12 @@ export const NamespacePage = () => {
               >
                 <i className="bi bi-download me-1"></i>
                 Download
+              </button>
+            )}
+            {user?.login === namespace && (
+              <button className="btn btn-sm btn-dark" onClick={() => setShowSettingsModal(true)}>
+                <i className="bi bi-gear me-1"></i>
+                Settings
               </button>
             )}
             {user?.login === namespace || user?.orgs.includes(namespace || '') ? (
@@ -246,6 +253,7 @@ export const NamespacePage = () => {
           onHide={() => setShowEndpointsModal(false)}
         />
         <DownloadGeo show={showGeoDownloadModal} onHide={() => setShowGeoDownloadModal(false)} />
+        <DeveloperSettingsModal show={showSettingsModal} onHide={() => setShowSettingsModal(false)} />
       </PageLayout>
     );
   }

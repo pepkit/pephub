@@ -3,8 +3,8 @@ import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { Sample } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
-import { useSession } from '../../hooks/useSession';
 import { ProjectConfigEditor } from '../project/project-config';
 import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
@@ -101,17 +101,7 @@ sample_table: samples.csv
   const isPrivate = watch('is_private');
   const pepSchema = watch('pep_schema');
 
-  const mutation = useBlankProjectFormMutation(
-    namespace,
-    projectName,
-    tag,
-    isPrivate,
-    description,
-    configYAML,
-    pepSchema,
-    sampleTable,
-    onHide,
-  );
+  const { isPending: isSubmitting, submit } = useBlankProjectFormMutation(namespace);
 
   return (
     <form id="blank-project-form" className="border-0 form-control">
@@ -128,55 +118,48 @@ sample_table: samples.csv
           Private
         </label>
       </div>
-
-      <span className="fs-4 d-flex align-items-center">
-        <select
-          id="blank-namespace-select"
-          className="form-select w-75"
-          aria-label="Namespace selection"
-          {...register('namespace', { required: true })}
-        >
-          <option value={user?.login}>{user?.login}</option>
-          {user?.orgs.map((org) => (
-            <option key={org} value={org}>
-              {org}
-            </option>
-          ))}
-        </select>
-        <span className="mx-1 mb-1">/</span>
-        <input
-          id="blank-project-name"
-          type="text"
-          className="form-control"
-          placeholder="name"
-          // dont allow any whitespace
-          {...register('project_name', {
-            required: {
-              value: true,
-              message: 'empty',
-            },
-            pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'invalid',
-            },
-          })}
-        />
-        <span className="mx-1 mb-1">:</span>
-        <input
-          {...register('tag', {
-            required: false,
-            pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'invalid',
-            },
-          })}
-          id="blank_tag"
-          type="text"
-          className="form-control"
-          placeholder="default"
-        />
-      </span>
-      <CombinedErrorMessage errors={errors} />
+      <div className="namespace-name-tag-container">
+        <label className="fw-bold text-sm">Namespace *</label>
+        <label className="fw-bold text-sm">Name *</label>
+        <label className="fw-bold text-sm">Tag</label>
+      </div>
+      <div className="namespace-name-tag-container fs-4 w-full">
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <select
+            id="blank-namespace-select"
+            className="form-select"
+            aria-label="Namespace selection"
+            {...register('namespace', { required: true })}
+          >
+            <option value={user?.login}>{user?.login}</option>
+            {user?.orgs.map((org) => (
+              <option key={org} value={org}>
+                {org}
+              </option>
+            ))}
+          </select>
+          <span className="mx-1 mb-1">/</span>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <input
+            // dont allow any whitespace
+            {...register('project_name', {
+              required: true,
+              pattern: {
+                value: /^\S+$/,
+                message: 'No spaces allowed.',
+              },
+            })}
+            id="blank-project-name"
+            type="text"
+            className="form-control"
+            placeholder="name"
+          />
+          <span className="mx-1 mb-1">:</span>
+        </div>
+        <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
+      </div>
+      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="blank_description"
         className="form-control mt-3"
@@ -228,14 +211,25 @@ sample_table: samples.csv
       </Tabs>
       <div className="mt-3">
         <button
-          disabled={!isValid || mutation.isPending}
+          disabled={!isValid || isSubmitting}
           id="blank-project-submit-btn"
           className="btn btn-success me-1"
           type="button"
-          onClick={() => mutation.mutate()}
+          onClick={() =>
+            submit({
+              projectName,
+              tag,
+              isPrivate,
+              description,
+              config: configYAML,
+              pepSchema,
+              sampleTable,
+              onSuccess: onHide,
+            })
+          }
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isPending ? 'Submitting...' : 'Add'}
+          {isSubmitting ? 'Submitting...' : 'Add'}
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
           Cancel

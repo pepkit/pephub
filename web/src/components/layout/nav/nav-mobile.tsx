@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-import { useSession } from '../../../hooks/useSession';
+import { useSession } from '../../../contexts/session-context';
 import { GitHubAvatar } from '../../badges/github-avatar';
 
 export const MobileNav = () => {
