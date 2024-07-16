@@ -1,10 +1,11 @@
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip, { TooltipProps } from 'react-bootstrap/Tooltip';
 import { useSearchParams } from 'react-router-dom';
 import ReactSelect from 'react-select';
 
 import { useProjectPage } from '../../contexts/project-page-context';
+import { ViewOptionsModal } from '../../components/modals/add-view-options';
 
 type ViewSelectorProps = {
   view: string | undefined;
@@ -15,9 +16,16 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const { view, setView } = props;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { projectViewsQuery } = useProjectPage();
+  const { 
+    namespace,
+    projectName,
+    tag,
+    projectViewsQuery 
+  } = useProjectPage();
   const projectViewsIsLoading = projectViewsQuery.isLoading;
   const projectViews = projectViewsQuery.data;
+
+  const [showViewOptionsModal, setShowViewOptionsModal] = useState(false);
 
   const renderTooltip = (props: TooltipProps) => (
     <Tooltip id="button-tooltip" {...props}>
@@ -30,8 +38,20 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   return (
     <Fragment>
       <div className="ps-3 d-flex flex-row align-items-center justify-content-end w-25">
+        <button
+          onClick={() => setShowViewOptionsModal(true)}
+          className="btn btn-secondary rounded-end-0 rounded-start-1 ps-2 pe-2"
+        >
+          <i className="bi bi-gear-wide-connected"></i>
+        </button>
         <ReactSelect
-          className="top-z rounded w-100"
+          styles={{
+            control: (provided) => ({
+              ...provided,
+              borderRadius: '0 .25em .25em 0', // Left radii set to 0, right radii kept at 4px
+            }),
+          }}
+          className="top-z w-100"
           options={
             projectViews?.views.map((view) => ({
               view: view.name,
@@ -67,6 +87,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
           <i className="bi bi-info-circle ms-2"></i>
         </OverlayTrigger>
       </div>
+      <ViewOptionsModal show={showViewOptionsModal} onHide={() => setShowViewOptionsModal(false)} />
     </Fragment>
   );
 };

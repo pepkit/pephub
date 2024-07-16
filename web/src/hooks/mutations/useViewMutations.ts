@@ -12,6 +12,11 @@ export const useViewMutations = (namespace: string, project: string, tag: string
 
   const addViewMutation = useMutation({
     mutationFn: (createViewRequest: CreateProjectViewRequest) => {
+      console.log(namespace)
+      console.log(project)
+      console.log(tag)
+      console.log(jwt)
+      console.log(createViewRequest)
       return addProjectView(namespace, project, tag, jwt, createViewRequest);
     },
     onSuccess: () => {
