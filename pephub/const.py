@@ -123,7 +123,7 @@ LOG_LEVEL_MAP = {
     "CRITICAL": logging.CRITICAL,
 }
 
-JWT_SECRET = token_hex(32)
+JWT_SECRET = "0" * 64 if os.getenv("PH_DEV_MODE") is not None else token_hex(32)
 JWT_EXPIRATION = 4320  # 3 days in minutes
 JWT_EXPIRATION_SECONDS = JWT_EXPIRATION * 60  # seconds
 MAX_NEW_KEYS = 5

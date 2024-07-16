@@ -37,6 +37,7 @@ from ...developer_keys import dev_key_handler
 
 load_dotenv()
 
+REDIRECT_CODES = {}
 CODE_EXCHANGE = {}
 DEVICE_CODES = {}
 
@@ -125,7 +126,6 @@ def login(
     state = {
         "client_redirect_uri": client_redirect_uri,
         "client_finally_send_to": client_finally_send_to,
-        "secret": JWT_SECRET,
     }
     authorization_url = build_authorization_url(
         client_id=github_app_config.client_id,
@@ -143,11 +143,6 @@ def callback(
 ):
     # We should check the provided state here to confirm that we generated it
     state = json.loads(state)
-    if state["secret"] != JWT_SECRET:
-        raise HTTPException(
-            status_code=400,
-            detail="The provided state is invalid. Please try logging in again.",
-        )
     client_redirect_uri = state.get("client_redirect_uri")
     # Make a request to the following endpoint to receive an access token
     url = "https://github.com/login/oauth/access_token"
