@@ -118,12 +118,12 @@ export const arraysToSampleList = (arraysList: any[][]) => {
     sampleList.push(sample);
   });
 
-  // filter all samples where **all** attriutes are `null`
+  // filter all samples where **all** attriutes are falsey
   // except for the `ph_id` attribute
   sampleList = sampleList.filter((sample) => {
     let hasNonNull = false;
     Object.keys(sample).forEach((key) => {
-      if (key !== PH_ID_COL && sample[key] !== null) {
+      if (key !== PH_ID_COL && sample[key]) {
         hasNonNull = true;
       }
     });
