@@ -13,7 +13,7 @@ import { useAddStar } from '../../hooks/mutations/useAddStar';
 import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
-import { copyToClipboard, numberWithCommas } from '../../utils/etc';
+import { copyToClipboard, getOS, numberWithCommas } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
 import { downloadZip } from '../../utils/project';
 import { ProjectHistoryModal } from '../modals/project-history';
@@ -64,6 +64,34 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
       }
     }
   }, [fork]);
+
+  // key bindings for opening header
+  useEffect(() => {
+    const os = getOS();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      let ctrlKey = false;
+      switch (os) {
+        case 'Mac OS':
+          ctrlKey = e.metaKey;
+          break;
+        default:
+          ctrlKey = e.ctrlKey;
+          break;
+      }
+      // OPEN HISTORY MODAL
+      if (ctrlKey && e.key === 'h') {
+        e.preventDefault();
+        setShowProjectHistoryModal(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // if (true) {
   if (projectAnnotationQuery.isLoading) {

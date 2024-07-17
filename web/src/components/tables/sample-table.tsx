@@ -99,6 +99,7 @@ export const SampleTable = (props: Props) => {
       manualRowMove={true}
       licenseKey="non-commercial-and-evaluation"
       manualColumnResize
+      afterPaste={(coords) => {}}
       afterChange={(changes) => {
         if (changes && onChange) {
           changes.forEach((change) => {

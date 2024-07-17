@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, set, useForm } from 'react-hook-form';
 import { Fragment } from 'react/jsx-runtime';
 
 import { useProjectPage } from '../../contexts/project-page-context';
@@ -48,7 +48,7 @@ export const ProjectInterface = (props: Props) => {
   const { data: historyData } = useProjectHistory(namespace, projectName, tag, currentHistoryId);
 
   // fetch the page view (samples, subsamples, config)
-  const { pageView } = useProjectPageView();
+  const { pageView, setPageView } = useProjectPageView();
 
   // form to store project updated fields temporarily
   // on the client before submitting to the server
@@ -87,10 +87,26 @@ export const ProjectInterface = (props: Props) => {
   //   console.log('new', newSamples);
   // }, [newSamples]);
 
-  // on save handler
+  // keyboard shortcuts
   useEffect(() => {
     // os info
     const os = getOS();
+
+    const handleNavigationKeyDown = (e: KeyboardEvent) => {
+      // if we are focused on any of the data elements (sample table, config, etc... dont do anything)
+      if (projectDataRef.current?.contains(document.activeElement)) {
+        return;
+      }
+      if (e.key === 'c') {
+        setPageView('config');
+      }
+      if (e.key === 's') {
+        setPageView('samples');
+      }
+      if (e.key === 'u') {
+        setPageView('subsamples');
+      }
+    };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       let ctrlKey = false;
@@ -102,12 +118,28 @@ export const ProjectInterface = (props: Props) => {
           ctrlKey = e.ctrlKey;
           break;
       }
-      // check for ctrl+s, ignore if fetchsampletable is false
+      // SAVE (ctrl + s)
       if (ctrlKey && e.key === 's') {
         if (projectUpdates.formState.isDirty && !isSubmitting) {
           e.preventDefault();
           handleSubmit();
         }
+      }
+
+      // DISCARD (ctrl + d)
+      if (ctrlKey && e.key === 'd') {
+        if (projectUpdates.formState.isDirty && !isSubmitting) {
+          e.preventDefault();
+          projectUpdates.reset();
+        }
+      }
+
+      // NAVIGATION ('p' + other keys to go to tabs or open modals)
+      if (e.key === 'p') {
+        window.addEventListener('keydown', handleNavigationKeyDown);
+        setTimeout(() => {
+          window.removeEventListener('keydown', handleNavigationKeyDown);
+        }, 1000);
       }
     };
 
