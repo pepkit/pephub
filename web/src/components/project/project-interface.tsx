@@ -1,9 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Fragment } from 'react/jsx-runtime';
-import { useShallow } from 'zustand/react/shallow';
 
-import { Sample } from '../../../types';
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
 import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
@@ -16,6 +14,7 @@ import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { useProjectPageView } from '../../hooks/stores/useProjectPageView';
 import { getOS } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
+import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { SampleTable } from '../tables/sample-table';
 import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
@@ -29,8 +28,8 @@ type Props = {
 
 type ProjectUpdateFields = {
   config: string;
-  samples: Sample[];
-  subsamples: Sample[];
+  samples: any[][];
+  subsamples: any[][];
 };
 
 export const ProjectInterface = (props: Props) => {
@@ -56,8 +55,8 @@ export const ProjectInterface = (props: Props) => {
   const projectUpdates = useForm<ProjectUpdateFields>({
     defaultValues: {
       config: projectConfig?.config || '',
-      samples: sampleTable?.items || [],
-      subsamples: subSampleTable?.items || [],
+      samples: sampleListToArrays(sampleTable?.items || []),
+      subsamples: sampleListToArrays(subSampleTable?.items || []),
     },
   });
 
@@ -70,8 +69,23 @@ export const ProjectInterface = (props: Props) => {
   const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   const handleSubmit = () => {
-    submit(projectUpdates.getValues());
+    const values = projectUpdates.getValues();
+    // submit({
+    //   config: values.config,
+    //   samples: arraysToSampleList(values.samples),
+    //   subsamples: arraysToSampleList(values.subsamples),
+    // });
+    const samplesParsed = arraysToSampleList(values.samples);
+    const subsamplesParsed = arraysToSampleList(values.subsamples);
+    console.log('samplesParsed', samplesParsed);
+    console.log('subsamplesParsed', subsamplesParsed);
   };
+
+  // for debugging
+  // useEffect(() => {
+  //   console.log('old', sampleListToArrays(sampleTable?.items || []));
+  //   console.log('new', newSamples);
+  // }, [newSamples]);
 
   // on save handler
   useEffect(() => {
@@ -125,7 +139,7 @@ export const ProjectInterface = (props: Props) => {
                   onChange(samples);
                 }}
                 readOnly={!userCanEdit}
-                data={currentHistoryId ? historyData?._sample_dict || [] : newSamples}
+                data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
               />
             )}

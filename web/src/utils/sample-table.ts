@@ -71,18 +71,23 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   // first row is the header row
   let headerRow = arraysList[0];
 
-  // look for null values, simply populate with the column name
+  // look for null values, warn user that this
+  // may cause issues
   headerRow = headerRow.map((cell, index) => {
     if (!cell) {
-      return `column_${index + 1}`;
+      toast.error('Empty column header detected. This may cause issues with your PEP.');
     }
     return cell;
   });
 
-  if (headerRow.every((cell) => !cell)) {
-    toast.error('Header row cannot be empty! Please add at least one column name.');
-    return [];
-  }
+  // look for duplicate values in the header row
+  const seen: any = {};
+  headerRow.forEach((cell) => {
+    if (seen[cell]) {
+      toast.error(`Duplicate column header detected: ${cell}. This will cause unexpected changes to your PEP.`);
+    }
+    seen[cell] = true;
+  });
 
   // get the rest of the rows
   const theRest = arraysList.slice(1);
