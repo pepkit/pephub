@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Controller, set, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import { Fragment } from 'react/jsx-runtime';
 
 import { useProjectPage } from '../../contexts/project-page-context';
@@ -70,22 +71,22 @@ export const ProjectInterface = (props: Props) => {
 
   const handleSubmit = () => {
     const values = projectUpdates.getValues();
-    submit({
-      config: values.config,
-      samples: arraysToSampleList(values.samples),
-      subsamples: arraysToSampleList(values.subsamples),
-    });
-    // const samplesParsed = arraysToSampleList(values.samples);
-    // const subsamplesParsed = arraysToSampleList(values.subsamples);
-    // console.log('samplesParsed', samplesParsed);
-    // console.log('subsamplesParsed', subsamplesParsed);
-  };
 
-  // for debugging
-  // useEffect(() => {
-  //   console.log('old', sampleListToArrays(sampleTable?.items || []));
-  //   console.log('new', newSamples);
-  // }, [newSamples]);
+    try {
+      const samplesParsed = arraysToSampleList(values.samples);
+      const subsamplesParsed = arraysToSampleList(values.subsamples);
+      submit({
+        config: values.config,
+        samples: samplesParsed,
+        subsamples: subsamplesParsed,
+      });
+    } catch (e) {
+      toast.error('The project could not be saved. ' + e, {
+        duration: 5000,
+        position: 'top-center',
+      });
+    }
+  };
 
   // keyboard shortcuts
   useEffect(() => {

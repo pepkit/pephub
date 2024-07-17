@@ -37,20 +37,14 @@ export const SampleTable = (props: Props) => {
   const hotRef = useRef<HotTable>(null);
 
   if (hotRef) {
-    // if data-bs-theme=="dark" then add dark theme to the table
-    // data-bs-theme is on <html> tag
-    const theme = document.documentElement.getAttribute('data-bs-theme');
-
-    if (theme === 'dark') {
-      tableClassName += ' htDark';
-    }
-
     hotRef.current?.hotInstance?.updateSettings({
       className: tableClassName,
     });
   }
 
   const numColumns = data.length > 0 ? data[0].length : 0;
+
+  const ph_id_col = data[0].indexOf('ph_id');
 
   return (
     <HotTable
@@ -72,7 +66,7 @@ export const SampleTable = (props: Props) => {
       }}
       hiddenColumns={{
         indicators: true,
-        columns: [numColumns - 1],
+        columns: ph_id_col === -1 ? [] : [numColumns - 1],
       }}
       dropdownMenu={true}
       minCols={2}
