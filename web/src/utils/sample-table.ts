@@ -75,7 +75,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   // may cause issues
   headerRow = headerRow.map((cell, index) => {
     if (!cell) {
-      toast.error('Empty column header detected. This may cause issues with your PEP.');
+      // toast.error('Empty column header detected. This may cause issues with your PEP.');
     }
     return cell;
   });
@@ -84,7 +84,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   const seen: any = {};
   headerRow.forEach((cell) => {
     if (seen[cell]) {
-      toast.error(`Duplicate column header detected: ${cell}. This will cause unexpected changes to your PEP.`);
+      // toast.error(`Duplicate column header detected: ${cell}. This will cause unexpected changes to your PEP.`);
     }
     seen[cell] = true;
   });

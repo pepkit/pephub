@@ -70,15 +70,15 @@ export const ProjectInterface = (props: Props) => {
 
   const handleSubmit = () => {
     const values = projectUpdates.getValues();
-    // submit({
-    //   config: values.config,
-    //   samples: arraysToSampleList(values.samples),
-    //   subsamples: arraysToSampleList(values.subsamples),
-    // });
-    const samplesParsed = arraysToSampleList(values.samples);
-    const subsamplesParsed = arraysToSampleList(values.subsamples);
-    console.log('samplesParsed', samplesParsed);
-    console.log('subsamplesParsed', subsamplesParsed);
+    submit({
+      config: values.config,
+      samples: arraysToSampleList(values.samples),
+      subsamples: arraysToSampleList(values.subsamples),
+    });
+    // const samplesParsed = arraysToSampleList(values.samples);
+    // const subsamplesParsed = arraysToSampleList(values.subsamples);
+    // console.log('samplesParsed', samplesParsed);
+    // console.log('subsamplesParsed', subsamplesParsed);
   };
 
   // for debugging
