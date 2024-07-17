@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { Controller, set, useForm } from 'react-hook-form';
+import { Fragment } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { Fragment } from 'react/jsx-runtime';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
