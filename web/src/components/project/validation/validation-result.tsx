@@ -47,6 +47,7 @@ export const ValidationResult = (props: Props) => {
         show={validationModalIsOpen}
         onHide={() => setValidationModalIsOpen(false)}
         validationResult={validationResult}
+        currentSchema={schemaRegistry}
       />
     </div>
   );
