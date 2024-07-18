@@ -34,7 +34,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
 
   return (
     <Fragment>
-      <div className="ps-3 d-flex flex-row align-items-center justify-content-end w-25">
+      <div className="ps-3 d-flex flex-row align-items-center justify-content-end" style={{width: '25vw'}}>
         <button
           onClick={() => setShowViewOptionsModal(true)}
           className="btn btn-secondary rounded-end-0 rounded-start-1 ps-2 pe-2"
