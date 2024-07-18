@@ -166,10 +166,12 @@ export const ProjectInterface = (props: Props) => {
           <Controller
             control={projectUpdates.control}
             name="samples"
-            render={({ field: { onChange } }) => (
+            render={() => (
               <SampleTable
                 onChange={(samples) => {
-                  onChange(samples);
+                  projectUpdates.setValue('samples', samples, {
+                    shouldDirty: true,
+                  });
                 }}
                 readOnly={!userCanEdit}
                 data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
@@ -182,10 +184,12 @@ export const ProjectInterface = (props: Props) => {
           <Controller
             control={projectUpdates.control}
             name="subsamples"
-            render={({ field: { onChange } }) => (
+            render={() => (
               <SampleTable
                 onChange={(subsamples) => {
-                  onChange(subsamples);
+                  projectUpdates.setValue('subsamples', subsamples, {
+                    shouldDirty: true,
+                  });
                 }}
                 data={currentHistoryId ? historyData?._subsample_list || [] : newSubsamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
