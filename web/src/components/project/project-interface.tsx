@@ -121,7 +121,9 @@ export const ProjectInterface = (props: Props) => {
       }
       // SAVE (ctrl + s)
       if (ctrlKey && e.key === 's') {
-        if (projectUpdates.formState.isDirty && !isSubmitting) {
+        if (true && !isSubmitting) {
+          // TODO: why does this not work in production?
+          // if (projectUpdates.formState.isDirty && !isSubmitting) {
           e.preventDefault();
           handleSubmit();
         }
