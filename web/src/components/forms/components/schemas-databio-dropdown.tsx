@@ -6,9 +6,10 @@ import { useSchemas } from '../../../hooks/queries/useSchemas';
 interface Props {
   value?: string;
   onChange: (value: string) => void;
+  showDownload?: boolean;
 }
 
-const SchemaDropdown: FC<Props> = ({ value, onChange }) => {
+const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => {
   const { data: schemas, isLoading } = useSchemas();
 
   const options = Object.keys(schemas || {}).map((schema) => ({
@@ -19,7 +20,7 @@ const SchemaDropdown: FC<Props> = ({ value, onChange }) => {
   const valueForSelect = options.find((option) => option.value === value);
 
   return (
-    <div className="d-flex flex-row align-items-center gap-1">
+    <div className="d-flex flex-row align-items-center gap-1 w-100">
       <Select
         options={options}
         value={valueForSelect}
@@ -31,13 +32,15 @@ const SchemaDropdown: FC<Props> = ({ value, onChange }) => {
         menuPlacement="top"
         className="w-100"
       />
-      <a
-        target="_blank"
-        href={`https://schema.databio.org/${value}.yaml`}
-        className="btn btn-outline-secondary opacity-50"
-      >
-        <i className="bi bi-download" />
-      </a>
+      {showDownload && (
+        <a
+          target="_blank"
+          href={`https://schema.databio.org/${value}.yaml`}
+          className="btn btn-outline-secondary opacity-50"
+        >
+          <i className="bi bi-download" />
+        </a>
+      )}
     </div>
   );
 };
