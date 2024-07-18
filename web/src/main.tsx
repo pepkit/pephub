@@ -25,6 +25,7 @@ import { Home } from './pages/Home';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
+import { Schemas } from './pages/Schemas';
 import { SearchPage } from './pages/Search';
 import { EidoValidator } from './pages/Validator';
 
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
         <ProjectPage />
       </ProjectPageProvider>
     ),
+  },
+  {
+    path: '/schemas',
+    element: <Schemas />,
   },
 ]);
 
