@@ -32,7 +32,7 @@ export const ValidationResult = (props: Props) => {
         }}
         className={wrapperClassName}
       >
-        <div className="d-flex flex-row align-items-center gap-2">
+        <div className="d-flex flex-row align-items-center gap-2 text-sm py-0">
           {isValidating ? (
             <span className="bg-warning text-warning rounded-pill validation-badge"></span>
           ) : validationResult?.valid ? (
