@@ -70,6 +70,8 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   //   { col1: 's2_col1', col2: 's2_col2', col3: 's2_col3' },
   // ]
 
+  const uniquePhIds = new Set();
+
   // first row is the header row
   let headerRow = arraysList[0];
 
@@ -134,6 +136,10 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   sampleList.forEach((sample) => {
     if (!sample[PH_ID_COL]) {
       sample[PH_ID_COL] = null;
+    } else if (uniquePhIds.has(sample[PH_ID_COL])) {
+      sample[PH_ID_COL] = null;
+    } else {
+      uniquePhIds.add(sample[PH_ID_COL]);
     }
   });
 
