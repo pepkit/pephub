@@ -83,7 +83,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
           <i className="bi bi-info-circle ms-2"></i>
         </OverlayTrigger>
       </div>
-      {/*<ViewOptionsModal show={showViewOptionsModal} onHide={() => setShowViewOptionsModal(false)} />*/}
+      <ViewOptionsModal show={showViewOptionsModal} onHide={() => setShowViewOptionsModal(false)} />
     </Fragment>
   );
 };

@@ -163,6 +163,9 @@ export const ProjectInterface = (props: Props) => {
             )}
           />
         )}
+        {pageView === 'help' && (
+          <iframe src='https://pep.databio.org/spec/specification/' style={{display:'block', width:'100%', height:'100vh'}}/>
+        )}
       </div>
     </Fragment>
   );
