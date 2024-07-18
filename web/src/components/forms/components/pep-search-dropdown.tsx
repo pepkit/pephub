@@ -33,7 +33,7 @@ export const PepSearchDropdown = (props: Props) => {
     type: props.type,
   });
 
-  const selectedProject = projects?.items.find(
+  const selectedProject = projects?.results.find(
     (v) => v.namespace === namespaceFromValue && v.name === projectName && v.tag === tag,
   );
 
@@ -60,7 +60,7 @@ export const PepSearchDropdown = (props: Props) => {
         onChange(newValue?.value || '');
       }}
       options={
-        projects?.items.map((n) => ({
+        projects?.results.map((n) => ({
           label: props.projectNameOnly ? `${n.name}:${n.tag}` : `${n.namespace}/${n.name}:${n.tag}`,
           value: `${n.namespace}/${n.name}:${n.tag}`,
         })) || []

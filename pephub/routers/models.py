@@ -71,6 +71,14 @@ class ProjectRawModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class ProjectHistoryResponse(BaseModel):
+    config: str = Field(alias="_config")
+    subsample_list: Optional[list] = Field(alias="_subsample_list", default=None)
+    sample_list: list[dict] = Field(alias="_sample_dict")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class ProjectRawRequest(BaseModel):
     config: dict
     subsample_list: Optional[List[List[dict]]] = None
@@ -88,3 +96,35 @@ class ProjectJsonRequest(BaseModel):
     overwrite: bool = False
     pep_schema: Optional[str] = DEFAULT_PEP_SCHEMA
     pop: Optional[bool] = None
+
+
+class RevokeRequest(BaseModel):
+    last_five_chars: str
+
+
+class DeveloperKey(BaseModel):
+    key: str
+    created_at: str
+    expires: str
+
+
+class VersionResponseModel(BaseModel):
+    pephub_version: str
+    peppy_version: str
+    python_version: str
+    fastapi_version: str
+    pepdbagent_version: str
+    api_version: int
+
+
+class BaseEndpointResponseModel(VersionResponseModel):
+    message: str
+
+
+class SamplesResponseModel(BaseModel):
+    count: int
+    items: list
+
+
+class ConfigResponseModel(BaseModel):
+    config: str

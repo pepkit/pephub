@@ -4,26 +4,28 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
 import { submitProjectJSON } from '../../api/namespace';
-import { extractError, extractErrorMessage } from '../../utils/etc';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
+import { extractErrorMessage } from '../../utils/etc';
 
-export const useBlankProjectFormMutation = (
-  namespace: string,
-  projectName: string,
-  tag: string,
-  isPrivate: boolean,
-  description: string,
-  config: string,
-  pepSchema: string,
-  sampleTable: Sample[],
-  onSuccess?: () => void,
-) => {
+type NewBlankProject = {
+  projectName: string;
+  tag: string;
+  isPrivate: boolean;
+  description: string;
+  config: string;
+  pepSchema: string;
+  sampleTable: Sample[];
+  onSuccess?: () => void;
+};
+
+export const useBlankProjectFormMutation = (namespace: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: () =>
-      submitProjectJSON(
+  const mutation = useMutation({
+    mutationFn: (data: NewBlankProject) => {
+      const { projectName, tag, isPrivate, description, config, pepSchema, sampleTable } = data;
+      return submitProjectJSON(
         {
           namespace: namespace,
           name: projectName,
@@ -35,14 +37,15 @@ export const useBlankProjectFormMutation = (
           sample_table: sampleTable,
         },
         session.jwt || '',
-      ),
-    onSuccess: () => {
+      );
+    },
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: [namespace],
       });
       toast.success('Project successfully uploaded!');
-      if (onSuccess) {
-        onSuccess();
+      if (variables.onSuccess) {
+        variables.onSuccess();
       }
     },
     onError: (err: AxiosError) => {
@@ -53,4 +56,9 @@ export const useBlankProjectFormMutation = (
       });
     },
   });
+
+  return {
+    ...mutation,
+    submit: mutation.mutate,
+  };
 };

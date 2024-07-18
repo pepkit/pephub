@@ -14,6 +14,7 @@ from pepdbagent.exceptions import (
     ProjectAlreadyInFavorites,
     ProjectNotInFavorites,
     ProjectUniqueNameError,
+    UserNotFoundError,
 )
 from pepdbagent.models import (
     AnnotationList,
@@ -35,6 +36,7 @@ from ....dependencies import (
     get_db,
     get_namespace_access_list,
     get_namespace_info,
+    get_user_from_session_info,
     read_authorization_header,
     verify_user_can_write_namespace,
     get_pepdb_namespace_info,
@@ -51,10 +53,10 @@ namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"
 @namespace.get(
     "/",
     summary="Fetch details about a particular namespace.",
+    response_model=Namespace,
 )
 async def get_namespace(
-    request: Request,
-    nspace: Namespace = Depends(get_namespace_info),
+    namespace_info: Namespace = Depends(get_namespace_info),
 ):
     """
     Fetch namespace. Returns a JSON representation of the namespace.
@@ -65,9 +67,7 @@ async def get_namespace(
 
         namespace: databio
     """
-    nspace = nspace.model_dump()
-    nspace["projects_endpoint"] = f"{str(request.url)[:-1]}/projects"
-    return JSONResponse(content=nspace)
+    return namespace_info
 
 
 @namespace.get(
@@ -81,8 +81,7 @@ async def get_namespace_projects(
     limit: int = 10,
     offset: int = 0,
     query: str = None,
-    session_info: dict = Depends(read_authorization_header),
-    namespace_access: List[str] = Depends(get_namespace_access_list),
+    admin_list: List[str] = Depends(get_namespace_access_list),
     order_by: str = "update_date",
     order_desc: bool = False,
     filter_by: Annotated[
@@ -110,7 +109,7 @@ async def get_namespace_projects(
             namespace=namespace,
             limit=limit,
             offset=offset,
-            admin=namespace_access,
+            admin=admin_list,
             order_by=order_by,
             order_desc=order_desc,
             filter_by=filter_by,
@@ -123,7 +122,7 @@ async def get_namespace_projects(
             namespace=namespace,
             limit=limit,
             offset=offset,
-            admin=namespace_access,
+            admin=admin_list,
             order_by=order_by,
             order_desc=order_desc,
             filter_by=filter_by,
@@ -131,17 +130,8 @@ async def get_namespace_projects(
             filter_end_date=filter_end_date,
             pep_type=pep_type,
         )
-    results = [p.model_dump() for p in search_result.results]
 
-    return JSONResponse(
-        content={
-            "count": search_result.count,
-            "limit": limit,
-            "offset": offset,
-            "items": results,
-            "session_info": session_info,
-        }
-    )
+    return search_result
 
 
 # url format based on:
@@ -168,8 +158,8 @@ async def create_pep(
     Create a PEP for a particular namespace you have write access to.
 
     Don't know your namespace? Log in to see.
-
     """
+
     if files is not None:
         init_file = parse_user_file_upload(files)
         init_file, other_files = split_upload_files_on_init_file(files, init_file)
@@ -210,8 +200,6 @@ async def create_pep(
                 content={
                     "namespace": namespace,
                     "name": name,
-                    "proj": p.to_dict(),
-                    "init_file": init_file.filename,
                     "tag": tag,
                     "registry_path": f"{namespace}/{name}:{tag}",
                 },
@@ -219,45 +207,10 @@ async def create_pep(
             )
     # create a blank peppy.Project object with fake files
     else:
-        # create temp dir that gets deleted when we're done
-        with tempfile.TemporaryDirectory() as dirpath:
-            config_file_name = "project_config.yaml"
-            sample_table_name = BLANK_PEP_CONFIG["sample_table"]
-
-            # create 'empty' config and sample table files
-            with open(f"{dirpath}/{config_file_name}", "w") as cfg_fh:
-                cfg_fh.write(json.dumps(BLANK_PEP_CONFIG))
-            with open(f"{dirpath}/{sample_table_name}", "w") as cfg_fh:
-                cfg_fh.write(BLANK_PEP_SAMPLE_TABLE)
-
-            # init project
-            p = Project(f"{dirpath}/{config_file_name}")
-            p.name = name
-            p.description = description
-            p.pep_schema = pep_schema
-            try:
-                agent.project.create(
-                    p,
-                    namespace=namespace,
-                    name=name,
-                    tag=tag,
-                    is_private=is_private,
-                )
-            except ProjectUniqueNameError as _:
-                raise HTTPException(
-                    detail=f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
-                    status_code=400,
-                )
-            return JSONResponse(
-                content={
-                    "namespace": namespace,
-                    "name": name,
-                    "proj": p.to_dict(),
-                    "tag": tag,
-                    "registry_path": f"{namespace}/{name}:{tag}",
-                },
-                status_code=202,
-            )
+        raise HTTPException(
+            detail=f"Project files were not provided",
+            status_code=400,
+        )
 
 
 @namespace.post(
@@ -456,3 +409,35 @@ async def get_namespace_stats(
             status_code=500,
             detail="Internal server error. Unexpected return value. Error: 500",
         )
+
+
+@namespace.delete(
+    "/",
+    summary="Delete user projects and stars from pephub",
+)
+def remove_user(
+    namespace: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+    user_name: str = Depends(get_user_from_session_info),
+):
+    """
+    Delete user related projects and stars from pephub
+    """
+    if user_name != namespace:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied. You can only delete your own namespace.",
+        )
+    try:
+        agent.user.delete(namespace)
+    except UserNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Namespace '{namespace}' not found.",
+        )
+    return JSONResponse(
+        content={
+            "message": f"Namespace {namespace} has been deleted.",
+        },
+        status_code=202,
+    )

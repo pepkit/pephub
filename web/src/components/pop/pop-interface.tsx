@@ -2,26 +2,32 @@ import { Fragment, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { ProjectAnnotation } from '../../../types';
+import { useProjectPage } from '../../contexts/project-page-context';
+import { useSession } from '../../contexts/session-context';
 import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
 import { useMultiProjectAnnotation } from '../../hooks/queries/useMultiProjectAnnotation';
+import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
-import { useSession } from '../../hooks/useSession';
 import { NamespaceSearchDropdown } from '../forms/components/namespace-search-dropdown';
 import { PepSearchDropdown } from '../forms/components/pep-search-dropdown';
 import { ProjectCardPlaceholder } from '../placeholders/project-card-placeholder';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 import { PopCard } from './pop-card';
 
-interface Props {
-  project: ProjectAnnotation;
-}
+type Props = {
+  projectInfo: ReturnType<typeof useProjectAnnotation>['data'];
+  sampleTable: ReturnType<typeof useSampleTable>['data'];
+};
 
-export const PopInterface = ({ project }: Props) => {
-  const { namespace, name, tag } = project;
+export const PopInterface = (props: Props) => {
+  const { projectInfo } = props;
+
+  const { namespace, projectName, tag } = useProjectPage();
+
   const { user } = useSession();
-  const { data: peps, isFetching: gettingProjectList } = useSampleTable({
+  const { data: peps } = useSampleTable({
     namespace,
-    project: name,
+    project: projectName,
     tag,
   });
   const { data: allProjectsInfo, isFetching: isLoading } = useMultiProjectAnnotation(
@@ -32,7 +38,7 @@ export const PopInterface = ({ project }: Props) => {
   const [addToPopRegistry, setAddToPopRegistry] = useState<string | undefined>(undefined);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
 
-  const sampleTableMutation = useSampleTableMutation(namespace, name, tag);
+  const { isPending: isSampleTablePending, submit } = useSampleTableMutation(namespace, projectName, tag);
 
   if (isLoading) {
     return (
@@ -58,7 +64,7 @@ export const PopInterface = ({ project }: Props) => {
                 project === null ? null : (
                   <PopCard
                     parentNamespace={namespace}
-                    parentName={name}
+                    parentName={projectName}
                     parentTag={tag}
                     currentPeps={peps?.items || []}
                     key={`${project.namespace}/${project.name}:${project.tag}`}
@@ -121,11 +127,11 @@ export const PopInterface = ({ project }: Props) => {
                             name: newProjectName,
                             tag: newProjectTag,
                           });
-                          sampleTableMutation.mutate(newPeps);
+                          submit(newPeps);
                         }}
-                        disabled={addToPopNamespace === '' || addToPopRegistry === '' || sampleTableMutation.isPending}
+                        disabled={addToPopNamespace === '' || addToPopRegistry === '' || isSampleTablePending}
                       >
-                        {sampleTableMutation.isPending ? (
+                        {isSampleTablePending ? (
                           <Fragment>
                             <span className="d-flex flex-row align-items-center">
                               <LoadingSpinner className="w-4 h-4 spin me-1 fill-light" />

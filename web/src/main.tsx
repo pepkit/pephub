@@ -16,8 +16,10 @@ import { Toaster } from 'react-hot-toast';
 // routing
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
+import { ApiProvider } from './contexts/api-context';
 // custom contexts
 import { ProjectPageProvider } from './contexts/project-page-context';
+import { SessionProvider } from './contexts/session-context';
 import './globals.css';
 import { Home } from './pages/Home';
 import { LoginSuccessPage } from './pages/LoginSuccess';
@@ -74,9 +76,13 @@ const App: React.FC = () => {
     <React.StrictMode>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-          <Toaster position="top-right" reverseOrder={false} gutter={8} toastOptions={{ duration: 3000 }} />
-          <ReactQueryDevtools initialIsOpen={false} />
+          <SessionProvider>
+            <ApiProvider>
+              <RouterProvider router={router} />
+              <Toaster position="top-right" reverseOrder={false} gutter={8} toastOptions={{ duration: 3000 }} />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </ApiProvider>
+          </SessionProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </React.StrictMode>

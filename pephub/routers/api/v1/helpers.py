@@ -37,19 +37,20 @@ async def verify_updated_project(updated_project) -> peppy.Project:
             detail=f"Could not parse provided yaml. Error: {e}",
         )
 
-    sample_table_index_col = yaml_dict.get(
-        SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
-    )
+    # sample_table_index_col = yaml_dict.get(
+    #     SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
+    # )
 
-    await check_sample_names(
-        new_raw_project[SAMPLE_RAW_DICT_KEY], sample_table_index_col
-    )
+    # await check_sample_names(
+    #     new_raw_project[SAMPLE_RAW_DICT_KEY], sample_table_index_col
+    # )
 
     # subsample table update
     if updated_project.subsample_tables is not None:
+        subsamples = list(updated_project.subsample_tables[0][0].values())
         new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = (
             updated_project.subsample_tables
-            if list(updated_project.subsample_tables[0][0].values())[0]
+            if len(subsamples) > 0 and subsamples[0]
             else None
         )
 

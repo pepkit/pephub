@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getProject } from '../../api/project';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 export const useProject = (namespace: string | undefined, project: string | undefined, tag: string | undefined) => {
   const session = useSession();

@@ -6,10 +6,11 @@ import { PageLayout } from '../components/layout/page-layout';
 import { LandingInfoPlaceholder } from '../components/placeholders/landing-leaderboard';
 import { SampleTable } from '../components/tables/sample-table';
 import { GenericTooltip } from '../components/tooltips/generic-tooltip';
+import { useSession } from '../contexts/session-context';
 import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
-import { useSession } from '../hooks/useSession';
 import { numberWithCommas } from '../utils/etc';
+import { sampleListToArrays } from '../utils/sample-table';
 
 interface MotionButtonProps {
   onClick?: () => void;
@@ -115,7 +116,7 @@ export function Home() {
                     transition={{ duration: 0.5 }}
                     className="landing-table shadow"
                   >
-                    <SampleTable minRows={9} data={exampleSamples?.items || []} />
+                    <SampleTable minRows={9} data={sampleListToArrays(exampleSamples?.items || [])} />
                   </motion.div>
                 </div>
               </div>

@@ -2,6 +2,8 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../types';
 
+const PH_ID_COL = 'ph_id';
+
 const arraysAreEmpty = (arraysList: any[][]) => {
   // check if the list of arrays is full of nulls
   // if so, then the list is empty
@@ -68,25 +70,33 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   //   { col1: 's2_col1', col2: 's2_col2', col3: 's2_col3' },
   // ]
 
+  const uniquePhIds = new Set();
+
   // first row is the header row
   let headerRow = arraysList[0];
 
-  // look for null values, simply populate with the column name
+  // look for null values, warn user that this
+  // may cause issues
   headerRow = headerRow.map((cell, index) => {
     if (!cell) {
-      return `column_${index + 1}`;
+      throw new Error(`Empty column header detected at index ${index}.`);
     }
     return cell;
   });
 
-  if (headerRow.every((cell) => !cell)) {
-    toast.error('Header row cannot be empty! Please add at least one column name.');
-    return [];
-  }
+  // look for duplicate values in the header row
+  const seen: any = {};
+  headerRow.forEach((cell) => {
+    if (seen[cell]) {
+      throw new Error(`Duplicate column header detected: ${cell}`);
+    }
+    seen[cell] = true;
+  });
 
   // get the rest of the rows
   const theRest = arraysList.slice(1);
-  const sampleList: Sample[] = [];
+
+  let sampleList: Sample[] = [];
 
   // if there's only a header row, return a list with one sample where all the property values are null
   if (arraysAreEmpty(theRest)) {
@@ -108,6 +118,29 @@ export const arraysToSampleList = (arraysList: any[][]) => {
       sample[headerRow[index]] = value;
     });
     sampleList.push(sample);
+  });
+
+  // filter all samples where **all** attriutes are falsey
+  // except for the `ph_id` attribute
+  sampleList = sampleList.filter((sample) => {
+    let hasNonNull = false;
+    Object.keys(sample).forEach((key) => {
+      if (key !== PH_ID_COL && sample[key]) {
+        hasNonNull = true;
+      }
+    });
+    return hasNonNull;
+  });
+
+  // add the ph_id column to the sample list if it doesn't exist
+  sampleList.forEach((sample) => {
+    if (!sample[PH_ID_COL]) {
+      sample[PH_ID_COL] = null;
+    } else if (uniquePhIds.has(sample[PH_ID_COL])) {
+      sample[PH_ID_COL] = null;
+    } else {
+      uniquePhIds.add(sample[PH_ID_COL]);
+    }
   });
 
   return sampleList;

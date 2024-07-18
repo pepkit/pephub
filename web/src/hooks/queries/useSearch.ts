@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { search } from '../../api/search';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 const DEFAULT_LIMIT = 10;
 const DEFAULT_OFFSET = 0;

@@ -3,16 +3,18 @@ import logging
 import coloredlogs
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
+
 
 from ._version import __version__ as server_v
 from .const import ALL_VERSIONS, PKG_NAME, TAGS_METADATA
+from .limiter import limiter, _custom_rate_limit_exceeded_handler
 from .routers.api.v1.base import api as api_base
 from .routers.api.v1.namespace import namespace as api_namespace
 from .routers.api.v1.namespace import namespaces as api_namespaces
 from .routers.api.v1.project import project as api_project
 from .routers.api.v1.project import projects as api_projects
 from .routers.api.v1.search import search as api_search
-from .routers.api.v1.user import user as api_user
 from .routers.auth.base import auth as auth_router
 from .routers.eido.eido import router as eido_router
 
@@ -58,6 +60,11 @@ app = FastAPI(
 #
 # # logfire.instrument_fastapi(app)
 
+# rate limiting
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _custom_rate_limit_exceeded_handler)
+
 # CORS is required for the validation HTML SPA to work externally
 origins = ["*"]
 app.add_middleware(
@@ -70,7 +77,6 @@ app.add_middleware(
 
 # build routes
 app.include_router(api_base)
-app.include_router(api_user)
 app.include_router(api_namespace)
 app.include_router(api_namespaces)
 app.include_router(api_project)

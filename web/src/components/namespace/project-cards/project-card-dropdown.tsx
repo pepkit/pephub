@@ -2,13 +2,12 @@ import { FC, Fragment } from 'react';
 import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
-import { ProjectAnnotation } from '../../../types';
-import { useAddStar } from '../../hooks/mutations/useAddStar';
-import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
-import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
-import { useSession } from '../../hooks/useSession';
-import { copyToClipboard } from '../../utils/etc';
-import { LoadingSpinner } from '../spinners/loading-spinner';
+import { ProjectAnnotation } from '../../../../types';
+import { useSession } from '../../../contexts/session-context';
+import { useAddStar } from '../../../hooks/mutations/useAddStar';
+import { useRemoveStar } from '../../../hooks/mutations/useRemoveStar';
+import { copyToClipboard } from '../../../utils/etc';
+import { LoadingSpinner } from '../../spinners/loading-spinner';
 
 interface Props {
   project: ProjectAnnotation;
@@ -23,25 +22,26 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
   const { project, isStarred, copied, setCopied, setShowDeletePEPModal, setShowForkPEPModal } = props;
   const { user } = useSession();
 
-  const { addStarMutation, removeStarMutation } = useNamespaceStars(user?.login || '/', {}, true);
+  const { isPending: isAddingStar, addStar } = useAddStar(user?.login);
+  const { isPending: isRemovingStar, removeStar } = useRemoveStar(user?.login);
 
   return (
     <Dropdown as={ButtonGroup}>
       <Button
-        disabled={addStarMutation.isPending || removeStarMutation.isPending}
+        disabled={isAddingStar || isRemovingStar}
         variant="outline-dark"
         size="sm"
         onClick={() => {
           if (!user) {
             toast.error('You must be logged in to star a project!');
           } else if (isStarred) {
-            removeStarMutation.mutate({
+            removeStar({
               namespaceToRemove: project.namespace,
               projectNameToRemove: project.name,
               projectTagToRemove: project.tag,
             });
           } else {
-            addStarMutation.mutate({
+            addStar({
               namespaceToStar: project.namespace,
               projectNameToStar: project.name,
               projectTagToStar: project.tag,
@@ -54,7 +54,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
             <div className="d-flex align-items-center">
               <i className="text-primary bi bi-star-fill me-1"></i>
               <span className="text-primary">
-                {removeStarMutation.isPending ? (
+                {isRemovingStar ? (
                   <Fragment>
                     {copied ? 'Copied!' : 'Star'}
                     <LoadingSpinner className="w-4 h-4 spin ms-1 mb-tiny fill-secondary" />
@@ -70,7 +70,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
             <div className="d-flex align-items-center">
               <i className="bi bi-star me-1"></i>
               <span>
-                {addStarMutation.isPending ? (
+                {isAddingStar ? (
                   <Fragment>
                     {copied ? 'Copied!' : 'Star'}
                     <LoadingSpinner className="w-4 h-4 spin ms-1 mb-tiny fill-secondary" />
@@ -114,7 +114,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
         ) : (
           <Dropdown.Item disabled>Fork (log in to fork)</Dropdown.Item>
         )}
-        {user && user.login === project.namespace && (
+        {user && user.orgs.includes(project.namespace) && (
           <Fragment>
             <Dropdown.Divider />
             <Dropdown.Item

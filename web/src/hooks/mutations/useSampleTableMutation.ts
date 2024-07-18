@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 
 import { Sample } from '../../../types';
 import { editProjectSampleTable } from '../../api/project';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 export const useSampleTableMutation = (namespace: string, project: string, tag: string) => {
   const session = useSession();
@@ -24,5 +24,8 @@ export const useSampleTableMutation = (namespace: string, project: string, tag: 
     },
   });
 
-  return mutation;
+  return {
+    ...mutation,
+    submit: mutation.mutate,
+  };
 };

@@ -4,11 +4,9 @@ import toast from 'react-hot-toast';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { ProjectAnnotation, Sample } from '../../../types';
+import { useSession } from '../../contexts/session-context';
 import { useAddStar } from '../../hooks/mutations/useAddStar';
 import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
-import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
-import { useSampleTable } from '../../hooks/queries/useSampleTable';
-import { useSession } from '../../hooks/useSession';
 import { copyToClipboard } from '../../utils/etc';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 
@@ -28,13 +26,13 @@ export const PopCardDropdown: FC<Props> = (props) => {
 
   const { user } = useSession();
 
-  const starAddMutation = useAddStar(user?.login || '');
+  const { isPending: isAddingStar, addStar } = useAddStar(user?.login || '');
   const starRemoveMutation = useRemoveStar(user?.login || '');
 
   return (
     <Dropdown as={ButtonGroup}>
       <Button
-        disabled={starAddMutation.isPending || starRemoveMutation.isPending}
+        disabled={isAddingStar || starRemoveMutation.isPending}
         variant="outline-dark"
         size="sm"
         onClick={() => {
@@ -47,7 +45,7 @@ export const PopCardDropdown: FC<Props> = (props) => {
               projectTagToRemove: project.tag,
             });
           } else {
-            starAddMutation.mutate({
+            addStar({
               namespaceToStar: project.namespace,
               projectNameToStar: project.name,
               projectTagToStar: project.tag,

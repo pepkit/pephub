@@ -3,9 +3,8 @@ import { FC } from 'react';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { ProjectAnnotation } from '../../../types';
-import { useBlankProjectFormMutation } from '../../hooks/mutations/useBlankProjectFormMutation';
+import { useSession } from '../../contexts/session-context';
 import { usePopCreateMutation } from '../../hooks/mutations/usePopCreateMutation';
-import { useSession } from '../../hooks/useSession';
 import { PepSelector } from './components/pep-selector';
 
 interface POPInputs {
@@ -80,23 +79,7 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   const isPrivate = watch('is_private');
   const peps = watch('peps');
 
-  const mutation = usePopCreateMutation(
-    namespace,
-    projectName,
-    tag,
-    isPrivate,
-    description,
-    'pep/2.1.0', // default schema for now
-    peps.map((pep) => {
-      return {
-        sample_name: `${pep.namespace}/${pep.name}:${pep.tag}`,
-        namespace: pep.namespace,
-        name: pep.name,
-        tag: pep.tag,
-      };
-    }),
-    onHide,
-  );
+  const { isPending: isSubmitting, submit } = usePopCreateMutation(namespace);
 
   return (
     <form id="blank-project-form" className="border-0 form-control">
@@ -113,54 +96,50 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           Private
         </label>
       </div>
-      <span className="fs-4 d-flex align-items-center">
-        <select
-          id="blank-namespace-select"
-          className="form-select w-75"
-          aria-label="Namespace selection"
-          {...register('namespace', { required: true })}
-        >
-          <option value={user?.login}>{user?.login}</option>
-          {user?.orgs.map((org) => (
-            <option key={org} value={org}>
-              {org}
-            </option>
-          ))}
-        </select>
-        <span className="mx-1 mb-1">/</span>
-        <input
-          id="blank-project-name"
-          type="text"
-          className="form-control"
-          placeholder="name"
-          // dont allow any whitespace
-          {...register('project_name', {
-            required: {
-              value: true,
-              message: 'empty',
-            },
-            pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'invalid',
-            },
-          })}
-        />
-        <span className="mx-1 mb-1">:</span>
-        <input
-          {...register('tag', {
-            required: false,
-            pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'invalid',
-            },
-          })}
-          id="blank_tag"
-          type="text"
-          className="form-control"
-          placeholder="default"
-        />
-      </span>
-      <CombinedErrorMessage errors={errors} />
+      <div className="namespace-name-tag-container">
+        <label className="fw-bold text-sm">Namespace *</label>
+        <label className="fw-bold text-sm">Name *</label>
+        <label className="fw-bold text-sm">Tag</label>
+      </div>
+      <div className="namespace-name-tag-container fs-4">
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <select
+            id="blank-namespace-select"
+            className="form-select"
+            aria-label="Namespace selection"
+            {...register('namespace', { required: true })}
+          >
+            <option value={user?.login}>{user?.login}</option>
+            {user?.orgs.map((org) => (
+              <option key={org} value={org}>
+                {org}
+              </option>
+            ))}
+          </select>
+          <span className="mx-1 mb-1">/</span>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <input
+            // dont allow any whitespace
+            {...register('project_name', {
+              required: true,
+              pattern: {
+                value: /^\S+$/,
+                message: 'No spaces allowed.',
+              },
+            })}
+            id="blank-project-name"
+            type="text"
+            className="form-control"
+            placeholder="name"
+          />
+          <span className="mx-1 mb-1">:</span>
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+          <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
+        </div>
+      </div>
+      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="blank_description"
         className="form-control mt-3"
@@ -216,14 +195,37 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
       ) : null}
       <div className="mt-3">
         <button
-          disabled={!isValid || mutation.isPending || peps.length === 0}
+          disabled={!isValid || isSubmitting || peps.length === 0}
           id="blank-project-submit-btn"
           className="btn btn-success me-1"
           type="button"
-          onClick={() => mutation.mutate()}
+          onClick={() =>
+            submit(
+              {
+                projectName,
+                tag,
+                isPrivate,
+                description,
+                pepSchema: 'pep/2.1.0', // default schema for now
+                peps: peps.map((pep) => {
+                  return {
+                    sample_name: `${pep.namespace}/${pep.name}:${pep.tag}`,
+                    namespace: pep.namespace,
+                    name: pep.name,
+                    tag: pep.tag,
+                  };
+                }),
+              },
+              {
+                onSuccess: () => {
+                  onHide();
+                },
+              },
+            )
+          }
         >
           <i className="bi bi-plus-circle me-1"></i>
-          {mutation.isPending ? 'Submitting...' : 'Add'}
+          {isSubmitting ? 'Submitting...' : 'Add'}
         </button>
         <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
           Cancel

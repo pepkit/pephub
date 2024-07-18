@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getView } from '../../api/project';
-import { useSession } from '../useSession';
+import { useSession } from '../../contexts/session-context';
 
 interface ViewParams {
   namespace: string | undefined;

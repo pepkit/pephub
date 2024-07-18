@@ -4,11 +4,11 @@ import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 
+import { useSession } from '../../contexts/session-context';
 import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
 import { useSchemas } from '../../hooks/queries/useSchemas';
 import { ValidationParams } from '../../hooks/queries/useValidation';
 import { useValidation } from '../../hooks/queries/useValidation';
-import { useSession } from '../../hooks/useSession';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
@@ -120,6 +120,7 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
     <>
       {/* Only in development mode  */}
       {/* render the params */}
+      {/* @ts-ignore */}
       {process.env.NODE_ENV === 'development' && (
         <div className="my-3">
           <pre>
@@ -159,7 +160,7 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
                       className="mt-2"
                       // @ts-ignore
                       options={
-                        projects?.items.map((project) => ({
+                        projects?.results.map((project) => ({
                           value: `${project.namespace}/${project.name}:${project.tag}`,
                           label: `${project.namespace}/${project.name}:${project.tag}`,
                         })) || []
