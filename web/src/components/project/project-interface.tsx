@@ -155,7 +155,9 @@ export const ProjectInterface = (props: Props) => {
     <Fragment>
       <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
         <ProjectValidationAndEditButtons
-          isDirty={projectUpdates.formState.isDirty}
+          isDirty={true}
+          // TODO: why does this not work in production?
+          // isDirty={projectUpdates.formState.isDirty}
           isUpdatingProject={isSubmitting}
           reset={projectUpdates.reset}
           handleSubmit={handleSubmit}
@@ -166,12 +168,10 @@ export const ProjectInterface = (props: Props) => {
           <Controller
             control={projectUpdates.control}
             name="samples"
-            render={() => (
+            render={({ field: { onChange } }) => (
               <SampleTable
                 onChange={(samples) => {
-                  projectUpdates.setValue('samples', samples, {
-                    shouldDirty: true,
-                  });
+                  onChange(samples);
                 }}
                 readOnly={!userCanEdit}
                 data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
@@ -184,12 +184,10 @@ export const ProjectInterface = (props: Props) => {
           <Controller
             control={projectUpdates.control}
             name="subsamples"
-            render={() => (
+            render={({ field: { onChange } }) => (
               <SampleTable
                 onChange={(subsamples) => {
-                  projectUpdates.setValue('subsamples', subsamples, {
-                    shouldDirty: true,
-                  });
+                  onChange(subsamples);
                 }}
                 data={currentHistoryId ? historyData?._subsample_list || [] : newSubsamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
