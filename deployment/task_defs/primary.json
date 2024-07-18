@@ -6,10 +6,10 @@
   "family": "pephub-task",
   "containerDefinitions": [
     {
-      "name": "pephub-container",      
-      "cpu": "512",
+      "name": "pephub-container",
+      "cpu": 512,
       "memory": 6096,
-      "memoryReservation": 512,      
+      "memoryReservation": 512,
       "portMappings": [
         {
           "hostPort": 8120,
@@ -108,9 +108,7 @@
   "placementConstraints": [],
   "taskRoleArn": "ecsTaskExecutionRole",
   "pidMode": null,
-  "requiresCompatibilities": [
-    "EC2"
-  ],
+  "requiresCompatibilities": ["EC2"],
   "networkMode": "bridge",
   "inferenceAccelerators": null,
   "proxyConfiguration": null,
