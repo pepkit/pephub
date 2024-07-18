@@ -10,6 +10,7 @@ import { useSession } from '../contexts/session-context';
 import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
 import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { numberWithCommas } from '../utils/etc';
+import { sampleListToArrays } from '../utils/sample-table';
 
 interface MotionButtonProps {
   onClick?: () => void;
@@ -115,7 +116,7 @@ export function Home() {
                     transition={{ duration: 0.5 }}
                     className="landing-table shadow"
                   >
-                    <SampleTable minRows={9} data={exampleSamples?.items || []} />
+                    <SampleTable minRows={9} data={sampleListToArrays(exampleSamples?.items || [])} />
                   </motion.div>
                 </div>
               </div>

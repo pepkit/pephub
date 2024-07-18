@@ -3,32 +3,28 @@ import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
 import { useRef } from 'react';
 
-import { Sample } from '../../../types';
-import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { addClassesToRows } from './hooks-callbacks';
+
+const ROW_HEIGHT = 23; // px
 
 type Props = {
   className?: string;
-  data: Sample[];
-  onChange?: (rows: Sample[]) => void;
+  data: any[][];
+  onChange?: (rows: any[][]) => void;
   readOnly?: boolean;
   height?: number;
   minRows?: number;
   stretchH?: 'none' | 'all' | 'last';
 };
-/**
- * This table is meant to handle csv strings, so just pass in
- * the csv string and it will handle the rest
- */
+
 export const SampleTable = (props: Props) => {
   const { data, readOnly = false, onChange, height, minRows, stretchH, className } = props;
-  // parse the list of objects into rows
-  const rows = sampleListToArrays(data);
-  const ROW_HEIGHT = 23; // px
 
   // compute table height based on number of rows
   // or the minRows prop if it is provided
-  let tableHeight = rows.length * ROW_HEIGHT + 50;
+  let tableHeight = data.length * ROW_HEIGHT + 50;
+
+  // if minRows is provided, then use that as the height
   if (minRows) {
     tableHeight = minRows * ROW_HEIGHT + 50;
   }
@@ -41,23 +37,19 @@ export const SampleTable = (props: Props) => {
   const hotRef = useRef<HotTable>(null);
 
   if (hotRef) {
-    // if data-bs-theme=="dark" then add dark theme to the table
-    // data-bs-theme is on <html> tag
-    const theme = document.documentElement.getAttribute('data-bs-theme');
-
-    if (theme === 'dark') {
-      tableClassName += ' htDark';
-    }
-
     hotRef.current?.hotInstance?.updateSettings({
       className: tableClassName,
     });
   }
 
+  const numColumns = data.length > 0 ? data[0].length : 0;
+
+  const ph_id_col = data[0].indexOf('ph_id');
+
   return (
     <HotTable
       ref={hotRef}
-      data={rows.length > 0 ? rows : [[]]}
+      data={data}
       stretchH={stretchH || 'all'}
       height={height || tableHeight}
       readOnly={readOnly}
@@ -71,6 +63,10 @@ export const SampleTable = (props: Props) => {
             innerDiv.classList.toggle('expanded');
           }
         });
+      }}
+      hiddenColumns={{
+        indicators: true,
+        columns: ph_id_col === -1 ? [] : [numColumns - 1],
       }}
       dropdownMenu={true}
       minCols={2}
@@ -97,30 +93,31 @@ export const SampleTable = (props: Props) => {
       manualRowMove={true}
       licenseKey="non-commercial-and-evaluation"
       manualColumnResize
+      afterPaste={(coords) => {}}
       afterChange={(changes) => {
         if (changes && onChange) {
           changes.forEach((change) => {
             const [row, col, _, newVal] = change;
-            // @ts-ignore - we know that col is a number
-            rows[row][col] = newVal;
+            // @ts-ignore we know that col is a number
+            data[row][col] = newVal;
           });
 
-          onChange(arraysToSampleList(rows));
+          onChange(data);
         }
       }}
       afterRemoveCol={(index, _amount) => {
         // remove all values at the specified index from "rows"
-        rows.forEach((row) => {
+        data.forEach((row) => {
           row.splice(index, 0);
         });
         if (onChange) {
-          onChange(arraysToSampleList(rows));
+          onChange(data);
         }
       }}
-      afterRemoveRow={(index, amount) => {
-        rows.splice(index, 0);
+      afterRemoveRow={(index, _amount) => {
+        data.splice(index, 0);
         if (onChange) {
-          onChange(arraysToSampleList(rows));
+          onChange(data);
         }
       }}
     />

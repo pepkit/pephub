@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
+import { HistoryBorderBox } from '../components/history/history-border-box';
 import { HistoryInfoBox } from '../components/history/history-info-box';
 import { HistoryToolbar } from '../components/history/history-toolbar';
 import { PageLayout } from '../components/layout/page-layout';
@@ -23,7 +24,7 @@ export const ProjectPage = () => {
   const { namespace, projectName, tag, shouldFetchSampleTable, forceTraditionalInterface } = useProjectPage();
 
   // get the value of which history id is being viewed
-  const { currentHistoryId } = useCurrentHistoryId();
+  const { currentHistoryId, setCurrentHistoryId } = useCurrentHistoryId();
 
   const projectConfigQuery = useProjectConfig(namespace, projectName, tag);
   const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
@@ -48,19 +49,36 @@ export const ProjectPage = () => {
   }, [shouldFetchSampleTable, projectInfo]);
 
   // add class to body for a border
+  // useEffect(() => {
+  //   if (currentHistoryId !== null) {
+  //     document.body.classList.add('viewing-history-border');
+  //     document.body.classList.add('border-warning');
+  //   } else {
+  //     document.body.classList.remove('viewing-history-border');
+  //     document.body.classList.remove('border-warning');
+  //   }
+  //   return () => {
+  //     document.body.classList.remove('viewing-history-border');
+  //     document.body.classList.remove('border-warning');
+  //   };
+  // }, [currentHistoryId]);
+
+  // key binding for escaping history view
   useEffect(() => {
-    if (currentHistoryId !== null) {
-      document.body.classList.add('viewing-history-border');
-      document.body.classList.add('border-warning');
-    } else {
-      document.body.classList.remove('viewing-history-border');
-      document.body.classList.remove('border-warning');
-    }
-    return () => {
-      document.body.classList.remove('viewing-history-border');
-      document.body.classList.remove('border-warning');
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && currentHistoryId !== null) {
+        // clear the history id
+        e.preventDefault();
+        setCurrentHistoryId(null);
+      }
     };
-  }, [currentHistoryId]);
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   if (projectAnnotationQuery.error) {
     return (
@@ -86,6 +104,7 @@ export const ProjectPage = () => {
           <div className="position-absolute top-0 start-0 w-100">
             <HistoryToolbar />
           </div>
+          <HistoryBorderBox />
         </Fragment>
       )}
       <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>

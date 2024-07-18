@@ -47,9 +47,10 @@ async def verify_updated_project(updated_project) -> peppy.Project:
 
     # subsample table update
     if updated_project.subsample_tables is not None:
+        subsamples = list(updated_project.subsample_tables[0][0].values())
         new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = (
             updated_project.subsample_tables
-            if list(updated_project.subsample_tables[0][0].values())[0]
+            if len(subsamples) > 0 and subsamples[0]
             else None
         )
 

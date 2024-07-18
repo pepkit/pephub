@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react';
+import { Fragment } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Fragment } from 'react/jsx-runtime';
-import { useShallow } from 'zustand/react/shallow';
+import toast from 'react-hot-toast';
 
-import { Sample } from '../../../types';
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
 import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
@@ -16,6 +15,7 @@ import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { useProjectPageView } from '../../hooks/stores/useProjectPageView';
 import { getOS } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
+import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { SampleTable } from '../tables/sample-table';
 import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
@@ -29,8 +29,8 @@ type Props = {
 
 type ProjectUpdateFields = {
   config: string;
-  samples: Sample[];
-  subsamples: Sample[];
+  samples: any[][];
+  subsamples: any[][];
 };
 
 export const ProjectInterface = (props: Props) => {
@@ -49,15 +49,15 @@ export const ProjectInterface = (props: Props) => {
   const { data: historyData } = useProjectHistory(namespace, projectName, tag, currentHistoryId);
 
   // fetch the page view (samples, subsamples, config)
-  const { pageView } = useProjectPageView();
+  const { pageView, setPageView } = useProjectPageView();
 
   // form to store project updated fields temporarily
   // on the client before submitting to the server
   const projectUpdates = useForm<ProjectUpdateFields>({
     defaultValues: {
       config: projectConfig?.config || '',
-      samples: sampleTable?.items || [],
-      subsamples: subSampleTable?.items || [],
+      samples: sampleListToArrays(sampleTable?.items || []),
+      subsamples: sampleListToArrays(subSampleTable?.items || []),
     },
   });
 
@@ -70,13 +70,44 @@ export const ProjectInterface = (props: Props) => {
   const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   const handleSubmit = () => {
-    submit(projectUpdates.getValues());
+    const values = projectUpdates.getValues();
+
+    try {
+      const samplesParsed = arraysToSampleList(values.samples);
+      const subsamplesParsed = arraysToSampleList(values.subsamples);
+      submit({
+        config: values.config,
+        samples: samplesParsed,
+        subsamples: subsamplesParsed,
+      });
+    } catch (e) {
+      toast.error('The project could not be saved. ' + e, {
+        duration: 5000,
+        position: 'top-center',
+      });
+    }
   };
 
-  // on save handler
+  // keyboard shortcuts
   useEffect(() => {
     // os info
     const os = getOS();
+
+    const handleNavigationKeyDown = (e: KeyboardEvent) => {
+      // if we are focused on any of the data elements (sample table, config, etc... dont do anything)
+      if (projectDataRef.current?.contains(document.activeElement)) {
+        return;
+      }
+      if (e.key === 'c') {
+        setPageView('config');
+      }
+      if (e.key === 's') {
+        setPageView('samples');
+      }
+      if (e.key === 'u') {
+        setPageView('subsamples');
+      }
+    };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       let ctrlKey = false;
@@ -88,12 +119,28 @@ export const ProjectInterface = (props: Props) => {
           ctrlKey = e.ctrlKey;
           break;
       }
-      // check for ctrl+s, ignore if fetchsampletable is false
+      // SAVE (ctrl + s)
       if (ctrlKey && e.key === 's') {
         if (projectUpdates.formState.isDirty && !isSubmitting) {
           e.preventDefault();
           handleSubmit();
         }
+      }
+
+      // DISCARD (ctrl + d)
+      if (ctrlKey && e.key === 'd') {
+        if (projectUpdates.formState.isDirty && !isSubmitting) {
+          e.preventDefault();
+          projectUpdates.reset();
+        }
+      }
+
+      // NAVIGATION ('p' + other keys to go to tabs or open modals)
+      if (e.key === 'p') {
+        window.addEventListener('keydown', handleNavigationKeyDown);
+        setTimeout(() => {
+          window.removeEventListener('keydown', handleNavigationKeyDown);
+        }, 1000);
       }
     };
 
@@ -125,7 +172,7 @@ export const ProjectInterface = (props: Props) => {
                   onChange(samples);
                 }}
                 readOnly={!userCanEdit}
-                data={currentHistoryId ? historyData?._sample_dict || [] : newSamples}
+                data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
               />
             )}
