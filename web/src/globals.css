@@ -615,4 +615,5 @@ body {
   /* no box shadow */
   box-shadow: none !important;
   transition: box-shadow 0.1s ease-in-out;
+  height: 31px !important;
 }

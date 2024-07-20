@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 import { useValidation } from '../../../hooks/queries/useValidation';
 import { ValidationResultModal } from '../../modals/validation-result';
@@ -14,7 +15,7 @@ export const ValidationResult = (props: Props) => {
 
   const [validationModalIsOpen, setValidationModalIsOpen] = useState(false);
 
-  let wrapperClassName = 'py-1 px-2 rounded shadow-md bg-opacity-10 validation-button';
+  let wrapperClassName = 'py-1 px-2 rounded-1 bg-opacity-10 validation-button';
   if (isValidating) {
     wrapperClassName += ' border border-warning text-warning bg-warning';
   } else if (validationResult?.valid) {
@@ -24,25 +25,35 @@ export const ValidationResult = (props: Props) => {
   }
 
   return (
-    <div className="d-flex flex-row align-items-center">
-      <button
-        disabled={isValidating}
-        onClick={() => {
-          setValidationModalIsOpen(true);
-        }}
-        className={wrapperClassName}
+    <div className="d-flex flex-row align-items-center rounded-1 shadow-sm">
+      <OverlayTrigger
+        overlay={
+          <Tooltip id="validation">
+            As you edit your project below, it will be validated against the schema currently selected for it.
+          </Tooltip>
+        }
+        delay={{ show: 250, hide: 500 }}
+        trigger={["hover"]}
       >
-        <div className="d-flex flex-row align-items-center gap-2 text-sm py-0">
-          {isValidating ? (
-            <span className="bg-warning text-warning rounded-pill validation-badge"></span>
-          ) : validationResult?.valid ? (
-            <span className="bg-success text-success rounded-pill validation-badge"></span>
-          ) : (
-            <span className="bg-danger text-danger rounded-pill validation-badge"></span>
-          )}
-          {schemaRegistry}
-        </div>
-      </button>
+        <button
+          disabled={isValidating}
+          onClick={() => {
+            setValidationModalIsOpen(true);
+          }}
+          className={wrapperClassName}
+        >
+          <div className="d-flex flex-row align-items-center gap-2 text-sm py-0">
+            {isValidating ? (
+              <span className="bg-warning text-warning rounded-pill validation-badge"></span>
+            ) : validationResult?.valid ? (
+              <span className="bg-success text-success rounded-pill validation-badge"></span>
+            ) : (
+              <span className="bg-danger text-danger rounded-pill validation-badge"></span>
+            )}
+            {schemaRegistry}
+          </div>
+        </button>
+      </OverlayTrigger>
       <ValidationResultModal
         show={validationModalIsOpen}
         onHide={() => setValidationModalIsOpen(false)}

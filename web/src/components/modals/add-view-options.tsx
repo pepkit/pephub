@@ -42,13 +42,13 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide }) => {
   };
 
   return (
-    <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
+    <Modal size="lg" centered animation={false} show={show} onHide={onHide} style={{zIndex: 99999}}>
       <Modal.Header closeButton>
         <h1 className="modal-title fs-5">Manage Views</h1>
       </Modal.Header>
       <Modal.Body>
         <div className="">
-          <h6 className="mb-1">Save View</h6>
+          <h6 className="mb-1">Save View (coming soon)</h6>
           <p className="mb-3 text-xs">Save the current project sample table state as a view by naming it and clicking the save button.</p>
           <input
             placeholder="View name..."
@@ -66,13 +66,13 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide }) => {
             //   !!view
             // }
             onClick={handleAddView}
-            className="btn btn-success px-2 mt-3 text-xs">
+            className="btn btn-success px-2 mt-3 text-xs disabled">
             <i className="bi bi-plus-lg"></i> Save New View
           </button>
         </div>
         <hr />
         <div className="">
-          <h6 className="mb-1">Remove View</h6>
+          <h6 className="mb-1">Remove View (coming soon)</h6>
           <p className="mb-3 text-xs">Remove an existing view by selecting it and clicking the remove button.</p>
           <ReactSelect
             styles={{
@@ -113,7 +113,7 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide }) => {
             // }
             // value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
           />
-          <button className="btn btn-danger px-2 mt-3 text-xs">
+          <button className="btn btn-danger px-2 mt-3 text-xs disabled">
             <i className="bi bi-trash"></i> Remove View
           </button>
         </div>
