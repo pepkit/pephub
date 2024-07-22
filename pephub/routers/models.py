@@ -128,3 +128,14 @@ class SamplesResponseModel(BaseModel):
 
 class ConfigResponseModel(BaseModel):
     config: str
+
+
+class SchemaCreateRequest(BaseModel):
+    name: str
+    description: Optional[str] = None
+    schema: str
+
+
+class SchemaUpdateRequest(BaseModel):
+    description: Optional[str] = None
+    schema: str
