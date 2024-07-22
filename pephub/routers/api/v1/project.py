@@ -50,7 +50,6 @@ from ...models import (
     ProjectOptional,
     ProjectRawModel,
     ProjectRawRequest,
-    CreateViewRequest,
     ProjectHistoryResponse,
     SamplesResponseModel,
     ConfigResponseModel,
@@ -681,15 +680,18 @@ async def get_view_of_the_project(
 
 
 @project.post(
-    "/views",
+    "/views/{view}",
     summary="Create a view",
     tags=["views"],
 )
 async def create_view_of_the_project(
     namespace: str,
     project: str,
-    create_view_request: CreateViewRequest,
+    view: str,
     tag: str = DEFAULT_TAG,
+    description: str = "",
+    sample_names: List[str] = None,
+    no_fail: bool = False,
     namespace_access_list: List[str] = Depends(get_namespace_access_list),
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
@@ -702,12 +704,8 @@ async def create_view_of_the_project(
             status_code=401,
         )
     try:
-        view_name = create_view_request.view_name
-        sample_names = create_view_request.sample_names
-        description = create_view_request.description
-        no_fail = create_view_request.no_fail
         agent.view.create(
-            view_name=view_name,
+            view_name=view,
             no_fail=no_fail,
             description=description,
             view_dict=CreateViewDictModel(

@@ -98,13 +98,6 @@ class ProjectJsonRequest(BaseModel):
     pop: Optional[bool] = None
 
 
-class CreateViewRequest(BaseModel):
-    view_name: str
-    sample_names: List[str]
-    description: Optional[str] = None
-    no_fail: Optional[bool]
-
-
 class RevokeRequest(BaseModel):
     last_five_chars: str
 
@@ -135,4 +128,3 @@ class SamplesResponseModel(BaseModel):
 
 class ConfigResponseModel(BaseModel):
     config: str
-
