@@ -144,3 +144,11 @@ class SchemaUpdateRequest(BaseModel):
 class SchemaGroupCreateRequest(BaseModel):
     name: str
     description: Optional[str] = None
+
+
+class SchemaGroupUpdateRequest(BaseModel):
+    description: Optional[str] = None
+
+
+class SchemaGroupAssignRequest(BaseModel):
+    group: str

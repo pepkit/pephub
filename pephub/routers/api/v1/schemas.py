@@ -26,7 +26,7 @@ from ....dependencies import (
 
 load_dotenv()
 
-groups = APIRouter(prefix="/api/v1/groups", tags=["groups"])
+groups = APIRouter(prefix="/api/v1/schema-groups", tags=["groups"])
 schemas = APIRouter(prefix="/api/v1/schemas", tags=["schemas"])
 
 
