@@ -25,8 +25,10 @@ import { Home } from './pages/Home';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
+import { Schema } from './pages/Schema';
 import { Schemas } from './pages/Schemas';
 import { SearchPage } from './pages/Search';
+import { UserSchemas } from './pages/UserSchemas';
 import { EidoValidator } from './pages/Validator';
 
 registerAllModules();
@@ -73,6 +75,14 @@ const router = createBrowserRouter([
   {
     path: '/schemas',
     element: <Schemas />,
+  },
+  {
+    path: '/schemas/:namespace',
+    element: <UserSchemas />,
+  },
+  {
+    path: '/schemas/:namespace/:schema',
+    element: <Schema />,
   },
 ]);
 

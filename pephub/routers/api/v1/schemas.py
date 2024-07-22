@@ -11,6 +11,7 @@ from pepdbagent.exceptions import (
     SchemaGroupDoesNotExistError,
     SchemaGroupAlreadyExistsError,
 )
+import yaml.parser
 
 from ...models import (
     SchemaCreateRequest,
@@ -75,10 +76,9 @@ async def create_schema_for_namespace(
         )
 
     # parse out the schema into a dictionary
-    schema_str = new_schema.schema
-    schema_dict = yaml.safe_load(schema_str)
-
     try:
+        schema_str = new_schema.schema
+        schema_dict = yaml.safe_load(schema_str)
         agent.schema.create(
             namespace=namespace,
             name=new_schema.name,
@@ -95,6 +95,11 @@ async def create_schema_for_namespace(
         raise HTTPException(
             status_code=409,
             detail=f"Schema {new_schema.name}/{namespace} already exists.",
+        )
+    except yaml.parser.ParserError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"The was an error parsing the yaml: {e}",
         )
 
 
