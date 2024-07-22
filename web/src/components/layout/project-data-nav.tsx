@@ -5,7 +5,9 @@ import { ViewSelector } from '../project/view-selector';
 
 type PageView = 'samples' | 'subsamples' | 'config' | 'help';
 
-type NavProps = {};
+type NavProps = {
+  filteredSamples: string[];
+};
 
 type ViewButtonProps = {
   view: PageView;
@@ -43,7 +45,7 @@ const ViewButton = (props: ViewButtonProps) => {
 };
 
 export const ProjectDataNav = (props: NavProps) => {
-  const {} = props;
+  const {filteredSamples} = props;
 
   const { pageView, setPageView } = useProjectPageView();
 
@@ -115,7 +117,7 @@ export const ProjectDataNav = (props: NavProps) => {
           color={pageView === 'help' ? ' text-dark' : ' text-muted'}
         />
       </div>
-      <ViewSelector />
+      <ViewSelector filteredSamples={filteredSamples} />
     </div>
   );
 };

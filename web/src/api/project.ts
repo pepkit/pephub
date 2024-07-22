@@ -343,16 +343,11 @@ export const addProjectView = (
   token: string | null,
   params: CreateProjectViewRequest,
 ) => {
-  const url = `${API_BASE}/projects/${namespace}/${projectName}/views?tag=${tag}`;
+  const url = `${API_BASE}/projects/${namespace}/${projectName}/views/${params.viewName}?description=${params.description}&tag=${tag}`;
   return axios.post<CreateProjectViewResponse>(
     url,
-    {
-      description: params.description,
-      sample_names: params.sampleNames,
-      no_fail: params.noFail,
-      view_name: params.viewName,
-    },
-    { headers: { Authorization: `Bearer ${token}` } },
+    params.sampleNames,
+    { headers: { Authorization: `Bearer ${token}` } }
   );
 };
 
@@ -364,7 +359,10 @@ export const deleteProjectView = (
   token: string | null,
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${projectName}/views/${viewName}?tag=${tag}`;
-  return axios.delete<DeleteProjectViewResponse>(url, { headers: { Authorization: `Bearer ${token}` } });
+  return axios.delete<DeleteProjectViewResponse>(
+    url, 
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 }; 
 
 export const getProjectAllHistory = (namespace: string, name: string, tag: string, jwt: string | null) => {

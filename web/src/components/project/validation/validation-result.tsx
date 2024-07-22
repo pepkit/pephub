@@ -33,7 +33,7 @@ export const ValidationResult = (props: Props) => {
           </Tooltip>
         }
         delay={{ show: 250, hide: 500 }}
-        trigger={["hover"]}
+        trigger={["hover", "focus"]}
       >
         <button
           disabled={isValidating}

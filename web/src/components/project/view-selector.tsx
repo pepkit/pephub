@@ -12,9 +12,12 @@ import { useSession } from '../../contexts/session-context';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { canEdit } from '../../utils/permissions';
 
-type ViewSelectorProps = {};
+type ViewSelectorProps = {
+  filteredSamples: string[];
+};
 
 export const ViewSelector = (props: ViewSelectorProps) => {
+  const { filteredSamples } = props;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { namespace, projectName, tag } = useProjectPage();
@@ -36,15 +39,19 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const renderTooltip = (props: TooltipProps) => (
     <Tooltip id="button-tooltip" {...props}>
       A project view is a way to subset your sample table in a way that is more manageable for viewing in the browser.
-      To learn more about vierws, and how to create them, visit the{' '}
+      To learn more about views, and how to create them, visit the{' '}
       <a href="https://pep.databio.org/pephub/">API documentation.</a>
     </Tooltip>
   );
 
   return (
     <Fragment>
-    <OverlayTrigger placement="top" delay={{ show: 250, hide: 500 }} overlay={renderTooltip} trigger={["hover"]}>  
-
+    <OverlayTrigger
+      placement="top"
+      delay={{ show: 250, hide: 500 }}
+      overlay={renderTooltip} 
+      trigger={["hover", "focus"]}
+    >  
       <div className="ps-3 d-flex flex-row align-items-center justify-content-end" style={{width: '25vw'}}>
         {userHasOwnership ? (
           <button
@@ -55,8 +62,6 @@ export const ViewSelector = (props: ViewSelectorProps) => {
           </button>
           ) : null
         }
-        
-        
           {/*<i className="bi bi-info-circle ms-2"></i>*/}
         <ReactSelect
           styles={{
@@ -99,7 +104,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
         
       </div>
       </OverlayTrigger>
-      <ViewOptionsModal show={showViewOptionsModal} onHide={() => setShowViewOptionsModal(false)} />
+      <ViewOptionsModal show={showViewOptionsModal} onHide={() => setShowViewOptionsModal(false)} filteredSamples={filteredSamples} />
     </Fragment>
   );
 };

@@ -16,10 +16,11 @@ type ProjectValidationAndEditButtonsProps = {
   isUpdatingProject: boolean;
   reset: () => void;
   handleSubmit: () => void;
+  filteredSamples: string[];
 };
 
 export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditButtonsProps) => {
-  const { isDirty, isUpdatingProject, reset, handleSubmit } = props;
+  const { isDirty, isUpdatingProject, reset, handleSubmit, filteredSamples } = props;
   const { user } = useSession();
 
   const { namespace, projectName, tag } = useProjectPage();
@@ -38,7 +39,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   return (
     <Fragment>
       <div className="h-100 flex-row d-flex align-items-end justify-content-between mx-3">
-        <ProjectDataNav />
+        <ProjectDataNav filteredSamples={filteredSamples} />
         {/* no matter what, only render if belonging to the user */}
         {userHasOwnership ? (
           <div className="h-100 d-flex flex-row align-items-center w-50 justify-content-end">
@@ -59,7 +60,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                         </Tooltip>
                       }
                       delay={{ show: 250, hide: 500 }}
-                      trigger={["hover"]}
+                      trigger={["hover", "focus"]}
                     >
                       <div className="d-flex align-items-center">
                         <StatusIcon className="text-2xl" variant="warning" />

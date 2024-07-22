@@ -1,19 +1,23 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { Modal, Tab, Tabs } from 'react-bootstrap';
 import ReactSelect from 'react-select';
+import { Controller, FieldErrors, useForm } from 'react-hook-form';
+import { ErrorMessage } from '@hookform/error-message';
+
 
 import { useViewMutations } from '../../hooks/mutations/useViewMutations';
 import { useProjectPage } from '../../contexts/project-page-context';
-import { CreateProjectViewRequest } from '../../api/project';
+import { CreateProjectViewRequest, addProjectView, deleteProjectView } from '../../api/project';
 import { useProjectViews } from '../../hooks/queries/useProjectViews';
 import { useProjectSelectedView } from '../../hooks/stores/useProjectSelectedViewStore';
 
 interface Props {
   show: boolean;
   onHide: () => void;
+  filteredSamples: string[];
 }
 
-export const ViewOptionsModal: FC<Props> = ({ show, onHide }) => {
+export const ViewOptionsModal: FC<Props> = ({ show, onHide, filteredSamples }) => {
 
   const { namespace, projectName, tag } = useProjectPage();
   const { view, setView } = useProjectSelectedView();
@@ -25,20 +29,49 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide }) => {
 
   const viewMutations = useViewMutations(namespace, projectName, tag);
 
+  const [selectedViewDelete, setSelectedViewDelete] = useState(null);
+  const [deleteState, setDeleteState] = useState(true);
+
+  type FormValues = {
+    name: string;
+    description: string;
+  };
+
+  const {
+    register,
+    reset: resetForm,
+    formState: { isValid, errors },
+  } = useForm<FormValues>({
+    mode: 'onChange',
+    defaultValues: {
+      name: null,
+      description: null,
+    },
+  });
+
+  const handleDeleteView =  async() => {
+    viewMutations.removeViewMutation.mutate(selectedViewDelete.value);
+    setSelectedViewDelete(null)
+  };
+
   const runValidation = () => {
     projectViewsQuery.refetch();
   };
 
-  const handleAddView = () => {
-    const createViewRequest: CreateProjectViewRequest = {
-      viewName: "test_view", // Get this from a state or input field
-      sampleNames: ["young_hsc_rep1"], // Get this from state or input fields
-      description: "test_description", // Optional
-      noFail: false // Optional
-    };
+  const onSubmit = (e) => {
+    e.preventDefault();
 
+    const createViewRequest: CreateProjectViewRequest = {
+      viewName: e.target[0].value,
+      sampleNames: filteredSamples, // You might want to update this based on your requirements
+      description: e.target[1].value,
+      noFail: false
+    };
+    
     viewMutations.addViewMutation.mutate(createViewRequest);
-    // runValidation();
+
+    e.target.reset()
+    resetForm({}, { keepValues: false })
   };
 
   return (
@@ -48,32 +81,58 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide }) => {
       </Modal.Header>
       <Modal.Body>
         <div className="">
-          <h6 className="mb-1">Save View (coming soon)</h6>
-          <p className="mb-3 text-xs">Save the current project sample table state as a view by naming it and clicking the save button.</p>
-          <input
-            placeholder="View name..."
-            type="text"
-            className="form-control"
-            id="view-name"
-            aria-describedby="view-name-help"
-          />
-          <button 
-            // disabled={
-            //   configMutation.isPending ||
-            //   totalProjectMutation.isPending ||
-            //   !(configIsDirty || samplesIsDirty || subsamplesIsDirty) ||
-            //   !shouldFetchSampleTable ||
-            //   !!view
-            // }
-            onClick={handleAddView}
-            className="btn btn-success px-2 mt-3 text-xs disabled">
-            <i className="bi bi-plus-lg"></i> Save New View
-          </button>
+          <h6 className="mb-1">Save View</h6>
+          <p className="mb-3 text-xs">Save the current filtered sample table state as a view by providing a name (required) and description (optional) for the view.</p>
+          <form onSubmit={onSubmit}>
+            <div className="input-group mb-2">
+              <span className="input-group-text">Name</span>
+              <input
+                {...register('name', {
+                  required: {
+                    value: true,
+                    message: 'View Name must not be empty.',
+                  },
+                  pattern: {
+                    value: /^[a-zA-Z0-9_-]+$/,
+                    message: "View Name must contain only alphanumeric characters, '-', or '_'.",
+                  },
+                })}
+                placeholder="..."
+                type="text"
+                className="form-control"
+                id="view-name"
+                aria-describedby="view-name-help"
+              />
+            </div> 
+            <div className="input-group">
+              <span className="input-group-text">Description</span>
+              <input
+                {...register('desc')}
+                placeholder="..."
+                type="text"
+                className="form-control"
+                id="view-description"
+                aria-describedby="view-description-help"
+              />
+            </div>
+            <ErrorMessage
+              errors={errors}
+              name="name"
+              render={({ message }) => message ? <p className="text-danger text-xs pt-1 mb-0">{message}</p> : null}
+            />
+            <button 
+              disabled={!isValid || !!errors.name?.message}
+              type='submit'
+              className="btn btn-success px-2 mt-3 text-xs">
+              <i className="bi bi-plus-lg"></i> Save New View
+            </button>
+
+          </form> 
         </div>
         <hr />
         <div className="">
-          <h6 className="mb-1">Remove View (coming soon)</h6>
-          <p className="mb-3 text-xs">Remove an existing view by selecting it and clicking the remove button.</p>
+          <h6 className="mb-1">Remove View</h6>
+          <p className="mb-3 text-xs">Remove an existing view by selecting it from the dropdown menu.</p>
           <ReactSelect
             styles={{
               control: (provided) => ({
@@ -90,30 +149,31 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide }) => {
                 label: `${view.name} | ${view.description || 'No description'}`,
               })) || []
             }
-            // onChange={(selectedOption) => {
-            //   debugger;
-            //   if (selectedOption === null) {
-            //     setView(undefined);
-            //     searchParams.delete('view');
-            //     setSearchParams(searchParams);
-            //   } else {
-            //     setView(selectedOption.value);
-            //     searchParams.set('view', selectedOption.value);
-            //     setSearchParams(searchParams);
-            //   }
-            // }}
-            // isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
-            // isClearable
-            // placeholder={
-            //   projectViewsIsLoading
-            //     ? 'Loading views...'
-            //     : projectViews?.views.length === 0
-            //     ? 'No views available'
-            //     : 'Select a view'
-            // }
-            // value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
+            onChange={(selectedOption) => {
+              debugger;
+              if ((selectedOption === null) || (projectViews?.views.length === 0)) {
+                setSelectedViewDelete(null);
+                setDeleteState(true);
+              } else {
+                setSelectedViewDelete(selectedOption);
+                setDeleteState(false);
+              }
+            }}
+            isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
+            isClearable
+            placeholder={
+              projectViewsIsLoading
+                ? 'Loading views...'
+                : projectViews?.views.length === 0
+                ? 'No views available'
+                : 'Select a view'
+            }
+            value={selectedViewDelete === null ? null : { view: selectedViewDelete.view, description: selectedViewDelete.description, value: selectedViewDelete.value, label: selectedViewDelete.label }}
           />
-          <button className="btn btn-danger px-2 mt-3 text-xs disabled">
+          <button
+            disabled={deleteState}
+            onClick={handleDeleteView}
+            className="btn btn-danger px-2 mt-3 text-xs">
             <i className="bi bi-trash"></i> Remove View
           </button>
         </div>

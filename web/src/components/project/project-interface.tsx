@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Fragment } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -38,6 +38,8 @@ export const ProjectInterface = (props: Props) => {
 
   const { user } = useSession();
   const projectDataRef = useRef<HTMLDivElement>(null);
+
+  const [filteredSamples, setFilteredSamples] = useState(null)
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
@@ -159,6 +161,7 @@ export const ProjectInterface = (props: Props) => {
           isUpdatingProject={isSubmitting}
           reset={projectUpdates.reset}
           handleSubmit={handleSubmit}
+          filteredSamples={filteredSamples}
         />
       </div>
       <div ref={projectDataRef}>
@@ -174,6 +177,7 @@ export const ProjectInterface = (props: Props) => {
                 readOnly={!userCanEdit}
                 data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                setFilteredSamples={setFilteredSamples}
               />
             )}
           />
