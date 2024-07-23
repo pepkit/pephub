@@ -6,17 +6,23 @@ import { updateSchema } from '../../api/schemas';
 import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
 
+type UpdateSchemaPayload = {
+  schema?: string;
+  description?: string;
+  isPrivate?: boolean;
+};
+
 export const useEditSchemaMutation = (namespace: string, name: string) => {
   const { jwt } = useSession();
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: (newSchema: string) => {
-      return updateSchema(namespace, name, newSchema, jwt);
+    mutationFn: (updates: UpdateSchemaPayload) => {
+      return updateSchema(namespace, name, updates, jwt);
     },
     onSuccess: () => {
       toast.success('Schema updated');
       queryClient.invalidateQueries({
-        queryKey: ['schemas', namespace, name],
+        queryKey: ['schema', namespace, name],
       });
     },
     onError(err: AxiosError) {

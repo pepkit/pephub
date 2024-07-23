@@ -30,6 +30,10 @@ type GetSchemasResponse = {
 
 type GetSchemaResponse = {
   schema: string;
+  description: string;
+  // private: boolean;
+  last_update_date: string;
+  submission_date: string;
 };
 
 type CreateSchemaResponse = {
@@ -42,6 +46,12 @@ type DeleteSchemaResponse = {
 
 type UpdateSchemaResponse = {
   message: string;
+};
+
+type UpdateSchemaPayload = {
+  schema?: string;
+  description?: string;
+  isPrivate?: boolean;
 };
 
 export const getSchemas = async (params: PaginationParams) => {
@@ -89,12 +99,15 @@ export const deleteSchema = async (namespace: string, name: string, jwt: string 
   return data;
 };
 
-export const updateSchema = async (namespace: string, name: string, newSchema: string, jwt: string | null) => {
+export const updateSchema = async (
+  namespace: string,
+  name: string,
+  updatedSchema: UpdateSchemaPayload,
+  jwt: string | null,
+) => {
   const url = `${API_BASE}/schemas/${namespace}/${name}`;
-  const { data } = await axios.patch<UpdateSchemaResponse>(
-    url,
-    { schema: newSchema },
-    { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
-  );
+  const { data } = await axios.patch<UpdateSchemaResponse>(url, updatedSchema, {
+    headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` },
+  });
   return data;
 };

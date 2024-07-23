@@ -12,6 +12,7 @@ from pepdbagent.exceptions import (
     SchemaGroupAlreadyExistsError,
 )
 import yaml.parser
+import yaml.scanner
 
 from ...models import (
     SchemaCreateRequest,
@@ -111,7 +112,13 @@ async def get_schema(
 ):
     try:
         res = agent.schema.get(namespace=namespace, name=schema)
-        return {"schema": yaml.dump(res)}
+        info = agent.schema.info(namespace=namespace, name=schema)
+        return {
+            "schema": yaml.dump(res),
+            "description": info.description,
+            "last_update_date": info.last_update_date,
+            "submission_date": info.submission_date,
+        }
     except SchemaDoesNotExistError:
         raise HTTPException(
             status_code=404, detail=f"Schema {schema}/{namespace} not found."
@@ -149,12 +156,35 @@ async def update_schema(
             status_code=403, detail="You do not have permission to update this schema"
         )
 
-    agent.schema.update(
-        namespace=namespace,
-        name=schema,
-        schema=yaml.safe_load(updated_schema.schema),
-        description=updated_schema.description,
+    # get current version of the schema
+    current_schema = agent.schema.get(namespace=namespace, name=schema)
+    current_schema_annotation = agent.schema.info(namespace=namespace, name=schema)
+
+    new_schema = (
+        yaml.safe_load(updated_schema.schema)
+        if updated_schema.schema
+        else current_schema
     )
+
+    try:
+        agent.schema.update(
+            namespace=namespace,
+            name=schema,
+            schema=new_schema,
+            description=(
+                updated_schema.description or current_schema_annotation.description
+            ),
+        )
+    except yaml.parser.ParserError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"The was an error parsing the yaml: {e}",
+        )
+    except yaml.scanner.ScannerError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"The was an error scanning the yaml: {e}",
+        )
 
     return {"message": "Schema updated successfully"}
 

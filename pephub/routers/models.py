@@ -138,7 +138,7 @@ class SchemaCreateRequest(BaseModel):
 
 class SchemaUpdateRequest(BaseModel):
     description: Optional[str] = None
-    schema: str
+    schema: Optional[str] = None
 
 
 class SchemaGroupCreateRequest(BaseModel):

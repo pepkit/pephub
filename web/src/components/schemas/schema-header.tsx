@@ -1,9 +1,10 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { Breadcrumb } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import YAML from 'yaml';
 
 import { useSession } from '../../contexts/session-context';
+import { useEditSchemaMutation } from '../../hooks/mutations/useEditSchemaMutation';
 import { useSchema } from '../../hooks/queries/useSchema';
 import { copyToClipboard } from '../../utils/etc';
 import { DeleteSchemaModal } from '../modals/delete-schema';
@@ -13,6 +14,7 @@ type Props = {
   handleSave: () => void;
   handleDiscard: () => void;
   isUpdating: boolean;
+  description: string;
 };
 
 export const SchemaHeader = (props: Props) => {
@@ -21,10 +23,14 @@ export const SchemaHeader = (props: Props) => {
   const { namespace, schema } = useParams();
 
   const [copied, setCopied] = useState(false);
+  const [editingDescription, setEditingDescription] = useState(false);
   const [showSchemaDeleteModal, setShowSchemaDeleteModal] = useState(false);
+  const [newDescription, setNewDescription] = useState(props.description);
 
   const { data: schemaData } = useSchema(namespace, schema);
-  const schemaObj = YAML.parse(schemaData?.schema || '');
+  const { update, isPending: isUpdatingDescription } = useEditSchemaMutation(namespace!, schema!);
+
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   return (
     <div className="p-2 w-100">
@@ -67,7 +73,48 @@ export const SchemaHeader = (props: Props) => {
           )}
         </div>
       </div>
-      <div className="text-muted">{schemaObj?.description || 'No description.'}</div>
+      {editingDescription ? (
+        <div className="w-100">
+          <textarea
+            ref={textAreaRef}
+            rows={5}
+            className="form-control"
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+          />
+          <div className="d-flex align-items-center justify-content-end p-1 gap-1">
+            <button className="btn btn-sm btn-outline-dark" onClick={() => setEditingDescription(false)}>
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                update(
+                  { description: newDescription },
+                  {
+                    onSuccess: () => {
+                      setEditingDescription(false);
+                    },
+                  },
+                );
+              }}
+              className="btn btn-sm btn-success"
+            >
+              {isUpdatingDescription ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <span className="d-flex align-items-center gap-2">
+          <i
+            className="bi bi-pencil-fill text-muted text-sm cursor-pointer"
+            onClick={() => {
+              setEditingDescription(true);
+              textAreaRef.current?.focus();
+            }}
+          ></i>
+          <div className="text-muted">{schemaData?.description || 'No description.'}</div>
+        </span>
+      )}
       <DeleteSchemaModal
         namespace={namespace!}
         name={schema!}
