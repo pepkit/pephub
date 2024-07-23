@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Breadcrumb } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import YAML from 'yaml';
@@ -21,7 +21,7 @@ export const SchemaHeader = () => {
       <div className="d-flex align-items-center justify-content-between w-100">
         <Breadcrumb className="fw-bold pt-2">
           <Breadcrumb.Item href="/schemas">schemas</Breadcrumb.Item>
-          <Breadcrumb.Item>{namespace}</Breadcrumb.Item>
+          <Breadcrumb.Item href={`/schemas/${namespace}`}>{namespace}</Breadcrumb.Item>
           <Breadcrumb.Item active>{schema}</Breadcrumb.Item>
         </Breadcrumb>
         <div className="d-flex align-items-center gap-2">
@@ -43,13 +43,16 @@ export const SchemaHeader = () => {
             </button>
           </div>
           {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
-            <button className="btn btn-sm btn-danger">
-              <i className="bi bi-trash"></i> Delete
-            </button>
+            <Fragment>
+              <button className="btn btn-sm btn-danger">
+                <i className="bi bi-trash"></i> Delete
+              </button>
+              <button className="btn btn-sm btn-success">Save</button>
+            </Fragment>
           )}
         </div>
       </div>
-      <div className="text-muted">{schemaObj['description'] || 'No description.'}</div>
+      <div className="text-muted">{schemaObj?.description || 'No description.'}</div>
     </div>
   );
 };

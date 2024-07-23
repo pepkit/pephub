@@ -10,7 +10,7 @@ export type Schema = {
   name: string;
   last_update_date: string;
   submission_date: string;
-  description: string;
+  description: string | undefined;
 };
 
 type PaginationParams = {
@@ -50,6 +50,13 @@ export const getSchemas = async (params: PaginationParams) => {
 export const getSchema = async (namespace: string, name: string) => {
   const url = `${API_BASE}/schemas/${namespace}/${name}`;
   const { data } = await axios.get<GetSchemaResponse>(url);
+  return data;
+};
+
+export const getNamespaceSchemas = async (namespace: string, params: PaginationParams) => {
+  const query = constructQueryFromPaginationParams(params);
+  const url = `${API_BASE}/schemas/${namespace}?${query.toString()}`;
+  const { data } = await axios.get<GetSchemasResponse>(url);
   return data;
 };
 

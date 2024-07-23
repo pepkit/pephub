@@ -1,6 +1,7 @@
 import { Modal, Tab, Tabs } from 'react-bootstrap';
 
 import { BlankProjectForm } from '../forms/blank-project-form';
+import { CreateSchemaForm } from '../forms/create-schema-form';
 import { PopForm } from '../forms/pop-form';
 import { ProjectUploadForm } from '../forms/project-upload-form';
 
@@ -56,6 +57,25 @@ export const AddPEPModal = (props: Props) => {
           >
             <div className="border border-top-0">
               <PopForm defaultNamespace={defaultNamespace} onHide={onHide} />
+            </div>
+          </Tab>
+          <Tab
+            eventKey="schema"
+            title={
+              <span>
+                <i className="bi bi-filetype-yml me-1"></i>
+                Schema
+              </span>
+            }
+          >
+            <div className="border border-top-0 p-2">
+              <CreateSchemaForm
+                editorHeight="400px"
+                onCancel={onHide}
+                onSubmit={() => {
+                  onHide();
+                }}
+              />
             </div>
           </Tab>
         </Tabs>

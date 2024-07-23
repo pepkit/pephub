@@ -22,6 +22,7 @@ required:
 `;
 
 type Props = {
+  editorHeight?: string;
   onCancel: () => void;
   onSubmit: () => void;
 };
@@ -35,7 +36,7 @@ type FormFields = {
 };
 
 export const CreateSchemaForm = (props: Props) => {
-  const { onCancel, onSubmit } = props;
+  const { onCancel, onSubmit, editorHeight } = props;
   const { user } = useSession();
   const { formState, watch, register, control, reset } = useForm<FormFields>({
     defaultValues: {
@@ -54,7 +55,7 @@ export const CreateSchemaForm = (props: Props) => {
 
   return (
     <form>
-      <div className="mb-3 form-check form-switch">
+      {/* <div className="mb-3 form-check form-switch">
         <label className="form-check-label" htmlFor="is-private-toggle">
           Private
         </label>
@@ -65,7 +66,7 @@ export const CreateSchemaForm = (props: Props) => {
           role="switch"
           id="is-private-toggle"
         />
-      </div>
+      </div> */}
       <div className="namespace-name-tag-container">
         <label className="fw-bold text-sm">Namespace *</label>
         <label className="fw-bold text-sm">Name *</label>
@@ -129,12 +130,12 @@ export const CreateSchemaForm = (props: Props) => {
               defaultLanguage="yaml"
               value={value}
               loading={null}
-              height={'60vh'}
+              height={editorHeight || '50vh'}
             />
           )}
         />
       </div>
-      <div className="d-flex align-items-center gap-1 w-100 justify-content-end mt-2">
+      <div className="d-flex align-items-center gap-1 w-100 justify-content-start my-2">
         <button
           className="btn btn-outline-dark"
           onClick={() => {
@@ -146,6 +147,7 @@ export const CreateSchemaForm = (props: Props) => {
           Cancel
         </button>
         <button
+          disabled={isSubmitting || !formState.isDirty}
           type="button"
           className="btn btn-success"
           onClick={() => {
@@ -166,7 +168,7 @@ export const CreateSchemaForm = (props: Props) => {
             );
           }}
         >
-          Create
+          {isSubmitting ? 'Creating...' : 'Create'}
         </button>
       </div>
     </form>

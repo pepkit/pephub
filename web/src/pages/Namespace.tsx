@@ -16,13 +16,16 @@ import { NamespacePageSearchBar } from '../components/namespace/search-bar';
 import { StarFilterBar } from '../components/namespace/star-filter-bar';
 import { NamespaceViewSelector } from '../components/namespace/view-selector';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
+import { SchemaListCard } from '../components/schemas/schema-list-card';
+import { SchemaListSearchBar } from '../components/schemas/schema-list-search-bar';
 import { useSession } from '../contexts/session-context';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
+import { useNamespaceSchemas } from '../hooks/queries/useNamespaceSchemas';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useDebounce } from '../hooks/useDebounce';
 import { numberWithCommas } from '../utils/etc';
 
-type View = 'peps' | 'pops' | 'stars';
+type View = 'peps' | 'pops' | 'schemas' | 'stars';
 
 export const NamespacePage = () => {
   const [searchParams] = useSearchParams();
@@ -47,8 +50,10 @@ export const NamespacePage = () => {
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
   const [showGeoDownloadModal, setShowGeoDownloadModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
+  const [view, setView] = useState<View>(viewFromUrl || 'peps');
   const [starSearch, setStarSearch] = useState<string>(searchParams.get('starSearch') || '');
+
+  const [schemaSearch, setSchemaSearch] = useState<string>('');
 
   const searchDebounced = useDebounce<string>(search, 500);
 
@@ -72,10 +77,16 @@ export const NamespacePage = () => {
     type: view === 'pops' ? 'pop' : 'pep',
   });
 
+  const { data: schemas } = useNamespaceSchemas(namespace, {});
+
   const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   // left over from when we were filtering on sample number
   const projectsFiltered = projects?.results?.filter((p) => p.number_of_samples) || [];
+
+  // filter schemas by search
+  const schemasFiltered =
+    schemas?.results.filter((s) => s.name.toLowerCase().includes(schemaSearch.toLowerCase())) || [];
 
   if (namespaceInfoIsLoading || starsAreLoading) {
     return (
@@ -171,12 +182,16 @@ export const NamespacePage = () => {
           <p className="mb-0">
             <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}
           </p>
+          <p className="mb-0">
+            <span className="fw-bold">Total schemas: {numberWithCommas(schemas?.count || 0)}</span>{' '}
+          </p>
         </>
         <div className="mt-3 d-flex">
           <NamespaceViewSelector
             numPeps={pepsInfo?.count || 0}
             numPops={popsInfo?.count || 0}
             numStars={stars?.length || 0}
+            numSchemas={schemas?.count || 0}
             view={view}
             setView={setView}
             enableStars={namespace === user?.login}
@@ -221,6 +236,22 @@ export const NamespacePage = () => {
                 ) : null}
               </Fragment>
             </div>
+          </Fragment>
+        ) : view === 'schemas' ? (
+          <Fragment>
+            {schemasFiltered?.length === 0 ? (
+              <div className="text-center mt-5">
+                <p className="fst-italic text-muted">No schemas found.</p>
+                <i className="text-muted text-4xl bi bi-stars mt-4"></i>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <SchemaListSearchBar value={schemaSearch} setValue={setSchemaSearch} />
+                {schemasFiltered.map((s) => (
+                  <SchemaListCard key={s.name} schema={s} />
+                ))}
+              </div>
+            )}
           </Fragment>
         ) : (
           // render stars in namespace
