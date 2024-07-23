@@ -17,7 +17,7 @@ interface Props {
   filteredSamples: string[];
 }
 
-export const ViewOptionsModal: FC<Props> = ({ show, onHide, filteredSamples }) => {
+export const ViewOptionsModal: FC<Props> = ({ show, onHide, filteredSamples}) => {
 
   const { namespace, projectName, tag } = useProjectPage();
   const { view, setView } = useProjectSelectedView();
@@ -80,56 +80,57 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide, filteredSamples }) =
         <h1 className="modal-title fs-5">Manage Views</h1>
       </Modal.Header>
       <Modal.Body>
-        <div className="">
-          <h6 className="mb-1">Save View</h6>
-          <p className="mb-3 text-xs">Save the current filtered sample table state as a view by providing a name (required) and description (optional) for the view.</p>
-          <form onSubmit={onSubmit}>
-            <div className="input-group mb-2">
-              <span className="input-group-text">Name</span>
-              <input
-                {...register('name', {
-                  required: {
-                    value: true,
-                    message: 'View Name must not be empty.',
-                  },
-                  pattern: {
-                    value: /^[a-zA-Z0-9_-]+$/,
-                    message: "View Name must contain only alphanumeric characters, '-', or '_'.",
-                  },
-                })}
-                placeholder="..."
-                type="text"
-                className="form-control"
-                id="view-name"
-                aria-describedby="view-name-help"
+        {filteredSamples ? (
+          <div className="">
+            <h6 className="mb-1">Save View</h6>
+            <p className="mb-3 text-xs">Save the current filtered sample table state as a view by providing a name (required) and description (optional) for the view.</p>
+            <form onSubmit={onSubmit}>
+              <div className="input-group mb-2">
+                <span className="input-group-text text-xs">Name</span>
+                <input
+                  {...register('name', {
+                    required: {
+                      value: true,
+                      message: 'View Name must not be empty.',
+                    },
+                    pattern: {
+                      value: /^[a-zA-Z0-9_-]+$/,
+                      message: "View Name must contain only alphanumeric characters, '-', or '_'.",
+                    },
+                  })}
+                  placeholder="..."
+                  type="text"
+                  className="form-control text-xs"
+                  id="view-name"
+                  aria-describedby="view-name-help"
+                />
+              </div> 
+              <div className="input-group">
+                <span className="input-group-text text-xs">Description</span>
+                <input
+                  {...register('desc')}
+                  placeholder="..."
+                  type="text"
+                  className="form-control text-xs"
+                  id="view-description"
+                  aria-describedby="view-description-help"
+                />
+              </div>
+              <ErrorMessage
+                errors={errors}
+                name="name"
+                render={({ message }) => message ? <p className="text-danger text-xs pt-1 mb-0">{message}</p> : null}
               />
-            </div> 
-            <div className="input-group">
-              <span className="input-group-text">Description</span>
-              <input
-                {...register('desc')}
-                placeholder="..."
-                type="text"
-                className="form-control"
-                id="view-description"
-                aria-describedby="view-description-help"
-              />
-            </div>
-            <ErrorMessage
-              errors={errors}
-              name="name"
-              render={({ message }) => message ? <p className="text-danger text-xs pt-1 mb-0">{message}</p> : null}
-            />
-            <button 
-              disabled={!isValid || !!errors.name?.message}
-              type='submit'
-              className="btn btn-success px-2 mt-3 text-xs">
-              <i className="bi bi-plus-lg"></i> Save New View
-            </button>
-
-          </form> 
-        </div>
-        <hr />
+              <button 
+                disabled={!isValid || !!errors.name?.message}
+                type='submit'
+                className="btn btn-success px-2 mt-3 text-xs">
+                <i className="bi bi-plus-lg"></i> Save New View
+              </button>
+            </form> 
+          <hr />
+          </div>
+        ) : null }
         <div className="">
           <h6 className="mb-1">Remove View</h6>
           <p className="mb-3 text-xs">Remove an existing view by selecting it from the dropdown menu.</p>

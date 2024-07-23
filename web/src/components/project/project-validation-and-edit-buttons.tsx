@@ -55,12 +55,12 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                   <>
                     <OverlayTrigger
                       overlay={
-                        <Tooltip id="validation">
+                        <Tooltip id="validation" style={{position:"fixed"}}>
                           As you edit your project below, it will be validated against the schema currently selected for it.
                         </Tooltip>
                       }
                       delay={{ show: 250, hide: 500 }}
-                      trigger={["hover", "focus"]}
+                      trigger={["hover"]}
                     >
                       <div className="d-flex align-items-center">
                         <StatusIcon className="text-2xl" variant="warning" />

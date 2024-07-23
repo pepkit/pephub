@@ -45,7 +45,7 @@ const ViewButton = (props: ViewButtonProps) => {
 };
 
 export const ProjectDataNav = (props: NavProps) => {
-  const {filteredSamples} = props;
+  const { filteredSamples } = props;
 
   const { pageView, setPageView } = useProjectPageView();
 

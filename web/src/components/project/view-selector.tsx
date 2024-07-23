@@ -46,65 +46,66 @@ export const ViewSelector = (props: ViewSelectorProps) => {
 
   return (
     <Fragment>
-    <OverlayTrigger
-      placement="top"
-      delay={{ show: 250, hide: 500 }}
-      overlay={renderTooltip} 
-      trigger={["hover", "focus"]}
-    >  
-      <div className="ps-3 d-flex flex-row align-items-center justify-content-end" style={{width: '25vw'}}>
-        {userHasOwnership ? (
-          <button
-            onClick={() => setShowViewOptionsModal(true)}
-            className="btn btn-secondary rounded-end-0 rounded-start-1 ps-2 pe-2"
-          >
-            <i className="bi bi-gear-wide-connected"></i>
-          </button>
-          ) : null
-        }
-          {/*<i className="bi bi-info-circle ms-2"></i>*/}
-        <ReactSelect
-          styles={{
-            control: (provided) => ({
-              ...provided,
-              borderRadius: selectorRadius, // Left radii set to 0, right radii kept at 4px
-            }),
-          }}
-          className="top-z w-100"
-          options={
-            projectViews?.views.map((view) => ({
-              view: view.name,
-              description: view.description || 'No description',
-              value: view.name,
-              label: `${view.name} | ${view.description || 'No description'}`,
-            })) || []
-          }
-          onChange={(selectedOption) => {
-            if (selectedOption === null) {
-              setView(undefined);
-              searchParams.delete('view');
-              setSearchParams(searchParams);
-            } else {
-              setView(selectedOption.value);
-              searchParams.set('view', selectedOption.value);
-              setSearchParams(searchParams);
+    
+    <div className="ps-3 d-flex flex-row align-items-center" style={{width: '25vw'}}>
+      {userHasOwnership ? (
+        <button
+          onClick={() => setShowViewOptionsModal(true)}
+          className={!filteredSamples ? "btn btn-secondary rounded-end-0 rounded-start-1 ps-2 pe-2" : "btn btn-primary glow-button rounded-end-0 rounded-start-1 ps-2 pe-2"}
+          style={{transitionDuration: '250ms'}}
+        >
+          <i className="bi bi-gear-wide-connected"></i>
+        </button>
+      ) : null }
+      <OverlayTrigger
+        placement="top"
+        delay={{ show: 250, hide: 500 }}
+        overlay={renderTooltip} 
+        trigger={["hover"]}
+      > 
+        <div className="w-100">
+          <ReactSelect
+            styles={{
+              control: (provided) => ({
+                ...provided,
+                borderRadius: selectorRadius, // Left radii set to 0, right radii kept at 4px
+              }),
+            }}
+            className="top-z w-100"
+            options={
+              projectViews?.views.map((view) => ({
+                view: view.name,
+                description: view.description || 'No description',
+                value: view.name,
+                label: `${view.name} | ${view.description || 'No description'}`,
+              })) || []
             }
-          }}
-          isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
-          isClearable
-          placeholder={
-            projectViewsIsLoading
-              ? 'Loading views...'
-              : projectViews?.views.length === 0
-              ? 'No views available'
-              : 'Select a view'
-          }
-          value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
-        />
-        
-      </div>
+            onChange={(selectedOption) => {
+              if (selectedOption === null) {
+                setView(undefined);
+                searchParams.delete('view');
+                setSearchParams(searchParams);
+              } else {
+                setView(selectedOption.value);
+                searchParams.set('view', selectedOption.value);
+                setSearchParams(searchParams);
+              }
+            }}
+            isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
+            isClearable
+            placeholder={
+              projectViewsIsLoading
+                ? 'Loading views...'
+                : projectViews?.views.length === 0
+                ? 'No views available'
+                : 'Select a view'
+            }
+            value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
+          />
+        </div>
       </OverlayTrigger>
-      <ViewOptionsModal show={showViewOptionsModal} onHide={() => setShowViewOptionsModal(false)} filteredSamples={filteredSamples} />
+    </div>
+    <ViewOptionsModal show={showViewOptionsModal} onHide={() => setShowViewOptionsModal(false)} filteredSamples={filteredSamples} />
     </Fragment>
   );
 };

@@ -25,6 +25,7 @@ type Props = {
   projectInfo: ReturnType<typeof useProjectAnnotation>['data'];
   sampleTable: ReturnType<typeof useSampleTable>['data'];
   subSampleTable: ReturnType<typeof useSubsampleTable>['data'];
+  sampleTableIndex: string;
 };
 
 type ProjectUpdateFields = {
@@ -34,7 +35,7 @@ type ProjectUpdateFields = {
 };
 
 export const ProjectInterface = (props: Props) => {
-  const { projectConfig, sampleTable, subSampleTable } = props;
+  const { projectConfig, sampleTable, subSampleTable, sampleTableIndex } = props;
 
   const { user } = useSession();
   const projectDataRef = useRef<HTMLDivElement>(null);
@@ -178,6 +179,7 @@ export const ProjectInterface = (props: Props) => {
                 data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                 setFilteredSamples={setFilteredSamples}
+                sampleTableIndex={sampleTableIndex}
               />
             )}
           />
