@@ -1138,4 +1138,3 @@ def delete_full_history(
             status_code=400,
             detail="Could not delete history. Server error.",
         )
-

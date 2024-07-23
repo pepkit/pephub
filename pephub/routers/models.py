@@ -128,4 +128,3 @@ class SamplesResponseModel(BaseModel):
 
 class ConfigResponseModel(BaseModel):
     config: str
-
