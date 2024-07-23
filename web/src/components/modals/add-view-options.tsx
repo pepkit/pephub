@@ -11,13 +11,19 @@ import { CreateProjectViewRequest, addProjectView, deleteProjectView } from '../
 import { useProjectViews } from '../../hooks/queries/useProjectViews';
 import { useProjectSelectedView } from '../../hooks/stores/useProjectSelectedViewStore';
 
-interface Props {
+type Props = {
   show: boolean;
   onHide: () => void;
   filteredSamples: string[];
-}
+};
 
-export const ViewOptionsModal: FC<Props> = ({ show, onHide, filteredSamples}) => {
+type FormValues = {
+  name: string;
+  description: string;
+};
+
+export const ViewOptionsModal = (props: Props) => {
+  const { show, onHide, filteredSamples } = props;
 
   const { namespace, projectName, tag } = useProjectPage();
   const { view, setView } = useProjectSelectedView();
@@ -31,11 +37,6 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide, filteredSamples}) =>
 
   const [selectedViewDelete, setSelectedViewDelete] = useState(null);
   const [deleteState, setDeleteState] = useState(true);
-
-  type FormValues = {
-    name: string;
-    description: string;
-  };
 
   const {
     register,
@@ -151,7 +152,6 @@ export const ViewOptionsModal: FC<Props> = ({ show, onHide, filteredSamples}) =>
               })) || []
             }
             onChange={(selectedOption) => {
-              debugger;
               if ((selectedOption === null) || (projectViews?.views.length === 0)) {
                 setSelectedViewDelete(null);
                 setDeleteState(true);

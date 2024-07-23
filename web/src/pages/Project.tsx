@@ -24,7 +24,6 @@ function extractSampleTableIndex(text: string) {
 export const ProjectPage = () => {
   // auto-dismiss popup for large sample tables
   const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
-  const [sampleTableIndex, setSampleTableIndex] = useState(null)
 
   // project page context state
   const { namespace, projectName, tag, shouldFetchSampleTable, forceTraditionalInterface } = useProjectPage();
@@ -48,12 +47,7 @@ export const ProjectPage = () => {
   // local state
   const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
 
-  useEffect(() => {
-    if (projectConfigQuery.data?.config) {
-      const index = extractSampleTableIndex(projectConfigQuery.data.config);
-      setSampleTableIndex(index);
-    }
-  }, [projectConfigQuery.data]);
+  const sampleTableIndex = projectConfigQuery.data ? extractSampleTableIndex(projectConfigQuery.data?.config) : null;
 
   useEffect(() => {
     if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {

@@ -15,8 +15,8 @@ type Props = {
   height?: number;
   minRows?: number;
   stretchH?: 'none' | 'all' | 'last';
-  setFilteredSamples: (samples: string[]) => void;
-  sampleTableIndex: string;
+  setFilteredSamples?: (samples: string[]) => void;
+  sampleTableIndex?: string;
 };
 
 export const SampleTable = (props: Props) => {
@@ -47,7 +47,7 @@ export const SampleTable = (props: Props) => {
   const numColumns = data.length > 0 ? data[0].length : 0;
 
   const ph_id_col = data[0].indexOf('ph_id');
-
+  
   return (
     <HotTable
       afterFilter={(k) => {
