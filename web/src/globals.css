@@ -615,4 +615,43 @@ body {
   /* no box shadow */
   box-shadow: none !important;
   transition: box-shadow 0.1s ease-in-out;
+  height: 31px !important;
 }
+
+.glow-button {
+  --box-shadow-color: black;
+  box-shadow: 0 0 7px var(--box-shadow-color);
+}
+
+.btn-primary.glow-button {
+  --box-shadow-color: #007bff80;
+}
+
+.btn-secondary.glow-button {
+  --box-shadow-color: #6c757d80;
+}
+
+.btn-success.glow-button {
+  --box-shadow-color: #28a74580;
+}
+
+.btn-danger.glow-button {
+  --box-shadow-color: #dc354580;
+}
+
+.btn-warning.glow-button {
+  --box-shadow-color: #ffc10780;
+}
+
+.btn-info.glow-button {
+  --box-shadow-color: #17a2b880;
+}
+
+.btn-light.glow-button {
+  --box-shadow-color: #f8f9fa80;
+}
+
+.btn-dark.glow-button {
+  --box-shadow-color: #343a4080;
+}
+

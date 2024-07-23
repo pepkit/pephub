@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type ProjectPageView = 'samples' | 'subsamples' | 'config';
+type ProjectPageView = 'samples' | 'subsamples' | 'config' | 'help';
 type ProjectPageViewStore = {
   pageView: ProjectPageView;
   setPageView: (pageView: ProjectPageView) => void;

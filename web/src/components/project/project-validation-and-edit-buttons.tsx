@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
@@ -15,10 +16,11 @@ type ProjectValidationAndEditButtonsProps = {
   isUpdatingProject: boolean;
   reset: () => void;
   handleSubmit: () => void;
+  filteredSamples: string[];
 };
 
 export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditButtonsProps) => {
-  const { isDirty, isUpdatingProject, reset, handleSubmit } = props;
+  const { isDirty, isUpdatingProject, reset, handleSubmit, filteredSamples } = props;
   const { user } = useSession();
 
   const { namespace, projectName, tag } = useProjectPage();
@@ -37,27 +39,38 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   return (
     <Fragment>
       <div className="h-100 flex-row d-flex align-items-end justify-content-between mx-3">
-        <ProjectDataNav />
+        <ProjectDataNav filteredSamples={filteredSamples} />
         {/* no matter what, only render if belonging to the user */}
         {userHasOwnership ? (
           <div className="h-100 d-flex flex-row align-items-center w-50 justify-content-end">
-            <ValidationTooltip />
-            {projectInfo?.pep_schema ? (
-              <ValidationResult
-                schemaRegistry={projectInfo.pep_schema}
-                isValidating={projectValidationQuery.isLoading}
-                validationResult={validationResult}
-              />
-            ) : (
-              <div className="d-flex flex-row align-items-center mb-1 me-4">
-                <>
-                  <div className="d-flex align-items-center">
-                    <StatusIcon className="text-2xl" variant="warning" />
-                    <span>Add schema to PEP to validate</span>
-                  </div>
-                </>
-              </div>
-            )}
+            <div>
+              {projectInfo?.pep_schema ? (
+                <ValidationResult
+                  schemaRegistry={projectInfo.pep_schema}
+                  isValidating={projectValidationQuery.isLoading}
+                  validationResult={validationResult}
+                />
+              ) : (
+                <div className="d-flex flex-row align-items-center mb-1 me-4">
+                  <>
+                    <OverlayTrigger
+                      overlay={
+                        <Tooltip id="validation" style={{position:"fixed"}}>
+                          As you edit your project below, it will be validated against the schema currently selected for it.
+                        </Tooltip>
+                      }
+                      delay={{ show: 250, hide: 500 }}
+                      trigger={["hover"]}
+                    >
+                      <div className="d-flex align-items-center">
+                        <StatusIcon className="text-2xl" variant="warning" />
+                        <span>Add schema to PEP to validate</span>
+                      </div>
+                    </OverlayTrigger>
+                  </>
+                </div>
+              )}
+            </div>
             <div className="ps-1">
               <Fragment>
                 <button

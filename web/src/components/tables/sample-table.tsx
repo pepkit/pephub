@@ -15,10 +15,12 @@ type Props = {
   height?: number;
   minRows?: number;
   stretchH?: 'none' | 'all' | 'last';
+  setFilteredSamples: (samples: string[]) => void;
+  sampleTableIndex: string;
 };
 
 export const SampleTable = (props: Props) => {
-  const { data, readOnly = false, onChange, height, minRows, stretchH, className } = props;
+  const { data, readOnly = false, onChange, height, minRows, stretchH, className, setFilteredSamples, sampleTableIndex } = props;
 
   // compute table height based on number of rows
   // or the minRows prop if it is provided
@@ -41,13 +43,22 @@ export const SampleTable = (props: Props) => {
       className: tableClassName,
     });
   }
-
+  
   const numColumns = data.length > 0 ? data[0].length : 0;
 
   const ph_id_col = data[0].indexOf('ph_id');
 
   return (
     <HotTable
+      afterFilter={(k) => {
+        setFilteredSamples((k.length > 0) ? (
+          hotRef.current?.hotInstance?.getData()
+          .map(subArray => subArray[hotRef.current?.hotInstance?.getData()[0].findIndex(x => x == (sampleTableIndex ? sampleTableIndex : 'sample_name'))])
+          .filter(element => element != null)
+          .slice(1) 
+          ) : null
+        );
+      }}
       ref={hotRef}
       data={data}
       stretchH={stretchH || 'all'}

@@ -16,9 +16,15 @@ import { useSampleTable } from '../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../hooks/queries/useSubsampleTable';
 import { useCurrentHistoryId } from '../hooks/stores/useCurrentHistoryId';
 
+function extractSampleTableIndex(text: string) {
+  const match = text.match(/^sample_table_index:\s*(.+)$/m);
+  return match ? match[1] : null;
+}
+
 export const ProjectPage = () => {
   // auto-dismiss popup for large sample tables
   const [hideLargeSampleTableModal] = useLocalStorage('hideLargeSampleTableModal', 'false');
+  const [sampleTableIndex, setSampleTableIndex] = useState(null)
 
   // project page context state
   const { namespace, projectName, tag, shouldFetchSampleTable, forceTraditionalInterface } = useProjectPage();
@@ -41,6 +47,13 @@ export const ProjectPage = () => {
 
   // local state
   const [showLargeSampleTableModal, setShowLargeSampleTableModal] = useState(false);
+
+  useEffect(() => {
+    if (projectConfigQuery.data?.config) {
+      const index = extractSampleTableIndex(projectConfigQuery.data.config);
+      setSampleTableIndex(index);
+    }
+  }, [projectConfigQuery.data]);
 
   useEffect(() => {
     if (projectInfo !== undefined && hideLargeSampleTableModal === 'false') {
@@ -118,6 +131,7 @@ export const ProjectPage = () => {
             projectConfig={projectConfigQuery.data}
             sampleTable={sampleTableQuery.data}
             subSampleTable={subSampleTableQuery.data}
+            sampleTableIndex={sampleTableIndex}
           />
         )}
         <LargeSampleTableModal

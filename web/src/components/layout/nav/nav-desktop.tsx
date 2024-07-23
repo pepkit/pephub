@@ -227,9 +227,9 @@ export const NavDesktop = () => {
             </Dropdown>
           </div>
         ) : (
-          <div className="my-0 nav-item h5 pt-1">
-            <button className="btn btn-sm btn-dark px-3 mb-1" onClick={() => login()}>
-              <i className="fa fa-github"></i>Log in
+          <div className="my-0 me-3 nav-item h5 pt-1">
+            <button className="btn btn-sm btn-dark px-2 mb-1" onClick={() => login()}>
+              <i className="bi bi-github pe-1"></i>Sign In
             </button>
           </div>
         )}
