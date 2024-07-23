@@ -6,12 +6,14 @@ import YAML from 'yaml';
 import { useSession } from '../../contexts/session-context';
 import { useSchema } from '../../hooks/queries/useSchema';
 import { copyToClipboard } from '../../utils/etc';
+import { DeleteSchemaModal } from '../modals/delete-schema';
 
 export const SchemaHeader = () => {
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
   const [copied, setCopied] = useState(false);
+  const [showSchemaDeleteModal, setShowSchemaDeleteModal] = useState(false);
 
   const { data: schemaData } = useSchema(namespace, schema);
   const schemaObj = YAML.parse(schemaData?.schema || '');
@@ -44,7 +46,7 @@ export const SchemaHeader = () => {
           </div>
           {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
             <Fragment>
-              <button className="btn btn-sm btn-danger">
+              <button className="btn btn-sm btn-danger" onClick={() => setShowSchemaDeleteModal(true)}>
                 <i className="bi bi-trash"></i> Delete
               </button>
               <button className="btn btn-sm btn-success">Save</button>
@@ -53,6 +55,13 @@ export const SchemaHeader = () => {
         </div>
       </div>
       <div className="text-muted">{schemaObj?.description || 'No description.'}</div>
+      <DeleteSchemaModal
+        namespace={namespace!}
+        name={schema!}
+        show={showSchemaDeleteModal}
+        onHide={() => setShowSchemaDeleteModal(false)}
+        redirect={`/${namespace}?view=schemas`}
+      />
     </div>
   );
 };
