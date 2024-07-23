@@ -242,7 +242,6 @@ export const NamespacePage = () => {
             {schemasFiltered?.length === 0 ? (
               <div className="text-center mt-5">
                 <p className="fst-italic text-muted">No schemas found.</p>
-                <i className="text-muted text-4xl bi bi-stars mt-4"></i>
               </div>
             ) : (
               <div className="mt-3">

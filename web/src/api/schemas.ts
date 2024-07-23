@@ -40,6 +40,10 @@ type DeleteSchemaResponse = {
   message: string;
 };
 
+type UpdateSchemaResponse = {
+  message: string;
+};
+
 export const getSchemas = async (params: PaginationParams) => {
   const query = constructQueryFromPaginationParams(params);
   const url = `${API_BASE}/schemas?${query.toString()}`;
@@ -79,8 +83,18 @@ export const createNewSchema = async (
 
 export const deleteSchema = async (namespace: string, name: string, jwt: string | null) => {
   const url = `${API_BASE}/schemas/${namespace}/${name}`;
-  const { data } = await axios.delete<CreateSchemaResponse>(url, {
+  const { data } = await axios.delete<DeleteSchemaResponse>(url, {
     headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` },
   });
+  return data;
+};
+
+export const updateSchema = async (namespace: string, name: string, newSchema: string, jwt: string | null) => {
+  const url = `${API_BASE}/schemas/${namespace}/${name}`;
+  const { data } = await axios.patch<UpdateSchemaResponse>(
+    url,
+    { schema: newSchema },
+    { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
+  );
   return data;
 };

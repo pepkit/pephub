@@ -137,16 +137,6 @@ export const CreateSchemaForm = (props: Props) => {
       </div>
       <div className="d-flex align-items-center gap-1 w-100 justify-content-start my-2">
         <button
-          className="btn btn-outline-dark"
-          onClick={() => {
-            reset();
-            onCancel();
-          }}
-          type="reset"
-        >
-          Cancel
-        </button>
-        <button
           disabled={isSubmitting || !formState.isDirty}
           type="button"
           className="btn btn-success"
@@ -168,7 +158,18 @@ export const CreateSchemaForm = (props: Props) => {
             );
           }}
         >
+          <i className="bi bi-plus-circle me-1"></i>
           {isSubmitting ? 'Creating...' : 'Create'}
+        </button>
+        <button
+          className="btn btn-outline-dark"
+          onClick={() => {
+            reset();
+            onCancel();
+          }}
+          type="reset"
+        >
+          Cancel
         </button>
       </div>
     </form>

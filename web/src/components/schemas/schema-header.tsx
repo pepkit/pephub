@@ -8,7 +8,15 @@ import { useSchema } from '../../hooks/queries/useSchema';
 import { copyToClipboard } from '../../utils/etc';
 import { DeleteSchemaModal } from '../modals/delete-schema';
 
-export const SchemaHeader = () => {
+type Props = {
+  isDirty: boolean;
+  handleSave: () => void;
+  handleDiscard: () => void;
+  isUpdating: boolean;
+};
+
+export const SchemaHeader = (props: Props) => {
+  const { isDirty, handleSave, handleDiscard, isUpdating } = props;
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
@@ -26,7 +34,7 @@ export const SchemaHeader = () => {
           <Breadcrumb.Item href={`/schemas/${namespace}`}>{namespace}</Breadcrumb.Item>
           <Breadcrumb.Item active>{schema}</Breadcrumb.Item>
         </Breadcrumb>
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-1">
           <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">
               {namespace}/{schema}
@@ -49,7 +57,12 @@ export const SchemaHeader = () => {
               <button className="btn btn-sm btn-danger" onClick={() => setShowSchemaDeleteModal(true)}>
                 <i className="bi bi-trash"></i> Delete
               </button>
-              <button className="btn btn-sm btn-success">Save</button>
+              <button disabled={!isDirty || isUpdating} onClick={handleSave} className="btn btn-sm btn-success">
+                {isUpdating ? 'Saving...' : 'Save'}
+              </button>
+              <button disabled={!isDirty || isUpdating} onClick={handleDiscard} className="btn btn-sm btn-outline-dark">
+                Discard
+              </button>
             </Fragment>
           )}
         </div>
