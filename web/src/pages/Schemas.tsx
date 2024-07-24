@@ -6,6 +6,7 @@ import { SchemasPagePlaceholder } from '../components/schemas/placeholders/schem
 import { SchemaCard } from '../components/schemas/schema-card';
 import { SchemasNav } from '../components/schemas/schemas-nav';
 import { useAllSchemas } from '../hooks/queries/useAllSchemas';
+import { useDebounce } from '../hooks/useDebounce';
 
 const NoSchemas = () => {
   return (
@@ -25,7 +26,11 @@ export function Schemas() {
   const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState('');
+  const [orderBy, setOrderBy] = useState('update_date');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [showCreateSchemaModal, setShowCreateSchemaModal] = useState(false);
+
+  const searchDebounced = useDebounce(search, 500);
 
   const {
     data: schemas,
@@ -34,7 +39,9 @@ export function Schemas() {
   } = useAllSchemas({
     limit,
     offset,
-    search,
+    search: searchDebounced,
+    order,
+    orderBy,
   });
 
   const noSchemasInDatabase = schemas?.count === 0;
@@ -67,12 +74,24 @@ export function Schemas() {
   return (
     <PageLayout title="Schemas">
       <div className="p-2">
-        <SchemasNav setCreateModalOpen={setShowCreateSchemaModal} />
+        <SchemasNav
+          limit={limit}
+          setLimit={setLimit}
+          offset={offset}
+          setOffset={setOffset}
+          orderBy={orderBy}
+          setOrderBy={setOrderBy}
+          order={order}
+          setOrder={setOrder}
+          search={search}
+          setSearch={setSearch}
+          setCreateModalOpen={setShowCreateSchemaModal}
+        />
         <div className="d-flex flex-col align-items-center">
           {noSchemasInDatabase ? (
             <NoSchemas />
           ) : (
-            <div className="d-flex flex-wrap my-2 gap-4">
+            <div className="schemas-grid w-100 py-2">
               {schemas?.results.map((s, i) => (
                 <SchemaCard key={`${i}-${s.namespace}/${s.name}`} schema={s} />
               ))}

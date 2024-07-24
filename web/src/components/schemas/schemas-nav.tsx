@@ -2,10 +2,32 @@ import { useSession } from '../../contexts/session-context';
 
 type Props = {
   setCreateModalOpen: (open: boolean) => void;
+  limit: number;
+  setLimit: (limit: number) => void;
+  offset: number;
+  setOffset: (offset: number) => void;
+  orderBy: string;
+  setOrderBy: (orderBy: string) => void;
+  order: 'asc' | 'desc';
+  setOrder: (order: 'asc' | 'desc') => void;
+  search: string;
+  setSearch: (search: string) => void;
 };
 
 export const SchemasNav = (props: Props) => {
-  const { setCreateModalOpen } = props;
+  const {
+    setCreateModalOpen,
+    limit,
+    setLimit,
+    offset,
+    setOffset,
+    orderBy,
+    setOrderBy,
+    order,
+    setOrder,
+    search,
+    setSearch,
+  } = props;
   const { user } = useSession();
   return (
     <div className="d-flex flex-column align-items-center gap-2">
@@ -37,14 +59,33 @@ export const SchemasNav = (props: Props) => {
           </div>
         )}
       </div>
-      <div className="d-flex align-items-center w-100">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Search schemas"
-          aria-label="Search schemas"
-          aria-describedby="search-schemas"
-        />
+      <div className="flex-row d-flex align-items-center position-relative w-100">
+        <div className="input-group">
+          <label className="input-group-text" htmlFor="limit-select">
+            Search
+          </label>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            type="text"
+            className="form-control rounded-end-0"
+            placeholder="Search schemas"
+            aria-label="Search schemas"
+            aria-describedby="search-schemas"
+          />
+        </div>
+        <select
+          style={{ width: '10%' }}
+          className="form-control form-select rounded-start-0"
+          id="limit-select"
+          value={limit}
+          onChange={(e) => setLimit(Number(e.target.value))}
+        >
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
       </div>
     </div>
   );

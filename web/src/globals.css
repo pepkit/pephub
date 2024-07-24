@@ -606,7 +606,6 @@ body {
 }
 
 .schema-card {
-  width: 300px;
   cursor: pointer;
   transition: border-color 0.2s;
 
@@ -631,4 +630,14 @@ body {
   /* no box shadow */
   box-shadow: none !important;
   transition: box-shadow 0.1s ease-in-out;
+}
+
+.schemas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  /*  if small just make 1fr */
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
