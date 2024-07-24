@@ -619,6 +619,8 @@ body {
   &:hover {
     border-color: #636363 !important;
   }
+}
+
 .validation-badge {
   display: inline-block;
   height: 10px !important;
