@@ -85,6 +85,10 @@ export const MobileNav = () => {
           <i className="bi bi-github me-2" />
           GitHub
         </Dropdown.Item>
+        <Dropdown.Item href="/schemas">
+          <i className="bi bi-file-earmark-check me-2" />
+          Schemas
+        </Dropdown.Item>
         <Dropdown.Item href="/validate">
           <i className="bi bi-check-circle me-2" />
           Validation

@@ -140,6 +140,11 @@ export const NavDesktop = () => {
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
+        <a className="nav-link" href="/schemas">
+          <i className="bi bi-file-earmark-check me-1 text-base"></i>Schemas
+        </a>
+      </li>
+      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="/validate">
           <i className="bi bi-check2-circle me-1 text-base"></i>Validation
         </a>
