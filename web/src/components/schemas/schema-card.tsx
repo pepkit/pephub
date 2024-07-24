@@ -1,5 +1,5 @@
 import { Schema } from '../../api/schemas';
-import { dateStringToDate } from '../../utils/dates';
+import { dateStringToDate, dateStringToDateTime } from '../../utils/dates';
 
 type Props = {
   schema: Schema;
@@ -17,8 +17,9 @@ export const SchemaCard = (props: Props) => {
             </h3>
             <p className="text-muted mb-0 my-2">{schema.description}</p>
           </div>
-          <div className="d-flex align-items-center">
-            <p className="fst-italic mb-0">{dateStringToDate(schema.last_update_date)}</p>
+          <div className="d-flex align-items-center mt-1">
+            <i className="bi bi-clock me-1 text-sm"></i>
+            <p className="fst-italic mb-0 text-sm">{dateStringToDateTime(schema.last_update_date)}</p>
           </div>
         </div>
       </a>
