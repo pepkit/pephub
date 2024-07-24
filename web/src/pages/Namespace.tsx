@@ -179,12 +179,12 @@ export const NamespacePage = () => {
               </span>
             </p>
           )}
-          <p className="mb-0">
-            <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}
-          </p>
-          <p className="mb-0">
-            <span className="fw-bold">Total schemas: {numberWithCommas(schemas?.count || 0)}</span>{' '}
-          </p>
+          {/*<p className="mb-0">*/}
+          {/*  <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}*/}
+          {/*</p>*/}
+          {/*<p className="mb-0">*/}
+          {/*  <span className="fw-bold">Total schemas: {numberWithCommas(schemas?.count || 0)}</span>{' '}*/}
+          {/*</p>*/}
         </>
         <div className="mt-3 d-flex">
           <NamespaceViewSelector

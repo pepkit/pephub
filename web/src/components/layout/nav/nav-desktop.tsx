@@ -178,6 +178,10 @@ export const NavDesktop = () => {
                   <i className="bi bi-star me-1"></i>
                   Stars
                 </Dropdown.Item>
+                <Dropdown.Item href={`/${user.login}?view=schemas`}>
+                  <i className="bi bi-file-earmark-check me-1"></i>
+                  My Schemas
+                </Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Header>Organizations</Dropdown.Header>
                 {user?.orgs.length > 0 ? (
