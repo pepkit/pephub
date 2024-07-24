@@ -53,12 +53,6 @@ export const SchemaUploadForm = (props: Props) => {
 
   const { isPending: isUploading, upload } = useUploadSchemaFile();
 
-  useEffect(() => {
-    if (uploadFile) {
-      console.log(uploadFile);
-    }
-  }, [uploadFile]);
-
   return (
     <form id="upload-form" className="border-0 form-control">
       {/* <div className="mb-3 mt-3 form-check form-switch">
