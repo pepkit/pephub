@@ -1,4 +1,4 @@
-import { Fragment, MouseEvent, forwardRef } from 'react';
+import { Fragment } from 'react';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
@@ -7,11 +7,8 @@ import { useValidation } from '../../hooks/queries/useValidation';
 import { canEdit } from '../../utils/permissions';
 import { StatusIcon } from '../badges/status-icons';
 import { ProjectDataNav } from '../layout/project-data-nav';
-
-type CustomToggleProps = {
-  children?: React.ReactNode;
-  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-};
+import { ValidationTooltip } from '../tooltips/validation-tooltip';
+import { ValidationResult } from './validation/validation-result';
 
 type ProjectValidationAndEditButtonsProps = {
   isDirty: boolean;
@@ -20,34 +17,20 @@ type ProjectValidationAndEditButtonsProps = {
   handleSubmit: () => void;
 };
 
-const ValiationToggle = forwardRef<HTMLAnchorElement, CustomToggleProps>(({ children, onClick }, ref) => (
-  <a
-    href=""
-    ref={ref}
-    onClick={(e) => {
-      e.preventDefault();
-      if (onClick) {
-        onClick(e);
-      }
-    }}
-    className="text-decoration-none"
-  >
-    {children}
-  </a>
-));
-
 export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditButtonsProps) => {
   const { isDirty, isUpdatingProject, reset, handleSubmit } = props;
   const { user } = useSession();
 
   const { namespace, projectName, tag } = useProjectPage();
 
-  // const projectValidationQuery = useValidation({
-  //   pepRegistry: `${namespace}/${projectName}:${tag}`,
-  //   schema: projectAnnotationQuery.data?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
-  // });
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
-  // const validationResult = projectValidationQuery.data;
+  const projectValidationQuery = useValidation({
+    pepRegistry: `${namespace}/${projectName}:${tag}`,
+    schema_registry: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
+    enabled: !!projectInfo?.pep_schema,
+  });
+
+  const validationResult = projectValidationQuery.data;
 
   const userHasOwnership = user && projectInfo && canEdit(user, projectInfo);
 
@@ -57,62 +40,14 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
         <ProjectDataNav />
         {/* no matter what, only render if belonging to the user */}
         {userHasOwnership ? (
-          <div className="h-100 d-flex flex-row align-items-center w-25 justify-content-end">
-            {/* <ValidationTooltip /> */}
+          <div className="h-100 d-flex flex-row align-items-center w-50 justify-content-end">
+            <ValidationTooltip />
             {projectInfo?.pep_schema ? (
-              <div className="d-flex flex-row align-items-center me-4">
-                {/* {projectValidationQuery.isLoading || projectValidationQuery.isFetching ? (
-                  <span>Validating...</span>
-                ) : validationResult?.valid ? (
-                  <Dropdown>
-                    <div className="d-flex align-items-center">
-                      <Dropdown.Toggle as={ValiationToggle}>
-                        <StatusIcon className="text-2xl cursor-pointer" variant="success" />
-                      </Dropdown.Toggle>
-                      <span className="text-success">Valid</span>
-                    </div>
-                    <Dropdown.Menu className="border border-dark shadow-lg">
-                      <Dropdown.Header className="text-success">
-                        Your PEP is valid against {projectInfo?.pep_schema}
-                      </Dropdown.Header>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                ) : (
-                  <Dropdown>
-                    <div className="d-flex align-items-center">
-                      <Dropdown.Toggle as={ValiationToggle}>
-                        <StatusIcon className="text-2xl cursor-pointer" variant="danger" />
-                      </Dropdown.Toggle>
-                      <span className="text-danger">Invalid</span>
-                    </div>
-                    <Dropdown.Menu className="border border-dark shadow-lg">
-                      <Dropdown.Header>
-                        {validationResult?.error_type === 'Schema' ? (
-                          <span className="text-danger">Schema is invalid</span>
-                        ) : (
-                          <>
-                            <span className="text-danger fw-bold">
-                              Your PEP is invalid against {projectInfo?.pep_schema}
-                            </span>
-                            <p className="mb-0 fw-bold">
-                              <span className="text-danger">
-                                Errors found in {validationResult?.error_type}
-                                {': '}
-                              </span>
-                            </p>
-                            {validationResult?.errors.map((error, index) => (
-                              <Dropdown.Header className="text-danger" key={index}>
-                                <i className="bi bi bi-exclamation-triangle me-2"></i>
-                                {error}
-                              </Dropdown.Header>
-                            ))}
-                          </>
-                        )}
-                      </Dropdown.Header>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                )} */}
-              </div>
+              <ValidationResult
+                schemaRegistry={projectInfo.pep_schema}
+                isValidating={projectValidationQuery.isLoading}
+                validationResult={validationResult}
+              />
             ) : (
               <div className="d-flex flex-row align-items-center mb-1 me-4">
                 <>

@@ -212,44 +212,6 @@ async def create_pep(
             status_code=400,
         )
 
-        # # create temp dir that gets deleted when we're done
-        # with tempfile.TemporaryDirectory() as dirpath:
-        #     config_file_name = "project_config.yaml"
-        #     sample_table_name = BLANK_PEP_CONFIG["sample_table"]
-        #
-        #     # create 'empty' config and sample table files
-        #     with open(f"{dirpath}/{config_file_name}", "w") as cfg_fh:
-        #         cfg_fh.write(json.dumps(BLANK_PEP_CONFIG))
-        #     with open(f"{dirpath}/{sample_table_name}", "w") as cfg_fh:
-        #         cfg_fh.write(BLANK_PEP_SAMPLE_TABLE)
-        #
-        #     # init project
-        #     p = Project(f"{dirpath}/{config_file_name}")
-        #     try:
-        #         agent.project.create(
-        #             p,
-        #             namespace=namespace,
-        #             name=name,
-        #             tag=tag,
-        #             description=description,
-        #             is_private=is_private,
-        #             pep_schema=pep_schema,
-        #         )
-        #     except ProjectUniqueNameError as _:
-        #         raise HTTPException(
-        #             detail=f"Project '{namespace}/{p.name}:{tag}' already exists in namespace",
-        #             status_code=400,
-        #         )
-        #     return JSONResponse(
-        #         content={
-        #             "namespace": namespace,
-        #             "name": name,
-        #             "tag": tag,
-        #             "registry_path": f"{namespace}/{name}:{tag}",
-        #         },
-        #         status_code=202,
-        #     )
-
 
 @namespace.post(
     "/projects/json",

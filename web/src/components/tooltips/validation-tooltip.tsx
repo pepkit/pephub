@@ -8,6 +8,6 @@ export const ValidationTooltip = () => (
       </Tooltip>
     }
   >
-    <i className="bi bi-info-circle me-1 mb-1"></i>
+    <i className="bi bi-info-circle me-1"></i>
   </OverlayTrigger>
 );

@@ -619,4 +619,14 @@ body {
   &:hover {
     border-color: #636363 !important;
   }
+.validation-badge {
+  display: inline-block;
+  height: 10px !important;
+  width: 10px !important;
+}
+
+.validation-button {
+  /* no box shadow */
+  box-shadow: none !important;
+  transition: box-shadow 0.1s ease-in-out;
 }
