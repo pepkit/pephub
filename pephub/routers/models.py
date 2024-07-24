@@ -152,3 +152,10 @@ class SchemaGroupUpdateRequest(BaseModel):
 
 class SchemaGroupAssignRequest(BaseModel):
     group: str
+
+
+class SchemaGetResponse(BaseModel):
+    schema: str
+    description: Optional[str] = None
+    last_update_date: str = ""
+    submission_date: str = ""
