@@ -70,6 +70,10 @@ export const ViewOptionsModal = (props: Props) => {
   };
 
   const onSubmit = () => {
+    if (filteredSamples.length === 0) {
+      toast.error('Please filter samples before saving a view.');
+      return;
+    }
     const createViewRequest: CreateProjectViewRequest = {
       viewName: viewName,
       sampleNames: filteredSamples, // You might want to update this based on your requirements

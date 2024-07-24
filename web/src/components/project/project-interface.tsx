@@ -40,7 +40,7 @@ export const ProjectInterface = (props: Props) => {
   const { user } = useSession();
   const projectDataRef = useRef<HTMLDivElement>(null);
 
-  const [filteredSamples, setFilteredSamples] = useState(null)
+  const [filteredSamples, setFilteredSamples] = useState(null);
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
@@ -162,7 +162,7 @@ export const ProjectInterface = (props: Props) => {
           isUpdatingProject={isSubmitting}
           reset={projectUpdates.reset}
           handleSubmit={handleSubmit}
-          filteredSamples={filteredSamples}
+          filteredSamples={filteredSamples || []}
         />
       </div>
       <div ref={projectDataRef}>
@@ -217,7 +217,10 @@ export const ProjectInterface = (props: Props) => {
           />
         )}
         {pageView === 'help' && (
-          <iframe src='https://pep.databio.org/spec/specification/' style={{display:'block', width:'100%', height:'100vh'}}/>
+          <iframe
+            src="https://pep.databio.org/spec/specification/"
+            style={{ display: 'block', width: '100%', height: '100vh' }}
+          />
         )}
       </div>
     </Fragment>
