@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useRef } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip, { TooltipProps } from 'react-bootstrap/Tooltip';
 import { useSearchParams } from 'react-router-dom';
@@ -31,6 +31,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const projectViews = projectViewsQuery.data;
 
   const [showViewOptionsModal, setShowViewOptionsModal] = useState(false);
+  const selectRef = useRef(null);
 
   const { user } = useSession();
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
@@ -62,9 +63,10 @@ export const ViewSelector = (props: ViewSelectorProps) => {
             <i className="bi bi-gear-wide-connected"></i>
           </button>
         ) : null}
-        <OverlayTrigger placement="top" delay={{ show: 250, hide: 500 }} overlay={renderTooltip} trigger={['hover']}>
+        <OverlayTrigger placement="top" delay={{ show: 250, hide: 500 }} overlay={renderTooltip}>
           <div className="w-100">
             <ReactSelect
+             ref={selectRef}
               styles={{
                 control: (provided) => ({
                   ...provided,
@@ -90,6 +92,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                   searchParams.set('view', selectedOption.value);
                   setSearchParams(searchParams);
                 }
+                setTimeout(function() {selectRef.current.blur()}, 50);
               }}
               isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
               isClearable
