@@ -44,6 +44,8 @@ async def get_all_schemas(
     query: Optional[str] = None,
     limit: Optional[int] = 100,
     offset: Optional[int] = 0,
+    order_by: str = "update_date",
+    order_desc: bool = False,
     namespace: Optional[str] = None,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
@@ -52,6 +54,8 @@ async def get_all_schemas(
         search_str=query,
         limit=limit,
         offset=offset,
+        order_by=order_by,
+        order_desc=order_desc,
     )
     return result
 
@@ -63,9 +67,16 @@ async def get_schemas_in_namespace(
     limit: Optional[int] = 100,
     offset: Optional[int] = 0,
     agent: PEPDatabaseAgent = Depends(get_db),
+    order_by: str = "update_date",
+    order_desc: bool = False,
 ):
     result = agent.schema.search(
-        namespace=namespace, search_str=query, limit=limit, offset=offset
+        namespace=namespace,
+        search_str=query,
+        limit=limit,
+        offset=offset,
+        order_by=order_by,
+        order_desc=order_desc,
     )
     return result
 
@@ -116,7 +127,7 @@ async def create_schema_for_namespace_by_file(
     namespace: str,
     name: Optional[str] = Form(...),
     schema_file: UploadFile = File(...),
-    description: Optional[str] = Form(...),
+    description: Optional[str] = Form(default=None),
     agent: PEPDatabaseAgent = Depends(get_db),
     list_of_admins: Optional[list] = Depends(get_namespace_access_list),
     user_name: Optional[str] = Depends(get_user_from_session_info),
