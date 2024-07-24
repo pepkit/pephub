@@ -9,7 +9,8 @@ export const NavLogo = () => {
       {user ? (
         <div>
           <a
-            href={`/${user.login}`}
+            // href={`/${user.login}`}
+            href="/"
             className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none"
           >
             <img src="/pephub_logo.svg" alt="PEPhub" height="60" />
