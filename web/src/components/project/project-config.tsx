@@ -1,5 +1,4 @@
 import Editor from '@monaco-editor/react';
-import { memo } from 'react';
 
 type Props = {
   value: string;

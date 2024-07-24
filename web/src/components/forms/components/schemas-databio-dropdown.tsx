@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import Select, { SingleValue } from 'react-select';
 
+import { useAllSchemas } from '../../../hooks/queries/useAllSchemas';
 import { useSchemas } from '../../../hooks/queries/useSchemas';
 
 interface Props {
@@ -10,11 +11,11 @@ interface Props {
 }
 
 const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => {
-  const { data: schemas, isLoading } = useSchemas();
+  const { data: schemas, isFetching: isLoading } = useAllSchemas({});
 
-  const options = Object.keys(schemas || {}).map((schema) => ({
-    label: schema,
-    value: schema,
+  const options = (schemas?.results || []).map((schema) => ({
+    label: `${schema.namespace}/${schema.name}`,
+    value: `${schema.namespace}/${schema.name}`,
   }));
 
   const valueForSelect = options.find((option) => option.value === value);

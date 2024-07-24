@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, Header, Query
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
-from fastembed.embedding import FlagEmbedding as Embedding
+from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.exceptions import ProjectNotFoundError

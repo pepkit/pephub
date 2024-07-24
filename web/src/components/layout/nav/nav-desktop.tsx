@@ -140,6 +140,11 @@ export const NavDesktop = () => {
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
+        <a className="nav-link" href="/schemas">
+          <i className="bi bi-file-earmark-check me-1 text-base"></i>Schemas
+        </a>
+      </li>
+      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="/validate">
           <i className="bi bi-check2-circle me-1 text-base"></i>Validation
         </a>
@@ -172,6 +177,10 @@ export const NavDesktop = () => {
                 <Dropdown.Item href={`/${user.login}?view=stars`}>
                   <i className="bi bi-star me-1"></i>
                   Stars
+                </Dropdown.Item>
+                <Dropdown.Item href={`/${user.login}?view=schemas`}>
+                  <i className="bi bi-filetype-yml me-1"></i>
+                  My Schemas
                 </Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Header>Organizations</Dropdown.Header>

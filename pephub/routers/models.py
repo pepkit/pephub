@@ -128,3 +128,34 @@ class SamplesResponseModel(BaseModel):
 
 class ConfigResponseModel(BaseModel):
     config: str
+
+
+class SchemaCreateRequest(BaseModel):
+    name: str
+    description: Optional[str] = None
+    schema: str
+
+
+class SchemaUpdateRequest(BaseModel):
+    description: Optional[str] = None
+    schema: Optional[str] = None
+
+
+class SchemaGroupCreateRequest(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
+class SchemaGroupUpdateRequest(BaseModel):
+    description: Optional[str] = None
+
+
+class SchemaGroupAssignRequest(BaseModel):
+    group: str
+
+
+class SchemaGetResponse(BaseModel):
+    schema: str
+    description: Optional[str] = None
+    last_update_date: str = ""
+    submission_date: str = ""

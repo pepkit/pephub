@@ -68,12 +68,12 @@ export const ValidationResultModal = (props: Props) => {
         ) : (
           <Fragment>
             <p>You PEP is invalid against the schema.</p>
+            <p>Validation result:</p>
             <pre>
               <code>{JSON.stringify(validationResult, null, 2)}</code>
             </pre>
           </Fragment>
         )}
-
         <form className="my-1">
           <label className="fw-bold">You can change schemas here</label>
           <div className="d-flex align-items-center w-100 gap-1">
@@ -102,9 +102,21 @@ export const ValidationResultModal = (props: Props) => {
         </form>
       </Modal.Body>
       <Modal.Footer>
-        <button className="btn btn-dark" onClick={onHide}>
-          Close
-        </button>
+        <div className="d-flex align-items-center justify-content-between w-100">
+          <div className="d-flex align-items-center">
+            <a href={`/schemas/${props.currentSchema}`}>
+              <button className="btn btn-sm btn-outline-dark">
+                <span className="d-flex align-items-center gap-1">
+                  <i className="bi bi-arrow-left"></i>
+                  Go to {props.currentSchema}
+                </span>
+              </button>
+            </a>
+          </div>
+          <button className="btn btn-dark" onClick={onHide}>
+            Close
+          </button>
+        </div>
       </Modal.Footer>
     </Modal>
   );

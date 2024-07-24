@@ -1,5 +1,5 @@
 // react query stuff
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 // css
@@ -14,7 +14,7 @@ import { HelmetProvider } from 'react-helmet-async';
 // notifications
 import { Toaster } from 'react-hot-toast';
 // routing
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter, redirect } from 'react-router-dom';
 
 import { ApiProvider } from './contexts/api-context';
 // custom contexts
@@ -25,6 +25,8 @@ import { Home } from './pages/Home';
 import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
+import { Schema } from './pages/Schema';
+import { Schemas } from './pages/Schemas';
 import { SearchPage } from './pages/Search';
 import { EidoValidator } from './pages/Validator';
 
@@ -68,6 +70,24 @@ const router = createBrowserRouter([
         <ProjectPage />
       </ProjectPageProvider>
     ),
+  },
+  {
+    path: '/schemas',
+    element: <Schemas />,
+  },
+  {
+    path: '/schemas/:namespace',
+    loader: async ({ params }) => {
+      const { namespace } = params;
+      if (namespace === undefined) {
+        return redirect('/schemas');
+      }
+      return redirect(`/${namespace}?view=schemas`);
+    },
+  },
+  {
+    path: '/schemas/:namespace/:schema',
+    element: <Schema />,
   },
 ]);
 

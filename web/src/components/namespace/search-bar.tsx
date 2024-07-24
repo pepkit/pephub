@@ -29,7 +29,7 @@ export const NamespacePageSearchBar: FC<Props> = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   return (
-    <div className="flex-row d-flex align-items-center" style={{ position: 'relative' }}>
+    <div className="flex-row d-flex align-items-center position-relative">
       <div className="input-group shadow-sm">
         <span id="search-bar-label" className="input-group-text">
           Search
