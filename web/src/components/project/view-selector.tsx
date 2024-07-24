@@ -20,6 +20,8 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const { filteredSamples } = props;
   const [searchParams, setSearchParams] = useSearchParams();
 
+  console.log(filteredSamples)
+
   const { namespace, projectName, tag } = useProjectPage();
   const { view, setView } = useProjectSelectedView();
 
@@ -51,9 +53,9 @@ export const ViewSelector = (props: ViewSelectorProps) => {
           <button
             onClick={() => setShowViewOptionsModal(true)}
             className={
-              !filteredSamples
-                ? 'btn btn-secondary rounded-end-0 rounded-start-1 ps-2 pe-2'
-                : 'btn btn-primary glow-button rounded-end-0 rounded-start-1 ps-2 pe-2'
+              filteredSamples.length > 0
+                ? 'btn btn-primary glow-button rounded-end-0 rounded-start-1 ps-2 pe-2'
+                : 'btn btn-secondary rounded-end-0 rounded-start-1 ps-2 pe-2'
             }
             style={{ transitionDuration: '250ms' }}
           >
