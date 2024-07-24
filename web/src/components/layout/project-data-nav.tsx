@@ -92,17 +92,6 @@ export const ProjectDataNav = (props: NavProps) => {
           color={pageView === 'config' ? ' text-dark' : ' text-muted'}
         />
       </div>
-      <div className={pageView === 'help' ? 'border-0 px-1 h-100 text-muted bg-white shadow-sm' : 'px-1 h-100'}>
-        <ViewButton
-          view="help"
-          setPageView={setPageView}
-          icon="bi bi-question-circle-fill me-2"
-          text="Help"
-          isDirty={false}
-          bold={pageView === 'help' ? ' fw-normal' : ' fw-light'}
-          color={pageView === 'help' ? ' text-dark' : ' text-muted'}
-        />
-      </div>
       <ViewSelector filteredSamples={filteredSamples} />
     </div>
   );
