@@ -38,7 +38,7 @@ export const SearchBox: FC<Props> = ({
   return (
     <motion.input
       style={{
-        zIndex: -1,
+        zIndex: 0,
       }}
       onKeyDown={onKeyDown}
       type="text"

@@ -154,6 +154,22 @@ export const ProjectInterface = (props: Props) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (currentHistoryId !== null) {
+      // set global-search-bar z-index to -1
+      const globalSearchBar = document.getElementById('global-search-bar');
+      if (globalSearchBar) {
+        globalSearchBar.style.zIndex = '-1';
+      }
+    } else {
+      // set global-search-bar z-index to 1
+      const globalSearchBar = document.getElementById('global-search-bar');
+      if (globalSearchBar) {
+        globalSearchBar.style.zIndex = '1';
+      }
+    }
+  }, [currentHistoryId]);
+
   return (
     <Fragment>
       <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
