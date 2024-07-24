@@ -1,13 +1,13 @@
-import { FC, useState } from 'react';
-import { Modal, Tab, Tabs } from 'react-bootstrap';
-import ReactSelect from 'react-select';
-import { Controller, FieldErrors, useForm } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
+import { FormEvent, useState } from 'react';
+import { Modal } from 'react-bootstrap';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import ReactSelect from 'react-select';
 
-
-import { useViewMutations } from '../../hooks/mutations/useViewMutations';
+import { CreateProjectViewRequest } from '../../api/project';
 import { useProjectPage } from '../../contexts/project-page-context';
-import { CreateProjectViewRequest, addProjectView, deleteProjectView } from '../../api/project';
+import { useViewMutations } from '../../hooks/mutations/useViewMutations';
 import { useProjectViews } from '../../hooks/queries/useProjectViews';
 import { useProjectSelectedView } from '../../hooks/stores/useProjectSelectedViewStore';
 
@@ -22,61 +22,68 @@ type FormValues = {
   description: string;
 };
 
+type ViewOption = {
+  view: string;
+  description: string;
+  value: string;
+  label: string;
+};
+
 export const ViewOptionsModal = (props: Props) => {
   const { show, onHide, filteredSamples } = props;
 
   const { namespace, projectName, tag } = useProjectPage();
-  const { view, setView } = useProjectSelectedView();
 
   const projectViewsQuery = useProjectViews(namespace, projectName, tag);
-  
+
   const projectViewsIsLoading = projectViewsQuery.isLoading;
   const projectViews = projectViewsQuery.data;
 
   const viewMutations = useViewMutations(namespace, projectName, tag);
 
-  const [selectedViewDelete, setSelectedViewDelete] = useState(null);
+  const [selectedViewDelete, setSelectedViewDelete] = useState<ViewOption | null>(null);
   const [deleteState, setDeleteState] = useState(true);
 
   const {
+    watch,
     register,
     reset: resetForm,
     formState: { isValid, errors },
   } = useForm<FormValues>({
     mode: 'onChange',
     defaultValues: {
-      name: null,
-      description: null,
+      name: undefined,
+      description: undefined,
     },
   });
 
-  const handleDeleteView =  async() => {
+  const viewName = watch('name');
+  const viewDescription = watch('description');
+
+  const handleDeleteView = () => {
+    if (selectedViewDelete === null) {
+      toast.error('No view selected to delete');
+      return;
+    }
     viewMutations.removeViewMutation.mutate(selectedViewDelete.value);
-    setSelectedViewDelete(null)
+    setSelectedViewDelete(null);
   };
 
-  const runValidation = () => {
-    projectViewsQuery.refetch();
-  };
-
-  const onSubmit = (e) => {
-    e.preventDefault();
-
+  const onSubmit = () => {
     const createViewRequest: CreateProjectViewRequest = {
-      viewName: e.target[0].value,
+      viewName: viewName,
       sampleNames: filteredSamples, // You might want to update this based on your requirements
-      description: e.target[1].value,
-      noFail: false
+      description: viewDescription,
+      noFail: false,
     };
-    
+
     viewMutations.addViewMutation.mutate(createViewRequest);
 
-    e.target.reset()
-    resetForm({}, { keepValues: false })
+    resetForm({}, { keepValues: false });
   };
 
   return (
-    <Modal size="lg" centered animation={false} show={show} onHide={onHide} style={{zIndex: 99999}}>
+    <Modal size="lg" centered animation={false} show={show} onHide={onHide} style={{ zIndex: 99999 }}>
       <Modal.Header closeButton>
         <h1 className="modal-title fs-5">Manage Views</h1>
       </Modal.Header>
@@ -84,8 +91,11 @@ export const ViewOptionsModal = (props: Props) => {
         {filteredSamples ? (
           <div className="">
             <h6 className="mb-1">Save View</h6>
-            <p className="mb-3 text-xs">Save the current filtered sample table state as a view by providing a name (required) and description (optional) for the view.</p>
-            <form onSubmit={onSubmit}>
+            <p className="mb-3 text-xs">
+              Save the current filtered sample table state as a view by providing a name (required) and description
+              (optional) for the view.
+            </p>
+            <form>
               <div className="input-group mb-2">
                 <span className="input-group-text text-xs">Name</span>
                 <input
@@ -105,11 +115,11 @@ export const ViewOptionsModal = (props: Props) => {
                   id="view-name"
                   aria-describedby="view-name-help"
                 />
-              </div> 
+              </div>
               <div className="input-group">
                 <span className="input-group-text text-xs">Description</span>
                 <input
-                  {...register('desc')}
+                  {...register('description')}
                   placeholder="..."
                   type="text"
                   className="form-control text-xs"
@@ -120,18 +130,22 @@ export const ViewOptionsModal = (props: Props) => {
               <ErrorMessage
                 errors={errors}
                 name="name"
-                render={({ message }) => message ? <p className="text-danger text-xs pt-1 mb-0">{message}</p> : null}
+                render={({ message }) => (message ? <p className="text-danger text-xs pt-1 mb-0">{message}</p> : null)}
               />
-              <button 
+              <button
                 disabled={!isValid || !!errors.name?.message}
-                type='submit'
-                className="btn btn-success px-2 mt-3 text-xs">
+                type="button"
+                className="btn btn-success px-2 mt-3 text-xs"
+                onClick={() => {
+                  onSubmit();
+                }}
+              >
                 <i className="bi bi-plus-lg"></i> Save New View
               </button>
-            </form> 
-          <hr />
+            </form>
+            <hr />
           </div>
-        ) : null }
+        ) : null}
         <div className="">
           <h6 className="mb-1">Remove View</h6>
           <p className="mb-3 text-xs">Remove an existing view by selecting it from the dropdown menu.</p>
@@ -152,7 +166,7 @@ export const ViewOptionsModal = (props: Props) => {
               })) || []
             }
             onChange={(selectedOption) => {
-              if ((selectedOption === null) || (projectViews?.views.length === 0)) {
+              if (selectedOption === null || projectViews?.views.length === 0) {
                 setSelectedViewDelete(null);
                 setDeleteState(true);
               } else {
@@ -169,12 +183,18 @@ export const ViewOptionsModal = (props: Props) => {
                 ? 'No views available'
                 : 'Select a view'
             }
-            value={selectedViewDelete === null ? null : { view: selectedViewDelete.view, description: selectedViewDelete.description, value: selectedViewDelete.value, label: selectedViewDelete.label }}
+            value={
+              selectedViewDelete === null
+                ? null
+                : {
+                    view: selectedViewDelete.view,
+                    description: selectedViewDelete.description,
+                    value: selectedViewDelete.value,
+                    label: selectedViewDelete.label,
+                  }
+            }
           />
-          <button
-            disabled={deleteState}
-            onClick={handleDeleteView}
-            className="btn btn-danger px-2 mt-3 text-xs">
+          <button disabled={deleteState} onClick={handleDeleteView} className="btn btn-danger px-2 mt-3 text-xs">
             <i className="bi bi-trash"></i> Remove View
           </button>
         </div>

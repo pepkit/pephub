@@ -3,8 +3,8 @@ import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
 import { CreateProjectViewRequest, addProjectView, deleteProjectView } from '../../api/project';
-import { extractErrorMessage } from '../../utils/etc';
 import { useSession } from '../../contexts/session-context';
+import { extractErrorMessage } from '../../utils/etc';
 
 export const useViewMutations = (namespace: string, project: string, tag: string) => {
   const { jwt } = useSession();
@@ -29,7 +29,10 @@ export const useViewMutations = (namespace: string, project: string, tag: string
   });
 
   const removeViewMutation = useMutation({
-    mutationFn: (viewName: string) => {
+    mutationFn: (viewName: string | undefined | null) => {
+      if (!viewName) {
+        throw new Error('View name is not provided');
+      }
       return deleteProjectView(namespace, project, tag, viewName, jwt);
     },
     onSuccess: () => {
