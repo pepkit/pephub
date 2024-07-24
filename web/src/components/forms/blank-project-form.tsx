@@ -239,7 +239,15 @@ sample_table: samples.csv
           <i className="bi bi-plus-circle me-1"></i>
           {isSubmitting ? 'Submitting...' : 'Add'}
         </button>
-        <button type="button" className="btn btn-outline-dark me-1" data-bs-dismiss="modal" onClick={() => resetForm()}>
+        <button
+          type="button"
+          className="btn btn-outline-dark me-1"
+          data-bs-dismiss="modal"
+          onClick={() => {
+            resetForm();
+            onHide();
+          }}
+        >
           Cancel
         </button>
       </div>
