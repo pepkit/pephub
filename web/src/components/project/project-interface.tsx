@@ -40,7 +40,7 @@ export const ProjectInterface = (props: Props) => {
   const { user } = useSession();
   const projectDataRef = useRef<HTMLDivElement>(null);
 
-  const [filteredSamples, setFilteredSamples] = useState(null);
+  const [filteredSamples, setFilteredSamples] = useState<string[]>([]);
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
@@ -178,7 +178,7 @@ export const ProjectInterface = (props: Props) => {
                 readOnly={!userCanEdit}
                 data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                setFilteredSamples={setFilteredSamples}
+                setFilteredSamples={(samples) => setFilteredSamples(samples)}
                 sampleTableIndex={sampleTableIndex}
               />
             )}
