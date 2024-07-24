@@ -125,7 +125,7 @@ export const ProjectPage = () => {
             projectConfig={projectConfigQuery.data}
             sampleTable={sampleTableQuery.data}
             subSampleTable={subSampleTableQuery.data}
-            sampleTableIndex={sampleTableIndex}
+            sampleTableIndex={sampleTableIndex || 'sample_name'}
           />
         )}
         <LargeSampleTableModal
