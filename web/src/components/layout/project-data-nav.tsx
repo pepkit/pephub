@@ -3,9 +3,11 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useProjectPageView } from '../../hooks/stores/useProjectPageView';
 import { ViewSelector } from '../project/view-selector';
 
-type PageView = 'samples' | 'subsamples' | 'config';
+type PageView = 'samples' | 'subsamples' | 'config' | 'help';
 
-type NavProps = {};
+type NavProps = {
+  filteredSamples: string[];
+};
 
 type ViewButtonProps = {
   view: PageView;
@@ -43,26 +45,12 @@ const ViewButton = (props: ViewButtonProps) => {
 };
 
 export const ProjectDataNav = (props: NavProps) => {
-  const {} = props;
+  const { filteredSamples } = props;
 
   const { pageView, setPageView } = useProjectPageView();
 
   return (
     <div className="h-100 w-100 d-flex flex-row align-items-center">
-      <div className="mx-2">
-        <OverlayTrigger
-          placement="right"
-          delay={{ show: 100, hide: 600 }}
-          overlay={
-            <Tooltip id="project-nav-tabs-tooltip">
-              A project consists of samples, subsamples, and a configuration file. For a detailed explanation of each
-              you can refer to the <a href="https://pep.databio.org/spec/specification/">PEP specification</a>.
-            </Tooltip>
-          }
-        >
-          <i className="bi bi-info-circle text-muted"></i>
-        </OverlayTrigger>
-      </div>
       <div
         className={
           pageView === 'samples' ? 'border-0 px-1 h-100 text-muted bg-white shadow-sm align-middle' : 'px-1 h-100'
@@ -104,7 +92,18 @@ export const ProjectDataNav = (props: NavProps) => {
           color={pageView === 'config' ? ' text-dark' : ' text-muted'}
         />
       </div>
-      <ViewSelector />
+      <div className={pageView === 'help' ? 'border-0 px-1 h-100 text-muted bg-white shadow-sm' : 'px-1 h-100'}>
+        <ViewButton
+          view="help"
+          setPageView={setPageView}
+          icon="bi bi-question-circle-fill me-2"
+          text="Help"
+          isDirty={false}
+          bold={pageView === 'help' ? ' fw-normal' : ' fw-light'}
+          color={pageView === 'help' ? ' text-dark' : ' text-muted'}
+        />
+      </div>
+      <ViewSelector filteredSamples={filteredSamples} />
     </div>
   );
 };

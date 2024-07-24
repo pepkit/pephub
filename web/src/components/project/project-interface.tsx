@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Fragment } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -25,6 +25,7 @@ type Props = {
   projectInfo: ReturnType<typeof useProjectAnnotation>['data'];
   sampleTable: ReturnType<typeof useSampleTable>['data'];
   subSampleTable: ReturnType<typeof useSubsampleTable>['data'];
+  sampleTableIndex: string;
 };
 
 type ProjectUpdateFields = {
@@ -34,10 +35,12 @@ type ProjectUpdateFields = {
 };
 
 export const ProjectInterface = (props: Props) => {
-  const { projectConfig, sampleTable, subSampleTable } = props;
+  const { projectConfig, sampleTable, subSampleTable, sampleTableIndex } = props;
 
   const { user } = useSession();
   const projectDataRef = useRef<HTMLDivElement>(null);
+
+  const [filteredSamples, setFilteredSamples] = useState(null)
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
@@ -159,6 +162,7 @@ export const ProjectInterface = (props: Props) => {
           isUpdatingProject={isSubmitting}
           reset={projectUpdates.reset}
           handleSubmit={handleSubmit}
+          filteredSamples={filteredSamples}
         />
       </div>
       <div ref={projectDataRef}>
@@ -174,6 +178,8 @@ export const ProjectInterface = (props: Props) => {
                 readOnly={!userCanEdit}
                 data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                setFilteredSamples={setFilteredSamples}
+                sampleTableIndex={sampleTableIndex}
               />
             )}
           />
@@ -209,6 +215,9 @@ export const ProjectInterface = (props: Props) => {
               />
             )}
           />
+        )}
+        {pageView === 'help' && (
+          <iframe src='https://pep.databio.org/spec/specification/' style={{display:'block', width:'100%', height:'100vh'}}/>
         )}
       </div>
     </Fragment>
