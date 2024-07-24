@@ -2,7 +2,7 @@ from typing import Optional
 
 import yaml
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import (
@@ -63,7 +63,7 @@ async def get_schemas_in_namespace(
     return result
 
 
-@schemas.post("/{namespace}")
+@schemas.post("/{namespace}/json")
 async def create_schema_for_namespace(
     namespace: str,
     new_schema: SchemaCreateRequest,
@@ -96,6 +96,52 @@ async def create_schema_for_namespace(
         raise HTTPException(
             status_code=409,
             detail=f"Schema {new_schema.name}/{namespace} already exists.",
+        )
+    except yaml.parser.ParserError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"The was an error parsing the yaml: {e}",
+        )
+
+
+@schemas.post("/{namespace}/file")
+async def create_schema_for_namespace_by_file(
+    namespace: str,
+    name: Optional[str] = Form(...),
+    schema_file: UploadFile = File(...),
+    description: Optional[str] = Form(...),
+    agent: PEPDatabaseAgent = Depends(get_db),
+    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
+    user_name: Optional[str] = Depends(get_user_from_session_info),
+):
+    if user_name not in list_of_admins:
+        raise HTTPException(
+            status_code=403, detail="You do not have permission to create this schema"
+        )
+
+    # parse out the schema into a dictionary
+    try:
+        schema_str = schema_file.file.read().decode("utf-8")
+        schema_dict = yaml.safe_load(schema_str)
+        schema_name = name or schema_file.filename
+
+        agent.schema.create(
+            namespace=namespace,
+            name=schema_name,
+            description=description,
+            schema=schema_dict,
+            overwrite=False,
+            update_only=False,
+        )
+
+        return {
+            "message": "Schema created successfully",
+        }
+
+    except SchemaAlreadyExistsError:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Schema {schema_name}/{namespace} already exists.",
         )
     except yaml.parser.ParserError as e:
         raise HTTPException(

@@ -22,6 +22,7 @@ required:
 `;
 
 type Props = {
+  defaultNamespace?: string;
   editorHeight?: string;
   onCancel: () => void;
   onSubmit: () => void;
@@ -36,11 +37,11 @@ type FormFields = {
 };
 
 export const CreateSchemaForm = (props: Props) => {
-  const { onCancel, onSubmit, editorHeight } = props;
+  const { onCancel, onSubmit, editorHeight, defaultNamespace } = props;
   const { user } = useSession();
   const { formState, watch, register, control, reset } = useForm<FormFields>({
     defaultValues: {
-      namespace: user?.login || undefined,
+      namespace: defaultNamespace || user?.login || undefined,
       schemaYaml: defaultSchemaYaml,
     },
   });

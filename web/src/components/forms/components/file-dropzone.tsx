@@ -18,7 +18,13 @@ export const FileDropZone: FC<FileDropzoneProps> = ({ name, multiple = true, con
         <Dropzone
           innerRef={innerRef}
           multiple={multiple}
-          onChange={(e) => onChange(multiple ? e.target.files : e.target.files ? e.target.files[0] : undefined)}
+          onChange={(e) => {
+            if (multiple) {
+              onChange(e.target.files);
+            } else {
+              onChange(e.target.files ? e.target.files[0] : undefined);
+            }
+          }}
         />
       )}
     />
@@ -56,7 +62,11 @@ const Dropzone: FC<DropzoneProps> = ({ multiple = true, onChange, innerRef }) =>
     >
       <div className="flex-row d-flex align-items-center">
         <i className="bi bi-cloud-arrow-up"></i>
-        <span className="text-secondary ms-2">Drag files here</span>
+        {multiple ? (
+          <span className="text-secondary ms-2">Drag files here or click to browse</span>
+        ) : (
+          <span className="text-secondary ms-2">Drag file here or click to browse</span>
+        )}
       </div>
       <span className="my-1 text-secondary">or</span>
       <span className="text-secondary">click to browse</span>

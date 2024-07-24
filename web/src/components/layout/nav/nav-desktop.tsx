@@ -179,7 +179,7 @@ export const NavDesktop = () => {
                   Stars
                 </Dropdown.Item>
                 <Dropdown.Item href={`/${user.login}?view=schemas`}>
-                  <i className="bi bi-file-earmark-check me-1"></i>
+                  <i className="bi bi-filetype-yml me-1"></i>
                   My Schemas
                 </Dropdown.Item>
                 <Dropdown.Divider />

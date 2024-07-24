@@ -82,12 +82,33 @@ export const createNewSchema = async (
   schema: string,
   jwt: string | null,
 ) => {
-  const url = `${API_BASE}/schemas/${namespace}`;
+  const url = `${API_BASE}/schemas/${namespace}/json`;
   const { data } = await axios.post<CreateSchemaResponse>(
     url,
     { namespace: namespace, name, description, schema },
     { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
   );
+  return data;
+};
+
+export const createNewSchemaFiles = async (
+  namespace: string,
+  name: string | undefined | null,
+  description: string | undefined | null,
+  isPrivate: boolean,
+  schema: File,
+  jwt: string | null,
+) => {
+  const url = `${API_BASE}/schemas/${namespace}/file`;
+  const formData = new FormData();
+  formData.append('namespace', namespace);
+  formData.append('schema_file', schema);
+  name && formData.append('name', name);
+  description && formData.append('description', description);
+
+  const { data } = await axios.post<CreateSchemaResponse>(url, formData, {
+    headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}`, 'Content-Type': 'multipart/form-data' },
+  });
   return data;
 };
 

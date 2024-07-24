@@ -27,7 +27,7 @@ export const MobileNav = () => {
               My PEPs
             </Dropdown.Item>
             <Dropdown.Item href={`/${user.login}`}>
-              <i className="bi bi-file-earmark-check me-1"></i>
+              <i className="bi bi-filetype-yml me-1"></i>
               My Schemas
             </Dropdown.Item>
             <Dropdown.Item href={`/${user.login}?view=stars`}>
