@@ -14,11 +14,18 @@ from pepdbagent.exceptions import (
 import yaml.parser
 import yaml.scanner
 
+from pepdbagent.models import (
+    SchemaSearchResult,
+    SchemaGroupSearchResult,
+    SchemaGroupAnnotation,
+)
+
 from ...models import (
     SchemaCreateRequest,
     SchemaUpdateRequest,
     SchemaGroupCreateRequest,
     SchemaGroupAssignRequest,
+    SchemaGetResponse,
 )
 from ....dependencies import (
     get_db,
@@ -32,7 +39,7 @@ groups = APIRouter(prefix="/api/v1/schema-groups", tags=["groups"])
 schemas = APIRouter(prefix="/api/v1/schemas", tags=["schemas"])
 
 
-@schemas.get("")
+@schemas.get("", response_model=SchemaSearchResult)
 async def get_all_schemas(
     query: Optional[str] = None,
     limit: Optional[int] = 100,
@@ -49,7 +56,7 @@ async def get_all_schemas(
     return result
 
 
-@schemas.get("/{namespace}")
+@schemas.get("/{namespace}", response_model=SchemaSearchResult)
 async def get_schemas_in_namespace(
     namespace: str,
     query: Optional[str] = None,
@@ -150,21 +157,22 @@ async def create_schema_for_namespace_by_file(
         )
 
 
-@schemas.get("/{namespace}/{schema}")
+@schemas.get("/{namespace}/{schema}", response_model=SchemaGetResponse)
 async def get_schema(
     namespace: str,
     schema: str,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     try:
-        res = agent.schema.get(namespace=namespace, name=schema)
+        schema_dict = agent.schema.get(namespace=namespace, name=schema)
         info = agent.schema.info(namespace=namespace, name=schema)
-        return {
-            "schema": yaml.dump(res),
-            "description": info.description,
-            "last_update_date": info.last_update_date,
-            "submission_date": info.submission_date,
-        }
+        return SchemaGetResponse(
+            schema=yaml.dump(schema_dict),
+            description=info.description,
+            last_update_date=info.last_update_date,
+            submission_date=info.submission_date,
+        )
+
     except SchemaDoesNotExistError:
         raise HTTPException(
             status_code=404, detail=f"Schema {schema}/{namespace} not found."
@@ -293,7 +301,7 @@ async def remove_group_from_schema(
     return {"message": "Group removed from schema successfully"}
 
 
-@groups.get("")
+@groups.get("", response_model=SchemaGroupSearchResult)
 async def get_all_groups(
     namespace: Optional[str] = None,
     query: Optional[str] = None,
@@ -310,7 +318,7 @@ async def get_all_groups(
     return result
 
 
-@groups.get("/{namespace}")
+@groups.get("/{namespace}", response_model=SchemaGroupSearchResult)
 async def get_groups_in_namespace(
     namespace: str,
     query: Optional[str] = None,
@@ -324,7 +332,7 @@ async def get_groups_in_namespace(
     return result
 
 
-@groups.get("/{namespace}/{group}")
+@groups.get("/{namespace}/{group}", response_model=SchemaGroupAnnotation)
 async def get_group(
     namespace: str,
     group: str,
