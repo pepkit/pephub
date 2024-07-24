@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Form, UploadFile
 from fastapi.exceptions import HTTPException
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.utils import registry_path_converter
+from pepdbagent.exceptions import SchemaDoesNotExistError
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -112,16 +113,19 @@ async def validate(
         )
 
     if schema_registry is not None:
-        schema_url = f"https://schema.databio.org/{schema_registry}.yaml"
+        schema_namespace, schema_name = schema_registry.split("/")
 
         try:
-            response = requests.get(schema_url)
-            response.raise_for_status()  # Check if the request was successful
-            yaml_string = response.text
-        except requests.exceptions.RequestException as e:
+            schema = agent.schema.get(
+                namespace=schema_namespace,
+                name=schema_name,
+            )
+            yaml_string = yaml.dump(schema)
+
+        except SchemaDoesNotExistError:
             raise HTTPException(
-                status_code=400,
-                detail={"error": f"Error fetching schema: {str(e)}"},
+                status_code=404,
+                detail={"error": "Schema not found."},
             )
 
         # save schema string to temp file
