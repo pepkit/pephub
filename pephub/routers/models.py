@@ -4,7 +4,7 @@ from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.models import UpdateItems
 from pydantic import BaseModel, ConfigDict, Field
 
-from ..const import DEFAULT_PEP_SCHEMA, DEFAULT_QDRANT_SCORE_THRESHOLD
+from ..const import DEFAULT_QDRANT_SCORE_THRESHOLD
 
 
 class ProjectOptional(UpdateItems):
@@ -94,7 +94,7 @@ class ProjectJsonRequest(BaseModel):
     is_private: bool = False
     tag: str = DEFAULT_TAG
     overwrite: bool = False
-    pep_schema: Optional[str] = DEFAULT_PEP_SCHEMA
+    pep_schema: Optional[str] = None
     pop: Optional[bool] = None
 
 
