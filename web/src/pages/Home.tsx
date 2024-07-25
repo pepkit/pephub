@@ -183,7 +183,7 @@ export function Home() {
             </Col>
           </Row>
           <div className="p-5"></div>
-          <div className="p-5"></div>
+          {/* <div className="p-5"></div> */}
           <Row className="w-100 align-items-center">
             <Col sm={6} md={6}>
               <h2 className="fw-bold">PEPhub client </h2>
