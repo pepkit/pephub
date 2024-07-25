@@ -410,6 +410,15 @@ body {
     height: 80vh;
   }
 }
+@media (min-width: 768px) {
+  h40 {
+    height: 40vh;
+  }
+}
+
+.code-snippet-container {
+  min-height: 200px;
+}
 
 .wtHolder {
   overflow: hidden;
@@ -632,7 +641,6 @@ body {
   transition: box-shadow 0.1s ease-in-out;
   height: 31px !important;
 }
-
 
 .schemas-grid {
   display: grid;
