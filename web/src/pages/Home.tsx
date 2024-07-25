@@ -136,8 +136,8 @@ export function Home() {
               <h2 className="fw-bold">Web server and API</h2>
               <p className="text-balance pe-4">
                 The PEPhub web server and API are designed to provide a user-friendly interface for exploring and
-                working with biologically ortiented sample metadata. The web server allows users to search for metadata,
-                view detailed information about these metadata, and create new metadata.
+                working with biologically oriented sample metadata. The web server allows users to search for metadata,
+                view detailed information about these metadata, and create projects.
               </p>
             </Col>
             <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100">
@@ -190,11 +190,11 @@ export function Home() {
               <p className="text-balance pe-4">
                 PEPhub provides a Python an R client for interacting with the PEPhub API. The client allows users to
                 download and work with project metadata programmatically, without the need to interact with the native
-                API. <code>peppy</code> is available on PyPI with other useful tools for genomic metadata manipulation.
+                API. <code>PEPHubClient</code> is available on PyPI with other useful tools for metadata manipulation.
                 Peppy:{' '}
-                <a href="https://pypi.org/project/peppy/" className="bi bi-box-fill">
+                <a href="https://pypi.org/project/pephubclient/" className="bi bi-box-fill">
                   {' '}
-                  PyPI peppy
+                  PyPI pephubclient
                 </a>
                 .
               </p>

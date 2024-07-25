@@ -95,8 +95,10 @@ export const CLIENT_PYTHON_CODE_MD = `
 import peppy
 
 project = peppy.Project.from_pephub('databio/example')
+# where 'databio/example' is the project registry path
 
-print(project)
+for sample in proj.samples:
+  print(sample)
 \`\`\`
 `;
 
@@ -105,21 +107,50 @@ import peppy
 
 project = peppy.Project.from_pephub('databio/example')
 
-print(project)
+for sample in proj.samples:
+  print(sample)
 `;
 
 export const CLIENT_R_CODE_MD = `
 \`\`\`r
+library(pepr)
 
-# PEPHub client is not yet available in R
-# R package is under development
+pep <- pullProject('databio/example:default')
+
+for (sample in sampleTable(pep)) {
+  print(sample)
+} 
 
 \`\`\`
 `;
 
 export const CLIENT_R_CODE_RAW = `
-# PEPHub client is not yet available in R
-# R package is under development
+library(pepr)
+
+pep <- pullProject('databio/example:default')
+
+for (sample in sampleTable(pep)) {
+  print(sample)
+} 
+`;
+
+export const CLIENT_CLI_CODE_MD = `
+\`\`\`bash
+
+phc login
+
+phc pull databio/example:default --zip
+\`\`\`
+`;
+
+export const CLIENT_CLI_CODE_RAW = `
+library(pepr)
+
+pep <- pullProject('databio/example:default')
+
+for (sample in sampleTable(pep)) {
+  print(sample)
+} 
 `;
 
 export const PEPHUBCLIENT_SNIPPETS = [
@@ -132,5 +163,10 @@ export const PEPHUBCLIENT_SNIPPETS = [
     language: 'R',
     code: CLIENT_R_CODE_MD,
     raw: CLIENT_R_CODE_RAW,
+  },
+  {
+    language: 'CLI',
+    code: CLIENT_CLI_CODE_MD,
+    raw: CLIENT_CLI_CODE_RAW,
   },
 ];
