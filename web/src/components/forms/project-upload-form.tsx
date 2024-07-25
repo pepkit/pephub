@@ -1,5 +1,5 @@
 import { ErrorMessage } from '@hookform/error-message';
-import { FC, useRef } from 'react';
+import { useRef } from 'react';
 import { Controller, FieldErrors, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -54,7 +54,7 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   return null;
 };
 
-export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
+export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
   // get user info
   const { user } = useSession();
 
@@ -70,7 +70,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
     mode: 'onChange',
     defaultValues: {
       is_private: false,
-      pep_schema: 'databio/pep-2.1.0',
+      pep_schema: undefined,
       namespace: defaultNamespace || user?.login || '',
     },
   });

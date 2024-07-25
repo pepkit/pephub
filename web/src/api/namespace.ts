@@ -207,12 +207,12 @@ export const submitProjectJSON = (
         pep_dict: {
           config: config_json,
           sample_list: sample_table,
-          pep_schema: pep_schema,
         },
         description: description || '',
         name: name,
         is_private: is_private || false,
         tag: tag || 'default',
+        pep_schema: pep_schema,
       },
       {
         headers: {

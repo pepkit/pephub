@@ -64,7 +64,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                     >
                       <div className="d-flex align-items-center">
                         <StatusIcon className="text-2xl" variant="warning" />
-                        <span>Add schema to PEP to validate</span>
+                        <span>No schema</span>
                       </div>
                     </OverlayTrigger>
                   </>

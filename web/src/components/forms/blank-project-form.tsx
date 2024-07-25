@@ -90,7 +90,7 @@ export const BlankProjectForm = (props: Props) => {
       config: `pep_version: 2.1.0
 sample_table: samples.csv
       `,
-      pep_schema: 'pep/2.1.0',
+      pep_schema: undefined,
     },
   });
 

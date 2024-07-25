@@ -1,4 +1,3 @@
-import json
 import shutil
 import tempfile
 from typing import List, Literal, Optional, Union
@@ -204,7 +203,7 @@ async def create_pep(
     # create a blank peppy.Project object with fake files
     else:
         raise HTTPException(
-            detail=f"Project files were not provided",
+            detail="Project files were not provided",
             status_code=400,
         )
 
