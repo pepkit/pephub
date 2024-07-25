@@ -8,7 +8,6 @@ import { useValidation } from '../../hooks/queries/useValidation';
 import { canEdit } from '../../utils/permissions';
 import { StatusIcon } from '../badges/status-icons';
 import { ProjectDataNav } from '../layout/project-data-nav';
-import { ValidationTooltip } from '../tooltips/validation-tooltip';
 import { ValidationResult } from './validation/validation-result';
 
 type ProjectValidationAndEditButtonsProps = {
@@ -55,12 +54,13 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                   <>
                     <OverlayTrigger
                       overlay={
-                        <Tooltip id="validation" style={{position:"fixed"}}>
-                          As you edit your project below, it will be validated against the schema currently selected for it.
+                        <Tooltip id="validation" style={{ position: 'fixed' }}>
+                          As you edit your project below, it will be validated against the schema currently selected for
+                          it.
                         </Tooltip>
                       }
                       delay={{ show: 250, hide: 500 }}
-                      trigger={["hover"]}
+                      trigger={['hover']}
                     >
                       <div className="d-flex align-items-center">
                         <StatusIcon className="text-2xl" variant="warning" />

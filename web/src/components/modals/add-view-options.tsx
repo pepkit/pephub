@@ -81,7 +81,11 @@ export const ViewOptionsModal = (props: Props) => {
       noFail: false,
     };
 
-    viewMutations.addViewMutation.mutate(createViewRequest);
+    viewMutations.addViewMutation.mutate(createViewRequest, {
+      onSuccess: () => {
+        onHide();
+      },
+    });
 
     resetForm({}, { keepValues: false });
   };
@@ -95,13 +99,13 @@ export const ViewOptionsModal = (props: Props) => {
         {filteredSamples ? (
           <div className="">
             <h6 className="mb-1">Save View</h6>
-            <p className="mb-3 text-xs">
+            <p className="mb-3">
               Save the current filtered sample table state as a view by providing a name (required) and description
               (optional) for the view.
             </p>
             <form>
               <div className="input-group mb-2">
-                <span className="input-group-text text-xs">Name</span>
+                <span className="input-group-text">Name</span>
                 <input
                   {...register('name', {
                     required: {
@@ -113,20 +117,19 @@ export const ViewOptionsModal = (props: Props) => {
                       message: "View Name must contain only alphanumeric characters, '-', or '_'.",
                     },
                   })}
-                  placeholder="..."
                   type="text"
-                  className="form-control text-xs"
+                  className="form-control"
                   id="view-name"
                   aria-describedby="view-name-help"
                 />
               </div>
-              <div className="input-group">
-                <span className="input-group-text text-xs">Description</span>
-                <input
+              <div className="mt-1">
+                <label htmlFor="view-description" className="form-label fw-bold">
+                  Description
+                </label>
+                <textarea
                   {...register('description')}
-                  placeholder="..."
-                  type="text"
-                  className="form-control text-xs"
+                  className="form-control"
                   id="view-description"
                   aria-describedby="view-description-help"
                 />
@@ -134,17 +137,24 @@ export const ViewOptionsModal = (props: Props) => {
               <ErrorMessage
                 errors={errors}
                 name="name"
-                render={({ message }) => (message ? <p className="text-danger text-xs pt-1 mb-0">{message}</p> : null)}
+                render={({ message }) => (message ? <p className="text-danger pt-1 mb-0">{message}</p> : null)}
               />
               <button
-                disabled={!isValid || !!errors.name?.message}
+                disabled={
+                  filteredSamples.length === 0 ||
+                  !isValid ||
+                  !!errors.name?.message ||
+                  viewMutations.addViewMutation.isPending
+                }
                 type="button"
-                className="btn btn-success px-2 mt-3 text-xs"
+                className="btn btn-success px-2 mt-3"
                 onClick={() => {
                   onSubmit();
+                  resetForm();
                 }}
               >
-                <i className="bi bi-plus-lg"></i> Save New View
+                <i className="bi bi-plus-circle me-1"></i>
+                {viewMutations.addViewMutation.isPending ? 'Creating...' : 'Create'}
               </button>
             </form>
             <hr />
@@ -152,7 +162,7 @@ export const ViewOptionsModal = (props: Props) => {
         ) : null}
         <div className="">
           <h6 className="mb-1">Remove View</h6>
-          <p className="mb-3 text-xs">Remove an existing view by selecting it from the dropdown menu.</p>
+          <p className="mb-3">Remove an existing view by selecting it from the dropdown menu.</p>
           <ReactSelect
             styles={{
               control: (provided) => ({
@@ -198,8 +208,12 @@ export const ViewOptionsModal = (props: Props) => {
                   }
             }
           />
-          <button disabled={deleteState} onClick={handleDeleteView} className="btn btn-danger px-2 mt-3 text-xs">
-            <i className="bi bi-trash"></i> Remove View
+          <button
+            disabled={deleteState || viewMutations.removeViewMutation.isPending || selectedViewDelete === null}
+            onClick={handleDeleteView}
+            className="btn btn-danger px-2 mt-3"
+          >
+            <i className="bi bi-trash"></i> {viewMutations.removeViewMutation.isPending ? 'Removing...' : 'Remove'}
           </button>
         </div>
       </Modal.Body>

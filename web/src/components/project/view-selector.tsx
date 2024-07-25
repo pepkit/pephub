@@ -21,6 +21,11 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { namespace, projectName, tag } = useProjectPage();
+
+  // this is the DATA view, i.e. a slice of the sample table
+  // to inprove performance and usability
+  // this is NOT the PAGE view, which is
+  // which tab the user is currently viewing (a separate idea)
   const { view, setView } = useProjectSelectedView();
 
   const projectViewsQuery = useProjectViews(namespace, projectName, tag);
