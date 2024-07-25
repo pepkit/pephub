@@ -141,7 +141,7 @@ export function Home() {
               </p>
             </Col>
             <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100">
-              <div className="border border-2 border-dark p-2 rounded w-100 position-relative landing-code-snippet-container">
+              <div className="border border-2 border-dark p-2 rounded w-100 position-relative landing-code-snippet-container shadow">
                 <Tab.Container id="code-snippets" defaultActiveKey={CODE_SNIPPETS[0].language}>
                   <div className="d-flex flex-row align-items-center text-sm">
                     <Nav variant="pills" className="flex-row">
@@ -200,7 +200,7 @@ export function Home() {
               </p>
             </Col>
             <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100">
-              <div className="border border-2 border-dark p-2 rounded w-100 position-relative landing-code-snippet-container">
+              <div className="border border-2 border-dark p-2 rounded w-100 position-relative landing-code-snippet-container shadow">
                 <Tab.Container id="code-snippets" defaultActiveKey={CODE_SNIPPETS[0].language}>
                   <div className="d-flex flex-row align-items-center text-sm">
                     <Nav variant="pills" className="flex-row">
