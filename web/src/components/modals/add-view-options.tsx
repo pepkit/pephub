@@ -96,7 +96,7 @@ export const ViewOptionsModal = (props: Props) => {
         <h1 className="modal-title fs-5">Manage Views</h1>
       </Modal.Header>
       <Modal.Body>
-        {filteredSamples ? (
+        {filteredSamples.length > 0 ? (
           <div className="">
             <h6 className="mb-1">Save View</h6>
             <p className="mb-3">
@@ -104,8 +104,10 @@ export const ViewOptionsModal = (props: Props) => {
               (optional) for the view.
             </p>
             <form>
-              <div className="input-group mb-2">
-                <span className="input-group-text">Name</span>
+              <div className="pb-2">
+                <label htmlFor="view-description" className="form-label fw-bold">
+                  Name
+                </label>
                 <input
                   {...register('name', {
                     required: {
@@ -121,6 +123,7 @@ export const ViewOptionsModal = (props: Props) => {
                   className="form-control"
                   id="view-name"
                   aria-describedby="view-name-help"
+                  placeholder="Name..."
                 />
               </div>
               <div className="mt-1">
@@ -132,6 +135,7 @@ export const ViewOptionsModal = (props: Props) => {
                   className="form-control"
                   id="view-description"
                   aria-describedby="view-description-help"
+                  placeholder="Description..."
                 />
               </div>
               <ErrorMessage
