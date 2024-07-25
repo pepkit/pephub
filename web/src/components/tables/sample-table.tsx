@@ -75,6 +75,12 @@ export const SampleTable = (props: Props) => {
           const filteredSamples = hotdata
             .map((subArray) => subArray[sampleTableIndexCol])
             .filter((element) => element != null);
+          if (sampleTableIndex) {
+            const sampleTableIndexIndex = filteredSamples.indexOf(sampleTableIndex);
+            if (sampleTableIndexIndex > -1) {
+              const filteredSamplesIndex = filteredSamples.splice(sampleTableIndexIndex, 1);
+            }
+          }
           setFilteredSamples(filteredSamples);
           // if there are no filters applied, then set the filtered samples to an empty array
         } else {

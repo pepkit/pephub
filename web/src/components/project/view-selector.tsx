@@ -54,7 +54,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
 
   return (
     <Fragment>
-      <div className="ps-3 d-flex flex-row align-items-center" style={{ width: '25vw' }}>
+      <div className="ps-3 d-flex flex-row align-items-center" style={{ width: '19vw' }}>
         {userHasOwnership ? (
           <button
             onClick={() => setShowViewOptionsModal(true)}
