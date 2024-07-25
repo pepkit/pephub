@@ -28,12 +28,12 @@ export const ValidationResult = (props: Props) => {
     <div className="d-flex flex-row align-items-center rounded-1 shadow-sm">
       <OverlayTrigger
         overlay={
-          <Tooltip id="validation" style={{position:"fixed"}}>
+          <Tooltip id="validation" style={{ position: 'fixed' }}>
             As you edit your project below, it will be validated against the schema currently selected for it.
           </Tooltip>
         }
         delay={{ show: 250, hide: 500 }}
-        trigger={["hover"]}
+        trigger={['hover']}
       >
         <button
           disabled={isValidating}
@@ -50,7 +50,14 @@ export const ValidationResult = (props: Props) => {
             ) : (
               <span className="bg-danger text-danger rounded-pill validation-badge"></span>
             )}
-            {schemaRegistry}
+            <span
+              className="text-truncate"
+              style={{
+                maxWidth: '200px',
+              }}
+            >
+              {schemaRegistry}
+            </span>
           </div>
         </button>
       </OverlayTrigger>
