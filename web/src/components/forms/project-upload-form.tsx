@@ -70,7 +70,7 @@ export const ProjectUploadForm: FC<Props> = ({ onHide, defaultNamespace }) => {
     mode: 'onChange',
     defaultValues: {
       is_private: false,
-      pep_schema: 'pep/2.1.0',
+      pep_schema: 'databio/pep-2.1.0',
       namespace: defaultNamespace || user?.login || '',
     },
   });
