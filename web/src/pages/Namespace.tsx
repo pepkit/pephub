@@ -276,12 +276,14 @@ export const NamespacePage = () => {
               ) : (
                 schemasFiltered.map((s) => <SchemaListCard key={s.name} schema={s} />)
               )}
-              <Pagination
-                limit={schemaLimit}
-                offset={schemaOffset}
-                count={schemas?.count || 0}
-                setOffset={setSchemaOffset}
-              />
+              {schemas?.count && schemas?.count > schemaLimit ? (
+                <Pagination
+                  limit={schemaLimit}
+                  offset={schemaOffset}
+                  count={schemas?.count || 0}
+                  setOffset={setSchemaOffset}
+                />
+              ) : null}
             </div>
           </Fragment>
         ) : (
