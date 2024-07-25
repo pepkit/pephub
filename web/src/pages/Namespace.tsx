@@ -239,18 +239,16 @@ export const NamespacePage = () => {
           </Fragment>
         ) : view === 'schemas' ? (
           <Fragment>
-            {schemasFiltered?.length === 0 ? (
-              <div className="text-center mt-5">
-                <p className="fst-italic text-muted">No schemas found.</p>
-              </div>
-            ) : (
-              <div className="mt-3">
-                <SchemaListSearchBar value={schemaSearch} setValue={setSchemaSearch} />
-                {schemasFiltered.map((s) => (
-                  <SchemaListCard key={s.name} schema={s} />
-                ))}
-              </div>
-            )}
+            <div className="mt-3">
+              <SchemaListSearchBar value={schemaSearch} setValue={setSchemaSearch} />
+              {schemasFiltered?.length === 0 ? (
+                <div className="text-center mt-5">
+                  <p className="fst-italic text-muted">No schemas found.</p>
+                </div>
+              ) : (
+                schemasFiltered.map((s) => <SchemaListCard key={s.name} schema={s} />)
+              )}
+            </div>
           </Fragment>
         ) : (
           // render stars in namespace
