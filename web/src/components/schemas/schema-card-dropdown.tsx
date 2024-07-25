@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 import { Schema } from '../../api/schemas';
 import { useSession } from '../../contexts/session-context';
@@ -11,6 +12,8 @@ type Props = {
 };
 
 export const SchemaCardDropdown = (props: Props) => {
+  const navigate = useNavigate();
+
   const { schema } = props;
   const { user } = useSession();
 
@@ -19,7 +22,7 @@ export const SchemaCardDropdown = (props: Props) => {
 
   return (
     <Dropdown as={ButtonGroup}>
-      <Button variant="outline-dark" size="sm">
+      <Button onClick={() => navigate(`/schemas/${schema.namespace}/${schema.name}`)} variant="outline-dark" size="sm">
         View
       </Button>
       <Dropdown.Toggle split variant="outline-dark" id="dropdown-split-basic" />
@@ -41,7 +44,6 @@ export const SchemaCardDropdown = (props: Props) => {
           <i className="bi bi-copy me-1"></i>
           {copied ? 'Copied!' : 'Copy'}
         </Dropdown.Item>
-
         {user && (user.orgs.includes(schema.namespace) || user.login === schema.namespace) && (
           <Fragment>
             <Dropdown.Divider />

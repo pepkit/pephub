@@ -38,12 +38,23 @@ export const NamespacePage = () => {
   // get session info
   const { user } = useSession();
 
-  // pagination
+  // pagination for projects
   const [limit, setLimit] = useState(searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10);
   const [offset, setOffset] = useState(searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0);
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [orderBy, setOrderBy] = useState(searchParams.get('orderBy') || 'update_date');
   const [order, setOrder] = useState(searchParams.get('order') || 'asc');
+
+  // pagination for schemas
+  const [schemaLimit, setSchemaLimit] = useState(
+    searchParams.get('schemaLimit') ? parseInt(searchParams.get('schemaLimit')!) : 10,
+  );
+  const [schemaOffset, setSchemaOffset] = useState(
+    searchParams.get('schemaOffset') ? parseInt(searchParams.get('schemaOffset')!) : 0,
+  );
+  const [schemaSearch, setSchemaSearch] = useState<string>(searchParams.get('schemaSearch') || '');
+  const [schemaOrderBy, setSchemaOrderBy] = useState(searchParams.get('schemaOrderBy') || 'name');
+  const [schemaOrder, setSchemaOrder] = useState(searchParams.get('schemaOrder') || 'asc');
 
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
@@ -53,13 +64,12 @@ export const NamespacePage = () => {
   const [view, setView] = useState<View>(viewFromUrl || 'peps');
   const [starSearch, setStarSearch] = useState<string>(searchParams.get('starSearch') || '');
 
-  const [schemaSearch, setSchemaSearch] = useState<string>('');
-
   const searchDebounced = useDebounce<string>(search, 500);
+  const schemaSearchDebounced = useDebounce<string>(schemaSearch, 500);
 
   // data fetching
   const {
-    data: namespaceInfo,
+    // data: namespaceInfo,
     isLoading: namespaceInfoIsLoading,
     error,
   } = useNamespaceProjects(namespace, {
@@ -77,7 +87,14 @@ export const NamespacePage = () => {
     type: view === 'pops' ? 'pop' : 'pep',
   });
 
-  const { data: schemas } = useNamespaceSchemas(namespace, {});
+  const { data: schemas } = useNamespaceSchemas(namespace, {
+    limit: schemaLimit,
+    offset: schemaOffset,
+    orderBy: schemaOrderBy,
+    // @ts-ignore - just for now, I know this will work fine
+    order: schemaOrder,
+    search: schemaSearchDebounced,
+  });
 
   const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
@@ -240,7 +257,18 @@ export const NamespacePage = () => {
         ) : view === 'schemas' ? (
           <Fragment>
             <div className="mt-3">
-              <SchemaListSearchBar value={schemaSearch} setValue={setSchemaSearch} />
+              <SchemaListSearchBar
+                limit={schemaLimit}
+                namespace={namespace || ''}
+                orderBy={schemaOrderBy}
+                order={schemaOrder}
+                setLimit={setSchemaLimit}
+                setOffset={setSchemaOffset}
+                setOrderBy={setSchemaOrderBy}
+                setOrder={setSchemaOrder}
+                search={schemaSearch}
+                setSearch={setSchemaSearch}
+              />
               {schemasFiltered?.length === 0 ? (
                 <div className="text-center mt-5">
                   <p className="fst-italic text-muted">No schemas found.</p>
@@ -248,6 +276,12 @@ export const NamespacePage = () => {
               ) : (
                 schemasFiltered.map((s) => <SchemaListCard key={s.name} schema={s} />)
               )}
+              <Pagination
+                limit={schemaLimit}
+                offset={schemaOffset}
+                count={schemas?.count || 0}
+                setOffset={setSchemaOffset}
+              />
             </div>
           </Fragment>
         ) : (
