@@ -25,6 +25,7 @@ export const useBlankProjectFormMutation = (namespace: string) => {
   const mutation = useMutation({
     mutationFn: (data: NewBlankProject) => {
       const { projectName, tag, isPrivate, description, config, pepSchema, sampleTable } = data;
+      debugger;
       return submitProjectJSON(
         {
           namespace: namespace,

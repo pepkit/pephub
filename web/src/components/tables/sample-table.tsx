@@ -15,10 +15,22 @@ type Props = {
   height?: number;
   minRows?: number;
   stretchH?: 'none' | 'all' | 'last';
+  setFilteredSamples?: (samples: string[]) => void;
+  sampleTableIndex?: string;
 };
 
 export const SampleTable = (props: Props) => {
-  const { data, readOnly = false, onChange, height, minRows, stretchH, className } = props;
+  const {
+    data,
+    readOnly = false,
+    onChange,
+    height,
+    minRows,
+    stretchH,
+    className,
+    setFilteredSamples,
+    sampleTableIndex,
+  } = props;
 
   // compute table height based on number of rows
   // or the minRows prop if it is provided
@@ -45,9 +57,36 @@ export const SampleTable = (props: Props) => {
   const numColumns = data.length > 0 ? data[0].length : 0;
 
   const ph_id_col = data[0].indexOf('ph_id');
+  let sampleTableIndexCol = 0;
+  if (sampleTableIndex) {
+    sampleTableIndexCol = data[0].indexOf(sampleTableIndex);
+  }
 
   return (
     <HotTable
+      afterFilter={(k) => {
+        if (!setFilteredSamples) {
+          return;
+        }
+
+        // if there are filters applied, then filter the samples
+        if (k.length > 0) {
+          const hotdata = hotRef.current?.hotInstance?.getData() || [];
+          const filteredSamples = hotdata
+            .map((subArray) => subArray[sampleTableIndexCol])
+            .filter((element) => element != null);
+          if (sampleTableIndex) {
+            const sampleTableIndexIndex = filteredSamples.indexOf(sampleTableIndex);
+            if (sampleTableIndexIndex > -1) {
+              const filteredSamplesIndex = filteredSamples.splice(sampleTableIndexIndex, 1);
+            }
+          }
+          setFilteredSamples(filteredSamples);
+          // if there are no filters applied, then set the filtered samples to an empty array
+        } else {
+          setFilteredSamples([]);
+        }
+      }}
       ref={hotRef}
       data={data}
       stretchH={stretchH || 'all'}

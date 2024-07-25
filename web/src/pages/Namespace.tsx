@@ -16,13 +16,16 @@ import { NamespacePageSearchBar } from '../components/namespace/search-bar';
 import { StarFilterBar } from '../components/namespace/star-filter-bar';
 import { NamespaceViewSelector } from '../components/namespace/view-selector';
 import { ProjectListPlaceholder } from '../components/placeholders/project-list';
+import { SchemaListCard } from '../components/schemas/schema-list-card';
+import { SchemaListSearchBar } from '../components/schemas/schema-list-search-bar';
 import { useSession } from '../contexts/session-context';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
+import { useNamespaceSchemas } from '../hooks/queries/useNamespaceSchemas';
 import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useDebounce } from '../hooks/useDebounce';
 import { numberWithCommas } from '../utils/etc';
 
-type View = 'peps' | 'pops' | 'stars';
+type View = 'peps' | 'pops' | 'schemas' | 'stars';
 
 export const NamespacePage = () => {
   const [searchParams] = useSearchParams();
@@ -35,26 +38,38 @@ export const NamespacePage = () => {
   // get session info
   const { user } = useSession();
 
-  // pagination
+  // pagination for projects
   const [limit, setLimit] = useState(searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10);
   const [offset, setOffset] = useState(searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0);
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [orderBy, setOrderBy] = useState(searchParams.get('orderBy') || 'update_date');
   const [order, setOrder] = useState(searchParams.get('order') || 'asc');
 
+  // pagination for schemas
+  const [schemaLimit, setSchemaLimit] = useState(
+    searchParams.get('schemaLimit') ? parseInt(searchParams.get('schemaLimit')!) : 10,
+  );
+  const [schemaOffset, setSchemaOffset] = useState(
+    searchParams.get('schemaOffset') ? parseInt(searchParams.get('schemaOffset')!) : 0,
+  );
+  const [schemaSearch, setSchemaSearch] = useState<string>(searchParams.get('schemaSearch') || '');
+  const [schemaOrderBy, setSchemaOrderBy] = useState(searchParams.get('schemaOrderBy') || 'name');
+  const [schemaOrder, setSchemaOrder] = useState(searchParams.get('schemaOrder') || 'asc');
+
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
   const [showGeoDownloadModal, setShowGeoDownloadModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [view, setView] = useState<View>(viewFromUrl === 'stars' ? 'stars' : 'peps');
+  const [view, setView] = useState<View>(viewFromUrl || 'peps');
   const [starSearch, setStarSearch] = useState<string>(searchParams.get('starSearch') || '');
 
   const searchDebounced = useDebounce<string>(search, 500);
+  const schemaSearchDebounced = useDebounce<string>(schemaSearch, 500);
 
   // data fetching
   const {
-    data: namespaceInfo,
+    // data: namespaceInfo,
     isLoading: namespaceInfoIsLoading,
     error,
   } = useNamespaceProjects(namespace, {
@@ -72,10 +87,23 @@ export const NamespacePage = () => {
     type: view === 'pops' ? 'pop' : 'pep',
   });
 
+  const { data: schemas } = useNamespaceSchemas(namespace, {
+    limit: schemaLimit,
+    offset: schemaOffset,
+    orderBy: schemaOrderBy,
+    // @ts-ignore - just for now, I know this will work fine
+    order: schemaOrder,
+    search: schemaSearchDebounced,
+  });
+
   const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
   // left over from when we were filtering on sample number
   const projectsFiltered = projects?.results?.filter((p) => p.number_of_samples) || [];
+
+  // filter schemas by search
+  const schemasFiltered =
+    schemas?.results.filter((s) => s.name.toLowerCase().includes(schemaSearch.toLowerCase())) || [];
 
   if (namespaceInfoIsLoading || starsAreLoading) {
     return (
@@ -168,15 +196,19 @@ export const NamespacePage = () => {
               </span>
             </p>
           )}
-          <p className="mb-0">
-            <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}
-          </p>
+          {/*<p className="mb-0">*/}
+          {/*  <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}*/}
+          {/*</p>*/}
+          {/*<p className="mb-0">*/}
+          {/*  <span className="fw-bold">Total schemas: {numberWithCommas(schemas?.count || 0)}</span>{' '}*/}
+          {/*</p>*/}
         </>
         <div className="mt-3 d-flex">
           <NamespaceViewSelector
             numPeps={pepsInfo?.count || 0}
             numPops={popsInfo?.count || 0}
             numStars={stars?.length || 0}
+            numSchemas={schemas?.count || 0}
             view={view}
             setView={setView}
             enableStars={namespace === user?.login}
@@ -220,6 +252,38 @@ export const NamespacePage = () => {
                   <Pagination limit={limit} offset={offset} count={projects.count} setOffset={setOffset} />
                 ) : null}
               </Fragment>
+            </div>
+          </Fragment>
+        ) : view === 'schemas' ? (
+          <Fragment>
+            <div className="mt-3">
+              <SchemaListSearchBar
+                limit={schemaLimit}
+                namespace={namespace || ''}
+                orderBy={schemaOrderBy}
+                order={schemaOrder}
+                setLimit={setSchemaLimit}
+                setOffset={setSchemaOffset}
+                setOrderBy={setSchemaOrderBy}
+                setOrder={setSchemaOrder}
+                search={schemaSearch}
+                setSearch={setSchemaSearch}
+              />
+              {schemasFiltered?.length === 0 ? (
+                <div className="text-center mt-5">
+                  <p className="fst-italic text-muted">No schemas found.</p>
+                </div>
+              ) : (
+                schemasFiltered.map((s) => <SchemaListCard key={s.name} schema={s} />)
+              )}
+              {schemas?.count && schemas?.count > schemaLimit ? (
+                <Pagination
+                  limit={schemaLimit}
+                  offset={schemaOffset}
+                  count={schemas?.count || 0}
+                  setOffset={setSchemaOffset}
+                />
+              ) : null}
             </div>
           </Fragment>
         ) : (

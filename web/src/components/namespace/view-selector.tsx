@@ -3,13 +3,14 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink, useSearchParams } from 'react-router-dom';
 
-type View = 'peps' | 'pops' | 'stars';
+type View = 'peps' | 'pops' | 'schemas' | 'stars';
 
 type Props = {
   view: View;
   numPeps: number;
   numPops: number;
   numStars?: number;
+  numSchemas: number;
   setView: (view: View) => void;
   enableStars?: boolean;
 };
@@ -54,6 +55,21 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
             ) : (
               <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
                 {props.numPops}
+              </span>
+            )}
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link eventKey="schemas" className="px-2 py-1 me-1">
+            <i className="bi bi-filetype-yml me-1"></i>
+            Schemas
+            {props.view === 'schemas' ? (
+              <span className="text-sm ms-2 rounded-pill border border-light px-2 bg-light bg-opacity-10">
+                {props.numSchemas}
+              </span>
+            ) : (
+              <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+                {props.numSchemas}
               </span>
             )}
           </Nav.Link>

@@ -729,7 +729,7 @@ async def create_view_of_the_project(
         _LOGGER.error(f"Could not create view. Error: {e}")
         raise HTTPException(
             status_code=409,
-            detail="Could not create view",
+            detail="A view with this name already exists in the project.",
         )
     return JSONResponse(
         content={

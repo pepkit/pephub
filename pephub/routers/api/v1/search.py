@@ -3,7 +3,7 @@ from typing import List, Optional
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from fastembed.embedding import FlagEmbedding as Embedding
+from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.models import NamespaceList
 from qdrant_client import QdrantClient

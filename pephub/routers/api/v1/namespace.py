@@ -1,11 +1,10 @@
-import json
 import shutil
 import tempfile
 from typing import List, Literal, Optional, Union
 
 import peppy
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_LIMIT_INFO
@@ -27,9 +26,6 @@ from peppy.const import DESC_KEY, NAME_KEY
 from typing_extensions import Annotated
 
 from ....const import (
-    BLANK_PEP_CONFIG,
-    BLANK_PEP_SAMPLE_TABLE,
-    DEFAULT_PEP_SCHEMA,
     DEFAULT_TAG,
 )
 from ....dependencies import (
@@ -37,7 +33,6 @@ from ....dependencies import (
     get_namespace_access_list,
     get_namespace_info,
     get_user_from_session_info,
-    read_authorization_header,
     verify_user_can_write_namespace,
     get_pepdb_namespace_info,
 )
@@ -148,7 +143,7 @@ async def create_pep(
     is_private: bool = Form(False),
     tag: str = Form(DEFAULT_TAG),
     description: Union[str, None] = Form(None),
-    pep_schema: str = Form(DEFAULT_PEP_SCHEMA),
+    pep_schema: str = Form(None),
     files: List[UploadFile] = File(
         None  # let the file upload be optional. dont send a file? We instantiate with blank
     ),
@@ -208,7 +203,7 @@ async def create_pep(
     # create a blank peppy.Project object with fake files
     else:
         raise HTTPException(
-            detail=f"Project files were not provided",
+            detail="Project files were not provided",
             status_code=400,
         )
 

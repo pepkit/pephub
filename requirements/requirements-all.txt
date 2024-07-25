@@ -1,8 +1,8 @@
 fastapi>=0.108.0
 psycopg>=3.1.15
-pepdbagent>=0.10.0
-# pepdbagent @ git+https://github.com/pepkit/pepdbagent.git@dev#egg=pepdbagent
-peppy>=0.40.1
+pepdbagent>=0.11.0
+# pepdbagent @ git+https://github.com/pepkit/pepdbagent.git@schams2.0#egg=pepdbagent
+peppy>=0.40.5
 eido>=0.2.2
 jinja2>=3.1.2
 python-multipart>=0.0.5

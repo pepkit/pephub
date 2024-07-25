@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Fragment } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -11,8 +11,10 @@ import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
 import { useProjectHistory } from '../../hooks/queries/useProjectHistory';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { useSubsampleTable } from '../../hooks/queries/useSubsampleTable';
+import { useView } from '../../hooks/queries/useView';
 import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { useProjectPageView } from '../../hooks/stores/useProjectPageView';
+import { useProjectSelectedView } from '../../hooks/stores/useProjectSelectedViewStore';
 import { getOS } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
@@ -25,6 +27,7 @@ type Props = {
   projectInfo: ReturnType<typeof useProjectAnnotation>['data'];
   sampleTable: ReturnType<typeof useSampleTable>['data'];
   subSampleTable: ReturnType<typeof useSubsampleTable>['data'];
+  sampleTableIndex: string;
 };
 
 type ProjectUpdateFields = {
@@ -34,10 +37,12 @@ type ProjectUpdateFields = {
 };
 
 export const ProjectInterface = (props: Props) => {
-  const { projectConfig, sampleTable, subSampleTable } = props;
+  const { projectConfig, sampleTable, subSampleTable, sampleTableIndex } = props;
 
   const { user } = useSession();
   const projectDataRef = useRef<HTMLDivElement>(null);
+
+  const [filteredSamples, setFilteredSamples] = useState<string[]>([]);
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
@@ -49,7 +54,20 @@ export const ProjectInterface = (props: Props) => {
   const { data: historyData } = useProjectHistory(namespace, projectName, tag, currentHistoryId);
 
   // fetch the page view (samples, subsamples, config)
+  // this is not the DATA view, which is a separate idea
   const { pageView, setPageView } = useProjectPageView();
+
+  // the is the DATA view, i.e. a slice of the sample table
+  const { view } = useProjectSelectedView();
+
+  const { data: viewData } = useView({
+    namespace,
+    project: projectName,
+    tag,
+    view,
+    enabled: !!view,
+  });
+  const viewSamples = viewData?._samples || [];
 
   // form to store project updated fields temporarily
   // on the client before submitting to the server
@@ -153,6 +171,22 @@ export const ProjectInterface = (props: Props) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (currentHistoryId !== null) {
+      // set global-search-bar z-index to -1
+      const globalSearchBar = document.getElementById('global-search-bar');
+      if (globalSearchBar) {
+        globalSearchBar.style.zIndex = '-1';
+      }
+    } else {
+      // set global-search-bar z-index to 1
+      const globalSearchBar = document.getElementById('global-search-bar');
+      if (globalSearchBar) {
+        globalSearchBar.style.zIndex = '1';
+      }
+    }
+  }, [currentHistoryId]);
+
   return (
     <Fragment>
       <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
@@ -163,6 +197,7 @@ export const ProjectInterface = (props: Props) => {
           isUpdatingProject={isSubmitting}
           reset={projectUpdates.reset}
           handleSubmit={handleSubmit}
+          filteredSamples={filteredSamples || []}
         />
       </div>
       <div ref={projectDataRef}>
@@ -175,9 +210,17 @@ export const ProjectInterface = (props: Props) => {
                 onChange={(samples) => {
                   onChange(samples);
                 }}
-                readOnly={!userCanEdit}
-                data={currentHistoryId ? sampleListToArrays(historyData?._sample_dict || []) : newSamples}
+                readOnly={!userCanEdit || view !== undefined}
+                data={
+                  view !== undefined
+                    ? sampleListToArrays(viewSamples)
+                    : currentHistoryId
+                    ? sampleListToArrays(historyData?._sample_dict || [])
+                    : newSamples
+                }
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                setFilteredSamples={(samples) => setFilteredSamples(samples)}
+                sampleTableIndex={sampleTableIndex}
               />
             )}
           />

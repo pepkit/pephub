@@ -410,6 +410,15 @@ body {
     height: 80vh;
   }
 }
+@media (min-width: 768px) {
+  h40 {
+    height: 40vh;
+  }
+}
+
+.code-snippet-container {
+  min-height: 200px;
+}
 
 .wtHolder {
   overflow: hidden;
@@ -605,6 +614,21 @@ body {
   border: 4px solid #ed8936;
 }
 
+.schema-card {
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  /* no link underline or color */
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  &:hover {
+    border-color: #636363 !important;
+  }
+}
+
 .validation-badge {
   display: inline-block;
   height: 10px !important;
@@ -615,4 +639,52 @@ body {
   /* no box shadow */
   box-shadow: none !important;
   transition: box-shadow 0.1s ease-in-out;
+  height: 31px !important;
+}
+
+.schemas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  /*  if small just make 1fr */
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.glow-button {
+  --box-shadow-color: black;
+  box-shadow: 0 0 7px var(--box-shadow-color);
+}
+
+.btn-primary.glow-button {
+  --box-shadow-color: #007bff80;
+}
+
+.btn-secondary.glow-button {
+  --box-shadow-color: #6c757d80;
+}
+
+.btn-success.glow-button {
+  --box-shadow-color: #28a74580;
+}
+
+.btn-danger.glow-button {
+  --box-shadow-color: #dc354580;
+}
+
+.btn-warning.glow-button {
+  --box-shadow-color: #ffc10780;
+}
+
+.btn-info.glow-button {
+  --box-shadow-color: #17a2b880;
+}
+
+.btn-light.glow-button {
+  --box-shadow-color: #f8f9fa80;
+}
+
+.btn-dark.glow-button {
+  --box-shadow-color: #343a4080;
 }
