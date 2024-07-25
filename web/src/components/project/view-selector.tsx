@@ -1,4 +1,4 @@
-import { Fragment, useState, useRef } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip, { TooltipProps } from 'react-bootstrap/Tooltip';
 import { useSearchParams } from 'react-router-dom';
@@ -20,8 +20,6 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const { filteredSamples } = props;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  console.log(filteredSamples)
-
   const { namespace, projectName, tag } = useProjectPage();
   const { view, setView } = useProjectSelectedView();
 
@@ -31,7 +29,9 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const projectViews = projectViewsQuery.data;
 
   const [showViewOptionsModal, setShowViewOptionsModal] = useState(false);
-  const selectRef = useRef(null);
+
+  // shouldnt use any, but react-select types are a mess
+  const selectRef = useRef<any>(null);
 
   const { user } = useSession();
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
@@ -66,7 +66,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
         <OverlayTrigger placement="top" delay={{ show: 250, hide: 500 }} overlay={renderTooltip}>
           <div className="w-100">
             <ReactSelect
-             ref={selectRef}
+              ref={selectRef}
               styles={{
                 control: (provided) => ({
                   ...provided,
@@ -92,7 +92,11 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                   searchParams.set('view', selectedOption.value);
                   setSearchParams(searchParams);
                 }
-                setTimeout(function() {selectRef.current.blur()}, 50);
+                setTimeout(() => {
+                  if (selectRef.current) {
+                    selectRef.current.blur();
+                  }
+                }, 50);
               }}
               isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
               isClearable
