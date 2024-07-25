@@ -97,7 +97,7 @@ import peppy
 project = peppy.Project.from_pephub('databio/example')
 # where 'databio/example' is the project registry path
 
-for sample in proj.samples:
+for sample in project.samples:
   print(sample)
 \`\`\`
 `;
@@ -107,7 +107,7 @@ import peppy
 
 project = peppy.Project.from_pephub('databio/example')
 
-for sample in proj.samples:
+for sample in project.samples:
   print(sample)
 `;
 
