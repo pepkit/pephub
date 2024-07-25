@@ -62,7 +62,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                       delay={{ show: 250, hide: 500 }}
                       trigger={['hover']}
                     >
-                      <div className="d-flex align-items-center bg-warning bg-opacity-10 px-2 rounded border border-warning text-sm">
+                      <div className="d-flex align-items-center bg-warning bg-opacity-10 px-2 rounded-1 validation-button border border-warning text-sm">
                         <StatusIcon className="me-1" variant="warning" />
                         <span className="text-warning">No schema</span>
                       </div>
