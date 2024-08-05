@@ -15,6 +15,7 @@ type Props = {
   show: boolean;
   onHide: () => void;
   filteredSamples: string[];
+  deleteView: (deletedView: string) => void;
 };
 
 type FormValues = {
@@ -30,7 +31,7 @@ type ViewOption = {
 };
 
 export const ViewOptionsModal = (props: Props) => {
-  const { show, onHide, filteredSamples } = props;
+  const { show, onHide, filteredSamples, deleteView } = props;
 
   const { namespace, projectName, tag } = useProjectPage();
 
@@ -66,7 +67,9 @@ export const ViewOptionsModal = (props: Props) => {
       return;
     }
     viewMutations.removeViewMutation.mutate(selectedViewDelete.value);
+    console.log(selectedViewDelete)
     setSelectedViewDelete(null);
+    deleteView(selectedViewDelete.value)
   };
 
   const onSubmit = () => {
