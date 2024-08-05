@@ -67,7 +67,6 @@ export const ViewOptionsModal = (props: Props) => {
       return;
     }
     viewMutations.removeViewMutation.mutate(selectedViewDelete.value);
-    console.log(selectedViewDelete)
     setSelectedViewDelete(null);
     deleteView(selectedViewDelete.value)
   };
