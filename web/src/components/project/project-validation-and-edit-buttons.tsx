@@ -27,11 +27,12 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
   const projectValidationQuery = useValidation({
     pepRegistry: `${namespace}/${projectName}:${tag}`,
-    schema_registry: projectInfo?.pep_schema || 'pep/2.0.0', // default to basic pep 2.0.0 schema
+    schema_registry: projectInfo?.pep_schema || 'pep/2.0.0',
     enabled: !!projectInfo?.pep_schema,
   });
 
   const validationResult = projectValidationQuery.data;
+  const projectSchema = projectInfo?.pep_schema;
 
   const userHasOwnership = user && projectInfo && canEdit(user, projectInfo);
 
@@ -43,34 +44,11 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
         {userHasOwnership ? (
           <div className="h-100 d-flex flex-row align-items-center w-50 justify-content-end">
             <div>
-              {projectInfo?.pep_schema ? (
-                <ValidationResult
-                  schemaRegistry={projectInfo.pep_schema}
-                  isValidating={projectValidationQuery.isLoading}
-                  validationResult={validationResult}
-                />
-              ) : (
-                <div className="d-flex flex-row align-items-center">
-                  <>
-                    <OverlayTrigger
-                      overlay={
-                        <Tooltip id="validation" style={{ position: 'fixed' }}>
-                          As you edit your project below, it will be validated against the schema currently selected for
-                          it.
-                        </Tooltip>
-                      }
-                      delay={{ show: 250, hide: 500 }}
-                      trigger={['hover']}
-                    >
-                      <div className="d-flex align-items-center bg-warning bg-opacity-10 px-2 rounded-1 validation-button border border-warning text-sm">
-                        <StatusIcon className="me-1" variant="warning" />
-                        <span className="text-warning">No schema</span>
-                      </div>
-                    </OverlayTrigger>
-                  </>
-                </div>
-              )}
-            </div>
+              <ValidationResult
+                schemaRegistry={projectSchema}
+                isValidating={projectValidationQuery.isLoading}
+                validationResult={validationResult}
+              />
             <div className="ps-1">
               <Fragment>
                 <button
