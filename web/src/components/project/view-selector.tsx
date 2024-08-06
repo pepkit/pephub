@@ -41,6 +41,15 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const { user } = useSession();
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
 
+  const deleteView = (deletedView: string) => {
+    if (selectRef.current.getValue()[0].value === deletedView) {
+      setView(undefined);
+      searchParams.delete('view');
+      setSearchParams(searchParams);
+      selectRef.current.clearValue();
+    };    
+  };
+
   const userHasOwnership = user && projectInfo && canEdit(user, projectInfo);
   const selectorRadius = userHasOwnership ? '0 .25em .25em 0' : '.25em';
 
@@ -121,6 +130,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
         show={showViewOptionsModal}
         onHide={() => setShowViewOptionsModal(false)}
         filteredSamples={filteredSamples}
+        deleteView={deleteView}
       />
     </Fragment>
   );
