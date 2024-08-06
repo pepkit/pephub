@@ -49,6 +49,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                 isValidating={projectValidationQuery.isLoading}
                 validationResult={validationResult}
               />
+            </div>
             <div className="ps-1">
               <Fragment>
                 <button
