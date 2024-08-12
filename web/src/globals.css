@@ -688,3 +688,14 @@ body {
 .btn-dark.glow-button {
   --box-shadow-color: #343a4080;
 }
+
+.btn-group-vertical .btn-check:checked + .btn-outline-secondary{
+  box-shadow: inset 0 0 10px 2.5px #28a74524 !important;
+  outline: none;
+  border: 1px solid #28a745;
+
+  background-color: #28a74516;
+  color: #28a745;
+}
+
+

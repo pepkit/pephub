@@ -115,7 +115,7 @@ export const ProjectPage = () => {
         </Fragment>
       )}
       <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
-        <ProjectHeader />
+        <ProjectHeader sampleTable={sampleTableQuery.data} sampleTableIndex={sampleTableIndex || 'sample_name'}/>
         {projectInfo?.pop && !forceTraditionalInterface ? (
           <PopInterface projectInfo={projectInfo} sampleTable={sampleTableQuery.data} />
         ) : (

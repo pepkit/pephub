@@ -18,10 +18,18 @@ import { canEdit } from '../../utils/permissions';
 import { downloadZip } from '../../utils/project';
 import { ProjectHistoryModal } from '../modals/project-history';
 import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
+import { StandardizeMetadataModal } from '../modals/standardize-metadata';
 
-type ProjectPageHeaderBarProps = {};
 
-export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
+
+type Props = {
+  sampleTable: ReturnType<typeof useSampleTable>['data'];
+  sampleTableIndex: string;
+};
+
+export const ProjectHeaderBar = (props: Props) => {
+  const { sampleTable, sampleTableIndex } = props;
+
   const { user, login, jwt } = useSession();
 
   const [searchParams] = useSearchParams();
@@ -45,6 +53,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
   const [showProjectHistoryModal, setShowProjectHistoryModal] = useState(false);
+  const [showStandardizeMetadataModal, setShowStandardizeMetadataModal] = useState(false);
 
   // queries
   const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
@@ -179,13 +188,17 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
               {user && projectInfo && canEdit(user, projectInfo) && (
                 <Fragment>
                   <Dropdown.Divider />
+                  <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
+                    <i className="me-1 bi bi-pencil-square"></i>
+                    Edit
+                  </Dropdown.Item>
                   <Dropdown.Item onClick={() => setShowProjectHistoryModal(true)}>
                     <i className="me-1 bi bi-stopwatch" />
                     History
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
-                    <i className="me-1 bi bi-pencil-square"></i>
-                    Edit
+                  <Dropdown.Item onClick={() => setShowStandardizeMetadataModal(true)}>
+                    <i className="me-1 bi bi-magic"></i>
+                    Standardize
                   </Dropdown.Item>
                   <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
                     <i className="me-1 bi bi-trash3"></i>
@@ -274,9 +287,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
       />
       <AddToPOPModal
         show={showAddToPOPModal}
-        onHide={() => {
-          setShowAddToPOPModal(false);
-        }}
+        onHide={() => setShowAddToPOPModal(false)}
         namespace={namespace!}
         project={projectName}
         tag={tag}
@@ -287,6 +298,15 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
         namespace={namespace}
         project={projectName}
         tag={tag}
+      />
+      <StandardizeMetadataModal
+        show={showStandardizeMetadataModal}
+        onHide={() => setShowStandardizeMetadataModal(false)}
+        namespace={namespace}
+        project={projectName}
+        tag={tag}
+        sampleTable={sampleTable}
+        sampleTableIndex={sampleTableIndex}
       />
     </div>
   );
