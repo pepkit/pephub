@@ -14,18 +14,23 @@ type Props = {
   onHide: () => void;
   sampleTable: ReturnType<typeof useSampleTable>['data'];
   sampleTableIndex: string;
+  newSamples: any;
+  setNewSamples: (samples: any[][]) => void;
 };
 
 export const StandardizeMetadataModal = (props: Props) => {
-  const { namespace, project, tag, show, onHide, sampleTable, sampleTableIndex } = props;
+  const { namespace, project, tag, show, onHide, sampleTable, sampleTableIndex, newSamples, setNewSamples } = props;
 
-  const tabDataRaw = sampleListToArrays(sampleTable?.items || [])
+  // const tabDataRaw = sampleListToArrays(sampleTable?.items || [])
+  const tabDataRaw = newSamples;
+
   const tabData = tabDataRaw[0].map((_, colIndex) => tabDataRaw.map(row => row[colIndex])).reduce((obj, row) => {
     const [key, ...values] = row;
     obj[key] = values;
     return obj;
   }, {});
 
+  // console.log(tabDataRaw)
   // console.log(tabData)
   // console.log(sampleTableIndex)
 
@@ -38,25 +43,13 @@ export const StandardizeMetadataModal = (props: Props) => {
     return `${(value * 100).toFixed(2)}%`;
   };
 
-  const [selectedValues, setSelectedValues] = useState({});
-  const [hasDuplicates, setHasDuplicates] = useState(false);
-
   const handleRadioChange = (key, value) => {
     setSelectedValues(prev => {
-      let newValues;
-      if (value === null) {
-        // Create a new object without the specified key
-        const { [key]: _, ...rest } = prev;
-        newValues = rest;
-      } else {
-        // Add or update the key-value pair
-        newValues = {
-          ...prev,
-          [key]: value
-        };
-      }
+      const newValues = {
+        ...prev,
+        [key]: value === null ? key : value
+      };
       
-      // Check for duplicates
       setHasDuplicates(checkForDuplicates(newValues));
       
       return newValues;
@@ -81,6 +74,47 @@ export const StandardizeMetadataModal = (props: Props) => {
 
     return false; // No duplicates found
   };
+
+  const getDefaultSelections = () => {
+    const defaultSelections = {};
+    Object.keys(data).forEach(key => {
+      if (data[key]['Not Predictable'] === 0) {
+        defaultSelections[key] = key;  // Use the key itself as the default value
+      } else {
+        const options = Object.entries(data[key]);
+        const [bestOption] = options.reduce((best, current) => 
+          current[1] > best[1] && current[0] !== 'Not Predictable' ? current : best
+        );
+        defaultSelections[key] = bestOption;
+      }
+    });
+    return defaultSelections;
+  };
+
+  type TabDataRow = string[];
+  type TabData = TabDataRow[];
+  type SelectedValues = Record<string, string>;
+
+  const updateTabDataRaw = (tabDataRaw: TabData, selectedValues: SelectedValues): TabData => {
+    if (tabDataRaw.length === 0) return tabDataRaw;
+
+    // Create a new array to avoid mutating the original
+    const updatedTabDataRaw: TabData = [tabDataRaw[0].slice(), ...tabDataRaw.slice(1)];
+
+    // Update only the column names (first row) based on selectedValues
+    Object.entries(selectedValues).forEach(([key, value]) => {
+      const columnIndex = updatedTabDataRaw[0].indexOf(key);
+      if (columnIndex !== -1 && key !== value) {
+        updatedTabDataRaw[0][columnIndex] = value;
+      }
+    });
+
+    return updatedTabDataRaw;
+  };
+
+
+  const [selectedValues, setSelectedValues] = useState(getDefaultSelections());
+  const [hasDuplicates, setHasDuplicates] = useState(false);
 
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="xl">
@@ -131,7 +165,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                             name={key}
                             id={`${key}-suggested-${subKey}`}
                             value={subKey}
-                            defaultChecked={(value !== 0) && (index === 0)}
+                            defaultChecked={selectedValues[key] === subKey}
                             disabled={data[key]['Not Predictable'] === 0}
                             onChange={() => handleRadioChange(key, subKey)}
                           />
@@ -146,8 +180,8 @@ export const StandardizeMetadataModal = (props: Props) => {
                       type="radio"
                       name={key}
                       id={`${key}-original`}
-                      value="original"
-                      defaultChecked={data[key]['Not Predictable'] === 0}
+                      value={key}
+                      defaultChecked={selectedValues[key] === key}  // Check if the selected value is the same as the key
                       onChange={() => handleRadioChange(key, null)}
                     />
                     <label className='btn btn-outline-secondary selected-outline shadow-sm' htmlFor={`${key}-original`}>
@@ -184,6 +218,24 @@ export const StandardizeMetadataModal = (props: Props) => {
           disabled={hasDuplicates}
           onClick={() => {
             console.log('Selected values:', selectedValues);
+
+            const finalValues = Object.fromEntries(
+              Object.entries(selectedValues).filter(([k, v]) => v !== k)
+            );
+            console.log('Selected values:', finalValues);
+
+            // Update tabDataRaw
+            const updatedTabDataRaw = updateTabDataRaw(tabDataRaw, finalValues);
+            
+            // Log the updated tabDataRaw
+            console.log('Updated tabDataRaw:', updatedTabDataRaw);
+
+            setNewSamples(updatedTabDataRaw);
+
+            // Close the modal
+            onHide();
+
+
           }}
         >
           Accept

@@ -21,6 +21,9 @@ import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table
 import { SampleTable } from '../tables/sample-table';
 import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
+import { StandardizeMetadataModal } from '../modals/standardize-metadata';
+
+import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
 
 type Props = {
   projectConfig: ReturnType<typeof useProjectConfig>['data'];
@@ -43,6 +46,8 @@ export const ProjectInterface = (props: Props) => {
   const projectDataRef = useRef<HTMLDivElement>(null);
 
   const [filteredSamples, setFilteredSamples] = useState<string[]>([]);
+
+  const { showStandardizeMetadataModal, setShowStandardizeMetadataModal } = useStandardizeModalStore();
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
@@ -86,6 +91,10 @@ export const ProjectInterface = (props: Props) => {
   const userCanEdit = projectInfo && canEdit(user, projectInfo);
 
   const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
+
+  const setNewSamples = (samples: any[][]) => {
+    projectUpdates.setValue('samples', samples, { shouldDirty: true });
+  }
 
   const handleSubmit = () => {
     const values = projectUpdates.getValues();
@@ -254,6 +263,17 @@ export const ProjectInterface = (props: Props) => {
           />
         )}
       </div>
+      <StandardizeMetadataModal
+        show={showStandardizeMetadataModal}
+        onHide={() => setShowStandardizeMetadataModal(false)}
+        namespace={namespace}
+        project={projectName}
+        tag={tag}
+        sampleTable={sampleTable}
+        sampleTableIndex={sampleTableIndex}
+        newSamples={newSamples}
+        setNewSamples={setNewSamples}
+      />
     </Fragment>
   );
 };

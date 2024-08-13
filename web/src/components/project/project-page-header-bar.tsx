@@ -18,8 +18,8 @@ import { canEdit } from '../../utils/permissions';
 import { downloadZip } from '../../utils/project';
 import { ProjectHistoryModal } from '../modals/project-history';
 import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
-import { StandardizeMetadataModal } from '../modals/standardize-metadata';
 
+import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
 
 
 type Props = {
@@ -53,7 +53,8 @@ export const ProjectHeaderBar = (props: Props) => {
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
   const [showProjectHistoryModal, setShowProjectHistoryModal] = useState(false);
-  const [showStandardizeMetadataModal, setShowStandardizeMetadataModal] = useState(false);
+
+  const { showStandardizeMetadataModal, setShowStandardizeMetadataModal } = useStandardizeModalStore();
 
   // queries
   const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
@@ -298,15 +299,6 @@ export const ProjectHeaderBar = (props: Props) => {
         namespace={namespace}
         project={projectName}
         tag={tag}
-      />
-      <StandardizeMetadataModal
-        show={showStandardizeMetadataModal}
-        onHide={() => setShowStandardizeMetadataModal(false)}
-        namespace={namespace}
-        project={projectName}
-        tag={tag}
-        sampleTable={sampleTable}
-        sampleTableIndex={sampleTableIndex}
       />
     </div>
   );
