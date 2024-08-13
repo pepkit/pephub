@@ -694,7 +694,7 @@ body {
   outline: none;
   border: 1px solid #28a745;
 
-  background-color: #28a74516;
+  background-color: #28a74516 !important;
   color: #28a745;
 }
 

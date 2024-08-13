@@ -6,6 +6,10 @@ import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { ProjectMetaEditForm } from '../forms/edit-project-meta';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 
+import { HotTable } from '@handsontable/react';
+import Handsontable from 'handsontable';
+import 'handsontable/dist/handsontable.full.css';
+
 type Props = {
   namespace: string;
   project: string;
@@ -23,7 +27,6 @@ export const StandardizeMetadataModal = (props: Props) => {
 
   // const tabDataRaw = sampleListToArrays(sampleTable?.items || [])
   const tabDataRaw = newSamples;
-
   const tabData = tabDataRaw[0].map((_, colIndex) => tabDataRaw.map(row => row[colIndex])).reduce((obj, row) => {
     const [key, ...values] = row;
     obj[key] = values;
@@ -49,44 +52,47 @@ export const StandardizeMetadataModal = (props: Props) => {
         ...prev,
         [key]: value === null ? key : value
       };
-      
-      setHasDuplicates(checkForDuplicates(newValues));
+
+      setWhereDuplicates(checkForDuplicates(newValues))
       
       return newValues;
     });
   };
 
   const checkForDuplicates = (values) => {
-    const valueSet = new Set();
-    const keys = new Set(Object.keys(tabData));
+    const valueArray = Object.values(values);
+    const duplicates = {};
+    const result = [];
 
-    for (const [key, value] of Object.entries(values)) {
-      // Remove the current key from the set of tabData keys
-      keys.delete(key);
-
-      // Check if the value is already in the set or matches a remaining key in tabData
-      if (valueSet.has(value) || keys.has(value)) {
-        return true; // Found a duplicate
+    for (let i = 0; i < valueArray.length; i++) {
+      const value = valueArray[i];
+      if (value in duplicates) {
+        // If we haven't added this value's index yet, add it
+        if (duplicates[value].length === 1) {
+          result.push(duplicates[value][0]);
+        }
+        result.push(i);
+      } else {
+        duplicates[value] = [i];
       }
-
-      valueSet.add(value);
     }
 
-    return false; // No duplicates found
+    return result.length > 0 ? result : null;
   };
 
   const getDefaultSelections = () => {
     const defaultSelections = {};
     Object.keys(data).forEach(key => {
-      if (data[key]['Not Predictable'] === 0) {
-        defaultSelections[key] = key;  // Use the key itself as the default value
-      } else {
-        const options = Object.entries(data[key]);
-        const [bestOption] = options.reduce((best, current) => 
-          current[1] > best[1] && current[0] !== 'Not Predictable' ? current : best
-        );
-        defaultSelections[key] = bestOption;
-      }
+      // if (data[key]['Not Predictable'] === 0) {
+      //   defaultSelections[key] = key;  // Use the key itself as the default value
+      // } else {
+      //   const options = Object.entries(data[key]);
+      //   const [bestOption] = options.reduce((best, current) => 
+      //     current[1] > best[1] && current[0] !== 'Not Predictable' ? current : best
+      //   );
+      //   defaultSelections[key] = bestOption;
+      // }
+      defaultSelections[key] = key;
     });
     return defaultSelections;
   };
@@ -114,7 +120,7 @@ export const StandardizeMetadataModal = (props: Props) => {
 
 
   const [selectedValues, setSelectedValues] = useState(getDefaultSelections());
-  const [hasDuplicates, setHasDuplicates] = useState(false);
+  const [whereDuplicates, setWhereDuplicates] = useState(null)
 
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="xl">
@@ -142,20 +148,44 @@ export const StandardizeMetadataModal = (props: Props) => {
         </div>
 
         <form>
-          {Object.keys(data).map((key) => (
+          {Object.keys(data).map((key, index) => (
             <div className="mb-3" key={key}>
 
-              <div className='row border shadow-sm rounded-2 m-1 pt-3'>
-                <div className='col-6'>
-                  <p className='fw-bold'>{key}</p>
-
-                  {tabData[key] && (
-                    <p>[{tabData[key].slice(0, 3).join(', ')}]</p>
-                  )}
+              <div className='row border shadow-sm rounded-2 m-1 pt-3' style={{'backgroundColor': whereDuplicates?.includes(index) ? '#dc354520' : 'white'}}>
+                <div className='col-6 text-center'>
+                  
+                  <div className='w-100 h-100 overflow-auto'>
+                    <HotTable
+                      data={[
+                              [selectedValues[key] || ''],
+                              ...(tabData[key] && tabData[key].slice(0, 3).map(item => [item]) || [])
+                            ]}
+                      colHeaders={false}
+                      rowHeaders={true}
+                      width='100%'
+                      height='90%'
+                      colWidths="100%"  // Set all columns to 100% width
+                      stretchH="all"    // Stretch all columns
+                      autoColumnSize={false}  // Disable auto column sizing
+                      columns={[
+                        {
+                          data: 0,
+                          type: typeof tabData[key] === 'number' ? 'numeric' : 'text',
+                          renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            if (row === 0) {
+                              td.style.fontWeight = 'bold';
+                            }
+                          }
+                        }
+                      ]}
+                      licenseKey="non-commercial-and-evaluation"
+                    />
+                  </div>
 
                 </div>
                 <div className='col-6 mb-3' role='group' aria-label='radio_group'>
-                  <div className="btn-group-vertical w-100">
+                  <div className="btn-group-vertical w-100 bg-white rounded-2">
                     {Object.entries(data[key]).map(([subKey, value], index, array) => (
                       <React.Fragment key={subKey}>
                         
@@ -169,7 +199,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                             disabled={data[key]['Not Predictable'] === 0}
                             onChange={() => handleRadioChange(key, subKey)}
                           />
-                          <label className="btn btn-outline-secondary selected-outline shadow-sm" htmlFor={`${key}-suggested-${subKey}`}>
+                          <label className="btn btn-outline-secondary selected-outline shadow-sm bg-white" htmlFor={`${key}-suggested-${subKey}`}>
                             {subKey} ({formatToPercentage(value)})
                           </label>
                       </React.Fragment>
@@ -184,7 +214,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                       defaultChecked={selectedValues[key] === key}  // Check if the selected value is the same as the key
                       onChange={() => handleRadioChange(key, null)}
                     />
-                    <label className='btn btn-outline-secondary selected-outline shadow-sm' htmlFor={`${key}-original`}>
+                    <label className='btn btn-outline-secondary selected-outline shadow-sm bg-white' htmlFor={`${key}-original`}>
                       Keep Original
                     </label>
                   </div>
@@ -198,7 +228,7 @@ export const StandardizeMetadataModal = (props: Props) => {
       </Modal.Body>
       <Modal.Footer>
 
-        {hasDuplicates && (
+        {whereDuplicates !== null && (
           <div className="text-danger me-auto">
             Warning: ensure no duplicates between original and predicted columns have been selected.
           </div>
@@ -215,7 +245,7 @@ export const StandardizeMetadataModal = (props: Props) => {
         </button>
         <button 
           className='btn btn-success'
-          disabled={hasDuplicates}
+          disabled={whereDuplicates !== null}
           onClick={() => {
             console.log('Selected values:', selectedValues);
 
