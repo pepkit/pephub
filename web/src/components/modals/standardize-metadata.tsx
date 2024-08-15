@@ -10,6 +10,8 @@ import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
 
+import ReactSelect from 'react-select';
+
 type Props = {
   namespace: string;
   project: string;
@@ -118,6 +120,18 @@ export const StandardizeMetadataModal = (props: Props) => {
     return updatedTabDataRaw;
   };
 
+  function prepareHandsontableData(key, selectedValues, tabData) {
+    const selectedValue = selectedValues[key] || '';
+    const topValues = tabData[key]?.slice(0, 6).map(item => [item]) || [];
+    const emptyRows = Array(Math.max(0, 6 - topValues.length)).fill(['']);
+
+    return [
+      [selectedValue],
+      ...topValues,
+      ...emptyRows
+    ];
+  }
+
 
   const [selectedValues, setSelectedValues] = useState(getDefaultSelections());
   const [whereDuplicates, setWhereDuplicates] = useState(null)
@@ -136,37 +150,71 @@ export const StandardizeMetadataModal = (props: Props) => {
             After accepting the changes, save your project for them to take effect.</p>
           </div>
         </div>
-        <div className='border-bottom' style={{'margin':'0 -1em'}}>
+        <div className='border-bottom' style={{'margin':'0 -1em'}}></div>
+
+
+        <div className='row my-3'>
+          <div className='col-12'>
+            <h6 className='ms-1'>Standardizer Schema</h6>
+            <div className='row'>
+              <div className='col-9'>
+                
+                  <ReactSelect
+                      className="top-z w-100 ms-1"
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          borderRadius: '.333333em', // Left radii set to 0, right radii kept at 4px
+                        }),
+                      }}
+                      options={
+                        [
+                          { value: 'ENCODE', label: 'ENCODE' },
+                          { value: 'Fairtracks', label: 'Fairtracks' },
+                          { value: 'vanilla', label: 'Vanilla' }
+                        ]
+                      }
+                    />
+              </div>
+              <div className='col-3'>
+                <button className='btn btn-success float-end me-1 w-100'>
+                Standardize!
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div className='border-bottom' style={{'margin':'0 -1em'}}></div>
+
         <div className='row mb-2 mt-3'>
           <div className='col-6 text-center'>
             <h5>Original Column</h5>
           </div>
           <div className='col-6 text-center'>
-            <h5>Predicted Standardized Column</h5>
+            <h5>Predicted Column Header</h5>
           </div>
         </div>
+
 
         <form>
           {Object.keys(data).map((key, index) => (
             <div className="mb-3" key={key}>
 
-              <div className='row border shadow-sm rounded-2 m-1 pt-3' style={{'backgroundColor': whereDuplicates?.includes(index) ? '#dc354520' : 'white'}}>
+              <div className='row border shadow-sm rounded-2 m-1 py-3' style={{'backgroundColor': whereDuplicates?.includes(index) ? '#dc354520' : 'white'}}>
+
                 <div className='col-6 text-center'>
                   
-                  <div className='w-100 h-100 overflow-auto'>
+                  <div className='w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-s'>
                     <HotTable
-                      data={[
-                              [selectedValues[key] || ''],
-                              ...(tabData[key] && tabData[key].slice(0, 3).map(item => [item]) || [])
-                            ]}
+                      data={prepareHandsontableData(key, selectedValues, tabData)}
                       colHeaders={false}
                       rowHeaders={true}
                       width='100%'
-                      height='90%'
-                      colWidths="100%"  // Set all columns to 100% width
-                      stretchH="all"    // Stretch all columns
-                      autoColumnSize={false}  // Disable auto column sizing
+                      height='100%'
+                      colWidths="100%"
+                      stretchH="all"
+                      autoColumnSize={false}
                       columns={[
                         {
                           data: 0,
@@ -175,48 +223,55 @@ export const StandardizeMetadataModal = (props: Props) => {
                             Handsontable.renderers.TextRenderer.apply(this, arguments);
                             if (row === 0) {
                               td.style.fontWeight = 'bold';
+                              if (whereDuplicates?.includes(index)) {
+                                td.style.color= 'red';
+                              }
                             }
+
                           }
                         }
                       ]}
                       licenseKey="non-commercial-and-evaluation"
+                      className='custom-handsontable'
                     />
                   </div>
 
                 </div>
-                <div className='col-6 mb-3' role='group' aria-label='radio_group'>
-                  <div className="btn-group-vertical w-100 bg-white rounded-2">
-                    {Object.entries(data[key]).map(([subKey, value], index, array) => (
-                      <React.Fragment key={subKey}>
-                        
-                          <input
-                            className="btn-check"
-                            type="radio"
-                            name={key}
-                            id={`${key}-suggested-${subKey}`}
-                            value={subKey}
-                            defaultChecked={selectedValues[key] === subKey}
-                            disabled={data[key]['Not Predictable'] === 0}
-                            onChange={() => handleRadioChange(key, subKey)}
-                          />
-                          <label className="btn btn-outline-secondary selected-outline shadow-sm bg-white" htmlFor={`${key}-suggested-${subKey}`}>
-                            {subKey} ({formatToPercentage(value)})
-                          </label>
-                      </React.Fragment>
-                    ))}
+                <div className='col-6' role='group' aria-label='radio_group'>
+                  <div className='w-100 h-100 rounded-2 outer-container'>
+                    <div className="btn-group-vertical h-100 w-100 bg-white rounded-2 h-100">
+                      <input
+                        className="btn-check"
+                        type="radio"
+                        name={key}
+                        id={`${key}-original`}
+                        value={key}
+                        defaultChecked={selectedValues[key] === key}  // Check if the selected value is the same as the key
+                        onChange={() => handleRadioChange(key, null)}
+                      />
+                      <label className='btn btn-outline-secondary selected-outline shadow-sm bg-white' htmlFor={`${key}-original`}>
+                        <strong>{key}</strong> (original value)
+                      </label>
 
-                    <input
-                      className="btn-check"
-                      type="radio"
-                      name={key}
-                      id={`${key}-original`}
-                      value={key}
-                      defaultChecked={selectedValues[key] === key}  // Check if the selected value is the same as the key
-                      onChange={() => handleRadioChange(key, null)}
-                    />
-                    <label className='btn btn-outline-secondary selected-outline shadow-sm bg-white' htmlFor={`${key}-original`}>
-                      Keep Original
-                    </label>
+                      {Object.entries(data[key]).map(([subKey, value], index, array) => (
+                        <React.Fragment key={subKey}>
+                          
+                            <input
+                              className="btn-check"
+                              type="radio"
+                              name={key}
+                              id={`${key}-suggested-${subKey}`}
+                              value={subKey}
+                              defaultChecked={selectedValues[key] === subKey}
+                              disabled={data[key]['Not Predictable'] === 0}
+                              onChange={() => handleRadioChange(key, subKey)}
+                            />
+                            <label className="btn btn-outline-secondary selected-outline shadow-sm bg-white" htmlFor={`${key}-suggested-${subKey}`}>
+                              {subKey} ({formatToPercentage(value)})
+                            </label>
+                        </React.Fragment>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <br/>
@@ -230,7 +285,7 @@ export const StandardizeMetadataModal = (props: Props) => {
 
         {whereDuplicates !== null && (
           <div className="text-danger me-auto">
-            Warning: ensure no duplicates between original and predicted columns have been selected.
+            Warning: ensure no duplicate column names have been selected.
           </div>
         )}
         

@@ -699,3 +699,39 @@ body {
 }
 
 
+.custom-handsontable .handsontable {
+/*  border-radius: 8px;*/
+  overflow: hidden;
+}
+
+.custom-handsontable .handsontable th,
+.custom-handsontable .handsontable td {
+/*  border-color: #ccc;*/
+}
+
+.custom-handsontable .handsontable th:first-child,
+.custom-handsontable .handsontable td:first-child {
+  border-left: none !important;
+}
+
+.custom-handsontable .handsontable th:last-child,
+.custom-handsontable .handsontable td:last-child {
+  border-right: none !important;
+}
+
+.custom-handsontable .handsontable tr:first-child th,
+.custom-handsontable .handsontable tr:first-child td {
+  border-top: none !important;
+}
+
+.custom-handsontable .handsontable tr:last-child th,
+.custom-handsontable .handsontable tr:last-child td {
+  border-bottom: none !important;
+}
+
+.btn-group-vertical {
+  bottom: -1px;
+}
+
+
+
