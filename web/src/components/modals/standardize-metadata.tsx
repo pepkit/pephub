@@ -153,7 +153,7 @@ export const StandardizeMetadataModal = (props: Props) => {
           <div className="col-12 text-s">
             <p>
               Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of
-              your projects. After choosing a standardizer schema below, compare predicted suggestions (accuracy indicated in parenthesis) and choose whether
+              your projects. After choosing a standardizer schema below, compare predicted suggestions (confidence indicated in parenthesis) and choose whether
               to keep or discard them. Column contents [previewed in brackets] are not changed by the standardizer.
               After accepting the changes, save your project for them to take effect.
             </p>

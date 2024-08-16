@@ -1146,10 +1146,7 @@ def delete_full_history(
     summary="Standardize PEP metadata column headers",
 )
 async def get_standardized_cols(
-    namespace: str,
-    project: str,
-    tag: Optional[str] = DEFAULT_TAG,
-    schema: str = ''
+    namespace: str, project: str, tag: Optional[str] = DEFAULT_TAG, schema: str = ""
 ):
     """
     Standardize PEP metadata column headers using BEDmess.
@@ -1162,16 +1159,13 @@ async def get_standardized_cols(
     - dict: Standardized results
     """
 
-    if schema == '':
+    if schema == "":
         return {}
 
-    path = namespace + '/' + project + ':' + tag
+    path = namespace + "/" + project + ":" + tag
     print(path)
 
     model = AttrStandardizer(schema)
 
     results = model.standardize(pep=path)
     return {"results": results}
-
-
-
