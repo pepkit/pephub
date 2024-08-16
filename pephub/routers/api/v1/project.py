@@ -55,6 +55,7 @@ from ...models import (
     ConfigResponseModel,
 )
 from .helpers import verify_updated_project
+from attribute_standardizer.attr_standardizer_class import AttrStandardizer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -1138,3 +1139,39 @@ def delete_full_history(
             status_code=400,
             detail="Could not delete history. Server error.",
         )
+
+
+@project.get(
+    "/standardize",
+    summary="Standardize PEP metadata column headers",
+)
+async def get_standardized_cols(
+    namespace: str,
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
+    schema: str = ''
+):
+    """
+    Standardize PEP metadata column headers using BEDmess.
+
+    Args:
+    - pep (str): PEP string to be standardized
+    - schema (str): Schema for AttrStandardizer
+
+    Returns:
+    - dict: Standardized results
+    """
+
+    if schema == '':
+        return {}
+
+    path = namespace + '/' + project + ':' + tag
+    print(path)
+
+    model = AttrStandardizer(schema)
+
+    results = model.standardize(pep=path)
+    return {"results": results}
+
+
+

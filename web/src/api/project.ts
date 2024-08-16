@@ -85,6 +85,14 @@ export type RestoreProjectFromHistoryResponse = {
   registry: string;
 };
 
+export type StandardizeColsResponse = {
+  results: {
+    [key: string]: {
+      [key: string]: number;
+    };
+  };
+};
+
 export const getProject = (
   namespace: string,
   projectName: string,
@@ -403,4 +411,17 @@ export const restoreProjectFromHistory = (
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${name}/history/${historyId}/restore?tag=${tag}`;
   return axios.post<RestoreProjectFromHistoryResponse>(url, {}, { headers: { Authorization: `Bearer ${jwt}` } });
+};
+
+export const getStandardizedCols = (
+  namespace: string,
+  name: string,
+  tag: string,
+  jwt: string | null,
+  schema: string
+) => {
+  const url = `${API_BASE}/projects/${namespace}/${name}/standardize`;
+  return axios
+    .get<StandardizeColsResponse>(url, { headers: { Authorization: `Bearer ${jwt}` } })
+    .then((res) => res.data);
 };
