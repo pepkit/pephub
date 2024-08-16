@@ -1,17 +1,16 @@
-import { Modal } from 'react-bootstrap';
-import React, { useState } from 'react';
-import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
-import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
-import { useSampleTable } from '../../hooks/queries/useSampleTable';
-import { ProjectMetaEditForm } from '../forms/edit-project-meta';
-import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
-import { useStandardize } from '../../hooks/queries/useStandardize';
-
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-
+import React, { FormEvent, useState } from 'react';
+import { Modal } from 'react-bootstrap';
 import ReactSelect from 'react-select';
+
+import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
+import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
+import { useSampleTable } from '../../hooks/queries/useSampleTable';
+import { useStandardize } from '../../hooks/queries/useStandardize';
+import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
+import { ProjectMetaEditForm } from '../forms/edit-project-meta';
 
 type Props = {
   namespace: string;
@@ -28,51 +27,54 @@ type Props = {
 type TabDataRow = string[];
 type TabData = TabDataRow[];
 type SelectedValues = Record<string, string>;
+type AvailableSchemas = 'ENCODE' | 'FAIRTRACKS';
 
 export const StandardizeMetadataModal = (props: Props) => {
   const { namespace, project, tag, show, onHide, sampleTable, sampleTableIndex, newSamples, setNewSamples } = props;
 
   // const tabDataRaw = sampleListToArrays(sampleTable?.items || [])
   const tabDataRaw = newSamples;
-  const tabData = tabDataRaw[0].map((_, colIndex) => tabDataRaw.map(row => row[colIndex])).reduce((obj, row) => {
-    const [key, ...values] = row;
-    obj[key] = values;
-    return obj;
-  }, {});
+  const tabData = tabDataRaw[0]
+    .map((_, colIndex) => tabDataRaw.map((row) => row[colIndex]))
+    .reduce((obj, row) => {
+      const [key, ...values] = row;
+      obj[key] = values;
+      return obj;
+    }, {});
 
   // console.log(tabDataRaw)
   // console.log(tabData)
   // console.log(sampleTableIndex)
 
   // const [selectedOption, setSelectedOption] = useState({ value: 'ENCODE', label: 'ENCODE' });
-  const [selectedOption, setSelectedOption] = useState(null);
-  const selectRef = React.useRef(null);
+  const [selectedOption, setSelectedOption] = useState<AvailableSchemas>('ENCODE');
 
-  const { isLoading, isError, error, data, refetch } = useStandardize(
-    namespace,
-    project,
-    tag,
-    selectedOption?.value,
-  );
+  const {
+    isLoading,
+    isError,
+    error,
+    data,
+    refetch: standardize,
+  } = useStandardize(namespace, project, tag, selectedOption?.value);
 
-  const standardizedData = data?.results
+  const standardizedData = data?.results;
 
-  console.log(selectedOption)
-  console.log(standardizedData)
+  console.log(selectedOption);
+  console.log(standardizedData);
 
   const formatToPercentage = (value: number): string => {
     return `${(value * 100).toFixed(2)}%`;
   };
 
   const handleRadioChange = (key, value) => {
-    setSelectedValues(prev => {
+    setSelectedValues((prev) => {
       const newValues = {
         ...prev,
-        [key]: value === null ? key : value
+        [key]: value === null ? key : value,
       };
 
-      setWhereDuplicates(checkForDuplicates(newValues))
-      
+      setWhereDuplicates(checkForDuplicates(newValues));
+
       return newValues;
     });
   };
@@ -103,7 +105,7 @@ export const StandardizeMetadataModal = (props: Props) => {
       return {};
     }
     const defaultSelections = {};
-    Object.keys(standardizedData).forEach(key => {
+    Object.keys(standardizedData).forEach((key) => {
       defaultSelections[key] = key;
     });
     return defaultSelections;
@@ -128,29 +130,22 @@ export const StandardizeMetadataModal = (props: Props) => {
 
   const prepareHandsontableData = (key, selectedValues, tabData) => {
     const selectedValue = selectedValues[key] || '';
-    const topValues = tabData[key]?.slice(0, 6).map(item => [item]) || [];
+    const topValues = tabData[key]?.slice(0, 6).map((item) => [item]) || [];
     const emptyRows = Array(Math.max(0, 6 - topValues.length)).fill(['']);
 
-    return [
-      [selectedValue],
-      ...topValues,
-      ...emptyRows
-    ];
-  }
+    return [[selectedValue], ...topValues, ...emptyRows];
+  };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (selectRef.current) {
-      const currentValue = selectRef.current.getValue()[0];
-      setSelectedOption(currentValue);
-      console.log('Form submitted with:', currentValue);
-      // Refetch data with new selectedOption
-      await refetch();
-    }
+    console.log('Form submitted with:', selectedOption);
+
+    // Refetch data with new selectedOption
+    await standardize();
   };
 
   const [selectedValues, setSelectedValues] = useState(getDefaultSelections());
-  const [whereDuplicates, setWhereDuplicates] = useState(null)
+  const [whereDuplicates, setWhereDuplicates] = useState(null);
 
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="xl">
@@ -158,192 +153,189 @@ export const StandardizeMetadataModal = (props: Props) => {
         <Modal.Title>Metadata Standardizer</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div className='row'>
-          <div className='col-12 text-s'>
-            <p>Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of your projects. 
-            Compare predicted suggestions below (accuracy indicated in parenthesis) and choose whether to keep or discard them.
-            Column contents [previewed in brackets] are not changed by the standardizer.
-            After accepting the changes, save your project for them to take effect.</p>
+        <div className="row">
+          <div className="col-12 text-s">
+            <p>
+              Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of
+              your projects. Compare predicted suggestions below (accuracy indicated in parenthesis) and choose whether
+              to keep or discard them. Column contents [previewed in brackets] are not changed by the standardizer.
+              After accepting the changes, save your project for them to take effect.
+            </p>
           </div>
         </div>
-        <div className='border-bottom' style={{'margin':'0 -1em'}}></div>
+        <div className="border-bottom" style={{ margin: '0 -1em' }}></div>
 
+        <div className="row my-3">
+          <div className="col-12">
+            <h6 className="ms-1">Standardizer Schema</h6>
 
-        <div className='row my-3'>
-          <div className='col-12'>
-            <h6 className='ms-1'>Standardizer Schema</h6>
-            
             <form onSubmit={handleSubmit}>
-              <div className='row'>
-                <div className='col-9'>
+              <div className="row">
+                <div className="col-9">
                   <ReactSelect
                     className="top-z w-100 ms-1"
-                    ref={selectRef}
                     styles={{
                       control: (provided) => ({
                         ...provided,
                         borderRadius: '.333333em', // Left radii set to 0, right radii kept at 4px
                       }),
                     }}
-                    options={
-                      [
-                        { value: 'ENCODE', label: 'ENCODE' },
-                        { value: 'FAIRTRACKS', label: 'Fairtracks' }
-                      ]
-                    }
+                    options={[
+                      // @ts-ignore
+                      { value: 'ENCODE', label: 'ENCODE' },
+                      // @ts-ignore
+                      { value: 'FAIRTRACKS', label: 'Fairtracks' },
+                    ]}
                     defaultValue={selectedOption}
+                    value={selectedOption}
+                    onChange={(selectedOption) => {
+                      if (selectedOption === null) {
+                        return;
+                      }
+                      setSelectedOption(selectedOption);
+                    }}
                   />
-              </div>
-              <div className='col-3'>
-                <button
-                  className='btn btn-success float-end me-1 w-100'
-                  type='submit'
-                >
-                  Standardize!
-                </button>
-
-              
                 </div>
-              
+                <div className="col-3">
+                  <button className="btn btn-success float-end me-1 w-100" type="submit">
+                    Standardize!
+                  </button>
+                </div>
               </div>
             </form>
           </div>
         </div>
 
-        {standardizedData ? 
+        {standardizedData ? (
+          <>
+            <div className="border-bottom" style={{ margin: '0 -1em' }}></div>
 
-        <>
-          <div className='border-bottom' style={{'margin':'0 -1em'}}></div>
-
-          <div className='row mb-2 mt-3'>
-            <div className='col-6 text-center'>
-              <h5>Original Column</h5>
+            <div className="row mb-2 mt-3">
+              <div className="col-6 text-center">
+                <h5>Original Column</h5>
+              </div>
+              <div className="col-6 text-center">
+                <h5>Predicted Column Header</h5>
+              </div>
             </div>
-            <div className='col-6 text-center'>
-              <h5>Predicted Column Header</h5>
-            </div>
-          </div>
 
-
-          <form>
-            {Object.keys(standardizedData).map((key, index) => (
-              <div className="mb-3" key={key}>
-
-                <div className='row border shadow-sm rounded-3 m-1 py-3' style={{'backgroundColor': whereDuplicates?.includes(index) ? '#dc354520' : 'white'}}>
-
-                  <div className='col-6 text-center'>
-                    
-                    <div className='w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm'>
-                      <HotTable
-                        data={prepareHandsontableData(key, selectedValues, tabData)}
-                        colHeaders={false}
-                        rowHeaders={true}
-                        width='100%'
-                        height='100%'
-                        colWidths="100%"
-                        stretchH="all"
-                        autoColumnSize={false}
-                        readOnly={true}
-                        columns={[
-                          {
-                            data: 0,
-                            type: typeof tabData[key] === 'number' ? 'numeric' : 'text',
-                            renderer: function(instance, td, row, col, prop, value, cellProperties) {
-                              Handsontable.renderers.TextRenderer.apply(this, arguments);
-                              if (row === 0) {
-                                td.style.fontWeight = 'bold';
-                                if (whereDuplicates?.includes(index)) {
-                                  td.style.color= 'red';
+            <form>
+              {Object.keys(standardizedData).map((key, index) => (
+                <div className="mb-3" key={key}>
+                  <div
+                    className="row border shadow-sm rounded-3 m-1 py-3"
+                    style={{ backgroundColor: whereDuplicates?.includes(index) ? '#dc354520' : 'white' }}
+                  >
+                    <div className="col-6 text-center">
+                      <div className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm">
+                        <HotTable
+                          data={prepareHandsontableData(key, selectedValues, tabData)}
+                          colHeaders={false}
+                          rowHeaders={true}
+                          width="100%"
+                          height="100%"
+                          colWidths="100%"
+                          stretchH="all"
+                          autoColumnSize={false}
+                          readOnly={true}
+                          columns={[
+                            {
+                              data: 0,
+                              type: typeof tabData[key] === 'number' ? 'numeric' : 'text',
+                              renderer: function (instance, td, row, col, prop, value, cellProperties) {
+                                Handsontable.renderers.TextRenderer.apply(this, arguments);
+                                if (row === 0) {
+                                  td.style.fontWeight = 'bold';
+                                  if (whereDuplicates?.includes(index)) {
+                                    td.style.color = 'red';
+                                  }
                                 }
-                              }
-
-                            }
-                          }
-                        ]}
-                        licenseKey="non-commercial-and-evaluation"
-                        className='custom-handsontable'
-                      />
-                    </div>
-
-                  </div>
-                  <div className='col-6' role='group' aria-label='radio_group'>
-                    <div className='w-100 h-100 rounded-2 outer-container'>
-                      <div className="btn-group-vertical w-100 bg-white rounded-2" style={{'height': 'calc(100% - 2px)', 'bottom': '-1px'}}>
-                        <input
-                          className="btn-check"
-                          type="radio"
-                          name={key}
-                          id={`${key}-original`}
-                          value={key}
-                          defaultChecked={selectedValues[key] === key}  // Check if the selected value is the same as the key
-                          onChange={() => handleRadioChange(key, null)}
+                              },
+                            },
+                          ]}
+                          licenseKey="non-commercial-and-evaluation"
+                          className="custom-handsontable"
                         />
-                        <label className='btn btn-outline-secondary selected-outline shadow-sm bg-white' htmlFor={`${key}-original`}>
-                          <strong>{key}</strong> (original value)
-                        </label>
-
-                        {Object.entries(standardizedData[key]).map(([subKey, value], index, array) => (
-                          <React.Fragment key={subKey}>
-                            <input
-                              className="btn-check"
-                              type="radio"
-                              name={key}
-                              id={`${key}-suggested-${subKey}`}
-                              value={subKey}
-                              defaultChecked={selectedValues[key] === subKey}
-                              disabled={standardizedData[key]['Not Predictable'] === 0}
-                              onChange={() => handleRadioChange(key, subKey)}
-                            />
-                            <label className="btn btn-outline-secondary selected-outline shadow-sm bg-white" htmlFor={`${key}-suggested-${subKey}`}>
-                              {subKey} ({formatToPercentage(value)})
-                            </label>
-                          </React.Fragment>
-                        ))}
-
                       </div>
                     </div>
+                    <div className="col-6" role="group" aria-label="radio_group">
+                      <div className="w-100 h-100 rounded-2 outer-container">
+                        <div
+                          className="btn-group-vertical w-100 bg-white rounded-2"
+                          style={{ height: 'calc(100% - 2px)', bottom: '-1px' }}
+                        >
+                          <input
+                            className="btn-check"
+                            type="radio"
+                            name={key}
+                            id={`${key}-original`}
+                            value={key}
+                            defaultChecked={selectedValues[key] === key} // Check if the selected value is the same as the key
+                            onChange={() => handleRadioChange(key, null)}
+                          />
+                          <label
+                            className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
+                            htmlFor={`${key}-original`}
+                          >
+                            <strong>{key}</strong> (original value)
+                          </label>
+
+                          {Object.entries(standardizedData[key]).map(([subKey, value], index, array) => (
+                            <React.Fragment key={subKey}>
+                              <input
+                                className="btn-check"
+                                type="radio"
+                                name={key}
+                                id={`${key}-suggested-${subKey}`}
+                                value={subKey}
+                                defaultChecked={selectedValues[key] === subKey}
+                                disabled={standardizedData[key]['Not Predictable'] === 0}
+                                onChange={() => handleRadioChange(key, subKey)}
+                              />
+                              <label
+                                className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
+                                htmlFor={`${key}-suggested-${subKey}`}
+                              >
+                                {subKey} ({formatToPercentage(value)})
+                              </label>
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <br />
                   </div>
-                  <br/>
                 </div>
-              </div>
-            ))}
-          </form>
-
-        </> : null
-        }        
-
+              ))}
+            </form>
+          </>
+        ) : null}
       </Modal.Body>
       <Modal.Footer>
-
         {whereDuplicates !== null && (
-          <div className="text-danger me-auto">
-            Warning: ensure no duplicate column names have been selected.
-          </div>
+          <div className="text-danger me-auto">Warning: ensure no duplicate column names have been selected.</div>
         )}
-        
 
-        <button 
-          className='btn btn-outline-dark me-1'
+        <button
+          className="btn btn-outline-dark me-1"
           onClick={() => {
             onHide();
           }}
         >
           Cancel
         </button>
-        <button 
-          className='btn btn-success'
+        <button
+          className="btn btn-success"
           disabled={whereDuplicates !== null}
           onClick={() => {
             console.log('Selected values:', selectedValues);
 
-            const finalValues = Object.fromEntries(
-              Object.entries(selectedValues).filter(([k, v]) => v !== k)
-            );
+            const finalValues = Object.fromEntries(Object.entries(selectedValues).filter(([k, v]) => v !== k));
             console.log('Selected values:', finalValues);
 
             // Update tabDataRaw
             const updatedTabDataRaw = updateTabDataRaw(tabDataRaw, finalValues);
-            
+
             // Log the updated tabDataRaw
             console.log('Updated tabDataRaw:', updatedTabDataRaw);
 
@@ -351,14 +343,11 @@ export const StandardizeMetadataModal = (props: Props) => {
 
             // Close the modal
             onHide();
-
-
           }}
         >
           Accept
         </button>
       </Modal.Footer>
-
     </Modal>
   );
 };
