@@ -1,7 +1,7 @@
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useState, useEffect, useCallback } from 'react';
 import { Modal } from 'react-bootstrap';
 import ReactSelect from 'react-select';
 
@@ -11,6 +11,7 @@ import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { useStandardize } from '../../hooks/queries/useStandardize';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { ProjectMetaEditForm } from '../forms/edit-project-meta';
+import { LoadingSpinner } from '../spinners/loading-spinner'
 
 type Props = {
   namespace: string;
@@ -42,15 +43,12 @@ export const StandardizeMetadataModal = (props: Props) => {
       return obj;
     }, {});
 
-  // console.log(tabDataRaw)
-  // console.log(tabData)
-  // console.log(sampleTableIndex)
-
-  // const [selectedOption, setSelectedOption] = useState({ value: 'ENCODE', label: 'ENCODE' });
-  const [selectedOption, setSelectedOption] = useState<AvailableSchemas>('ENCODE');
+  const [selectedOption, setSelectedOption] = useState<AvailableSchemas>('');
+  const [selectedValues, setSelectedValues] = useState<SelectedValues>({});
+  const [whereDuplicates, setWhereDuplicates] = useState<number[] | null>(null);
 
   const {
-    isLoading,
+    isFetching,
     isError,
     error,
     data,
@@ -58,9 +56,6 @@ export const StandardizeMetadataModal = (props: Props) => {
   } = useStandardize(namespace, project, tag, selectedOption?.value);
 
   const standardizedData = data?.results;
-
-  console.log(selectedOption);
-  console.log(standardizedData);
 
   const formatToPercentage = (value: number): string => {
     return `${(value * 100).toFixed(2)}%`;
@@ -100,10 +95,7 @@ export const StandardizeMetadataModal = (props: Props) => {
     return result.length > 0 ? result : null;
   };
 
-  const getDefaultSelections = () => {
-    if (!standardizedData) {
-      return {};
-    }
+  const getDefaultSelections = (standardizedData) => {
     const defaultSelections = {};
     Object.keys(standardizedData).forEach((key) => {
       defaultSelections[key] = key;
@@ -128,24 +120,28 @@ export const StandardizeMetadataModal = (props: Props) => {
     return updatedTabDataRaw;
   };
 
-  const prepareHandsontableData = (key, selectedValues, tabData) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // Refetch data with new selectedOption
+    await standardize();
+  };
+
+  const prepareHandsontableData = useCallback((key: string) => {
     const selectedValue = selectedValues[key] || '';
     const topValues = tabData[key]?.slice(0, 6).map((item) => [item]) || [];
     const emptyRows = Array(Math.max(0, 6 - topValues.length)).fill(['']);
 
     return [[selectedValue], ...topValues, ...emptyRows];
-  };
+  }, [selectedValues, tabData]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log('Form submitted with:', selectedOption);
-
-    // Refetch data with new selectedOption
-    await standardize();
-  };
-
-  const [selectedValues, setSelectedValues] = useState(getDefaultSelections());
-  const [whereDuplicates, setWhereDuplicates] = useState(null);
+  useEffect(() => {
+    if (data?.results) {
+      const defaultSelections = getDefaultSelections(data.results);
+      setWhereDuplicates(checkForDuplicates(defaultSelections));
+      console.log('Setting default selections:', defaultSelections);
+      setSelectedValues(defaultSelections);
+    }
+  }, [data]);
 
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="xl">
@@ -157,7 +153,7 @@ export const StandardizeMetadataModal = (props: Props) => {
           <div className="col-12 text-s">
             <p>
               Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of
-              your projects. Compare predicted suggestions below (accuracy indicated in parenthesis) and choose whether
+              your projects. After choosing a standardizer schema below, compare predicted suggestions (accuracy indicated in parenthesis) and choose whether
               to keep or discard them. Column contents [previewed in brackets] are not changed by the standardizer.
               After accepting the changes, save your project for them to take effect.
             </p>
@@ -206,7 +202,7 @@ export const StandardizeMetadataModal = (props: Props) => {
           </div>
         </div>
 
-        {standardizedData ? (
+        {standardizedData && !isFetching ? (
           <>
             <div className="border-bottom" style={{ margin: '0 -1em' }}></div>
 
@@ -223,13 +219,14 @@ export const StandardizeMetadataModal = (props: Props) => {
               {Object.keys(standardizedData).map((key, index) => (
                 <div className="mb-3" key={key}>
                   <div
-                    className="row border shadow-sm rounded-3 m-1 py-3"
-                    style={{ backgroundColor: whereDuplicates?.includes(index) ? '#dc354520' : 'white' }}
+                    className={(key === sampleTableIndex) ? "row border shadow-sm rounded-3 m-1 pb-3 pt-2" : "row border shadow-sm rounded-3 m-1 py-3"}
+                    style={{ backgroundColor: whereDuplicates?.includes(index) ? '#dc354520' : (key === sampleTableIndex) ? '#ffc10720' : 'white' }}
                   >
+                    {key === sampleTableIndex ? <p className='text-center text-xs mb-2 p-0 fw-bold'>SampleTableIndex must also be updated in project config!</p> : null}
                     <div className="col-6 text-center">
                       <div className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm">
                         <HotTable
-                          data={prepareHandsontableData(key, selectedValues, tabData)}
+                          data={prepareHandsontableData(key)}
                           colHeaders={false}
                           rowHeaders={true}
                           width="100%"
@@ -250,8 +247,8 @@ export const StandardizeMetadataModal = (props: Props) => {
                                     td.style.color = 'red';
                                   }
                                 }
-                              },
-                            },
+                              }
+                            }
                           ]}
                           licenseKey="non-commercial-and-evaluation"
                           className="custom-handsontable"
@@ -270,7 +267,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                             name={key}
                             id={`${key}-original`}
                             value={key}
-                            defaultChecked={selectedValues[key] === key} // Check if the selected value is the same as the key
+                            checked={selectedValues[key] === key} // Check if the selected value is the same as the key
                             onChange={() => handleRadioChange(key, null)}
                           />
                           <label
@@ -288,7 +285,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                                 name={key}
                                 id={`${key}-suggested-${subKey}`}
                                 value={subKey}
-                                defaultChecked={selectedValues[key] === subKey}
+                                checked={selectedValues[key] === subKey}
                                 disabled={standardizedData[key]['Not Predictable'] === 0}
                                 onChange={() => handleRadioChange(key, subKey)}
                               />
@@ -309,7 +306,14 @@ export const StandardizeMetadataModal = (props: Props) => {
               ))}
             </form>
           </>
-        ) : null}
+        ) : isFetching ? 
+
+          <div className='row text-center my-5'>
+            <LoadingSpinner />
+          </div>
+         : 
+        null
+      }
       </Modal.Body>
       <Modal.Footer>
         {whereDuplicates !== null && (
@@ -325,23 +329,12 @@ export const StandardizeMetadataModal = (props: Props) => {
           Cancel
         </button>
         <button
-          className="btn btn-success"
-          disabled={whereDuplicates !== null}
+          className="btn btn-secondary"
+          disabled={whereDuplicates !== null || isFetching || isError || !data}
           onClick={() => {
-            console.log('Selected values:', selectedValues);
-
             const finalValues = Object.fromEntries(Object.entries(selectedValues).filter(([k, v]) => v !== k));
-            console.log('Selected values:', finalValues);
-
-            // Update tabDataRaw
             const updatedTabDataRaw = updateTabDataRaw(tabDataRaw, finalValues);
-
-            // Log the updated tabDataRaw
-            console.log('Updated tabDataRaw:', updatedTabDataRaw);
-
             setNewSamples(updatedTabDataRaw);
-
-            // Close the modal
             onHide();
           }}
         >
