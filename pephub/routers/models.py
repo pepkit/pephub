@@ -160,5 +160,6 @@ class SchemaGetResponse(BaseModel):
     last_update_date: str = ""
     submission_date: str = ""
 
+
 class StandardizerResponse(BaseModel):
     results: dict = {}

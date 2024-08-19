@@ -1148,9 +1148,11 @@ def delete_full_history(
     response_model=StandardizerResponse,
 )
 async def get_standardized_cols(
-    namespace: str, project: str, tag: Optional[str] = DEFAULT_TAG, 
+    namespace: str,
+    project: str,
+    tag: Optional[str] = DEFAULT_TAG,
     # pep: project = Depends(get_project),
-    schema: str = ""
+    schema: str = "",
 ):
     """
     Standardize PEP metadata column headers using BEDmess.
@@ -1162,7 +1164,10 @@ async def get_standardized_cols(
     """
 
     if schema == "":
-        raise HTTPException(code=400, detail="Schema is required! Available schemas are ENCODE and Fairtracks")
+        raise HTTPException(
+            code=400,
+            detail="Schema is required! Available schemas are ENCODE and Fairtracks",
+        )
         return {}
 
     path = namespace + "/" + project + ":" + tag
@@ -1173,4 +1178,3 @@ async def get_standardized_cols(
     # print({'results': results})
     # return{"results": results}
     return StandardizerResponse(results=results)
-
