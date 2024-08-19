@@ -1,7 +1,7 @@
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-import React, { FormEvent, useState, useEffect, useCallback } from 'react';
+import React, { FormEvent, useState, useEffect, useCallback, useMemo } from 'react';
 import { Modal } from 'react-bootstrap';
 import ReactSelect from 'react-select';
 
@@ -45,6 +45,9 @@ export const StandardizeMetadataModal = (props: Props) => {
       return obj;
     }, {} as Record<string, any[]>);
 
+  const originalCols: string[] = useMemo(() => Object.keys(tabData), []);
+  const newCols: string[] = Object.keys(tabData);
+
   const [selectedOption, setSelectedOption] = useState<{ value: AvailableSchemas; label: string } | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValues>({});
   const [whereDuplicates, setWhereDuplicates] = useState<number[] | null>(null);
@@ -59,15 +62,21 @@ export const StandardizeMetadataModal = (props: Props) => {
 
   const standardizedData = data?.results as StandardizedData | undefined;
 
+  const getOriginalColValues = (key: string): string | undefined => {
+    const oldColIndex = originalCols.indexOf(key);
+    if (oldColIndex !== -1 && oldColIndex < newCols.length) {
+      return newCols[oldColIndex];
+    }
+    return undefined;
+  };
+
   const handleRadioChange = (key: string, value: string | null) => {
     setSelectedValues((prev) => {
       const newValues = {
         ...prev,
         [key]: value === null ? key : value,
       };
-
       setWhereDuplicates(checkForDuplicates(newValues));
-
       return newValues;
     });
   };
@@ -106,8 +115,14 @@ export const StandardizeMetadataModal = (props: Props) => {
     const updatedTabDataRaw: TabData = [tabDataRaw[0].slice(), ...tabDataRaw.slice(1)];
 
     Object.entries(selectedValues).forEach(([key, value]) => {
-      const columnIndex = updatedTabDataRaw[0].indexOf(key);
-      if (columnIndex !== -1 && key !== value) {
+      let columnIndex = updatedTabDataRaw[0].indexOf(key);
+      if (columnIndex === -1) {
+        const originalValue = getOriginalColValues(key)
+        if (originalValue) {
+          columnIndex = updatedTabDataRaw[0].indexOf(originalValue)
+        }
+      }
+      if (columnIndex !== -1) {
         updatedTabDataRaw[0][columnIndex] = value;
       }
     });
@@ -122,7 +137,8 @@ export const StandardizeMetadataModal = (props: Props) => {
 
   const prepareHandsontableData = useCallback((key: string) => {
     const selectedValue = selectedValues[key] || '';
-    const topValues = tabData[key]?.slice(0, 6).map((item) => [item]) || [];
+    const originalValue = getOriginalColValues(key)
+    const topValues = tabData[key]?.slice(0, 6).map((item) => [item]) || tabData[originalValue]?.slice(0, 6).map((item) => [item]) || [];
     const emptyRows = Array(Math.max(0, 6 - topValues.length)).fill(['']);
 
     return [[selectedValue], ...topValues, ...emptyRows];
@@ -135,6 +151,8 @@ export const StandardizeMetadataModal = (props: Props) => {
       setSelectedValues(defaultSelections);
     }
   }, [standardizedData]);
+
+
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="xl">
       <Modal.Header closeButton>
@@ -330,8 +348,7 @@ export const StandardizeMetadataModal = (props: Props) => {
           className="btn btn-secondary"
           disabled={whereDuplicates !== null || isFetching || isError || !data}
           onClick={() => {
-            const finalValues = Object.fromEntries(Object.entries(selectedValues).filter(([k, v]) => v !== k));
-            const updatedTabDataRaw = updateTabDataRaw(tabDataRaw, finalValues);
+            const updatedTabDataRaw = updateTabDataRaw(tabDataRaw, selectedValues);
             setNewSamples(updatedTabDataRaw);
             onHide();
           }}
