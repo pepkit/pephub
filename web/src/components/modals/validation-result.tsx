@@ -11,7 +11,7 @@ type Props = {
   show: boolean;
   onHide: () => void;
   validationResult: ReturnType<typeof useValidation>['data'];
-  currentSchema: string;
+  currentSchema: string | undefined;
 };
 
 type FormProps = {
@@ -35,7 +35,7 @@ export const ValidationResultModal = (props: Props) => {
   const handleSubmit = () => {
     if (newSchema === '') {
       submit({
-        newSchema: null,
+        newSchema: undefined,
       });
     } else {
       submit({

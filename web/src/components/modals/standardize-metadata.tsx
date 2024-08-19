@@ -12,6 +12,7 @@ import { useStandardize } from '../../hooks/queries/useStandardize';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { ProjectMetaEditForm } from '../forms/edit-project-meta';
 import { LoadingSpinner } from '../spinners/loading-spinner'
+import { formatToPercentage } from '../../utils/etc'
 
 type Props = {
   namespace: string;
@@ -21,7 +22,7 @@ type Props = {
   onHide: () => void;
   sampleTable: ReturnType<typeof useSampleTable>['data'];
   sampleTableIndex: string;
-  newSamples: any;
+  newSamples: any[][];
   setNewSamples: (samples: any[][]) => void;
 };
 
@@ -30,20 +31,21 @@ type TabData = TabDataRow[];
 type SelectedValues = Record<string, string>;
 type AvailableSchemas = 'ENCODE' | 'FAIRTRACKS';
 
+type StandardizedData = Record<string, Record<string, number>>;
+
 export const StandardizeMetadataModal = (props: Props) => {
   const { namespace, project, tag, show, onHide, sampleTable, sampleTableIndex, newSamples, setNewSamples } = props;
 
-  // const tabDataRaw = sampleListToArrays(sampleTable?.items || [])
   const tabDataRaw = newSamples;
   const tabData = tabDataRaw[0]
     .map((_, colIndex) => tabDataRaw.map((row) => row[colIndex]))
     .reduce((obj, row) => {
       const [key, ...values] = row;
-      obj[key] = values;
+      obj[key as string] = values;
       return obj;
-    }, {});
+    }, {} as Record<string, any[]>);
 
-  const [selectedOption, setSelectedOption] = useState<AvailableSchemas>('');
+  const [selectedOption, setSelectedOption] = useState<{ value: AvailableSchemas; label: string } | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValues>({});
   const [whereDuplicates, setWhereDuplicates] = useState<number[] | null>(null);
 
@@ -55,13 +57,9 @@ export const StandardizeMetadataModal = (props: Props) => {
     refetch: standardize,
   } = useStandardize(namespace, project, tag, selectedOption?.value);
 
-  const standardizedData = data?.results;
+  const standardizedData = data?.results as StandardizedData | undefined;
 
-  const formatToPercentage = (value: number): string => {
-    return `${(value * 100).toFixed(2)}%`;
-  };
-
-  const handleRadioChange = (key, value) => {
+  const handleRadioChange = (key: string, value: string | null) => {
     setSelectedValues((prev) => {
       const newValues = {
         ...prev,
@@ -74,15 +72,14 @@ export const StandardizeMetadataModal = (props: Props) => {
     });
   };
 
-  const checkForDuplicates = (values) => {
+  const checkForDuplicates = (values: SelectedValues): number[] | null => {
     const valueArray = Object.values(values);
-    const duplicates = {};
-    const result = [];
+    const duplicates: Record<string, number[]> = {};
+    const result: number[] = [];
 
     for (let i = 0; i < valueArray.length; i++) {
       const value = valueArray[i];
       if (value in duplicates) {
-        // If we haven't added this value's index yet, add it
         if (duplicates[value].length === 1) {
           result.push(duplicates[value][0]);
         }
@@ -95,8 +92,8 @@ export const StandardizeMetadataModal = (props: Props) => {
     return result.length > 0 ? result : null;
   };
 
-  const getDefaultSelections = (standardizedData) => {
-    const defaultSelections = {};
+  const getDefaultSelections = (standardizedData: StandardizedData): SelectedValues => {
+    const defaultSelections: SelectedValues = {};
     Object.keys(standardizedData).forEach((key) => {
       defaultSelections[key] = key;
     });
@@ -106,10 +103,8 @@ export const StandardizeMetadataModal = (props: Props) => {
   const updateTabDataRaw = (tabDataRaw: TabData, selectedValues: SelectedValues): TabData => {
     if (tabDataRaw.length === 0) return tabDataRaw;
 
-    // Create a new array to avoid mutating the original
     const updatedTabDataRaw: TabData = [tabDataRaw[0].slice(), ...tabDataRaw.slice(1)];
 
-    // Update only the column names (first row) based on selectedValues
     Object.entries(selectedValues).forEach(([key, value]) => {
       const columnIndex = updatedTabDataRaw[0].indexOf(key);
       if (columnIndex !== -1 && key !== value) {
@@ -122,7 +117,6 @@ export const StandardizeMetadataModal = (props: Props) => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Refetch data with new selectedOption
     await standardize();
   };
 
@@ -135,14 +129,13 @@ export const StandardizeMetadataModal = (props: Props) => {
   }, [selectedValues, tabData]);
 
   useEffect(() => {
-    if (data?.results) {
-      const defaultSelections = getDefaultSelections(data.results);
+    if (standardizedData) {
+      const defaultSelections = getDefaultSelections(standardizedData);
       setWhereDuplicates(checkForDuplicates(defaultSelections));
       console.log('Setting default selections:', defaultSelections);
       setSelectedValues(defaultSelections);
     }
-  }, [data]);
-
+  }, [standardizedData]);
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="xl">
       <Modal.Header closeButton>
@@ -239,8 +232,16 @@ export const StandardizeMetadataModal = (props: Props) => {
                             {
                               data: 0,
                               type: typeof tabData[key] === 'number' ? 'numeric' : 'text',
-                              renderer: function (instance, td, row, col, prop, value, cellProperties) {
-                                Handsontable.renderers.TextRenderer.apply(this, arguments);
+                              renderer: function(
+                                instance: Handsontable.Core,
+                                td: HTMLTableCellElement,
+                                row: number,
+                                col: number,
+                                prop: string | number,
+                                value: any,
+                                cellProperties: Handsontable.CellProperties
+                              ) {
+                                Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
                                 if (row === 0) {
                                   td.style.fontWeight = 'bold';
                                   if (whereDuplicates?.includes(index)) {

@@ -90,3 +90,9 @@ export const isEllipsisActive = (element: HTMLElement | null): boolean => {
   }
   return element.offsetWidth < element.scrollWidth;
 };
+
+export const formatToPercentage = (value: number): string => {
+  return `${(value * 100).toFixed(2)}%`;
+};
+
+

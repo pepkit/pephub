@@ -1,6 +1,7 @@
 import { ProjectInfoFooter } from './project-info-footer';
 import { ProjectDescription } from './project-page-description';
 import { ProjectHeaderBar } from './project-page-header-bar';
+import { useSampleTable } from '../../hooks/queries/useSampleTable'
 
 
 type Props = {

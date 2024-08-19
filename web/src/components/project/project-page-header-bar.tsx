@@ -20,6 +20,7 @@ import { ProjectHistoryModal } from '../modals/project-history';
 import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
 
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
+import { useSampleTable } from '../../hooks/queries/useSampleTable'
 
 
 type Props = {

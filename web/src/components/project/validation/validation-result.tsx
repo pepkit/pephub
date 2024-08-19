@@ -7,7 +7,7 @@ import { StatusIcon } from '../../badges/status-icons';
 
 
 type Props = {
-  schemaRegistry: string;
+  schemaRegistry: string | undefined;
   isValidating: boolean;
   validationResult: ReturnType<typeof useValidation>['data'];
 };
