@@ -29,6 +29,7 @@ from pepdbagent.models import (
     ProjectViews,
     HistoryAnnotationModel,
 )
+from peppy import Project
 from peppy.const import SAMPLE_DF_KEY, SAMPLE_RAW_DICT_KEY
 
 from ....const import SAMPLE_CONVERSION_FUNCTIONS
@@ -53,6 +54,7 @@ from ...models import (
     ProjectHistoryResponse,
     SamplesResponseModel,
     ConfigResponseModel,
+    StandardizerResponse,
 )
 from .helpers import verify_updated_project
 from attribute_standardizer.attr_standardizer_class import AttrStandardizer
@@ -1144,28 +1146,31 @@ def delete_full_history(
 @project.get(
     "/standardize",
     summary="Standardize PEP metadata column headers",
+    response_model=StandardizerResponse,
 )
 async def get_standardized_cols(
-    namespace: str, project: str, tag: Optional[str] = DEFAULT_TAG, schema: str = ""
+    # namespace: str, project: str, tag: Optional[str] = DEFAULT_TAG
+    pep: Project = Depends(get_project),
+    schema: str = "",
 ):
     """
     Standardize PEP metadata column headers using BEDmess.
 
-    Args:
-    - pep (str): PEP string to be standardized
-    - schema (str): Schema for AttrStandardizer
+    :param namespace: pep: PEP string to be standardized
+    :param schema: Schema for AttrStandardizer
 
-    Returns:
-    - dict: Standardized results
+    :return dict: Standardized results
     """
+    # # TODO: call pepdbagent
+    #
+    # if schema == "":
+    #     return {}
+    #
+    # path = namespace + "/" + project + ":" + tag
+    # print(path)
+    #
+    # model = AttrStandardizer(schema)
 
-    if schema == "":
-        return {}
-
-    path = namespace + "/" + project + ":" + tag
-    print(path)
-
-    model = AttrStandardizer(schema)
-
-    results = model.standardize(pep=path)
-    return {"results": results}
+    # results = model.standardize(pep=path)
+    return StandardizerResponse()
+    # return StandardizerResponse(results=results)
