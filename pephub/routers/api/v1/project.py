@@ -53,6 +53,7 @@ from ...models import (
     ProjectHistoryResponse,
     SamplesResponseModel,
     ConfigResponseModel,
+    StandardizerResponse,
 )
 from .helpers import verify_updated_project
 from attribute_standardizer.attr_standardizer_class import AttrStandardizer
@@ -1141,31 +1142,35 @@ def delete_full_history(
         )
 
 
-@project.get(
+@project.post(
     "/standardize",
     summary="Standardize PEP metadata column headers",
+    response_model=StandardizerResponse,
 )
 async def get_standardized_cols(
-    namespace: str, project: str, tag: Optional[str] = DEFAULT_TAG, schema: str = ""
+    namespace: str, project: str, tag: Optional[str] = DEFAULT_TAG, 
+    # pep: project = Depends(get_project),
+    schema: str = ""
 ):
     """
     Standardize PEP metadata column headers using BEDmess.
 
-    Args:
-    - pep (str): PEP string to be standardized
-    - schema (str): Schema for AttrStandardizer
+    :param namespace: pep: PEP string to be standardized
+    :param schema: Schema for AttrStandardizer
 
-    Returns:
-    - dict: Standardized results
+    :return dict: Standardized results
     """
 
     if schema == "":
+        raise HTTPException(code=400, detail="Schema is required! Available schemas are ENCODE and Fairtracks")
         return {}
 
     path = namespace + "/" + project + ":" + tag
-    print(path)
 
     model = AttrStandardizer(schema)
 
     results = model.standardize(pep=path)
-    return {"results": results}
+    # print({'results': results})
+    # return{"results": results}
+    return StandardizerResponse(results=results)
+

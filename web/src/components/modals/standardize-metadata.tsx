@@ -132,7 +132,6 @@ export const StandardizeMetadataModal = (props: Props) => {
     if (standardizedData) {
       const defaultSelections = getDefaultSelections(standardizedData);
       setWhereDuplicates(checkForDuplicates(defaultSelections));
-      console.log('Setting default selections:', defaultSelections);
       setSelectedValues(defaultSelections);
     }
   }, [standardizedData]);
@@ -217,7 +216,8 @@ export const StandardizeMetadataModal = (props: Props) => {
                   >
                     {key === sampleTableIndex ? <p className='text-center text-xs mb-2 p-0 fw-bold'>SampleTableIndex must also be updated in project config!</p> : null}
                     <div className="col-6 text-center">
-                      <div className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm">
+                      <div className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm"
+                        style={{'bottom': '-1px'}}>
                         <HotTable
                           data={prepareHandsontableData(key)}
                           colHeaders={false}
@@ -258,10 +258,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                     </div>
                     <div className="col-6" role="group" aria-label="radio_group">
                       <div className="w-100 h-100 rounded-2 outer-container">
-                        <div
-                          className="btn-group-vertical w-100 bg-white rounded-2"
-                          style={{ height: 'calc(100% - 2px)', bottom: '-1px' }}
-                        >
+                        <div className="btn-group-vertical w-100 h-100 bg-white rounded-2">
                           <input
                             className="btn-check"
                             type="radio"

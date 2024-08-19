@@ -422,6 +422,6 @@ export const getStandardizedCols = (
 ) => {
   const url = `${API_BASE}/projects/${namespace}/${name}/standardize?schema=${schema}&tag=${tag}`;
   return axios
-    .get<StandardizeColsResponse>(url, { headers: { Authorization: `Bearer ${jwt}` } })
+    .post<StandardizeColsResponse>(url, { headers: { Authorization: `Bearer ${jwt}` } })
     .then((res) => res.data);
 };
