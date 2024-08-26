@@ -107,6 +107,9 @@ export const SchemaUploadForm = (props: Props) => {
           />
         </div>
       </div>
+      <p className='text-xs'>
+        * Namespace and Schema Name are required.
+      </p>
       <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="description"

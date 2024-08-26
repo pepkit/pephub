@@ -106,6 +106,9 @@ export const CreateSchemaForm = (props: Props) => {
           />
         </div>
       </div>
+      <p className='text-xs'>
+        * Namespace and Schema Name are required.
+      </p>
       <div className="my-1">
         <label className="fw-bold text-sm" htmlFor="schema-description">
           Description

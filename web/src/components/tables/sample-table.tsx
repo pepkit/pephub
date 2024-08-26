@@ -103,10 +103,10 @@ export const SampleTable = (props: Props) => {
           }
         });
       }}
-      hiddenColumns={{
-        indicators: true,
-        columns: ph_id_col === -1 ? [] : [numColumns - 1],
-      }}
+      // hiddenColumns={{
+      //   indicators: true,
+      //   columns: ph_id_col === -1 ? [] : [numColumns - 1],
+      // }}
       dropdownMenu={true}
       minCols={2}
       minRows={minRows || 50}

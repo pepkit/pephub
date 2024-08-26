@@ -139,6 +139,9 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
         </div>
       </div>
+      <p className='text-xs'>
+        * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
+      </p>
       <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="blank_description"

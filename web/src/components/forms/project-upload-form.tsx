@@ -145,6 +145,9 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
           <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag')} />
         </div>
       </div>
+      <p className='text-xs'>
+        * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
+      </p>
       <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="description"

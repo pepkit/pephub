@@ -103,8 +103,84 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
               <i className="bi bi-lock"></i>
               Private
             </label>
+
           </div>
-          <span className="fs-4 d-flex align-items-center">
+          <div className="namespace-name-tag-container">
+            <label className="fw-bold text-sm">Namespace *</label>
+            <label className="fw-bold text-sm">Name *</label>
+            <label className="fw-bold text-sm">Tag</label>
+          </div>
+          <div className="namespace-name-tag-container fs-4 w-full">
+            <div className="d-flex flex-row align-items-center justify-content-between w-full">
+              <select
+                id="blank-namespace-select"
+                className="form-select"
+                aria-label="Namespace selection"
+                {...register('namespace', { required: true })}
+              >
+                <option value={user?.login}>{user?.login}</option>
+                {user?.orgs.map((org) => (
+                  <option key={org} value={org}>
+                    {org}
+                  </option>
+                ))}
+              </select>
+              <span className="mx-1 mb-1">/</span>
+            </div>
+            <div className="d-flex flex-row align-items-center justify-content-between w-full">
+              {/*<input
+                // dont allow any whitespace
+                {...register('project_name', {
+                  required: true,
+                  pattern: {
+                    value: /^\S+$/,
+                    message: 'No spaces allowed.',
+                  },
+                })}
+                id="blank-project-name"
+                type="text"
+                className="form-control"
+                placeholder="name"
+              />*/}
+              <input
+                // {...register('project', { required: true })}
+                type="text"
+                className="form-control"
+                placeholder="project name"
+                id="blank-project-name"
+                {...register('project', {
+                  required: {
+                    value: true,
+                    message: 'empty',
+                  },
+                  pattern: {
+                    value: /^[a-zA-Z0-9_-]+$/,
+                    message: 'invalid',
+                  },
+                })}
+              />
+              <span className="mx-1 mb-1">:</span>
+            </div>
+            {/*<input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />*/}
+            <input
+              // {...register('tag', { required: true })}
+              type="text"
+              className="form-control"
+              placeholder="default"
+              id="blank_tag" 
+              {...register('tag', {
+                // required: {
+                //   value: true,
+                //   message: 'empty',
+                // },
+                pattern: {
+                  value: /^[a-zA-Z0-9_-]+$/,
+                  message: 'invalid',
+                },
+              })}
+            />
+          </div>
+          {/*<span className="fs-4 d-flex align-items-center">
             <select
               {...register('namespace', { required: true })}
               className="form-select w-75"
@@ -152,7 +228,7 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
               })}
             />
           </span>
-          <CombinedErrorMessage errors={errors} />
+*/}          <CombinedErrorMessage errors={errors} />
           <p className="mt-1 lh-sm text-muted" style={{ fontSize: '0.9rem' }}>
             {' '}
             By default, forks are named the same as their original project. You can customize the name to distinguish it

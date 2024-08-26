@@ -1,6 +1,6 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { FormEvent, useState } from 'react';
-import { Modal } from 'react-bootstrap';
+import { Modal, Tab, Tabs } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import ReactSelect from 'react-select';
@@ -98,130 +98,158 @@ export const ViewOptionsModal = (props: Props) => {
         <h1 className="modal-title fs-5">Manage Views</h1>
       </Modal.Header>
       <Modal.Body>
-        {filteredSamples.length > 0 ? (
-          <div className="">
-            <h6 className="mb-1">Save View</h6>
-            <p className="mb-3">
-              Save the current filtered sample table state as a view by providing a name (required) and description
-              (optional) for the view.
-            </p>
-            <form>
-              <div className="pb-2">
-                <label htmlFor="view-description" className="form-label fw-bold">
-                  Name
-                </label>
-                <input
-                  {...register('name', {
-                    required: {
-                      value: true,
-                      message: 'View Name must not be empty.',
-                    },
-                    pattern: {
-                      value: /^[a-zA-Z0-9_-]+$/,
-                      message: "View Name must contain only alphanumeric characters, '-', or '_'.",
-                    },
-                  })}
-                  type="text"
-                  className="form-control"
-                  id="view-name"
-                  aria-describedby="view-name-help"
-                  placeholder="Name..."
+        <Tabs defaultActiveKey="blank" id="uncontrolled-tab">
+          <Tab
+            eventKey="blank"
+            title={
+              <span>
+                <i className="bi bi-save me-1"></i>
+                Save View
+              </span>
+            }
+          >
+            <div className="border border-top-0 p-2">
+              <p className="mb-3">
+                Save the current filtered sample table state as a view by providing a name (required) and description
+                (optional) for the view. 
+              </p>
+              {filteredSamples.length > 0 ? (
+                null
+              ) : 
+                <p className='text-xs text-danger'>
+                  You currently do not have any table filters applied. 
+                  To apply one, click on the dropdown arrow next to your column header of interest, and then filter by value. 
+                  To clear the current filter, click "Select all".
+                </p>
+              }
+              <form>
+                <div className="pb-2">
+                  <label htmlFor="view-description" className="form-label fw-bold">
+                    Name
+                  </label>
+                  <input
+                    {...register('name', {
+                      required: {
+                        value: true,
+                        message: 'View Name must not be empty.',
+                      },
+                      pattern: {
+                        value: /^[a-zA-Z0-9_-]+$/,
+                        message: "View Name must contain only alphanumeric characters, '-', or '_'.",
+                      },
+                    })}
+                    type="text"
+                    className="form-control"
+                    id="view-name"
+                    aria-describedby="view-name-help"
+                    placeholder="Name..."
+                    disabled={filteredSamples.length === 0}
+                  />
+                </div>
+                <div className="mt-1">
+                  <label htmlFor="view-description" className="form-label fw-bold">
+                    Description
+                  </label>
+                  <textarea
+                    {...register('description')}
+                    className="form-control"
+                    id="view-description"
+                    aria-describedby="view-description-help"
+                    placeholder="Description..."
+                    disabled={filteredSamples.length === 0}
+                  />
+                </div>
+                <ErrorMessage
+                  errors={errors}
+                  name="name"
+                  render={({ message }) => (message ? <p className="text-danger pt-1 mb-0">{message}</p> : null)}
                 />
-              </div>
-              <div className="mt-1">
-                <label htmlFor="view-description" className="form-label fw-bold">
-                  Description
-                </label>
-                <textarea
-                  {...register('description')}
-                  className="form-control"
-                  id="view-description"
-                  aria-describedby="view-description-help"
-                  placeholder="Description..."
-                />
-              </div>
-              <ErrorMessage
-                errors={errors}
-                name="name"
-                render={({ message }) => (message ? <p className="text-danger pt-1 mb-0">{message}</p> : null)}
+                <button
+                  disabled={
+                    filteredSamples.length === 0 ||
+                    !isValid ||
+                    !!errors.name?.message ||
+                    viewMutations.addViewMutation.isPending
+                  }
+                  type="button"
+                  className="btn btn-success px-2 mt-3"
+                  onClick={() => {
+                    onSubmit();
+                    resetForm();
+                  }}
+                >
+                  <i className="bi bi-plus-circle me-1"></i>
+                  {viewMutations.addViewMutation.isPending ? 'Creating...' : 'Create'}
+                </button>
+              </form>
+            </div>
+          </Tab>
+          <Tab
+            eventKey="from-file"
+            title={
+              <span>
+                <i className="bi bi-trash me-1"></i>
+                Remove View
+              </span>
+            }
+          >
+            <div className="border border-top-0 p-2">
+              <p className="mb-3">Remove an existing view by selecting it from the dropdown menu.</p>
+              <ReactSelect
+                styles={{
+                  control: (provided) => ({
+                    ...provided,
+                    borderRadius: '0.333333em',
+                  }),
+                }}
+                className="top-z w-100 ms-auto"
+                options={
+                  projectViews?.views.map((view) => ({
+                    view: view.name,
+                    description: view.description || 'No description',
+                    value: view.name,
+                    label: `${view.name} | ${view.description || 'No description'}`,
+                  })) || []
+                }
+                onChange={(selectedOption) => {
+                  if (selectedOption === null || projectViews?.views.length === 0) {
+                    setSelectedViewDelete(null);
+                    setDeleteState(true);
+                  } else {
+                    setSelectedViewDelete(selectedOption);
+                    setDeleteState(false);
+                  }
+                }}
+                isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
+                isClearable
+                placeholder={
+                  projectViewsIsLoading
+                    ? 'Loading views...'
+                    : projectViews?.views.length === 0
+                    ? 'No views available'
+                    : 'Select a view'
+                }
+                value={
+                  selectedViewDelete === null
+                    ? null
+                    : {
+                        view: selectedViewDelete.view,
+                        description: selectedViewDelete.description,
+                        value: selectedViewDelete.value,
+                        label: selectedViewDelete.label,
+                      }
+                }
               />
               <button
-                disabled={
-                  filteredSamples.length === 0 ||
-                  !isValid ||
-                  !!errors.name?.message ||
-                  viewMutations.addViewMutation.isPending
-                }
-                type="button"
-                className="btn btn-success px-2 mt-3"
-                onClick={() => {
-                  onSubmit();
-                  resetForm();
-                }}
+                disabled={deleteState || viewMutations.removeViewMutation.isPending || selectedViewDelete === null}
+                onClick={handleDeleteView}
+                className="btn btn-danger px-2 mt-3"
               >
-                <i className="bi bi-plus-circle me-1"></i>
-                {viewMutations.addViewMutation.isPending ? 'Creating...' : 'Create'}
+                <i className="bi bi-trash"></i> {viewMutations.removeViewMutation.isPending ? 'Removing...' : 'Remove'}
               </button>
-            </form>
-            <hr />
-          </div>
-        ) : null}
-        <div className="">
-          <h6 className="mb-1">Remove View</h6>
-          <p className="mb-3">Remove an existing view by selecting it from the dropdown menu.</p>
-          <ReactSelect
-            styles={{
-              control: (provided) => ({
-                ...provided,
-                borderRadius: '0.333333em', // Left radii set to 0, right radii kept at 4px
-              }),
-            }}
-            className="top-z w-100 ms-auto"
-            options={
-              projectViews?.views.map((view) => ({
-                view: view.name,
-                description: view.description || 'No description',
-                value: view.name,
-                label: `${view.name} | ${view.description || 'No description'}`,
-              })) || []
-            }
-            onChange={(selectedOption) => {
-              if (selectedOption === null || projectViews?.views.length === 0) {
-                setSelectedViewDelete(null);
-                setDeleteState(true);
-              } else {
-                setSelectedViewDelete(selectedOption);
-                setDeleteState(false);
-              }
-            }}
-            isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
-            isClearable
-            placeholder={
-              projectViewsIsLoading
-                ? 'Loading views...'
-                : projectViews?.views.length === 0
-                ? 'No views available'
-                : 'Select a view'
-            }
-            value={
-              selectedViewDelete === null
-                ? null
-                : {
-                    view: selectedViewDelete.view,
-                    description: selectedViewDelete.description,
-                    value: selectedViewDelete.value,
-                    label: selectedViewDelete.label,
-                  }
-            }
-          />
-          <button
-            disabled={deleteState || viewMutations.removeViewMutation.isPending || selectedViewDelete === null}
-            onClick={handleDeleteView}
-            className="btn btn-danger px-2 mt-3"
-          >
-            <i className="bi bi-trash"></i> {viewMutations.removeViewMutation.isPending ? 'Removing...' : 'Remove'}
-          </button>
-        </div>
+            </div>
+          </Tab>
+        </Tabs>
       </Modal.Body>
     </Modal>
   );

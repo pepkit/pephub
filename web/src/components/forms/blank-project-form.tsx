@@ -126,7 +126,7 @@ sample_table: samples.csv
         <label className="fw-bold text-sm">Tag</label>
       </div>
       <div className="namespace-name-tag-container fs-4 w-full">
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+        <div className="d-flex flex-row align-items-center justify-content-between w-full">
           <select
             id="blank-namespace-select"
             className="form-select"
@@ -142,7 +142,7 @@ sample_table: samples.csv
           </select>
           <span className="mx-1 mb-1">/</span>
         </div>
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+        <div className="d-flex flex-row align-items-center justify-content-between w-full">
           <input
             // dont allow any whitespace
             {...register('project_name', {
@@ -161,6 +161,9 @@ sample_table: samples.csv
         </div>
         <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
       </div>
+      <p className='text-xs'>
+        * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
+      </p>
       <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
       <textarea
         id="blank_description"

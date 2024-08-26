@@ -61,6 +61,19 @@ export const ViewSelector = (props: ViewSelectorProps) => {
     </Tooltip>
   );
 
+  const [hoverCount, setHoverCount] = useState(0);
+  const [showOverlayTimer, setShowOverlayTimer] = useState(200)
+
+  const handleMouseEnter = () => {
+    if (hoverCount === 0) {
+      setShowOverlayTimer(1600)
+    } else if (hoverCount === 4) {
+      setShowOverlayTimer(200)
+    }
+    setHoverCount((prevCount) => (prevCount + 1) % 5);
+  };
+
+
   return (
     <Fragment>
       <div className="ps-3 d-flex flex-row align-items-center" style={{ width: '19vw' }}>
@@ -77,8 +90,8 @@ export const ViewSelector = (props: ViewSelectorProps) => {
             <i className="bi bi-gear-wide-connected"></i>
           </button>
         ) : null}
-        <OverlayTrigger placement="top" delay={{ show: 250, hide: 500 }} overlay={renderTooltip}>
-          <div className="w-100">
+        <OverlayTrigger placement="top" delay={{ show: showOverlayTimer, hide: 500 }} overlay={renderTooltip}>
+          <div className="w-100" onMouseEnter={handleMouseEnter}>
             <ReactSelect
               ref={selectRef}
               styles={{
@@ -88,16 +101,17 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                 }),
               }}
               className="top-z w-100"
-              options={
-                projectViews?.views.map((view) => ({
+              options={[
+                { value: null, label: "Default view" },
+                ...(projectViews?.views.map((view) => ({
                   view: view.name,
                   description: view.description || 'No description',
                   value: view.name,
                   label: `${view.name} | ${view.description || 'No description'}`,
-                })) || []
-              }
+                })) || [])
+              ]}
               onChange={(selectedOption) => {
-                if (selectedOption === null) {
+                if (selectedOption === null || selectedOption.value === null) {
                   setView(undefined);
                   searchParams.delete('view');
                   setSearchParams(searchParams);
@@ -113,7 +127,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                 }, 50);
               }}
               isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
-              isClearable
+              isClearable={false}
               placeholder={
                 projectViewsIsLoading
                   ? 'Loading views...'
@@ -121,7 +135,11 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                   ? 'No views available'
                   : 'Select a view'
               }
-              value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
+              value={
+                view === undefined 
+                  ? { value: null, label: "Default view" } 
+                  : { view: view, description: view, value: view, label: view }
+              }
             />
           </div>
         </OverlayTrigger>

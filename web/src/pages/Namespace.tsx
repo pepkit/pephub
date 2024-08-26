@@ -179,8 +179,33 @@ export const NamespacePage = () => {
             ) : null}
           </div>
         </div>
-        <>
-          {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
+        {user?.orgs && user.orgs.length > 0 && (
+          <>
+            {user?.orgs.some(org => org === namespace) && (
+              <p className="mb-0">
+                <span className="fw-bold d-flex">
+                  You belong to this organization. 
+                </span>
+              </p>
+            )}
+            <p>
+              <span className="fw-bold d-flex">
+                Organizations you belong to:{' '}
+                <div className="d-flex align-items-center">
+                  {user?.orgs.map((org) => (
+                    <Fragment key={org}>
+                      <a className="ms-1 text-decoration-none" href={`/${org}`}>
+                        <NamespaceBadge className="me-1" namespace={org} />
+                      </a>{' '}
+                    </Fragment>
+                  ))}
+                </div>
+              </span>
+            </p>
+          </>
+        )}
+        {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
+          <>
             <p className="mb-0">
               <span className="fw-bold d-flex">
                 Organizations you belong to:{' '}
@@ -195,14 +220,14 @@ export const NamespacePage = () => {
                 </div>
               </span>
             </p>
-          )}
           {/*<p className="mb-0">*/}
           {/*  <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}*/}
           {/*</p>*/}
           {/*<p className="mb-0">*/}
           {/*  <span className="fw-bold">Total schemas: {numberWithCommas(schemas?.count || 0)}</span>{' '}*/}
           {/*</p>*/}
-        </>
+          </>
+        )}
         <div className="mt-3 d-flex">
           <NamespaceViewSelector
             numPeps={pepsInfo?.count || 0}
