@@ -54,6 +54,11 @@ export const SampleTable = (props: Props) => {
     });
   }
 
+  const columns = data[0].map((header, index) => ({
+    data: index,
+    readOnly: header === 'ph_id' || readOnly
+  }));
+
   const numColumns = data.length > 0 ? data[0].length : 0;
 
   const ph_id_col = data[0].indexOf('ph_id');
@@ -93,6 +98,7 @@ export const SampleTable = (props: Props) => {
       height={height || tableHeight}
       readOnly={readOnly}
       colHeaders={true}
+      columns={columns}
       renderer={(instance, td, row, col, prop, value, cellProperties) => {
         Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
         td.innerHTML = `<div class="truncated">${value || ''}</div>`;

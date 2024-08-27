@@ -179,7 +179,7 @@ export const NamespacePage = () => {
             ) : null}
           </div>
         </div>
-        {user?.orgs && user.orgs.length > 0 && (
+        {namespace !== user?.login && user?.orgs && user.orgs.length > 0 && (
           <>
             {user?.orgs.some(org => org === namespace) && (
               <p className="mb-0">
