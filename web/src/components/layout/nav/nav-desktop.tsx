@@ -161,7 +161,7 @@ export const NavDesktop = () => {
               <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
                 <GitHubAvatar namespace={user.login} height={40} width={40} />
               </Dropdown.Toggle>
-              <Dropdown.Menu className="border border-dark shadow-lg">
+              <Dropdown.Menu className="border border-light-subtle shadow">
                 <Dropdown.Header className="d-flex flex-row align-items-center">
                   <GitHubAvatar namespace={user.login} height={20} width={20} />
                   <div className="d-flex flex-column">

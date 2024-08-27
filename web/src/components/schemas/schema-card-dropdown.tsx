@@ -22,10 +22,10 @@ export const SchemaCardDropdown = (props: Props) => {
 
   return (
     <Dropdown as={ButtonGroup}>
-      <Button onClick={() => navigate(`/schemas/${schema.namespace}/${schema.name}`)} variant="outline-dark" size="sm">
+      <Button onClick={() => navigate(`/schemas/${schema.namespace}/${schema.name}`)} variant="outline-dark" className='border-dark-subtle mt-1' size="sm">
         View
       </Button>
-      <Dropdown.Toggle split variant="outline-dark" id="dropdown-split-basic" />
+      <Dropdown.Toggle split variant="outline-dark" className='border-dark-subtle mt-1 me-1' id="dropdown-split-basic" />
       <Dropdown.Menu>
         <Dropdown.Item href={`/schemas/${schema.namespace}/${schema.name}`}>
           <i className="bi bi-eye me-1"></i>

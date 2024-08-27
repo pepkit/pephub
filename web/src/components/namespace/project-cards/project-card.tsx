@@ -30,7 +30,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
   return (
     <div
       id={`project-card-${project.namespace}/${project.name}:${project.tag}`}
-      className="w-100 border border-dark rounded shadow-sm p-2 mt-3 bg-secondary bg-opacity-10"
+      className="w-100 border border-light-subtle rounded shadow-sm ps-3 pe-2 pb-3 pt-2 mt-3 bg-opacity-10"
       // style={{ backgroundColor: '#f6f8fa' }}
     >
       <div className="d-flex flex-row align-items-start justify-content-between">
@@ -104,7 +104,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           </small>
           <small>
             {project?.forked_from && (
-              <span className="p-1 border rounded fw-bold">
+              <span className="p-1 border rounded fw-bold me-1">
                 <Fragment>
                   <i className="bi bi-bezier2"></i>
                   <span className="ms-1">Forked from</span>

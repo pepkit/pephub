@@ -8,7 +8,7 @@ type Props = {
 export const SchemaCard = (props: Props) => {
   const { schema } = props;
   return (
-    <div className="shadow-sm rounded border schema-card">
+    <div className="shadow-sm rounded border border-light-subtle schema-card">
       <a href={`/schemas/${schema.namespace}/${schema.name}`}>
         <div className="p-3 d-flex flex-column justify-content-between h-100">
           <div>

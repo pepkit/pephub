@@ -10,11 +10,11 @@ export const SchemaListCard = (props: Props) => {
   const { schema } = props;
   const { namespace, name, description, last_update_date, submission_date } = schema;
   return (
-    <div className="border border-dark p-2 shadow-sm rounded mt-3">
+    <div className="border border-light-subtle ps-3 pe-2 pb-3 pt-2 shadow-sm rounded mt-3">
       <div className="d-flex flex-column gap-1">
         <div className="d-flex justify-content-between">
           <a href={`/schemas/${namespace}/${name}`}>
-            <h4 className="fw-bold fs-4 mb-0">
+            <h4 className="fw-bold fs-4 mb-0 mt-1">
               {namespace}/{name}
             </h4>
           </a>
