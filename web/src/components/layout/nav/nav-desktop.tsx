@@ -158,7 +158,7 @@ export const NavDesktop = () => {
         {user ? (
           <div className="mx-2 my-0 nav-item h5 pt-1">
             <Dropdown className="me-3">
-              <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
+              <Dropdown.Toggle className="shadow-none border border-0" variant="none" id="navbarDropdown">
                 <GitHubAvatar namespace={user.login} height={40} width={40} />
               </Dropdown.Toggle>
               <Dropdown.Menu className="border border-light-subtle shadow">

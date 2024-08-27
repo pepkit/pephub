@@ -8,10 +8,10 @@ export const MobileNav = () => {
   const { login, user, logout } = useSession();
   return (
     <Dropdown className="me-3">
-      <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
+      <Dropdown.Toggle className="shadow-none border border-0" variant="none" id="navbarDropdown">
         {user ? <GitHubAvatar namespace={user.login} height={40} width={40} /> : <i className="bi bi-list fs-4" />}
       </Dropdown.Toggle>
-      <Dropdown.Menu>
+      <Dropdown.Menu className="border border-light-subtle shadow">
         {user && (
           <Fragment>
             <Dropdown.Header className="d-flex flex-row align-items-center">

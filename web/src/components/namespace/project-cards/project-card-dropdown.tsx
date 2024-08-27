@@ -30,7 +30,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
       <Button
         disabled={isAddingStar || isRemovingStar}
         variant="outline-dark"
-        className='border-dark-subtle mt-1'
+        className='border border-secondary-subtle mt-1 shadow-sm rounded-start-2'
         size="sm"
         onClick={() => {
           if (!user) {
@@ -84,7 +84,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
           </Fragment>
         )}
       </Button>
-      <Dropdown.Toggle split variant="outline-dark" id="dropdown-split-basic" className='border-dark-subtle mt-1 me-1'/>
+      <Dropdown.Toggle split variant="outline-dark" id="dropdown-split-basic" className='border border-secondary-subtle mt-1 me-1 shadow-sm rounded-end-2'/>
       <Dropdown.Menu>
         <Dropdown.Item href={`/${project.namespace}/${project.name}`}>
           <i className="bi bi-eye me-1"></i>
