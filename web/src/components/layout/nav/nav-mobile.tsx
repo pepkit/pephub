@@ -106,6 +106,15 @@ export const MobileNav = () => {
           Docs
         </Dropdown.Item>
         <Dropdown.Divider />
+                <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/discussions" target="_blank" rel="noopener noreferrer">
+                  {/*<i className="bi bi-pencil-square me-1"></i>*/}
+                  Give Feedback
+                </Dropdown.Item>
+                <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/issues" target="_blank" rel="noopener noreferrer">
+                  {/*<i className="bi bi-bug me-1"></i>*/}
+                  Report a Bug
+                </Dropdown.Item>
+        <Dropdown.Divider />
         {user ? (
           <Fragment>
             <Dropdown.Item onClick={logout} className="text-danger">

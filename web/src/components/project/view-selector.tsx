@@ -66,7 +66,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
 
   const handleMouseEnter = () => {
     if (hoverCount === 0) {
-      setShowOverlayTimer(1600)
+      setShowOverlayTimer(2200)
     } else if (hoverCount === 4) {
       setShowOverlayTimer(200)
     }
