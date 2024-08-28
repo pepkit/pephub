@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import Optional, Union, Literal
+from starlette.responses import Response
 
 import yaml
 from dotenv import load_dotenv
@@ -27,6 +28,7 @@ from ...models import (
     SchemaGroupAssignRequest,
     SchemaGetResponse,
 )
+from ....helpers import download_yaml
 from ....dependencies import (
     get_db,
     get_namespace_access_list,
@@ -168,14 +170,21 @@ async def create_schema_for_namespace_by_file(
         )
 
 
-@schemas.get("/{namespace}/{schema}", response_model=SchemaGetResponse)
+@schemas.get("/{namespace}/{schema}", response_model=Union[SchemaGetResponse, dict])
 async def get_schema(
     namespace: str,
     schema: str,
     agent: PEPDatabaseAgent = Depends(get_db),
+    return_type: Optional[Literal["yaml", "json"]] = "json",
 ):
     try:
         schema_dict = agent.schema.get(namespace=namespace, name=schema)
+    except SchemaDoesNotExistError:
+        raise HTTPException(
+            status_code=404, detail=f"Schema {schema}/{namespace} not found."
+        )
+    if return_type == "yaml":
+
         info = agent.schema.info(namespace=namespace, name=schema)
         return SchemaGetResponse(
             schema=yaml.dump(schema_dict),
@@ -183,11 +192,23 @@ async def get_schema(
             last_update_date=info.last_update_date,
             submission_date=info.submission_date,
         )
+    else:
+        return schema_dict
 
+
+@schemas.get("/{namespace}/{schema}/file")
+async def download_schema(
+    namespace: str,
+    schema: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+) -> Response:
+    try:
+        schema_dict = agent.schema.get(namespace=namespace, name=schema)
     except SchemaDoesNotExistError:
         raise HTTPException(
             status_code=404, detail=f"Schema {schema}/{namespace} not found."
         )
+    return download_yaml(schema_dict, file_name=f"{schema}/{namespace}.yaml")
 
 
 @schemas.delete("/{namespace}/{schema}")
