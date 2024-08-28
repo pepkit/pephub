@@ -108,14 +108,10 @@ export const ProjectInterface = (props: Props) => {
         subsamples: subsamplesParsed,
       });
     } catch (e) {
-      // toast.error('The project could not be saved. ' + e, {
-      //   duration: 10000,
-      //   position: 'top-center',
-      // });
       toast((t) => (
         <div className='my-1'>
           <p><strong>{'The project could not be saved.'}</strong></p>
-          <p>{e + ''}</p>
+          <p>{e.message + ''}</p>
           <button className='btn btn-sm btn-danger float-end mt-3' onClick={() => toast.dismiss(t.id)}>
             Dismiss
           </button>

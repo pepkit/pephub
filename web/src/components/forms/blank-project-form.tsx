@@ -234,7 +234,18 @@ sample_table: samples.csv
                 onSuccess: onHide,
               });
             } catch (e) {
-              toast.error('Invalid sample table. ' + e);
+              toast((t) => (
+                <div className='my-1'>
+                  <p><strong>{'The project could not be created.'}</strong></p>
+                  <p>{e.message + ''}</p>
+                  <button className='btn btn-sm btn-danger float-end mt-3' onClick={() => toast.dismiss(t.id)}>
+                    Dismiss
+                  </button>
+                </div>
+              ), {
+                duration: 16000,
+                position: 'top-right',
+              });
               return;
             }
           }}
