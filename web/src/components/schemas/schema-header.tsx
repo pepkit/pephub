@@ -9,6 +9,8 @@ import { useSchema } from '../../hooks/queries/useSchema';
 import { copyToClipboard } from '../../utils/etc';
 import { DeleteSchemaModal } from '../modals/delete-schema';
 
+const API_HOST = import.meta.env.VITE_API_HOST || '';
+
 type Props = {
   isDirty: boolean;
   handleSave: () => void;
@@ -41,16 +43,14 @@ export const SchemaHeader = (props: Props) => {
           <Breadcrumb.Item active>{schema}</Breadcrumb.Item>
         </Breadcrumb>
         <div className="d-flex align-items-center gap-1">
-          <button
+          <a
+            target="_blank"
+            href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/file`}
             className="btn btn-sm btn-dark"
-            // TODO: Implement download
-            // onClick={() => {
-            //   ;
-            // }}
           >
-            {''}
-            <i className="bi bi-download me-1"> </i> Download
-          </button>
+            <i className="bi bi-download me-1" />
+            Download
+          </a>
           <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">
               {namespace}/{schema}

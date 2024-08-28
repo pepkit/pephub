@@ -208,7 +208,7 @@ async def download_schema(
         raise HTTPException(
             status_code=404, detail=f"Schema {schema}/{namespace} not found."
         )
-    return download_yaml(schema_dict, file_name=f"{schema}/{namespace}.yaml")
+    return download_yaml(schema_dict, file_name=f"{namespace}/{schema}.yaml")
 
 
 @schemas.delete("/{namespace}/{schema}")

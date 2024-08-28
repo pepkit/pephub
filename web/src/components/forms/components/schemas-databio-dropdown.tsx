@@ -2,7 +2,8 @@ import { FC } from 'react';
 import Select, { SingleValue } from 'react-select';
 
 import { useAllSchemas } from '../../../hooks/queries/useAllSchemas';
-import { useSchemas } from '../../../hooks/queries/useSchemas';
+
+const API_HOST = import.meta.env.VITE_API_HOST || '';
 
 interface Props {
   value?: string;
@@ -36,7 +37,7 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => 
       {showDownload && (
         <a
           target="_blank"
-          href={`https://schema.databio.org/${value}.yaml`}
+          href={`${API_HOST}/api/v1/schemas/${value}/file`}
           className="btn btn-outline-secondary opacity-50"
         >
           <i className="bi bi-download" />
