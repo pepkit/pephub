@@ -41,6 +41,16 @@ export const SchemaHeader = (props: Props) => {
           <Breadcrumb.Item active>{schema}</Breadcrumb.Item>
         </Breadcrumb>
         <div className="d-flex align-items-center gap-1">
+          <button
+            className="btn btn-sm btn-dark"
+            // TODO: Implement download
+            // onClick={() => {
+            //   ;
+            // }}
+          >
+            {''}
+            <i className="bi bi-download me-1"> </i> Download
+          </button>
           <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">
               {namespace}/{schema}

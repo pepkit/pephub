@@ -1,6 +1,6 @@
+import { Fragment } from 'react';
 import { Modal } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
-import { Fragment } from 'react/jsx-runtime';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';

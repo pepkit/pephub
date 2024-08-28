@@ -23,7 +23,7 @@ const NoSchemas = () => {
 };
 
 export function Schemas() {
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(25);
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState('');
   const [orderBy, setOrderBy] = useState('update_date');
