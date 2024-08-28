@@ -105,12 +105,8 @@ export const ProjectInterface = (props: Props) => {
       const subsamplesParsed = arraysToSampleList(values.subsamples);
       const configParsed = yaml.load(values.config) as Record<string, unknown>;
       
-      if (!('name' in configParsed)) {
-        const errorMessage = `PEPs used with PEPhub must have a "name" value specified in the project config.`;
-        throw new Error(errorMessage);
-      }
-
-      if (('name' in configParsed) && (!configParsed.name)) {
+      // check if 'name' value exists in config for PEPhub PEP
+      if (!('name' in configParsed) || (('name' in configParsed) && (!configParsed.name))) {
         const errorMessage = `PEPs used with PEPhub must have a "name" value specified in the project config.`;
         throw new Error(errorMessage);
       }
