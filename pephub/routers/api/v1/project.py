@@ -56,7 +56,7 @@ from ...models import (
     StandardizerResponse,
 )
 from .helpers import verify_updated_project
-from attribute_standardizer.attr_standardizer_class import AttrStandardizer
+# from attribute_standardizer.attr_standardizer_class import AttrStandardizer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -1142,39 +1142,39 @@ def delete_full_history(
         )
 
 
-@project.post(
-    "/standardize",
-    summary="Standardize PEP metadata column headers",
-    response_model=StandardizerResponse,
-)
-async def get_standardized_cols(
-    namespace: str,
-    project: str,
-    tag: Optional[str] = DEFAULT_TAG,
-    # pep: project = Depends(get_project),
-    schema: str = "",
-):
-    """
-    Standardize PEP metadata column headers using BEDmess.
+# @project.post(
+#     "/standardize",
+#     summary="Standardize PEP metadata column headers",
+#     response_model=StandardizerResponse,
+# )
+# async def get_standardized_cols(
+#     namespace: str,
+#     project: str,
+#     tag: Optional[str] = DEFAULT_TAG,
+#     # pep: project = Depends(get_project),
+#     schema: str = "",
+# ):
+#     """
+#     Standardize PEP metadata column headers using BEDmess.
 
-    :param namespace: pep: PEP string to be standardized
-    :param schema: Schema for AttrStandardizer
+#     :param namespace: pep: PEP string to be standardized
+#     :param schema: Schema for AttrStandardizer
 
-    :return dict: Standardized results
-    """
+#     :return dict: Standardized results
+#     """
 
-    if schema == "":
-        raise HTTPException(
-            code=400,
-            detail="Schema is required! Available schemas are ENCODE and Fairtracks",
-        )
-        return {}
+#     if schema == "":
+#         raise HTTPException(
+#             code=400,
+#             detail="Schema is required! Available schemas are ENCODE and Fairtracks",
+#         )
+#         return {}
 
-    path = namespace + "/" + project + ":" + tag
+#     path = namespace + "/" + project + ":" + tag
 
-    model = AttrStandardizer(schema)
+#     model = AttrStandardizer(schema)
 
-    results = model.standardize(pep=path)
-    # print({'results': results})
-    # return{"results": results}
-    return StandardizerResponse(results=results)
+#     results = model.standardize(pep=path)
+#     # print({'results': results})
+#     # return{"results": results}
+#     return StandardizerResponse(results=results)

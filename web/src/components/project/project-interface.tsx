@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Fragment } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import yaml from 'js-yaml';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
@@ -102,6 +103,18 @@ export const ProjectInterface = (props: Props) => {
     try {
       const samplesParsed = arraysToSampleList(values.samples);
       const subsamplesParsed = arraysToSampleList(values.subsamples);
+      const configParsed = yaml.load(values.config) as Record<string, unknown>;
+      
+      if (!('name' in configParsed)) {
+        const errorMessage = `PEPs used with PEPhub must have a "name" value specified in the project config.`;
+        throw new Error(errorMessage);
+      }
+
+      if (('name' in configParsed) && (!configParsed.name)) {
+        const errorMessage = `PEPs used with PEPhub must have a "name" value specified in the project config.`;
+        throw new Error(errorMessage);
+      }
+
       submit({
         config: values.config,
         samples: samplesParsed,

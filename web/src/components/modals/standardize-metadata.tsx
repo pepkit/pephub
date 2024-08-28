@@ -203,7 +203,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                   />
                 </div>
                 <div className="col-3">
-                  <button className="btn btn-success float-end me-1 w-100" type="submit">
+                  <button className="btn btn-success float-end me-1 w-100" type="submit" disabled={true}>
                     Standardize!
                   </button>
                 </div>
