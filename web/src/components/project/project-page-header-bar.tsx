@@ -110,8 +110,8 @@ export const ProjectHeaderBar = (props: Props) => {
   }
 
   return (
-    <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-1">
-      <div className="d-flex flex-row align-items-center w-75">
+    <div className="d-flex align-items-start justify-content-between px-4 mb-1 row">
+      <div className="d-flex flex-row align-items-center col-md-6">
         <Breadcrumb className="fw-bold pt-2">
           <Breadcrumb.Item href="/">home</Breadcrumb.Item>
           <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
@@ -125,7 +125,7 @@ export const ProjectHeaderBar = (props: Props) => {
           )}
         </Breadcrumb>
       </div>
-      <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100 pt-2">
+      <div className="d-flex align-items-center gap-1 justify-content-end pt-2 col-md-6">
         <div className="d-flex flex-row align-items-center">
           <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">

@@ -98,7 +98,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
     const errorMessage = realDuplicates
       .map(([header, indices]) => `"${header}" at columns ${indices.map(i => i + 1).join(', ')}`)
       .join('; ');
-    throw new Error(`PEPs cannot have duplicate column headers. Rename duplicate column headers. \n\n Duplicate headers found: ${errorMessage}`);
+    throw new Error(`PEPs cannot have duplicate column headers. Rename the duplicate headers. \n\n Duplicate headers found: ${errorMessage}`);
   }
 
   // find ph_id index
@@ -140,7 +140,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
     .filter(index => index !== -1);
 
   if (nullHeaderIndices.length > 0) {
-    const errorMessage = `PEPs cannot have empty column headers. Either add column headers or remove the columns. \n\n Empty headers found at columns: ${nullHeaderIndices.map(i => i + 1).join(', ')}`;
+    const errorMessage = `PEPs cannot have empty column headers. Either add column headers or remove the columns using the context menu (right click). \n\n Empty headers found at columns: ${nullHeaderIndices.map(i => i + 1).join(', ')}`;
     throw new Error(errorMessage);
   }
 

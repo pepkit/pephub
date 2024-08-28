@@ -97,7 +97,7 @@ export const ViewOptionsModal = (props: Props) => {
       <Modal.Header closeButton>
         <h1 className="modal-title fs-5">Manage Views</h1>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body >
         <Tabs defaultActiveKey="blank" id="uncontrolled-tab">
           <Tab
             eventKey="blank"
@@ -108,7 +108,10 @@ export const ViewOptionsModal = (props: Props) => {
               </span>
             }
           >
-            <div className="border border-top-0 p-2">
+            <div 
+              className="border border-top-0 p-2" 
+              // style={{ minHeight: '360px' }}
+            >
               <p className="mb-3">
                 Save the current filtered sample table state as a view by providing a name (required) and description
                 (optional) for the view. 
@@ -193,7 +196,10 @@ export const ViewOptionsModal = (props: Props) => {
               </span>
             }
           >
-            <div className="border border-top-0 p-2">
+            <div 
+              className="border border-top-0 p-2" 
+              // style={{ minHeight: '360px' }}
+            >
               <p className="mb-3">Remove an existing view by selecting it from the dropdown menu.</p>
               <ReactSelect
                 styles={{

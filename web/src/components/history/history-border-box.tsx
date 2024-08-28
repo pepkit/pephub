@@ -5,7 +5,7 @@ export const HistoryBorderBox = () => {
       style={{
         height: '100vh',
         width: '100vw',
-        zIndex: 1,
+        zIndex: 99999,
         pointerEvents: 'none',
       }}
     ></div>

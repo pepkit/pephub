@@ -87,7 +87,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
             }
             style={{ transitionDuration: '250ms' }}
           >
-            <i className="bi bi-gear-wide-connected"></i>
+            <i className="bi bi-pin-angle-fill"></i>
           </button>
         ) : null}
         <OverlayTrigger placement="top" delay={{ show: showOverlayTimer, hide: 500 }} overlay={renderTooltip}>
