@@ -159,7 +159,10 @@ async def update_pep(
     )
     if new_project:
         update_dict.update(project=new_project)
-        new_name = new_project.name or project
+        try:
+            new_name = new_project.name or project
+        except NotImplementedError:
+            new_name = new_project.name = project
     else:
         new_name = project
     agent.project.update(
@@ -171,7 +174,6 @@ async def update_pep(
     )
 
     # fetch latest name and tag
-    new_name = updated_project.name or new_name
     tag = updated_project.tag or tag
 
     return JSONResponse(
