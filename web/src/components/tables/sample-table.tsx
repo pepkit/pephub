@@ -54,10 +54,10 @@ export const SampleTable = (props: Props) => {
     });
   }
 
-  const columns = data[0].map((header, index) => ({
-    data: index,
-    readOnly: header === 'ph_id' || readOnly
-  }));
+  // const columns = data[0].map((header, index) => ({
+  //   data: index,
+  //   readOnly: header === 'ph_id' || readOnly
+  // }));
 
   const numColumns = data.length > 0 ? data[0].length : 0;
 
@@ -98,9 +98,24 @@ export const SampleTable = (props: Props) => {
       height={height || tableHeight}
       readOnly={readOnly}
       colHeaders={true}
-      columns={columns}
+      // columns={columns}
+      cells={(row, col, prop) => {
+        const cellProperties = {};
+        if (row === 0) {
+          cellProperties.isHeader = true;
+        }
+        // if (col === ph_id_col) {
+        //   cellProperties.readOnly = true;
+        // }
+        return cellProperties;
+      }}
       renderer={(instance, td, row, col, prop, value, cellProperties) => {
         Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+        if (cellProperties.isHeader) {
+          td.style.fontWeight = 'bold';
+        } else {
+          td.style.fontWeight = 'normal';
+        }
         td.innerHTML = `<div class="truncated">${value || ''}</div>`;
         td.addEventListener('click', function (event) {
           const innerDiv = td.querySelector('.truncated');
@@ -109,10 +124,10 @@ export const SampleTable = (props: Props) => {
           }
         });
       }}
-      // hiddenColumns={{
-      //   indicators: true,
-      //   columns: ph_id_col === -1 ? [] : [numColumns - 1],
-      // }}
+      hiddenColumns={{
+        indicators: true,
+        columns: ph_id_col === -1 ? [] : [numColumns - 1],
+      }}
       dropdownMenu={true}
       minCols={2}
       minRows={minRows || 50}
