@@ -72,7 +72,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
 
   // console.log(arraysList)
 
-  const uniquePhIds = new Set();
+  const uniquePhIds = new Set<string>();
 
   // first row is the header row
   let headerRow = arraysList[0];
@@ -80,7 +80,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   console.log(headerRow)
 
   // look for duplicate values in the header row
-  const duplicateHeaders = {};
+  const duplicateHeaders: Record<string, number[]> = {};
   headerRow.forEach((header, index) => {
     if (header && (header in duplicateHeaders)) {
       duplicateHeaders[header].push(index);
@@ -96,7 +96,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   // If there are duplicate headers, throw an error
   if (realDuplicates.length > 0) {
     const errorMessage = realDuplicates
-      .map(([header, indices]) => `"${header}" at columns ${indices.map(i => i + 1).join(', ')}`)
+      .map(([header, indices]) => `"${header}" at columns ${indices.map((i) => i + 1).join(', ')}`)
       .join('; ');
     throw new Error(`PEPs cannot have duplicate column headers. Rename the duplicate headers. \n\n Duplicate headers found: ${errorMessage}`);
   }
@@ -116,7 +116,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   }
 
   // Check columns from lastNonNullIndex + 1 to phIdIndex - 1
-  const columnsToRemove = [];
+  const columnsToRemove: number[] = [];
   for (let colIndex = lastNonNullIndex; colIndex < phIdIndex; colIndex++) {
     // Check if all values in this column are null
     const allNull = arraysList.slice(1).every(row => row[colIndex] === null);

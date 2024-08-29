@@ -100,9 +100,11 @@ export const SampleTable = (props: Props) => {
       colHeaders={true}
       // columns={columns}
       cells={(row, col, prop) => {
-        const cellProperties = {};
+        const cellProperties = {} as { isHeader?: boolean };
         if (row === 0) {
           cellProperties.isHeader = true;
+        } else {
+          cellProperties.isHeader = false;
         }
         // if (col === ph_id_col) {
         //   cellProperties.readOnly = true;

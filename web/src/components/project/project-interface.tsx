@@ -120,7 +120,9 @@ export const ProjectInterface = (props: Props) => {
       toast((t) => (
         <div className='my-1'>
           <p><strong>{'The project could not be saved.'}</strong></p>
-          <p>{e.message + ''}</p>
+          {e instanceof Error ?
+            <p>{e.message + ''}</p> : <p>An unknown error occurred.</p>
+          }
           <button className='btn btn-sm btn-danger float-end mt-3' onClick={() => toast.dismiss(t.id)}>
             Dismiss
           </button>

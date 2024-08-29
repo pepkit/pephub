@@ -138,7 +138,10 @@ export const StandardizeMetadataModal = (props: Props) => {
   const prepareHandsontableData = useCallback((key: string) => {
     const selectedValue = selectedValues[key] || '';
     const originalValue = getOriginalColValues(key)
-    const topValues = tabData[key]?.slice(0, 6).map((item) => [item]) || tabData[originalValue]?.slice(0, 6).map((item) => [item]) || [];
+    let topValues: string[][] = []
+    if (originalValue) {
+      topValues = tabData[key]?.slice(0, 6).map((item) => [item]) || tabData[originalValue]?.slice(0, 6).map((item) => [item]) || [];
+    }
     const emptyRows = Array(Math.max(0, 6 - topValues.length)).fill(['']);
 
     return [[selectedValue], ...topValues, ...emptyRows];
@@ -203,7 +206,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                   />
                 </div>
                 <div className="col-3">
-                  <button className="btn btn-success float-end me-1 w-100" type="submit" disabled={true}>
+                  <button className="btn btn-success float-end me-1 w-100" type="submit">
                     Standardize!
                   </button>
                 </div>
