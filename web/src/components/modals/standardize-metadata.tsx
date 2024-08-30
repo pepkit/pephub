@@ -158,207 +158,214 @@ export const StandardizeMetadataModal = (props: Props) => {
 
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="xl">
-      <Modal.Header closeButton>
-        <Modal.Title>Metadata Standardizer</Modal.Title>
-      </Modal.Header>
       <Modal.Body>
-        <div className="row">
-          <div className="col-12 text-s">
-            <p>
-              Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of
-              your projects. After choosing a standardizer schema below, compare predicted suggestions (confidence indicated in parenthesis) and choose whether
-              to keep or discard them. Column contents [previewed in brackets] are not changed by the standardizer.
-              After accepting the changes, save your project for them to take effect.
-            </p>
-          </div>
-        </div>
-        <div className="border-bottom" style={{ margin: '0 -1em' }}></div>
+        <div className='p-1 modal-pill'>
+          <h1 className="fs-5 mb-1 fw-semibold d-inline">Metadata Standardizer</h1>
+          <button
+            className="btn btn-outline-dark px-1 py-0 m-0 float-end d-inline rounded-3 border-0 shadow-none"
+            type="button" 
+            onClick={() => {
+              onHide();
+            }}
+          >
+            <i className="bi bi-x-lg"></i>
+          </button>
+          <div className="border-bottom mt-3" style={{ margin: '0 -1.25em' }}></div>
+          <p className='text-sm my-3'>
+            Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of
+            your projects. After choosing a standardizer schema below, compare predicted suggestions (confidence indicated in parenthesis) and choose whether
+            to keep or discard them. Column contents are not modified by the standardizer.
+            After accepting the changes, save your project for them to take effect.
+          </p>
+          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
 
-        <div className="row my-3">
-          <div className="col-12">
-            <h6 className="ms-1">Standardizer Schema</h6>
+          <div className="row mt-3 mb-4">
+            <div className="col-12">
+              <p className="mb-1 fw-semibold text-sm">Standardizer Schema</p>
 
-            <form onSubmit={handleSubmit}>
-              <div className="row">
-                <div className="col-9">
-                  <ReactSelect
-                    className="top-z w-100 ms-1"
-                    styles={{
-                      control: (provided) => ({
-                        ...provided,
-                        borderRadius: '.333333em', // Left radii set to 0, right radii kept at 4px
-                      }),
-                    }}
-                    options={[
-                      // @ts-ignore
-                      { value: 'ENCODE', label: 'ENCODE' },
-                      // @ts-ignore
-                      { value: 'FAIRTRACKS', label: 'Fairtracks' },
-                    ]}
-                    defaultValue={selectedOption}
-                    value={selectedOption}
-                    onChange={(selectedOption) => {
-                      if (selectedOption === null) {
-                        return;
-                      }
-                      setSelectedOption(selectedOption);
-                    }}
-                  />
+              <form onSubmit={handleSubmit}>
+                <div className="row">
+                  <div className="col-9 pe-0">
+                    <ReactSelect
+                      className="top-z w-100"
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          borderRadius: '.333333em', // Left radii set to 0, right radii kept at 4px
+                        }),
+                      }}
+                      options={[
+                        // @ts-ignore
+                        { value: 'ENCODE', label: 'ENCODE' },
+                        // @ts-ignore
+                        { value: 'FAIRTRACKS', label: 'Fairtracks' },
+                      ]}
+                      defaultValue={selectedOption}
+                      value={selectedOption}
+                      onChange={(selectedOption) => {
+                        if (selectedOption === null) {
+                          return;
+                        }
+                        setSelectedOption(selectedOption);
+                      }}
+                    />
+                  </div>
+                  <div className="col-3">
+                    <button className="btn btn-success float-end w-100" type="submit">
+                      Standardize!
+                    </button>
+                  </div>
                 </div>
-                <div className="col-3">
-                  <button className="btn btn-success float-end me-1 w-100" type="submit">
-                    Standardize!
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        {standardizedData && !isFetching ? (
-          <>
-            <div className="border-bottom" style={{ margin: '0 -1em' }}></div>
-
-            <div className="row mb-2 mt-3">
-              <div className="col-6 text-center">
-                <h5>Original Column</h5>
-              </div>
-              <div className="col-6 text-center">
-                <h5>Predicted Column Header</h5>
-              </div>
+              </form>
             </div>
+          </div>
 
-            <form>
-              {Object.keys(standardizedData).map((key, index) => (
-                <div className="mb-3" key={key}>
-                  <div
-                    className={(key === sampleTableIndex) ? "row border shadow-sm rounded-3 m-1 pb-3 pt-2" : "row border shadow-sm rounded-3 m-1 py-3"}
-                    style={{ backgroundColor: whereDuplicates?.includes(index) ? '#dc354520' : (key === sampleTableIndex) ? '#ffc10720' : 'white' }}
-                  >
-                    {key === sampleTableIndex ? <p className='text-center text-xs mb-2 p-0 fw-bold'>SampleTableIndex must also be updated in project config!</p> : null}
-                    <div className="col-6 text-center">
-                      <div className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm"
-                        style={{'bottom': '-1px'}}>
-                        <HotTable
-                          data={prepareHandsontableData(key)}
-                          colHeaders={false}
-                          rowHeaders={true}
-                          width="100%"
-                          height="100%"
-                          colWidths="100%"
-                          stretchH="all"
-                          autoColumnSize={false}
-                          readOnly={true}
-                          columns={[
-                            {
-                              data: 0,
-                              type: typeof tabData[key] === 'number' ? 'numeric' : 'text',
-                              renderer: function(
-                                instance: Handsontable.Core,
-                                td: HTMLTableCellElement,
-                                row: number,
-                                col: number,
-                                prop: string | number,
-                                value: any,
-                                cellProperties: Handsontable.CellProperties
-                              ) {
-                                Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
-                                if (row === 0) {
-                                  td.style.fontWeight = 'bold';
-                                  if (whereDuplicates?.includes(index)) {
-                                    td.style.color = 'red';
+          {standardizedData && !isFetching ? (
+            <>
+              <div className="border-bottom mt-4" style={{ margin: '0 -1.25em' }}></div>
+
+              <div className="row mb-2 mt-3">
+                <div className="col-6 text-center">
+                  <p className='mb-0 fw-semibold'>Original Column</p>
+                </div>
+                <div className="col-6 text-center">
+                  <p className='mb-0 fw-semibold'>Predicted Column Header</p>
+                </div>
+              </div>
+
+              <form>
+                {Object.keys(standardizedData).map((key, index) => (
+                  <div className="mb-3" key={key}>
+                    <div
+                      className={(key === sampleTableIndex) ? "row border shadow-sm rounded-3 m-1 pb-3 pt-2" : "row border shadow-sm rounded-3 m-1 py-3"}
+                      style={{ backgroundColor: whereDuplicates?.includes(index) ? '#dc354520' : (key === sampleTableIndex) ? '#ffc10720' : 'white' }}
+                    >
+                      {key === sampleTableIndex ? <p className='text-center text-xs mb-2 p-0 fw-bold'>SampleTableIndex must also be updated in project config!</p> : null}
+                      <div className="col-6 text-center">
+                        <div className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm"
+                          style={{'bottom': '-1px'}}>
+                          <HotTable
+                            data={prepareHandsontableData(key)}
+                            colHeaders={false}
+                            rowHeaders={true}
+                            width="100%"
+                            height="100%"
+                            colWidths="100%"
+                            stretchH="all"
+                            autoColumnSize={false}
+                            readOnly={true}
+                            columns={[
+                              {
+                                data: 0,
+                                type: typeof tabData[key] === 'number' ? 'numeric' : 'text',
+                                renderer: function(
+                                  instance: Handsontable.Core,
+                                  td: HTMLTableCellElement,
+                                  row: number,
+                                  col: number,
+                                  prop: string | number,
+                                  value: any,
+                                  cellProperties: Handsontable.CellProperties
+                                ) {
+                                  Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+                                  if (row === 0) {
+                                    td.style.fontWeight = 'bold';
+                                    if (whereDuplicates?.includes(index)) {
+                                      td.style.color = 'red';
+                                    }
                                   }
                                 }
                               }
-                            }
-                          ]}
-                          licenseKey="non-commercial-and-evaluation"
-                          className="custom-handsontable"
-                        />
-                      </div>
-                    </div>
-                    <div className="col-6" role="group" aria-label="radio_group">
-                      <div className="w-100 h-100 rounded-2 outer-container">
-                        <div className="btn-group-vertical w-100 h-100 bg-white rounded-2">
-                          <input
-                            className="btn-check"
-                            type="radio"
-                            name={key}
-                            id={`${key}-original`}
-                            value={key}
-                            checked={selectedValues[key] === key} // Check if the selected value is the same as the key
-                            onChange={() => handleRadioChange(key, null)}
+                            ]}
+                            licenseKey="non-commercial-and-evaluation"
+                            className="custom-handsontable"
                           />
-                          <label
-                            className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
-                            htmlFor={`${key}-original`}
-                          >
-                            <strong>{key}</strong> (original value)
-                          </label>
-
-                          {Object.entries(standardizedData[key]).map(([subKey, value], index, array) => (
-                            <React.Fragment key={subKey}>
-                              <input
-                                className="btn-check"
-                                type="radio"
-                                name={key}
-                                id={`${key}-suggested-${subKey}`}
-                                value={subKey}
-                                checked={selectedValues[key] === subKey}
-                                disabled={standardizedData[key]['Not Predictable'] === 0}
-                                onChange={() => handleRadioChange(key, subKey)}
-                              />
-                              <label
-                                className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
-                                htmlFor={`${key}-suggested-${subKey}`}
-                              >
-                                {subKey} ({formatToPercentage(value)})
-                              </label>
-                            </React.Fragment>
-                          ))}
                         </div>
                       </div>
+                      <div className="col-6" role="group" aria-label="radio_group">
+                        <div className="w-100 h-100 rounded-2 outer-container">
+                          <div className="btn-group-vertical w-100 h-100 bg-white rounded-2">
+                            <input
+                              className="btn-check"
+                              type="radio"
+                              name={key}
+                              id={`${key}-original`}
+                              value={key}
+                              checked={selectedValues[key] === key} // Check if the selected value is the same as the key
+                              onChange={() => handleRadioChange(key, null)}
+                            />
+                            <label
+                              className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
+                              htmlFor={`${key}-original`}
+                            >
+                              <strong className='fw-semibold'>{key}</strong> (original value)
+                            </label>
+
+                            {Object.entries(standardizedData[key]).map(([subKey, value], index, array) => (
+                              <React.Fragment key={subKey}>
+                                <input
+                                  className="btn-check"
+                                  type="radio"
+                                  name={key}
+                                  id={`${key}-suggested-${subKey}`}
+                                  value={subKey}
+                                  checked={selectedValues[key] === subKey}
+                                  disabled={standardizedData[key]['Not Predictable'] === 0}
+                                  onChange={() => handleRadioChange(key, subKey)}
+                                />
+                                <label
+                                  className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
+                                  htmlFor={`${key}-suggested-${subKey}`}
+                                >
+                                  {subKey} ({formatToPercentage(value)})
+                                </label>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <br />
                     </div>
-                    <br />
                   </div>
-                </div>
-              ))}
-            </form>
-          </>
-        ) : isFetching ? 
+                ))}
+              </form>
+            </>
+          ) : isFetching ? 
 
-          <div className='row text-center my-5'>
-            <LoadingSpinner />
+            <div className='row text-center my-5'>
+              <LoadingSpinner />
+            </div>
+           : 
+          null
+        }
+
+          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
+          <div>
+            {whereDuplicates !== null && (
+              <span className="text-danger me-auto align-middle">Warning: ensure no duplicate column names have been selected.</span>
+            )}
+            <button
+              className="btn btn-secondary mt-3 mb-1 float-end"
+              disabled={whereDuplicates !== null || isFetching || isError || !data}
+              onClick={() => {
+                const updatedTabDataRaw = updateTabDataRaw(tabDataRaw, selectedValues);
+                setNewSamples(updatedTabDataRaw);
+                onHide();
+              }}
+            >
+              Accept
+            </button>
+            <button
+              className="btn btn-outline-dark mt-3 mb-1 me-1 float-end"
+              onClick={() => {
+                onHide();
+              }}
+            >
+              Cancel
+            </button>
           </div>
-         : 
-        null
-      }
+        </div>
       </Modal.Body>
-      <Modal.Footer>
-        {whereDuplicates !== null && (
-          <div className="text-danger me-auto">Warning: ensure no duplicate column names have been selected.</div>
-        )}
-
-        <button
-          className="btn btn-outline-dark me-1"
-          onClick={() => {
-            onHide();
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          className="btn btn-secondary"
-          disabled={whereDuplicates !== null || isFetching || isError || !data}
-          onClick={() => {
-            const updatedTabDataRaw = updateTabDataRaw(tabDataRaw, selectedValues);
-            setNewSamples(updatedTabDataRaw);
-            onHide();
-          }}
-        >
-          Accept
-        </button>
-      </Modal.Footer>
     </Modal>
   );
 };

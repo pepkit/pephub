@@ -152,7 +152,7 @@ export const ProjectHeaderBar = (props: Props) => {
             <i className="bi bi-gear-fill me-1"></i>
             More
           </Dropdown.Toggle>
-          <Dropdown.Menu>
+          <Dropdown.Menu className="border border-light-subtle shadow">
             <Dropdown.Item onClick={() => downloadZip(namespace, projectName, tag, jwt)}>
               <i className="bi bi-file-earmark-zip me-1"></i>
               Download

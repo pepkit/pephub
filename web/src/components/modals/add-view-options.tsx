@@ -197,7 +197,7 @@ export const ViewOptionsModal = (props: Props) => {
                         viewMutations.addViewMutation.isPending
                       }
                       type="button"
-                      className="btn btn-success px-2 mt-3 float-end"
+                      className="btn btn-success px-2 mt-4 mb-1 float-end"
                       onClick={() => {
                         onSubmit();
                         resetForm();
@@ -207,7 +207,7 @@ export const ViewOptionsModal = (props: Props) => {
                       {viewMutations.addViewMutation.isPending ? 'Creating...' : 'Create'}
                     </button>
                     <button
-                      className="btn btn-outline-dark me-1 mt-3 float-end"
+                      className="btn btn-outline-dark me-1 mt-4 mb-1 float-end"
                       onClick={() => {
                         onHide();
                       }}
@@ -284,12 +284,12 @@ export const ViewOptionsModal = (props: Props) => {
                   <button
                     disabled={deleteState || viewMutations.removeViewMutation.isPending || selectedViewDelete === null}
                     onClick={handleDeleteView}
-                    className="btn btn-danger px-2 mt-3 float-end"
+                    className="btn btn-danger px-2 mt-4 mb-1 float-end"
                   >
                     <i className="bi bi-trash"></i> {viewMutations.removeViewMutation.isPending ? 'Removing...' : 'Remove'}
                   </button>
                   <button
-                    className="btn btn-outline-dark me-1 mt-3 float-end"
+                    className="btn btn-outline-dark me-1 mt-4 mb-1 float-end"
                     onClick={() => {
                       onHide();
                     }}
