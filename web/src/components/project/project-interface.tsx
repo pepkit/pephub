@@ -215,7 +215,7 @@ export const ProjectInterface = (props: Props) => {
 
   return (
     <Fragment>
-      <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
+      <div className="pt-0 px-2 bg-body-secondary bg-opacity-25" style={{ height: '3.5em' }}>
         <ProjectValidationAndEditButtons
           isDirty={projectUpdates.formState.isDirty}
           isUpdatingProject={isSubmitting}

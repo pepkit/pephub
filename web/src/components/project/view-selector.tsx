@@ -53,27 +53,6 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const userHasOwnership = user && projectInfo && canEdit(user, projectInfo);
   const selectorRadius = userHasOwnership ? '0 .25em .25em 0' : '.25em';
 
-  const renderTooltip = (props: TooltipProps) => (
-    <Tooltip id="button-tooltip" {...props}>
-      A project view is a way to subset your sample table in a way that is more manageable for viewing in the browser.
-      To learn more about views, and how to create them, visit the{' '}
-      <a href="https://pep.databio.org/pephub/">API documentation.</a>
-    </Tooltip>
-  );
-
-  const [hoverCount, setHoverCount] = useState(0);
-  const [showOverlayTimer, setShowOverlayTimer] = useState(200)
-
-  const handleMouseEnter = () => {
-    if (hoverCount === 0) {
-      setShowOverlayTimer(2200)
-    } else if (hoverCount === 4) {
-      setShowOverlayTimer(200)
-    }
-    setHoverCount((prevCount) => (prevCount + 1) % 5);
-  };
-
-
   return (
     <Fragment>
       <div className="ps-3 d-flex flex-row align-items-center" style={{ width: '19vw' }}>
@@ -90,8 +69,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
             <i className="bi bi-pin-angle-fill"></i>
           </button>
         ) : null}
-        <OverlayTrigger placement="top" delay={{ show: showOverlayTimer, hide: 500 }} overlay={renderTooltip}>
-          <div className="w-100" onMouseEnter={handleMouseEnter}>
+          <div className="w-100" >
             <ReactSelect
               ref={selectRef}
               styles={{
@@ -142,7 +120,6 @@ export const ViewSelector = (props: ViewSelectorProps) => {
               }
             />
           </div>
-        </OverlayTrigger>
       </div>
       <ViewOptionsModal
         show={showViewOptionsModal}

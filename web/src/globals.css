@@ -728,6 +728,17 @@ body {
   border-bottom: none !important;
 }
 
+.modal-pill .nav-pills .nav-link.active { 
+  background-color: white;
+  color: black;
+  box-shadow: .5px 1px 7px 1px #00000010 !important;
+  font-weight: 600;
+}
+
+.modal-pill .nav-pills .nav-link { 
+  color: #000000aa;
+}
+
 @keyframes pulse-fast {
   0%, 88%, 100% { opacity: 1; }
   10% { opacity: 0.5; }
