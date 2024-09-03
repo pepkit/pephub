@@ -70,14 +70,10 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   //   { col1: 's2_col1', col2: 's2_col2', col3: 's2_col3' },
   // ]
 
-  // console.log(arraysList)
-
   const uniquePhIds = new Set<string>();
 
   // first row is the header row
   let headerRow = arraysList[0];
-
-  console.log(headerRow)
 
   // look for duplicate values in the header row
   const duplicateHeaders: Record<string, number[]> = {};
@@ -106,8 +102,6 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   if (phIdIndex === -1) {
     phIdIndex = headerRow.length; // Use the last column index if 'ph_id' is not found
   }
-
-  console.log(phIdIndex)
 
   // find index of last non-null column header before phIdIndex
   let lastNonNullIndex = phIdIndex;
@@ -193,9 +187,6 @@ export const arraysToSampleList = (arraysList: any[][]) => {
       uniquePhIds.add(sample[PH_ID_COL]);
     }
   });
-
-  console.log(sampleList)
-
   return sampleList;
 };
 
