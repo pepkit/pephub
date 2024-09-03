@@ -1,4 +1,4 @@
-import { FC, Fragment } from 'react';
+import { FC, Fragment, useState } from 'react';
 import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
@@ -26,6 +26,11 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
   const { isPending: isAddingStar, addStar } = useAddStar(user?.login);
   const { isPending: isRemovingStar, removeStar } = useRemoveStar(user?.login);
 
+  const [localStarred, setLocalStarred] = useState(false);
+
+  console.log(starNumber)
+  console.log(localStarred)
+
   return (
     <Dropdown as={ButtonGroup}>
       <Button
@@ -49,6 +54,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
               projectNameToStar: project.name,
               projectTagToStar: project.tag,
             });
+            setLocalStarred(true)
           }
         }}
       >
@@ -57,13 +63,9 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
             <div className="d-flex align-items-center">
               <i className="bi bi-star-fill me-2"></i>
               <span className='fw-semibold'>
-                {isRemovingStar ? (
-                  <Fragment>
-                    {copied ? 'Copied!' : starNumber + 1}
-                  </Fragment>
-                ) : (
-                  <Fragment>{copied ? 'Copied!' : starNumber + 1}</Fragment>
-                )}
+                <Fragment>
+                  {copied ? 'Copied!' : (localStarred ? (starNumber + 1) : starNumber)}
+                </Fragment>
               </span>
             </div>
           </Fragment>
@@ -72,13 +74,9 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
             <div className="d-flex align-items-center">
               <i className="bi bi-star me-2"></i>
               <span className='fw-normal'>
-                {isAddingStar ? (
-                  <Fragment>
-                    {copied ? 'Copied!' : starNumber}
-                  </Fragment>
-                ) : (
-                  <Fragment>{copied ? 'Copied!' : starNumber}</Fragment>
-                )}
+                <Fragment>
+                  {copied ? 'Copied!' : starNumber}
+                </Fragment>
               </span>
             </div>
           </Fragment>

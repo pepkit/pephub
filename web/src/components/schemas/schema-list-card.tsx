@@ -20,26 +20,26 @@ export const SchemaListCard = (props: Props) => {
           <SchemaCardDropdown schema={schema} />
         </div>
 
-        {description ? (
-          <MarkdownToText>{description}</MarkdownToText>
-        ) : (
-          <em>
-            <span className="text-muted text-italic">No description</span>
-          </em>
-        )}
-        {/*<p className="text-muted mb-0">{description || 'No description'}</p>*/}
-        <p className="mt-2 mb-0">
-          <small>
-            <span className="me-3">
-              <span className="fw-semibold">Created:</span>
-              <span className="mx-1">{dateStringToDateTime(submission_date)}</span>
-            </span>
-            <span>
-              <span className="fw-semibold">Updated:</span>
-              <span className="mx-1">{dateStringToDateTime(last_update_date)}</span>
-            </span>
-          </small>
-        </p>
+        <div className="mb-0">
+          {description ? (
+            <MarkdownToText>{description}</MarkdownToText>
+          ) : (
+            <em>
+              <span className="text-muted text-italic">No description</span>
+            </em>
+          )}
+        </div>
+
+        <div className="d-flex flex-row align-items-center mt-3 text-sm">
+          <span className="me-3">
+            <span className="fw-semibold">Created:</span>
+            <span className="mx-1">{dateStringToDateTime(submission_date)}</span>
+          </span>
+          <span>
+            <span className="fw-semibold">Updated:</span>
+            <span className="mx-1">{dateStringToDateTime(last_update_date)}</span>
+          </span>
+        </div>
       </div>
     </div>
   );

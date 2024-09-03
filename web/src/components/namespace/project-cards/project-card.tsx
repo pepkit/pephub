@@ -65,55 +65,46 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           starNumber={project.stars_number || 0}
         />
       </div>
-      <div>
-        
-        <div className="mb-0">
-          {project.description ? (
-            <MarkdownToText>{project.description}</MarkdownToText>
-          ) : (
-            <em>
-              <span className="text-muted text-italic">No description</span>
-            </em>
-          )}
-        </div>
+      <div className="mb-0">
+        {project.description ? (
+          <MarkdownToText>{project.description}</MarkdownToText>
+        ) : (
+          <em>
+            <span className="text-muted text-italic">No description</span>
+          </em>
+        )}
       </div>
-      <div className="d-flex flex-row align-items-center mt-3">
-        <small>
-            <span className="me-3">
-              <span className="fw-semibold">Sample Count:</span>
-              <span className="mx-1">{project.number_of_samples}</span>
-            </span>
-            <span>
-              <span className="fw-semibold">Schema:</span>
-              <span className="mx-1">{project.pep_schema || 'No schema'}</span>
-            </span>
-          </small>
-        </div>
-        <div className="d-flex flex-row align-items-center text-mute justify-content-between">
-          <small>
-            <span className="me-3">
-              <span className="fw-semibold">Created:</span>
-              <span className="mx-1" id="project-submission-date">{dateStringToDateTime(project.submission_date)}</span>
-            </span>
-            <span>
-              <span className="fw-semibold">Updated:</span>
-              <span className="mx-1" id="project-update-date">{dateStringToDateTime(project.last_update_date)}</span>
-            </span>
-          </small>
-          <small>
-            {project?.forked_from && (
-              <span className="p-1 border rounded fw-bold me-1 bg-white position-relative" style={{zIndex: 2}}>
-                <Fragment>
-                  <i className="bi bi-bezier2"></i>
-                  <span className="ms-1">Forked from</span>
-                  <a className="text-decoration-none ms-1" href={`/${project?.forked_from.replace(':', '?tag=')}`}>
-                    {project?.forked_from}
-                  </a>
-                </Fragment>
-              </span>
-            )}
-          </small>
-        </div>
+      <div className="d-flex flex-row align-items-center mt-3 text-sm">
+        <span className="me-3">
+          <span className="fw-semibold">Sample Count:</span>
+          <span className="mx-1">{project.number_of_samples}</span>
+        </span>
+        <span>
+          <span className="fw-semibold">Schema:</span>
+          <span className="mx-1">{project.pep_schema || 'No schema'}</span>
+        </span>
+      </div>
+      <div className="d-flex flex-row align-items-center text-mute text-sm">
+        <span className="me-3">
+          <span className="fw-semibold">Created:</span>
+          <span className="mx-1" id="project-submission-date">{dateStringToDateTime(project.submission_date)}</span>
+        </span>
+        <span>
+          <span className="fw-semibold">Updated:</span>
+          <span className="mx-1" id="project-update-date">{dateStringToDateTime(project.last_update_date)}</span>
+        </span>
+        {project?.forked_from && (
+          <span className="p-1 border rounded fw-bold me-1 bg-white ms-auto" style={{zIndex: 2}}>
+            <Fragment>
+              <i className="bi bi-bezier2"></i>
+              <span className="ms-1">Forked from</span>
+              <a className="text-decoration-none ms-1" href={`/${project?.forked_from.replace(':', '?tag=')}`}>
+                {project?.forked_from}
+              </a>
+            </Fragment>
+          </span>
+        )}
+      </div>
       <ForkPEPModal
         show={showForkPEPModal}
         onHide={() => setShowForkPEPModal(false)}
