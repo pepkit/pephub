@@ -30,7 +30,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
   return (
     <div
       id={`project-card-${project.namespace}/${project.name}:${project.tag}`}
-      className="w-100 border border-light-subtle rounded shadow-sm ps-3 pe-2 pb-3 pt-2 mt-3 bg-opacity-10"
+      className="w-100 border rounded shadow-sm ps-3 pe-2 pb-3 pt-2 mt-3 bg-body-tertiary"
       // style={{ backgroundColor: '#f6f8fa' }}
     >
       <div className="d-flex flex-row align-items-start justify-content-between">

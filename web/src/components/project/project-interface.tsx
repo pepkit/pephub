@@ -49,6 +49,7 @@ export const ProjectInterface = (props: Props) => {
   const [filteredSamples, setFilteredSamples] = useState<string[]>([]);
 
   const { showStandardizeMetadataModal, setShowStandardizeMetadataModal } = useStandardizeModalStore();
+  const [resetStandardizedData, setResetStandardizedData] = useState(false);
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
@@ -98,6 +99,8 @@ export const ProjectInterface = (props: Props) => {
   }
 
   const handleSubmit = () => {
+    setResetStandardizedData(false);
+
     const values = projectUpdates.getValues();
 
     try {
@@ -292,6 +295,8 @@ export const ProjectInterface = (props: Props) => {
         sampleTableIndex={sampleTableIndex}
         newSamples={newSamples}
         setNewSamples={setNewSamples}
+        resetStandardizedData={resetStandardizedData}
+        setResetStandardizedData={setResetStandardizedData}
       />
     </Fragment>
   );

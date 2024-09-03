@@ -24,6 +24,9 @@ type Props = {
   sampleTableIndex: string;
   newSamples: any[][];
   setNewSamples: (samples: any[][]) => void;
+  resetStandardizedData: boolean;
+  setResetStandardizedData: (boolean) => void;
+
 };
 
 type TabDataRow = string[];
@@ -34,7 +37,7 @@ type AvailableSchemas = 'ENCODE' | 'FAIRTRACKS';
 type StandardizedData = Record<string, Record<string, number>>;
 
 export const StandardizeMetadataModal = (props: Props) => {
-  const { namespace, project, tag, show, onHide, sampleTable, sampleTableIndex, newSamples, setNewSamples } = props;
+  const { namespace, project, tag, show, onHide, sampleTable, sampleTableIndex, newSamples, setNewSamples, resetStandardizedData, setResetStandardizedData } = props;
 
   const tabDataRaw = newSamples;
   const tabData = tabDataRaw[0]
@@ -56,9 +59,11 @@ export const StandardizeMetadataModal = (props: Props) => {
     isFetching,
     isError,
     error,
-    data,
+    data: rawData,
     refetch: standardize,
   } = useStandardize(namespace, project, tag, selectedOption?.value);
+
+  const data = resetStandardizedData ? rawData : null;
 
   const standardizedData = data?.results as StandardizedData | undefined;
 
@@ -132,6 +137,7 @@ export const StandardizeMetadataModal = (props: Props) => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setResetStandardizedData(true);
     await standardize();
   };
 
@@ -154,6 +160,14 @@ export const StandardizeMetadataModal = (props: Props) => {
       setSelectedValues(defaultSelections);
     }
   }, [standardizedData]);
+
+  useEffect(() => {
+    if (!resetStandardizedData) {
+      setSelectedOption(null);
+      setSelectedValues({});
+      setWhereDuplicates(null);
+    }
+  }, [resetStandardizedData]);
 
 
   return (
@@ -210,7 +224,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                     />
                   </div>
                   <div className="col-3">
-                    <button className="btn btn-success float-end w-100" type="submit">
+                    <button className="btn btn-success float-end w-100" type="submit" disabled={selectedOption === null}>
                       Standardize!
                     </button>
                   </div>
@@ -341,7 +355,7 @@ export const StandardizeMetadataModal = (props: Props) => {
           <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
           <div>
             {whereDuplicates !== null && (
-              <span className="text-danger me-auto align-middle">Warning: ensure no duplicate column names have been selected.</span>
+              <div className="text-danger me-auto mt-3 pt-2 d-inline-block">Warning: ensure no duplicate column names have been selected.</div>
             )}
             <button
               className="btn btn-secondary mt-3 mb-1 float-end"

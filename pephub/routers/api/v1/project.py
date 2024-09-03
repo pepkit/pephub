@@ -1170,8 +1170,12 @@ async def get_standardized_cols(
 
     prj = peppy.Project.from_dict(pep)
     model = AttrStandardizer(schema)
+
+    print(prj.sample_table)
+    print(pep)
     try:
         results = model.standardize(pep=prj)
+        print(results)
     except Exception:
         raise HTTPException(
             code=400,
