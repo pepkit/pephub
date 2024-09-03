@@ -22,11 +22,12 @@ export const SchemaCardDropdown = (props: Props) => {
 
   return (
     <Dropdown as={ButtonGroup}>
-      <Button onClick={() => navigate(`/schemas/${schema.namespace}/${schema.name}`)} variant="outline-dark" className='border border-secondary-subtle mt-1 shadow-sm rounded-start-2' size="sm">
-        View
-      </Button>
-      <Dropdown.Toggle split variant="outline-dark" className='border border-secondary-subtle mt-1 me-1 shadow-sm rounded-end-2' id="dropdown-split-basic" />
-      <Dropdown.Menu>
+      <Dropdown.Toggle 
+        split variant="outline" 
+        className='border border-0 mt-1 me-1 shadow-none rounded-end-2 star-button' 
+        style={{zIndex: 2}}
+        id="dropdown-split-basic" />
+      <Dropdown.Menu className='border border-light-subtle shadow-sm'>
         <Dropdown.Item href={`/schemas/${schema.namespace}/${schema.name}`}>
           <i className="bi bi-eye me-1"></i>
           View

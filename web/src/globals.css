@@ -698,6 +698,26 @@ body {
   color: #28a745;
 }
 
+.namespace-card:hover {
+  background: #007bff16 !important;
+/*  box-shadow: 0 0 8px #007bff80 !important;*/
+  transition: all 180ms;
+}
+
+.star-button {
+  background-color: #ced4daab !important;
+}
+
+.starred-button {
+  background-color: #cfe2ff !important;
+}
+
+.star-button:hover,
+.starred-button:hover {
+  filter: brightness(92%);
+  transition: all 180ms;
+}
+
 .custom-handsontable .handsontable {
 /*  border-radius: 8px;*/
   overflow: hidden;
