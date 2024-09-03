@@ -93,8 +93,9 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
         <form>
           <div className="mb-4 border-bottom">
             <p className="mb-3 lh-sm">
-              <i className="bi bi-info-circle me-1"></i>A fork is a copy of a Project. Forking a project allows you to
-              freely experiment with changes without affecting the original PEP.
+              <i className="bi bi-info-circle me-1 text-sm"></i>A fork is a copy of a Project. Forking a project allows you to
+              freely experiment with changes without affecting the original PEP. By default, forks are named the same as their original project. You can customize the name to distinguish it
+            further.
             </p>
           </div>
           <div className="mb-3 form-check form-switch">
@@ -229,11 +230,9 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
             />
           </span>
 */}          <CombinedErrorMessage errors={errors} />
-          <p className="mt-1 lh-sm text-muted" style={{ fontSize: '0.9rem' }}>
-            {' '}
-            By default, forks are named the same as their original project. You can customize the name to distinguish it
-            further.{' '}
-          </p>
+          <p className='text-xs'>
+              * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
+            </p>
           <textarea
             {...(register('description'),
             {
