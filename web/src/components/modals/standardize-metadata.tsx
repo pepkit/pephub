@@ -170,8 +170,7 @@ export const StandardizeMetadataModal = (props: Props) => {
           >
             <i className="bi bi-x-lg"></i>
           </button>
-          <div className="border-bottom mt-3" style={{ margin: '0 -1.25em' }}></div>
-          <p className='text-sm my-3'>
+          <p className='text-sm mt-1 mb-3'>
             Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of
             your projects. After choosing a standardizer schema below, compare predicted suggestions (confidence indicated in parenthesis) and choose whether
             to keep or discard them. Column contents are not modified by the standardizer.

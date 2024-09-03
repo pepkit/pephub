@@ -112,12 +112,12 @@ export const ViewOptionsModal = (props: Props) => {
             <a href="https://pep.databio.org/pephub/">API documentation</a>
             .
           </p>
-
+          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
           <Tabs 
             variant="pills" 
             justify defaultActiveKey="blank" 
             id="uncontrolled-tab"
-            className='border border-2 border-light-subtle rounded rounded-3 text-sm bg-body-secondary' 
+            className='border border-2 border-light-subtle rounded rounded-3 text-sm bg-body-secondary mt-3' 
            >
             <Tab
               eventKey="blank"
@@ -188,6 +188,7 @@ export const ViewOptionsModal = (props: Props) => {
                     name="name"
                     render={({ message }) => (message ? <p className="text-danger pt-1 mb-0">{message}</p> : null)}
                   />
+                  <div className="border-bottom mt-3" style={{ margin: '0 -1.25em' }}></div>
                   <div>
                     <button
                       disabled={
@@ -197,7 +198,7 @@ export const ViewOptionsModal = (props: Props) => {
                         viewMutations.addViewMutation.isPending
                       }
                       type="button"
-                      className="btn btn-success px-2 mt-4 mb-1 float-end"
+                      className="btn btn-success px-2 mt-3 mb-1 float-end"
                       onClick={() => {
                         onSubmit();
                         resetForm();
@@ -207,7 +208,7 @@ export const ViewOptionsModal = (props: Props) => {
                       {viewMutations.addViewMutation.isPending ? 'Creating...' : 'Create'}
                     </button>
                     <button
-                      className="btn btn-outline-dark me-1 mt-4 mb-1 float-end"
+                      className="btn btn-outline-dark me-1 mt-3 mb-1 float-end"
                       onClick={() => {
                         onHide();
                       }}
@@ -280,16 +281,17 @@ export const ViewOptionsModal = (props: Props) => {
                         }
                   }
                 />
+                <div className="border-bottom mt-3" style={{ margin: '0 -1.25em' }}></div>
                 <div>
                   <button
                     disabled={deleteState || viewMutations.removeViewMutation.isPending || selectedViewDelete === null}
                     onClick={handleDeleteView}
-                    className="btn btn-danger px-2 mt-4 mb-1 float-end"
+                    className="btn btn-danger px-2 mt-3 mb-1 float-end"
                   >
                     <i className="bi bi-trash"></i> {viewMutations.removeViewMutation.isPending ? 'Removing...' : 'Remove'}
                   </button>
                   <button
-                    className="btn btn-outline-dark me-1 mt-4 mb-1 float-end"
+                    className="btn btn-outline-dark me-1 mt-3 mb-1 float-end"
                     onClick={() => {
                       onHide();
                     }}
