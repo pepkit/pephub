@@ -139,7 +139,9 @@ export const ProjectInterface = (props: Props) => {
       }
       // SAVE (ctrl + s)
       if (ctrlKey && e.key === 's') {
-        if (projectUpdates.formState.isDirty && !isSubmitting) {
+        if (true && !isSubmitting) {
+          // TODO: why does this not work in production?
+          // if (projectUpdates.formState.isDirty && !isSubmitting) {
           e.preventDefault();
           handleSubmit();
         }
@@ -189,7 +191,9 @@ export const ProjectInterface = (props: Props) => {
     <Fragment>
       <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
         <ProjectValidationAndEditButtons
-          isDirty={projectUpdates.formState.isDirty}
+          isDirty={true}
+          // TODO: why does this not work in production?
+          // isDirty={projectUpdates.formState.isDirty}
           isUpdatingProject={isSubmitting}
           reset={projectUpdates.reset}
           handleSubmit={handleSubmit}
@@ -230,7 +234,7 @@ export const ProjectInterface = (props: Props) => {
                 onChange={(subsamples) => {
                   onChange(subsamples);
                 }}
-                data={currentHistoryId ? historyData?._subsample_list || [] : newSubsamples}
+                data={currentHistoryId ? sampleListToArrays(historyData?._subsample_list || []) : newSubsamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                 readOnly={!userCanEdit}
               />
