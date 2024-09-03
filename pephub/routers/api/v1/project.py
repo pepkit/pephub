@@ -1149,9 +1149,6 @@ def delete_full_history(
     response_model=StandardizerResponse,
 )
 async def get_standardized_cols(
-    # namespace: str,
-    # project: str,
-    # tag: Optional[str] = DEFAULT_TAG,
     pep: project = Depends(get_project),
     schema: str = "",
 ):
@@ -1171,14 +1168,14 @@ async def get_standardized_cols(
         )
         return {}
 
-    # path = namespace + "/" + project + ":" + tag
-
+    prj = peppy.Project.from_dict(pep)
     model = AttrStandardizer(schema)
+    try:
+        results = model.standardize(pep=prj)
+    except Exception:
+        raise HTTPException(
+            code=400,
+            detail=f"Error standardizing PEP.",
+        )
 
-    results = model.standardize(pep=pep)
-    # results = model.standardize(pep=path)
-    # print({'results': results})
-    # return{"results": results}
-
-    print(results)
     return StandardizerResponse(results=results)
