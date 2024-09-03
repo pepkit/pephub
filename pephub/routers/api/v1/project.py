@@ -1149,10 +1149,10 @@ def delete_full_history(
     response_model=StandardizerResponse,
 )
 async def get_standardized_cols(
-    namespace: str,
-    project: str,
-    tag: Optional[str] = DEFAULT_TAG,
-    # pep: project = Depends(get_project),
+    # namespace: str,
+    # project: str,
+    # tag: Optional[str] = DEFAULT_TAG,
+    pep: project = Depends(get_project),
     schema: str = "",
 ):
     """
@@ -1171,11 +1171,14 @@ async def get_standardized_cols(
         )
         return {}
 
-    path = namespace + "/" + project + ":" + tag
+    # path = namespace + "/" + project + ":" + tag
 
     model = AttrStandardizer(schema)
 
-    results = model.standardize(pep=path)
+    results = model.standardize(pep=pep)
+    # results = model.standardize(pep=path)
     # print({'results': results})
     # return{"results": results}
+
+    print(results)
     return StandardizerResponse(results=results)
