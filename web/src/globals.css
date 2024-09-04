@@ -825,7 +825,7 @@ body {
   text-decoration: none;
   padding: 5px;
   margin: -5px;
-  border-radius: 5px;
+  border-radius: .375rem;
 }
 
 .breadcrumb-item a:hover,
