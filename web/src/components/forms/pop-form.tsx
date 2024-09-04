@@ -44,7 +44,7 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   }
 
   if (nameError || tagError) {
-    return <p className="text-danger text-xs pt-1">{msg}</p>;
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
   }
 
   return null;
@@ -123,9 +123,15 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
             // dont allow any whitespace
             {...register('project_name', {
               required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
                 value: /^\S+$/,
                 message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
               },
             })}
             id="blank-project-name"
@@ -136,10 +142,22 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           <span className="mx-1 mb-1">:</span>
         </div>
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
-          <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
+          <input 
+            {...register('tag', {
+            required: false,
+              pattern: {
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
+              },
+            })} 
+            id="blank_tag" 
+            type="text" 
+            className="form-control" 
+            placeholder="default" 
+          />
         </div>
       </div>
-      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors} />
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="blank_description"

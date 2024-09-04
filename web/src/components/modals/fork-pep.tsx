@@ -52,7 +52,7 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   }
 
   if (nameError || tagError) {
-    return <p className="text-danger text-xs pt-1">{msg}</p>;
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
   }
 
   return null;

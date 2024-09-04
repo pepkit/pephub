@@ -50,7 +50,7 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   }
 
   if (nameError || tagError) {
-    return <p className="text-danger text-xs pt-1">{msg}</p>;
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
   }
 
   return null;
@@ -147,9 +147,15 @@ sample_table: samples.csv
             // dont allow any whitespace
             {...register('project_name', {
               required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
                 value: /^\S+$/,
                 message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
               },
             })}
             id="blank-project-name"
@@ -159,10 +165,20 @@ sample_table: samples.csv
           />
           <span className="mx-1 mb-1">:</span>
         </div>
-        <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
+        <input {...register('tag', {
+            required: false,
+            pattern: {
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: "invalid",
+            },
+          })} 
+          id="blank_tag" 
+          type="text" 
+          className="form-control" 
+          placeholder="default" 
+        />
       </div>
-      
-      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors}/>
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="blank_description"

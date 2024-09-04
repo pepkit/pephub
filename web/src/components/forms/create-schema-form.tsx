@@ -1,5 +1,6 @@
 import { Editor } from '@monaco-editor/react';
-import { Controller, useForm } from 'react-hook-form';
+import { ErrorMessage } from '@hookform/error-message';
+import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { useSession } from '../../contexts/session-context';
 import { useCreateSchemaMutation } from '../../hooks/mutations/useCreateSchemaMutation';
@@ -36,10 +37,39 @@ type FormFields = {
   schemaYaml: string;
 };
 
+type CombinedErrorMessageProps = {
+  errors: FieldErrors<POPInputs>;
+};
+
+const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
+  const { errors } = props;
+  const nameError = errors.name?.message;
+  let msg = null;
+
+  if (nameError == 'empty') {
+    msg = 'Project Name must not be empty.';
+  } else if (nameError == 'invalid') {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
+  }
+
+  if (nameError) {
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
+  }
+
+  return null;
+};
+
 export const CreateSchemaForm = (props: Props) => {
   const { onCancel, onSubmit, editorHeight, defaultNamespace } = props;
   const { user } = useSession();
-  const { formState, watch, register, control, reset } = useForm<FormFields>({
+  const { 
+    watch, 
+    register, 
+    control, 
+    reset, 
+    formState: { isValid, isDirty, errors }, 
+  } = useForm<FormFields>({
+    mode: 'onChange',
     defaultValues: {
       namespace: defaultNamespace || user?.login || undefined,
       schemaYaml: defaultSchemaYaml,
@@ -94,9 +124,15 @@ export const CreateSchemaForm = (props: Props) => {
             // dont allow any whitespace
             {...register('name', {
               required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
                 value: /^\S+$/,
                 message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
               },
             })}
             id="schema-name"
@@ -106,6 +142,7 @@ export const CreateSchemaForm = (props: Props) => {
           />
         </div>
       </div>
+      <CombinedErrorMessage errors={errors} />
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         {...register('description')}
@@ -137,7 +174,7 @@ export const CreateSchemaForm = (props: Props) => {
       </p>
       <div className="mt-3">
         <button
-          disabled={isSubmitting || !formState.isDirty}
+          disabled={isSubmitting || !isDirty || !isValid}
           type="button"
           className="btn btn-success float-end"
           onClick={() => {

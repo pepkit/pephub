@@ -48,7 +48,7 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   }
 
   if (nameError || tagError) {
-    return <p className="text-danger text-xs pt-1">{msg}</p>;
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
   }
 
   return null;
@@ -133,19 +133,37 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
             // dont allow any whitespace
             {...register('name', {
               required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
                 value: /^\S+$/,
                 message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
               },
             })}
           />
           <span className="mx-1 mb-1">:</span>
         </div>
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
-          <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag')} />
+          <input 
+            {...register('tag', {
+            required: false,
+              pattern: {
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
+              },
+            })}
+            id="tag" 
+            type="text" 
+            className="form-control" 
+            placeholder="default" 
+          />
         </div>
       </div>
-      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors} />
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="description"
@@ -223,7 +241,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
               },
             );
           }}
-          disabled={isUploading}
+          disabled={!isValid || isUploading}
           type="button"
           id="new-project-submit-btn"
           className="btn btn-success float-end"

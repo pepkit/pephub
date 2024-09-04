@@ -22,6 +22,28 @@ type Props = {
   defaultNamespace?: string;
 };
 
+type CombinedErrorMessageProps = {
+  errors: FieldErrors<POPInputs>;
+};
+
+const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
+  const { errors } = props;
+  const nameError = errors.name?.message;
+  let msg = null;
+
+  if (nameError == 'empty') {
+    msg = 'Project Name must not be empty.';
+  } else if (nameError == 'invalid') {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
+  }
+
+  if (nameError) {
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
+  }
+
+  return null;
+};
+
 export const SchemaUploadForm = (props: Props) => {
   const { defaultNamespace, onCancel, onSubmit } = props;
 
@@ -34,7 +56,7 @@ export const SchemaUploadForm = (props: Props) => {
     register,
     control,
     watch,
-    formState: { errors },
+    formState: { isValid, errors },
   } = useForm<FromFileInputs>({
     mode: 'onChange',
     defaultValues: {
@@ -99,15 +121,21 @@ export const SchemaUploadForm = (props: Props) => {
             // dont allow any whitespace
             {...register('name', {
               required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
                 value: /^\S+$/,
                 message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
               },
             })}
           />
         </div>
       </div>
-      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors} />
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="description"
@@ -159,7 +187,7 @@ export const SchemaUploadForm = (props: Props) => {
               },
             );
           }}
-          disabled={isUploading}
+          disabled={!isValid || isUploading}
           type="button"
           id="new-project-submit-btn"
           className="btn btn-success float-end"
