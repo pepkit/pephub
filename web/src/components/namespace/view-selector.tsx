@@ -27,7 +27,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
   };
 
   return (
-    <div className="p-1 namespace-nav">
+    <div className="px-0 py-1 namespace-nav">
       <Nav variant="pills" defaultActiveKey={props.view} onSelect={handleNavSelect}>
         <Nav.Item>
           <Nav.Link eventKey="peps" className="px-2 py-1 me-1">
