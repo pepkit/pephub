@@ -162,14 +162,14 @@ export const SchemaUploadForm = (props: Props) => {
           disabled={isUploading}
           type="button"
           id="new-project-submit-btn"
-          className="btn btn-success me-1"
+          className="btn btn-success float-end"
         >
           <i className="bi bi-plus-circle me-1"></i>
           {isUploading ? 'Submitting...' : 'Submit'}
         </button>
         <button
           type="button"
-          className="btn btn-outline-dark me-1"
+          className="btn btn-outline-dark me-1 float-end"
           data-bs-dismiss="modal"
           onClick={() => {
             resetForm();
