@@ -52,28 +52,16 @@ export const sampleListToArrays = (sampleList: Sample[]) => {
   return arraysList;
 };
 
-export const arraysToSampleList = (arraysList: any[][]) => {
-  // parse the list of arrays into a list of samples
-  // the first row will be the header row or sample keys
-  // the rest of the rows will be the sample values
-  //
-  // for example this input:
-  // [
-  //   ['col1', 'col2', 'col3'],
-  //   ['s1_col1', 's1_col2', 's1_col3'],
-  //   ['s2_col1', 's2_col2', 's2_col3'],
-  // ]
-  //
-  // will be parsed into this output:
-  // [
-  //   { col1: 's1_col1', col2: 's1_col2', col3: 's1_col3' },
-  //   { col1: 's2_col1', col2: 's2_col2', col3: 's2_col3' },
-  // ]
+export const arraysToSampleList = (arraysList: any[][], tableType: string) => {
+  // Replace all instances of '' with null
+  const updatedArraysList = arraysList.map(row =>
+    row.map(value => value === '' ? null : value)
+  );
 
   const uniquePhIds = new Set<string>();
 
   // first row is the header row
-  let headerRow = arraysList[0];
+  let headerRow = updatedArraysList[0];
 
   // look for duplicate values in the header row
   const duplicateHeaders: Record<string, number[]> = {};
@@ -94,7 +82,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
     const errorMessage = realDuplicates
       .map(([header, indices]) => `"${header}" at columns ${indices.map((i) => i + 1).join(', ')}`)
       .join('; ');
-    throw new Error(`PEPs cannot have duplicate column headers. Rename the duplicate headers. \n\n Duplicate headers found: ${errorMessage}`);
+    throw new Error(`PEPs cannot have duplicate column headers. Rename the duplicate headers. \n\n Duplicate headers found in ${tableType} Table: ${errorMessage}`);
   }
 
   // find ph_id index
@@ -113,7 +101,7 @@ export const arraysToSampleList = (arraysList: any[][]) => {
   const columnsToRemove: number[] = [];
   for (let colIndex = lastNonNullIndex; colIndex < phIdIndex; colIndex++) {
     // Check if all values in this column are null
-    const allNull = arraysList.slice(1).every(row => row[colIndex] === null);
+    const allNull = updatedArraysList.slice(1).every(row => row[colIndex] === null);
     
     if (allNull) {
       columnsToRemove.push(colIndex);
@@ -122,24 +110,24 @@ export const arraysToSampleList = (arraysList: any[][]) => {
 
   // remove entirely null columns
   if (columnsToRemove.length > 0) {
-    for (let i = 0; i < arraysList.length; i++) {
-      arraysList[i] = arraysList[i].filter((_, index) => !columnsToRemove.includes(index));
+    for (let i = 0; i < updatedArraysList.length; i++) {
+      updatedArraysList[i] = updatedArraysList[i].filter((_, index) => !columnsToRemove.includes(index));
     }
-    headerRow = arraysList[0];
+    headerRow = updatedArraysList[0];
   }
 
   // Check for null column headers
-  const nullHeaderIndices = arraysList[0]
-    .map((header, index) => (header === null || header === '') ? index : -1)
+  const nullHeaderIndices = updatedArraysList[0]
+    .map((header, index) => header === null ? index : -1)
     .filter(index => index !== -1);
 
   if (nullHeaderIndices.length > 0) {
-    const errorMessage = `PEPs cannot have empty column headers. Either add column headers or remove the columns using the context menu (right click). \n\n Empty headers found at columns: ${nullHeaderIndices.map(i => i + 1).join(', ')}`;
+    const errorMessage = `PEPs cannot have empty column headers. Either add column headers or remove the columns using the context menu (right click). \n\n Empty headers found in ${tableType} Table at columns: ${nullHeaderIndices.map(i => i + 1).join(', ')}`;
     throw new Error(errorMessage);
   }
 
   // get the rest of the rows
-  const theRest = arraysList.slice(1);
+  const theRest = updatedArraysList.slice(1);
 
   let sampleList: Sample[] = [];
 

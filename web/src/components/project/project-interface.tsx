@@ -104,15 +104,15 @@ export const ProjectInterface = (props: Props) => {
     const values = projectUpdates.getValues();
 
     try {
-      const samplesParsed = arraysToSampleList(values.samples);
-      const subsamplesParsed = arraysToSampleList(values.subsamples);
+      const samplesParsed = arraysToSampleList(values.samples, 'Sample');
+      const subsamplesParsed = arraysToSampleList(values.subsamples, 'Subsample');
       const configParsed = yaml.load(values.config) as Record<string, unknown>;
       
-      // check if 'name' value exists in config for PEPhub PEP
-      if (!('name' in configParsed) || (('name' in configParsed) && (!configParsed.name))) {
-        const errorMessage = `PEPs used with PEPhub must have a "name" value specified in the project config.`;
-        throw new Error(errorMessage);
-      }
+      // // check if 'name' value exists in config for PEPhub PEP
+      // if (!('name' in configParsed) || (('name' in configParsed) && (!configParsed.name))) {
+      //   const errorMessage = `PEPs used with PEPhub must have a "name" value specified in the project config.`;
+      //   throw new Error(errorMessage);
+      // }
 
       submit({
         config: values.config,
