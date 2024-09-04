@@ -32,7 +32,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
     <Dropdown as={ButtonGroup}>
       <Button
         disabled={isAddingStar || isRemovingStar}
-        variant='light'
+        variant='outline'
         className={isStarred ? 'border mt-1 shadow-none rounded-start-2 starred-button' : 'border mt-1 shadow-none rounded-start-2 star-button'} 
         style={{zIndex: 2}}
         size="sm"
@@ -80,7 +80,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
         )}
       </Button>
       <Dropdown.Toggle 
-        split variant="light" 
+        split variant="outline" 
         id="dropdown-split-basic" 
         className='border mt-1 me-1 shadow-none rounded-end-2 star-dropdown-button' 
         style={{zIndex: 2}}
