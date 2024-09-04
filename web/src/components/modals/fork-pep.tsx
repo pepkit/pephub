@@ -86,38 +86,111 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
 
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
-      <Modal.Header closeButton>
-        <h1 className="modal-title fs-5">Fork PEP</h1>
-      </Modal.Header>
       <Modal.Body>
-        <form>
-          <div className="mb-4 border-bottom">
-            <p className="mb-3 lh-sm">
-              <i className="bi bi-info-circle me-1 text-sm"></i>A fork is a copy of a Project. Forking a project allows you to
-              freely experiment with changes without affecting the original PEP. By default, forks are named the same as their original project. You can customize the name to distinguish it
-            further.
-            </p>
-          </div>
-          <div className="mb-3 form-check form-switch">
-            <input {...register('is_private')} className="form-check-input" type="checkbox" role="switch" />
-            <label className="form-check-label">
-              <i className="bi bi-lock"></i>
-              Private
-            </label>
+        <div className='p-1 modal-pill'>
+          <h1 className="fs-5 mb-1 fw-semibold d-inline">Fork PEP</h1>
+          <button
+            className="btn btn-outline-dark px-1 py-0 m-0 float-end d-inline rounded-3 border-0 shadow-none"
+            type="button" 
+            onClick={() => {
+              onHide();
+            }}
+          >
+            <i className="bi bi-x-lg"></i>
+          </button>
+          <p className='text-sm mt-1 mb-3'>
+            A fork is a copy of a Project that lets you freely experiment with changes without affecting the original PEP. Forks are named the same as their original project by default, but can be named something else for customization.
+          </p>
+          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
 
-          </div>
-          <div className="namespace-name-tag-container">
-            <label className="fw-bold text-sm">Namespace *</label>
-            <label className="fw-bold text-sm">Name *</label>
-            <label className="fw-bold text-sm">Tag</label>
-          </div>
-          <div className="namespace-name-tag-container fs-4 w-full">
-            <div className="d-flex flex-row align-items-center justify-content-between w-full">
+          <form>
+            <div className="mt-3 form-check form-switch">
+              <input {...register('is_private')} className="form-check-input" type="checkbox" role="switch" />
+              <label className="form-check-label text-sm">
+                <i className="bi bi-lock"></i>
+                Private
+              </label>
+            </div>
+            <div className="namespace-name-tag-container mt-2">
+              <label className="fw-semibold text-sm">Namespace*</label>
+              <label className="fw-semibold text-sm">Name*</label>
+              <label className="fw-semibold text-sm">Tag</label>
+            </div>
+            <div className="namespace-name-tag-container fs-4 w-full">
+              <div className="d-flex flex-row align-items-center justify-content-between w-full">
+                <select
+                  id="blank-namespace-select"
+                  className="form-select"
+                  aria-label="Namespace selection"
+                  {...register('namespace', { required: true })}
+                >
+                  <option value={user?.login}>{user?.login}</option>
+                  {user?.orgs.map((org) => (
+                    <option key={org} value={org}>
+                      {org}
+                    </option>
+                  ))}
+                </select>
+                <span className="mx-1 mb-1">/</span>
+              </div>
+              <div className="d-flex flex-row align-items-center justify-content-between w-full">
+                {/*<input
+                  // dont allow any whitespace
+                  {...register('project_name', {
+                    required: true,
+                    pattern: {
+                      value: /^\S+$/,
+                      message: 'No spaces allowed.',
+                    },
+                  })}
+                  id="blank-project-name"
+                  type="text"
+                  className="form-control"
+                  placeholder="name"
+                />*/}
+                <input
+                  // {...register('project', { required: true })}
+                  type="text"
+                  className="form-control"
+                  placeholder="project name"
+                  id="blank-project-name"
+                  {...register('project', {
+                    required: {
+                      value: true,
+                      message: 'empty',
+                    },
+                    pattern: {
+                      value: /^[a-zA-Z0-9_-]+$/,
+                      message: 'invalid',
+                    },
+                  })}
+                />
+                <span className="mx-1 mb-1">:</span>
+              </div>
+              {/*<input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />*/}
+              <input
+                // {...register('tag', { required: true })}
+                type="text"
+                className="form-control"
+                placeholder="default"
+                id="blank_tag" 
+                {...register('tag', {
+                  // required: {
+                  //   value: true,
+                  //   message: 'empty',
+                  // },
+                  pattern: {
+                    value: /^[a-zA-Z0-9_-]+$/,
+                    message: 'invalid',
+                  },
+                })}
+              />
+            </div>
+            {/*<span className="fs-4 d-flex align-items-center">
               <select
-                id="blank-namespace-select"
-                className="form-select"
-                aria-label="Namespace selection"
                 {...register('namespace', { required: true })}
+                className="form-select w-75"
+                aria-label="Namespace selection"
               >
                 <option value={user?.login}>{user?.login}</option>
                 {user?.orgs.map((org) => (
@@ -127,28 +200,11 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
                 ))}
               </select>
               <span className="mx-1 mb-1">/</span>
-            </div>
-            <div className="d-flex flex-row align-items-center justify-content-between w-full">
-              {/*<input
-                // dont allow any whitespace
-                {...register('project_name', {
-                  required: true,
-                  pattern: {
-                    value: /^\S+$/,
-                    message: 'No spaces allowed.',
-                  },
-                })}
-                id="blank-project-name"
-                type="text"
-                className="form-control"
-                placeholder="name"
-              />*/}
               <input
                 // {...register('project', { required: true })}
                 type="text"
                 className="form-control"
                 placeholder="project name"
-                id="blank-project-name"
                 {...register('project', {
                   required: {
                     value: true,
@@ -161,125 +217,80 @@ export const ForkPEPModal: FC<Props> = ({ namespace, project, tag, description, 
                 })}
               />
               <span className="mx-1 mb-1">:</span>
-            </div>
-            {/*<input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />*/}
-            <input
-              // {...register('tag', { required: true })}
-              type="text"
-              className="form-control"
-              placeholder="default"
-              id="blank_tag" 
-              {...register('tag', {
-                // required: {
-                //   value: true,
-                //   message: 'empty',
-                // },
-                pattern: {
-                  value: /^[a-zA-Z0-9_-]+$/,
-                  message: 'invalid',
-                },
+              <input
+                // {...register('tag', { required: true })}
+                type="text"
+                className="form-control"
+                placeholder="default"
+                {...register('tag', {
+                  required: {
+                    value: true,
+                    message: 'empty',
+                  },
+                  pattern: {
+                    value: /^[a-zA-Z0-9_-]+$/,
+                    message: 'invalid',
+                  },
+                })}
+              />
+            </span>
+  */}          <CombinedErrorMessage errors={errors} />
+            <label className="fw-semibold text-sm mt-2">Description</label>
+
+            <textarea
+              {...(register('description'),
+              {
+                defaultValue: description,
               })}
-            />
-          </div>
-          {/*<span className="fs-4 d-flex align-items-center">
-            <select
-              {...register('namespace', { required: true })}
-              className="form-select w-75"
-              aria-label="Namespace selection"
-            >
-              <option value={user?.login}>{user?.login}</option>
-              {user?.orgs.map((org) => (
-                <option key={org} value={org}>
-                  {org}
-                </option>
-              ))}
-            </select>
-            <span className="mx-1 mb-1">/</span>
-            <input
-              // {...register('project', { required: true })}
-              type="text"
               className="form-control"
-              placeholder="project name"
-              {...register('project', {
-                required: {
-                  value: true,
-                  message: 'empty',
-                },
-                pattern: {
-                  value: /^[a-zA-Z0-9_-]+$/,
-                  message: 'invalid',
-                },
-              })}
-            />
-            <span className="mx-1 mb-1">:</span>
-            <input
-              // {...register('tag', { required: true })}
-              type="text"
-              className="form-control"
-              placeholder="default"
-              {...register('tag', {
-                required: {
-                  value: true,
-                  message: 'empty',
-                },
-                pattern: {
-                  value: /^[a-zA-Z0-9_-]+$/,
-                  message: 'invalid',
-                },
-              })}
-            />
-          </span>
-*/}          <CombinedErrorMessage errors={errors} />
-          <p className='text-xs'>
+              rows={3}
+              placeholder="Describe your PEP."
+            ></textarea>
+            <p className='text-xs mt-1'>
               * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
             </p>
-          <textarea
-            {...(register('description'),
-            {
-              defaultValue: description,
-            })}
-            className="form-control mt-3"
-            rows={3}
-            placeholder="Describe your PEP."
-          ></textarea>
-        </form>
+          </form>
+          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
+
+          <div className="mt-3">
+            <button
+              onClick={() =>
+                fork(
+                  {
+                    forkTo: projectNamespace,
+                    forkName: projectName,
+                    forkTag: projectTag,
+                    forkDescription: projectDescription,
+                  },
+                  {
+                    onSuccess: () => {
+                      onHide();
+                      resetForm();
+                    },
+                  },
+                )
+              }
+              disabled={!isValid || !!errors.project?.message || !!errors.tag?.message || !!isForking}
+              id="fork-submit-btn"
+              type="submit"
+              className="btn btn-success float-end"
+            >
+              {isForking ? 'Forking...' : 'Fork'}
+          </button>
+          <button
+            onClick={() => {
+              onHide();
+              resetForm();
+            }}
+            type="button"
+            className="btn btn-outline-dark float-end me-1"
+          >
+            Cancel
+          </button>
+        </div>
+          
+        </div>
       </Modal.Body>
-      <Modal.Footer>
-        <button
-          onClick={() => {
-            onHide();
-            resetForm();
-          }}
-          type="button"
-          className="btn btn-outline-dark"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() =>
-            fork(
-              {
-                forkTo: projectNamespace,
-                forkName: projectName,
-                forkTag: projectTag,
-                forkDescription: projectDescription,
-              },
-              {
-                onSuccess: () => {
-                  onHide();
-                  resetForm();
-                },
-              },
-            )
-          }
-          disabled={!isValid || !!errors.project?.message || !!errors.tag?.message || !!isForking}
-          id="fork-submit-btn"
-          type="submit"
-          className="btn btn-success"
-        >
-          {isForking ? 'Forking...' : 'Fork'}
-        </button>
-      </Modal.Footer>
     </Modal>
   );
 };
