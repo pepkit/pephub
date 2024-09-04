@@ -94,7 +94,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
           <span className="mx-1" id="project-update-date">{dateStringToDateTime(project.last_update_date)}</span>
         </span>
         {project?.forked_from && (
-          <span className="p-1 border rounded fw-bold me-1 bg-white ms-auto" style={{zIndex: 2}}>
+          <span className="p-1 border rounded fw-bold me-1 bg-white ms-auto" style={{zIndex: 2, margin: '-1.25em 0 -1em'}}>
             <Fragment>
               <i className="bi bi-bezier2"></i>
               <span className="ms-1">Forked from</span>

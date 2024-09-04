@@ -54,7 +54,7 @@ export const SchemaUploadForm = (props: Props) => {
   const { isPending: isUploading, upload } = useUploadSchemaFile();
 
   return (
-    <form id="upload-form" className="border-0 form-control">
+    <form id="upload-form" className="border-0 form-control p-0">
       {/* <div className="mb-3 mt-3 form-check form-switch">
         <input
           className="form-check-input"
@@ -68,9 +68,9 @@ export const SchemaUploadForm = (props: Props) => {
           Private
         </label>
       </div> */}
-      <div className="namespace-name-tag-container">
-        <label className="fw-bold text-sm">Namespace *</label>
-        <label className="fw-bold text-sm">Name *</label>
+      <div className="namespace-name-tag-container mt-2">
+        <label className="fw-semibold text-sm">Namespace*</label>
+        <label className="fw-semibold text-sm">Name*</label>
       </div>
       <div className="namespace-name-tag-container fs-4">
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
@@ -107,13 +107,11 @@ export const SchemaUploadForm = (props: Props) => {
           />
         </div>
       </div>
-      <p className='text-xs'>
-        * Namespace and Schema Name are required.
-      </p>
       <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
+      <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="description"
-        className="form-control mt-3"
+        className="form-control"
         rows={3}
         placeholder="Describe your schema."
         {...register('description')}
@@ -139,6 +137,9 @@ export const SchemaUploadForm = (props: Props) => {
       ) : (
         <FileDropZone name="file" control={control} multiple={false} innerRef={fileDialogRef} />
       )}
+      <p className='text-xs mt-1'>
+        * Namespace and Schema Name are required.
+      </p>
       <div className="mt-2">
         <button
           onClick={() => {

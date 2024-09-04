@@ -68,9 +68,9 @@ export const CreateSchemaForm = (props: Props) => {
           id="is-private-toggle"
         />
       </div> */}
-      <div className="namespace-name-tag-container">
-        <label className="fw-bold text-sm">Namespace *</label>
-        <label className="fw-bold text-sm">Name *</label>
+      <div className="namespace-name-tag-container mt-2">
+        <label className="fw-semibold text-sm">Namespace*</label>
+        <label className="fw-semibold text-sm">Name*</label>
       </div>
       <div className="namespace-name-tag-container fs-4">
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
@@ -106,21 +106,14 @@ export const CreateSchemaForm = (props: Props) => {
           />
         </div>
       </div>
-      <p className='text-xs'>
-        * Namespace and Schema Name are required.
-      </p>
-      <div className="my-1">
-        <label className="fw-bold text-sm" htmlFor="schema-description">
-          Description
-        </label>
-        <textarea
-          {...register('description')}
-          id="schema-description"
-          className="form-control"
-          placeholder="Schema description"
-        />
-      </div>
-      <div className="border rounded mt-2 p-1">
+      <label className="fw-semibold text-sm mt-2">Description</label>
+      <textarea
+        {...register('description')}
+        id="schema-description"
+        className="form-control"
+        placeholder="Schema description"
+      />
+      <div className="border rounded mt-3 py-1">
         <Controller
           name="schemaYaml"
           control={control}
@@ -139,11 +132,14 @@ export const CreateSchemaForm = (props: Props) => {
           )}
         />
       </div>
-      <div className="d-flex align-items-center gap-1 w-100 justify-content-start my-2">
+      <p className='text-xs mt-1'>
+        * Namespace and Schema Name are required.
+      </p>
+      <div className="mt-3">
         <button
           disabled={isSubmitting || !formState.isDirty}
           type="button"
-          className="btn btn-success"
+          className="btn btn-success float-end"
           onClick={() => {
             submit(
               {
@@ -166,7 +162,7 @@ export const CreateSchemaForm = (props: Props) => {
           {isSubmitting ? 'Creating...' : 'Create'}
         </button>
         <button
-          className="btn btn-outline-dark"
+          className="btn btn-outline-dark me-1 float-end"
           onClick={() => {
             reset();
             onCancel();

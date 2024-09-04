@@ -87,8 +87,8 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
   const { isPending: isUploading, upload } = useUploadMutation(namespace);
 
   return (
-    <form id="new-project-form" className="border-0 form-control">
-      <div className="mb-3 mt-3 form-check form-switch">
+    <form id="new-project-form" className="border-0 form-control p-0">
+      <div className="mt-3 form-check form-switch">
         <input
           className="form-check-input"
           type="checkbox"
@@ -96,15 +96,15 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
           id="is-private-toggle"
           {...register('is_private')}
         />
-        <label className="form-check-label">
+        <label className="form-check-label text-sm">
           <i className="bi bi-lock"></i>
           Private
         </label>
       </div>
-      <div className="namespace-name-tag-container">
-        <label className="fw-bold text-sm">Namespace *</label>
-        <label className="fw-bold text-sm">Name *</label>
-        <label className="fw-bold text-sm">Tag</label>
+      <div className="namespace-name-tag-container mt-2">
+        <label className="fw-semibold text-sm">Namespace*</label>
+        <label className="fw-semibold text-sm">Name*</label>
+        <label className="fw-semibold text-sm">Tag</label>
       </div>
       <div className="namespace-name-tag-container fs-4">
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
@@ -145,21 +145,16 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
           <input id="tag" type="text" className="form-control" placeholder="default" {...register('tag')} />
         </div>
       </div>
-      <p className='text-xs'>
-        * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
-      </p>
       <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
+      <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="description"
-        className="form-control mt-3"
+        className="form-control"
         rows={3}
         placeholder="Describe your PEP."
         {...register('description')}
       ></textarea>
-      <label className="form-check-label mt-3 mb-1">
-        <i className="bi bi-file-earmark-break me-1"></i>
-        Schema
-      </label>
+      <label className="fw-semibold text-sm mt-2">Schema</label>
       <div>
         <Controller
           control={control}
@@ -201,7 +196,10 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
       ) : (
         <FileDropZone name="files" control={control} multiple={true} innerRef={fileDialogRef} />
       )}
-      <div className="mt-2">
+      <p className='text-xs mt-1'>
+        * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
+      </p>
+      <div className="mt-3">
         <button
           onClick={() => {
             if (projectName === '') {
@@ -228,14 +226,14 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
           disabled={isUploading}
           type="button"
           id="new-project-submit-btn"
-          className="btn btn-success me-1"
+          className="btn btn-success float-end"
         >
           <i className="bi bi-plus-circle me-1"></i>
           {isUploading ? 'Submitting...' : 'Submit'}
         </button>
         <button
           type="button"
-          className="btn btn-outline-dark me-1"
+          className="btn btn-outline-dark me-1 float-end"
           data-bs-dismiss="modal"
           onClick={() => {
             resetForm();

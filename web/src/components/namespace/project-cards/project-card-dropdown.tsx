@@ -28,9 +28,6 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
 
   const [localStarred, setLocalStarred] = useState(false);
 
-  console.log(starNumber)
-  console.log(localStarred)
-
   return (
     <Dropdown as={ButtonGroup}>
       <Button

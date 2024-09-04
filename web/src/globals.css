@@ -749,14 +749,37 @@ body {
 }
 
 .modal-pill .nav-pills .nav-link.active { 
-  background-color: white;
-  color: black;
+  background-color: white !important;
+  color: black !important;
   box-shadow: .5px 1px 7px 1px #00000010 !important;
-  font-weight: 600;
+  font-weight: 600 !important;
 }
 
 .modal-pill .nav-pills .nav-link { 
   color: #000000aa;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.modal-pill .nav-pills .nav-link:hover {
+  color: black;
+  transition: all 180ms;
+}
+
+.modal-pill .nav-tabs .nav-link.active { 
+  color: black !important;
+  font-weight: 600 !important;
+}
+
+.modal-pill .nav-tabs .nav-link { 
+  color: #000000aa;
+  padding-top: .4;
+  padding-bottom: .4;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-pill .nav-tabs .nav-link:hover {
+  color: black;
 }
 
 @keyframes pulse-fast {
