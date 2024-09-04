@@ -3,10 +3,19 @@ body {
   overflow: auto;
 }
 
-.namespace-nav {
-  .nav-link.active {
-    background-color: #0080ffc8 !important;
-  }
+.namespace-nav .nav-link {
+  color: black;
+  transition: all 180ms;
+}
+
+.namespace-nav .nav-link:hover {
+  background-color: #052c6512;
+  color: #052c65;
+}
+
+.namespace-nav .nav-link.active {
+  background-color: #052c65cf !important;
+  color: white !important;
 }
 
 .top-z {
@@ -699,23 +708,35 @@ body {
 }
 
 .namespace-card:hover {
-  background: #007bff16 !important;
+  background: #052c6512 !important;
 /*  box-shadow: 0 0 8px #007bff80 !important;*/
   transition: all 180ms;
 }
 
 .star-button {
-  background-color: #ced4daab !important;
+  background-color: white;
 }
 
 .starred-button {
   background-color: #cfe2ff !important;
+  color: #052c65 !important;
+}
+
+.star-dropdown-button {
+  background-color: white;
+}
+
+.star-button:hover,
+.starred-button:hover,
+.star-dropdown-button:hover {
+  border: 1px solid black !important;
+  background-color: #cfe2ff80;
+  color: inherit;
 }
 
 .star-button:hover,
 .starred-button:hover {
-  filter: brightness(92%);
-  transition: all 180ms;
+  box-shadow: inset -1px 0 0 0px black !important;
 }
 
 .custom-handsontable .handsontable {
@@ -780,6 +801,39 @@ body {
 
 .modal-pill .nav-tabs .nav-link:hover {
   color: black;
+}
+
+.breadcrumb-item a,
+.dark-link {
+  color: #052c65cf !important;
+  text-decoration: none;
+  padding: 5px;
+  margin: -5px;
+  border-radius: 5px;
+}
+
+.breadcrumb-item a:hover,
+.dark-link:hover {
+  color: #052c65 !important;
+/*  text-decoration: underline;*/
+  background-color: #052c6512;
+}
+
+.forked-link {
+  transition: all 150ms;
+}
+
+.forked-link:hover {
+  border-color: black !important;
+  background-color: #cfe2ff80 !important;
+}
+
+.forked-link:hover a {
+  color: #007bff;
+}
+
+.forked-link a {
+  color: #052c65cf;
 }
 
 @keyframes pulse-fast {

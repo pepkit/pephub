@@ -38,7 +38,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
                 {props.numPeps}
               </span>
             ) : (
-              <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+              <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                 {props.numPeps}
               </span>
             )}
@@ -53,7 +53,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
                 {props.numPops}
               </span>
             ) : (
-              <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+              <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                 {props.numPops}
               </span>
             )}
@@ -68,7 +68,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
                 {props.numSchemas}
               </span>
             ) : (
-              <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+              <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                 {props.numSchemas}
               </span>
             )}
@@ -84,7 +84,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
                   {props.numStars}
                 </span>
               ) : (
-                <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+                <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                   {props.numStars}
                 </span>
               )}

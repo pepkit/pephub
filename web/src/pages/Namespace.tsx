@@ -132,9 +132,9 @@ export const NamespacePage = () => {
     return (
       <PageLayout title={namespace}>
         {/* breadcrumbs */}
-        <div className="fw-bold mt-2">
+        <div className="fw-bold mt-3">
           <Breadcrumb>
-            <Breadcrumb.Item href="/">home</Breadcrumb.Item>
+            <Breadcrumb.Item className='text-dark' href="/">home</Breadcrumb.Item>
             <Breadcrumb.Item active>{namespace}</Breadcrumb.Item>
           </Breadcrumb>
         </div>
@@ -190,11 +190,11 @@ export const NamespacePage = () => {
             )}
             <p>
               <span className="fw-bold d-flex">
-                Organizations you belong to:{' '}
+                Organizations you belong to:
                 <div className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
-                      <a className="ms-1 text-decoration-none" href={`/${org}`}>
+                      <a className="ms-1 dark-link" href={`/${org}`}>
                         <NamespaceBadge className="me-1" namespace={org} />
                       </a>{' '}
                     </Fragment>
@@ -208,11 +208,11 @@ export const NamespacePage = () => {
           <>
             <p className="mb-0">
               <span className="fw-bold d-flex">
-                Organizations you belong to:{' '}
+                Organizations you belong to:
                 <div className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
-                      <a className="ms-1 text-decoration-none" href={`/${org}`}>
+                      <a className="ms-1 dark-link" href={`/${org}`}>
                         <NamespaceBadge className="me-1" namespace={org} />
                       </a>{' '}
                     </Fragment>

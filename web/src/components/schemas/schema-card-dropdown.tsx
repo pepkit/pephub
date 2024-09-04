@@ -24,7 +24,7 @@ export const SchemaCardDropdown = (props: Props) => {
     <Dropdown as={ButtonGroup}>
       <Dropdown.Toggle 
         split variant="outline" 
-        className='border border-0 mt-1 me-1 shadow-none rounded-end-2 star-button' 
+        className='border mt-1 me-1 shadow-none rounded-end-2 star-dropdown-button' 
         style={{zIndex: 2}}
         id="dropdown-split-basic" />
       <Dropdown.Menu className='border border-light-subtle shadow-sm'>

@@ -33,7 +33,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
       <Button
         disabled={isAddingStar || isRemovingStar}
         variant='light'
-        className={isStarred ? 'border border-0 mt-1 shadow-none rounded-start-2 starred-button' : 'border border-0 mt-1 shadow-none rounded-start-2 star-button'} 
+        className={isStarred ? 'border mt-1 shadow-none rounded-start-2 starred-button' : 'border mt-1 shadow-none rounded-start-2 star-button'} 
         style={{zIndex: 2}}
         size="sm"
         onClick={() => {
@@ -82,7 +82,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
       <Dropdown.Toggle 
         split variant="light" 
         id="dropdown-split-basic" 
-        className='border border-light border-2 border-top-0 border-end-0 border-bottom-0 mt-1 me-1 shadow-none rounded-end-2 star-button' 
+        className='border mt-1 me-1 shadow-none rounded-end-2 star-dropdown-button' 
         style={{zIndex: 2}}
       />
       <Dropdown.Menu className="border border-light-subtle shadow-sm">
