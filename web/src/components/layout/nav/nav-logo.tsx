@@ -13,7 +13,7 @@ export const NavLogo = () => {
             href="/"
             className="mb-3 align-items-center mb-md-0 me-md-auto text-dark text-decoration-none"
           >
-            <img src="/pephub_logo.svg" alt="PEPhub" height="60" />
+            <img src="/pephub_logo.svg" alt="PEPhub" height="57" />
           </a>
         </div>
       ) : (

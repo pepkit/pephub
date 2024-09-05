@@ -3,10 +3,19 @@ body {
   overflow: auto;
 }
 
-.namespace-nav {
-  .nav-link.active {
-    background-color: #0080ffc8 !important;
-  }
+.namespace-nav .nav-link {
+  color: black;
+  transition: all 180ms;
+}
+
+.namespace-nav .nav-link:hover {
+  background-color: #052c6512;
+  color: #052c65;
+}
+
+.namespace-nav .nav-link.active {
+  background-color: #052c65cf !important;
+  color: white !important;
 }
 
 .top-z {
@@ -688,3 +697,176 @@ body {
 .btn-dark.glow-button {
   --box-shadow-color: #343a4080;
 }
+
+.btn-group-vertical .btn-check:checked + .btn-outline-secondary {
+  box-shadow: inset 0 0 10px 2.5px #28a74524 !important;
+  outline: none;
+  border: 1px solid #28a745;
+
+  background-color: #28a74516 !important;
+  color: #28a745;
+}
+
+.namespace-card:hover {
+  background: #052c6512 !important;
+/*  box-shadow: 0 0 8px #007bff80 !important;*/
+  transition: all 180ms;
+}
+
+.star-button {
+  background-color: white;
+}
+
+.starred-button {
+  background-color: #cfe2ff !important;
+  color: #052c65 !important;
+}
+
+.star-dropdown-button {
+  background-color: white;
+}
+
+.star-button:hover,
+.starred-button:hover,
+.star-dropdown-button:hover {
+  border: 1px solid black !important;
+  background-color: #cfe2ff80;
+  color: inherit;
+}
+
+.star-button:hover,
+.starred-button:hover {
+  box-shadow: inset -1px 0 0 0px black !important;
+}
+
+.custom-handsontable .handsontable {
+/*  border-radius: 8px;*/
+  overflow: hidden;
+}
+
+.custom-handsontable .handsontable th,
+.custom-handsontable .handsontable td {
+/*  border-color: #ccc;*/
+}
+
+.custom-handsontable .handsontable th:first-child,
+.custom-handsontable .handsontable td:first-child {
+  border-left: none !important;
+}
+
+.custom-handsontable .handsontable th:last-child,
+.custom-handsontable .handsontable td:last-child {
+  border-right: none !important;
+}
+
+.custom-handsontable .handsontable tr:first-child th,
+.custom-handsontable .handsontable tr:first-child td {
+  border-top: none !important;
+}
+
+.custom-handsontable .handsontable tr:last-child th,
+.custom-handsontable .handsontable tr:last-child td {
+  border-bottom: none !important;
+}
+
+.modal-pill .nav-pills .nav-link.active { 
+  background-color: white !important;
+  color: black !important;
+  box-shadow: .5px 1px 7px 1px #00000010 !important;
+  font-weight: 600 !important;
+}
+
+.modal-pill .nav-pills .nav-item {
+  margin-left: 1px;
+}
+
+.modal-pill .nav-pills .nav-item:first-child {
+  margin-left: 0;
+  margin-right: 0;
+} 
+
+.modal-pill .nav-pills .nav-item:last-child {
+  margin-right: -1.5px;
+} 
+
+.modal-pill .nav-pills .nav-link { 
+  color: #000000aa;
+  padding-left: 0;
+  padding-right: 0;
+  width: calc(100% - 1.5px);
+}
+
+.modal-pill .nav-pills .nav-link:hover {
+  color: black;
+  transition: all 180ms;
+  background-color: #ffffff80;
+/*  box-shadow: inset 0 0 0 1px #00000022;*/
+}
+
+.modal-pill .nav-tabs .nav-link.active { 
+  color: black !important;
+  font-weight: 600 !important;
+}
+
+.modal-pill .nav-tabs .nav-link { 
+  color: #000000aa;
+  padding-top: .4;
+  padding-bottom: .4;
+/*  border-bottom: 1px solid #dee2e6;*/
+}
+
+.modal-pill .nav-tabs .nav-link:hover {
+  color: black;
+}
+
+.breadcrumb-item a,
+.dark-link {
+  color: #052c65cf !important;
+  text-decoration: none;
+  padding: 5px;
+  margin: -5px;
+  border-radius: .375rem;
+}
+
+.breadcrumb-item a:hover,
+.dark-link:hover {
+  color: #052c65 !important;
+/*  text-decoration: underline;*/
+  background-color: #052c6512;
+}
+
+.forked-link {
+  transition: all 150ms;
+}
+
+.forked-link:hover {
+  border-color: black !important;
+  background-color: #cfe2ff80 !important;
+}
+
+.forked-link:hover a {
+  color: #007bff;
+}
+
+.forked-link a {
+  color: #052c65cf;
+}
+
+@keyframes pulse-fast {
+  0%, 88%, 100% { opacity: 1; }
+  10% { opacity: 0.5; }
+}
+
+.spinner-pulse circle {
+  animation: pulse-fast 1.15s cubic-bezier(0.1, 0, 0.1, 1) infinite;
+}
+
+.spinner-pulse circle:nth-child(1) { animation-delay: 0s; }
+.spinner-pulse circle:nth-child(8) { animation-delay: -0.14375s; }
+.spinner-pulse circle:nth-child(7) { animation-delay: -0.2875s; }
+.spinner-pulse circle:nth-child(6) { animation-delay: -0.43125s; }
+.spinner-pulse circle:nth-child(5) { animation-delay: -0.575s; }
+.spinner-pulse circle:nth-child(4) { animation-delay: -0.71875s; }
+.spinner-pulse circle:nth-child(3) { animation-delay: -0.8625s; }
+.spinner-pulse circle:nth-child(2) { animation-delay: -1.00625s; }
+

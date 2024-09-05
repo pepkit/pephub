@@ -27,7 +27,7 @@ export const SchemaListSearchBar = ({
 }: Props) => {
   return (
     <div className="flex-row d-flex align-items-center position-relative">
-      <div className="input-group shadow-sm">
+      <div className="input-group shadow-sm rounded-2">
         <span id="search-bar-label" className="input-group-text">
           Search
         </span>

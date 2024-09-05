@@ -19,9 +19,18 @@ import { downloadZip } from '../../utils/project';
 import { ProjectHistoryModal } from '../modals/project-history';
 import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
 
-type ProjectPageHeaderBarProps = {};
+import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
+import { useSampleTable } from '../../hooks/queries/useSampleTable'
 
-export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
+
+type Props = {
+  sampleTable: ReturnType<typeof useSampleTable>['data'];
+  sampleTableIndex: string;
+};
+
+export const ProjectHeaderBar = (props: Props) => {
+  const { sampleTable, sampleTableIndex } = props;
+
   const { user, login, jwt } = useSession();
 
   const [searchParams] = useSearchParams();
@@ -45,6 +54,8 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   const [showEditMetaMetadataModal, setShowEditMetaMetadataModal] = useState(false);
   const [showAddToPOPModal, setShowAddToPOPModal] = useState(false);
   const [showProjectHistoryModal, setShowProjectHistoryModal] = useState(false);
+
+  const { showStandardizeMetadataModal, setShowStandardizeMetadataModal } = useStandardizeModalStore();
 
   // queries
   const projectAnnotationQuery = useProjectAnnotation(namespace, projectName, tag);
@@ -99,8 +110,8 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
   }
 
   return (
-    <div className="d-flex flex-row align-items-start justify-content-between px-4 mb-1">
-      <div className="d-flex flex-row align-items-center w-75">
+    <div className="d-flex align-items-start justify-content-between px-4 mb-1 row">
+      <div className="d-flex flex-row align-items-center col-md-6">
         <Breadcrumb className="fw-bold pt-2">
           <Breadcrumb.Item href="/">home</Breadcrumb.Item>
           <Breadcrumb.Item href={`/${namespace}`}>{namespace}</Breadcrumb.Item>
@@ -114,7 +125,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
           )}
         </Breadcrumb>
       </div>
-      <div className="d-flex flex-row align-items-center gap-1 justify-content-end w-100 pt-2">
+      <div className="d-flex align-items-center gap-1 justify-content-end pt-2 col-md-6">
         <div className="d-flex flex-row align-items-center">
           <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">
@@ -141,7 +152,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
             <i className="bi bi-gear-fill me-1"></i>
             More
           </Dropdown.Toggle>
-          <Dropdown.Menu>
+          <Dropdown.Menu className="border border-light-subtle shadow">
             <Dropdown.Item onClick={() => downloadZip(namespace, projectName, tag, jwt)}>
               <i className="bi bi-file-earmark-zip me-1"></i>
               Download
@@ -179,13 +190,17 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
               {user && projectInfo && canEdit(user, projectInfo) && (
                 <Fragment>
                   <Dropdown.Divider />
+                  <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
+                    <i className="me-1 bi bi-pencil-square"></i>
+                    Edit
+                  </Dropdown.Item>
                   <Dropdown.Item onClick={() => setShowProjectHistoryModal(true)}>
                     <i className="me-1 bi bi-stopwatch" />
                     History
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setShowEditMetaMetadataModal(true)}>
-                    <i className="me-1 bi bi-pencil-square"></i>
-                    Edit
+                  <Dropdown.Item onClick={() => setShowStandardizeMetadataModal(true)}>
+                    <i className="me-1 bi bi-magic"></i>
+                    Standardize
                   </Dropdown.Item>
                   <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
                     <i className="me-1 bi bi-trash3"></i>
@@ -274,9 +289,7 @@ export const ProjectHeaderBar = (props: ProjectPageHeaderBarProps) => {
       />
       <AddToPOPModal
         show={showAddToPOPModal}
-        onHide={() => {
-          setShowAddToPOPModal(false);
-        }}
+        onHide={() => setShowAddToPOPModal(false)}
         namespace={namespace!}
         project={projectName}
         tag={tag}

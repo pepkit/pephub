@@ -30,9 +30,15 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => 
           onChange(newValue?.value || '');
         }}
         placeholder={isLoading ? 'Fetching schemas...' : 'Assign a schema...'}
-        isClearable
+        // isClearable
         menuPlacement="top"
         className="w-100"
+        styles={{
+                control: (provided) => ({
+                  ...provided,
+                  borderRadius: '.33333em',
+                })
+              }}
       />
       {showDownload && (
         <a

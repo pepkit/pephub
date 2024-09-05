@@ -8,10 +8,10 @@ export const MobileNav = () => {
   const { login, user, logout } = useSession();
   return (
     <Dropdown className="me-3">
-      <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
+      <Dropdown.Toggle className="shadow-none border border-0" variant="none" id="navbarDropdown">
         {user ? <GitHubAvatar namespace={user.login} height={40} width={40} /> : <i className="bi bi-list fs-4" />}
       </Dropdown.Toggle>
-      <Dropdown.Menu>
+      <Dropdown.Menu className="border border-light-subtle shadow">
         {user && (
           <Fragment>
             <Dropdown.Header className="d-flex flex-row align-items-center">
@@ -105,6 +105,15 @@ export const MobileNav = () => {
           <i className="bi bi-info-circle me-2" />
           Docs
         </Dropdown.Item>
+        <Dropdown.Divider />
+                <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/discussions" target="_blank" rel="noopener noreferrer">
+                  {/*<i className="bi bi-pencil-square me-1"></i>*/}
+                  Give Feedback
+                </Dropdown.Item>
+                <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/issues" target="_blank" rel="noopener noreferrer">
+                  {/*<i className="bi bi-bug me-1"></i>*/}
+                  Report a Bug
+                </Dropdown.Item>
         <Dropdown.Divider />
         {user ? (
           <Fragment>

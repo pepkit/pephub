@@ -1,5 +1,6 @@
 import { Editor } from '@monaco-editor/react';
-import { Controller, useForm } from 'react-hook-form';
+import { ErrorMessage } from '@hookform/error-message';
+import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { useSession } from '../../contexts/session-context';
 import { useCreateSchemaMutation } from '../../hooks/mutations/useCreateSchemaMutation';
@@ -36,10 +37,39 @@ type FormFields = {
   schemaYaml: string;
 };
 
+type CombinedErrorMessageProps = {
+  errors: FieldErrors<POPInputs>;
+};
+
+const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
+  const { errors } = props;
+  const nameError = errors.name?.message;
+  let msg = null;
+
+  if (nameError == 'empty') {
+    msg = 'Project Name must not be empty.';
+  } else if (nameError == 'invalid') {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
+  }
+
+  if (nameError) {
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
+  }
+
+  return null;
+};
+
 export const CreateSchemaForm = (props: Props) => {
   const { onCancel, onSubmit, editorHeight, defaultNamespace } = props;
   const { user } = useSession();
-  const { formState, watch, register, control, reset } = useForm<FormFields>({
+  const { 
+    watch, 
+    register, 
+    control, 
+    reset, 
+    formState: { isValid, isDirty, errors }, 
+  } = useForm<FormFields>({
+    mode: 'onChange',
     defaultValues: {
       namespace: defaultNamespace || user?.login || undefined,
       schemaYaml: defaultSchemaYaml,
@@ -68,9 +98,9 @@ export const CreateSchemaForm = (props: Props) => {
           id="is-private-toggle"
         />
       </div> */}
-      <div className="namespace-name-tag-container">
-        <label className="fw-bold text-sm">Namespace *</label>
-        <label className="fw-bold text-sm">Name *</label>
+      <div className="namespace-name-tag-container mt-2">
+        <label className="fw-semibold text-sm">Namespace*</label>
+        <label className="fw-semibold text-sm">Name*</label>
       </div>
       <div className="namespace-name-tag-container fs-4">
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
@@ -94,9 +124,15 @@ export const CreateSchemaForm = (props: Props) => {
             // dont allow any whitespace
             {...register('name', {
               required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
                 value: /^\S+$/,
                 message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
               },
             })}
             id="schema-name"
@@ -106,18 +142,15 @@ export const CreateSchemaForm = (props: Props) => {
           />
         </div>
       </div>
-      <div className="my-1">
-        <label className="fw-bold text-sm" htmlFor="schema-description">
-          Description
-        </label>
-        <textarea
-          {...register('description')}
-          id="schema-description"
-          className="form-control"
-          placeholder="Schema description"
-        />
-      </div>
-      <div className="border rounded mt-2 p-1">
+      <CombinedErrorMessage errors={errors} />
+      <label className="fw-semibold text-sm mt-2">Description</label>
+      <textarea
+        {...register('description')}
+        id="schema-description"
+        className="form-control"
+        placeholder="Schema description"
+      />
+      <div className="border rounded mt-3 py-1">
         <Controller
           name="schemaYaml"
           control={control}
@@ -136,11 +169,14 @@ export const CreateSchemaForm = (props: Props) => {
           )}
         />
       </div>
-      <div className="d-flex align-items-center gap-1 w-100 justify-content-start my-2">
+      <p className='text-xs mt-1'>
+        * Namespace and Schema Name are required.
+      </p>
+      <div className="mt-3">
         <button
-          disabled={isSubmitting || !formState.isDirty}
+          disabled={isSubmitting || !isDirty || !isValid}
           type="button"
-          className="btn btn-success"
+          className="btn btn-success float-end"
           onClick={() => {
             submit(
               {
@@ -163,7 +199,7 @@ export const CreateSchemaForm = (props: Props) => {
           {isSubmitting ? 'Creating...' : 'Create'}
         </button>
         <button
-          className="btn btn-outline-dark"
+          className="btn btn-outline-dark me-1 float-end"
           onClick={() => {
             reset();
             onCancel();

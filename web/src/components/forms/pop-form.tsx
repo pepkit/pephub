@@ -44,7 +44,7 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   }
 
   if (nameError || tagError) {
-    return <p className="text-danger text-xs pt-1">{msg}</p>;
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
   }
 
   return null;
@@ -82,8 +82,8 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
   const { isPending: isSubmitting, submit } = usePopCreateMutation(namespace);
 
   return (
-    <form id="blank-project-form" className="border-0 form-control">
-      <div className="mb-3 mt-3 form-check form-switch">
+    <form id="blank-project-form" className="border-0 form-control p-0">
+      <div className="mt-3 form-check form-switch">
         <input
           className="form-check-input"
           type="checkbox"
@@ -91,15 +91,15 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           id="blank-is-private-toggle"
           {...register('is_private')}
         />
-        <label className="form-check-label">
+        <label className="form-check-label text-sm">
           <i className="bi bi-lock"></i>
           Private
         </label>
       </div>
-      <div className="namespace-name-tag-container">
-        <label className="fw-bold text-sm">Namespace *</label>
-        <label className="fw-bold text-sm">Name *</label>
-        <label className="fw-bold text-sm">Tag</label>
+      <div className="namespace-name-tag-container mt-2">
+        <label className="fw-semibold text-sm">Namespace*</label>
+        <label className="fw-semibold text-sm">Name*</label>
+        <label className="fw-semibold text-sm">Tag</label>
       </div>
       <div className="namespace-name-tag-container fs-4">
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
@@ -123,9 +123,15 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
             // dont allow any whitespace
             {...register('project_name', {
               required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
                 value: /^\S+$/,
                 message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
               },
             })}
             id="blank-project-name"
@@ -136,18 +142,31 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           <span className="mx-1 mb-1">:</span>
         </div>
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
-          <input {...register('tag')} id="blank_tag" type="text" className="form-control" placeholder="default" />
+          <input 
+            {...register('tag', {
+            required: false,
+              pattern: {
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
+              },
+            })} 
+            id="blank_tag" 
+            type="text" 
+            className="form-control" 
+            placeholder="default" 
+          />
         </div>
       </div>
-      <ErrorMessage errors={errors} name="project_name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors} />
+      <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="blank_description"
-        className="form-control mt-3"
+        className="form-control"
         rows={3}
         placeholder="Describe your POP."
         {...register('description')}
       ></textarea>
-      <label className="form-check-label mt-3 mb-1">Add PEPs to your POP</label>
+      <label className="fw-semibold text-sm mt-2">Add PEPs to your POP</label>
       {/* Add a dropdown here */}
       <div>
         <Controller
@@ -193,11 +212,14 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           })}
         </div>
       ) : null}
+      <p className='text-xs mt-1'>
+        * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
+      </p>
       <div className="mt-3">
         <button
           disabled={!isValid || isSubmitting || peps.length === 0}
           id="blank-project-submit-btn"
-          className="btn btn-success me-1"
+          className="btn btn-success float-end"
           type="button"
           onClick={() =>
             submit(
@@ -229,7 +251,7 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
         </button>
         <button
           type="button"
-          className="btn btn-outline-dark me-1"
+          className="btn btn-outline-dark me-1 float-end"
           data-bs-dismiss="modal"
           onClick={() => {
             onHide();

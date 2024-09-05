@@ -22,6 +22,28 @@ type Props = {
   defaultNamespace?: string;
 };
 
+type CombinedErrorMessageProps = {
+  errors: FieldErrors<POPInputs>;
+};
+
+const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
+  const { errors } = props;
+  const nameError = errors.name?.message;
+  let msg = null;
+
+  if (nameError == 'empty') {
+    msg = 'Project Name must not be empty.';
+  } else if (nameError == 'invalid') {
+    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
+  }
+
+  if (nameError) {
+    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
+  }
+
+  return null;
+};
+
 export const SchemaUploadForm = (props: Props) => {
   const { defaultNamespace, onCancel, onSubmit } = props;
 
@@ -34,7 +56,7 @@ export const SchemaUploadForm = (props: Props) => {
     register,
     control,
     watch,
-    formState: { errors },
+    formState: { isValid, errors },
   } = useForm<FromFileInputs>({
     mode: 'onChange',
     defaultValues: {
@@ -54,7 +76,7 @@ export const SchemaUploadForm = (props: Props) => {
   const { isPending: isUploading, upload } = useUploadSchemaFile();
 
   return (
-    <form id="upload-form" className="border-0 form-control">
+    <form id="upload-form" className="border-0 form-control p-0">
       {/* <div className="mb-3 mt-3 form-check form-switch">
         <input
           className="form-check-input"
@@ -68,9 +90,9 @@ export const SchemaUploadForm = (props: Props) => {
           Private
         </label>
       </div> */}
-      <div className="namespace-name-tag-container">
-        <label className="fw-bold text-sm">Namespace *</label>
-        <label className="fw-bold text-sm">Name *</label>
+      <div className="namespace-name-tag-container mt-2">
+        <label className="fw-semibold text-sm">Namespace*</label>
+        <label className="fw-semibold text-sm">Name*</label>
       </div>
       <div className="namespace-name-tag-container fs-4">
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
@@ -99,18 +121,25 @@ export const SchemaUploadForm = (props: Props) => {
             // dont allow any whitespace
             {...register('name', {
               required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
                 value: /^\S+$/,
                 message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_-]+$/,
+                message: "invalid",
               },
             })}
           />
         </div>
       </div>
-      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors} />
+      <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="description"
-        className="form-control mt-3"
+        className="form-control"
         rows={3}
         placeholder="Describe your schema."
         {...register('description')}
@@ -136,6 +165,9 @@ export const SchemaUploadForm = (props: Props) => {
       ) : (
         <FileDropZone name="file" control={control} multiple={false} innerRef={fileDialogRef} />
       )}
+      <p className='text-xs mt-1'>
+        * Namespace and Schema Name are required.
+      </p>
       <div className="mt-2">
         <button
           onClick={() => {
@@ -155,17 +187,17 @@ export const SchemaUploadForm = (props: Props) => {
               },
             );
           }}
-          disabled={isUploading}
+          disabled={!isValid || isUploading}
           type="button"
           id="new-project-submit-btn"
-          className="btn btn-success me-1"
+          className="btn btn-success float-end"
         >
           <i className="bi bi-plus-circle me-1"></i>
           {isUploading ? 'Submitting...' : 'Submit'}
         </button>
         <button
           type="button"
-          className="btn btn-outline-dark me-1"
+          className="btn btn-outline-dark me-1 float-end"
           data-bs-dismiss="modal"
           onClick={() => {
             resetForm();

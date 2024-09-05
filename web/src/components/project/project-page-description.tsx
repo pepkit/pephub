@@ -31,8 +31,8 @@ export const ProjectDescription = () => {
 
   return (
     <Fragment>
-      <div className="d-flex flex-row align-items-center justify-content-between px-4 w-100">
-        <div ref={projectDescriptionRef} className="w-100" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
+      <div className="d-flex align-items-center justify-content-between px-4 row">
+        <div ref={projectDescriptionRef} className="col-md-12" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
           <Markdown>
             {currentHistoryId !== null
               ? YAML.parse(projectHistoryQuery.data?._config || '')?.description || 'No description'
