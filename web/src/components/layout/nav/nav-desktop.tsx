@@ -58,7 +58,7 @@ export const NavDesktop = () => {
 
   return (
     <ul className="mb-2 ms-auto d-flex flex-row align-items-center gap-2 list-none">
-      <li>
+      <li className='me-1'>
         <div className="mt-1 input-group">
           {user ? (
             <SearchBox
@@ -73,7 +73,7 @@ export const NavDesktop = () => {
               id="global-search-bar"
               type="text"
               className="form-control border-end-0 shadow-sm"
-              placeholder="Search pephub"
+              placeholder="Search PEPhub"
               aria-label="search"
               aria-describedby="search"
             />
@@ -96,7 +96,7 @@ export const NavDesktop = () => {
                   id="global-search-bar"
                   type="text"
                   className="form-control border-end-0 shadow-sm rounded-0 rounded-start"
-                  placeholder="Search pephub"
+                  placeholder="Search PEPhub"
                   aria-label="search"
                   aria-describedby="search"
                 />
@@ -144,19 +144,19 @@ export const NavDesktop = () => {
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
+        <a className="nav-link" href="https://pep.databio.org/pephub">
+          <i className="bi bi-file-earmark-text me-1 text-base align-top"></i>Docs
+        </a>
+      </li>
+      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="https://github.com/pepkit/pephub" target="_blank">
           <i className="me-1 bi bi-github text-base align-top"></i>
           GitHub
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-        <a className="nav-link" href="https://pep.databio.org/pephub">
-          <i className="bi bi-file-earmark-text me-1 text-base align-top"></i>Docs
-        </a>
-      </li>
-      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         {user ? (
-          <div className="mx-2 my-0 nav-item h5 pt-1">
+          <div className="my-0 nav-item h5 pt-1">
             <Dropdown className="me-3">
               <Dropdown.Toggle className="shadow-none border border-0" variant="none" id="navbarDropdown">
                 <GitHubAvatar namespace={user.login} height={40} width={40} />

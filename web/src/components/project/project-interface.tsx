@@ -265,7 +265,7 @@ export const ProjectInterface = (props: Props) => {
                 onChange={(subsamples) => {
                   onChange(subsamples);
                 }}
-                data={currentHistoryId ? sampleListToArrays(historyData?._subsample_list || []) : newSubsamples}
+                data={currentHistoryId ? sampleListToArrays(historyData?._subsample_list[0] || []) : newSubsamples}
                 height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                 readOnly={!userCanEdit}
               />

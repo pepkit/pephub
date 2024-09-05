@@ -96,9 +96,9 @@ export function Home() {
                   largestNamespaces.results.map((namespace, index) => {
                     return (
                       <div key={index}>
-                        <span className="ms-2">
+                        <span className="ms-2 ">
                           {index + 1}.{' '}
-                          <a href={`/${namespace.namespace}`}>
+                          <a className='dark-link' href={`/${namespace.namespace}`}>
                             {namespace.namespace}: {numberWithCommas(namespace.number_of_projects)}
                           </a>
                         </span>
@@ -140,7 +140,7 @@ export function Home() {
                 view detailed information about these metadata, and create projects.
               </p>
             </Col>
-            <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100">
+            <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100 namespace-nav">
               <div className="border border-2 border-dark p-2 rounded w-100 position-relative landing-code-snippet-container shadow">
                 <Tab.Container id="code-snippets" defaultActiveKey={CODE_SNIPPETS[0].language}>
                   <div className="d-flex flex-row align-items-center text-sm">
@@ -199,7 +199,7 @@ export function Home() {
                 .
               </p>
             </Col>
-            <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100">
+            <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100 namespace-nav">
               <div className="border border-2 border-dark p-2 rounded w-100 position-relative landing-code-snippet-container shadow">
                 <Tab.Container id="code-snippets" defaultActiveKey={CODE_SNIPPETS[0].language}>
                   <div className="d-flex flex-row align-items-center text-sm">

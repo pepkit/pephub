@@ -126,6 +126,7 @@ export const ProjectMetaEditForm = (props: Props) => {
                     shouldDirty: true,
                   });
                 }}
+                showDownload={value !== null}
               />
             )}
           />

@@ -21,14 +21,14 @@ export const LandingPaths: FC = () => {
         <path
           className="landing-path-glow"
           d="M300,10 Q275,10 275,35 L275,615 Q275,640 300,640"
-          stroke="#3b82f6"
+          stroke="#052c65"
           strokeWidth="3"
           fill="none"
         />
         <path
           className="landing-path-glow"
           d="M100,10 Q125,10 125,35 L125,615 Q125,640 100,640"
-          stroke="#3b82f6"
+          stroke="#052c65"
           strokeWidth="3"
           fill="none"
         />
@@ -38,7 +38,7 @@ export const LandingPaths: FC = () => {
           x1="300"
           y2="10"
           x2="400"
-          stroke="#3b82f6"
+          stroke="#052c65"
           strokeWidth="3"
           fill="none"
         />
@@ -48,7 +48,7 @@ export const LandingPaths: FC = () => {
           x1="300"
           y2="640"
           x2="400"
-          stroke="#3b82f6"
+          stroke="#052c65"
           strokeWidth="3"
           fill="none"
         />
@@ -58,7 +58,7 @@ export const LandingPaths: FC = () => {
           x1="100"
           y2="10"
           x2="0"
-          stroke="#3b82f6"
+          stroke="#052c65"
           strokeWidth="3"
           fill="none"
         />
@@ -68,7 +68,7 @@ export const LandingPaths: FC = () => {
           x1="100"
           y2="640"
           x2="0"
-          stroke="#3b82f6"
+          stroke="#052c65"
           strokeWidth="3"
           fill="none"
         />
@@ -81,7 +81,7 @@ export const LandingPaths: FC = () => {
       >
         <a href={'/databio/example'}>
           <motion.div
-            className="bottom-right-landing-icon landing-icon-border fw-bold text-primary bg-gradient rounded shadow bg-white cursor-pointer d-flex flex-row align-items-center justify-content-center"
+            className="bottom-right-landing-icon landing-icon-border fw-bold text-primary-emphasis bg-gradient rounded shadow bg-white cursor-pointer d-flex flex-row align-items-center justify-content-center"
             whileHover={{ scale: 1.05 }}
           >
             <i className="bi bi-eye-fill me-1"></i>
@@ -90,7 +90,7 @@ export const LandingPaths: FC = () => {
         </a>
         <a href="databio/example?fork=true">
           <motion.div
-            className="top-right-landing-icon landing-icon-border fw-bold text-primary bg-gradient rounded shadow bg-white cursor-pointer d-flex flex-row align-items-center justify-content-center"
+            className="top-right-landing-icon landing-icon-border fw-bold text-primary-emphasis bg-gradient rounded shadow bg-white cursor-pointer d-flex flex-row align-items-center justify-content-center"
             whileHover={{ scale: 1.05 }}
           >
             <img src="/github-branch-primary.svg" height="20px" className="me-1" />
@@ -99,7 +99,7 @@ export const LandingPaths: FC = () => {
         </a>
         <a href={'/validate?pepRegistryPath=databio/example:default'}>
           <motion.div
-            className="bottom-left-landing-icon landing-icon-border fw-bold text-primary bg-gradient rounded shadow bg-white cursor-pointer d-flex flex-row align-items-center justify-content-center"
+            className="bottom-left-landing-icon landing-icon-border fw-bold text-primary-emphasis bg-gradient rounded shadow bg-white cursor-pointer d-flex flex-row align-items-center justify-content-center"
             whileHover={{ scale: 1.05 }}
             style={{}}
           >
@@ -109,7 +109,7 @@ export const LandingPaths: FC = () => {
         </a>
         <a href={`${API_HOST}/api/v1/projects/databio/example`}>
           <motion.div
-            className="top-left-landing-icon landing-icon-border fw-bold text-primary bg-gradient rounded shadow bg-white cursor-pointer d-flex flex-row align-items-center justify-content-center"
+            className="top-left-landing-icon landing-icon-border fw-bold text-primary-emphasis bg-gradient rounded shadow bg-white cursor-pointer d-flex flex-row align-items-center justify-content-center"
             whileHover={{ scale: 1.05 }}
           >
             <i className="bi bi-download me-1"></i>

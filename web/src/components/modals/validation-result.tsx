@@ -127,16 +127,19 @@ export const ValidationResultModal = (props: Props) => {
       </Modal.Body>
       <Modal.Footer>
         <div className="d-flex align-items-center justify-content-between w-100">
-          <div className="d-flex align-items-center">
-            <a href={`/schemas/${props.currentSchema}`}>
-              <button className="btn btn-sm btn-outline-dark">
-                <span className="d-flex align-items-center gap-1">
-                  <i className="bi bi-arrow-left"></i>
-                  Go to {props.currentSchema}
-                </span>
-              </button>
-            </a>
-          </div>
+          { currentSchema? 
+            <div className="d-flex align-items-center">
+              <a href={`/schemas/${props.currentSchema}`}>
+                <button className="btn btn-sm btn-outline-dark">
+                  <span className="d-flex align-items-center gap-1">
+                    <i className="bi bi-arrow-left"></i>
+                    Go to {props.currentSchema}
+                  </span>
+                </button>
+              </a>
+            </div>
+            : null
+          }
           <button className="btn btn-dark" onClick={onHide}>
             Close
           </button>
