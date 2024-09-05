@@ -57,7 +57,7 @@ from ...models import (
 )
 from .helpers import verify_updated_project
 
-from attribute_standardizer.attr_standardizer_class import AttrStandardizer
+from attribute_standardizer import AttrStandardizer
 
 _LOGGER = logging.getLogger(__name__)
 
