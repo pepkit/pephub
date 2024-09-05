@@ -26,7 +26,6 @@ type Props = {
   setNewSamples: (samples: any[][]) => void;
   resetStandardizedData: boolean;
   setResetStandardizedData: (boolean) => void;
-
 };
 
 type TabDataRow = string[];

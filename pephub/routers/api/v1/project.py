@@ -1149,7 +1149,7 @@ def delete_full_history(
     response_model=StandardizerResponse,
 )
 async def get_standardized_cols(
-    pep: project = Depends(get_project),
+    pep: peppy.Project = Depends(get_project),
     schema: str = "",
 ):
     """
@@ -1163,7 +1163,7 @@ async def get_standardized_cols(
 
     if schema == "":
         raise HTTPException(
-            code=400,
+            code=500,
             detail="Schema is required! Available schemas are ENCODE and Fairtracks",
         )
         return {}

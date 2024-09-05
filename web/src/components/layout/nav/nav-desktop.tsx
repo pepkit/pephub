@@ -125,7 +125,7 @@ export const NavDesktop = () => {
               </motion.div>
             </>
           )}
-          <span className="input-group-text border-start-0 shadow-sm">
+          <span className="input-group-text border-start-0 shadow-sm me-1">
             <div className="px-1 border rounded border-secondary text-secondary text-sm">
               {os === 'Mac OS' ? <i className="bi bi-command"></i> : 'ctrl'}
             </div>
@@ -134,24 +134,24 @@ export const NavDesktop = () => {
         </div>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-        <a className="nav-link" href="https://github.com/pepkit/pephub" target="_blank">
-          <i className="me-1 bi bi-github text-base"></i>
-          GitHub
-        </a>
-      </li>
-      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="/schemas">
-          <i className="bi bi-file-earmark-check me-1 text-base"></i>Schemas
+          <i className="bi bi-globe2 me-1 text-base align-top"></i>Browse
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="/validate">
-          <i className="bi bi-check2-circle me-1 text-base"></i>Validation
+          <i className="bi bi-check2-circle me-1 text-base align-top"></i>Validation
+        </a>
+      </li>
+      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
+        <a className="nav-link" href="https://github.com/pepkit/pephub" target="_blank">
+          <i className="me-1 bi bi-github text-base align-top"></i>
+          GitHub
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="https://pep.databio.org/pephub">
-          <i className="bi bi-info-circle me-1 text-base"></i>Docs
+          <i className="bi bi-file-earmark-text me-1 text-base align-top"></i>Docs
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">

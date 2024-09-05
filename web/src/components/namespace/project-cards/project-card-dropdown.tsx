@@ -56,27 +56,23 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
         }}
       >
         {isStarred ? (
-          <Fragment>
-            <div className="d-flex align-items-center">
-              <i className="bi bi-star-fill me-2"></i>
-              <span className='fw-semibold'>
-                <Fragment>
-                  {copied ? 'Copied!' : (localStarred ? (starNumber + 1) : starNumber)}
-                </Fragment>
-              </span>
-            </div>
-          </Fragment>
+          <div className="d-flex align-items-center text-sm">
+            <i className="bi bi-star-fill me-1" style={{padding: '0 2px .5px 0'}}></i>
+            <span className='fw-semibold'>
+              <Fragment>
+                {copied ? 'Copied!' : (localStarred ? (starNumber + 1) : starNumber)}
+              </Fragment>
+            </span>
+          </div>
         ) : (
-          <Fragment>
-            <div className="d-flex align-items-center">
-              <i className="bi bi-star me-2"></i>
-              <span className='fw-normal'>
-                <Fragment>
-                  {copied ? 'Copied!' : starNumber}
-                </Fragment>
-              </span>
-            </div>
-          </Fragment>
+          <div className="d-flex align-items-center text-sm">
+            <i className="bi bi-star me-1" style={{padding: '0 2px .5px 0'}}></i>
+            <span className='fw-normal'>
+              <Fragment>
+                {copied ? 'Copied!' : starNumber}
+              </Fragment>
+            </span>
+          </div>
         )}
       </Button>
       <Dropdown.Toggle 
