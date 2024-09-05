@@ -22,6 +22,12 @@ required:
   - samples
 `;
 
+interface BlankSchemaInputs {
+  namespace: string;
+  name: string;
+  schemaYaml: string;
+}
+
 type Props = {
   defaultNamespace?: string;
   editorHeight?: string;
@@ -38,7 +44,7 @@ type FormFields = {
 };
 
 type CombinedErrorMessageProps = {
-  errors: FieldErrors<POPInputs>;
+  errors: FieldErrors<BlankSchemaInputs>;
 };
 
 const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
@@ -47,9 +53,9 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   let msg = null;
 
   if (nameError == 'empty') {
-    msg = 'Project Name must not be empty.';
+    msg = 'Schema Name must not be empty.';
   } else if (nameError == 'invalid') {
-    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
+    msg = "Schema Name must contain only alphanumeric characters, '-', or '_'.";
   }
 
   if (nameError) {
@@ -71,7 +77,7 @@ export const CreateSchemaForm = (props: Props) => {
   } = useForm<FormFields>({
     mode: 'onChange',
     defaultValues: {
-      namespace: defaultNamespace || user?.login || undefined,
+      namespace: defaultNamespace || user?.login || '',
       schemaYaml: defaultSchemaYaml,
     },
   });
@@ -98,12 +104,12 @@ export const CreateSchemaForm = (props: Props) => {
           id="is-private-toggle"
         />
       </div> */}
-      <div className="namespace-name-tag-container mt-2">
+      <div className="namespace-name-tag-container mt-3">
         <label className="fw-semibold text-sm">Namespace*</label>
         <label className="fw-semibold text-sm">Name*</label>
       </div>
-      <div className="namespace-name-tag-container fs-4">
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+      <div className="namespace-name-tag-container fs-4 d-flex">
+        <div className="d-flex flex-row align-items-center justify-content-between w-25">
           <select
             id="blank-namespace-select"
             className="form-select"
@@ -119,18 +125,15 @@ export const CreateSchemaForm = (props: Props) => {
           </select>
           <span className="mx-1 mb-1">/</span>
         </div>
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+        <div className="d-flex flex-row align-items-center justify-content-between w-75">
           <input
             // dont allow any whitespace
             {...register('name', {
-              required: true,
               required: {
                 value: true,
                 message: "empty",
               },
               pattern: {
-                value: /^\S+$/,
-                message: 'No spaces allowed.',
                 value: /^[a-zA-Z0-9_-]+$/,
                 message: "invalid",
               },
@@ -150,7 +153,8 @@ export const CreateSchemaForm = (props: Props) => {
         className="form-control"
         placeholder="Schema description"
       />
-      <div className="border rounded mt-3 py-1">
+      <label className="fw-semibold text-sm mt-2">Config</label>
+      <div className="border rounded py-1">
         <Controller
           name="schemaYaml"
           control={control}

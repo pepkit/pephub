@@ -132,14 +132,11 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
             placeholder="name"
             // dont allow any whitespace
             {...register('name', {
-              required: true,
               required: {
                 value: true,
                 message: "empty",
               },
               pattern: {
-                value: /^\S+$/,
-                message: 'No spaces allowed.',
                 value: /^[a-zA-Z0-9_-]+$/,
                 message: "invalid",
               },
@@ -183,12 +180,14 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
               onChange={(schema) => {
                 setValue('pep_schema', schema);
               }}
+              showDownload={false}
             />
           )}
         />
       </div>
+      <label className="fw-semibold text-sm mt-2">PEP Upload</label>
       {uploadFiles ? (
-        <div className="dashed-border p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
+        <div className="dashed-border p-5 order border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
           <div className="d-flex flex-column align-items-center">
             {Array.from(uploadFiles).map((file, i) => {
               return (

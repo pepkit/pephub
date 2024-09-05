@@ -122,14 +122,11 @@ export const PopForm: FC<Props> = ({ onHide, defaultNamespace }) => {
           <input
             // dont allow any whitespace
             {...register('project_name', {
-              required: true,
               required: {
                 value: true,
                 message: "empty",
               },
               pattern: {
-                value: /^\S+$/,
-                message: 'No spaces allowed.',
                 value: /^[a-zA-Z0-9_-]+$/,
                 message: "invalid",
               },

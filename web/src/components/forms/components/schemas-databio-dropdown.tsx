@@ -36,7 +36,8 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => 
         styles={{
                 control: (provided) => ({
                   ...provided,
-                  borderRadius: '.33333em',
+                  borderRadius: '.375em',
+                  borderColor: '#dee2e6'
                 })
               }}
       />
@@ -44,7 +45,7 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => 
         <a
           target="_blank"
           href={`${API_HOST}/api/v1/schemas/${value}/file`}
-          className="btn btn-outline-secondary opacity-50"
+          className="btn btn-outline-light border shadow-sm text-body-tertiary"
         >
           <i className="bi bi-download" />
         </a>

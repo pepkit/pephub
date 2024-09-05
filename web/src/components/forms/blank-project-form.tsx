@@ -146,14 +146,11 @@ sample_table: samples.csv
           <input
             // dont allow any whitespace
             {...register('project_name', {
-              required: true,
               required: {
                 value: true,
                 message: "empty",
               },
               pattern: {
-                value: /^\S+$/,
-                message: 'No spaces allowed.',
                 value: /^[a-zA-Z0-9_-]+$/,
                 message: "invalid",
               },
@@ -198,6 +195,7 @@ sample_table: samples.csv
               onChange={(schema) => {
                 setValue('pep_schema', schema);
               }}
+              showDownload={false}
             />
           )}
         />
@@ -237,7 +235,7 @@ sample_table: samples.csv
           type="button"
           onClick={() => {
             try {
-              const parsedSamples = arraysToSampleList(sampleTable);
+              const parsedSamples = arraysToSampleList(sampleTable, 'Sample');
               submit({
                 projectName,
                 tag,

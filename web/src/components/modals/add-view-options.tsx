@@ -240,7 +240,8 @@ export const ViewOptionsModal = (props: Props) => {
                   styles={{
                     control: (provided) => ({
                       ...provided,
-                      borderRadius: '0.333333em',
+                      borderRadius: '0.375em',
+                      borderColor: '#dee2e6'
                     }),
                   }}
                   className="top-z w-100 ms-auto"

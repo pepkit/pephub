@@ -1,6 +1,6 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { useEffect, useRef } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldErrors } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { useSession } from '../../contexts/session-context';
@@ -23,7 +23,7 @@ type Props = {
 };
 
 type CombinedErrorMessageProps = {
-  errors: FieldErrors<POPInputs>;
+  errors: FieldErrors<FromFileInputs>;
 };
 
 const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
@@ -32,9 +32,9 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   let msg = null;
 
   if (nameError == 'empty') {
-    msg = 'Project Name must not be empty.';
+    msg = 'Schema Name must not be empty.';
   } else if (nameError == 'invalid') {
-    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
+    msg = "Schema Name must contain only alphanumeric characters, '-', or '_'.";
   }
 
   if (nameError) {
@@ -90,12 +90,12 @@ export const SchemaUploadForm = (props: Props) => {
           Private
         </label>
       </div> */}
-      <div className="namespace-name-tag-container mt-2">
+      <div className="namespace-name-tag-container mt-3">
         <label className="fw-semibold text-sm">Namespace*</label>
         <label className="fw-semibold text-sm">Name*</label>
       </div>
-      <div className="namespace-name-tag-container fs-4">
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+      <div className="namespace-name-tag-container fs-4 d-flex">
+        <div className="d-flex flex-row align-items-center justify-content-between w-25">
           <select
             id="namespace-select"
             className="form-select"
@@ -112,7 +112,7 @@ export const SchemaUploadForm = (props: Props) => {
           </select>
           <span className="mx-1 mb-1">/</span>
         </div>
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+        <div className="d-flex flex-row align-items-center justify-content-between w-75">
           <input
             id="project-name"
             type="text"
@@ -120,14 +120,11 @@ export const SchemaUploadForm = (props: Props) => {
             placeholder="name"
             // dont allow any whitespace
             {...register('name', {
-              required: true,
               required: {
                 value: true,
                 message: "empty",
               },
               pattern: {
-                value: /^\S+$/,
-                message: 'No spaces allowed.',
                 value: /^[a-zA-Z0-9_-]+$/,
                 message: "invalid",
               },
@@ -144,8 +141,9 @@ export const SchemaUploadForm = (props: Props) => {
         placeholder="Describe your schema."
         {...register('description')}
       ></textarea>
+      <label className="fw-semibold text-sm mt-2">Schema Upload</label>
       {uploadFile ? (
-        <div className="dashed-border p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
+        <div className="dashed-border p-5 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
           <div className="d-flex flex-column align-items-center">
             <div className="flex-row d-flex align-items-center">
               <i className="bi bi-file-earmark-text me-1"></i>
