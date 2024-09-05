@@ -179,24 +179,22 @@ export const NamespacePage = () => {
             ) : null}
           </div>
         </div>
-        {namespace !== user?.login && user?.orgs && user.orgs.length > 0 && (
+        {namespace !== user?.login && user?.orgs && user?.orgs.some(org => org === namespace) && (
           <>
-            {user?.orgs.some(org => org === namespace) && (
-              <p className="mb-0">
-                <span className="fw-bold d-flex">
-                  You belong to this organization. 
-                </span>
-              </p>
-            )}
+            <p className="mb-0">
+              <span className="fw-bold d-flex">
+                You belong to this organization. 
+              </span>
+            </p>
             <p>
               <span className="fw-bold d-flex">
                 Organizations you belong to:
                 <div className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
-                      <a className="ms-1 dark-link" href={`/${org}`}>
+                      <a className="dark-link" style={{marginLeft: '0'}} href={`/${org}`}>
                         <NamespaceBadge className="me-1" namespace={org} />
-                      </a>{' '}
+                      </a>
                     </Fragment>
                   ))}
                 </div>
@@ -212,9 +210,9 @@ export const NamespacePage = () => {
                 <div className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
-                      <a className="ms-1 dark-link" href={`/${org}`}>
+                      <a className="dark-link" style={{marginLeft: '0'}} href={`/${org}`}>
                         <NamespaceBadge className="me-1" namespace={org} />
-                      </a>{' '}
+                      </a>
                     </Fragment>
                   ))}
                 </div>
