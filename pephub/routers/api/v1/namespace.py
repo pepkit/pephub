@@ -1,6 +1,7 @@
 import shutil
 import tempfile
 from typing import List, Literal, Optional, Union
+import os
 
 import peppy
 from dotenv import load_dotenv
@@ -20,6 +21,7 @@ from pepdbagent.models import (
     ListOfNamespaceInfo,
     Namespace,
     NamespaceStats,
+    TarNamespaceModelReturn,
 )
 from peppy import Project
 from peppy.const import DESC_KEY, NAME_KEY
@@ -27,6 +29,7 @@ from typing_extensions import Annotated
 
 from ....const import (
     DEFAULT_TAG,
+    ARCHIVE_URL_PATH,
 )
 from ....dependencies import (
     get_db,
@@ -436,3 +439,18 @@ def remove_user(
         },
         status_code=202,
     )
+
+
+@namespace.get(
+    "/archive",
+    summary="Get metadata of all archived files of all projects in the namespace",
+    response_model=TarNamespaceModelReturn,
+)
+async def get_archive(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+
+    result = agent.namespace.get_tar_info(namespace)
+
+    for item in result.results:
+        item.file_path = os.path.join(ARCHIVE_URL_PATH, item.file_path)
+
+    return result

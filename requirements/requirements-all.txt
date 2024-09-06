@@ -1,6 +1,6 @@
 fastapi>=0.108.0
 psycopg>=3.1.15
-pepdbagent>=0.11.0
+pepdbagent>=0.11.1
 # pepdbagent @ git+https://github.com/pepkit/pepdbagent.git@schams2.0#egg=pepdbagent
 peppy>=0.40.5
 eido>=0.2.2

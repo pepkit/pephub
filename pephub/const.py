@@ -138,3 +138,5 @@ DEFAULT_TAG = "default"
 DEFAULT_QDRANT_SCORE_THRESHOLD = (
     0.72  # empirical value, highly dependent on the model used
 )
+
+ARCHIVE_URL_PATH = "https://cloud2.databio.org/pephub/"
