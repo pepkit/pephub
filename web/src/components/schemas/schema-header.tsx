@@ -165,7 +165,6 @@ export const SchemaHeader = (props: Props) => {
         name={schema!}
         show={showSchemaAPIModal}
         onHide={() => setShowSchemaAPIModal(false)}
-        redirect={`/${namespace}?view=schemas`}
       />
     </div>
 
