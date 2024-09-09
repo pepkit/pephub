@@ -27,7 +27,7 @@ export const ProjectStars: FC<Props> = (props) => {
     <Button
       disabled={isAddingStar || isRemovingStar}
       variant='outline'
-      className={isStarred ? 'border border-black shadow-none rounded-1 starred-button' : 'border border-black shadow-none rounded-1 star-button'} 
+      className={isStarred ? 'border border-black shadow-sm rounded-1 starred-button' : 'border border-black shadow-sm rounded-1 star-button'} 
       style={{zIndex: 2}}
       size="sm"
       onClick={() => {
