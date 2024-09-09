@@ -2,8 +2,9 @@ import { FC } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink, useSearchParams } from 'react-router-dom';
+import { DownloadGeoCount } from '../namespace/archive/download-geo-count';
 
-type View = 'peps' | 'pops' | 'schemas' | 'stars';
+type View = 'peps' | 'pops' | 'schemas' | 'stars' | 'archive';
 
 type Props = {
   view: View;
@@ -13,6 +14,8 @@ type Props = {
   numSchemas: number;
   setView: (view: View) => void;
   enableStars?: boolean;
+  isGEO?: boolean;
+  namespace?: string;
 };
 
 export const NamespaceViewSelector: FC<Props> = (props) => {
@@ -86,6 +89,23 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
               ) : (
                 <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                   {props.numStars}
+                </span>
+              )}
+            </Nav.Link>
+          </Nav.Item>
+        )}
+        {props.isGEO && (
+          <Nav.Item>
+            <Nav.Link eventKey="archive" className="px-2 py-1 me-1">
+              <i className="bi bi-database-down me-1"></i>
+              Archive
+              {props.view === 'archive' ? (
+                <span className="text-sm ms-2 rounded-pill border border-light px-2 bg-light bg-opacity-10">
+                  <DownloadGeoCount namespace={props.namespace}/>
+                </span>
+              ) : (
+                <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
+                  <DownloadGeoCount namespace={props.namespace}/>
                 </span>
               )}
             </Nav.Link>

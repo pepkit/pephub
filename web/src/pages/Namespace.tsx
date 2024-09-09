@@ -7,7 +7,7 @@ import { PageLayout } from '../components/layout/page-layout';
 import { Pagination } from '../components/layout/pagination';
 import { AddPEPModal } from '../components/modals/add-pep';
 import { DeveloperSettingsModal } from '../components/modals/developer-settings-modal';
-import { DownloadGeo } from '../components/modals/download-geo';
+import { DownloadGeo } from '../components/namespace/archive/download-geo';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePagePlaceholder } from '../components/namespace/namespace-page-placeholder';
@@ -25,7 +25,7 @@ import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useDebounce } from '../hooks/useDebounce';
 import { numberWithCommas } from '../utils/etc';
 
-type View = 'peps' | 'pops' | 'schemas' | 'stars';
+type View = 'peps' | 'pops' | 'schemas' | 'stars' | 'archive';
 
 export const NamespacePage = () => {
   const [searchParams] = useSearchParams();
@@ -147,7 +147,7 @@ export const NamespacePage = () => {
               <i className="bi bi-hdd-rack me-1"></i>
               API
             </button>
-            {namespace === 'geo' && (
+            {namespace === 'geos' && (
               <button
                 className="btn btn-sm btn-dark"
                 onClick={() => {
@@ -235,6 +235,8 @@ export const NamespacePage = () => {
             view={view}
             setView={setView}
             enableStars={namespace === user?.login}
+            isGEO={namespace === 'geo'}
+            namespace={namespace}
           />
         </div>
         <div className="my-1 border-bottom border-grey"></div>
@@ -309,7 +311,7 @@ export const NamespacePage = () => {
               ) : null}
             </div>
           </Fragment>
-        ) : (
+        ) : view === 'stars' ? (
           // render stars in namespace
           <Fragment>
             {stars?.length === 0 ? (
@@ -332,14 +334,21 @@ export const NamespacePage = () => {
               </div>
             )}
           </Fragment>
-        )}
+        ) : (view === 'archive' && namespace === 'geo') ? (
+          <Fragment>
+            <div className="mt-3">
+              <DownloadGeo namespace={namespace}/>
+            </div>
+          </Fragment>
+        ) : null
+        }
         <AddPEPModal defaultNamespace={namespace} show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
         <NamespaceAPIEndpointsModal
           namespace={namespace || ''}
           show={showEndpointsModal}
           onHide={() => setShowEndpointsModal(false)}
         />
-        <DownloadGeo show={showGeoDownloadModal} onHide={() => setShowGeoDownloadModal(false)} />
+        
         <DeveloperSettingsModal show={showSettingsModal} onHide={() => setShowSettingsModal(false)} />
       </PageLayout>
     );

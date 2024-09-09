@@ -47,6 +47,7 @@ body {
 
 .btn-primary-emphasis {
   background-color: #052c65;
+  color: white;
 }
 
 /* tailwind pulse */
@@ -839,6 +840,17 @@ body {
 .dark-button {
   background-color: #052c65 !important;
   color: white !important;
+  border-radius: .375em;
+}
+
+.page-item:not(.disabled) .page-link {
+  color: #052c65cf;
+}
+
+.page-item.active .page-link {
+  color: white !important;
+  border-color: #052c65cf !important;
+  background-color: #052c65cf !important;
 }
 
 .forked-link {
