@@ -56,14 +56,12 @@ export const ProjectInfoFooter = () => {
         </div>
         <span className="">
           {projectInfo?.forked_from && (
-            <span className="p-1 border rounded fw-bold">
-              <Fragment>
-                <i className="bi bi-bezier2"></i>
-                <span className="ms-1">Forked from</span>
-                <a className="text-decoration-none ms-1" href={`/${projectInfo?.forked_from.replace(':', '?tag=')}`}>
-                  {projectInfo?.forked_from}
-                </a>
-              </Fragment>
+            <span className="p-1 border rounded fw-bold me-1 bg-white ms-auto position-relative forked-link" style={{zIndex: 2, margin: '-1.25em 0 -1em'}}>
+              <i className="bi bi-bezier2"></i>
+              <span className="ms-1">Forked from</span>
+              <a className="text-decoration-none ms-1 stretched-link" href={`/${projectInfo?.forked_from.replace(':', '?tag=')}`}>
+                {projectInfo?.forked_from}
+              </a>
             </span>
           )}
           {/*{projectInfo?.digest}*/}

@@ -8,6 +8,7 @@ import { useAddStar } from '../../../hooks/mutations/useAddStar';
 import { useRemoveStar } from '../../../hooks/mutations/useRemoveStar';
 import { copyToClipboard } from '../../../utils/etc';
 import { LoadingSpinner } from '../../spinners/loading-spinner';
+import { numberWithCommas } from '../../../utils/etc';
 
 interface Props {
   project: ProjectAnnotation;
@@ -26,7 +27,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
   const { isPending: isAddingStar, addStar } = useAddStar(user?.login);
   const { isPending: isRemovingStar, removeStar } = useRemoveStar(user?.login);
 
-  const [localStarred, setLocalStarred] = useState(false);
+  const [localStarred, setLocalStarred] = useState(isStarred);
 
   return (
     <Dropdown as={ButtonGroup}>
@@ -51,7 +52,6 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
               projectNameToStar: project.name,
               projectTagToStar: project.tag,
             });
-            setLocalStarred(true)
           }
         }}
       >
@@ -60,7 +60,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
             <i className="bi bi-star-fill me-1" style={{padding: '0 2px .5px 0'}}></i>
             <span className='fw-semibold'>
               <Fragment>
-                {copied ? 'Copied!' : (localStarred ? (starNumber + 1) : starNumber)}
+                {copied ? 'Copied!' : (localStarred ? numberWithCommas(starNumber) : numberWithCommas(starNumber + 1))}
               </Fragment>
             </span>
           </div>
@@ -69,7 +69,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
             <i className="bi bi-star me-1" style={{padding: '0 2px .5px 0'}}></i>
             <span className='fw-normal'>
               <Fragment>
-                {copied ? 'Copied!' : starNumber}
+                {copied ? 'Copied!' : (localStarred ? numberWithCommas(starNumber - 1) : numberWithCommas(starNumber))}
               </Fragment>
             </span>
           </div>
