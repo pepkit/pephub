@@ -104,6 +104,6 @@ export const DownloadGeoCount = (props: Props) => {
   // };
 
   return (
-    <span>{data?.count}</span>
+    <span>{data ? data.count : 0}</span>
   );
 };

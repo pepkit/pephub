@@ -129,7 +129,9 @@ export const DownloadGeo = (props: Props) => {
         All GEO PEPs are archived quarterly into a single <code>tar</code> file.
         Each archive is slightly over 1 gb in size.
       </p>
-      {data ? <NamespaceArchiveTable data={data} /> : null}
+      {data ? <NamespaceArchiveTable data={data} /> : 
+        <p className='text-center'>No archives currently exist for this namespace.</p>
+      }
     </div>
   );
 };
