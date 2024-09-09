@@ -58,7 +58,7 @@ export const NavDesktop = () => {
 
   return (
     <ul className="mb-2 ms-auto d-flex flex-row align-items-center gap-2 list-none">
-      <li className='me-1'>
+      <li className="me-1">
         <div className="mt-1 input-group">
           {user ? (
             <SearchBox
@@ -135,7 +135,7 @@ export const NavDesktop = () => {
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="/schemas">
-          <i className="bi bi-globe2 me-1 text-base align-top"></i>Browse
+          <i className="bi bi-globe2 me-1 text-base align-top"></i>Schemas
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
@@ -231,11 +231,21 @@ export const NavDesktop = () => {
                   </Fragment>
                 )}
                 <Dropdown.Divider />
-                <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/discussions" target="_blank" rel="noopener noreferrer">
+                <Dropdown.Item
+                  as="a"
+                  href="https://github.com/pepkit/pephub/discussions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {/*<i className="bi bi-pencil-square me-1"></i>*/}
                   Give Feedback
                 </Dropdown.Item>
-                <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/issues" target="_blank" rel="noopener noreferrer">
+                <Dropdown.Item
+                  as="a"
+                  href="https://github.com/pepkit/pephub/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {/*<i className="bi bi-bug me-1"></i>*/}
                   Report a Bug
                 </Dropdown.Item>

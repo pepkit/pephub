@@ -1,7 +1,7 @@
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-import React, { FormEvent, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import ReactSelect from 'react-select';
 
@@ -9,10 +9,10 @@ import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProject
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { useStandardize } from '../../hooks/queries/useStandardize';
+import { formatToPercentage } from '../../utils/etc';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { ProjectMetaEditForm } from '../forms/edit-project-meta';
-import { LoadingSpinner } from '../spinners/loading-spinner'
-import { formatToPercentage } from '../../utils/etc'
+import { LoadingSpinner } from '../spinners/loading-spinner';
 
 type Props = {
   namespace: string;
@@ -36,7 +36,19 @@ type AvailableSchemas = 'ENCODE' | 'FAIRTRACKS';
 type StandardizedData = Record<string, Record<string, number>>;
 
 export const StandardizeMetadataModal = (props: Props) => {
-  const { namespace, project, tag, show, onHide, sampleTable, sampleTableIndex, newSamples, setNewSamples, resetStandardizedData, setResetStandardizedData } = props;
+  const {
+    namespace,
+    project,
+    tag,
+    show,
+    onHide,
+    sampleTable,
+    sampleTableIndex,
+    newSamples,
+    setNewSamples,
+    resetStandardizedData,
+    setResetStandardizedData,
+  } = props;
 
   const tabDataRaw = newSamples;
   const tabData = tabDataRaw[0]
@@ -121,9 +133,9 @@ export const StandardizeMetadataModal = (props: Props) => {
     Object.entries(selectedValues).forEach(([key, value]) => {
       let columnIndex = updatedTabDataRaw[0].indexOf(key);
       if (columnIndex === -1) {
-        const originalValue = getOriginalColValues(key)
+        const originalValue = getOriginalColValues(key);
         if (originalValue) {
-          columnIndex = updatedTabDataRaw[0].indexOf(originalValue)
+          columnIndex = updatedTabDataRaw[0].indexOf(originalValue);
         }
       }
       if (columnIndex !== -1) {
@@ -140,17 +152,23 @@ export const StandardizeMetadataModal = (props: Props) => {
     await standardize();
   };
 
-  const prepareHandsontableData = useCallback((key: string) => {
-    const selectedValue = selectedValues[key] || '';
-    const originalValue = getOriginalColValues(key)
-    let topValues: string[][] = []
-    if (originalValue) {
-      topValues = tabData[key]?.slice(0, 6).map((item) => [item]) || tabData[originalValue]?.slice(0, 6).map((item) => [item]) || [];
-    }
-    const emptyRows = Array(Math.max(0, 6 - topValues.length)).fill(['']);
+  const prepareHandsontableData = useCallback(
+    (key: string) => {
+      const selectedValue = selectedValues[key] || '';
+      const originalValue = getOriginalColValues(key);
+      let topValues: string[][] = [];
+      if (originalValue) {
+        topValues =
+          tabData[key]?.slice(0, 6).map((item) => [item]) ||
+          tabData[originalValue]?.slice(0, 6).map((item) => [item]) ||
+          [];
+      }
+      const emptyRows = Array(Math.max(0, 6 - topValues.length)).fill(['']);
 
-    return [[selectedValue], ...topValues, ...emptyRows];
-  }, [selectedValues, tabData]);
+      return [[selectedValue], ...topValues, ...emptyRows];
+    },
+    [selectedValues, tabData],
+  );
 
   useEffect(() => {
     if (standardizedData) {
@@ -168,26 +186,25 @@ export const StandardizeMetadataModal = (props: Props) => {
     }
   }, [resetStandardizedData]);
 
-
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="xl">
       <Modal.Body>
-        <div className='p-1 modal-pill'>
+        <div className="p-1 modal-pill">
           <h1 className="fs-5 mb-1 fw-semibold d-inline">Metadata Standardizer</h1>
           <button
             className="btn btn-outline-dark px-1 py-0 m-0 float-end d-inline rounded-3 border-0 shadow-none"
-            type="button" 
+            type="button"
             onClick={() => {
               onHide();
             }}
           >
             <i className="bi bi-x-lg"></i>
           </button>
-          <p className='text-sm mt-1 mb-3'>
-            Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of
-            your projects. After choosing a standardizer schema below, compare predicted suggestions (confidence indicated in parenthesis) and choose whether
-            to keep or discard them. Column contents are not modified by the standardizer.
-            After accepting the changes, save your project for them to take effect.
+          <p className="text-sm mt-1 mb-3">
+            Use the metadata standardizer powered by BEDmess to bring consistency across metadata columns in all of your
+            projects. After choosing a standardizer schema below, compare predicted suggestions (confidence indicated in
+            parenthesis) and choose whether to keep or discard them. Column contents are not modified by the
+            standardizer. After accepting the changes, save your project for them to take effect.
           </p>
           <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
 
@@ -211,6 +228,8 @@ export const StandardizeMetadataModal = (props: Props) => {
                         { value: 'ENCODE', label: 'ENCODE' },
                         // @ts-ignore
                         { value: 'FAIRTRACKS', label: 'Fairtracks' },
+                        // @ts-ignore
+                        { value: 'BEDBASE', label: 'BEDBASE' },
                       ]}
                       defaultValue={selectedOption}
                       value={selectedOption}
@@ -223,7 +242,11 @@ export const StandardizeMetadataModal = (props: Props) => {
                     />
                   </div>
                   <div className="col-3">
-                    <button className="btn btn-success float-end w-100" type="submit" disabled={selectedOption === null}>
+                    <button
+                      className="btn btn-success float-end w-100"
+                      type="submit"
+                      disabled={selectedOption === null}
+                    >
                       Standardize!
                     </button>
                   </div>
@@ -238,10 +261,10 @@ export const StandardizeMetadataModal = (props: Props) => {
 
               <div className="row mb-2 mt-3">
                 <div className="col-6 text-center">
-                  <p className='mb-0 fw-semibold'>Original Column</p>
+                  <p className="mb-0 fw-semibold">Original Column</p>
                 </div>
                 <div className="col-6 text-center">
-                  <p className='mb-0 fw-semibold'>Predicted Column Header</p>
+                  <p className="mb-0 fw-semibold">Predicted Column Header</p>
                 </div>
               </div>
 
@@ -249,13 +272,29 @@ export const StandardizeMetadataModal = (props: Props) => {
                 {Object.keys(standardizedData).map((key, index) => (
                   <div className="mb-3" key={key}>
                     <div
-                      className={(key === sampleTableIndex) ? "row border shadow-sm rounded-3 m-1 pb-3 pt-2" : "row border shadow-sm rounded-3 m-1 py-3"}
-                      style={{ backgroundColor: whereDuplicates?.includes(index) ? '#dc354520' : (key === sampleTableIndex) ? '#ffc10720' : 'white' }}
+                      className={
+                        key === sampleTableIndex
+                          ? 'row border shadow-sm rounded-3 m-1 pb-3 pt-2'
+                          : 'row border shadow-sm rounded-3 m-1 py-3'
+                      }
+                      style={{
+                        backgroundColor: whereDuplicates?.includes(index)
+                          ? '#dc354520'
+                          : key === sampleTableIndex
+                          ? '#ffc10720'
+                          : 'white',
+                      }}
                     >
-                      {key === sampleTableIndex ? <p className='text-center text-xs mb-2 p-0 fw-bold'>SampleTableIndex must also be updated in project config!</p> : null}
+                      {key === sampleTableIndex ? (
+                        <p className="text-center text-xs mb-2 p-0 fw-bold">
+                          SampleTableIndex must also be updated in project config!
+                        </p>
+                      ) : null}
                       <div className="col-6 text-center">
-                        <div className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm"
-                          style={{'bottom': '-1px'}}>
+                        <div
+                          className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm"
+                          style={{ bottom: '-1px' }}
+                        >
                           <HotTable
                             data={prepareHandsontableData(key)}
                             colHeaders={false}
@@ -270,24 +309,32 @@ export const StandardizeMetadataModal = (props: Props) => {
                               {
                                 data: 0,
                                 type: typeof tabData[key] === 'number' ? 'numeric' : 'text',
-                                renderer: function(
+                                renderer: function (
                                   instance: Handsontable.Core,
                                   td: HTMLTableCellElement,
                                   row: number,
                                   col: number,
                                   prop: string | number,
                                   value: any,
-                                  cellProperties: Handsontable.CellProperties
+                                  cellProperties: Handsontable.CellProperties,
                                 ) {
-                                  Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+                                  Handsontable.renderers.TextRenderer.apply(this, [
+                                    instance,
+                                    td,
+                                    row,
+                                    col,
+                                    prop,
+                                    value,
+                                    cellProperties,
+                                  ]);
                                   if (row === 0) {
                                     td.style.fontWeight = 'bold';
                                     if (whereDuplicates?.includes(index)) {
                                       td.style.color = 'red';
                                     }
                                   }
-                                }
-                              }
+                                },
+                              },
                             ]}
                             licenseKey="non-commercial-and-evaluation"
                             className="custom-handsontable"
@@ -310,7 +357,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                               className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
                               htmlFor={`${key}-original`}
                             >
-                              <strong className='fw-semibold'>{key}</strong> (original value)
+                              <strong className="fw-semibold">{key}</strong> (original value)
                             </label>
 
                             {Object.entries(standardizedData[key]).map(([subKey, value], index, array) => (
@@ -342,19 +389,18 @@ export const StandardizeMetadataModal = (props: Props) => {
                 ))}
               </form>
             </>
-          ) : isFetching ? 
-
-            <div className='row text-center my-5'>
+          ) : isFetching ? (
+            <div className="row text-center my-5">
               <LoadingSpinner />
             </div>
-           : 
-          null
-        }
+          ) : null}
 
           <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
           <div>
             {whereDuplicates !== null && (
-              <div className="text-danger me-auto mt-3 pt-2 d-inline-block">Warning: ensure no duplicate column names have been selected.</div>
+              <div className="text-danger me-auto mt-3 pt-2 d-inline-block">
+                Warning: ensure no duplicate column names have been selected.
+              </div>
             )}
             <button
               className="btn btn-secondary mt-3 mb-1 float-end"
