@@ -739,8 +739,8 @@ body {
   color: inherit;
 }
 
-.star-button:hover,
-.starred-button:hover {
+.dropdown .star-button:hover,
+.dropdown .starred-button:hover {
   box-shadow: inset -1px 0 0 0px black !important;
 }
 

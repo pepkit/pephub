@@ -18,6 +18,7 @@ import { canEdit } from '../../utils/permissions';
 import { downloadZip } from '../../utils/project';
 import { ProjectHistoryModal } from '../modals/project-history';
 import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
+import { ProjectStars } from './project-stars'
 
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
 import { useSampleTable } from '../../hooks/queries/useSampleTable'
@@ -42,7 +43,7 @@ export const ProjectHeaderBar = (props: Props) => {
   const { namespace, projectName, tag, forceTraditionalInterface, setForceTraditionalInterface } = useProjectPage();
 
   // add star and remove star mutations
-  const { data: stars } = useNamespaceStars(user?.login, {}, true);
+  const { data: stars, isLoading } = useNamespaceStars(user?.login, {}, true);
   const { isPending: isAddingStar, addStar } = useAddStar(user?.login);
   const { isPending: isRemovingStar, removeStar } = useRemoveStar(user?.login);
 
@@ -147,6 +148,10 @@ export const ProjectHeaderBar = (props: Props) => {
             </button>
           </div>
         </div>
+        {projectInfo && !isLoading ? 
+          <ProjectStars project={projectInfo} isStarred={isStarred} starNumber={projectInfo.stars_number} />
+          : null
+        }
         <Dropdown>
           <Dropdown.Toggle size="sm" variant="dark">
             <i className="bi bi-gear-fill me-1"></i>
@@ -211,51 +216,6 @@ export const ProjectHeaderBar = (props: Props) => {
             </Fragment>
           </Dropdown.Menu>
         </Dropdown>
-        <button
-          className="btn btn-outline-dark btn-sm"
-          disabled={isAddingStar || isRemovingStar}
-          onClick={() => {
-            if (!user) {
-              login();
-              return;
-            }
-            if (isStarred) {
-              removeStar({
-                namespaceToRemove: projectInfo?.namespace!,
-                projectNameToRemove: projectInfo?.name!,
-                projectTagToRemove: projectInfo?.tag!,
-              });
-            } else {
-              addStar({
-                namespaceToStar: projectInfo?.namespace!,
-                projectNameToStar: projectInfo?.name!,
-                projectTagToStar: projectInfo?.tag!,
-              });
-            }
-          }}
-        >
-          {isStarred ? (
-            <Fragment>
-              <span className="text-primary">
-                <i className="me-1 bi bi-star-fill"></i>
-                Starred
-                <span className="px-2 border border-dark rounded-pill text-dark ms-1 bg-dark bg-opacity-10">
-                  {numberWithCommas(projectInfo?.stars_number || 0)}
-                </span>
-              </span>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <span>
-                <i className="me-1 bi bi-star"></i>
-                Star
-                <span className="px-2 border border-dark rounded-pill text-dark ms-1 bg-dark bg-opacity-10">
-                  {numberWithCommas(projectInfo?.stars_number || 0)}
-                </span>
-              </span>
-            </Fragment>
-          )}
-        </button>
       </div>
       <EditMetaMetadataModal
         show={showEditMetaMetadataModal}
