@@ -27,7 +27,7 @@ export const DownloadGeo = (props: Props) => {
         Each archive is slightly over 1 gb in size.
       </p>
       {data ? <NamespaceArchiveTable data={data} /> : 
-        <p className='text-center mt-1 fw-semibold'>No archives currently exist for this namespace.</p>
+        <p className='text-center mt-3 fw-semibold'>No archives currently exist for this namespace.</p>
       }
     </div>
   );

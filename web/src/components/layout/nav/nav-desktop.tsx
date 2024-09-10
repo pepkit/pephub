@@ -135,7 +135,7 @@ export const NavDesktop = () => {
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="/schemas">
-          <i className="bi bi-globe2 me-1 text-base align-top"></i>Schemas
+          <i className="bi bi-globe2 me-1 text-base align-top"></i>Browse
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
