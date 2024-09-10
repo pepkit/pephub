@@ -43,7 +43,7 @@ export const ProjectHeaderBar = (props: Props) => {
   const { namespace, projectName, tag, forceTraditionalInterface, setForceTraditionalInterface } = useProjectPage();
 
   // add star and remove star mutations
-  const { data: stars } = useNamespaceStars(user?.login, {}, true);
+  const { data: stars, isLoading } = useNamespaceStars(user?.login, {}, true);
   const { isPending: isAddingStar, addStar } = useAddStar(user?.login);
   const { isPending: isRemovingStar, removeStar } = useRemoveStar(user?.login);
 
@@ -65,11 +65,6 @@ export const ProjectHeaderBar = (props: Props) => {
   // is starred?
   const isStarred =
     stars?.find((star) => star.namespace === projectInfo?.namespace && star.name === projectInfo?.name) !== undefined;
-
-  const [localStarred, setLocalStarred] = useState(isStarred);
-
-  console.log('localStarred ' + localStarred)
-  console.log('isStarred ' + isStarred)
 
   // watch for the fork query param to open the fork modal
   useEffect(() => {
@@ -153,7 +148,7 @@ export const ProjectHeaderBar = (props: Props) => {
             </button>
           </div>
         </div>
-        {projectInfo ? 
+        {projectInfo && !isLoading ? 
           <ProjectStars project={projectInfo} isStarred={isStarred} starNumber={projectInfo.stars_number} />
           : null
         }

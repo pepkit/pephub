@@ -16,7 +16,7 @@ interface Props {
 export const ProjectCard: FC<Props> = ({ project }) => {
   const { user } = useSession();
 
-  const { data: stars } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
+  const { data: stars, isLoading } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
 
   // state
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
@@ -55,15 +55,19 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             </span>
           ) : null}
         </div>
-        <ProjectCardDropdown
-          project={project}
-          isStarred={!!isStarred}
-          copied={copied}
-          setCopied={setCopied}
-          setShowDeletePEPModal={setShowDeletePEPModal}
-          setShowForkPEPModal={setShowForkPEPModal}
-          starNumber={project.stars_number || 0}
-        />
+        { !isLoading ? 
+          <ProjectCardDropdown
+            project={project}
+            isStarred={!!isStarred}
+            copied={copied}
+            setCopied={setCopied}
+            setShowDeletePEPModal={setShowDeletePEPModal}
+            setShowForkPEPModal={setShowForkPEPModal}
+            starNumber={project?.stars_number}
+          />
+          : null          
+        }
+        
       </div>
       <div className="mb-0">
         {project.description ? (

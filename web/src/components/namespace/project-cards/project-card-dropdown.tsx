@@ -29,6 +29,9 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
 
   const [localStarred, setLocalStarred] = useState(isStarred);
 
+  console.log('isStarred ' + project?.name + ' ' + isStarred)
+  console.log('localStarred ' + project?.name + ' ' + localStarred)
+
   return (
     <Dropdown as={ButtonGroup}>
       <Button
@@ -57,7 +60,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
       >
         {isStarred ? (
           <div className="d-flex align-items-center text-sm">
-            <i className="bi bi-star-fill me-1" style={{padding: '0 2px .5px 0'}}></i>
+            <i className="bi bi-star-fill me-1 position-relative" style={{paddingRight: '2px', marginTop: '-0.666666px'}}></i>
             <span className='fw-semibold'>
               <Fragment>
                 {copied ? 'Copied!' : (localStarred ? numberWithCommas(starNumber) : numberWithCommas(starNumber + 1))}
@@ -66,7 +69,7 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
           </div>
         ) : (
           <div className="d-flex align-items-center text-sm">
-            <i className="bi bi-star me-1" style={{padding: '0 2px .5px 0'}}></i>
+            <i className="bi bi-star me-1 position-relative" style={{paddingRight: '2px', marginTop: '-0.666666px'}}></i>
             <span className='fw-normal'>
               <Fragment>
                 {copied ? 'Copied!' : (localStarred ? numberWithCommas(starNumber - 1) : numberWithCommas(starNumber))}

@@ -23,6 +23,9 @@ export const ProjectStars: FC<Props> = (props) => {
 
   const [localStarred, setLocalStarred] = useState(isStarred);
 
+  console.log('isStarred ' + isStarred)
+  console.log('localStarred ' + localStarred)
+
   return (
     <Button
       disabled={isAddingStar || isRemovingStar}
@@ -53,7 +56,7 @@ export const ProjectStars: FC<Props> = (props) => {
           <i className="bi bi-star-fill me-1 position-relative" style={{paddingRight: '2px', marginTop: '-0.666666px'}}></i>
           <span className='fw-semibold'>
             <Fragment>
-              {(localStarred ? numberWithCommas(starNumber) : numberWithCommas(starNumber + 1))}
+              {(localStarred ? numberWithCommas(starNumber) : numberWithCommas(starNumber + 1))} {((localStarred && starNumber === 1) || (!localStarred && starNumber + 1 === 1)) ? 'Star' : 'Stars'}
             </Fragment>
           </span>
         </div>
@@ -62,7 +65,7 @@ export const ProjectStars: FC<Props> = (props) => {
           <i className="bi bi-star me-1 position-relative" style={{paddingRight: '2px', marginTop: '-0.666666px'}}></i>
           <span className='fw-normal'>
             <Fragment>
-              {(localStarred ? numberWithCommas(starNumber - 1) : numberWithCommas(starNumber))}
+              {(localStarred ? numberWithCommas(starNumber - 1) : numberWithCommas(starNumber))} {((localStarred && starNumber - 1 === 1) || (!localStarred && starNumber === 1)) ? 'Star' : 'Stars'}
             </Fragment>
           </span>
         </div>
