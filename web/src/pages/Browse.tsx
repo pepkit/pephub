@@ -16,7 +16,7 @@ import { Markdown } from '../components/markdown/render';
 import { ProjectAccordion } from '../components/browse/project-accordion'
 import { NamespaceLongRow } from '../components/browse/namespace-long-row'
 
-type View = 'namespaces' | 'schemas';
+type View = 'peps' | 'schemas';
 
 const NoSchemas = () => {
   return (
@@ -36,8 +36,7 @@ export function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const viewFromUrl = searchParams.get('view') as View;
 
-  const [view, setView] = useState<View>(viewFromUrl || 'namespaces');
-
+  const [view, setView] = useState<View>(viewFromUrl || 'peps');
 
   const [limit, setLimit] = useState(25);
   const [offset, setOffset] = useState(0);
@@ -54,7 +53,6 @@ export function Browse() {
     limit: 10,
     offset: 0,
     orderBy: 'update_date',
-    // @ts-ignore - just for now, I know this will work fine
     order: 'asc',
     search: '',
     type: 'pep',
@@ -189,9 +187,9 @@ export function Browse() {
             className='border border-2 border-light-subtle rounded rounded-3 bg-body-secondary mt-3 w-50 mx-auto' 
           >
             <Nav.Item>
-              <Nav.Link eventKey="namespaces" className="px-2 py-1 me-1">
+              <Nav.Link eventKey="peps" className="px-2 py-1 me-1">
                 <i className="bi bi-people-fill me-1"></i>
-                Popular Namespaces
+                Popular PEPs
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>
@@ -203,7 +201,7 @@ export function Browse() {
           </Nav>
         </div>
 
-        {view === 'namespaces' ?
+        {view === 'peps' ?
           <>
             <div className='row mt-4'>
               <div className='col-1'></div>

@@ -41,7 +41,7 @@ export const SchemaHeader = (props: Props) => {
     <div className="p-2 w-100">
       <div className="d-flex align-items-center justify-content-between w-100">
         <Breadcrumb className="fw-bold pt-2">
-          <Breadcrumb.Item href="/schemas">schemas</Breadcrumb.Item>
+          <Breadcrumb.Item href="/browse?view=schemas">schemas</Breadcrumb.Item>
           <Breadcrumb.Item href={`/schemas/${namespace}`}>{namespace}</Breadcrumb.Item>
           <Breadcrumb.Item active>{schema}</Breadcrumb.Item>
         </Breadcrumb>

@@ -73,7 +73,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/schemas',
+    path: '/browse',
     element: <Browse />,
   },
   {
