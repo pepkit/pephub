@@ -8,7 +8,8 @@ body {
   transition: all 180ms;
 }
 
-.namespace-nav .nav-link:hover {
+.namespace-nav .nav-link:hover,
+.namespace-card:hover {
   background-color: #052c6512;
   color: #052c65;
 }
@@ -778,7 +779,7 @@ body {
   background-color: white !important;
   color: black !important;
   box-shadow: .5px 1px 7px 1px #00000010 !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
 }
 
 .modal-pill .nav-pills .nav-item {
@@ -809,7 +810,7 @@ body {
 
 .modal-pill .nav-tabs .nav-link.active { 
   color: black !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
 }
 
 .modal-pill .nav-tabs .nav-link { 
@@ -868,6 +869,27 @@ body {
 
 .forked-link a {
   color: #052c65cf;
+}
+
+.scroll-track-none::-webkit-scrollbar {
+  width: 3px;
+  height: 6px;
+}
+
+.scroll-track-none::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.scroll-track-none::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+.scroll-track-none::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.10), inset 0 -1px 0 rgba(0, 0, 0, 0.07);
+  border-radius: .375em;
 }
 
 @keyframes pulse-fast {

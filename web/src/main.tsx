@@ -5,6 +5,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 // css
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'handsontable/dist/handsontable.full.min.css';
+import "bootstrap/dist/js/bootstrap.bundle.min.js"
 // Language
 // handsontable stuff
 import { registerAllModules } from 'handsontable/registry';
@@ -26,7 +27,7 @@ import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
 import { Schema } from './pages/Schema';
-import { Schemas } from './pages/Schemas';
+import { Browse } from './pages/Browse';
 import { SearchPage } from './pages/Search';
 import { EidoValidator } from './pages/Validator';
 
@@ -72,8 +73,8 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/schemas',
-    element: <Schemas />,
+    path: '/browse',
+    element: <Browse />,
   },
   {
     path: '/schemas/:namespace',

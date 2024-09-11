@@ -80,7 +80,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
               }}
               className="top-z w-100"
               options={[
-                { value: null, label: "Default view" },
+                { value: null, label: "Default View" },
                 ...(projectViews?.views.map((view) => ({
                   view: view.name,
                   description: view.description || 'No description',
@@ -115,7 +115,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
               }
               value={
                 view === undefined 
-                  ? { value: null, label: "Default view" } 
+                  ? { value: null, label: "Default View" } 
                   : { view: view, description: view, value: view, label: view }
               }
             />

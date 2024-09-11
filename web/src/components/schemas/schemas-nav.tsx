@@ -33,7 +33,7 @@ export const SchemasNav = (props: Props) => {
     <div className="d-flex flex-column align-items-center gap-2">
       <div className="d-flex align-items-center justify-content-between w-100">
         <div className="d-flex align-items-center">
-          <h1 className="m-0 fw-bold">PEPhub schemas</h1>
+          <h3 className="m-0 fw-semibold">PEPhub schemas</h3>
         </div>
         {user && (
           <div className="d-flex align-items-center gap-1">
