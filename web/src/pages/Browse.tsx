@@ -205,7 +205,7 @@ export function Browse() {
 
         {view === 'namespaces' ?
           <>
-            <div className='row my-4'>
+            <div className='row mt-4'>
               <div className='col-1'></div>
               {selectedNamespace === undefined ? 
                 <div className='mt-2'>
@@ -216,7 +216,7 @@ export function Browse() {
                   {renderRow(20, 25)}
                 </div>
                 : 
-                <div className='mt-1'>
+                <div className='mt-1 mb-3'>
                   <NamespaceLongRow
                     namespaces={namespaces?.data?.results}
                     selectedNamespace={selectedNamespace}
@@ -228,13 +228,29 @@ export function Browse() {
             </div>
 
             <div className='row mt-0'>
-              {topNamespace?.data?.results ? <ProjectAccordion projects={topNamespace?.data?.results} />
-              : selectedNamespace ?
-              <div className='col-12 mt-4 text-center'>
-                <LoadingSpinner />
+              <div className='col-12'>
+                {topNamespace?.data?.results ? 
+                  <>
+                    <div className='text-center'>
+                      <a
+                        className='fs-6 fw-semibold text-decoration-none text-reset dark-link'
+                        href={`${selectedNamespace}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Visit {selectedNamespace} <i className='bi bi-caret-right-fill'/>
+                      </a>
+                    </div>
+                    <ProjectAccordion projects={topNamespace?.data?.results} />
+                    <p className='text-sm fw-medium text-center mt-2'>Want to see more? Visit the namespace to view remaining projects.</p>
+                  </>
+                : selectedNamespace ?
+                <div className='col-12 mt-4 text-center'>
+                  <LoadingSpinner />
+                </div>
+                : null
+                }
               </div>
-              : null
-              }
             </div>
           </>
           : 

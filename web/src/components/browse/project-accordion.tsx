@@ -15,7 +15,7 @@ export const ProjectAccordion = (props: Props) => {
   const projectItems = Object.entries(projects).filter(([key]) => key !== 'length');
 
   return (
-    <div className="accordion" id="projectAccordion">
+    <div className="accordion mt-2" id="projectAccordion">
       {projectItems.map(([key, project], index) => (
         <div className="accordion-item shadow-sm" key={key}>
           <h2 className="accordion-header" id={`heading${key}`}>
