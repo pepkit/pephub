@@ -59,7 +59,6 @@ export const NamespacePage = () => {
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
-  const [showGeoDownloadModal, setShowGeoDownloadModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [view, setView] = useState<View>(viewFromUrl || 'peps');
   const [starSearch, setStarSearch] = useState<string>(searchParams.get('starSearch') || '');
@@ -147,17 +146,6 @@ export const NamespacePage = () => {
               <i className="bi bi-hdd-rack me-1"></i>
               API
             </button>
-            {namespace === 'geo' && (
-              <button
-                className="btn btn-sm btn-dark"
-                onClick={() => {
-                  setShowGeoDownloadModal(true);
-                }}
-              >
-                <i className="bi bi-download me-1"></i>
-                Download
-              </button>
-            )}
             {user?.login === namespace && (
               <button className="btn btn-sm btn-dark" onClick={() => setShowSettingsModal(true)}>
                 <i className="bi bi-gear me-1"></i>
