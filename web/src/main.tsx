@@ -26,7 +26,7 @@ import { LoginSuccessPage } from './pages/LoginSuccess';
 import { NamespacePage } from './pages/Namespace';
 import { ProjectPage } from './pages/Project';
 import { Schema } from './pages/Schema';
-import { Schemas } from './pages/Schemas';
+import { Browse } from './pages/Browse';
 import { SearchPage } from './pages/Search';
 import { EidoValidator } from './pages/Validator';
 
@@ -73,7 +73,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/schemas',
-    element: <Schemas />,
+    element: <Browse />,
   },
   {
     path: '/schemas/:namespace',

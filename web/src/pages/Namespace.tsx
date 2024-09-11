@@ -147,7 +147,7 @@ export const NamespacePage = () => {
               <i className="bi bi-hdd-rack me-1"></i>
               API
             </button>
-            {namespace === 'geos' && (
+            {namespace === 'geo' && (
               <button
                 className="btn btn-sm btn-dark"
                 onClick={() => {
@@ -325,8 +325,8 @@ export const NamespacePage = () => {
                 {stars
                   ?.filter(
                     (star) =>
-                      star.description.toLowerCase().includes(starSearch.toLowerCase()) ||
-                      star.name.toLowerCase().includes(starSearch.toLowerCase()),
+                      star.description?.toLowerCase().includes(starSearch.toLowerCase()) ||
+                      star.name?.toLowerCase().includes(starSearch.toLowerCase()),
                   )
                   .map((star) => (
                     <ProjectCard key={star.digest} project={star} />
