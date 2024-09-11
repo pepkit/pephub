@@ -1,24 +1,13 @@
 import { FC, useState, useMemo } from 'react';
 
 import { ArchiveItem, ArchiveResponse } from '../../../api/namespace'
+import { dateStringToDateTime } from '../../../utils/dates'
 
 interface Props {
   data: ArchiveResponse;
 }
 
 const ITEMS_PER_PAGE = 10;
-
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
-};
 
 export const NamespaceArchiveTable: React.FC<Props> = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,7 +83,7 @@ export const NamespaceArchiveTable: React.FC<Props> = ({ data }) => {
               <tr key={result.identifier}>
                 <td>{result.namespace}</td>
                 <td>{result.number_of_projects}</td>
-                <td>{formatDate(result.creation_date)}</td>
+                <td>{dateStringToDateTime(result.creation_date)}</td>
                 <td>{(result.file_size / 1024 / 1024 / 1024).toFixed(2)} gb</td>
                 <td>
                   <a href={result.file_path} className="btn btn-sm btn-secondary" target="_blank" rel="noopener noreferrer">

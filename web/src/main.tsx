@@ -5,6 +5,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 // css
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'handsontable/dist/handsontable.full.min.css';
+import "bootstrap/dist/js/bootstrap.bundle.min.js"
 // Language
 // handsontable stuff
 import { registerAllModules } from 'handsontable/registry';

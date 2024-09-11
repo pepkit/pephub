@@ -47,43 +47,37 @@ export const NamespaceLongRow = (props: Props) => {
     }
   }, [selectedNamespace, scrollToItem]);
 
-  const renderLongRow = () => (
-    <div 
-      ref={containerRef}
-      className="row flex-nowrap overflow-auto py-1" 
-      style={{ scrollSnapType: 'x mandatory' }}
-    >
-      {namespaces ? (
-        Object.values(namespaces).map((item, index) => (
-          <div 
-            key={index} 
-            ref={(el) => { itemRefs.current[item.namespace] = el; }}
-            className="col-2 flex-shrink-0" 
-            style={{ scrollSnapAlign: 'start' }}
-          >
-            <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
-              <div className="card-body text-center px-0">
-                <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
-                  <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
-                    {index + 1}. {item?.namespace}
-                  </a>
-                </p>
-                <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
-                  {item?.number_of_projects} Projects
-                </p>
-              </div>
-            </div>
-          </div>
-        ))
-      ) : null}
-    </div>
-  );
-
   return (
     <div className="position-relative">
-      {renderLongRow()}
-      <span><i className='bi bi-caret-left-fill'/></span>
-      <span><i className='bi bi-caret-right-fill float-end'/></span>
+      <div 
+        ref={containerRef}
+        className="row flex-nowrap overflow-auto pb-2 scroll-track-none" 
+        style={{ scrollSnapType: 'x mandatory' }}
+      >
+        {namespaces && (
+          Object.values(namespaces).map((item, index) => (
+            <div 
+              key={index} 
+              ref={(el) => { itemRefs.current[item.namespace] = el; }}
+              className="col-2 flex-shrink-0" 
+              style={{ scrollSnapAlign: 'start' }}
+            >
+              <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
+                <div className="card-body text-center px-0">
+                  <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
+                    <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
+                      {index + 1}. {item?.namespace}
+                    </a>
+                  </p>
+                  <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
+                    {item?.number_of_projects} Projects
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

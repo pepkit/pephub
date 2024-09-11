@@ -2,9 +2,7 @@ import { useState } from 'react';
 
 import { Markdown } from '../markdown/render';
 import { ProjectAnnotation } from '../../../types';
-
-import 'bootstrap/dist/css/bootstrap.min.css'
-import "bootstrap/dist/js/bootstrap.bundle.min.js"
+import { dateStringToDateTime } from '../../utils/dates'
 
 type Props = {
   projects: ProjectAnnotation[];
@@ -12,22 +10,9 @@ type Props = {
 
 export const ProjectAccordion = (props: Props) => {
   const { projects } = props;
-  const [openIndex, setOpenIndex] = useState(null);
 
   // Filter out the 'length' property
   const projectItems = Object.entries(projects).filter(([key]) => key !== 'length');
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
 
   return (
     <div className="accordion" id="projectAccordion">
@@ -58,8 +43,8 @@ export const ProjectAccordion = (props: Props) => {
                 <div className='col'>
                   {project.description ? <Markdown>{project.description}</Markdown> : <p className='fst-italic'>No description</p>}
                   <p className='m-0 text-sm'><span className='fw-semibold'>Sample Count:</span> {project.number_of_samples}</p>
-                  <p className='m-0 text-sm'><span className='fw-semibold'>Created:</span> {formatDate(project.submission_date)}</p>
-                  <p className='m-0 text-sm'><span className='fw-semibold'>Updated:</span> {formatDate(project.last_update_date)}</p>
+                  <p className='m-0 text-sm'><span className='fw-semibold'>Created:</span> {dateStringToDateTime(project.submission_date)}</p>
+                  <p className='m-0 text-sm'><span className='fw-semibold'>Updated:</span> {dateStringToDateTime(project.last_update_date)}</p>
                 </div>
                 <div className='col-1 d-flex align-items-center justify-content-end'>
                   <a

@@ -871,6 +871,27 @@ body {
   color: #052c65cf;
 }
 
+.scroll-track-none::-webkit-scrollbar {
+  width: 3px;
+  height: 6px;
+}
+
+.scroll-track-none::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.scroll-track-none::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+.scroll-track-none::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.10), inset 0 -1px 0 rgba(0, 0, 0, 0.07);
+  border-radius: .375em;
+}
+
 @keyframes pulse-fast {
   0%, 88%, 100% { opacity: 1; }
   10% { opacity: 0.5; }
