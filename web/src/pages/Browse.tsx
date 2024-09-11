@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink, useParams, useSearchParams } from 'react-router-dom';
 
@@ -14,6 +14,7 @@ import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
 import { LoadingSpinner } from '../components/spinners/loading-spinner';
 import { Markdown } from '../components/markdown/render';
 import { ProjectAccordion } from '../components/browse/project-accordion'
+import { NamespaceLongRow } from '../components/browse/namespace-long-row'
 
 type View = 'namespaces' | 'schemas';
 
@@ -48,7 +49,7 @@ export function Browse() {
 
   const searchDebounced = useDebounce(search, 500);
 
-  const namespaces = useBiggestNamespace(10);
+  const namespaces = useBiggestNamespace(25);
   const topNamespace = useNamespaceProjects(selectedNamespace, {
     limit: 10,
     offset: 0,
@@ -58,13 +59,11 @@ export function Browse() {
     search: '',
     type: view === 'pep',
   });
-
-  console.log(namespaces?.data?.results[0].namespace)
   
   const handleSelectNamespace = (selectedNamespace) => {
     setSelectedNamespace(prevSelectedNamespace => 
-    prevSelectedNamespace === selectedNamespace ? null : selectedNamespace
-  );
+      prevSelectedNamespace === selectedNamespace ? null : selectedNamespace
+    );
   }
 
   const handleNavSelect = (eventKey: string | null) => {
@@ -116,7 +115,7 @@ export function Browse() {
   }
 
   const renderRow = (startIndex, endIndex) => (
-    <div className='row mb-5'>
+    <div className='row mb-4'>
       <div className='col-1'></div>
       {namespaces?.data?.results ? (
         Object.values(namespaces.data.results)
@@ -144,12 +143,21 @@ export function Browse() {
 
   const renderLongRow = () => (
     <div className="position-relative">
-      <div className="row flex-nowrap overflow-auto py-1" style={{ scrollSnapType: 'x mandatory' }}>
+      <div 
+        // ref={containerRef}
+        className="row flex-nowrap overflow-auto py-4" 
+        style={{ scrollSnapType: 'x mandatory' }}
+      >
         {namespaces?.data?.results ? (
           Object.values(namespaces.data.results).map((item, index) => (
-            <div key={index} className="col-2 flex-shrink-0" style={{ scrollSnapAlign: 'start' }}>
+             <div 
+              key={index} 
+              // ref={el => itemRefs.current[item.namespace] = el}
+              className="col-2 flex-shrink-0" 
+              style={{ scrollSnapAlign: 'start' }}
+            >
               <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
-                <div className="card-body text-center">
+                <div className="card-body text-center px-0">
                   <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
                     <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
                       {index + 1}. {item?.namespace}
@@ -200,15 +208,20 @@ export function Browse() {
             <div className='row my-4'>
               <div className='col-1'></div>
               {selectedNamespace === null ? 
-                <div className='mt-5'>
+                <div className='mt-2'>
                   {renderRow(0, 5)}
                   {renderRow(5, 10)}
+                  {renderRow(10, 15)}
+                  {renderRow(15, 20)}
+                  {renderRow(20, 25)}
                 </div>
                 : 
                 <div className='mt-1'>
-                  {renderLongRow()}
-                  <span><i className='bi bi-caret-left-fill'/></span>
-                  <span><i className='bi bi-caret-right-fill float-end'/></span>
+                  <NamespaceLongRow
+                    namespaces={namespaces}
+                    selectedNamespace={selectedNamespace}
+                    handleSelectNamespace={handleSelectNamespace}
+                  />
                 </div>
               }
               <div className='col-1'></div>
@@ -225,7 +238,7 @@ export function Browse() {
             </div>
           </>
           : 
-          <div className="mt-4">
+          <div className="mt-2">
             <SchemasNav
               limit={limit}
               setLimit={setLimit}

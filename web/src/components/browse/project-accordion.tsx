@@ -48,12 +48,24 @@ export const ProjectAccordion = ({ projects }) => {
             data-bs-parent="#projectAccordion"
           >
             <div className="accordion-body">
-
-              {project.description ? <Markdown>{project.description}</Markdown> : <p className='fst-italic'>No description</p>}
-              <p className='m-0 text-sm'><span className='fw-semibold'>Sample Count:</span> {project.number_of_samples}</p>
-              <p className='m-0 text-sm'><span className='fw-semibold'>Created:</span> {formatDate(project.submission_date)}</p>
-              <p className='m-0 text-sm'><span className='fw-semibold'>Updated:</span> {formatDate(project.last_update_date)}</p>
-              
+              <div className='row'>
+                <div className='col'>
+                  {project.description ? <Markdown>{project.description}</Markdown> : <p className='fst-italic'>No description</p>}
+                  <p className='m-0 text-sm'><span className='fw-semibold'>Sample Count:</span> {project.number_of_samples}</p>
+                  <p className='m-0 text-sm'><span className='fw-semibold'>Created:</span> {formatDate(project.submission_date)}</p>
+                  <p className='m-0 text-sm'><span className='fw-semibold'>Updated:</span> {formatDate(project.last_update_date)}</p>
+                </div>
+                <div className='col-1 d-flex align-items-center justify-content-end'>
+                  <a
+                    className='btn btn-dark fw-medium'
+                    href={`${project.namespace}/${project.name}?tag=${project.tag}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Go <i className='bi bi-caret-right-fill'/>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
