@@ -45,7 +45,7 @@ export function Browse() {
   const [orderBy, setOrderBy] = useState('update_date');
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [showCreateSchemaModal, setShowCreateSchemaModal] = useState(false);
-  const [selectedNamespace, setSelectedNamespace] = useState(null)
+  const [selectedNamespace, setSelectedNamespace] = useState<string | undefined>(undefined);
 
   const searchDebounced = useDebounce(search, 500);
 
@@ -57,12 +57,12 @@ export function Browse() {
     // @ts-ignore - just for now, I know this will work fine
     order: 'asc',
     search: '',
-    type: view === 'pep',
+    type: 'pep',
   });
   
-  const handleSelectNamespace = (selectedNamespace) => {
-    setSelectedNamespace(prevSelectedNamespace => 
-      prevSelectedNamespace === selectedNamespace ? null : selectedNamespace
+  const handleSelectNamespace = (selectedNamespace: string) => {
+    setSelectedNamespace((prevSelectedNamespace: string | undefined) => 
+      prevSelectedNamespace === selectedNamespace ? undefined : selectedNamespace
     );
   }
 
@@ -114,13 +114,13 @@ export function Browse() {
     );
   }
 
-  const renderRow = (startIndex, endIndex) => (
+  const renderRow = (startIndex: number, endIndex: number) => (
     <div className='row mb-4'>
       <div className='col-1'></div>
       {namespaces?.data?.results ? (
         Object.values(namespaces.data.results)
           .slice(startIndex, endIndex)
-          .map((item, index) => (
+          .map((item, index: number) => (
             <div key={startIndex + index} className="col-2">
               <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
                 <div className="card-body text-center">
@@ -207,7 +207,7 @@ export function Browse() {
           <>
             <div className='row my-4'>
               <div className='col-1'></div>
-              {selectedNamespace === null ? 
+              {selectedNamespace === undefined ? 
                 <div className='mt-2'>
                   {renderRow(0, 5)}
                   {renderRow(5, 10)}
@@ -218,7 +218,7 @@ export function Browse() {
                 : 
                 <div className='mt-1'>
                   <NamespaceLongRow
-                    namespaces={namespaces}
+                    namespaces={namespaces?.data?.results}
                     selectedNamespace={selectedNamespace}
                     handleSelectNamespace={handleSelectNamespace}
                   />

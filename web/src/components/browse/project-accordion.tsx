@@ -1,17 +1,23 @@
 import { useState } from 'react';
 
 import { Markdown } from '../markdown/render';
+import { ProjectAnnotation } from '../../../types';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import "bootstrap/dist/js/bootstrap.bundle.min.js"
 
-export const ProjectAccordion = ({ projects }) => {
+type Props = {
+  projects: ProjectAnnotation[];
+};
+
+export const ProjectAccordion = (props: Props) => {
+  const { projects } = props;
   const [openIndex, setOpenIndex] = useState(null);
 
   // Filter out the 'length' property
   const projectItems = Object.entries(projects).filter(([key]) => key !== 'length');
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
       year: 'numeric',

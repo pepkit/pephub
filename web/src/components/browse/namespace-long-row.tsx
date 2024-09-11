@@ -1,29 +1,43 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 
-export const NamespaceLongRow = ({ namespaces, selectedNamespace, handleSelectNamespace }) => {
-  const containerRef = useRef(null);
-  const itemRefs = useRef({});
+import { BiggestNamespaceResults } from '../../../types';
 
-  const isInViewport = (element) => {
+type Props = {
+  namespaces: BiggestNamespaceResults[] | undefined;
+  selectedNamespace: string | undefined;
+  handleSelectNamespace: (selectedNamespace: string) => void;
+};
+
+export const NamespaceLongRow = (props: Props) => {
+  const {
+    namespaces,
+    selectedNamespace,
+    handleSelectNamespace
+  } = props;
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  const isInViewport = (element: HTMLElement): boolean => {
     const rect = element.getBoundingClientRect();
+    const padding = 12; // Adjust this value to increase or decrease the padding
+
     return (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      rect.top >= 0 - padding &&
+      rect.left >= 0 - padding &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + padding &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth) + padding
     );
   };
 
-  const scrollToItem = useCallback((namespace) => {
-    if (itemRefs.current[namespace]) {
-      const element = itemRefs.current[namespace];
-      if (!isInViewport(element)) {
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'start'
-        });
-      }
+  const scrollToItem = useCallback((namespace: string) => {
+    const element = itemRefs.current[namespace];
+    if (element && !isInViewport(element)) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'start'
+      });
     }
   }, []);
 
@@ -39,11 +53,11 @@ export const NamespaceLongRow = ({ namespaces, selectedNamespace, handleSelectNa
       className="row flex-nowrap overflow-auto py-1" 
       style={{ scrollSnapType: 'x mandatory' }}
     >
-      {namespaces?.data?.results ? (
-        Object.values(namespaces.data.results).map((item, index) => (
+      {namespaces ? (
+        Object.values(namespaces).map((item, index) => (
           <div 
             key={index} 
-            ref={el => itemRefs.current[item.namespace] = el}
+            ref={(el) => { itemRefs.current[item.namespace] = el; }}
             className="col-2 flex-shrink-0" 
             style={{ scrollSnapAlign: 'start' }}
           >
