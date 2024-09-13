@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { Markdown } from '../markdown/render';
 import { ProjectAnnotation } from '../../../types';
-import { dateStringToDateTime } from '../../utils/dates'
+import { dateStringToDateTime, dateStringToDateTimeShort } from '../../utils/dates'
 
 type Props = {
   projects: ProjectAnnotation[];
@@ -29,7 +29,14 @@ export const ProjectAccordion = (props: Props) => {
             >
               <span style={{minWidth: '2.5em'}}>{index + 1}.</span>
               <span className='w-75'>{project.namespace}/<span className='fw-semibold'>{project.name}</span>:{project.tag}</span>
-              <span style={{marginLeft: '10em', minWidth: '4.5em'}} className='text-center text-sm border border-dark rounded-2 px-2 py-1'>{project.stars_number} Stars</span>
+              
+              <span className='text-xs text-start d-flex justify-content-between' style={{width: '15%'}}>
+
+                <span className='ps-1' style={{minWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}><span className='fw-medium'>Sample Count: </span>{project.number_of_samples}</span>
+                <span> | </span>
+                <span className='ps-1' style={{minWidth: '20%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}><span className='fw-medium'>Stars: </span>{project.stars_number}</span>
+
+              </span>
             </button>
           </h2>
           <div
@@ -42,11 +49,10 @@ export const ProjectAccordion = (props: Props) => {
               <div className='row'>
                 <div className='col'>
                   {project.description ? <Markdown>{project.description}</Markdown> : <p className='fst-italic'>No description</p>}
-                  <p className='m-0 text-sm'><span className='fw-semibold'>Sample Count:</span> {project.number_of_samples}</p>
-                  <p className='m-0 text-sm'><span className='fw-semibold'>Created:</span> {dateStringToDateTime(project.submission_date)}</p>
-                  <p className='m-0 text-sm'><span className='fw-semibold'>Updated:</span> {dateStringToDateTime(project.last_update_date)}</p>
+                  <span className='m-0 pe-4 text-sm'><span className='fw-medium'>Created:</span> {dateStringToDateTime(project.submission_date)}</span>
+                  <span className='m-0 text-sm'><span className='fw-medium'>Updated:</span> {dateStringToDateTime(project.last_update_date)}</span>
                 </div>
-                <div className='col-1 d-flex align-items-center justify-content-end'>
+                <div className='col-2 d-flex align-items-center justify-content-end'>
                   <a
                     className='btn btn-dark fw-medium'
                     href={`${project.namespace}/${project.name}?tag=${project.tag}`}

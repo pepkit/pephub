@@ -66,7 +66,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
             }
             style={{ transitionDuration: '250ms' }}
           >
-            <i className="bi bi-card-list"></i>
+            <i className="bi bi-display"></i>
           </button>
         ) : null}
           <div className="w-100" >
