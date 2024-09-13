@@ -363,3 +363,9 @@ export const getNamespaceArchive = (namespace: string) => {
   const url = `${API_BASE}/namespaces/${namespace}/archive`;
   return axios.get<ArchiveResponse>(url).then((res) => res.data);
 };
+
+export const getStandardizerSchemas = (namespace: string) => {
+  const url = `${API_BASE}/namespaces/${namespace}/standardizer_schemas`;
+  return axios.get<string[]>(url).then((res) => res.data);
+};
+

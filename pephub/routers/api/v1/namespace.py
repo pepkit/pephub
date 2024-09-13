@@ -42,6 +42,8 @@ from ....dependencies import (
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...models import FavoriteRequest, ProjectJsonRequest, ProjectRawModel
 
+from attribute_standardizer import AttrStandardizer
+
 load_dotenv()
 
 namespaces = APIRouter(prefix="/api/v1/namespaces", tags=["namespace"])
@@ -454,3 +456,15 @@ async def get_archive(namespace: str, agent: PEPDatabaseAgent = Depends(get_db))
         item.file_path = os.path.join(ARCHIVE_URL_PATH, item.file_path)
 
     return result
+
+
+@namespace.get(
+    "/standardizer_schemas",
+    summary="Get metadata of all archived files of all projects in the namespace",
+)
+async def get_schemas(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+
+    model = AttrStandardizer("ENCODE")
+    schemas = model.get_available_schemas()
+
+    return schemas
