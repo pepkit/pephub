@@ -85,25 +85,25 @@ export const MobileNav = () => {
             <Dropdown.Divider />
           </Fragment>
         )}
-        <Dropdown.Item href="https://github.com/pepkit/pephub">
-          <i className="bi bi-github me-2" />
-          GitHub
+        <Dropdown.Item href="/search">
+          <i className="bi bi-search me-2" />
+          Search
         </Dropdown.Item>
-        <Dropdown.Item href="/schemas">
-          <i className="bi bi-file-earmark-check me-2" />
-          Schemas
+        <Dropdown.Item href="/browse">
+          <i className="bi bi-globe2 me-2" />
+          Browse
         </Dropdown.Item>
         <Dropdown.Item href="/validate">
           <i className="bi bi-check-circle me-2" />
           Validation
         </Dropdown.Item>
-        <Dropdown.Item href="/search">
-          <i className="bi bi-search me-2" />
-          Search
-        </Dropdown.Item>
         <Dropdown.Item href="/about">
-          <i className="bi bi-info-circle me-2" />
+          <i className="bi bi-file-earmark-text me-2" />
           Docs
+        </Dropdown.Item>
+        <Dropdown.Item href="https://github.com/pepkit/pephub">
+          <i className="bi bi-github me-2" />
+          GitHub
         </Dropdown.Item>
         <Dropdown.Divider />
                 <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/discussions" target="_blank" rel="noopener noreferrer">

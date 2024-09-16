@@ -9,6 +9,7 @@ import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProject
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { useStandardize } from '../../hooks/queries/useStandardize';
+import { useStandardizerSchemas } from '../../hooks/queries/useStandardizerSchemas';
 import { formatToPercentage } from '../../utils/etc';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { ProjectMetaEditForm } from '../forms/edit-project-meta';
@@ -31,8 +32,6 @@ type Props = {
 type TabDataRow = string[];
 type TabData = TabDataRow[];
 type SelectedValues = Record<string, string>;
-type AvailableSchemas = 'ENCODE' | 'FAIRTRACKS';
-
 type StandardizedData = Record<string, Record<string, number>>;
 
 export const StandardizeMetadataModal = (props: Props) => {
@@ -50,6 +49,8 @@ export const StandardizeMetadataModal = (props: Props) => {
     setResetStandardizedData,
   } = props;
 
+  const { data: schemaOptions} = useStandardizerSchemas(namespace);
+
   const tabDataRaw = newSamples;
   const tabData = tabDataRaw[0]
     .map((_, colIndex) => tabDataRaw.map((row) => row[colIndex]))
@@ -62,7 +63,7 @@ export const StandardizeMetadataModal = (props: Props) => {
   const originalCols: string[] = useMemo(() => Object.keys(tabData), []);
   const newCols: string[] = Object.keys(tabData);
 
-  const [selectedOption, setSelectedOption] = useState<{ value: AvailableSchemas; label: string } | null>(null);
+  const [selectedOption, setSelectedOption] = useState<{ value: string; label: string } | null>(null);
   const [selectedValues, setSelectedValues] = useState<SelectedValues>({});
   const [whereDuplicates, setWhereDuplicates] = useState<number[] | null>(null);
 
@@ -220,17 +221,11 @@ export const StandardizeMetadataModal = (props: Props) => {
                       styles={{
                         control: (provided) => ({
                           ...provided,
-                          borderRadius: '.333333em', // Left radii set to 0, right radii kept at 4px
+                          borderRadius: '.375em', // Left radii set to 0, right radii kept at 4px
                         }),
                       }}
-                      options={[
-                        // @ts-ignore
-                        { value: 'ENCODE', label: 'ENCODE' },
-                        // @ts-ignore
-                        { value: 'FAIRTRACKS', label: 'Fairtracks' },
-                        // @ts-ignore
-                        { value: 'BEDBASE', label: 'BEDBASE' },
-                      ]}
+                      // @ts-ignore
+                      options={schemaOptions?.map(option => ({ value: option, label: option }))}
                       defaultValue={selectedOption}
                       value={selectedOption}
                       onChange={(selectedOption) => {

@@ -231,7 +231,7 @@ export function Browse() {
                   <>
                     <div className='text-center'>
                       <a
-                        className='fs-6 fw-semibold text-decoration-none text-reset dark-link'
+                        className='fs-6 fw-medium shadow-sm btn btn-outline-dark'
                         href={`${selectedNamespace}`}
                         target="_blank"
                         rel="noopener noreferrer"

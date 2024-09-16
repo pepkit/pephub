@@ -832,6 +832,17 @@ body {
   border-radius: .375rem;
 }
 
+@-moz-document url-prefix() {
+  .breadcrumb-item a,
+  .dark-link {
+    color: #052c65cf !important;
+    text-decoration: none;
+    padding: 5px;
+    margin: -5px 0;
+    border-radius: .375rem;
+  }
+}
+
 .breadcrumb-item a:hover,
 .dark-link:hover {
   color: #052c65 !important;
