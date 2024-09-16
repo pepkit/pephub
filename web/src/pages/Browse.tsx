@@ -1,22 +1,21 @@
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink, useParams, useSearchParams } from 'react-router-dom';
 
+import { NamespaceGrid } from '../components/browse/namespace-grid';
+import { NamespaceLongRow } from '../components/browse/namespace-long-row';
+import { ProjectAccordion } from '../components/browse/project-accordion';
 import { PageLayout } from '../components/layout/page-layout';
+import { Markdown } from '../components/markdown/render';
 import { CreateSchemaModal } from '../components/modals/create-schema-modal';
 import { SchemasPagePlaceholder } from '../components/schemas/placeholders/schemas-page-placeholder';
 import { SchemaCard } from '../components/schemas/schema-card';
 import { SchemasNav } from '../components/schemas/schemas-nav';
+import { LoadingSpinner } from '../components/spinners/loading-spinner';
 import { useAllSchemas } from '../hooks/queries/useAllSchemas';
-import { useDebounce } from '../hooks/useDebounce';
 import { useBiggestNamespace } from '../hooks/queries/useBiggestNamespace';
 import { useNamespaceProjects } from '../hooks/queries/useNamespaceProjects';
-import { LoadingSpinner } from '../components/spinners/loading-spinner';
-import { Markdown } from '../components/markdown/render';
-import { ProjectAccordion } from '../components/browse/project-accordion'
-import { NamespaceLongRow } from '../components/browse/namespace-long-row'
-import { NamespaceGrid } from '../components/browse/namespace-grid'
-
+import { useDebounce } from '../hooks/useDebounce';
 
 type View = 'peps' | 'schemas';
 
@@ -55,17 +54,16 @@ export function Browse() {
     limit: 10,
     offset: 0,
     orderBy: 'stars',
-    // orderBy: 'update_date',
-    order: 'desc',
+    order: 'asc',
     search: '',
     type: 'pep',
   });
-  
+
   const handleSelectNamespace = (selectedNamespace: string) => {
-    setSelectedNamespace((prevSelectedNamespace: string | undefined) => 
-      prevSelectedNamespace === selectedNamespace ? undefined : selectedNamespace
+    setSelectedNamespace((prevSelectedNamespace: string | undefined) =>
+      prevSelectedNamespace === selectedNamespace ? undefined : selectedNamespace,
     );
-  }
+  };
 
   const handleNavSelect = (eventKey: string | null) => {
     if (eventKey === null) {
@@ -115,17 +113,16 @@ export function Browse() {
     );
   }
 
-  
   return (
     <PageLayout title="Browse">
       <div className="p-2">
         <div className="px-0 py-1 modal-pill col-lg-6 col-md-9 col-sm-12 mx-auto">
-          <Nav 
-            variant="pills" 
+          <Nav
+            variant="pills"
             justify
-            defaultActiveKey={view} 
+            defaultActiveKey={view}
             onSelect={handleNavSelect}
-            className='border border-2 border-light-subtle rounded rounded-3 bg-body-secondary mt-3 w-100 mx-auto' 
+            className="border border-2 border-light-subtle rounded rounded-3 bg-body-secondary mt-3 w-100 mx-auto"
           >
             <Nav.Item>
               <Nav.Link eventKey="peps" className="px-2 py-1 me-1">
@@ -142,58 +139,57 @@ export function Browse() {
           </Nav>
         </div>
 
-        {view === 'peps' ?
+        {view === 'peps' ? (
           <>
-            <div className='row mt-4'>
-              {selectedNamespace === undefined ? 
-                <div className='col-12'>
+            <div className="row mt-4">
+              {selectedNamespace === undefined ? (
+                <div className="col-12">
                   <NamespaceGrid
                     namespaces={namespaces?.data?.results}
                     selectedNamespace={selectedNamespace}
                     handleSelectNamespace={handleSelectNamespace}
                   />
                 </div>
-                : 
-                <div className='mt-1 mb-3'>
+              ) : (
+                <div className="mt-1 mb-3">
                   <NamespaceLongRow
                     namespaces={namespaces?.data?.results}
                     selectedNamespace={selectedNamespace}
                     handleSelectNamespace={handleSelectNamespace}
                   />
                 </div>
-              }
+              )}
             </div>
 
-            <div className='row mt-0'>
-              <div className='col-12'>
-                {topNamespace?.data?.results ? 
+            <div className="row mt-0">
+              <div className="col-12">
+                {topNamespace?.data?.results ? (
                   <>
-                    <div className='d-flex flex-wrap align-items-center justify-content-between'>
-                      <div className='fs-6 fw-medium pt-3'>
-                        Top 10 Starred PEPs
-                      </div>
+                    <div className="d-flex flex-wrap align-items-center justify-content-between">
+                      <div className="fs-6 fw-medium pt-3">Top 10 Starred PEPs</div>
                       <a
-                        className='fs-6 fw-medium shadow-sm btn btn-outline-dark mt-2 mt-sm-0'
+                        className="fs-6 fw-medium shadow-sm btn btn-outline-dark mt-2 mt-sm-0"
                         href={`${selectedNamespace}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Visit {selectedNamespace} <i className='bi bi-caret-right-fill'/>
+                        Visit {selectedNamespace} <i className="bi bi-caret-right-fill" />
                       </a>
                     </div>
                     <ProjectAccordion projects={topNamespace?.data?.results} />
-                    <p className='text-sm fw-medium text-center mt-2'>Want to see more? Visit the namespace to view remaining projects.</p>
+                    <p className="text-sm fw-medium text-center mt-2">
+                      Want to see more? Visit the namespace to view remaining projects.
+                    </p>
                   </>
-                : selectedNamespace ?
-                <div className='col-12 mt-4 text-center'>
-                  <LoadingSpinner />
-                </div>
-                : null
-                }
+                ) : selectedNamespace ? (
+                  <div className="col-12 mt-4 text-center">
+                    <LoadingSpinner />
+                  </div>
+                ) : null}
               </div>
             </div>
           </>
-          : 
+        ) : (
           <div className="mt-2">
             <SchemasNav
               limit={limit}
@@ -220,8 +216,7 @@ export function Browse() {
               )}
             </div>
           </div>
-        }
-
+        )}
       </div>
       <CreateSchemaModal
         show={showCreateSchemaModal}
