@@ -15,6 +15,8 @@ import { LoadingSpinner } from '../components/spinners/loading-spinner';
 import { Markdown } from '../components/markdown/render';
 import { ProjectAccordion } from '../components/browse/project-accordion'
 import { NamespaceLongRow } from '../components/browse/namespace-long-row'
+import { NamespaceGrid } from '../components/browse/namespace-grid'
+
 
 type View = 'peps' | 'schemas';
 
@@ -113,60 +115,7 @@ export function Browse() {
     );
   }
 
-  const renderRow = (startIndex: number, endIndex: number) => (
-    <div className='row mb-4'>
-      <div className='col-1'></div>
-      {namespaces?.data?.results ? (
-        Object.values(namespaces.data.results)
-          .slice(startIndex, endIndex)
-          .map((item, index: number) => (
-            <div key={startIndex + index} className="col-2">
-              <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
-                <div className="card-body text-center">
-                  <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
-                    <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
-                      {startIndex + index + 1}. {item?.namespace}
-                    </a>
-                  </p>
-                  <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
-                    {item?.number_of_projects} Projects
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))
-      ) : null}
-      <div className='col-1'></div>
-    </div>
-  );
-
-  const renderNamespaceGrid = () => (
-    <div className="row mt-1">
-      <div className="col-12 col-lg-10 offset-lg-1">
-        <div className="row row-cols-1 row-cols-sm-3 row-cols-xl-5 g-lg-4 g-3">
-          {namespaces?.data?.results ? 
-            Object.values(namespaces.data.results).map((item, index: number) => (
-              <div key={index} className="col">
-                <div className={`card h-100 shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
-                  <div className="card-body text-center d-flex flex-column justify-content-center">
-                    <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
-                      <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
-                        {index + 1}. {item?.namespace}
-                      </a>
-                    </p>
-                    <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
-                      {item?.number_of_projects} Projects
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))
-          : null}
-        </div>
-      </div>
-    </div>
-  );
-
+  
   return (
     <PageLayout title="Browse">
       <div className="p-2">
@@ -198,7 +147,11 @@ export function Browse() {
             <div className='row mt-4'>
               {selectedNamespace === undefined ? 
                 <div className='col-12'>
-                  {renderNamespaceGrid()}
+                  <NamespaceGrid
+                    namespaces={namespaces?.data?.results}
+                    selectedNamespace={selectedNamespace}
+                    handleSelectNamespace={handleSelectNamespace}
+                  />
                 </div>
                 : 
                 <div className='mt-1 mb-3'>
