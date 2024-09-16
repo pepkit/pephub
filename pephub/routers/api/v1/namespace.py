@@ -80,7 +80,9 @@ async def get_namespace_projects(
     offset: int = 0,
     query: str = None,
     admin_list: List[str] = Depends(get_namespace_access_list),
-    order_by: str = "update_date",
+    order_by: Optional[
+        Literal["update_date", "name", "submission_date", "stars"]
+    ] = "update_date",
     order_desc: bool = False,
     filter_by: Annotated[
         Optional[Literal["submission_date", "last_update_date"]],
