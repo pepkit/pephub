@@ -42,7 +42,7 @@ from ....dependencies import (
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...models import FavoriteRequest, ProjectJsonRequest, ProjectRawModel
 
-from attribute_standardizer import AttrStandardizer
+from bedms.const import AVAILABLE_SCHEMAS
 
 load_dotenv()
 
@@ -462,11 +462,8 @@ async def get_archive(namespace: str, agent: PEPDatabaseAgent = Depends(get_db))
 
 @namespace.get(
     "/standardizer_schemas",
-    summary="Get metadata of all archived files of all projects in the namespace",
+    summary="Get all available schemas from BEDMS",
 )
 async def get_schemas(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
 
-    model = AttrStandardizer("ENCODE")
-    schemas = model.get_available_schemas()
-
-    return schemas
+    return AVAILABLE_SCHEMAS

@@ -202,7 +202,7 @@ export const StandardizeMetadataModal = (props: Props) => {
             <i className="bi bi-x-lg"></i>
           </button>
           <p className="text-sm mt-1 mb-3">
-            Use the metadata standardizer powered by BEDms to bring consistency across metadata columns in all of your
+            Use the metadata standardizer powered by BEDMS to bring consistency across metadata columns in all of your
             projects. After choosing a standardizer schema below, compare predicted suggestions (confidence indicated in
             parenthesis) and choose whether to keep or discard them. Column contents are not modified by the
             standardizer. After accepting the changes, save your project for them to take effect.

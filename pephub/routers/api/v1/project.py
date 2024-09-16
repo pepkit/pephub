@@ -57,7 +57,7 @@ from ...models import (
 )
 from .helpers import verify_updated_project
 
-from attribute_standardizer import AttrStandardizer
+from bedms import AttrStandardizer
 
 _LOGGER = logging.getLogger(__name__)
 
