@@ -59,7 +59,7 @@ export const NamespaceLongRow = (props: Props) => {
             <div 
               key={index} 
               ref={(el) => { itemRefs.current[item.namespace] = el; }}
-              className="col-2 flex-shrink-0" 
+              className="col-xl-2 col-md-4 flex-shrink-0" 
               style={{ scrollSnapAlign: 'start' }}
             >
               <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>

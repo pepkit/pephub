@@ -52,8 +52,9 @@ export function Browse() {
   const topNamespace = useNamespaceProjects(selectedNamespace, {
     limit: 10,
     offset: 0,
-    orderBy: 'update_date',
-    order: 'asc',
+    orderBy: 'stars',
+    // orderBy: 'update_date',
+    order: 'desc',
     search: '',
     type: 'pep',
   });
@@ -139,52 +140,43 @@ export function Browse() {
     </div>
   );
 
-  const renderLongRow = () => (
-    <div className="position-relative">
-      <div 
-        // ref={containerRef}
-        className="row flex-nowrap overflow-auto py-4" 
-        style={{ scrollSnapType: 'x mandatory' }}
-      >
-        {namespaces?.data?.results ? (
-          Object.values(namespaces.data.results).map((item, index) => (
-             <div 
-              key={index} 
-              // ref={el => itemRefs.current[item.namespace] = el}
-              className="col-2 flex-shrink-0" 
-              style={{ scrollSnapAlign: 'start' }}
-            >
-              <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
-                <div className="card-body text-center px-0">
-                  <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
-                    <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
-                      {index + 1}. {item?.namespace}
-                    </a>
-                  </p>
-                  <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
-                    {item?.number_of_projects} Projects
-                  </p>
+  const renderNamespaceGrid = () => (
+    <div className="row mt-1">
+      <div className="col-12 col-lg-10 offset-lg-1">
+        <div className="row row-cols-1 row-cols-sm-3 row-cols-xl-5 g-lg-4 g-3">
+          {namespaces?.data?.results ? 
+            Object.values(namespaces.data.results).map((item, index: number) => (
+              <div key={index} className="col">
+                <div className={`card h-100 shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
+                  <div className="card-body text-center d-flex flex-column justify-content-center">
+                    <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
+                      <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
+                        {index + 1}. {item?.namespace}
+                      </a>
+                    </p>
+                    <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
+                      {item?.number_of_projects} Projects
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
-        ) : null}
+            ))
+          : null}
+        </div>
       </div>
     </div>
-  )
+  );
 
   return (
     <PageLayout title="Browse">
       <div className="p-2">
-
-
-        <div className="px-0 py-1 modal-pill">
+        <div className="px-0 py-1 modal-pill col-lg-6 col-md-9 col-sm-12 mx-auto">
           <Nav 
             variant="pills" 
             justify
             defaultActiveKey={view} 
             onSelect={handleNavSelect}
-            className='border border-2 border-light-subtle rounded rounded-3 bg-body-secondary mt-3 w-50 mx-auto' 
+            className='border border-2 border-light-subtle rounded rounded-3 bg-body-secondary mt-3 w-100 mx-auto' 
           >
             <Nav.Item>
               <Nav.Link eventKey="peps" className="px-2 py-1 me-1">
@@ -204,14 +196,9 @@ export function Browse() {
         {view === 'peps' ?
           <>
             <div className='row mt-4'>
-              <div className='col-1'></div>
               {selectedNamespace === undefined ? 
-                <div className='mt-2'>
-                  {renderRow(0, 5)}
-                  {renderRow(5, 10)}
-                  {renderRow(10, 15)}
-                  {renderRow(15, 20)}
-                  {renderRow(20, 25)}
+                <div className='col-12'>
+                  {renderNamespaceGrid()}
                 </div>
                 : 
                 <div className='mt-1 mb-3'>
@@ -222,16 +209,18 @@ export function Browse() {
                   />
                 </div>
               }
-              <div className='col-1'></div>
             </div>
 
             <div className='row mt-0'>
               <div className='col-12'>
                 {topNamespace?.data?.results ? 
                   <>
-                    <div className='text-center'>
+                    <div className='d-flex flex-wrap align-items-center justify-content-between'>
+                      <div className='fs-6 fw-medium pt-3'>
+                        Top 10 Starred PEPs
+                      </div>
                       <a
-                        className='fs-6 fw-medium shadow-sm btn btn-outline-dark'
+                        className='fs-6 fw-medium shadow-sm btn btn-outline-dark mt-2 mt-sm-0'
                         href={`${selectedNamespace}`}
                         target="_blank"
                         rel="noopener noreferrer"
