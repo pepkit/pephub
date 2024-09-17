@@ -272,9 +272,7 @@ export const ViewOptionsModal = (props: Props) => {
                       : 'Select a view'
                   }
                   value={
-                    selectedViewDelete === null
-                      ? null
-                      : {
+                    selectedViewDelete && {
                           view: selectedViewDelete.view,
                           description: selectedViewDelete.description,
                           value: selectedViewDelete.value,

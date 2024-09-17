@@ -1182,22 +1182,3 @@ async def get_standardized_cols(
         )
 
     return StandardizerResponse(results=results)
-
-
-@project.get(
-    "/history/{history_id}/zip",
-    summary="Zip a project history by id",
-    response_class=FileResponse,
-)
-def get_zip_snapshot(
-    namespace: str,
-    project: str,
-    history_id: int,
-    tag: str = DEFAULT_TAG,
-):
-    """
-    Get a project dict from history by id
-    """
-
-    schemas = model.show_available_schemas()
-    return schemas

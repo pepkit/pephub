@@ -77,6 +77,12 @@ const router = createBrowserRouter([
     element: <Browse />,
   },
   {
+    path: '/schemas',
+    loader: async ({ params }) => {
+      return redirect(`/browse`);
+    },
+  },
+  {
     path: '/schemas/:namespace',
     loader: async ({ params }) => {
       const { namespace } = params;

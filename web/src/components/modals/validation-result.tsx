@@ -77,7 +77,7 @@ export const ValidationResultModal = (props: Props) => {
         </h1>
       </Modal.Header>
       <Modal.Body>
-        {currentSchema ? (
+        {currentSchema && (
           <>
           {validationResult?.valid ? (
             <p>Your PEP is valid against the schema.</p>
@@ -91,7 +91,6 @@ export const ValidationResultModal = (props: Props) => {
             </Fragment>
           )}
           </>
-          ) : ( null
         )}
           
         <form className="mb-1">
@@ -127,7 +126,7 @@ export const ValidationResultModal = (props: Props) => {
       </Modal.Body>
       <Modal.Footer>
         <div className="d-flex align-items-center justify-content-between w-100">
-          { currentSchema? 
+          { currentSchema && (
             <div className="d-flex align-items-center">
               <a href={`/schemas/${props.currentSchema}`}>
                 <button className="btn btn-sm btn-outline-dark">
@@ -138,8 +137,7 @@ export const ValidationResultModal = (props: Props) => {
                 </button>
               </a>
             </div>
-            : null
-          }
+          )}
           <button className="btn btn-dark" onClick={onHide}>
             Close
           </button>

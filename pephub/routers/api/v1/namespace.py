@@ -461,7 +461,7 @@ async def get_archive(namespace: str, agent: PEPDatabaseAgent = Depends(get_db))
 
 
 @namespace.get(
-    "/standardizer_schemas",
+    "/standardizer-schemas",
     summary="Get all available schemas from BEDMS",
 )
 async def get_schemas(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):

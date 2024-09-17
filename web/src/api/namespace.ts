@@ -365,7 +365,7 @@ export const getNamespaceArchive = (namespace: string) => {
 };
 
 export const getStandardizerSchemas = (namespace: string) => {
-  const url = `${API_BASE}/namespaces/${namespace}/standardizer_schemas`;
+  const url = `${API_BASE}/namespaces/${namespace}/standardizer-schemas`;
   return axios.get<string[]>(url).then((res) => res.data);
 };
 

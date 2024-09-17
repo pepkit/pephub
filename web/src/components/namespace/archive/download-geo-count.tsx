@@ -1,5 +1,3 @@
-import { FC, useState, useMemo } from 'react';
-
 import { useNamespaceArchive } from '../../../hooks/queries/useNamespaceArchive'
 
 interface Props {

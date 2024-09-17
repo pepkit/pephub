@@ -1,5 +1,3 @@
-import { FC, useState, useMemo } from 'react';
-
 import { useNamespaceArchive } from '../../../hooks/queries/useNamespaceArchive'
 import { NamespaceArchiveTable } from '../archive/namespace-archive-table'
 import { ArchiveItem, ArchiveResponse } from '../../../api/namespace'

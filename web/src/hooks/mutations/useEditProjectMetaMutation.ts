@@ -12,7 +12,7 @@ type EditProjectMeta = {
   newIsPrivate?: boolean;
   newName?: string;
   newTag?: string;
-  newSchema?: string | undefined;
+  newSchema?: string;
   isPop?: boolean;
 };
 
