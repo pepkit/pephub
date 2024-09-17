@@ -7,6 +7,7 @@ import { useSession } from '../../contexts/session-context';
 import { useUploadSchemaFile } from '../../hooks/mutations/useUploadSchemaFile';
 import { GitHubAvatar } from '../badges/github-avatar';
 import { FileDropZone } from './components/file-dropzone';
+import { CombinedErrorMessage } from './components/combined-error-message'
 
 type FromFileInputs = {
   isPrivate: boolean;
@@ -20,28 +21,6 @@ type Props = {
   onSubmit: () => void;
   onCancel: () => void;
   defaultNamespace?: string;
-};
-
-type CombinedErrorMessageProps = {
-  errors: FieldErrors<FromFileInputs>;
-};
-
-const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
-  const { errors } = props;
-  const nameError = errors.name?.message;
-  let msg = null;
-
-  if (nameError == 'empty') {
-    msg = 'Schema Name must not be empty.';
-  } else if (nameError == 'invalid') {
-    msg = "Schema Name must contain only alphanumeric characters, '.', '-', or '_'.";
-  }
-
-  if (nameError) {
-    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
-  }
-
-  return null;
 };
 
 export const SchemaUploadForm = (props: Props) => {
@@ -132,7 +111,7 @@ export const SchemaUploadForm = (props: Props) => {
           />
         </div>
       </div>
-      <CombinedErrorMessage errors={errors} />
+      <CombinedErrorMessage errors={errors} formType={'schema'} />
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="description"

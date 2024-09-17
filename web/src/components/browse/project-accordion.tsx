@@ -28,15 +28,15 @@ export const ProjectAccordion = (props: Props) => {
               aria-controls={`collapse${key}`}
             >
               <span style={{minWidth: '2.5em'}}>{index + 1}.</span>
-              <span className='w-75'>{project.namespace}/<span className='fw-semibold'>{project.name}</span>:{project.tag}</span>
+              <div className='col-lg-9 col-md-7'>{project.namespace}/<span className='fw-semibold'>{project.name}</span>:{project.tag}</div>
               
-              <span className='text-xs text-start d-flex justify-content-between' style={{width: '15%'}}>
+              <div className='d-none d-md-flex text-xs text-start justify-content-between' style={{width: '15%'}}>
 
                 <span className='ps-1' style={{minWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}><span className='fw-medium'>Sample Count: </span>{project.number_of_samples}</span>
                 <span> | </span>
                 <span className='ps-1' style={{minWidth: '20%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}><span className='fw-medium'>Stars: </span>{project.stars_number}</span>
 
-              </span>
+              </div>
             </button>
           </h2>
           <div

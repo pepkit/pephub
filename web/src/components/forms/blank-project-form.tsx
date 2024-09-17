@@ -10,6 +10,7 @@ import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table
 import { ProjectConfigEditor } from '../project/project-config';
 import { SampleTable } from '../tables/sample-table';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { CombinedErrorMessage } from './components/combined-error-message'
 
 interface BlankProjectInputs {
   is_private: boolean;
@@ -26,35 +27,6 @@ interface Props {
   onHide: () => void;
   defaultNamespace?: string;
 }
-
-type CombinedErrorMessageProps = {
-  errors: FieldErrors<BlankProjectInputs>;
-};
-
-const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
-  const { errors } = props;
-  const nameError = errors.project_name?.message;
-  const tagError = errors.tag?.message;
-  let msg = null;
-
-  if (nameError == 'empty' && !tagError) {
-    msg = 'Project Name must not be empty.';
-  } else if (nameError == 'invalid' && !tagError) {
-    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
-  } else if (nameError == 'empty' && tagError == 'invalid') {
-    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'.";
-  } else if (nameError == 'invalid' && tagError == 'invalid') {
-    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'.";
-  } else if (!nameError && tagError == 'invalid') {
-    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'.";
-  }
-
-  if (nameError || tagError) {
-    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
-  }
-
-  return null;
-};
 
 export const BlankProjectForm = (props: Props) => {
   const { onHide, defaultNamespace } = props;
@@ -175,7 +147,7 @@ sample_table: samples.csv
           placeholder="default" 
         />
       </div>
-      <CombinedErrorMessage errors={errors}/>
+      <CombinedErrorMessage errors={errors} formType={'project'}/>
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="blank_description"

@@ -4,6 +4,7 @@ import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { useSession } from '../../contexts/session-context';
 import { useCreateSchemaMutation } from '../../hooks/mutations/useCreateSchemaMutation';
+import { CombinedErrorMessage } from './components/combined-error-message'
 
 const defaultSchemaYaml = `properties:
   samples:
@@ -41,28 +42,6 @@ type FormFields = {
   name: string;
   description: string;
   schemaYaml: string;
-};
-
-type CombinedErrorMessageProps = {
-  errors: FieldErrors<BlankSchemaInputs>;
-};
-
-const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
-  const { errors } = props;
-  const nameError = errors.name?.message;
-  let msg = null;
-
-  if (nameError == 'empty') {
-    msg = 'Schema Name must not be empty.';
-  } else if (nameError == 'invalid') {
-    msg = "Schema Name must contain only alphanumeric characters, '.', '-', or '_'.";
-  }
-
-  if (nameError) {
-    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
-  }
-
-  return null;
 };
 
 export const CreateSchemaForm = (props: Props) => {
@@ -145,7 +124,7 @@ export const CreateSchemaForm = (props: Props) => {
           />
         </div>
       </div>
-      <CombinedErrorMessage errors={errors} />
+      <CombinedErrorMessage errors={errors} formType={'schema'} />
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         {...register('description')}

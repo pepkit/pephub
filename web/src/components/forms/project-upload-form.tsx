@@ -9,6 +9,7 @@ import { popFileFromFileList } from '../../utils/dragndrop';
 import { GitHubAvatar } from '../badges/github-avatar';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
+import { CombinedErrorMessage } from './components/combined-error-message'
 
 interface FromFileInputs {
   is_private: boolean;
@@ -24,35 +25,6 @@ interface Props {
   onHide: () => void;
   defaultNamespace?: string;
 }
-
-type CombinedErrorMessageProps = {
-  errors: FieldErrors<FromFileInputs>;
-};
-
-const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
-  const { errors } = props;
-  const nameError = errors.name?.message;
-  const tagError = errors.tag?.message;
-  let msg = null;
-
-  if (nameError == 'empty' && !tagError) {
-    msg = 'Project Name must not be empty.';
-  } else if (nameError == 'invalid' && !tagError) {
-    msg = "Project Name must contain only alphanumeric characters, '-', or '_'.";
-  } else if (nameError == 'empty' && tagError == 'invalid') {
-    msg = "Project Name must not be empty and Tag must contain only alphanumeric characters, '-', or '_'.";
-  } else if (nameError == 'invalid' && tagError == 'invalid') {
-    msg = "Project Name and Tag must contain only alphanumeric characters, '-', or '_'.";
-  } else if (!nameError && tagError == 'invalid') {
-    msg = "Project Tag must contain only alphanumeric characters, '-', or '_'.";
-  }
-
-  if (nameError || tagError) {
-    return <p className="text-danger text-xs pt-1 mb-0">{msg}</p>;
-  }
-
-  return null;
-};
 
 export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
   // get user info
@@ -77,7 +49,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
 
   const uploadFiles = watch('files');
   const namespace = watch('namespace');
-  const projectName = watch('name');
+  const projectName = watch('project_name');
   const tag = watch('tag');
   const description = watch('description');
   const isPrivate = watch('is_private');
@@ -131,7 +103,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
             className="form-control"
             placeholder="name"
             // dont allow any whitespace
-            {...register('name', {
+            {...register('project_name', {
               required: {
                 value: true,
                 message: "empty",
@@ -160,7 +132,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
           />
         </div>
       </div>
-      <CombinedErrorMessage errors={errors} />
+      <CombinedErrorMessage errors={errors} formType={'project'} />
       <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="description"

@@ -18,7 +18,7 @@ export const NamespaceGrid = (props: Props) => {
   return (
     <div className="row mt-1">
       <div className="col-12 col-lg-10 offset-lg-1">
-        <div className="row row-cols-1 row-cols-sm-3 row-cols-xl-5 g-lg-4 g-3">
+        <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xxl-5 g-lg-4 g-3">
           {namespaces && (
             Object.values(namespaces).map((item, index: number) => (
               <div key={index} className="col">
@@ -30,7 +30,7 @@ export const NamespaceGrid = (props: Props) => {
                       </a>
                     </p>
                     <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
-                      {item?.number_of_projects} Projects
+                      {item?.number_of_projects} {item?.number_of_projects === 1 ? 'Project' : 'Projects'}
                     </p>
                   </div>
                 </div>

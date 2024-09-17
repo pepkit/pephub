@@ -59,7 +59,7 @@ export const NamespaceLongRow = (props: Props) => {
             <div 
               key={index} 
               ref={(el) => { itemRefs.current[item.namespace] = el; }}
-              className="col-xl-2 col-md-4 flex-shrink-0" 
+              className="col-xxl-2 col-lg-3 col-md-4 col-sm-6 flex-shrink-0" 
               style={{ scrollSnapAlign: 'start' }}
             >
               <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
@@ -70,7 +70,7 @@ export const NamespaceLongRow = (props: Props) => {
                     </a>
                   </p>
                   <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
-                    {item?.number_of_projects} Projects
+                    {item?.number_of_projects} {item?.number_of_projects === 1 ? 'Project' : 'Projects'}
                   </p>
                 </div>
               </div>

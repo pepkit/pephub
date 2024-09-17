@@ -269,6 +269,7 @@ export const NamespacePage = () => {
           </Fragment>
         ) : view === 'schemas' ? (
           <Fragment>
+            <span /> {/* for some reason react duplicates star cards without this span */}
             <div className="mt-3">
               <SchemaListSearchBar
                 limit={schemaLimit}
