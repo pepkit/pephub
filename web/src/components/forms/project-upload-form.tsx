@@ -49,7 +49,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
 
   const uploadFiles = watch('files');
   const namespace = watch('namespace');
-  const projectName = watch('project_name');
+  const projectName = watch('name');
   const tag = watch('tag');
   const description = watch('description');
   const isPrivate = watch('is_private');
@@ -103,7 +103,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
             className="form-control"
             placeholder="name"
             // dont allow any whitespace
-            {...register('project_name', {
+            {...register('name', {
               required: {
                 value: true,
                 message: "empty",

@@ -31,7 +31,7 @@ export const ProjectDescription = () => {
 
   return (
     <Fragment>
-      <div className="d-flex align-items-center justify-content-between px-4 row">
+      <div className="d-flex align-items-center justify-content-between mx-0 row">
         <div ref={projectDescriptionRef} className="col-md-12" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
           <Markdown>
             {currentHistoryId !== null

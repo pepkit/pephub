@@ -597,18 +597,6 @@ body {
   display: block;
 }
 
-.large-flex {
-  @media (min-width: 1024px) {
-    display: flex;
-  }
-}
-
-.large-hidden {
-  @media (min-width: 1024px) {
-    display: none;
-  }
-}
-
 .list-none {
   list-style: none;
 }

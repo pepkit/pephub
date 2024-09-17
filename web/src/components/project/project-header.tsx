@@ -13,7 +13,7 @@ export const ProjectHeader = (props: Props) => {
   const { sampleTable, sampleTableIndex } = props;
   
   return (
-    <div className="shadow-sm pt-2">
+    <div className="shadow-sm pt-2 container-fluid border-bottom">
       <ProjectHeaderBar sampleTable={sampleTable} sampleTableIndex={sampleTableIndex}/>
       <ProjectDescription />
       <ProjectInfoFooter />

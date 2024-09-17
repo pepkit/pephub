@@ -220,88 +220,88 @@ export const ProjectInterface = (props: Props) => {
 
   return (
     <Fragment>
-      <div className="pt-0 px-2 bg-body-secondary bg-opacity-25" style={{ height: '3.5em' }}>
-        <ProjectValidationAndEditButtons
-          isDirty={true}
-          // TODO: why does this not work in production?
-          // isDirty={projectUpdates.formState.isDirty}
-          isUpdatingProject={isSubmitting}
-          reset={projectUpdates.reset}
-          handleSubmit={handleSubmit}
-          filteredSamples={filteredSamples || []}
+        <div className="pt-0 px-2 bg-body-secondary bg-opacity-25" style={{ flex: '0 0 3.5em' }}>
+          <ProjectValidationAndEditButtons
+            isDirty={true}
+            // TODO: why does this not work in production?
+            // isDirty={projectUpdates.formState.isDirty}
+            isUpdatingProject={isSubmitting}
+            reset={projectUpdates.reset}
+            handleSubmit={handleSubmit}
+            filteredSamples={filteredSamples || []}
+          />
+        </div>
+        <div ref={projectDataRef} className='d-flex flex-column' style={{flex: 'auto'}}>
+          {pageView === 'samples' && (
+            <Controller
+              control={projectUpdates.control}
+              name="samples"
+              render={({ field: { onChange } }) => (
+                <SampleTable
+                  onChange={(samples) => {
+                    onChange(samples);
+                  }}
+                  readOnly={!userCanEdit || view !== undefined}
+                  data={
+                    view !== undefined
+                      ? sampleListToArrays(viewSamples)
+                      : currentHistoryId
+                      ? sampleListToArrays(historyData?._sample_dict || [])
+                      : newSamples
+                  }
+                  // height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                  setFilteredSamples={(samples) => setFilteredSamples(samples)}
+                  sampleTableIndex={sampleTableIndex}
+                />
+              )}
+            />
+          )}
+          {pageView === 'subsamples' && (
+            <Controller
+              control={projectUpdates.control}
+              name="subsamples"
+              render={({ field: { onChange } }) => (
+                <SampleTable
+                  onChange={(subsamples) => {
+                    onChange(subsamples);
+                  }}
+                  data={currentHistoryId ? sampleListToArrays(historyData?._subsample_list[0] || []) : newSubsamples}
+                  // height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                  readOnly={!userCanEdit}
+                />
+              )}
+            />
+          )}
+          {pageView === 'config' && (
+            <Controller
+              control={projectUpdates.control}
+              name="config"
+              render={({ field: { onChange } }) => (
+                <ProjectConfigEditor
+                  value={currentHistoryId ? historyData?._config || '' : newConfig}
+                  setValue={(val) => {
+                    onChange(val);
+                  }}
+                  height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                  readOnly={!userCanEdit}
+                />
+              )}
+            />
+          )}
+        </div>
+        <StandardizeMetadataModal
+          show={showStandardizeMetadataModal}
+          onHide={() => setShowStandardizeMetadataModal(false)}
+          namespace={namespace}
+          project={projectName}
+          tag={tag}
+          sampleTable={sampleTable}
+          sampleTableIndex={sampleTableIndex}
+          newSamples={newSamples}
+          setNewSamples={setNewSamples}
+          resetStandardizedData={resetStandardizedData}
+          setResetStandardizedData={setResetStandardizedData}
         />
-      </div>
-      <div ref={projectDataRef}>
-        {pageView === 'samples' && (
-          <Controller
-            control={projectUpdates.control}
-            name="samples"
-            render={({ field: { onChange } }) => (
-              <SampleTable
-                onChange={(samples) => {
-                  onChange(samples);
-                }}
-                readOnly={!userCanEdit || view !== undefined}
-                data={
-                  view !== undefined
-                    ? sampleListToArrays(viewSamples)
-                    : currentHistoryId
-                    ? sampleListToArrays(historyData?._sample_dict || [])
-                    : newSamples
-                }
-                height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                setFilteredSamples={(samples) => setFilteredSamples(samples)}
-                sampleTableIndex={sampleTableIndex}
-              />
-            )}
-          />
-        )}
-        {pageView === 'subsamples' && (
-          <Controller
-            control={projectUpdates.control}
-            name="subsamples"
-            render={({ field: { onChange } }) => (
-              <SampleTable
-                onChange={(subsamples) => {
-                  onChange(subsamples);
-                }}
-                data={currentHistoryId ? sampleListToArrays(historyData?._subsample_list[0] || []) : newSubsamples}
-                height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                readOnly={!userCanEdit}
-              />
-            )}
-          />
-        )}
-        {pageView === 'config' && (
-          <Controller
-            control={projectUpdates.control}
-            name="config"
-            render={({ field: { onChange } }) => (
-              <ProjectConfigEditor
-                value={currentHistoryId ? historyData?._config || '' : newConfig}
-                setValue={(val) => {
-                  onChange(val);
-                }}
-                height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                readOnly={!userCanEdit}
-              />
-            )}
-          />
-        )}
-      </div>
-      <StandardizeMetadataModal
-        show={showStandardizeMetadataModal}
-        onHide={() => setShowStandardizeMetadataModal(false)}
-        namespace={namespace}
-        project={projectName}
-        tag={tag}
-        sampleTable={sampleTable}
-        sampleTableIndex={sampleTableIndex}
-        newSamples={newSamples}
-        setNewSamples={setNewSamples}
-        resetStandardizedData={resetStandardizedData}
-        setResetStandardizedData={setResetStandardizedData}
-      />
     </Fragment>
   );
 };

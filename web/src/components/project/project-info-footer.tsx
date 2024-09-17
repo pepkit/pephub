@@ -24,7 +24,7 @@ export const ProjectInfoFooter = () => {
   }
 
   return (
-    <div className="d-flex align-items-center text-muted mt-1 px-4 pb-3 border-bottom row">
+    <div className="d-flex align-items-center text-muted mt-1 mx-0 pb-3 row">
       <small className="d-flex flex-row align-items-center justify-content-between col-md-12">
         <div className="me-3 row">
           <div className="col-sm-auto me-1">

@@ -111,7 +111,7 @@ export const ProjectHeaderBar = (props: Props) => {
   }
 
   return (
-    <div className="d-flex align-items-start justify-content-between px-4 mb-1 row">
+    <div className="d-flex align-items-start justify-content-between mx-0 mb-1 row">
       <div className="d-flex flex-row align-items-center col-md-6">
         <Breadcrumb className="fw-bold pt-2">
           <Breadcrumb.Item href="/">home</Breadcrumb.Item>

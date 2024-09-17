@@ -95,7 +95,8 @@ export const SampleTable = (props: Props) => {
       ref={hotRef}
       data={data}
       stretchH={stretchH || 'all'}
-      height={height || tableHeight}
+      // height={height || tableHeight}
+      height={height || '100%'}
       readOnly={readOnly}
       colHeaders={true}
       // columns={columns}
