@@ -55,7 +55,7 @@ const CombinedErrorMessage = (props: CombinedErrorMessageProps) => {
   if (nameError == 'empty') {
     msg = 'Schema Name must not be empty.';
   } else if (nameError == 'invalid') {
-    msg = "Schema Name must contain only alphanumeric characters, '-', or '_'.";
+    msg = "Schema Name must contain only alphanumeric characters, '.', '-', or '_'.";
   }
 
   if (nameError) {
@@ -134,7 +134,7 @@ export const CreateSchemaForm = (props: Props) => {
                 message: "empty",
               },
               pattern: {
-                value: /^[a-zA-Z0-9_-]+$/,
+                value: /^[a-zA-Z0-9_.-]+$/,
                 message: "invalid",
               },
             })}

@@ -14,6 +14,7 @@ import { formatToPercentage } from '../../utils/etc';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
 import { ProjectMetaEditForm } from '../forms/edit-project-meta';
 import { LoadingSpinner } from '../spinners/loading-spinner';
+import { StandardizerTable } from '../tables/standardizer-table';
 
 type Props = {
   namespace: string;
@@ -265,122 +266,17 @@ export const StandardizeMetadataModal = (props: Props) => {
 
               <form>
                 {Object.keys(standardizedData).map((key, index) => (
-                  <div className="mb-3" key={key}>
-                    <div
-                      className={
-                        key === sampleTableIndex
-                          ? 'row border shadow-sm rounded-3 m-1 pb-3 pt-2'
-                          : 'row border shadow-sm rounded-3 m-1 py-3'
-                      }
-                      style={{
-                        backgroundColor: whereDuplicates?.includes(index)
-                          ? '#dc354520'
-                          : key === sampleTableIndex
-                          ? '#ffc10720'
-                          : 'white',
-                      }}
-                    >
-                      {key === sampleTableIndex ? (
-                        <p className="text-center text-xs mb-2 p-0 fw-bold">
-                          SampleTableIndex must also be updated in project config!
-                        </p>
-                      ) : null}
-                      <div className="col-6 text-center">
-                        <div
-                          className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm"
-                          style={{ bottom: '-1px' }}
-                        >
-                          <HotTable
-                            data={prepareHandsontableData(key)}
-                            colHeaders={false}
-                            rowHeaders={true}
-                            width="100%"
-                            height="100%"
-                            colWidths="100%"
-                            stretchH="all"
-                            autoColumnSize={false}
-                            readOnly={true}
-                            columns={[
-                              {
-                                data: 0,
-                                type: typeof tabData[key] === 'number' ? 'numeric' : 'text',
-                                renderer: function (
-                                  instance: Handsontable.Core,
-                                  td: HTMLTableCellElement,
-                                  row: number,
-                                  col: number,
-                                  prop: string | number,
-                                  value: any,
-                                  cellProperties: Handsontable.CellProperties,
-                                ) {
-                                  Handsontable.renderers.TextRenderer.apply(this, [
-                                    instance,
-                                    td,
-                                    row,
-                                    col,
-                                    prop,
-                                    value,
-                                    cellProperties,
-                                  ]);
-                                  if (row === 0) {
-                                    td.style.fontWeight = 'bold';
-                                    if (whereDuplicates?.includes(index)) {
-                                      td.style.color = 'red';
-                                    }
-                                  }
-                                },
-                              },
-                            ]}
-                            licenseKey="non-commercial-and-evaluation"
-                            className="custom-handsontable"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-6" role="group" aria-label="radio_group">
-                        <div className="w-100 h-100 rounded-2 outer-container">
-                          <div className="btn-group-vertical w-100 h-100 bg-white rounded-2">
-                            <input
-                              className="btn-check"
-                              type="radio"
-                              name={key}
-                              id={`${key}-original`}
-                              value={key}
-                              checked={selectedValues[key] === key} // Check if the selected value is the same as the key
-                              onChange={() => handleRadioChange(key, null)}
-                            />
-                            <label
-                              className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
-                              htmlFor={`${key}-original`}
-                            >
-                              <strong className="fw-semibold">{key}</strong> (original value)
-                            </label>
-
-                            {Object.entries(standardizedData[key]).map(([subKey, value], index, array) => (
-                              <React.Fragment key={subKey}>
-                                <input
-                                  className="btn-check"
-                                  type="radio"
-                                  name={key}
-                                  id={`${key}-suggested-${subKey}`}
-                                  value={subKey}
-                                  checked={selectedValues[key] === subKey}
-                                  disabled={standardizedData[key]['Not Predictable'] === 0}
-                                  onChange={() => handleRadioChange(key, subKey)}
-                                />
-                                <label
-                                  className="btn btn-outline-secondary selected-outline shadow-sm bg-white"
-                                  htmlFor={`${key}-suggested-${subKey}`}
-                                >
-                                  {subKey} ({formatToPercentage(value)})
-                                </label>
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <br />
-                    </div>
-                  </div>
+                  <StandardizerTable
+                    columnKey={key}
+                    columnIndex={index}
+                    standardizedData={standardizedData[key]}
+                    selectedValues={selectedValues[key]}
+                    whereDuplicates={whereDuplicates}
+                    sampleTableIndex={sampleTableIndex}
+                    tabData={tabData[key]}
+                    handleRadioChange={handleRadioChange}
+                    tableData={prepareHandsontableData(key)}
+                  />
                 ))}
               </form>
             </>
