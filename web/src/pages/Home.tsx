@@ -123,7 +123,7 @@ export function Home() {
                     transition={{ duration: 0.5 }}
                     className="landing-table shadow"
                   >
-                    <SampleTable minRows={9} data={sampleListToArrays(exampleSamples?.items || [])} />
+                    <SampleTable height={9 * 23 + 50} minRows={9} data={sampleListToArrays(exampleSamples?.items || [])} />
                   </motion.div>
                 </div>
               </div>

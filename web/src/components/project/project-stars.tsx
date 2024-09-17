@@ -23,9 +23,6 @@ export const ProjectStars: FC<Props> = (props) => {
 
   const [localStarred, setLocalStarred] = useState(isStarred);
 
-  console.log('isStarred ' + isStarred)
-  console.log('localStarred ' + localStarred)
-
   return (
     <Button
       disabled={isAddingStar || isRemovingStar}
