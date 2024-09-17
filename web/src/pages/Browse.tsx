@@ -163,7 +163,7 @@ export function Browse() {
 
             <div className="row mt-0">
               <div className="col-12">
-                {topNamespace?.data?.results ? (
+                {topNamespace?.data?.results && !topNamespace?.isFetching ? (
                   <>
                     <div className="d-flex flex-wrap align-items-center justify-content-between">
                       <div className="fs-6 fw-medium pt-3">Top 10 Starred PEPs</div>
