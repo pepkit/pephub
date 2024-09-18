@@ -16,3 +16,4 @@ fastembed
 numpy<2.0.0
 slowapi
 cachetools>=4.2.4
+bedms>=0.1.0
