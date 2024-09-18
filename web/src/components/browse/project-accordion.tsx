@@ -72,8 +72,14 @@ export const ProjectAccordion = (props: Props) => {
               )}
               <div className='row mt-3'>
                 <div className='col'>
-                  <span className='m-0 pe-4 text-sm'><span className='fw-medium'>Created:</span> {dateStringToDateTime(project.submission_date)}</span>
-                  <span className='m-0 text-sm'><span className='fw-medium'>Updated:</span> {dateStringToDateTime(project.last_update_date)}</span>
+                  <p className='d-block d-md-none m-0'>
+                    <span className='m-0 pe-4 text-sm'><span className='fw-medium'>Sample Count:</span> {project.number_of_samples}</span>
+                    <span className='m-0 text-sm'><span className='fw-medium'>Stars:</span> {project.stars_number}</span>
+                  </p>
+                  <p className='m-0'>
+                    <span className='m-0 pe-4 text-sm'><span className='fw-medium'>Created:</span> {dateStringToDateTime(project.submission_date)}</span>
+                    <span className='m-0 text-sm'><span className='fw-medium'>Updated:</span> {dateStringToDateTime(project.last_update_date)}</span>
+                  </p>
                 </div>
               </div>
             </div>
