@@ -58,7 +58,7 @@ const Dropzone: FC<DropzoneProps> = ({ multiple = true, onChange, innerRef }) =>
   return (
     <div
       {...getRootProps()}
-      className="dnd-box p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3"
+      className="dnd-box p-5 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3"
     >
       <div className="flex-row d-flex align-items-center">
         <i className="bi bi-cloud-arrow-up"></i>

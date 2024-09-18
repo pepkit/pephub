@@ -58,7 +58,7 @@ export const NavDesktop = () => {
 
   return (
     <ul className="mb-2 ms-auto d-flex flex-row align-items-center gap-2 list-none">
-      <li>
+      <li className="me-1">
         <div className="mt-1 input-group">
           {user ? (
             <SearchBox
@@ -73,7 +73,7 @@ export const NavDesktop = () => {
               id="global-search-bar"
               type="text"
               className="form-control border-end-0 shadow-sm"
-              placeholder="Search pephub"
+              placeholder="Search PEPhub"
               aria-label="search"
               aria-describedby="search"
             />
@@ -96,7 +96,7 @@ export const NavDesktop = () => {
                   id="global-search-bar"
                   type="text"
                   className="form-control border-end-0 shadow-sm rounded-0 rounded-start"
-                  placeholder="Search pephub"
+                  placeholder="Search PEPhub"
                   aria-label="search"
                   aria-describedby="search"
                 />
@@ -125,7 +125,7 @@ export const NavDesktop = () => {
               </motion.div>
             </>
           )}
-          <span className="input-group-text border-start-0 shadow-sm">
+          <span className="input-group-text border-start-0 shadow-sm me-1">
             <div className="px-1 border rounded border-secondary text-secondary text-sm">
               {os === 'Mac OS' ? <i className="bi bi-command"></i> : 'ctrl'}
             </div>
@@ -134,34 +134,34 @@ export const NavDesktop = () => {
         </div>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-        <a className="nav-link" href="https://github.com/pepkit/pephub" target="_blank">
-          <i className="me-1 bi bi-github text-base"></i>
-          GitHub
-        </a>
-      </li>
-      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
-        <a className="nav-link" href="/schemas">
-          <i className="bi bi-file-earmark-check me-1 text-base"></i>Schemas
+        <a className="nav-link" href="/browse">
+          <i className="bi bi-globe2 me-1 text-base align-top"></i>Browse
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="/validate">
-          <i className="bi bi-check2-circle me-1 text-base"></i>Validation
+          <i className="bi bi-check2-circle me-1 text-base align-top"></i>Validation
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         <a className="nav-link" href="https://pep.databio.org/pephub">
-          <i className="bi bi-info-circle me-1 text-base"></i>Docs
+          <i className="bi bi-file-earmark-text me-1 text-base align-top"></i>Docs
+        </a>
+      </li>
+      <li className="text-body mx-2 my-0 nav-item h5 pt-1">
+        <a className="nav-link" href="https://github.com/pepkit/pephub" target="_blank">
+          <i className="me-1 bi bi-github text-base align-top"></i>
+          GitHub
         </a>
       </li>
       <li className="text-body mx-2 my-0 nav-item h5 pt-1">
         {user ? (
-          <div className="mx-2 my-0 nav-item h5 pt-1">
+          <div className="my-0 nav-item h5 pt-1">
             <Dropdown className="me-3">
-              <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
+              <Dropdown.Toggle className="shadow-none border border-0" variant="none" id="navbarDropdown">
                 <GitHubAvatar namespace={user.login} height={40} width={40} />
               </Dropdown.Toggle>
-              <Dropdown.Menu className="border border-dark shadow-lg">
+              <Dropdown.Menu className="border border-light-subtle shadow">
                 <Dropdown.Header className="d-flex flex-row align-items-center">
                   <GitHubAvatar namespace={user.login} height={20} width={20} />
                   <div className="d-flex flex-column">
@@ -230,6 +230,25 @@ export const NavDesktop = () => {
                     </OverlayTrigger>
                   </Fragment>
                 )}
+                <Dropdown.Divider />
+                <Dropdown.Item
+                  as="a"
+                  href="https://github.com/pepkit/pephub/discussions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {/*<i className="bi bi-pencil-square me-1"></i>*/}
+                  Give Feedback
+                </Dropdown.Item>
+                <Dropdown.Item
+                  as="a"
+                  href="https://github.com/pepkit/pephub/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {/*<i className="bi bi-bug me-1"></i>*/}
+                  Report a Bug
+                </Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
               </Dropdown.Menu>

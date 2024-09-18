@@ -34,7 +34,7 @@ export const DeleteSchemaModal = (props: Props) => {
       }}
     >
       <Modal.Header closeButton>
-        <h1 className="modal-title fs-5">Delete PEP?</h1>
+        <h1 className="modal-title fs-5">Delete Schema?</h1>
       </Modal.Header>
       <Modal.Body>
         <p>Are you sure you want to delete this schema? This action cannot be undone.</p>

@@ -1,8 +1,10 @@
 import { Editor } from '@monaco-editor/react';
-import { Controller, useForm } from 'react-hook-form';
+import { ErrorMessage } from '@hookform/error-message';
+import { Controller, FieldErrors, useForm } from 'react-hook-form';
 
 import { useSession } from '../../contexts/session-context';
 import { useCreateSchemaMutation } from '../../hooks/mutations/useCreateSchemaMutation';
+import { CombinedErrorMessage } from './components/combined-error-message'
 
 const defaultSchemaYaml = `properties:
   samples:
@@ -20,6 +22,12 @@ const defaultSchemaYaml = `properties:
 required:
   - samples
 `;
+
+interface BlankSchemaInputs {
+  namespace: string;
+  name: string;
+  schemaYaml: string;
+}
 
 type Props = {
   defaultNamespace?: string;
@@ -39,9 +47,16 @@ type FormFields = {
 export const CreateSchemaForm = (props: Props) => {
   const { onCancel, onSubmit, editorHeight, defaultNamespace } = props;
   const { user } = useSession();
-  const { formState, watch, register, control, reset } = useForm<FormFields>({
+  const { 
+    watch, 
+    register, 
+    control, 
+    reset, 
+    formState: { isValid, isDirty, errors }, 
+  } = useForm<FormFields>({
+    mode: 'onChange',
     defaultValues: {
-      namespace: defaultNamespace || user?.login || undefined,
+      namespace: defaultNamespace || user?.login || '',
       schemaYaml: defaultSchemaYaml,
     },
   });
@@ -68,12 +83,12 @@ export const CreateSchemaForm = (props: Props) => {
           id="is-private-toggle"
         />
       </div> */}
-      <div className="namespace-name-tag-container">
-        <label className="fw-bold text-sm">Namespace *</label>
-        <label className="fw-bold text-sm">Name *</label>
+      <div className="namespace-name-tag-container mt-3">
+        <label className="fw-semibold text-sm">Namespace*</label>
+        <label className="fw-semibold text-sm">Name*</label>
       </div>
-      <div className="namespace-name-tag-container fs-4">
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+      <div className="namespace-name-tag-container fs-4 d-flex">
+        <div className="d-flex flex-row align-items-center justify-content-between w-25">
           <select
             id="blank-namespace-select"
             className="form-select"
@@ -89,14 +104,17 @@ export const CreateSchemaForm = (props: Props) => {
           </select>
           <span className="mx-1 mb-1">/</span>
         </div>
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+        <div className="d-flex flex-row align-items-center justify-content-between w-75">
           <input
             // dont allow any whitespace
             {...register('name', {
-              required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
-                value: /^\S+$/,
-                message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_.-]+$/,
+                message: "invalid",
               },
             })}
             id="schema-name"
@@ -106,18 +124,16 @@ export const CreateSchemaForm = (props: Props) => {
           />
         </div>
       </div>
-      <div className="my-1">
-        <label className="fw-bold text-sm" htmlFor="schema-description">
-          Description
-        </label>
-        <textarea
-          {...register('description')}
-          id="schema-description"
-          className="form-control"
-          placeholder="Schema description"
-        />
-      </div>
-      <div className="border rounded mt-2 p-1">
+      <CombinedErrorMessage errors={errors} formType={'schema'} />
+      <label className="fw-semibold text-sm mt-2">Description</label>
+      <textarea
+        {...register('description')}
+        id="schema-description"
+        className="form-control"
+        placeholder="Schema description"
+      />
+      <label className="fw-semibold text-sm mt-2">Config</label>
+      <div className="border rounded py-1">
         <Controller
           name="schemaYaml"
           control={control}
@@ -136,11 +152,14 @@ export const CreateSchemaForm = (props: Props) => {
           )}
         />
       </div>
-      <div className="d-flex align-items-center gap-1 w-100 justify-content-start my-2">
+      <p className='text-xs mt-1'>
+        * Namespace and Schema Name are required.
+      </p>
+      <div className="mt-3">
         <button
-          disabled={isSubmitting || !formState.isDirty}
+          disabled={isSubmitting || !isDirty || !isValid}
           type="button"
-          className="btn btn-success"
+          className="btn btn-success float-end"
           onClick={() => {
             submit(
               {
@@ -163,7 +182,7 @@ export const CreateSchemaForm = (props: Props) => {
           {isSubmitting ? 'Creating...' : 'Create'}
         </button>
         <button
-          className="btn btn-outline-dark"
+          className="btn btn-outline-dark me-1 float-end"
           onClick={() => {
             reset();
             onCancel();

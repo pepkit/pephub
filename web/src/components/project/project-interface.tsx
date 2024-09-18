@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Fragment } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import yaml from 'js-yaml';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
@@ -21,6 +22,9 @@ import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table
 import { SampleTable } from '../tables/sample-table';
 import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
+import { StandardizeMetadataModal } from '../modals/standardize-metadata';
+
+import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
 
 type Props = {
   projectConfig: ReturnType<typeof useProjectConfig>['data'];
@@ -43,6 +47,9 @@ export const ProjectInterface = (props: Props) => {
   const projectDataRef = useRef<HTMLDivElement>(null);
 
   const [filteredSamples, setFilteredSamples] = useState<string[]>([]);
+
+  const { showStandardizeMetadataModal, setShowStandardizeMetadataModal } = useStandardizeModalStore();
+  const [resetStandardizedData, setResetStandardizedData] = useState(false);
 
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
@@ -87,20 +94,44 @@ export const ProjectInterface = (props: Props) => {
 
   const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
 
+  const setNewSamples = (samples: any[][]) => {
+    projectUpdates.setValue('samples', samples, { shouldDirty: true });
+  }
+
   const handleSubmit = () => {
+    setResetStandardizedData(false);
+
     const values = projectUpdates.getValues();
 
     try {
-      const samplesParsed = arraysToSampleList(values.samples);
-      const subsamplesParsed = arraysToSampleList(values.subsamples);
+      const samplesParsed = arraysToSampleList(values.samples, 'Sample');
+      const subsamplesParsed = arraysToSampleList(values.subsamples, 'Subsample');
+      const configParsed = yaml.load(values.config) as Record<string, unknown>;
+      
+      // // check if 'name' value exists in config for PEPhub PEP
+      // if (!('name' in configParsed) || (('name' in configParsed) && (!configParsed.name))) {
+      //   const errorMessage = `PEPs used with PEPhub must have a "name" value specified in the project config.`;
+      //   throw new Error(errorMessage);
+      // }
+
       submit({
         config: values.config,
         samples: samplesParsed,
         subsamples: subsamplesParsed,
       });
     } catch (e) {
-      toast.error('The project could not be saved. ' + e, {
-        duration: 5000,
+      toast((t) => (
+        <div className='my-1'>
+          <p><strong>{'The project could not be saved.'}</strong></p>
+          {e instanceof Error ?
+            <p>{e.message + ''}</p> : <p>An unknown error occurred.</p>
+          }
+          <button className='btn btn-sm btn-danger float-end mt-3' onClick={() => toast.dismiss(t.id)}>
+            Dismiss
+          </button>
+        </div>
+      ), {
+        duration: 16000,
         position: 'top-center',
       });
     }
@@ -189,75 +220,88 @@ export const ProjectInterface = (props: Props) => {
 
   return (
     <Fragment>
-      <div className="pt-0 px-2" style={{ backgroundColor: '#EFF3F640', height: '3.5em' }}>
-        <ProjectValidationAndEditButtons
-          isDirty={true}
-          // TODO: why does this not work in production?
-          // isDirty={projectUpdates.formState.isDirty}
-          isUpdatingProject={isSubmitting}
-          reset={projectUpdates.reset}
-          handleSubmit={handleSubmit}
-          filteredSamples={filteredSamples || []}
+        <div className="pt-0 px-2 bg-body-secondary bg-opacity-25" style={{ flex: '0 0 3.5em' }}>
+          <ProjectValidationAndEditButtons
+            isDirty={true}
+            // TODO: why does this not work in production?
+            // isDirty={projectUpdates.formState.isDirty}
+            isUpdatingProject={isSubmitting}
+            reset={projectUpdates.reset}
+            handleSubmit={handleSubmit}
+            filteredSamples={filteredSamples || []}
+          />
+        </div>
+        <div ref={projectDataRef} className='d-flex flex-column' style={{flex: 'auto'}}>
+          {pageView === 'samples' && (
+            <Controller
+              control={projectUpdates.control}
+              name="samples"
+              render={({ field: { onChange } }) => (
+                <SampleTable
+                  onChange={(samples) => {
+                    onChange(samples);
+                  }}
+                  readOnly={!userCanEdit || view !== undefined}
+                  data={
+                    view !== undefined
+                      ? sampleListToArrays(viewSamples)
+                      : currentHistoryId
+                      ? sampleListToArrays(historyData?._sample_dict || [])
+                      : newSamples
+                  }
+                  // height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                  setFilteredSamples={(samples) => setFilteredSamples(samples)}
+                  sampleTableIndex={sampleTableIndex}
+                />
+              )}
+            />
+          )}
+          {pageView === 'subsamples' && (
+            <Controller
+              control={projectUpdates.control}
+              name="subsamples"
+              render={({ field: { onChange } }) => (
+                <SampleTable
+                  onChange={(subsamples) => {
+                    onChange(subsamples);
+                  }}
+                  data={currentHistoryId ? sampleListToArrays(historyData?._subsample_list[0] || []) : newSubsamples}
+                  // height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                  readOnly={!userCanEdit}
+                />
+              )}
+            />
+          )}
+          {pageView === 'config' && (
+            <Controller
+              control={projectUpdates.control}
+              name="config"
+              render={({ field: { onChange } }) => (
+                <ProjectConfigEditor
+                  value={currentHistoryId ? historyData?._config || '' : newConfig}
+                  setValue={(val) => {
+                    onChange(val);
+                  }}
+                  height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
+                  readOnly={!userCanEdit}
+                />
+              )}
+            />
+          )}
+        </div>
+        <StandardizeMetadataModal
+          show={showStandardizeMetadataModal}
+          onHide={() => setShowStandardizeMetadataModal(false)}
+          namespace={namespace}
+          project={projectName}
+          tag={tag}
+          sampleTable={sampleTable}
+          sampleTableIndex={sampleTableIndex}
+          newSamples={newSamples}
+          setNewSamples={setNewSamples}
+          resetStandardizedData={resetStandardizedData}
+          setResetStandardizedData={setResetStandardizedData}
         />
-      </div>
-      <div ref={projectDataRef}>
-        {pageView === 'samples' && (
-          <Controller
-            control={projectUpdates.control}
-            name="samples"
-            render={({ field: { onChange } }) => (
-              <SampleTable
-                onChange={(samples) => {
-                  onChange(samples);
-                }}
-                readOnly={!userCanEdit || view !== undefined}
-                data={
-                  view !== undefined
-                    ? sampleListToArrays(viewSamples)
-                    : currentHistoryId
-                    ? sampleListToArrays(historyData?._sample_dict || [])
-                    : newSamples
-                }
-                height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                setFilteredSamples={(samples) => setFilteredSamples(samples)}
-                sampleTableIndex={sampleTableIndex}
-              />
-            )}
-          />
-        )}
-        {pageView === 'subsamples' && (
-          <Controller
-            control={projectUpdates.control}
-            name="subsamples"
-            render={({ field: { onChange } }) => (
-              <SampleTable
-                onChange={(subsamples) => {
-                  onChange(subsamples);
-                }}
-                data={currentHistoryId ? historyData?._subsample_list || [] : newSubsamples}
-                height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                readOnly={!userCanEdit}
-              />
-            )}
-          />
-        )}
-        {pageView === 'config' && (
-          <Controller
-            control={projectUpdates.control}
-            name="config"
-            render={({ field: { onChange } }) => (
-              <ProjectConfigEditor
-                value={currentHistoryId ? historyData?._config || '' : newConfig}
-                setValue={(val) => {
-                  onChange(val);
-                }}
-                height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
-                readOnly={!userCanEdit}
-              />
-            )}
-          />
-        )}
-      </div>
     </Fragment>
   );
 };

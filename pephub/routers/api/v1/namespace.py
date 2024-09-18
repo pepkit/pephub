@@ -1,6 +1,7 @@
 import shutil
 import tempfile
 from typing import List, Literal, Optional, Union
+import os
 
 import peppy
 from dotenv import load_dotenv
@@ -20,6 +21,7 @@ from pepdbagent.models import (
     ListOfNamespaceInfo,
     Namespace,
     NamespaceStats,
+    TarNamespaceModelReturn,
 )
 from peppy import Project
 from peppy.const import DESC_KEY, NAME_KEY
@@ -27,6 +29,7 @@ from typing_extensions import Annotated
 
 from ....const import (
     DEFAULT_TAG,
+    ARCHIVE_URL_PATH,
 )
 from ....dependencies import (
     get_db,
@@ -38,6 +41,8 @@ from ....dependencies import (
 )
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...models import FavoriteRequest, ProjectJsonRequest, ProjectRawModel
+
+from bedms.const import AVAILABLE_SCHEMAS
 
 load_dotenv()
 
@@ -77,7 +82,9 @@ async def get_namespace_projects(
     offset: int = 0,
     query: str = None,
     admin_list: List[str] = Depends(get_namespace_access_list),
-    order_by: str = "update_date",
+    order_by: Optional[
+        Literal["update_date", "name", "submission_date", "stars"]
+    ] = "update_date",
     order_desc: bool = False,
     filter_by: Annotated[
         Optional[Literal["submission_date", "last_update_date"]],
@@ -175,7 +182,6 @@ async def create_pep(
             p = Project(f"{dirpath}/{init_file.filename}")
             p.name = name
             p.description = description
-            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
@@ -184,7 +190,7 @@ async def create_pep(
                     tag=tag,
                     description=description,
                     is_private=is_private,
-                    pep_schema=pep_schema,
+                    pep_schema=pep_schema or "databio/pep-2.1.0",
                 )
             except ProjectUniqueNameError:
                 raise HTTPException(
@@ -228,7 +234,7 @@ async def upload_raw_pep(
         is_private = project_from_json.is_private
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
-        pep_schema = project_from_json.pep_schema
+        pep_schema = project_from_json.pep_schema or "databio/pep-2.1.0"
         pop = project_from_json.pop or False
         if hasattr(project_from_json, NAME_KEY):
             if project_from_json.name:
@@ -436,3 +442,27 @@ def remove_user(
         },
         status_code=202,
     )
+
+
+@namespace.get(
+    "/archive",
+    summary="Get metadata of all archived files of all projects in the namespace",
+    response_model=TarNamespaceModelReturn,
+)
+async def get_archive(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+
+    result = agent.namespace.get_tar_info(namespace)
+
+    for item in result.results:
+        item.file_path = os.path.join(ARCHIVE_URL_PATH, item.file_path)
+
+    return result
+
+
+@namespace.get(
+    "/standardizer-schemas",
+    summary="Get all available schemas from BEDMS",
+)
+async def get_schemas(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+
+    return AVAILABLE_SCHEMAS

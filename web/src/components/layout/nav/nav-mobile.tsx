@@ -8,10 +8,10 @@ export const MobileNav = () => {
   const { login, user, logout } = useSession();
   return (
     <Dropdown className="me-3">
-      <Dropdown.Toggle className="shadow-none" variant="none" id="navbarDropdown">
+      <Dropdown.Toggle className="shadow-none border border-0" variant="none" id="navbarDropdown">
         {user ? <GitHubAvatar namespace={user.login} height={40} width={40} /> : <i className="bi bi-list fs-4" />}
       </Dropdown.Toggle>
-      <Dropdown.Menu>
+      <Dropdown.Menu className="border border-light-subtle shadow">
         {user && (
           <Fragment>
             <Dropdown.Header className="d-flex flex-row align-items-center">
@@ -85,26 +85,35 @@ export const MobileNav = () => {
             <Dropdown.Divider />
           </Fragment>
         )}
-        <Dropdown.Item href="https://github.com/pepkit/pephub">
-          <i className="bi bi-github me-2" />
-          GitHub
+        <Dropdown.Item href="/search">
+          <i className="bi bi-search me-2" />
+          Search
         </Dropdown.Item>
-        <Dropdown.Item href="/schemas">
-          <i className="bi bi-file-earmark-check me-2" />
-          Schemas
+        <Dropdown.Item href="/browse">
+          <i className="bi bi-globe2 me-2" />
+          Browse
         </Dropdown.Item>
         <Dropdown.Item href="/validate">
           <i className="bi bi-check-circle me-2" />
           Validation
         </Dropdown.Item>
-        <Dropdown.Item href="/search">
-          <i className="bi bi-search me-2" />
-          Search
-        </Dropdown.Item>
         <Dropdown.Item href="/about">
-          <i className="bi bi-info-circle me-2" />
+          <i className="bi bi-file-earmark-text me-2" />
           Docs
         </Dropdown.Item>
+        <Dropdown.Item href="https://github.com/pepkit/pephub">
+          <i className="bi bi-github me-2" />
+          GitHub
+        </Dropdown.Item>
+        <Dropdown.Divider />
+                <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/discussions" target="_blank" rel="noopener noreferrer">
+                  {/*<i className="bi bi-pencil-square me-1"></i>*/}
+                  Give Feedback
+                </Dropdown.Item>
+                <Dropdown.Item as="a" href="https://github.com/pepkit/pephub/issues" target="_blank" rel="noopener noreferrer">
+                  {/*<i className="bi bi-bug me-1"></i>*/}
+                  Report a Bug
+                </Dropdown.Item>
         <Dropdown.Divider />
         {user ? (
           <Fragment>

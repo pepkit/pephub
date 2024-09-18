@@ -62,7 +62,7 @@ export const getSchemas = async (params: PaginationParams) => {
 };
 
 export const getSchema = async (namespace: string, name: string) => {
-  const url = `${API_BASE}/schemas/${namespace}/${name}`;
+  const url = `${API_BASE}/schemas/${namespace}/${name}?return_type=yaml`;
   const { data } = await axios.get<GetSchemaResponse>(url);
   return data;
 };

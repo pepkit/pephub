@@ -38,6 +38,13 @@ export const NamespaceSearchDropdown = (props: Props) => {
   return (
     <Select
       className="w-100"
+      styles={{
+        control: (provided) => ({
+          ...provided,
+          borderRadius: '.375em',
+          borderColor: '#dee2e6'
+        }),
+      }}
       isLoading={isLoading}
       inputValue={search}
       value={selectValue}

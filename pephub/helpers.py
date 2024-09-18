@@ -96,6 +96,29 @@ def zip_conv_result(conv_result: dict, filename: str = "project.zip") -> Respons
     return resp
 
 
+def download_yaml(content: dict, file_name: str = "unnamed.yaml") -> Response:
+    """
+    Convert json/dict to downloading io format
+
+    :param content: content of the file
+    :param file_name: name of the file
+    return Response: response object
+    """
+
+    yaml_string = yaml.dump(content)
+
+    yaml_bytes = io.BytesIO()
+    yaml_bytes.write(yaml_string.encode("utf-8"))
+    yaml_bytes.seek(0)  # Move the pointer to the start of the stream
+
+    # Create a streaming response with the YAML data
+    return Response(
+        yaml_bytes.getvalue(),
+        media_type="application/x-yaml",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"},
+    )
+
+
 def build_authorization_url(
     client_id: str,
     redirect_uri: str,

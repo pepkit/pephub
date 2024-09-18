@@ -68,7 +68,7 @@ export const ProjectMetaEditForm = (props: Props) => {
 
   return (
     <form>
-      <div className="mb-3 form-check form-switch">
+      <div className="mt-3 form-check form-switch text-sm">
         <label className="form-check-label" htmlFor="is-private-toggle">
           Private
         </label>
@@ -80,16 +80,14 @@ export const ProjectMetaEditForm = (props: Props) => {
           id="is-private-toggle"
         />
       </div>
-      <div className="mb-3 form-check form-switch">
+      <div className="form-check form-switch text-sm">
         <label className="form-check-label" htmlFor="is-pop-toggle">
           POP
         </label>
         <input {...register('pop')} className="form-check-input" type="checkbox" role="switch" id="is-pop-toggle" />
       </div>
-      <div className="mb-3">
-        <label htmlFor="project-name" className="form-label">
-          Project Name
-        </label>
+      <div className="mt-2">
+        <label className="fw-semibold text-sm">Project Name</label>
         <input
           placeholder="Project name"
           type="text"
@@ -113,10 +111,8 @@ export const ProjectMetaEditForm = (props: Props) => {
           render={({ message }) => (message ? <p className="text-danger text-xs pt-1">{message}</p> : null)}
         />
       </div>
-      <div className="mb-3">
-        <label htmlFor="schema-tag" className="form-label">
-          Schema
-        </label>
+      <div className="mt-2">
+        <label className="fw-semibold text-sm mt-2">Schema</label>
         <SchemaTooltip className="ms-1" />
         <div>
           <Controller
@@ -130,15 +126,14 @@ export const ProjectMetaEditForm = (props: Props) => {
                     shouldDirty: true,
                   });
                 }}
+                showDownload={value !== null}
               />
             )}
           />
         </div>
       </div>
-      <div className="mb-3">
-        <label htmlFor="project-tag" className="form-label">
-          Project Tag
-        </label>
+      <div className="mt-2">
+        <label className="fw-semibold text-sm mt-2">Project Tag</label>
         <input
           // {...register('tag')}
           type="text"
@@ -162,10 +157,8 @@ export const ProjectMetaEditForm = (props: Props) => {
           render={({ message }) => (message ? <p className="text-danger text-xs pt-1">{message}</p> : null)}
         />
       </div>
-      <div className="mb-3">
-        <label htmlFor="project-description" className="form-label">
-          Project Description
-        </label>
+      <div className="mt-2 mb-3">
+        <label className="fw-semibold text-sm mt-2">Description</label>
         <Controller
           control={control}
           name="description"
@@ -214,7 +207,7 @@ export const ProjectMetaEditForm = (props: Props) => {
           id="metadata-save-btn"
           disabled={(!isDirty && isValid) || !!errors.name?.message || !!errors.tag?.message || isSubmitting}
           type="button"
-          className="btn btn-success me-1"
+          className="btn btn-success"
         >
           {isSubmitting ? 'Saving...' : 'Save'}
         </button>

@@ -53,8 +53,11 @@ from ...models import (
     ProjectHistoryResponse,
     SamplesResponseModel,
     ConfigResponseModel,
+    StandardizerResponse,
 )
 from .helpers import verify_updated_project
+
+from bedms import AttrStandardizer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -159,7 +162,10 @@ async def update_pep(
     )
     if new_project:
         update_dict.update(project=new_project)
-        new_name = new_project.name or project
+        try:
+            new_name = new_project.name or project
+        except NotImplementedError:
+            new_name = new_project.name = project
     else:
         new_name = project
     agent.project.update(
@@ -171,7 +177,6 @@ async def update_pep(
     )
 
     # fetch latest name and tag
-    new_name = updated_project.name or new_name
     tag = updated_project.tag or tag
 
     return JSONResponse(
@@ -1138,3 +1143,42 @@ def delete_full_history(
             status_code=400,
             detail="Could not delete history. Server error.",
         )
+
+
+@project.post(
+    "/standardize",
+    summary="Standardize PEP metadata column headers",
+    response_model=StandardizerResponse,
+)
+async def get_standardized_cols(
+    pep: peppy.Project = Depends(get_project),
+    schema: str = "",
+):
+    """
+    Standardize PEP metadata column headers using BEDmess.
+
+    :param namespace: pep: PEP string to be standardized
+    :param schema: Schema for AttrStandardizer
+
+    :return dict: Standardized results
+    """
+
+    if schema == "":
+        raise HTTPException(
+            code=500,
+            detail="Schema is required! Available schemas are ENCODE and Fairtracks",
+        )
+        return {}
+
+    prj = peppy.Project.from_dict(pep)
+    model = AttrStandardizer(schema)
+
+    try:
+        results = model.standardize(pep=prj)
+    except Exception:
+        raise HTTPException(
+            code=400,
+            detail=f"Error standardizing PEP.",
+        )
+
+    return StandardizerResponse(results=results)

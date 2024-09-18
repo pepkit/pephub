@@ -35,18 +35,30 @@ export const EditMetaMetadataModal = (props: Props) => {
 
   return (
     <Modal centered animation={false} show={show} onHide={onHide} size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title>Edit Metadata</Modal.Title>
-      </Modal.Header>
       <Modal.Body>
-        <ProjectMetaEditForm
-          key={projectInfo.dataUpdatedAt}
-          projectInfo={projectInfo.data}
-          canConvertToPop={canConvertToPop || false}
-          isSubmitting={isSubmitting}
-          onSubmit={submit}
-          onCancel={onHide}
-        />
+        <div className='p-1 modal-pill'>
+          <h1 className="fs-5 mb-1 fw-semibold d-inline">Edit Metadata</h1>
+            <button
+              className="btn btn-outline-dark px-1 py-0 m-0 float-end d-inline rounded-3 border-0 shadow-none"
+              type="button" 
+              onClick={() => {
+                onHide();
+              }}
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
+            <p className='text-sm mt-1 mb-3'></p>
+            <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
+
+          <ProjectMetaEditForm
+            key={projectInfo.dataUpdatedAt}
+            projectInfo={projectInfo.data}
+            canConvertToPop={canConvertToPop || false}
+            isSubmitting={isSubmitting}
+            onSubmit={submit}
+            onCancel={onHide}
+          />
+        </div>
       </Modal.Body>
     </Modal>
   );

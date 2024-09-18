@@ -7,7 +7,7 @@ import { PageLayout } from '../components/layout/page-layout';
 import { Pagination } from '../components/layout/pagination';
 import { AddPEPModal } from '../components/modals/add-pep';
 import { DeveloperSettingsModal } from '../components/modals/developer-settings-modal';
-import { DownloadGeo } from '../components/modals/download-geo';
+import { DownloadGeo } from '../components/namespace/archive/download-geo';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePagePlaceholder } from '../components/namespace/namespace-page-placeholder';
@@ -25,7 +25,7 @@ import { useNamespaceStars } from '../hooks/queries/useNamespaceStars';
 import { useDebounce } from '../hooks/useDebounce';
 import { numberWithCommas } from '../utils/etc';
 
-type View = 'peps' | 'pops' | 'schemas' | 'stars';
+type View = 'peps' | 'pops' | 'schemas' | 'stars' | 'archive';
 
 export const NamespacePage = () => {
   const [searchParams] = useSearchParams();
@@ -59,7 +59,6 @@ export const NamespacePage = () => {
   // state
   const [showAddPEPModal, setShowAddPEPModal] = useState(false);
   const [showEndpointsModal, setShowEndpointsModal] = useState(false);
-  const [showGeoDownloadModal, setShowGeoDownloadModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [view, setView] = useState<View>(viewFromUrl || 'peps');
   const [starSearch, setStarSearch] = useState<string>(searchParams.get('starSearch') || '');
@@ -132,9 +131,9 @@ export const NamespacePage = () => {
     return (
       <PageLayout title={namespace}>
         {/* breadcrumbs */}
-        <div className="fw-bold mt-2">
+        <div className="fw-bold mt-3">
           <Breadcrumb>
-            <Breadcrumb.Item href="/">home</Breadcrumb.Item>
+            <Breadcrumb.Item className='text-dark' href="/">home</Breadcrumb.Item>
             <Breadcrumb.Item active>{namespace}</Breadcrumb.Item>
           </Breadcrumb>
         </div>
@@ -147,17 +146,6 @@ export const NamespacePage = () => {
               <i className="bi bi-hdd-rack me-1"></i>
               API
             </button>
-            {namespace === 'geo' && (
-              <button
-                className="btn btn-sm btn-dark"
-                onClick={() => {
-                  setShowGeoDownloadModal(true);
-                }}
-              >
-                <i className="bi bi-download me-1"></i>
-                Download
-              </button>
-            )}
             {user?.login === namespace && (
               <button className="btn btn-sm btn-dark" onClick={() => setShowSettingsModal(true)}>
                 <i className="bi bi-gear me-1"></i>
@@ -179,30 +167,53 @@ export const NamespacePage = () => {
             ) : null}
           </div>
         </div>
-        <>
-          {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
+        {namespace !== user?.login && user?.orgs && user?.orgs.some(org => org === namespace) && (
+          <>
             <p className="mb-0">
               <span className="fw-bold d-flex">
-                Organizations you belong to:{' '}
+                You belong to this organization. 
+              </span>
+            </p>
+            <p>
+              <span className="fw-bold d-flex">
+                Organizations you belong to:
                 <div className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
-                      <a className="ms-1 text-decoration-none" href={`/${org}`}>
+                      <a className="dark-link" style={{marginLeft: '0'}} href={`/${org}`}>
                         <NamespaceBadge className="me-1" namespace={org} />
-                      </a>{' '}
+                      </a>
                     </Fragment>
                   ))}
                 </div>
               </span>
             </p>
-          )}
+          </>
+        )}
+        {namespace === user?.login && user?.orgs && user.orgs.length > 0 && (
+          <>
+            <p className="mb-0">
+              <span className="fw-bold d-flex">
+                Organizations you belong to:
+                <div className="d-flex align-items-center">
+                  {user?.orgs.map((org) => (
+                    <Fragment key={org}>
+                      <a className="dark-link" style={{marginLeft: '0'}} href={`/${org}`}>
+                        <NamespaceBadge className="me-1" namespace={org} />
+                      </a>
+                    </Fragment>
+                  ))}
+                </div>
+              </span>
+            </p>
           {/*<p className="mb-0">*/}
           {/*  <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}*/}
           {/*</p>*/}
           {/*<p className="mb-0">*/}
           {/*  <span className="fw-bold">Total schemas: {numberWithCommas(schemas?.count || 0)}</span>{' '}*/}
           {/*</p>*/}
-        </>
+          </>
+        )}
         <div className="mt-3 d-flex">
           <NamespaceViewSelector
             numPeps={pepsInfo?.count || 0}
@@ -212,6 +223,8 @@ export const NamespacePage = () => {
             view={view}
             setView={setView}
             enableStars={namespace === user?.login}
+            isGEO={namespace === 'geo'}
+            namespace={namespace}
           />
         </div>
         <div className="my-1 border-bottom border-grey"></div>
@@ -256,6 +269,7 @@ export const NamespacePage = () => {
           </Fragment>
         ) : view === 'schemas' ? (
           <Fragment>
+            <span /> {/* for some reason react duplicates star cards without this span */}
             <div className="mt-3">
               <SchemaListSearchBar
                 limit={schemaLimit}
@@ -286,7 +300,7 @@ export const NamespacePage = () => {
               ) : null}
             </div>
           </Fragment>
-        ) : (
+        ) : view === 'stars' ? (
           // render stars in namespace
           <Fragment>
             {stars?.length === 0 ? (
@@ -300,8 +314,8 @@ export const NamespacePage = () => {
                 {stars
                   ?.filter(
                     (star) =>
-                      star.description.toLowerCase().includes(starSearch.toLowerCase()) ||
-                      star.name.toLowerCase().includes(starSearch.toLowerCase()),
+                      star.description?.toLowerCase().includes(starSearch.toLowerCase()) ||
+                      star.name?.toLowerCase().includes(starSearch.toLowerCase()),
                   )
                   .map((star) => (
                     <ProjectCard key={star.digest} project={star} />
@@ -309,14 +323,21 @@ export const NamespacePage = () => {
               </div>
             )}
           </Fragment>
-        )}
+        ) : (view === 'archive' && namespace === 'geo') ? (
+          <Fragment>
+            <div className="mt-3">
+              <DownloadGeo namespace={namespace}/>
+            </div>
+          </Fragment>
+        ) : null
+        }
         <AddPEPModal defaultNamespace={namespace} show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
         <NamespaceAPIEndpointsModal
           namespace={namespace || ''}
           show={showEndpointsModal}
           onHide={() => setShowEndpointsModal(false)}
         />
-        <DownloadGeo show={showGeoDownloadModal} onHide={() => setShowGeoDownloadModal(false)} />
+        
         <DeveloperSettingsModal show={showSettingsModal} onHide={() => setShowSettingsModal(false)} />
       </PageLayout>
     );

@@ -13,6 +13,7 @@ interface Props {
   image?: string;
   fullWidth?: boolean;
   footer?: boolean;
+  fullHeight?: boolean;
 }
 
 const Footer: FC = () => {
@@ -56,7 +57,7 @@ const Footer: FC = () => {
   );
 };
 
-export const PageLayout: FC<Props> = ({ children, title, description, image, fullWidth, footer = true }) => {
+export const PageLayout: FC<Props> = ({ children, title, description, image, fullWidth, footer = true, fullHeight }) => {
   const os = getOS();
   const searchInput = document.getElementById('global-search-bar');
 
@@ -89,7 +90,7 @@ export const PageLayout: FC<Props> = ({ children, title, description, image, ful
   }
 
   // set main class based on fullWidth prop
-  const mainClass = fullWidth ? `container-height` : 'container container-height';
+  const mainClass = fullWidth && fullHeight ? '' : (fullWidth ? `container-height` : 'container container-height');
 
   return (
     <>

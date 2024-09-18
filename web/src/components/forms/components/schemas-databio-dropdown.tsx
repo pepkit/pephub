@@ -2,7 +2,8 @@ import { FC } from 'react';
 import Select, { SingleValue } from 'react-select';
 
 import { useAllSchemas } from '../../../hooks/queries/useAllSchemas';
-import { useSchemas } from '../../../hooks/queries/useSchemas';
+
+const API_HOST = import.meta.env.VITE_API_HOST || '';
 
 interface Props {
   value?: string;
@@ -29,15 +30,22 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => 
           onChange(newValue?.value || '');
         }}
         placeholder={isLoading ? 'Fetching schemas...' : 'Assign a schema...'}
-        isClearable
+        // isClearable
         menuPlacement="top"
         className="w-100"
+        styles={{
+                control: (provided) => ({
+                  ...provided,
+                  borderRadius: '.375em',
+                  borderColor: '#dee2e6'
+                })
+              }}
       />
       {showDownload && (
         <a
           target="_blank"
-          href={`https://schema.databio.org/${value}.yaml`}
-          className="btn btn-outline-secondary opacity-50"
+          href={`${API_HOST}/api/v1/schemas/${value}/file`}
+          className="btn btn-outline-light border shadow-sm text-body-tertiary"
         >
           <i className="bi bi-download" />
         </a>

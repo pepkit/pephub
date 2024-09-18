@@ -1,30 +1,48 @@
 import logging
 
 import eido
+from eido.validation import validate_config
+from eido.exceptions import EidoValidationError
 import peppy
 import yaml
 from fastapi.exceptions import HTTPException
 from peppy import Project
 from peppy.const import (
     CONFIG_KEY,
-    SAMPLE_NAME_ATTR,
     SAMPLE_RAW_DICT_KEY,
-    SAMPLE_TABLE_INDEX_KEY,
     SUBSAMPLE_RAW_LIST_KEY,
+)
+from ....dependencies import (
+    get_db,
 )
 
 _LOGGER = logging.getLogger(__name__)
+DEFAULT_SCHEMA_NAMESPACE = "databio"
+DEFAULT_SCHEMA_NAME = "pep-2.1.0"
 
 
 async def verify_updated_project(updated_project) -> peppy.Project:
     new_raw_project = {}
+
+    agent = get_db()
+    default_schema = agent.schema.get(
+        namespace=DEFAULT_SCHEMA_NAMESPACE, name=DEFAULT_SCHEMA_NAME
+    )
 
     if not updated_project.sample_table or not updated_project.project_config_yaml:
         raise HTTPException(
             status_code=400,
             detail="Please provide a sample table and project config yaml to update project",
         )
-
+    try:
+        validate_config(
+            yaml.safe_load(updated_project.project_config_yaml), default_schema
+        )
+    except EidoValidationError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Config structure error: {', '.join(list(e.errors_by_type.keys()))}. Please check schema definition and try again.",
+        )
     # sample table update
     new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
 
@@ -64,7 +82,7 @@ async def verify_updated_project(updated_project) -> peppy.Project:
 
     try:
         # validate project (it will also validate samples)
-        eido.validate_project(new_project, "http://schema.databio.org/pep/2.1.0.yaml")
+        eido.validate_project(new_project, default_schema)
     except Exception as _:
         raise HTTPException(
             status_code=400,

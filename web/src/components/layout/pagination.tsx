@@ -23,10 +23,10 @@ export const Pagination: FC<Props> = ({ limit, offset, setOffset, count }) => {
   return (
     <div>
       <div className="d-flex flex-row align-items-center justify-content-center mt-2">
-        <button disabled={offset === 0} className="btn btn-link shadow-none" onClick={() => setOffset(0)}>
-          Begining
+        <button disabled={offset === 0} className="btn btn-link dark-link shadow-none mx-1" onClick={() => setOffset(0)}>
+          Beginning
         </button>
-        <button className="btn btn-link shadow-none" onClick={() => setOffset(offset - limit)} disabled={offset === 0}>
+        <button className="btn btn-link dark-link shadow-none mx-1" onClick={() => setOffset(offset - limit)} disabled={offset === 0}>
           <i className="bi bi-chevron-left"></i>
           Previous
         </button>
@@ -34,7 +34,7 @@ export const Pagination: FC<Props> = ({ limit, offset, setOffset, count }) => {
           {pages.map((page, i) => (
             <button
               key={i}
-              className={`btn btn-sm shadow-none px-2 py-1 me-1 ${page === currentPage ? 'btn-primary' : 'btn-link'}`}
+              className={`btn btn-sm shadow-none px-2 py-1 me-1 ${page === currentPage ? 'dark-button' : 'dark-link'}`}
               onClick={() => setOffset((page - 1) * limit)}
             >
               {page}
@@ -42,7 +42,7 @@ export const Pagination: FC<Props> = ({ limit, offset, setOffset, count }) => {
           ))}
         </div>
         <button
-          className="btn btn-link shadow-none"
+          className="btn btn-link dark-link shadow-none mx-1"
           onClick={() => setOffset(offset + limit)}
           disabled={offset + limit >= count}
         >
@@ -50,7 +50,7 @@ export const Pagination: FC<Props> = ({ limit, offset, setOffset, count }) => {
           <i className="bi bi-chevron-right"></i>
         </button>
         <button
-          className="btn btn-link shadow-none"
+          className="btn btn-link dark-link shadow-none mx-1"
           onClick={() => setOffset(count - limit)}
           disabled={offset + limit >= count}
         >

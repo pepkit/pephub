@@ -114,25 +114,27 @@ export const ProjectPage = () => {
           <HistoryBorderBox />
         </Fragment>
       )}
-      <PageLayout fullWidth footer={false} title={`${namespace}/${projectName}`}>
-        <ProjectHeader />
-        {projectInfo?.pop && !forceTraditionalInterface ? (
-          <PopInterface projectInfo={projectInfo} sampleTable={sampleTableQuery.data} />
-        ) : (
-          <ProjectInterface
-            key={`${projectAnnotationQuery.dataUpdatedAt}-${projectConfigQuery.dataUpdatedAt}-${sampleTableQuery.dataUpdatedAt}-${subSampleTableQuery.dataUpdatedAt}`}
-            projectInfo={projectAnnotationQuery.data}
-            projectConfig={projectConfigQuery.data}
-            sampleTable={sampleTableQuery.data}
-            subSampleTable={subSampleTableQuery.data}
-            sampleTableIndex={sampleTableIndex || 'sample_name'}
+      <PageLayout fullWidth fullHeight footer={false} title={`${namespace}/${projectName}`}>
+        <div className='d-flex flex-column' style={{height: 'calc(100vh - 85px)'}}>
+          <ProjectHeader sampleTable={sampleTableQuery.data} sampleTableIndex={sampleTableIndex || 'sample_name'}/>
+          {projectInfo?.pop && !forceTraditionalInterface ? (
+            <PopInterface projectInfo={projectInfo} sampleTable={sampleTableQuery.data} />
+          ) : (
+            <ProjectInterface
+              key={`${projectAnnotationQuery.dataUpdatedAt}-${projectConfigQuery.dataUpdatedAt}-${sampleTableQuery.dataUpdatedAt}-${subSampleTableQuery.dataUpdatedAt}`}
+              projectInfo={projectAnnotationQuery.data}
+              projectConfig={projectConfigQuery.data}
+              sampleTable={sampleTableQuery.data}
+              subSampleTable={subSampleTableQuery.data}
+              sampleTableIndex={sampleTableIndex || 'sample_name'}
+            />
+          )}
+          <LargeSampleTableModal
+            namespace={namespace}
+            show={showLargeSampleTableModal}
+            onHide={() => setShowLargeSampleTableModal(false)}
           />
-        )}
-        <LargeSampleTableModal
-          namespace={namespace}
-          show={showLargeSampleTableModal}
-          onHide={() => setShowLargeSampleTableModal(false)}
-        />
+        </div>
       </PageLayout>
     </div>
   );

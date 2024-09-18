@@ -41,16 +41,17 @@ export const ViewSelector = (props: ViewSelectorProps) => {
   const { user } = useSession();
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
 
+  const deleteView = (deletedView: string) => {
+    if (selectRef.current.getValue()[0].value === deletedView) {
+      setView(undefined);
+      searchParams.delete('view');
+      setSearchParams(searchParams);
+      selectRef.current.clearValue();
+    };    
+  };
+
   const userHasOwnership = user && projectInfo && canEdit(user, projectInfo);
   const selectorRadius = userHasOwnership ? '0 .25em .25em 0' : '.25em';
-
-  const renderTooltip = (props: TooltipProps) => (
-    <Tooltip id="button-tooltip" {...props}>
-      A project view is a way to subset your sample table in a way that is more manageable for viewing in the browser.
-      To learn more about views, and how to create them, visit the{' '}
-      <a href="https://pep.databio.org/pephub/">API documentation.</a>
-    </Tooltip>
-  );
 
   return (
     <Fragment>
@@ -65,11 +66,10 @@ export const ViewSelector = (props: ViewSelectorProps) => {
             }
             style={{ transitionDuration: '250ms' }}
           >
-            <i className="bi bi-gear-wide-connected"></i>
+            <i className="bi bi-display"></i>
           </button>
         ) : null}
-        <OverlayTrigger placement="top" delay={{ show: 250, hide: 500 }} overlay={renderTooltip}>
-          <div className="w-100">
+          <div className="w-100" >
             <ReactSelect
               ref={selectRef}
               styles={{
@@ -79,16 +79,17 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                 }),
               }}
               className="top-z w-100"
-              options={
-                projectViews?.views.map((view) => ({
+              options={[
+                { value: null, label: "Default View" },
+                ...(projectViews?.views.map((view) => ({
                   view: view.name,
                   description: view.description || 'No description',
                   value: view.name,
                   label: `${view.name} | ${view.description || 'No description'}`,
-                })) || []
-              }
+                })) || [])
+              ]}
               onChange={(selectedOption) => {
-                if (selectedOption === null) {
+                if (selectedOption === null || selectedOption.value === null) {
                   setView(undefined);
                   searchParams.delete('view');
                   setSearchParams(searchParams);
@@ -104,7 +105,7 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                 }, 50);
               }}
               isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
-              isClearable
+              isClearable={false}
               placeholder={
                 projectViewsIsLoading
                   ? 'Loading views...'
@@ -112,15 +113,19 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                   ? 'No views available'
                   : 'Select a view'
               }
-              value={view === undefined ? null : { view: view, description: view, value: view, label: view }}
+              value={
+                view === undefined 
+                  ? { value: null, label: "Default View" } 
+                  : { view: view, description: view, value: view, label: view }
+              }
             />
           </div>
-        </OverlayTrigger>
       </div>
       <ViewOptionsModal
         show={showViewOptionsModal}
         onHide={() => setShowViewOptionsModal(false)}
         filteredSamples={filteredSamples}
+        deleteView={deleteView}
       />
     </Fragment>
   );

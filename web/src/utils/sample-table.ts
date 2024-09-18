@@ -52,49 +52,82 @@ export const sampleListToArrays = (sampleList: Sample[]) => {
   return arraysList;
 };
 
-export const arraysToSampleList = (arraysList: any[][]) => {
-  // parse the list of arrays into a list of samples
-  // the first row will be the header row or sample keys
-  // the rest of the rows will be the sample values
-  //
-  // for example this input:
-  // [
-  //   ['col1', 'col2', 'col3'],
-  //   ['s1_col1', 's1_col2', 's1_col3'],
-  //   ['s2_col1', 's2_col2', 's2_col3'],
-  // ]
-  //
-  // will be parsed into this output:
-  // [
-  //   { col1: 's1_col1', col2: 's1_col2', col3: 's1_col3' },
-  //   { col1: 's2_col1', col2: 's2_col2', col3: 's2_col3' },
-  // ]
+export const arraysToSampleList = (arraysList: any[][], tableType: string) => {
+  // Replace all instances of '' with null
+  const updatedArraysList = arraysList.map(row =>
+    row.map(value => value === '' ? null : value)
+  );
 
-  const uniquePhIds = new Set();
+  const uniquePhIds = new Set<string>();
 
   // first row is the header row
-  let headerRow = arraysList[0];
-
-  // look for null values, warn user that this
-  // may cause issues
-  headerRow = headerRow.map((cell, index) => {
-    if (!cell) {
-      throw new Error(`Empty column header detected at index ${index}.`);
-    }
-    return cell;
-  });
+  let headerRow = updatedArraysList[0];
 
   // look for duplicate values in the header row
-  const seen: any = {};
-  headerRow.forEach((cell) => {
-    if (seen[cell]) {
-      throw new Error(`Duplicate column header detected: ${cell}`);
+  const duplicateHeaders: Record<string, number[]> = {};
+  headerRow.forEach((header, index) => {
+    if (header && (header in duplicateHeaders)) {
+      duplicateHeaders[header].push(index);
+    } else {
+      duplicateHeaders[header] = [index];
     }
-    seen[cell] = true;
   });
 
+  // Filter out non-duplicates and prepare error message
+  const realDuplicates = Object.entries(duplicateHeaders)
+    .filter(([_, indices]) => indices.length > 1);
+
+  // If there are duplicate headers, throw an error
+  if (realDuplicates.length > 0) {
+    const errorMessage = realDuplicates
+      .map(([header, indices]) => `"${header}" at columns ${indices.map((i) => i + 1).join(', ')}`)
+      .join('; ');
+    throw new Error(`PEPs cannot have duplicate column headers. Rename the duplicate headers. \n\n Duplicate headers found in ${tableType} Table: ${errorMessage}`);
+  }
+
+  // find ph_id index
+  let phIdIndex = headerRow.findIndex(header => header === 'ph_id');
+  if (phIdIndex === -1) {
+    phIdIndex = headerRow.length; // Use the last column index if 'ph_id' is not found
+  }
+
+  // find index of last non-null column header before phIdIndex
+  let lastNonNullIndex = phIdIndex;
+  while (lastNonNullIndex >= 0 && headerRow[lastNonNullIndex - 1] === null) {
+    lastNonNullIndex--;
+  }
+
+  // Check columns from lastNonNullIndex + 1 to phIdIndex - 1
+  const columnsToRemove: number[] = [];
+  for (let colIndex = lastNonNullIndex; colIndex < phIdIndex; colIndex++) {
+    // Check if all values in this column are null
+    const allNull = updatedArraysList.slice(1).every(row => row[colIndex] === null);
+    
+    if (allNull) {
+      columnsToRemove.push(colIndex);
+    }
+  }
+
+  // remove entirely null columns
+  if (columnsToRemove.length > 0) {
+    for (let i = 0; i < updatedArraysList.length; i++) {
+      updatedArraysList[i] = updatedArraysList[i].filter((_, index) => !columnsToRemove.includes(index));
+    }
+    headerRow = updatedArraysList[0];
+  }
+
+  // Check for null column headers
+  const nullHeaderIndices = updatedArraysList[0]
+    .map((header, index) => header === null ? index : -1)
+    .filter(index => index !== -1);
+
+  if (nullHeaderIndices.length > 0) {
+    const errorMessage = `PEPs cannot have empty column headers. Either add column headers or remove the columns using the context menu (right click). \n\n Empty headers found in ${tableType} Table at columns: ${nullHeaderIndices.map(i => i + 1).join(', ')}`;
+    throw new Error(errorMessage);
+  }
+
   // get the rest of the rows
-  const theRest = arraysList.slice(1);
+  const theRest = updatedArraysList.slice(1);
 
   let sampleList: Sample[] = [];
 
@@ -142,7 +175,6 @@ export const arraysToSampleList = (arraysList: any[][]) => {
       uniquePhIds.add(sample[PH_ID_COL]);
     }
   });
-
   return sampleList;
 };
 

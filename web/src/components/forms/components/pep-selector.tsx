@@ -62,6 +62,13 @@ const PepSelector: FC<Props> = ({ onChange, value }) => {
       <div className="w-75">
         <Select
           className="w-100"
+          styles={{
+            control: (provided) => ({
+              ...provided,
+              borderRadius: '.375em',
+              borderColor: '#dee2e6'
+            }),
+          }}
           isMulti
           isLoading={isLoading}
           inputValue={search}

@@ -2,8 +2,9 @@ import { FC } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink, useSearchParams } from 'react-router-dom';
+import { DownloadGeoCount } from '../namespace/archive/download-geo-count';
 
-type View = 'peps' | 'pops' | 'schemas' | 'stars';
+type View = 'peps' | 'pops' | 'schemas' | 'stars' | 'archive';
 
 type Props = {
   view: View;
@@ -13,6 +14,8 @@ type Props = {
   numSchemas: number;
   setView: (view: View) => void;
   enableStars?: boolean;
+  isGEO?: boolean;
+  namespace?: string;
 };
 
 export const NamespaceViewSelector: FC<Props> = (props) => {
@@ -27,7 +30,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
   };
 
   return (
-    <div className="p-1 namespace-nav">
+    <div className="px-0 py-1 namespace-nav">
       <Nav variant="pills" defaultActiveKey={props.view} onSelect={handleNavSelect}>
         <Nav.Item>
           <Nav.Link eventKey="peps" className="px-2 py-1 me-1">
@@ -38,7 +41,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
                 {props.numPeps}
               </span>
             ) : (
-              <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+              <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                 {props.numPeps}
               </span>
             )}
@@ -53,7 +56,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
                 {props.numPops}
               </span>
             ) : (
-              <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+              <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                 {props.numPops}
               </span>
             )}
@@ -68,7 +71,7 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
                 {props.numSchemas}
               </span>
             ) : (
-              <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+              <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                 {props.numSchemas}
               </span>
             )}
@@ -84,8 +87,25 @@ export const NamespaceViewSelector: FC<Props> = (props) => {
                   {props.numStars}
                 </span>
               ) : (
-                <span className="text-sm ms-2 rounded-pill border border-primary px-2 bg-primary bg-opacity-10">
+                <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
                   {props.numStars}
+                </span>
+              )}
+            </Nav.Link>
+          </Nav.Item>
+        )}
+        {props.isGEO && (
+          <Nav.Item>
+            <Nav.Link eventKey="archive" className="px-2 py-1 me-1">
+              <i className="bi bi-database-down me-1"></i>
+              Archive
+              {props.view === 'archive' ? (
+                <span className="text-sm ms-2 rounded-pill border border-light px-2 bg-light bg-opacity-10">
+                  <DownloadGeoCount namespace={props.namespace}/>
+                </span>
+              ) : (
+                <span className="text-sm ms-2 rounded-pill border border-secondary-subtle px-2 bg-secondary bg-opacity-10">
+                  <DownloadGeoCount namespace={props.namespace}/>
                 </span>
               )}
             </Nav.Link>

@@ -3,9 +3,11 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 import { useValidation } from '../../../hooks/queries/useValidation';
 import { ValidationResultModal } from '../../modals/validation-result';
+import { StatusIcon } from '../../badges/status-icons';
+
 
 type Props = {
-  schemaRegistry: string;
+  schemaRegistry: string | undefined;
   isValidating: boolean;
   validationResult: ReturnType<typeof useValidation>['data'];
 };
@@ -35,6 +37,8 @@ export const ValidationResult = (props: Props) => {
         delay={{ show: 250, hide: 500 }}
         trigger={['hover']}
       >
+
+      { schemaRegistry ? (
         <button
           disabled={isValidating}
           onClick={() => {
@@ -60,6 +64,18 @@ export const ValidationResult = (props: Props) => {
             </span>
           </div>
         </button>
+      ) : (
+        <button 
+          className="d-flex align-items-center bg-warning bg-opacity-10 px-2 rounded-1 validation-button border border-warning text-sm"
+          onClick={() => {
+              setValidationModalIsOpen(true);
+            }}
+        >
+          <StatusIcon className="me-1" variant="warning" />
+          <span className="text-warning">No Schema</span>
+        </button>
+      )}
+
       </OverlayTrigger>
       <ValidationResultModal
         show={validationModalIsOpen}

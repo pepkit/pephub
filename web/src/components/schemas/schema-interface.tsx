@@ -1,7 +1,7 @@
 import { Editor } from '@monaco-editor/react';
 import { useEffect } from 'react';
+import { Fragment } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Fragment } from 'react/jsx-runtime';
 
 import { useEditSchemaMutation } from '../../hooks/mutations/useEditSchemaMutation';
 import { useSchema } from '../../hooks/queries/useSchema';

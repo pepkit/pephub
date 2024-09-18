@@ -33,7 +33,7 @@ export const SchemasNav = (props: Props) => {
     <div className="d-flex flex-column align-items-center gap-2">
       <div className="d-flex align-items-center justify-content-between w-100">
         <div className="d-flex align-items-center">
-          <h1 className="m-0 fw-bold">PEPhub schemas</h1>
+          <h3 className="m-0 fw-semibold">PEPhub schemas</h3>
         </div>
         {user && (
           <div className="d-flex align-items-center gap-1">
@@ -76,15 +76,31 @@ export const SchemasNav = (props: Props) => {
         </div>
         <select
           style={{ width: '10%' }}
-          className="form-control form-select rounded-start-0"
+          className="form-control form-select rounded-start-0  rounded-end-0"
           id="limit-select"
           value={limit}
           onChange={(e) => setLimit(Number(e.target.value))}
         >
-          <option value="10">10</option>
           <option value="25">25</option>
           <option value="50">50</option>
           <option value="100">100</option>
+        </select>
+        <select
+          value={`${orderBy}+${order}`}
+          onChange={(e) => {
+            const [orderBy, order] = e.target.value.split('+');
+            setOrderBy(orderBy);
+            setOrder(order as 'asc' | 'desc');
+          }}
+          className="form-control form-select rounded-start-0"
+          style={{ width: '20%' }}
+        >
+          <option value={'name+asc'}>Name (A-Z)</option>
+          <option value={'name+desc'}>Name (Z-A)</option>
+          <option value={'update_date+asc'}>Last update (newest)</option>
+          <option value={'update_date+desc'}>Last update (oldest)</option>
+          <option value={'submission_date+asc'}>Submission date (newest)</option>
+          <option value={'submission_date+desc'}>Submission date (oldest)</option>
         </select>
       </div>
     </div>

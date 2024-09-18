@@ -159,3 +159,7 @@ class SchemaGetResponse(BaseModel):
     description: Optional[str] = None
     last_update_date: str = ""
     submission_date: str = ""
+
+
+class StandardizerResponse(BaseModel):
+    results: dict = {}

@@ -74,6 +74,20 @@ type DeleteAllPepsResponse = {
   message: string;
 };
 
+export interface ArchiveItem {
+  identifier: number;
+  namespace: string;
+  file_path: string;
+  creation_date: string; // ISO 8601 date string
+  number_of_projects: number;
+  file_size: number;
+}
+
+export interface ArchiveResponse {
+  count: number;
+  results: ArchiveItem[];
+}
+
 export const getNamespaceInfo = (namespace: string, token: string | null = null) => {
   const url = `${API_BASE}/namespaces/${namespace}/`; // note the trailing slash
   if (!token) {
@@ -344,3 +358,14 @@ export const deleteAllPepsFromNamespace = (namespace: string, token: string | nu
     },
   });
 };
+
+export const getNamespaceArchive = (namespace: string) => {
+  const url = `${API_BASE}/namespaces/${namespace}/archive`;
+  return axios.get<ArchiveResponse>(url).then((res) => res.data);
+};
+
+export const getStandardizerSchemas = (namespace: string) => {
+  const url = `${API_BASE}/namespaces/${namespace}/standardizer-schemas`;
+  return axios.get<string[]>(url).then((res) => res.data);
+};
+

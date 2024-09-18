@@ -1,12 +1,13 @@
 import { ErrorMessage } from '@hookform/error-message';
 import { useEffect, useRef } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldErrors } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { useSession } from '../../contexts/session-context';
 import { useUploadSchemaFile } from '../../hooks/mutations/useUploadSchemaFile';
 import { GitHubAvatar } from '../badges/github-avatar';
 import { FileDropZone } from './components/file-dropzone';
+import { CombinedErrorMessage } from './components/combined-error-message'
 
 type FromFileInputs = {
   isPrivate: boolean;
@@ -34,7 +35,7 @@ export const SchemaUploadForm = (props: Props) => {
     register,
     control,
     watch,
-    formState: { errors },
+    formState: { isValid, errors },
   } = useForm<FromFileInputs>({
     mode: 'onChange',
     defaultValues: {
@@ -54,7 +55,7 @@ export const SchemaUploadForm = (props: Props) => {
   const { isPending: isUploading, upload } = useUploadSchemaFile();
 
   return (
-    <form id="upload-form" className="border-0 form-control">
+    <form id="upload-form" className="border-0 form-control p-0">
       {/* <div className="mb-3 mt-3 form-check form-switch">
         <input
           className="form-check-input"
@@ -68,12 +69,12 @@ export const SchemaUploadForm = (props: Props) => {
           Private
         </label>
       </div> */}
-      <div className="namespace-name-tag-container">
-        <label className="fw-bold text-sm">Namespace *</label>
-        <label className="fw-bold text-sm">Name *</label>
+      <div className="namespace-name-tag-container mt-3">
+        <label className="fw-semibold text-sm">Namespace*</label>
+        <label className="fw-semibold text-sm">Name*</label>
       </div>
-      <div className="namespace-name-tag-container fs-4">
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+      <div className="namespace-name-tag-container fs-4 d-flex">
+        <div className="d-flex flex-row align-items-center justify-content-between w-25">
           <select
             id="namespace-select"
             className="form-select"
@@ -90,7 +91,7 @@ export const SchemaUploadForm = (props: Props) => {
           </select>
           <span className="mx-1 mb-1">/</span>
         </div>
-        <div className="d-flex flex-row align-items-center justify-content-between w-full ">
+        <div className="d-flex flex-row align-items-center justify-content-between w-75">
           <input
             id="project-name"
             type="text"
@@ -98,25 +99,30 @@ export const SchemaUploadForm = (props: Props) => {
             placeholder="name"
             // dont allow any whitespace
             {...register('name', {
-              required: true,
+              required: {
+                value: true,
+                message: "empty",
+              },
               pattern: {
-                value: /^\S+$/,
-                message: 'No spaces allowed.',
+                value: /^[a-zA-Z0-9_.-]+$/,
+                message: "invalid",
               },
             })}
           />
         </div>
       </div>
-      <ErrorMessage errors={errors} name="name" render={({ message }) => <p>{message}</p>} />
+      <CombinedErrorMessage errors={errors} formType={'schema'} />
+      <label className="fw-semibold text-sm mt-2">Description</label>
       <textarea
         id="description"
-        className="form-control mt-3"
+        className="form-control"
         rows={3}
         placeholder="Describe your schema."
         {...register('description')}
       ></textarea>
+      <label className="fw-semibold text-sm mt-2">Schema Upload</label>
       {uploadFile ? (
-        <div className="dashed-border p-5 mt-3 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
+        <div className="dashed-border p-5 border border-2 d-flex flex-column align-items-center justify-content-center rounded-3">
           <div className="d-flex flex-column align-items-center">
             <div className="flex-row d-flex align-items-center">
               <i className="bi bi-file-earmark-text me-1"></i>
@@ -136,6 +142,9 @@ export const SchemaUploadForm = (props: Props) => {
       ) : (
         <FileDropZone name="file" control={control} multiple={false} innerRef={fileDialogRef} />
       )}
+      <p className='text-xs mt-1'>
+        * Namespace and Schema Name are required.
+      </p>
       <div className="mt-2">
         <button
           onClick={() => {
@@ -155,17 +164,17 @@ export const SchemaUploadForm = (props: Props) => {
               },
             );
           }}
-          disabled={isUploading}
+          disabled={!isValid || isUploading}
           type="button"
           id="new-project-submit-btn"
-          className="btn btn-success me-1"
+          className="btn btn-success float-end"
         >
           <i className="bi bi-plus-circle me-1"></i>
           {isUploading ? 'Submitting...' : 'Submit'}
         </button>
         <button
           type="button"
-          className="btn btn-outline-dark me-1"
+          className="btn btn-outline-dark me-1 float-end"
           data-bs-dismiss="modal"
           onClick={() => {
             resetForm();

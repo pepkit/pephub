@@ -16,7 +16,7 @@ interface Props {
 export const ProjectCard: FC<Props> = ({ project }) => {
   const { user } = useSession();
 
-  const { data: stars } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
+  const { data: stars, isLoading } = useNamespaceStars(user?.login || '/', {}, true); // only fetch stars if the namespace is the user's
 
   // state
   const [showDeletePEPModal, setShowDeletePEPModal] = useState(false);
@@ -30,12 +30,11 @@ export const ProjectCard: FC<Props> = ({ project }) => {
   return (
     <div
       id={`project-card-${project.namespace}/${project.name}:${project.tag}`}
-      className="w-100 border border-dark rounded shadow-sm p-2 mt-3 bg-secondary bg-opacity-10"
-      // style={{ backgroundColor: '#f6f8fa' }}
+      className="w-100 border rounded shadow-sm ps-3 pe-2 pb-3 pt-2 mt-3 bg-body-tertiary card namespace-card"
     >
       <div className="d-flex flex-row align-items-start justify-content-between">
         <div className="d-flex flex-row align-items-center">
-          <a className="fw-bold fs-4" href={`${project.namespace}/${project.name}?tag=${project.tag}`}>
+          <a className="fw-semibold fs-4 stretched-link text-decoration-none text-primary-emphasis" href={`${project.namespace}/${project.name}?tag=${project.tag}`}>
             {project.namespace}/{project.name}:{project.tag}
           </a>
           {project.is_private ? (
@@ -56,66 +55,57 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             </span>
           ) : null}
         </div>
-        <ProjectCardDropdown
-          project={project}
-          isStarred={!!isStarred}
-          copied={copied}
-          setCopied={setCopied}
-          setShowDeletePEPModal={setShowDeletePEPModal}
-          setShowForkPEPModal={setShowForkPEPModal}
-        />
+        { !isLoading ? 
+          <ProjectCardDropdown
+            project={project}
+            isStarred={!!isStarred}
+            copied={copied}
+            setCopied={setCopied}
+            setShowDeletePEPModal={setShowDeletePEPModal}
+            setShowForkPEPModal={setShowForkPEPModal}
+            starNumber={project?.stars_number}
+          />
+          : null          
+        }
+        
       </div>
-      <div>
-        <div className="d-flex flex-row align-items-center">
-          <div className="me-4">
-            <i className="bi bi-star-fill"></i>
-            <span className="mx-1">{project.stars_number || 0}</span>
-          </div>
-          <div className="me-4">
-            <label className="fw-bold">No. of samples:</label>
-            <span className="mx-1">{project.number_of_samples}</span>
-          </div>
-          <div>
-            <label className="fw-bold">Schema:</label>
-            <span className="mx-1">{project.pep_schema || 'No schema'}</span>
-          </div>
-        </div>
-        <div className="mb-0">
-          {project.description ? (
-            <MarkdownToText>{project.description}</MarkdownToText>
-          ) : (
-            <em>
-              <span className="text-muted text-italic">No description</span>
-            </em>
-          )}
-        </div>
+      <div className="mb-0">
+        {project.description ? (
+          <MarkdownToText>{project.description}</MarkdownToText>
+        ) : (
+          <em>
+            <span className="text-muted text-italic">No description</span>
+          </em>
+        )}
       </div>
-      <div className="mt-3">
-        <div className="d-flex flex-row align-items-center text-mute justify-content-between">
-          <small>
-            <span className="me-3">
-              <i className="bi bi-calendar3"></i>
-              <span className="mx-1">Created:</span>
-              <span id="project-submission-date">{dateStringToDateTime(project.submission_date)}</span>
-              <i className="ms-4 bi bi-calendar3"></i>
-              <span className="mx-1">Updated:</span>
-              <span id="project-update-date">{dateStringToDateTime(project.last_update_date)}</span>
-            </span>
-          </small>
-          <small>
-            {project?.forked_from && (
-              <span className="p-1 border rounded fw-bold">
-                <Fragment>
-                  <i className="bi bi-bezier2"></i>
-                  <span className="ms-1">Forked from</span>
-                  <a className="text-decoration-none ms-1" href={`/${project?.forked_from.replace(':', '?tag=')}`}>
-                    {project?.forked_from}
-                  </a>
-                </Fragment>
-              </span>
-            )}
-          </small>
-        </div>
+      <div className="d-flex flex-row align-items-center mt-3 text-sm">
+        <span className="me-3">
+          <span className="fw-semibold">Sample Count:</span>
+          <span className="mx-1">{project.number_of_samples}</span>
+        </span>
+        <span>
+          <span className="fw-semibold">Schema:</span>
+          <span className="mx-1">{project.pep_schema || 'No schema'}</span>
+        </span>
+      </div>
+      <div className="d-flex flex-row align-items-center text-mute text-sm">
+        <span className="me-3">
+          <span className="fw-semibold">Created:</span>
+          <span className="mx-1" id="project-submission-date">{dateStringToDateTime(project.submission_date)}</span>
+        </span>
+        <span>
+          <span className="fw-semibold">Updated:</span>
+          <span className="mx-1" id="project-update-date">{dateStringToDateTime(project.last_update_date)}</span>
+        </span>
+        {project?.forked_from && (
+          <div className="p-1 border rounded fw-bold me-1 bg-white ms-auto position-relative forked-link" style={{zIndex: 2, margin: '-1.25em 0 -1em'}}>
+            <i className="bi bi-bezier2"></i>
+            <span className="ms-1">Forked from</span>
+            <a className="text-decoration-none ms-1 stretched-link" href={`/${project?.forked_from.replace(':', '?tag=')}`}>
+              {project?.forked_from}
+            </a>
+          </div>
+        )}
       </div>
       <ForkPEPModal
         show={showForkPEPModal}

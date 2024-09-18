@@ -54,6 +54,11 @@ export const SampleTable = (props: Props) => {
     });
   }
 
+  // const columns = data[0].map((header, index) => ({
+  //   data: index,
+  //   readOnly: header === 'ph_id' || readOnly
+  // }));
+
   const numColumns = data.length > 0 ? data[0].length : 0;
 
   const ph_id_col = data[0].indexOf('ph_id');
@@ -90,11 +95,30 @@ export const SampleTable = (props: Props) => {
       ref={hotRef}
       data={data}
       stretchH={stretchH || 'all'}
-      height={height || tableHeight}
+      // height={height || tableHeight}
+      height={height || '100%'}
       readOnly={readOnly}
       colHeaders={true}
+      // columns={columns}
+      cells={(row, col, prop) => {
+        const cellProperties = {} as { isHeader?: boolean };
+        if (row === 0) {
+          cellProperties.isHeader = true;
+        } else {
+          cellProperties.isHeader = false;
+        }
+        // if (col === ph_id_col) {
+        //   cellProperties.readOnly = true;
+        // }
+        return cellProperties;
+      }}
       renderer={(instance, td, row, col, prop, value, cellProperties) => {
         Handsontable.renderers.TextRenderer.apply(this, [instance, td, row, col, prop, value, cellProperties]);
+        if (cellProperties.isHeader) {
+          td.style.fontWeight = 'bold';
+        } else {
+          td.style.fontWeight = 'normal';
+        }
         td.innerHTML = `<div class="truncated">${value || ''}</div>`;
         td.addEventListener('click', function (event) {
           const innerDiv = td.querySelector('.truncated');

@@ -30,9 +30,9 @@ export const ProjectAPIEndpointsModal: FC<Props> = ({ namespace, project, tag, s
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
           <span className="fw-bold me-1">Samples:</span>
-          <a href={`${API_HOST}/api/v1/projects/${namespace}/${project}/samples?tag=${tag}`}>
+          <a href={`${API_HOST}/api/v1/projects/${namespace}/${project}/samples?tag=${tag}&raw=false`}>
             <code>
-              /api/v1/projects/{namespace}/{project}/samples?tag={tag}
+              /api/v1/projects/{namespace}/{project}/samples?tag={tag}&raw=false
             </code>
           </a>
         </p>

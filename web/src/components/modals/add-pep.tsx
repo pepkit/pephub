@@ -16,90 +16,106 @@ export const AddPEPModal = (props: Props) => {
   const { show, onHide, defaultNamespace } = props;
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
-      <Modal.Header closeButton>
-        <h1 className="modal-title fs-5">Submit a new resource</h1>
-      </Modal.Header>
       <Modal.Body>
-        <Tabs defaultActiveKey="blank" id="uncontrolled-tab">
-          <Tab
-            eventKey="blank"
-            title={
-              <span>
-                <i className="bi bi-pencil me-1"></i>
-                Blank PEP
-              </span>
-            }
+        <div className='p-1 modal-pill'>
+          <h1 className="fs-5 mb-1 fw-semibold d-inline">Submit a new resource</h1>
+          <button
+            className="btn btn-outline-dark px-1 py-0 m-0 float-end d-inline rounded-3 border-0 shadow-none"
+            type="button" 
+            onClick={() => {
+              onHide();
+            }}
           >
-            <div className="border border-top-0">
-              <BlankProjectForm defaultNamespace={defaultNamespace} onHide={onHide} />
-            </div>
-          </Tab>
-          <Tab
-            eventKey="from-file"
-            title={
-              <span>
-                <i className="bi bi-cloud-upload me-1"></i>
-                Upload PEP
-              </span>
-            }
-          >
-            <div className="border border-top-0">
-              <ProjectUploadForm defaultNamespace={defaultNamespace} onHide={onHide} />
-            </div>
-          </Tab>
-          <Tab
-            eventKey="pop"
-            title={
-              <span>
-                <i className="bi bi-collection me-1"></i>
-                POP
-              </span>
-            }
-          >
-            <div className="border border-top-0">
-              <PopForm defaultNamespace={defaultNamespace} onHide={onHide} />
-            </div>
-          </Tab>
-          <Tab
-            eventKey="new-schema"
-            title={
-              <span>
-                <i className="bi bi-filetype-yml me-1"></i>
-                New schema
-              </span>
-            }
-          >
-            <div className="border border-top-0 p-2">
-              <CreateSchemaForm
-                defaultNamespace={defaultNamespace}
-                editorHeight="400px"
-                onCancel={onHide}
-                onSubmit={() => {
-                  onHide();
-                }}
-              />
-            </div>
-          </Tab>
-          <Tab
-            eventKey="upload-schema"
-            title={
-              <span>
-                <i className="bi bi-cloud-upload me-1"></i>
-                Upload schema
-              </span>
-            }
-          >
-            <div className="border border-top-0 p-2">
-              <SchemaUploadForm
-                defaultNamespace={defaultNamespace}
-                onCancel={onHide}
-                onSubmit={() => {
-                  onHide();
-                }}
-              />
-            </div>
-          </Tab>
-        </Tabs>
+            <i className="bi bi-x-lg"></i>
+          </button>
+          <p className='text-sm mt-1 mb-3'></p>
+          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
+          <Tabs
+            variant="pills" 
+            justify defaultActiveKey="blank" 
+            id="uncontrolled-tab"
+            className='border border-2 border-light-subtle rounded rounded-3 text-sm bg-body-secondary mt-3' 
+           >
+            <Tab
+              eventKey="blank"
+              title={
+                <span>
+                  <i className="bi bi-pencil me-1"></i>
+                  Blank PEP
+                </span>
+              }
+            >
+              <div className="">
+                <BlankProjectForm defaultNamespace={defaultNamespace} onHide={onHide} />
+              </div>
+            </Tab>
+            <Tab
+              eventKey="from-file"
+              title={
+                <span>
+                  <i className="bi bi-cloud-upload me-1"></i>
+                  Upload PEP
+                </span>
+              }
+            >
+              <div className="">
+                <ProjectUploadForm defaultNamespace={defaultNamespace} onHide={onHide} />
+              </div>
+            </Tab>
+            <Tab
+              eventKey="pop"
+              title={
+                <span>
+                  <i className="bi bi-collection me-1"></i>
+                  POP
+                </span>
+              }
+            >
+              <div className="">
+                <PopForm defaultNamespace={defaultNamespace} onHide={onHide} />
+              </div>
+            </Tab>
+            <Tab
+              eventKey="new-schema"
+              title={
+                <span>
+                  <i className="bi bi-filetype-yml me-1"></i>
+                  New Schema
+                </span>
+              }
+            >
+              <div className="">
+                <CreateSchemaForm
+                  defaultNamespace={defaultNamespace}
+                  editorHeight="400px"
+                  onCancel={onHide}
+                  onSubmit={() => {
+                    onHide();
+                  }}
+                />
+              </div>
+            </Tab>
+            <Tab
+              eventKey="upload-schema"
+              title={
+                <span>
+                  <i className="bi bi-cloud-upload me-1"></i>
+                  Upload Schema
+                </span>
+              }
+            >
+              <div className="">
+                <SchemaUploadForm
+                  defaultNamespace={defaultNamespace}
+                  onCancel={onHide}
+                  onSubmit={() => {
+                    onHide();
+                  }}
+                />
+              </div>
+            </Tab>
+          </Tabs>
+        </div>
       </Modal.Body>
     </Modal>
   );
