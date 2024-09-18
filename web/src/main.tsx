@@ -79,7 +79,7 @@ const router = createBrowserRouter([
   {
     path: '/schemas',
     loader: async ({ params }) => {
-      return redirect(`/browse`);
+      return redirect(`/browse?view=schemas`);
     },
   },
   {
