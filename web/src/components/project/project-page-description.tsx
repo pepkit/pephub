@@ -8,7 +8,7 @@ import { useCurrentHistoryId } from '../../hooks/stores/useCurrentHistoryId';
 import { Markdown } from '../markdown/render';
 import { ProjectDescriptionPlaceholder } from './placeholders/project-description-placeholder';
 
-const MAX_DESC_HEIGHT = 200;
+const MAX_DESC_HEIGHT = 150;
 
 export const ProjectDescription = () => {
   const { namespace, projectName, tag } = useProjectPage();
