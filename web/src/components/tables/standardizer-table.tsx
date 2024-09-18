@@ -1,6 +1,7 @@
 import React from 'react';
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
+
 import { formatToPercentage } from '../../utils/etc';
 
 type StandardizerTableProps = {
@@ -52,7 +53,7 @@ export const StandardizerTable = (props: StandardizerTableProps) => {
             ) : null}
             <div className="col-6 text-center">
               <div
-                className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm"
+                className="w-100 h-100 border border-secondary-subtle rounded-2 shadow-sm"
                 style={{ bottom: '-1px' }}
               >
                 <HotTable
