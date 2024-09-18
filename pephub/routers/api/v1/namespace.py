@@ -182,7 +182,6 @@ async def create_pep(
             p = Project(f"{dirpath}/{init_file.filename}")
             p.name = name
             p.description = description
-            p.pep_schema = pep_schema
             try:
                 agent.project.create(
                     p,
@@ -191,7 +190,7 @@ async def create_pep(
                     tag=tag,
                     description=description,
                     is_private=is_private,
-                    pep_schema=pep_schema,
+                    pep_schema=pep_schema or "databio/pep-2.1.0",
                 )
             except ProjectUniqueNameError:
                 raise HTTPException(
@@ -235,7 +234,7 @@ async def upload_raw_pep(
         is_private = project_from_json.is_private
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
-        pep_schema = project_from_json.pep_schema
+        pep_schema = project_from_json.pep_schema or "databio/pep-2.1.0"
         pop = project_from_json.pop or False
         if hasattr(project_from_json, NAME_KEY):
             if project_from_json.name:
