@@ -1,6 +1,7 @@
 import React from 'react';
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
+
 import { formatToPercentage } from '../../utils/etc';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { arraysToSampleList, sampleListToArrays } from '../../utils/sample-table';
@@ -14,13 +15,22 @@ type BrowseTableProps = {
 
 export const BrowseTable = (props: BrowseTableProps) => {
   const { namespace, project, tag } = props;
+
+  const PH_ID_COL = 'ph_id';
+
   const { data: tabData, isFetching } = useSampleTable({
     namespace,
     project,
     tag,
     enabled: true
   });
+
   const tabSamples = tabData?.items || [];
+
+  const tabSamplesNoPHID = sampleListToArrays(tabSamples.map(sample => {
+    const { [PH_ID_COL]: _, ...rest } = sample;
+    return rest;
+  }));
 
   return (
     <>
@@ -33,7 +43,7 @@ export const BrowseTable = (props: BrowseTableProps) => {
           <p className='fw-medium text-sm mb-1'>Sample Table:</p>
           <div className="col overflow-auto border border-secondary-subtle rounded-2 shadow-sm p-0">
             <HotTable
-              data={sampleListToArrays(tabSamples)}
+              data={tabSamplesNoPHID}
               colHeaders={false}
               rowHeaders={true}
               width="100%"

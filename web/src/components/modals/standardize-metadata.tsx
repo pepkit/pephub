@@ -50,8 +50,6 @@ export const StandardizeMetadataModal = (props: Props) => {
     setResetStandardizedData,
   } = props;
 
-  const PH_ID_COL = 'ph_id';
-
   const { data: schemaOptions } = useStandardizerSchemas(namespace);
 
   const tabDataRaw = newSamples;
@@ -267,7 +265,7 @@ export const StandardizeMetadataModal = (props: Props) => {
               </div>
 
               <form>
-                {Object.keys(standardizedData).filter(key => key !== 'ph_id').map((key, index) => (
+                {Object.keys(standardizedData).map((key, index) => (
                   <StandardizerTable
                     columnKey={key}
                     columnIndex={index}

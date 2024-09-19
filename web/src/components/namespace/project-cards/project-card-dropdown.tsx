@@ -1,4 +1,4 @@
-import { FC, Fragment, useState } from 'react';
+import { FC, Fragment, useState, useEffect } from 'react';
 import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 
@@ -28,6 +28,10 @@ export const ProjectCardDropdown: FC<Props> = (props) => {
   const { isPending: isRemovingStar, removeStar } = useRemoveStar(user?.login);
 
   const [localStarred, setLocalStarred] = useState(isStarred);
+
+  useEffect(() => {
+    setLocalStarred(isStarred);
+  }, [project]);
 
   return (
     <Dropdown as={ButtonGroup}>
