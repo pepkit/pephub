@@ -56,7 +56,7 @@ export const StandardizerTable = (props: StandardizerTableProps) => {
             ) : null}
             <div className="col-6 text-center">
               <div
-                className="overflow-auto border border-secondary-subtle rounded-2 shadow-sm p-0"
+                className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm p-0"
                 style={{ bottom: '-1px' }}
               >
                 <HotTable

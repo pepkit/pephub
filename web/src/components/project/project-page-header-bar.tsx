@@ -173,7 +173,7 @@ export const ProjectHeaderBar = (props: Props) => {
                     <i className="me-1 bi bi-bezier2"></i>
                     Fork
                   </Dropdown.Item>
-                  {!projectInfo.pop && (
+                  {!projectInfo?.pop && (
                     <>
                       <Dropdown.Item onClick={() => setShowAddToPOPModal(true)}>
                         <i className="me-1 bi bi-plus-circle"></i>

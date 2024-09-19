@@ -50,6 +50,10 @@ export const StandardizeMetadataModal = (props: Props) => {
     setResetStandardizedData,
   } = props;
 
+  const maxColsExceeded = newSamples[0].length >= 9
+
+  console.log(maxColsExceeded)
+
   const { data: schemaOptions } = useStandardizerSchemas(namespace);
 
   const tabDataRaw = newSamples;
@@ -241,13 +245,23 @@ export const StandardizeMetadataModal = (props: Props) => {
                     <button
                       className="btn btn-success float-end w-100"
                       type="submit"
-                      disabled={selectedOption === null}
+                      disabled={selectedOption === null || maxColsExceeded}
                     >
                       Standardize!
                     </button>
                   </div>
                 </div>
               </form>
+
+              {maxColsExceeded && (
+                <div className='row'>
+                  <p className='text-sm mt-3 mb-1'>
+                    <strong>Note: </strong>
+                    Your project has nine or more columns. 
+                    Due to server constraints, we currently only support standardization of projects with fewer than nine columns on PEPhub.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
