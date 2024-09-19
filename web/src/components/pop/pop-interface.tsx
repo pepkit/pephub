@@ -57,7 +57,7 @@ export const PopInterface = (props: Props) => {
     return (
       <Fragment>
         <div className="px-2">
-          <div className="mt-3 border-top w-100"></div>
+          <div className="mt-1 w-100"></div>
           <div className="px-2">
             <div className="d-flex flex-column">
               {allProjectsInfo?.results.map((project: ProjectAnnotation | null) =>
