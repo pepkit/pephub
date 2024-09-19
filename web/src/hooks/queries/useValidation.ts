@@ -31,9 +31,12 @@ const runValidation = async (params: ValidationParams) => {
 
   // Schema things
   formData.append('schema', schema || '');
-  formData.append('schema_file', params.schema_file || '');
-  formData.append('schema_registry', schema_registry || '');
-
+  if (params.schema_file) {
+    formData.append('schema_file', params.schema_file);
+  }
+  if (schema_registry) {
+    formData.append('schema_registry', schema_registry || '');
+  }
   const { data: result } = await axios.post<ValidationResult>(`${API_BASE}/eido/validate`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
