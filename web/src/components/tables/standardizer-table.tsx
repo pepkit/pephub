@@ -94,7 +94,7 @@ export const StandardizerTable = (props: StandardizerTableProps) => {
                         if (row === 0) {
                           td.style.fontWeight = 'bold';
                           if (whereDuplicates?.includes(columnIndex)) {
-                            td.style.color = 'red';
+                            td.style.color = '#dc3545';
                           }
                         }
                       },

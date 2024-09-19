@@ -116,7 +116,7 @@ export interface ProjectViewAnnotation {
   name: string;
   description?: string;
   number_of_samples: number;
-  _samples: Sample[];
+  samples: Sample[];
 }
 
 export type ProjectAllHistory = {

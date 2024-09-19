@@ -74,7 +74,7 @@ export const ProjectInterface = (props: Props) => {
     view,
     enabled: !!view,
   });
-  const viewSamples = viewData?._samples || [];
+  const viewSamples = viewData?.samples || [];
 
   // form to store project updated fields temporarily
   // on the client before submitting to the server

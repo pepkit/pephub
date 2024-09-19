@@ -98,11 +98,6 @@ export const ViewSelector = (props: ViewSelectorProps) => {
                   searchParams.set('view', selectedOption.value);
                   setSearchParams(searchParams);
                 }
-                setTimeout(() => {
-                  if (selectRef.current) {
-                    selectRef.current.blur();
-                  }
-                }, 50);
               }}
               isDisabled={projectViews?.views.length === 0 || projectViewsIsLoading}
               isClearable={false}

@@ -50,9 +50,7 @@ export const StandardizeMetadataModal = (props: Props) => {
     setResetStandardizedData,
   } = props;
 
-  const maxColsExceeded = newSamples[0].length >= 9
-
-  console.log(maxColsExceeded)
+  const maxColsExceeded = newSamples[0].length >= 9;
 
   const { data: schemaOptions } = useStandardizerSchemas(namespace);
 
@@ -304,7 +302,7 @@ export const StandardizeMetadataModal = (props: Props) => {
           <div>
             {whereDuplicates !== null && (
               <div className="text-danger me-auto mt-3 pt-2 d-inline-block">
-                Warning: ensure no duplicate column names have been selected.
+                <strong>Warning:</strong> ensure no duplicate column names have been selected.
               </div>
             )}
             <button
