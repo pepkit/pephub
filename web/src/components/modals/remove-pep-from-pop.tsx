@@ -1,8 +1,12 @@
 import { FC, useState } from 'react';
 import { Modal } from 'react-bootstrap';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { Sample } from '../../../types';
-import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMutation';
+import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
+import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
+import { useSampleTable } from '../../hooks/queries/useSampleTable';
+import { useSubsampleTable } from '../../hooks/queries/useSubsampleTable';
 
 interface Props {
   show: boolean;
@@ -33,7 +37,18 @@ export const RemovePEPFromPOPModal: FC<Props> = ({
     setConfirmText('');
   };
 
-  const { isPending: isSampleTablePending, submit } = useSampleTableMutation(
+  let { namespace, project, tag } = useParams();
+
+  const { data: projectConfig } = useProjectConfig(namespace, project, tag);
+  const { data: subSampleTable } = useSubsampleTable(namespace, project, tag);
+
+  // const { isPending: isSampleTablePending, submit } = useSampleTableMutation(
+  //   namespaceToRemoveFrom!,
+  //   projectToRemoveFrom!,
+  //   tagToRemoveFrom || 'default',
+  // );
+
+  const { isPending: isSampleTablePending, submit } = useTotalProjectChangeMutation(
     namespaceToRemoveFrom!,
     projectToRemoveFrom!,
     tagToRemoveFrom || 'default',
@@ -73,15 +88,20 @@ export const RemovePEPFromPOPModal: FC<Props> = ({
       <Modal.Footer>
         <button
           onClick={() => {
-            submit(
-              currentPeps.filter((pep) => pep.sample_name !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}`),
-              {
-                onSuccess: () => {
-                  onSuccess();
-                  onHide();
-                },
-              },
-            );
+            submit({
+              config: projectConfig?.config,
+              samples: currentPeps.filter((pep) => pep.sample_name !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}`),
+              subsamples: subSampleTable?.items,
+            });
+            // submit(
+            //   currentPeps.filter((pep) => pep.sample_name !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}`),
+            //   {
+            //     onSuccess: () => {
+            //       onSuccess();
+            //       onHide();
+            //     },
+            //   },
+            // );
           }}
           disabled={confirmText !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}` || isSampleTablePending}
           type="button"

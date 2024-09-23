@@ -19,10 +19,8 @@ import { downloadZip } from '../../utils/project';
 import { ProjectHistoryModal } from '../modals/project-history';
 import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
 import { ProjectStars } from './project-stars'
-
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
 import { useSampleTable } from '../../hooks/queries/useSampleTable'
-
 
 type Props = {
   sampleTable: ReturnType<typeof useSampleTable>['data'];

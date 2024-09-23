@@ -23,7 +23,6 @@ import { SampleTable } from '../tables/sample-table';
 import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
 import { StandardizeMetadataModal } from '../modals/standardize-metadata';
-
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
 
 type Props = {
@@ -106,7 +105,7 @@ export const ProjectInterface = (props: Props) => {
     try {
       const samplesParsed = arraysToSampleList(values.samples, 'Sample');
       const subsamplesParsed = arraysToSampleList(values.subsamples, 'Subsample');
-      const configParsed = yaml.load(values.config) as Record<string, unknown>;
+      // const configParsed = yaml.load(values.config) as Record<string, unknown>;
       
       // // check if 'name' value exists in config for PEPhub PEP
       // if (!('name' in configParsed) || (('name' in configParsed) && (!configParsed.name))) {

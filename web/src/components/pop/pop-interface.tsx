@@ -8,19 +8,24 @@ import { useSampleTableMutation } from '../../hooks/mutations/useSampleTableMuta
 import { useMultiProjectAnnotation } from '../../hooks/queries/useMultiProjectAnnotation';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
 import { useSampleTable } from '../../hooks/queries/useSampleTable';
+import { useSubsampleTable } from '../../hooks/queries/useSubsampleTable';
+import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
 import { NamespaceSearchDropdown } from '../forms/components/namespace-search-dropdown';
 import { PepSearchDropdown } from '../forms/components/pep-search-dropdown';
 import { ProjectCardPlaceholder } from '../placeholders/project-card-placeholder';
 import { LoadingSpinner } from '../spinners/loading-spinner';
 import { PopCard } from './pop-card';
+import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
 
 type Props = {
   projectInfo: ReturnType<typeof useProjectAnnotation>['data'];
   sampleTable: ReturnType<typeof useSampleTable>['data'];
+  subSampleTable: ReturnType<typeof useSubsampleTable>['data'];
+  projectConfig: ReturnType<typeof useProjectConfig>['data'];
 };
 
 export const PopInterface = (props: Props) => {
-  const { projectInfo } = props;
+  const { projectInfo, subSampleTable, projectConfig } = props;
 
   const { namespace, projectName, tag } = useProjectPage();
 
@@ -38,7 +43,8 @@ export const PopInterface = (props: Props) => {
   const [addToPopRegistry, setAddToPopRegistry] = useState<string | undefined>(undefined);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
 
-  const { isPending: isSampleTablePending, submit } = useSampleTableMutation(namespace, projectName, tag);
+  // const { isPending: isSampleTablePending, submit } = useSampleTableMutation(namespace, projectName, tag);
+  const { isPending: isSampleTablePending, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   if (isLoading) {
     return (
@@ -119,15 +125,19 @@ export const PopInterface = (props: Props) => {
                             return;
                           }
                           let newPeps = peps?.items || [];
-                          const [newNamespace, newPojectNameAndTag] = addToPopRegistry.split('/');
-                          const [newProjectName, newProjectTag] = newPojectNameAndTag.split(':');
+                          const [newNamespace, newProjectNameAndTag] = addToPopRegistry.split('/');
+                          const [newProjectName, newProjectTag] = newProjectNameAndTag.split(':');
                           newPeps?.push({
                             sample_name: `${newNamespace}/${newProjectName}:${newProjectTag}`,
                             namespace: newNamespace,
                             name: newProjectName,
                             tag: newProjectTag,
                           });
-                          submit(newPeps);
+                          submit({
+                            config: projectConfig?.config,
+                            samples: newPeps,
+                            subsamples: subSampleTable?.items,
+                          });
                         }}
                         disabled={addToPopNamespace === '' || addToPopRegistry === '' || isSampleTablePending}
                       >
