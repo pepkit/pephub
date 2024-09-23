@@ -243,7 +243,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                     <button
                       className="btn btn-success float-end w-100"
                       type="submit"
-                      disabled={selectedOption === null || maxColsExceeded}
+                      disabled={selectedOption === null}
                     >
                       Standardize!
                     </button>
@@ -256,7 +256,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                   <p className='text-sm mt-3 mb-1'>
                     <strong>Note: </strong>
                     Your project has nine or more columns. 
-                    Due to server constraints, we currently only support standardization of projects with fewer than nine columns on PEPhub.
+                    Due to server constraints, standardization of nine or more columns on PEPhub may take some time. Please be patient.
                   </p>
                 </div>
               )}
