@@ -33,10 +33,6 @@ export const PopCardDropdown: FC<Props> = (props) => {
 
   const [localStarred, setLocalStarred] = useState(isStarred);
 
-  useEffect(() => {
-    setLocalStarred(isStarred);
-  }, [project]);
-
   return (
     <Dropdown as={ButtonGroup}>
       <Button

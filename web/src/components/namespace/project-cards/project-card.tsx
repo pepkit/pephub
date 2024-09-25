@@ -67,6 +67,7 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             setShowDeletePEPModal={setShowDeletePEPModal}
             setShowForkPEPModal={setShowForkPEPModal}
             starNumber={project?.stars_number}
+            key={project?.digest}
           />
         )}
       </div>

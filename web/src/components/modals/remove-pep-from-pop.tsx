@@ -88,20 +88,19 @@ export const RemovePEPFromPOPModal: FC<Props> = ({
       <Modal.Footer>
         <button
           onClick={() => {
-            submit({
-              config: projectConfig?.config,
-              samples: currentPeps.filter((pep) => pep.sample_name !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}`),
-              subsamples: subSampleTable?.items,
-            });
-            // submit(
-            //   currentPeps.filter((pep) => pep.sample_name !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}`),
-            //   {
-            //     onSuccess: () => {
-            //       onSuccess();
-            //       onHide();
-            //     },
-            //   },
-            // );
+            submit(
+              {
+                config: projectConfig?.config,
+                samples: currentPeps.filter((pep) => pep.sample_name !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}`),
+                subsamples: subSampleTable?.items,
+              },
+              {
+                onSuccess: () => {
+                  onSuccess();
+                  onHide();
+                },
+              }
+            );
           }}
           disabled={confirmText !== `${namespaceToRemove}/${projectToRemove}:${tagToRemove}` || isSampleTablePending}
           type="button"

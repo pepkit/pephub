@@ -68,6 +68,7 @@ export const PopCard: FC<Props> = ({ project, currentPeps, parentName, parentNam
           setShowForkPEPModal={setShowForkPEPModal}
           setShowRemovePEPModal={setShowRemovePEPModal}
           starNumber={project?.stars_number}
+          key={project?.digest}
         />
       </div>
       <div className="mb-0">
