@@ -50,7 +50,7 @@ export const StandardizeMetadataModal = (props: Props) => {
     setResetStandardizedData,
   } = props;
 
-  const PH_ID_COL = 'ph_id';
+  const maxColsExceeded = newSamples[0].length >= 9;
 
   const { data: schemaOptions } = useStandardizerSchemas(namespace);
 
@@ -250,6 +250,16 @@ export const StandardizeMetadataModal = (props: Props) => {
                   </div>
                 </div>
               </form>
+
+              {maxColsExceeded && (
+                <div className='row'>
+                  <p className='text-sm mt-3 mb-1'>
+                    <strong>Note: </strong>
+                    Your project has nine or more columns. 
+                    Due to server constraints, standardization of nine or more columns on PEPhub may take some time. Please be patient.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -267,7 +277,7 @@ export const StandardizeMetadataModal = (props: Props) => {
               </div>
 
               <form>
-                {Object.keys(standardizedData).filter(key => key !== 'ph_id').map((key, index) => (
+                {Object.keys(standardizedData).map((key, index) => (
                   <StandardizerTable
                     columnKey={key}
                     columnIndex={index}
@@ -292,7 +302,7 @@ export const StandardizeMetadataModal = (props: Props) => {
           <div>
             {whereDuplicates !== null && (
               <div className="text-danger me-auto mt-3 pt-2 d-inline-block">
-                Warning: ensure no duplicate column names have been selected.
+                <strong>Warning:</strong> ensure no duplicate column names have been selected.
               </div>
             )}
             <button

@@ -65,6 +65,13 @@ export const PepSearchDropdown = (props: Props) => {
           value: `${n.namespace}/${n.name}:${n.tag}`,
         })) || []
       }
+      styles={{
+        control: (provided) => ({
+          ...provided,
+          borderRadius: '.375em',
+          borderColor: '#dee2e6'
+        })
+      }}
       placeholder="Search for PEPs"
       menuPlacement="bottom"
       controlShouldRenderValue={true}

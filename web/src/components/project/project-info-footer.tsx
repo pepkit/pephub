@@ -46,7 +46,7 @@ export const ProjectInfoFooter = () => {
           </div>
           <div className="col-sm-auto">
             <i className="bi bi-arrows-expand"></i>
-            <span className="mx-1">Sample Count:</span>
+            <span className="mx-1">{projectInfo?.pop ? 'Project' : 'Sample'} Count:</span>
             <span id="project-update-date">
               {currentHistoryId !== null
                 ? projectHistoryQuery.data?._sample_dict.length

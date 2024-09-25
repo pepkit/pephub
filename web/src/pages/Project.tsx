@@ -118,7 +118,7 @@ export const ProjectPage = () => {
         <div className='d-flex flex-column' style={{height: 'calc(100vh - 85px)'}}>
           <ProjectHeader sampleTable={sampleTableQuery.data} sampleTableIndex={sampleTableIndex || 'sample_name'}/>
           {projectInfo?.pop && !forceTraditionalInterface ? (
-            <PopInterface projectInfo={projectInfo} sampleTable={sampleTableQuery.data} />
+            <PopInterface projectInfo={projectInfo} sampleTable={sampleTableQuery.data} subSampleTable={subSampleTableQuery.data} projectConfig={projectConfigQuery.data} />
           ) : (
             <ProjectInterface
               key={`${projectAnnotationQuery.dataUpdatedAt}-${projectConfigQuery.dataUpdatedAt}-${sampleTableQuery.dataUpdatedAt}-${subSampleTableQuery.dataUpdatedAt}`}

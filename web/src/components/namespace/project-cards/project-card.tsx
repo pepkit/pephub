@@ -1,4 +1,4 @@
-import { FC, Fragment, useState } from 'react';
+import { FC, Fragment, useState, useMemo} from 'react';
 
 import { ProjectAnnotation } from '../../../../types';
 import { useSession } from '../../../contexts/session-context';
@@ -23,8 +23,11 @@ export const ProjectCard: FC<Props> = ({ project }) => {
   const [showForkPEPModal, setShowForkPEPModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const isStarred = stars?.find(
-    (star) => star.namespace === project.namespace && star.name === project.name && star.tag === project.tag,
+  const isStarred = useMemo(() => 
+    !!stars?.find(
+      (star) => star.namespace === project.namespace && star.name === project.name && star.tag === project.tag
+    ),
+    [stars, project.namespace, project.name, project.tag]
   );
 
   return (
@@ -55,19 +58,18 @@ export const ProjectCard: FC<Props> = ({ project }) => {
             </span>
           ) : null}
         </div>
-        { !isLoading ? 
+        { !isLoading && (
           <ProjectCardDropdown
             project={project}
-            isStarred={!!isStarred}
+            isStarred={isStarred}
             copied={copied}
             setCopied={setCopied}
             setShowDeletePEPModal={setShowDeletePEPModal}
             setShowForkPEPModal={setShowForkPEPModal}
             starNumber={project?.stars_number}
+            key={project?.digest}
           />
-          : null          
-        }
-        
+        )}
       </div>
       <div className="mb-0">
         {project.description ? (

@@ -1,4 +1,4 @@
-import { FC, Fragment } from 'react';
+import { FC, Fragment, useState, useEffect } from 'react';
 import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { useAddStar } from '../../hooks/mutations/useAddStar';
 import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
 import { copyToClipboard } from '../../utils/etc';
 import { LoadingSpinner } from '../spinners/loading-spinner';
+import { numberWithCommas } from '../../utils/etc';
 
 interface Props {
   project: ProjectAnnotation;
@@ -17,23 +18,28 @@ interface Props {
   setCopied: (copied: boolean) => void;
   setShowForkPEPModal: (show: boolean) => void;
   setShowRemovePEPModal: (show: boolean) => void;
+  starNumber: number;
 }
 
 export const PopCardDropdown: FC<Props> = (props) => {
   let { namespace, project: name } = useParams();
 
-  const { project, isStarred, copied, setCopied, setShowForkPEPModal, setShowRemovePEPModal } = props;
+  const { project, isStarred, copied, setCopied, setShowForkPEPModal, setShowRemovePEPModal, starNumber } = props;
 
   const { user } = useSession();
 
   const { isPending: isAddingStar, addStar } = useAddStar(user?.login || '');
   const starRemoveMutation = useRemoveStar(user?.login || '');
 
+  const [localStarred, setLocalStarred] = useState(isStarred);
+
   return (
     <Dropdown as={ButtonGroup}>
       <Button
         disabled={isAddingStar || starRemoveMutation.isPending}
-        variant="outline-dark"
+        variant="outline"
+        className={isStarred ? 'border mt-1 shadow-none rounded-start-2 starred-button' : 'border mt-1 shadow-none rounded-start-2 star-button'} 
+        style={{zIndex: 2}}
         size="sm"
         onClick={() => {
           if (!user) {
@@ -54,42 +60,32 @@ export const PopCardDropdown: FC<Props> = (props) => {
         }}
       >
         {isStarred ? (
-          <Fragment>
-            <div className="d-flex align-items-center">
-              <i className="text-primary bi bi-star-fill me-1"></i>
-              <span className="text-primary">
-                s
-                {starRemoveMutation.isPending ? (
-                  <Fragment>
-                    {copied ? 'Copied!' : 'Star'}
-                    <LoadingSpinner className="w-4 h-4 spin ms-1 mb-tiny fill-secondary" />
-                  </Fragment>
-                ) : (
-                  <Fragment>{copied ? 'Copied!' : 'Star'}</Fragment>
-                )}
-              </span>
-            </div>
-          </Fragment>
+          <div className="d-flex align-items-center text-sm">
+            <i className="bi bi-star-fill me-1 position-relative" style={{paddingRight: '2px', marginTop: '-0.666666px'}}></i>
+            <span className='fw-semibold'>
+              <Fragment>
+                {copied ? 'Copied!' : (localStarred ? numberWithCommas(starNumber) : numberWithCommas(starNumber + 1))}
+              </Fragment>
+            </span>
+          </div>
         ) : (
-          <Fragment>
-            <div className="d-flex align-items-center">
-              <i className="bi bi-star me-1"></i>
-              <span>
-                {starRemoveMutation.isPending ? (
-                  <Fragment>
-                    {copied ? 'Copied!' : 'Star'}
-                    <LoadingSpinner className="w-4 h-4 spin ms-1 mb-tiny fill-secondary" />
-                  </Fragment>
-                ) : (
-                  <Fragment>{copied ? 'Copied!' : 'Star'}</Fragment>
-                )}
-              </span>
-            </div>
-          </Fragment>
+          <div className="d-flex align-items-center text-sm">
+            <i className="bi bi-star me-1 position-relative" style={{paddingRight: '2px', marginTop: '-0.666666px'}}></i>
+            <span className='fw-normal'>
+              <Fragment>
+                {copied ? 'Copied!' : (localStarred ? numberWithCommas(starNumber - 1) : numberWithCommas(starNumber))}
+              </Fragment>
+            </span>
+          </div>
         )}
       </Button>
-      <Dropdown.Toggle split variant="outline-dark" id="dropdown-split-basic" />
-      <Dropdown.Menu>
+      <Dropdown.Toggle 
+        split 
+        variant="outline"
+        className='border mt-1 me-1 shadow-none rounded-end-2 star-dropdown-button'
+        style={{zIndex: 2}}
+        id="dropdown-split-basic" />
+      <Dropdown.Menu className='border border-light-subtle shadow-sm'>
         <Dropdown.Item href={`/${project.namespace}/${project.name}`}>
           <i className="bi bi-eye me-1"></i>
           View

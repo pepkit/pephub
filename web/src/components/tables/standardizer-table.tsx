@@ -29,8 +29,11 @@ export const StandardizerTable = (props: StandardizerTableProps) => {
     tableData,
   } = props;
 
+  const PH_ID_COL = 'ph_id';
+
   return (
     <>
+      { columnKey !== PH_ID_COL && 
         <div className="mb-3" key={columnKey}>
           <div
             className={
@@ -53,7 +56,7 @@ export const StandardizerTable = (props: StandardizerTableProps) => {
             ) : null}
             <div className="col-6 text-center">
               <div
-                className="w-100 h-100 border border-secondary-subtle rounded-2 shadow-sm"
+                className="w-100 h-100 overflow-auto border border-secondary-subtle rounded-2 shadow-sm p-0"
                 style={{ bottom: '-1px' }}
               >
                 <HotTable
@@ -91,7 +94,7 @@ export const StandardizerTable = (props: StandardizerTableProps) => {
                         if (row === 0) {
                           td.style.fontWeight = 'bold';
                           if (whereDuplicates?.includes(columnIndex)) {
-                            td.style.color = 'red';
+                            td.style.color = '#dc3545';
                           }
                         }
                       },
@@ -147,6 +150,7 @@ export const StandardizerTable = (props: StandardizerTableProps) => {
             <br />
           </div>
         </div>
+      }
     </>
   );
 };

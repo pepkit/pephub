@@ -19,10 +19,8 @@ import { downloadZip } from '../../utils/project';
 import { ProjectHistoryModal } from '../modals/project-history';
 import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
 import { ProjectStars } from './project-stars'
-
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
 import { useSampleTable } from '../../hooks/queries/useSampleTable'
-
 
 type Props = {
   sampleTable: ReturnType<typeof useSampleTable>['data'];
@@ -173,10 +171,14 @@ export const ProjectHeaderBar = (props: Props) => {
                     <i className="me-1 bi bi-bezier2"></i>
                     Fork
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setShowAddToPOPModal(true)}>
-                    <i className="me-1 bi bi-plus-circle"></i>
-                    Add to POP
-                  </Dropdown.Item>
+                  {!projectInfo?.pop && (
+                    <>
+                      <Dropdown.Item onClick={() => setShowAddToPOPModal(true)}>
+                        <i className="me-1 bi bi-plus-circle"></i>
+                        Add to POP
+                      </Dropdown.Item>
+                    </>
+                  )}
                 </Fragment>
               )}
             </Fragment>
@@ -199,14 +201,18 @@ export const ProjectHeaderBar = (props: Props) => {
                     <i className="me-1 bi bi-pencil-square"></i>
                     Edit
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setShowProjectHistoryModal(true)}>
-                    <i className="me-1 bi bi-stopwatch" />
-                    History
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setShowStandardizeMetadataModal(true)}>
-                    <i className="me-1 bi bi-magic"></i>
-                    Standardize
-                  </Dropdown.Item>
+                  {!projectInfo.pop && (
+                    <>
+                      <Dropdown.Item onClick={() => setShowProjectHistoryModal(true)}>
+                      <i className="me-1 bi bi-stopwatch" />
+                        History
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={() => setShowStandardizeMetadataModal(true)}>
+                        <i className="me-1 bi bi-magic"></i>
+                        Standardize
+                      </Dropdown.Item>
+                    </>
+                  )}
                   <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>
                     <i className="me-1 bi bi-trash3"></i>
                     Delete
