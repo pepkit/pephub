@@ -31,7 +31,7 @@ from pepdbagent.models import (
 )
 from peppy.const import SAMPLE_DF_KEY, SAMPLE_RAW_DICT_KEY
 
-from ....const import SAMPLE_CONVERSION_FUNCTIONS
+# from ....const import SAMPLE_CONVERSION_FUNCTIONS
 from ....dependencies import (
     DEFAULT_TAG,
     get_config,
@@ -224,7 +224,7 @@ async def delete_a_pep(
         )
 
 
-@project.get("/samples", response_model=SamplesResponseModel)
+@project.get("/samples", response_model=Union[SamplesResponseModel, str, list, dict])
 async def get_pep_samples(
     proj: dict = Depends(get_project),
     format: Optional[str] = None,
@@ -239,29 +239,44 @@ async def get_pep_samples(
 
         project: example
         namespace: databio
+
+
+    To convert project use format parameter. Available formats are: basic, csv, yaml, json
     """
-    if format is not None:
-        conversion_func: Callable = SAMPLE_CONVERSION_FUNCTIONS.get(format, None)
-        if conversion_func is not None:
-            return PlainTextResponse(content=conversion_func(proj[SAMPLE_DF_KEY]))
-        else:
+
+    AVALIABLE_FORMATS = ["basic", "csv", "yaml", "json"]
+
+    if format:
+
+        if format not in AVALIABLE_FORMATS:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid format '{format}'. Valid formats are: {list(SAMPLE_CONVERSION_FUNCTIONS.keys())}",
+                detail=f"Invalid format '{format}'. Valid formats are: {AVALIABLE_FORMATS}",
             )
-    else:
-        if raw:
-            df = pd.DataFrame(proj[SAMPLE_RAW_DICT_KEY])
-            return SamplesResponseModel(
-                count=df.shape[0],
-                items=df.replace({np.nan: None}).to_dict(orient="records"),
-            )
-        else:
+
+        if isinstance(proj, dict):
             proj = peppy.Project.from_dict(proj)
-            return SamplesResponseModel(
-                count=len(proj.samples),
-                items=[s.to_dict() for s in proj.samples],
-            )
+
+        if format == "json":
+            return {
+                "samples": [sample.to_dict() for sample in proj.samples],
+            }
+        elif format == "csv":
+            return eido.convert_project(proj, "csv")["samples"]
+        elif format == "yaml":
+            return eido.convert_project(proj, "yaml-samples")["samples"]
+        elif format == "basic":
+            return eido.convert_project(proj, "basic")
+
+    if raw:
+        df = pd.DataFrame(proj[SAMPLE_RAW_DICT_KEY])
+        return SamplesResponseModel(
+            count=df.shape[0],
+            items=df.replace({np.nan: None}).to_dict(orient="records"),
+        )
+    if isinstance(proj, dict):
+        proj = peppy.Project.from_dict(proj)
+    return [sample.to_dict() for sample in proj.samples]
 
 
 @project.get("/config", summary="Get project configuration file")

@@ -97,12 +97,12 @@ TAGS_METADATA = [
 ]
 
 
-SAMPLE_CONVERSION_FUNCTIONS = {
-    "json": lambda x: x.to_json(),
-    "csv": lambda x: x.to_csv(index=False),
-    "latex": lambda x: x.to_latex(),
-    "txt": lambda x: x.to_string(),
-}
+# SAMPLE_CONVERSION_FUNCTIONS = {
+#     "json": lambda x: x.to_json(),
+#     "csv": lambda x: x.to_csv(index=False),
+#     "latex": lambda x: x.to_latex(),
+#     "txt": lambda x: x.to_string(),
+# }
 
 VALID_UPDATE_KEYS = [
     "name",
