@@ -18,7 +18,7 @@ export const ValidationResult = (props: Props) => {
   const [validationModalIsOpen, setValidationModalIsOpen] = useState(false);
 
   let wrapperClassName = 'py-1 px-2 rounded-1 bg-opacity-10 validation-button';
-  if (!shouldValidate) {
+  if (shouldValidate) {
     wrapperClassName += ' border border-warning text-warning bg-warning';
   } else if (isValidating) {
     wrapperClassName += ' border border-warning text-warning bg-warning';
@@ -48,7 +48,7 @@ export const ValidationResult = (props: Props) => {
             className={wrapperClassName}
           >
             <div className="d-flex flex-row align-items-center gap-2 text-sm py-0">
-              {isValidating || !shouldValidate ? (
+              {isValidating || shouldValidate ? (
                 <span className="bg-warning text-warning rounded-pill validation-badge"></span>
               ) : validationResult?.valid ? (
                 <span className="bg-success text-success rounded-pill validation-badge"></span>
