@@ -140,3 +140,5 @@ DEFAULT_QDRANT_SCORE_THRESHOLD = (
 )
 
 ARCHIVE_URL_PATH = "https://cloud2.databio.org/pephub/"
+
+MAX_PROCESSED_PROJECT_SIZE = 5000

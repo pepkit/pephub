@@ -16,6 +16,7 @@ from starlette.responses import JSONResponse
 
 from ...dependencies import DEFAULT_TAG, get_db
 from ...helpers import parse_user_file_upload, split_upload_files_on_init_file
+from ...const import MAX_PROCESSED_PROJECT_SIZE
 
 schemas_url = "https://schema.databio.org/list.json"
 schemas_to_test = requests.get(schemas_url).json()
@@ -84,6 +85,16 @@ async def validate(
     if pep_registry is not None:
         namespace, name, tag = registry_path_converter(pep_registry)
         tag = tag or DEFAULT_TAG
+
+        pep_annot = agent.annotation.get(namespace=namespace, name=name, tag=tag)
+
+        if pep_annot.results[0].number_of_samples > MAX_PROCESSED_PROJECT_SIZE:
+            return {
+                "valid": False,
+                "error_type": "Project size",
+                "errors": ["Project is too large. Can't validate."],
+            }
+
         p = agent.project.get(namespace, name, tag, raw=False)
     else:
         init_file = parse_user_file_upload(pep_files)

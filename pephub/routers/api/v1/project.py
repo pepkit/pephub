@@ -55,6 +55,7 @@ from ...models import (
     ConfigResponseModel,
     StandardizerResponse,
 )
+from ....const import MAX_PROCESSED_PROJECT_SIZE
 from .helpers import verify_updated_project
 
 from bedms import AttrStandardizer
@@ -93,7 +94,12 @@ async def get_namespace_projects_list(
     return agent.annotation.get_by_rp_list(registry_paths=paths, admin=namespace_access)
 
 
-@project.get("", summary="Fetch a PEP", response_model=ProjectRawRequest)
+@project.get(
+    "",
+    summary="Fetch a PEP",
+    response_model=ProjectRawRequest,
+    response_model_by_alias=False,
+)
 async def get_a_pep(
     proj: dict = Depends(get_project),
 ):
@@ -110,7 +116,7 @@ async def get_a_pep(
     """
     try:
         raw_project = ProjectRawModel(**proj)
-        return raw_project.model_dump(by_alias=False)
+        return raw_project
     except Exception:
         raise HTTPException(500, "Unexpected project error!")
 
@@ -255,6 +261,11 @@ async def get_pep_samples(
             )
 
         if isinstance(proj, dict):
+            if len(proj["_sample_dict"]) > MAX_PROCESSED_PROJECT_SIZE:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Project is too large. View raw samples, or create a view. Limit is {MAX_PROCESSED_PROJECT_SIZE} samples.",
+                )
             proj = peppy.Project.from_dict(proj)
 
         if format == "json":
@@ -275,6 +286,11 @@ async def get_pep_samples(
             items=df.replace({np.nan: None}).to_dict(orient="records"),
         )
     if isinstance(proj, dict):
+        if len(proj["_sample_dict"]) > MAX_PROCESSED_PROJECT_SIZE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Project is too large. View raw samples, or create a view. Limit is {MAX_PROCESSED_PROJECT_SIZE} samples.",
+            )
         proj = peppy.Project.from_dict(proj)
     return [sample.to_dict() for sample in proj.samples]
 
