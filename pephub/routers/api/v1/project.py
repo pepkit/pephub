@@ -1202,7 +1202,7 @@ async def get_standardized_cols(
         return {}
 
     prj = peppy.Project.from_dict(pep)
-    model = AttrStandardizer(schema)
+    model = AttrStandardizer(repo_id="databio/attribute-standardizer-model6", model_name=schema)
 
     try:
         results = model.standardize(pep=prj)
