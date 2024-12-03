@@ -55,7 +55,11 @@ from ...models import (
     ConfigResponseModel,
     StandardizerResponse,
 )
-from ....const import MAX_PROCESSED_PROJECT_SIZE
+from ....const import (
+    MAX_PROCESSED_PROJECT_SIZE,
+    BEDMS_REPO_URL,
+    MAX_STANDARDIZED_PROJECT_SIZE,
+)
 from .helpers import verify_updated_project
 
 from bedms import AttrStandardizer
@@ -1182,33 +1186,46 @@ def delete_full_history(
     response_model=StandardizerResponse,
 )
 async def get_standardized_cols(
-    pep: peppy.Project = Depends(get_project),
+    pep: dict = Depends(get_project),
     schema: str = "",
 ):
     """
-    Standardize PEP metadata column headers using BEDmess.
+    Standardize PEP metadata column headers using BEDms.
 
-    :param namespace: pep: PEP string to be standardized
+    :param pep: PEP string to be standardized
     :param schema: Schema for AttrStandardizer
 
     :return dict: Standardized results
     """
 
-    if schema == "":
+    if schema == "" or schema not in ["ENCODE", "BEDBASE", "FAIRTRACKS"]:
         raise HTTPException(
-            code=500,
-            detail="Schema is required! Available schemas are ENCODE and Fairtracks",
+            status_code=404,
+            detail="Schema not available! Available schemas are ENCODE, BEDBASE and FAIRTRACKS.",
         )
-        return {}
 
-    prj = peppy.Project.from_dict(pep)
-    model = AttrStandardizer(schema)
+    if len(pep["_sample_dict"]) > MAX_STANDARDIZED_PROJECT_SIZE:
+        # raise HTTPException(
+        #     status_code=400,
+        #     detail=f"Project is too large. Cannot standardize. "
+        #            f"Limit is {MAX_STANDARDIZED_PROJECT_SIZE} samples.",
+        # )
+        prj = peppy.Project.from_dict(
+            {
+                "_config": pep["_config"],
+                "_sample_dict": pep["_sample_dict"][:50],
+            }
+        )
+    else:
+        prj = peppy.Project.from_dict(pep)
+    model = AttrStandardizer(repo_id=BEDMS_REPO_URL, model_name=schema.lower())
 
     try:
         results = model.standardize(pep=prj)
-    except Exception:
+    except Exception as e:
+        _LOGGER.error(f"Error standardizing PEP. {e}")
         raise HTTPException(
-            code=400,
+            status_code=400,
             detail=f"Error standardizing PEP.",
         )
 
