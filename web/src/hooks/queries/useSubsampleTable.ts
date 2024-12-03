@@ -12,7 +12,7 @@ export const useSubsampleTable = (
   const query = useQuery({
     queryKey: [namespace, project, tag, 'subsamples'],
     queryFn: () => getSubsampleTable(namespace || '', project || '', tag, session.jwt || ''),
-    enabled: namespace !== undefined || project !== undefined,
+    enabled: namespace !== undefined && project !== undefined,
   });
   return query;
 };
