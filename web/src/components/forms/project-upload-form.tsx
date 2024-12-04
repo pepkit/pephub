@@ -213,7 +213,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
               },
             );
           }}
-          disabled={!isValid || isUploading || pepSchema === undefined}
+          disabled={!isValid || isUploading}
           type="button"
           id="new-project-submit-btn"
           className="btn btn-success float-end"
