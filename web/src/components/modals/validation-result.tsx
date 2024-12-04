@@ -70,29 +70,27 @@ export const ValidationResultModal = (props: Props) => {
               )}
             </>
           ) : (
-            <span className="d-flex align-items-center gap-1">
-              Select a Schema
-            </span>
+            <span className="d-flex align-items-center gap-1">Select a Schema</span>
           )}
         </h1>
       </Modal.Header>
       <Modal.Body>
         {currentSchema && (
           <>
-          {validationResult?.valid ? (
-            <p>Your PEP is valid against the schema.</p>
-          ) : (
-            <Fragment>
-              <p>You PEP is invalid against the schema.</p>
-              <p>Validation result:</p>
-              <pre>
-                <code>{JSON.stringify(validationResult, null, 2)}</code>
-              </pre>
-            </Fragment>
-          )}
+            {validationResult?.valid ? (
+              <p>Your PEP is valid against the schema.</p>
+            ) : (
+              <Fragment>
+                <p>Your PEP is invalid against the schema.</p>
+                <p>Validation result:</p>
+                <pre>
+                  <code>{JSON.stringify(validationResult, null, 2)}</code>
+                </pre>
+              </Fragment>
+            )}
           </>
         )}
-          
+
         <form className="mb-1">
           {currentSchema ? (
             <label className="mt-1 fw-bold">Change schemas here:</label>
@@ -126,7 +124,7 @@ export const ValidationResultModal = (props: Props) => {
       </Modal.Body>
       <Modal.Footer>
         <div className="d-flex align-items-center justify-content-between w-100">
-          { currentSchema && (
+          {currentSchema && (
             <div className="d-flex align-items-center">
               <a href={`/schemas/${props.currentSchema}`}>
                 <button className="btn btn-sm btn-outline-dark">

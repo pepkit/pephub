@@ -149,7 +149,8 @@ export const SampleTable = (props: Props) => {
         'copy',
         'cut',
       ]}
-      multiColumnSorting={true}
+      multiColumnSorting={false}
+      columnSorting={false}
       filters={true}
       rowHeaders={true}
       beforeRenderer={addClassesToRows}

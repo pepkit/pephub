@@ -9,6 +9,11 @@ import { useSampleTable } from '../../hooks/queries/useSampleTable';
 import { extractErrorMessage } from '../../utils/etc';
 import { PepSearchDropdown } from '../forms/components/pep-search-dropdown';
 import { LoadingSpinner } from '../spinners/loading-spinner';
+import { useTotalProjectChangeMutation } from '../../hooks/mutations/useTotalProjectChangeMutation';
+import { useProjectConfig } from '../../hooks/queries/useProjectConfig';
+import { useSubsampleTable } from '../../hooks/queries/useSubsampleTable';
+
+
 
 interface Props {
   show: boolean;
@@ -32,13 +37,17 @@ export const AddToPOPModal: FC<Props> = (props) => {
   // derived from project
   const [projectName, tag] = project?.split('/')[1].split(':') || [undefined, undefined];
 
-  // I run data validation in the actual button click, so im not doing it here
-  const { data: currentSampleTable } = useSampleTable({
+  const { data: popConfig } = useProjectConfig(namespace, projectName!, tag);
+  const { data: popSampleTable } = useSampleTable({
     namespace,
     project: projectName!,
     tag: tag,
+    enabled: true,
   });
-  const { isPending: isSampleTablePending, submit } = useSampleTableMutation(namespace, projectName!, tag!);
+  const { data: popSubSampleTable } = useSubsampleTable(namespace, projectName!, tag);
+
+  // const { isPending: isSampleTablePending, submit } = useSampleTableMutation(namespace, projectName!, tag!);
+  const { isPending: isSampleTablePending, submit } = useTotalProjectChangeMutation(namespace, projectName!, tag!);
 
   const onCancel = () => {
     setNamespace(user!.login);
@@ -47,47 +56,43 @@ export const AddToPOPModal: FC<Props> = (props) => {
   };
 
   const onAdd = () => {
-    if (!projectName || !tag) {
+    if (!projectName) {
       toast.error('Please select a project to add to the POP.');
       return;
     }
-    if (!currentSampleTable) {
+    if (!popSampleTable) {
       toast.error('There was an issue fetching the current sample table for the selected POP.');
       return;
     }
     if (
-      currentSampleTable.items.includes({
-        namespace: namespaceToAdd,
-        project: projectToAdd,
-        tag: tagToAdd,
-      })
+      popSampleTable?.items?.some(item => 
+        item.sample_name === `${namespaceToAdd}/${projectToAdd}:${tagToAdd}`
+      )
     ) {
       toast.error('This project is already in the POP!');
       return;
     }
-
-    // finally add the project to the pop if it passes all the checks
-    submit(
-      [
-        ...currentSampleTable.items,
-        {
-          sample_name: `${namespaceToAdd}/${projectToAdd}:${tagToAdd}`,
-          namespace: namespaceToAdd,
-          name: projectToAdd,
-          tag: tagToAdd,
-        },
-      ],
-      {
-        onSuccess: () => {
-          toast.success('Successfully added project to POP!');
-          onCancel();
-        },
-        onError: (err: AxiosError) => {
-          const errorMessage = extractErrorMessage(err);
-          toast.error(`There was an issue adding the project to the POP" ${errorMessage}`);
-        },
-      },
-    );
+    let newPeps = popSampleTable?.items || [];
+    newPeps?.push({
+      sample_name: `${namespaceToAdd}/${projectToAdd}:${tagToAdd}`,
+      namespace: namespaceToAdd,
+      name: projectToAdd,
+      tag: tagToAdd,
+    });
+    submit({
+      config: popConfig?.config,
+      samples: newPeps,
+      subsamples: popSubSampleTable?.items,
+    }, {
+      // onSuccess: () => {
+      //   toast.success('Successfully added project to POP!');
+      //   onCancel();
+      // },
+      // onError: (err: AxiosError) => {
+      //   const errorMessage = extractErrorMessage(err);
+      //   toast.error(`There was an issue adding the project to the POP: ${errorMessage}`);
+      // },
+    });
   };
 
   useEffect(() => {
@@ -129,7 +134,7 @@ export const AddToPOPModal: FC<Props> = (props) => {
           <button
             onClick={onAdd}
             className="btn btn-success"
-            disabled={!projectName || !tag || !currentSampleTable || isSampleTablePending}
+            // disabled={!projectName || !tag || !currentSampleTable || isSampleTablePending}
           >
             {isSampleTablePending ? (
               <Fragment>

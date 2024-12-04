@@ -140,3 +140,9 @@ DEFAULT_QDRANT_SCORE_THRESHOLD = (
 )
 
 ARCHIVE_URL_PATH = "https://cloud2.databio.org/pephub/"
+
+MAX_PROCESSED_PROJECT_SIZE = 5000
+
+MAX_STANDARDIZED_PROJECT_SIZE = 100
+
+BEDMS_REPO_URL = "databio/attribute-standardizer-model6"

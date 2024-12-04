@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const PepSearchDropdown = (props: Props) => {
-  const { value, onChange, namespace } = props;
+  const { value, onChange, namespace, type } = props;
 
   // value always has the format: namespace/project:tag
   // so we need to split it to get the namespace, project, and tag
@@ -72,7 +72,7 @@ export const PepSearchDropdown = (props: Props) => {
           borderColor: '#dee2e6'
         })
       }}
-      placeholder="Search for PEPs"
+      placeholder={type === 'pop' ? "Search for POPs" : "Search for PEPs"}
       menuPlacement="bottom"
       controlShouldRenderValue={true}
     />

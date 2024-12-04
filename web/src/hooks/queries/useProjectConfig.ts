@@ -12,7 +12,7 @@ export const useProjectConfig = (
   const query = useQuery({
     queryKey: [namespace, project, tag, 'config'],
     queryFn: () => getProjectConfig(namespace || '', project || '', tag, session.jwt || ''),
-    enabled: namespace !== undefined || project !== undefined,
+    enabled: namespace !== undefined && project !== undefined,
   });
   return query;
 };

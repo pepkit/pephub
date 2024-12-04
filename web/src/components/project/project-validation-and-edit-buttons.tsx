@@ -18,6 +18,8 @@ type ProjectValidationAndEditButtonsProps = {
   filteredSamples: string[];
 };
 
+const MAX_SAMPLES_FOR_VALIDATION = 5000;
+
 export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditButtonsProps) => {
   const { isDirty, isUpdatingProject, reset, handleSubmit, filteredSamples } = props;
   const { user } = useSession();
@@ -25,6 +27,8 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
   const { namespace, projectName, tag } = useProjectPage();
 
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
+  const shouldValidate: boolean = (projectInfo?.number_of_samples || 0) > MAX_SAMPLES_FOR_VALIDATION;
+
   const projectValidationQuery = useValidation({
     pepRegistry: `${namespace}/${projectName}:${tag}`,
     schema_registry: projectInfo?.pep_schema || 'pep/2.0.0',
@@ -48,6 +52,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                 schemaRegistry={projectSchema}
                 isValidating={projectValidationQuery.isLoading}
                 validationResult={validationResult}
+                shouldValidate={shouldValidate}
               />
             </div>
             <div className="ps-1">
