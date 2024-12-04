@@ -35,7 +35,7 @@ const runValidation = async (params: ValidationParams) => {
     formData.append('schema_file', params.schema_file);
   }
   if (schema_registry) {
-    formData.append('schema_registry', schema_registry);
+    formData.append('schema_registry', schema_registry || '');
   }
   const { data: result } = await axios.post<ValidationResult>(`${API_BASE}/eido/validate`, formData, {
     headers: {
