@@ -162,6 +162,8 @@ def get_organizations_from_session_info(
     organizations = []
     if session_info:
         organizations = session_info.get("orgs")
+        if organizations:
+            organizations = [x.lower() for x in organizations]
     return organizations
 
 
@@ -171,6 +173,8 @@ def get_user_from_session_info(
     user = None
     if session_info:
         user = session_info.get("login")
+        if user:
+            user = user.lower()
     return user
 
 
@@ -186,6 +190,7 @@ def get_namespace_access_list(
     if user:
         access_rights.append(user)
         access_rights.extend(orgs)
+        access_rights = [x.lower() for x in access_rights]
         return access_rights
     else:
         return []

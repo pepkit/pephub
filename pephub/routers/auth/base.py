@@ -165,11 +165,15 @@ def callback(
         "https://api.github.com/user",
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
+    if "login" in u:
+        u["login"] = u["login"].lower()
 
     organizations = requests.get(
         u["organizations_url"],
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
+    for org in organizations:
+        org["login"] = org["login"].lower()
 
     # encode the token
     token = CLIAuthSystem.jwt_encode_user_data(
