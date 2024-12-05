@@ -7,9 +7,9 @@ import { useSession } from '../../contexts/session-context';
 import { useUploadMutation } from '../../hooks/mutations/useUploadMutation';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { GitHubAvatar } from '../badges/github-avatar';
+import { CombinedErrorMessage } from './components/combined-error-message';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
-import { CombinedErrorMessage } from './components/combined-error-message'
 
 interface FromFileInputs {
   is_private: boolean;
@@ -106,29 +106,29 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
             {...register('name', {
               required: {
                 value: true,
-                message: "empty",
+                message: 'empty',
               },
               pattern: {
                 value: /^[a-zA-Z0-9_-]+$/,
-                message: "invalid",
+                message: 'invalid',
               },
             })}
           />
           <span className="mx-1 mb-1">:</span>
         </div>
         <div className="d-flex flex-row align-items-center justify-content-between w-full ">
-          <input 
+          <input
             {...register('tag', {
-            required: false,
+              required: false,
               pattern: {
                 value: /^[a-zA-Z0-9_-]+$/,
-                message: "invalid",
+                message: 'invalid',
               },
             })}
-            id="tag" 
-            type="text" 
-            className="form-control" 
-            placeholder="default" 
+            id="tag"
+            type="text"
+            className="form-control"
+            placeholder="default"
           />
         </div>
       </div>
@@ -185,8 +185,9 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
       ) : (
         <FileDropZone name="files" control={control} multiple={true} innerRef={fileDialogRef} />
       )}
-      <p className='text-xs mt-1'>
-        * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left empty.
+      <p className="text-xs mt-1">
+        * Namespace and Project Name are required. A tag value of "default" will be supplied if the Tag input is left
+        empty.
       </p>
       <div className="mt-3">
         <button
@@ -202,7 +203,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
                 isPrivate,
                 description,
                 files: uploadFiles,
-                pepSchema,
+                pepSchema: pepSchema || 'databio/pep-2.1.0',
               },
               {
                 onSuccess: () => {

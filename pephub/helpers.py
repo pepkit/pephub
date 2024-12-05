@@ -47,7 +47,7 @@ def zip_pep(project: Dict[str, Any]) -> Response:
     project_name = config[NAME_KEY]
 
     if project[SAMPLE_RAW_DICT_KEY] is not None:
-        config[CFG_SAMPLE_TABLE_KEY] = ["sample_table.csv"]
+        config[CFG_SAMPLE_TABLE_KEY] = "sample_table.csv"
         content_to_zip["sample_table.csv"] = pd.DataFrame(
             project[SAMPLE_RAW_DICT_KEY]
         ).to_csv(index=False)
