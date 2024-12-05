@@ -183,7 +183,12 @@ export const NavDesktop = () => {
                   My Schemas
                 </Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Header>Organizations</Dropdown.Header>
+                <Dropdown.Header className="d-flex">
+                  Organizations
+                  <a href="https://pep.databio.org/pephub/user/organization/" className="ms-1 text-secondary">
+                    <div className="bi bi-info-circle"></div>
+                  </a>
+                </Dropdown.Header>
                 {user?.orgs.length > 0 ? (
                   user.orgs.map((org) => (
                     <Dropdown.Item key={org} eventKey={org}>
