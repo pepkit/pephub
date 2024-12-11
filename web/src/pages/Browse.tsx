@@ -88,16 +88,6 @@ export function Browse() {
 
   const noSchemasInDatabase = schemas?.count === 0;
 
-  if (isLoading) {
-    return (
-      <PageLayout title="Browse">
-        <div className="w-100">
-          <SchemasPagePlaceholder />
-        </div>
-      </PageLayout>
-    );
-  }
-
   if (error) {
     return (
       <PageLayout title="Browse">
@@ -205,7 +195,9 @@ export function Browse() {
               setCreateModalOpen={setShowCreateSchemaModal}
             />
             <div className="d-flex flex-col align-items-center">
-              {noSchemasInDatabase ? (
+              {isLoading ? (
+                <SchemasPagePlaceholder />
+              ) : noSchemasInDatabase ? (
                 <NoSchemas />
               ) : (
                 <div className="schemas-grid w-100 py-2">
