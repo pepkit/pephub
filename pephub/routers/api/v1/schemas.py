@@ -27,6 +27,8 @@ from ...models import (
     SchemaGroupCreateRequest,
     SchemaGroupAssignRequest,
     SchemaGetResponse,
+    SchemaVersionsResponse,
+    SchemaVersionInfo,
 )
 from ....helpers import download_yaml
 from ....dependencies import (
@@ -68,6 +70,9 @@ async def get_schemas_in_namespace(
     query: Optional[str] = None,
     limit: Optional[int] = 100,
     offset: Optional[int] = 0,
+    latest_version: bool = False,
+    lifecycle_stage: Optional[str] = None,
+    maintainer: Optional[str] = None,
     agent: PEPDatabaseAgent = Depends(get_db),
     order_by: str = "update_date",
     order_desc: bool = False,
@@ -168,6 +173,50 @@ async def create_schema_for_namespace_by_file(
             status_code=400,
             detail=f"The was an error parsing the yaml: {e}",
         )
+
+
+@schemas.get("/{namespace}/{schema}/versions", response_model=SchemaVersionsResponse)
+async def get_schema_versions(
+    namespace: str,
+    schema: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    schema_info = agent.schema.info(namespace=namespace, name=schema)
+
+    return SchemaVersionsResponse(
+        namespace=namespace,
+        schema_name=schema,
+        versions=[
+            SchemaVersionInfo(
+                version="1.0.0",
+                status="current",
+                release_date=schema_info.submission_date,
+                contributors=["admin"],
+                release_notes="Initial release",
+                tags={
+                    "maturity_level": "trial_use",
+                },
+            )
+        ],
+    )
+
+
+@schemas.get(
+    "/{namespace}/{schema_name}/versions/{semantic_version}", response_model=dict
+)
+async def get_schema_versions(
+    namespace: str,
+    schema: str,
+    semantic_version: str,
+    agent: PEPDatabaseAgent = Depends(get_db),
+):
+    try:
+        schema_dict = agent.schema.get(namespace=namespace, name=schema)
+    except SchemaDoesNotExistError:
+        raise HTTPException(
+            status_code=404, detail=f"Schema {schema}/{namespace} not found."
+        )
+    return schema_dict
 
 
 @schemas.get("/{namespace}/{schema}", response_model=Union[SchemaGetResponse, dict])

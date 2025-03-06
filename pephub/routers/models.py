@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.models import UpdateItems
@@ -163,3 +163,19 @@ class SchemaGetResponse(BaseModel):
 
 class StandardizerResponse(BaseModel):
     results: dict = {}
+
+
+## Schemas
+class SchemaVersionInfo(BaseModel):
+    version: str
+    status: str
+    release_date: str
+    contributors: List[str]
+    release_notes: str
+    tags: Dict[str, str]
+
+
+class SchemaVersionsResponse(BaseModel):
+    namespace: str
+    schema_name: str
+    versions: List[SchemaVersionInfo]
