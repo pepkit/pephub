@@ -4,6 +4,7 @@ from starlette.responses import Response
 import yaml
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import (
@@ -193,7 +194,7 @@ async def get_schema(
             submission_date=info.submission_date,
         )
     else:
-        return schema_dict
+        return JSONResponse(content=schema_dict)
 
 
 @schemas.get("/{namespace}/{schema}/file")
