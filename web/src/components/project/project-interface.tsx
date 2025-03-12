@@ -113,6 +113,8 @@ export const ProjectInterface = (props: Props) => {
       //   throw new Error(errorMessage);
       // }
 
+      console.log(samplesParsed)
+
       submit({
         config: values.config,
         samples: samplesParsed,
