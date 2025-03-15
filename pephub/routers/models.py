@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.models import UpdateItems
@@ -165,17 +165,36 @@ class StandardizerResponse(BaseModel):
     results: dict = {}
 
 
-## Schemas
-class SchemaVersionInfo(BaseModel):
+# Schemas:
+class NewSchemaVersionModel(BaseModel):
+    """
+    Model for creating a new schema version from json
+    """
+
+    contributors: str = None
+    release_notes: str = None
+    tags: Optional[Union[List[str], str, Dict[str, str], List[Dict[str, str]]]] = (
+        None,
+    )
     version: str
-    status: str
-    release_date: str
-    contributors: List[str]
-    release_notes: str
-    tags: Dict[str, str]
+    schema_value: dict
 
 
-class SchemaVersionsResponse(BaseModel):
-    namespace: str
+class NewSchemaRecordModel(NewSchemaVersionModel):
+    """
+    Model for creating a new schema record from json
+    """
+
     schema_name: str
-    versions: List[SchemaVersionInfo]
+    description: str = None
+    maintainers: str = None
+    lifecycle_stage: str = None
+    private: bool = False
+
+
+class SchemaVersionTagAddModel(BaseModel):
+    """
+    Model for adding a tag to a schema version
+    """
+
+    tag: Optional[Union[List[str], str, Dict[str, str], List[Dict[str, str]]]] = None
