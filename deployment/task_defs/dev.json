@@ -23,7 +23,7 @@
           "name": "POSTGRES_HOST"
         },
         {
-          "valueFrom": "PEPHUB_POSTGRES_DB",
+          "valueFrom": "PEPHUB_POSTGRES_DB_DEV",
           "name": "POSTGRES_DB"
         },
         {
