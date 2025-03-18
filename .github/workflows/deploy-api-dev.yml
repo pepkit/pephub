@@ -54,10 +54,10 @@ jobs:
         id: build-image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: dev_pephub
+          REPOSITORY: pephub_dev
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f deployment/pephub.databio.org/Dockerfile .
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f deployment/pephub.databio.org/Dockerfile_dev .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
           echo "image=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
