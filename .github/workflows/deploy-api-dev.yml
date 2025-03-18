@@ -27,12 +27,12 @@ on:
   workflow_dispatch:
     inputs: null
 
-name: Deploy API to AWS - primary
+name: Deploy API to AWS - dev
 
 jobs:
   deploy:
     env:
-      server: primary
+      server: dev
     name: Deploy
     runs-on: ubuntu-latest
     steps:
@@ -54,7 +54,7 @@ jobs:
         id: build-image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: pephub
+          REPOSITORY: dev_pephub
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f deployment/pephub.databio.org/Dockerfile .
@@ -65,7 +65,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: deployment/task_defs/primary.json
+          task-definition: deployment/task_defs/dev.json
           container-name: pephub-container
           image: ${{ steps.build-image.outputs.image }}
 
@@ -73,6 +73,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: pephub-service-primary
+          service: pephub-service-dev
           cluster: yeti
           wait-for-service-stability: true
