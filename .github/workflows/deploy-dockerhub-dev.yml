@@ -1,8 +1,6 @@
-name: Deploy to Dockerhub on release
+name: Build and push dev image to Dockerhub
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs: null
 
@@ -27,5 +25,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          file: deployment/dockerhub/primary.Dockerfile
-          tags: databio/pephub:latest, databio/pephub:${{ github.ref_name }}
+          file: deployment/dockerhub/dev.Dockerfile
+          tags: "databio/pephub:dev"

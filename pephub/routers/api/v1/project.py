@@ -62,7 +62,7 @@ from ....const import (
 )
 from .helpers import verify_updated_project
 
-from bedms import AttrStandardizer
+# from bedms import AttrStandardizer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -1180,53 +1180,53 @@ def delete_full_history(
         )
 
 
-@project.post(
-    "/standardize",
-    summary="Standardize PEP metadata column headers",
-    response_model=StandardizerResponse,
-)
-async def get_standardized_cols(
-    pep: dict = Depends(get_project),
-    schema: str = "",
-):
-    """
-    Standardize PEP metadata column headers using BEDms.
+# @project.post(
+#     "/standardize",
+#     summary="Standardize PEP metadata column headers",
+#     response_model=StandardizerResponse,
+# )
+# async def get_standardized_cols(
+#     pep: dict = Depends(get_project),
+#     schema: str = "",
+# ):
+#     """
+#     Standardize PEP metadata column headers using BEDms.
 
-    :param pep: PEP string to be standardized
-    :param schema: Schema for AttrStandardizer
+#     :param pep: PEP string to be standardized
+#     :param schema: Schema for AttrStandardizer
 
-    :return dict: Standardized results
-    """
+#     :return dict: Standardized results
+#     """
 
-    if schema == "" or schema not in ["ENCODE", "BEDBASE", "FAIRTRACKS"]:
-        raise HTTPException(
-            status_code=404,
-            detail="Schema not available! Available schemas are ENCODE, BEDBASE and FAIRTRACKS.",
-        )
+#     if schema == "" or schema not in ["ENCODE", "BEDBASE", "FAIRTRACKS"]:
+#         raise HTTPException(
+#             status_code=404,
+#             detail="Schema not available! Available schemas are ENCODE, BEDBASE and FAIRTRACKS.",
+#         )
 
-    if len(pep["_sample_dict"]) > MAX_STANDARDIZED_PROJECT_SIZE:
-        # raise HTTPException(
-        #     status_code=400,
-        #     detail=f"Project is too large. Cannot standardize. "
-        #            f"Limit is {MAX_STANDARDIZED_PROJECT_SIZE} samples.",
-        # )
-        prj = peppy.Project.from_dict(
-            {
-                "_config": pep["_config"],
-                "_sample_dict": pep["_sample_dict"][:50],
-            }
-        )
-    else:
-        prj = peppy.Project.from_dict(pep)
-    model = AttrStandardizer(repo_id=BEDMS_REPO_URL, model_name=schema.lower())
+#     if len(pep["_sample_dict"]) > MAX_STANDARDIZED_PROJECT_SIZE:
+#         # raise HTTPException(
+#         #     status_code=400,
+#         #     detail=f"Project is too large. Cannot standardize. "
+#         #            f"Limit is {MAX_STANDARDIZED_PROJECT_SIZE} samples.",
+#         # )
+#         prj = peppy.Project.from_dict(
+#             {
+#                 "_config": pep["_config"],
+#                 "_sample_dict": pep["_sample_dict"][:50],
+#             }
+#         )
+#     else:
+#         prj = peppy.Project.from_dict(pep)
+#     model = AttrStandardizer(repo_id=BEDMS_REPO_URL, model_name=schema.lower())
 
-    try:
-        results = model.standardize(pep=prj)
-    except Exception as e:
-        _LOGGER.error(f"Error standardizing PEP. {e}")
-        raise HTTPException(
-            status_code=400,
-            detail=f"Error standardizing PEP.",
-        )
+#     try:
+#         results = model.standardize(pep=prj)
+#     except Exception as e:
+#         _LOGGER.error(f"Error standardizing PEP. {e}")
+#         raise HTTPException(
+#             status_code=400,
+#             detail=f"Error standardizing PEP.",
+#         )
 
-    return StandardizerResponse(results=results)
+#     return StandardizerResponse(results=results)
