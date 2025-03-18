@@ -379,7 +379,7 @@ async def remove_from_stars(
 
 
 @namespaces.get(
-    "/info",
+    "/",
     summary="Get information list of biggest namespaces",
     response_model=ListOfNamespaceInfo,
 )
