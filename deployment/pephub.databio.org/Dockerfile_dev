@@ -1,0 +1,2 @@
+FROM databio/pephub:dev
+# pass - nothing else is needed

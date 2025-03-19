@@ -4,7 +4,7 @@ from starlette.responses import Response
 import yaml
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Body
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import (
@@ -319,7 +319,7 @@ async def get_schema_versions(
     namespace: str,
     schema_name: str,
     semantic_version: str,
-    response_type: Literal["json", "yaml"] = "json",
+    format: Literal["json", "yaml"] = "json",
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
@@ -332,15 +332,16 @@ async def get_schema_versions(
         )
     except SchemaDoesNotExistError:
         raise HTTPException(
-            status_code=404, detail=f"Schema {namespace}/{schema_name} not found."
+            status_code=404,
+            detail=f"Schema {namespace}/{schema_name}:{semantic_version} not found.",
         )
     except SchemaVersionDoesNotExistError:
         raise HTTPException(
             status_code=404,
             detail=f"Schema version {semantic_version} not found for {namespace}/{schema_name}.",
         )
-    if response_type == "yaml":
-        return JSONResponse(str(yaml.dump(schema_dict)))
+    if format == "yaml":
+        return PlainTextResponse(str(yaml.dump(schema_dict)))
 
     return JSONResponse(content=schema_dict)
 

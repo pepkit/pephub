@@ -228,7 +228,7 @@ export const StandardizeMetadataModal = (props: Props) => {
                         }),
                       }}
                       // @ts-ignore
-                      options={schemaOptions?.map(option => ({ value: option, label: option }))}
+                      options={schemaOptions?.map((option) => ({ value: option, label: option }))}
                       defaultValue={selectedOption}
                       value={selectedOption}
                       onChange={(selectedOption) => {
@@ -252,11 +252,11 @@ export const StandardizeMetadataModal = (props: Props) => {
               </form>
 
               {maxColsExceeded && (
-                <div className='row'>
-                  <p className='text-sm mt-3 mb-1'>
+                <div className="row">
+                  <p className="text-sm mt-3 mb-1">
                     <strong>Note: </strong>
-                    Your project has nine or more columns. 
-                    Due to server constraints, standardization of nine or more columns on PEPhub may take some time. Please be patient.
+                    Your project has nine or more columns. Due to server constraints, standardization of nine or more
+                    columns on PEPhub may take some time. Please be patient.
                   </p>
                 </div>
               )}
