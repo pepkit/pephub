@@ -9,6 +9,7 @@ import { useSchema } from '../../hooks/queries/useSchema';
 import { copyToClipboard } from '../../utils/etc';
 import { DeleteSchemaModal } from '../modals/delete-schema';
 import { SchemaAPIEndpointsModal } from '../modals/schema-api-endpoints';
+import { dateStringToDateTime } from '../../utils/dates';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 
@@ -18,10 +19,23 @@ type Props = {
   handleDiscard: () => void;
   isUpdating: boolean;
   description: string;
+  maintainers: string;
+  isPrivate: boolean;
+  lifecycleStage: string;
+  releaseNotes: string;
+  contributors: string;
+  tags: object;
+  updateDate: string;
+  releaseDate: string;
+  currentVersion: string;
+  setCurrentVersionNumber: (versionNumber: string) => void;
+  allVersionNumbers: string[];
 };
 
 export const SchemaHeader = (props: Props) => {
-  const { isDirty, handleSave, handleDiscard, isUpdating } = props;
+  const { isDirty, handleSave, handleDiscard, isUpdating, maintainers, isPrivate, lifecycleStage, releaseNotes, contributors, tags, updateDate, releaseDate,
+    currentVersion, setCurrentVersionNumber, allVersionNumbers
+   } = props;
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
@@ -36,6 +50,8 @@ export const SchemaHeader = (props: Props) => {
   const { update, isPending: isUpdatingDescription } = useEditSchemaMutation(namespace!, schema!);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  // console.log(Object.entries(tags).map(([key, value], index) => (key + ': ' + value)))
 
   return (
     <div className="p-2 w-100">
@@ -153,6 +169,65 @@ export const SchemaHeader = (props: Props) => {
           <div className="text-muted">{schemaData?.description || 'No description.'}</div>
         </span>
       )}
+
+      <div className="d-flex align-items-center text-muted mt-1 mx-0 pb-3 row">
+        <small className="d-flex flex-row align-items-center justify-content-between col-md-12">
+          <div className="me-3 row">
+            <div className="col-sm-auto me-1">
+              <i className="bi bi-calendar3"></i>
+              <span className="mx-1">Created:</span>
+              <span id="project-submission-date">{dateStringToDateTime(releaseDate || '')}</span>
+            </div>
+            <div className="col-sm-auto me-1">
+              <i className="bi bi-calendar3"></i>
+              <span className="mx-1">Updated:</span>
+              <span id="project-update-date">
+                {dateStringToDateTime(updateDate || '')}
+              </span>
+            </div>
+            {/* <div className="col-sm-auto">
+              <i className="bi bi-arrows-expand"></i>
+              <span id="project-update-date">
+                {releaseDate}
+              </span>
+            </div> */}
+
+            <select
+              id="version-select"
+              value={currentVersion}
+              onChange={(e) => setCurrentVersionNumber(e.target.value)}
+              disabled={allVersionNumbers.length === 0}
+            >
+              {allVersionNumbers.map((version) => (
+                <option key={version} value={version}>
+                  {version}
+                </option>
+              ))}
+            </select>
+            <span>contributors: {contributors}</span>
+            <span>release notes: {releaseNotes}</span>
+            <span>maintainers: {maintainers}</span>
+            <span>lifecycle stage: {lifecycleStage}</span>
+            <span>tags: </span>
+            {tags ? (
+              <div className='d-flex mt-2'>
+                {Object.entries(tags).map(([key, value], index) => (
+                  <span className='border rounded-2 p-2 text-xs' key={key}>
+                    <span className='fw-bold'>{String(key)}</span>
+                    {String(value) && <span>: {String(value)}</span>}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="text-muted">No tags</span>
+            )}
+          </div>
+          <span className="">
+          </span>
+        </small>
+      </div>
+
+
       <DeleteSchemaModal
         namespace={namespace!}
         name={schema!}
