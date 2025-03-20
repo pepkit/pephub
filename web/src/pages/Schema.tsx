@@ -24,7 +24,7 @@ export function Schema() {
       <SchemaInterface
         namespace={namespace!}
         name={schema!}
-        key={schemaData?.schema || 'NONE'}
+        // key={schemaData?.schema || 'NONE'}
         canEdit={canEdit}
         schemaData={schemaData}
         schemaVersions={schemaVersions}

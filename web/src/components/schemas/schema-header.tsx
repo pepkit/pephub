@@ -4,30 +4,31 @@ import { useParams } from 'react-router-dom';
 
 import { useSession } from '../../contexts/session-context';
 import { copyToClipboard } from '../../utils/etc';
-import { VersionSchemaModal } from '../modals/version-schema';
-import { EditSchemaModal } from '../modals/edit-schema';
+
 import { DeleteSchemaModal } from '../modals/delete-schema';
 import { SchemaAPIEndpointsModal } from '../modals/schema-api-endpoints';
+
+import { useSchemaVersionModalStore } from '../../hooks/stores/useSchemaVersionModalStore'
+import { useSchemaEditModalStore } from '../../hooks/stores/useSchemaEditModalStore'
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 
 type Props = {
   isDirty: boolean;
-  handleSave: () => void;
   handleDiscard: () => void;
-  isUpdating: boolean;
 };
 
 export const SchemaHeader = (props: Props) => {
-  const { isDirty, handleSave, handleDiscard, isUpdating } = props;
+  const { isDirty, handleDiscard } = props;
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
   const [copied, setCopied] = useState(false);
-  const [showSchemaVersionModal, setShowSchemaVersionModal] = useState(false);
-  const [showSchemaEditModal, setShowSchemaEditModal] = useState(false);
   const [showSchemaDeleteModal, setShowSchemaDeleteModal] = useState(false);
   const [showSchemaAPIModal, setShowSchemaAPIModal] = useState(false);
+
+  const { setShowSchemaVersionModal } = useSchemaVersionModalStore();
+  const { setShowSchemaEditModal } = useSchemaEditModalStore();
 
   return (
     <div className="p-2 w-100">
@@ -38,19 +39,8 @@ export const SchemaHeader = (props: Props) => {
           <Breadcrumb.Item active>{schema}</Breadcrumb.Item>
         </Breadcrumb>
         <div className="d-flex align-items-center gap-1">
-          
-          {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
-            <Fragment>
-              <button disabled={!isDirty || isUpdating} onClick={() => setShowSchemaVersionModal(true)} className="btn btn-sm btn-success">
-                {isUpdating ? 'Saving...' : 'Save'}
-              </button>
-              <button disabled={!isDirty || isUpdating} onClick={handleDiscard} className="btn btn-sm btn-outline-dark">
-                Discard
-              </button>
-            </Fragment>
-          )}
 
-          {/* <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
+          <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">
               {namespace}/{schema}
             </span>
@@ -66,7 +56,7 @@ export const SchemaHeader = (props: Props) => {
             >
               {copied ? <i className="bi bi-check"></i> : <i className="bi bi-clipboard" />}
             </button>
-          </div> */}
+          </div>
 
           <Dropdown>
             <Dropdown.Toggle size="sm" variant="dark">
@@ -107,20 +97,7 @@ export const SchemaHeader = (props: Props) => {
         </div>
       </div>
 
-      <VersionSchemaModal
-        namespace={namespace!}
-        name={schema!}
-        show={showSchemaVersionModal}
-        onHide={() => setShowSchemaVersionModal(false)}
-        redirect={`/${namespace}?view=schemas`}
-      />
-      <EditSchemaModal
-        namespace={namespace!}
-        name={schema!}
-        show={showSchemaEditModal}
-        onHide={() => setShowSchemaEditModal(false)}
-        redirect={`/${namespace}?view=schemas`}
-      />
+
       <DeleteSchemaModal
         namespace={namespace!}
         name={schema!}

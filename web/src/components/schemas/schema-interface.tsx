@@ -1,15 +1,21 @@
 import { Editor } from '@monaco-editor/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Fragment } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { useEditSchemaMutation } from '../../hooks/mutations/useEditSchemaMutation';
 import { useSchema } from '../../hooks/queries/useSchema';
-// import { useSchemaVersions } from '../../hooks/queries/useSchemaVersions';
 import { useSchemaByVersion } from '../../hooks/queries/useSchemaByVersion';
 import { getOS } from '../../utils/etc';
 import { SchemaHeader } from './schema-header';
 import { SchemaSidebar } from './schema-sidebar';
+import { useSession } from '../../contexts/session-context';
+import { VersionSchemaModal } from '../modals/version-schema';
+import { EditSchemaModal } from '../modals/edit-schema';
+
+import { useSchemaVersionModalStore } from '../../hooks/stores/useSchemaVersionModalStore'
+import { useSchemaEditModalStore } from '../../hooks/stores/useSchemaEditModalStore'
+
 
 type FormFields = {
   schema: object;
@@ -25,18 +31,20 @@ type Props = {
 
 export const SchemaInterface = (props: Props) => {
   const { schemaData, schemaVersions, canEdit, namespace, name } = props;
+  const { user } = useSession();
 
   const [currentVersionNumber, setCurrentVersionNumber] = useState('');
+  const { showSchemaVersionModal, setShowSchemaVersionModal } = useSchemaVersionModalStore();
+  const { showSchemaEditModal, setShowSchemaEditModal } = useSchemaEditModalStore();
+    
+  const currentSchemaRef = useRef<object>({});
 
-  const sortedVersions = schemaVersions?.results?.length 
-  ? [...schemaVersions.results].sort((a, b) => new Date(b.release_date) - new Date(a.release_date))
-  : [];  
+  const sortedVersions = schemaVersions?.results?.length ? [...schemaVersions.results].sort((a, b) => 
+      (new Date(b.release_date)).getTime() - (new Date(a.release_date)).getTime()
+    ) : [];
   
   const allVersionNumbers = sortedVersions.map(schema => schema.version)
   const selectedVersion = sortedVersions[sortedVersions.findIndex(schema => schema.version === currentVersionNumber)]
-
-  console.log(schemaData)
-  console.log(selectedVersion)
 
   useEffect(() => {
     if (sortedVersions.length > 0 && !currentVersionNumber) {
@@ -44,14 +52,9 @@ export const SchemaInterface = (props: Props) => {
     }
   }, [sortedVersions, currentVersionNumber]);
 
-  const { data: schemaJson, isFetching: isLoading } = useSchemaByVersion(namespace, name, currentVersionNumber);
+  const { data: schemaJson, isFetching: isFetching } = useSchemaByVersion(namespace, name, currentVersionNumber);
 
-  
-
-
-  const { update, isPending: isUpdating } = useEditSchemaMutation(namespace, name);
-
-  const { formState, watch, reset, control, setValue } = useForm<FormFields>({
+  const { formState, watch, reset, control, setValue, getValues } = useForm<FormFields>({
     defaultValues: {
       schema: {},
     },
@@ -59,99 +62,85 @@ export const SchemaInterface = (props: Props) => {
 
   useEffect(() => {
     if (schemaJson) {
+      currentSchemaRef.current = schemaJson;
       setValue('schema', schemaJson, { shouldDirty: false });
     }
   }, [schemaJson, setValue]);
 
-
-  const newSchema = watch('schema');
-
-  const handleSubmit = () => {
-    update({
-      // schema: newSchema,
-    });
-    // reset();
-  };
-
   const handleDiscard = () => {
-    reset();
+    reset({ schema: currentSchemaRef.current });
   };
 
-  useEffect(() => {
-    const os = getOS();
-    const handleSave = (e: KeyboardEvent) => {
-      const ctrlKey = os === 'Mac OS' ? e.metaKey : e.ctrlKey;
-      if (ctrlKey && e.key === 's') {
-        e.preventDefault();
-        handleSubmit();
-      }
-    };
-    window.addEventListener('keydown', handleSave);
-    return () => {
-      window.removeEventListener('keydown', handleSave);
-    };
-  });
+  // useEffect(() => {
+  //   const os = getOS();
+  //   const handleSave = (e: KeyboardEvent) => {
+  //     const ctrlKey = os === 'Mac OS' ? e.metaKey : e.ctrlKey;
+  //     if (ctrlKey && e.key === 's') {
+  //       e.preventDefault();
+  //     }
+  //   };
+  //   window.addEventListener('keydown', handleSave);
+  //   return () => {
+  //     window.removeEventListener('keydown', handleSave);
+  //   };
+  // });
 
   return (
-    <Fragment>
-      <div className='row px-1'>
-        <div className="d-flex align-items-center justify-content-between px-4 mb-">
+    <div className='container-fluid'>
+      <div className='row'>
+        <div className="d-flex align-items-center justify-content-between px-3">
           <SchemaHeader
             key={schemaData?.description}
-            isUpdating={isUpdating}
             handleDiscard={handleDiscard}
-            handleSave={handleSubmit}
             isDirty={formState.isDirty}
           />
         </div>
         <div className='col-9 pe-1'>
           <div className="card rounded-2 m-3 mt-0 shadow-sm">
-            <div className="card-header fw-semibold text-sm">
-              Editor (JSON)
-            </div>
-            <div className='card-body ps-3 py-2'>
-            <Controller
-              name="schema"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                // <Editor
-                //   options={{
-                //     readOnly: !canEdit,
-                //   }}
-                //   language={'json'}
-                //   defaultLanguage="json"
-                //   value={value}
-                //   loading={null}
-                //   height={'75vh'}
-                //   onChange={(v) => {
-                //     onChange(v);
-                //   }}
-                // />
-                <Editor
-                  options={{
-                    readOnly: !canEdit,
-                  }}
-                  onChange={(v) => {
-                    try {
-                      // Try to parse the editor content as JSON
-                      const jsonValue = typeof v === 'string' ? JSON.parse(v) : v;
-                      onChange(jsonValue);
-                    } catch (err) {
-                      // If it's not valid JSON, just pass it through
-                      onChange(v);
-                    }
-                  }}
-                  saveViewState
-                  language="json"
-                  defaultLanguage="json"
-                  value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
-                  loading={null}
-                  height={'71vh'}
-                />
+            <div className="card-header fw-semibold text-sm d-flex align-items-center justify-content-between">
+              Config (JSON)
+              {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
+                <>
+                  <button disabled={!formState.isDirty} onClick={() => setShowSchemaVersionModal(true)} className="btn btn-xs btn-success ms-auto">
+                    Save
+                  </button>
+                  <button disabled={!formState.isDirty} onClick={handleDiscard} className="btn btn-xs btn-outline-dark ms-1">
+                    Discard
+                  </button>
+                </>
               )}
-            />
             </div>
-            
+            <div className='card-body py-2'>
+              {schemaJson && 
+                <Controller
+                  name="schema"
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <Editor
+                      options={{
+                        readOnly: !canEdit,
+                      }}
+                      onChange={(v) => {
+                        try {
+                          // Try to parse the editor content as JSON
+                          const jsonValue = typeof v === 'string' ? JSON.parse(v) : v;
+                          onChange(jsonValue);
+                        } catch (err) {
+                          // If it's not valid JSON, just pass it through
+                          onChange(v);
+                        }
+                      }}
+                      saveViewState
+                      language="json"
+                      defaultLanguage="json"
+                      value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
+                      loading={null}
+                      height={'74vh'}
+                    />
+                  )}
+                />
+              }
+            </div>
           </div>
         </div>
 
@@ -159,9 +148,9 @@ export const SchemaInterface = (props: Props) => {
           <SchemaSidebar
             key={schemaData?.description}
             description={schemaData?.description || ''}
-            maintainers={schemaData?.maintainers}
-            isPrivate={schemaData?.private}
-            lifecycleStage={schemaData?.lifecycle_stage}
+            maintainers={schemaData?.maintainers || ''}
+            isPrivate={schemaData?.private || false}
+            lifecycleStage={schemaData?.lifecycle_stage || ''}
             releaseNotes={selectedVersion?.release_notes}
             contributors={selectedVersion?.contributors}
             updateDate={selectedVersion?.last_update_date}
@@ -173,7 +162,26 @@ export const SchemaInterface = (props: Props) => {
           />
         </div>
       </div>
-      
-    </Fragment>
+
+      <VersionSchemaModal
+        namespace={namespace}
+        name={name}
+        tags={selectedVersion?.tags}
+        schemaJson={getValues('schema')}
+        contributors={selectedVersion?.contributors}
+        show={showSchemaVersionModal}
+        onHide={() => setShowSchemaVersionModal(false)}
+      />
+      <EditSchemaModal
+        namespace={namespace}
+        name={name}
+        description={schemaData?.description || ''}
+        maintainers={schemaData?.maintainers || ''}
+        lifecycleStage={schemaData?.lifecycle_stage || ''}
+        isPrivate={schemaData?.private || false}
+        show={showSchemaEditModal}
+        onHide={() => setShowSchemaEditModal(false)}
+      />
+    </div>
   );
 };

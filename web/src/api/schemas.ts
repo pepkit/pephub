@@ -73,7 +73,9 @@ type UpdateSchemaResponse = {
 };
 
 type UpdateSchemaPayload = {
-  schema?: string;
+  maintainers?: string;
+  lifecycleStage?: string;
+  name?: string;
   description?: string;
   isPrivate?: boolean;
 };
@@ -116,8 +118,8 @@ export const createNewSchema = async (
   description: string,
   schemaValue: object,
   isPrivate: boolean,
-  contributors: string[] | undefined,
-  maintainers: string[] | undefined,
+  contributors: string | undefined,
+  maintainers: string | undefined,
   tags: Record<string, string> | undefined,
   version: string | undefined,
   releaseNotes: string | undefined,
@@ -151,8 +153,8 @@ export const createNewSchemaFiles = async (
   description: string | undefined | null,
   schemaFile: File,
   isPrivate: boolean,
-  contributors: string[] | undefined,
-  maintainers: string[] | undefined,
+  contributors: string | undefined,
+  maintainers: string | undefined,
   tags: Record<string, string> | undefined,
   version: string | undefined,
   releaseNotes: string | undefined,
@@ -175,8 +177,8 @@ export const createNewSchemaFiles = async (
       schema_name: schemaName || '',
       description: description || '',
       private: isPrivate,
-      contributors: contributors ? contributors.join(',') : '',
-      maintainers: maintainers ? maintainers.join(',') : '',
+      contributors: contributors || '',
+      maintainers: maintainers || '',
       tags: tags || [],
       version: version || '',
       release_notes: releaseNotes || '',
@@ -198,12 +200,49 @@ export const deleteSchema = async (namespace: string, name: string, jwt: string 
 export const updateSchema = async (
   namespace: string,
   name: string,
-  updatedSchema: UpdateSchemaPayload,
   jwt: string | null,
+  maintainers?: string,
+  lifecycleStage?: string,
+  description?: string,
+  isPrivate?: boolean,
 ) => {
   const url = `${API_BASE}/schemas/${namespace}/${name}`;
-  const { data } = await axios.patch<UpdateSchemaResponse>(url, updatedSchema, {
+  const { data } = await axios.patch<UpdateSchemaResponse>(url, {
+    namespace,
+    name,
+    description: description || '',
+    private: isPrivate,
+    maintainers: maintainers || '',
+    lifecycle_stage: lifecycleStage || ''
+  }, {
     headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` },
   });
+  return data;
+};
+
+export const createSchemaVersion = async (
+  namespace: string,
+  schemaName: string,
+  schemaValue: object,
+  contributors: string | undefined,
+  tags: Record<string, string> | undefined,
+  version: string | undefined,
+  releaseNotes: string | undefined,
+  jwt: string | null,
+) => {
+  const url = `${API_BASE}/schemas/${namespace}/${schemaName}/versions/json`;
+  const { data } = await axios.post<CreateSchemaResponse>(
+    url,
+    { 
+      namespace,
+      schema_name: schemaName,
+      schema_value: schemaValue,
+      contributors: contributors,
+      tags: tags,
+      version: version || '1.0.0',
+      release_notes: releaseNotes || '',
+    },
+    { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
+  );
   return data;
 };

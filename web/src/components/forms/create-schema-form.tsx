@@ -46,11 +46,11 @@ type FormFields = {
   description: string;
   schemaJson: object;
   tags: Record<string, string>;
-  maintainers: string[];
+  maintainers: string;
   version: string;
   release_notes: string;
   lifecycle_stage: string;
-  contributors: string[];
+  contributors: string;
 };
 
 export const CreateSchemaForm = (props: Props) => {
@@ -66,8 +66,8 @@ export const CreateSchemaForm = (props: Props) => {
       version: '0.1.0',
       release_notes: '',
       lifecycle_stage: '',
-      contributors: [],
-      maintainers: [user?.login || ''], 
+      contributors: '',
+      maintainers: user?.login || '', 
       isPrivate: false,
       tags: {}
     },
@@ -114,8 +114,6 @@ export const CreateSchemaForm = (props: Props) => {
   const handleSubmit = () => {
     // Get all current values from the form
     const formValues = getValues();
-    console.log("Form values at submit:", formValues);
-    console.log("Tags at submit:", formValues.tags);
     
     submit(
       {
@@ -197,15 +195,6 @@ export const CreateSchemaForm = (props: Props) => {
           className="form-control"
           placeholder="Schema description"
         />
-        
-        <label className="fw-semibold text-sm mt-2">Maintainers</label>
-        <input
-          {...register('maintainers')}
-          id="maintainers"
-          type="text"
-          className="form-control"
-          placeholder="Maintainers"
-        />
 
         <label className="fw-semibold text-sm mt-2">Lifecycle Stage</label>
         <input
@@ -214,6 +203,15 @@ export const CreateSchemaForm = (props: Props) => {
           type="text"
           className="form-control"
           placeholder="Lifecycle stage"
+        />
+        
+        <label className="fw-semibold text-sm mt-2">Maintainers</label>
+        <input
+          {...register('maintainers')}
+          id="maintainers"
+          type="text"
+          className="form-control"
+          placeholder="Maintainers"
         />
 
         <label className="fw-semibold text-sm mt-2">Config (JSON)</label>

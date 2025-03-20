@@ -10,18 +10,18 @@ import { FileDropZone } from './components/file-dropzone';
 import { CombinedErrorMessage } from './components/combined-error-message'
 import { KeyValueInput } from './components/key-value-input';
 
-type FromFileInputs = {
+type FormFields = {
   isPrivate: boolean;
   namespace: string;
   name: string;
   description: string;
   file: File;
   tags: Record<string, string>; // Support multiple value types
-  maintainers: string[];
+  maintainers: string;
   version: string;
   release_notes: string;
   lifecycle_stage: string;
-  contributors: string[];
+  contributors: string;
 };
 
 type Props = {
@@ -42,8 +42,8 @@ export const SchemaUploadForm = (props: Props) => {
       version: '0.1.0',
       release_notes: '',
       lifecycle_stage: '',
-      contributors: [],
-      maintainers: [user?.login || ''], 
+      contributors: '',
+      maintainers: user?.login || '', 
       isPrivate: false,
       tags: {}
     },

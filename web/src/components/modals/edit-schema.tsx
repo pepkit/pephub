@@ -1,85 +1,53 @@
-import { useState } from 'react';
-import { Modal } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Modal, Tab, Tabs } from 'react-bootstrap';
 
-import { useDeleteSchemaMutation } from '../../hooks/mutations/useDeleteSchemaMutation';
+import { EditSchemaForm } from '../forms/edit-schema-form';
 
-type Props = {
+interface Props {
   show: boolean;
-  onHide: () => void;
   namespace: string;
   name: string;
-  redirect?: string;
-};
+  description: string;
+  maintainers: string;
+  lifecycleStage: string;
+  isPrivate: boolean;
+  onHide: () => void;
+}
 
 export const EditSchemaModal = (props: Props) => {
-  const { show, onHide, namespace, name, redirect } = props;
-  const navigate = useNavigate();
-
-  const { delete: deleteSchema, isPending: isDeleting } = useDeleteSchemaMutation();
-  const [confirmText, setConfirmText] = useState('');
-
-  const onSuccess = () => {
-    setConfirmText('');
-  };
-
+  const { show, onHide, namespace, name, description, maintainers, lifecycleStage, isPrivate } = props;
   return (
-    <Modal
-      centered
-      animation={false}
-      show={show}
-      onHide={() => {
-        onHide();
-        setConfirmText('');
-      }}
-    >
-      <Modal.Header closeButton>
-        <h1 className="modal-title fs-5">Edit Schema?</h1>
-      </Modal.Header>
+    <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
       <Modal.Body>
-        <p>Are you sure you want to delete this schema? This action cannot be undone.</p>
-        <label className="mb-3">
-          Please type{' '}
-          <span className="fw-bold">
-            {namespace}/{name}
-          </span>{' '}
-          to confirm:
-        </label>
-        <input
-          value={confirmText}
-          onChange={(e) => setConfirmText(e.target.value)}
-          id="delete-confirm-input"
-          type="text"
-          className="form-control"
-          placeholder={`${namespace}/${name}`}
-        />
+        <div className='p-1 modal-pill'>
+          <h1 className="fs-5 mb-1 fw-semibold d-inline">Edit Schema Metadata</h1>
+          <button
+            className="btn btn-outline-dark px-1 py-0 m-0 float-end d-inline rounded-3 border-0 shadow-none"
+            type="button" 
+            onClick={() => {
+              onHide();
+            }}
+          >
+            <i className="bi bi-x-lg"></i>
+          </button>
+          <p className='text-sm mt-1 mb-3'></p>
+          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
+          <div className="">
+            <EditSchemaForm
+              namespace={namespace}
+              name={name}
+              description={description}
+              maintainers={maintainers}
+              lifecycleStage={lifecycleStage}
+              isPrivate={isPrivate}
+              editorHeight="400px"
+              onCancel={onHide}
+              onSubmit={() => {
+                onHide();
+              }}
+            />
+          </div>
+        </div>
       </Modal.Body>
-      <Modal.Footer>
-        <button
-          onClick={() =>
-            deleteSchema(
-              {
-                namespace,
-                name,
-              },
-              {
-                onSuccess: () => {
-                  onSuccess();
-                  onHide();
-                  if (redirect) {
-                    navigate(redirect);
-                  }
-                },
-              },
-            )
-          }
-          disabled={confirmText !== `${namespace}/${name}` || isDeleting}
-          type="button"
-          className="btn btn-danger"
-        >
-          {isDeleting ? 'Deleting...' : 'Yes, delete'}
-        </button>
-      </Modal.Footer>
     </Modal>
   );
 };

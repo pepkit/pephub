@@ -1,24 +1,10 @@
-import { Fragment, useRef, useState } from 'react';
-import { Breadcrumb, Dropdown } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import YAML from 'yaml';
-import Select from 'react-select';
+import Select, { SingleValue } from 'react-select';
 
-import { useSession } from '../../contexts/session-context';
-import { useEditSchemaMutation } from '../../hooks/mutations/useEditSchemaMutation';
 import { useSchema } from '../../hooks/queries/useSchema';
-import { copyToClipboard } from '../../utils/etc';
-import { DeleteSchemaModal } from '../modals/delete-schema';
-import { SchemaAPIEndpointsModal } from '../modals/schema-api-endpoints';
 import { dateStringToDateTime } from '../../utils/dates';
 
-const API_HOST = import.meta.env.VITE_API_HOST || '';
-
 type Props = {
-  isDirty: boolean;
-  handleSave: () => void;
-  handleDiscard: () => void;
-  isUpdating: boolean;
   description: string;
   maintainers: string;
   isPrivate: boolean;
@@ -37,26 +23,15 @@ export const SchemaSidebar = (props: Props) => {
   const { maintainers, isPrivate, lifecycleStage, releaseNotes, contributors, tags, updateDate, releaseDate,
     currentVersion, setCurrentVersionNumber, allVersionNumbers
    } = props;
-  const { user } = useSession();
   const { namespace, schema } = useParams();
-
   const { data: schemaData } = useSchema(namespace, schema);
 
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  // console.log(Object.entries(tags).map(([key, value], index) => (key + ': ' + value)))
-
   return (
-    <div className="pe-4">
+    <div className="pe-3">
       <small>
         <div className="mt-3 mb-4">
           <p className='fw-semibold my-1'>Description</p>
           <div className="text-muted">{schemaData?.description || 'N/A'}</div>
-        </div>
-
-        <div className="my-4">
-          <p className='fw-semibold my-1'>Creation Date</p>
-          <div className="text-muted">{dateStringToDateTime(releaseDate || '')}</div>
         </div>
 
         <div className="my-4">
@@ -90,8 +65,9 @@ export const SchemaSidebar = (props: Props) => {
         </div>
 
         <div className="my-4">
-          <p className='fw-semibold my-1'>Version Release Date</p>
-          <div className="text-muted">{dateStringToDateTime(updateDate || '')}</div>
+          <p className='fw-semibold my-1'>Timestamps</p>
+          <div className="text-muted">Created: {dateStringToDateTime(releaseDate || '')}</div>
+          <div className="text-muted">Updated: {dateStringToDateTime(updateDate || '')}</div>
         </div>
         
         <div className="my-4">
