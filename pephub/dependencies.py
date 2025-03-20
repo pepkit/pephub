@@ -157,7 +157,7 @@ def read_authorization_header(authorization: str = Header(None)) -> Union[dict, 
 
 
 def get_organizations_from_session_info(
-    session_info: Union[dict, None] = Depends(read_authorization_header)
+    session_info: Union[dict, None] = Depends(read_authorization_header),
 ) -> List[str]:
     organizations = []
     if session_info:
@@ -168,7 +168,7 @@ def get_organizations_from_session_info(
 
 
 def get_user_from_session_info(
-    session_info: Union[dict, None] = Depends(read_authorization_header)
+    session_info: Union[dict, None] = Depends(read_authorization_header),
 ) -> Union[str, None]:
     user = None
     if session_info:
