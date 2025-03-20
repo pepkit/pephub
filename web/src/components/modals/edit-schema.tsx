@@ -15,6 +15,7 @@ interface Props {
 
 export const EditSchemaModal = (props: Props) => {
   const { show, onHide, namespace, name, description, maintainers, lifecycleStage, isPrivate } = props;
+
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
       <Modal.Body>

@@ -7,13 +7,14 @@ interface Props {
   onHide: () => void;
   namespace: string;
   name: string;
+  version: string;
   tags: Record<string, string>;
   schemaJson: object;
   contributors: string;
 }
 
 export const VersionSchemaModal = (props: Props) => {
-  const { show, onHide, namespace, name, tags, schemaJson, contributors } = props;
+  const { show, onHide, namespace, name, version, tags, schemaJson, contributors } = props;
   
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
@@ -35,6 +36,7 @@ export const VersionSchemaModal = (props: Props) => {
             <VersionSchemaForm
               namespace={namespace}
               name={name}
+              version={version}
               editorHeight="400px"
               tags={tags}
               schemaJson={schemaJson}

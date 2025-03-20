@@ -38,6 +38,8 @@ from ....dependencies import (
     get_user_from_session_info,
 )
 
+import json
+
 load_dotenv()
 
 groups = APIRouter(prefix="/api/v1/schema-groups", tags=["groups"])
@@ -127,6 +129,13 @@ async def create_schema_for_namespace_by_file(
         raise HTTPException(
             status_code=403, detail="You do not have permission to create this schema"
         )
+    
+    # Check if tags is a string that needs to be parsed
+    if isinstance(tags, str) and tags.startswith('{') and tags.endswith('}'):
+        try:
+            tags = json.loads(tags)  # Parse the JSON string into a dictionary
+        except json.JSONDecodeError:
+            pass  # Keep original value if parsing fails
 
     # parse out the schema into a dictionary
     try:

@@ -4,7 +4,6 @@ import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useSession } from '../../contexts/session-context';
 import { useEditSchemaMutation } from '../../hooks/mutations/useEditSchemaMutation';
 import { CombinedErrorMessage } from './components/combined-error-message';
-import { KeyValueInput } from './components/key-value-input';
 
 // Props type definition
 type Props = {
@@ -80,7 +79,7 @@ export const EditSchemaForm = (props: Props) => {
   return (
     <FormProvider {...formMethods}>
       <form>
-        <div className="mt-3 form-check form-switch">
+        {/* <div className="mt-3 form-check form-switch">
           <label className="form-check-label" htmlFor="is-private-toggle">
             Private
           </label>
@@ -91,7 +90,7 @@ export const EditSchemaForm = (props: Props) => {
             role="switch"
             id="is-private-toggle"
           />
-        </div>
+        </div> */}
         
         <label className="fw-semibold text-sm mt-2">Description</label>
         <textarea

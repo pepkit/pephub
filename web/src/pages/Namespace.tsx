@@ -219,7 +219,7 @@ export const NamespacePage = () => {
             numPeps={pepsInfo?.count || 0}
             numPops={popsInfo?.count || 0}
             numStars={stars?.length || 0}
-            numSchemas={schemas?.count || 0}
+            numSchemas={schemas?.pagination?.total || 0}
             view={view}
             setView={setView}
             enableStars={namespace === user?.login}
@@ -290,11 +290,11 @@ export const NamespacePage = () => {
               ) : (
                 schemasFiltered.map((s) => <SchemaListCard key={s.name} schema={s} />)
               )}
-              {schemas?.count && schemas?.count > schemaLimit ? (
+              {schemas?.pagination?.total && schemas?.pagination?.total > schemaLimit ? (
                 <Pagination
                   limit={schemaLimit}
                   offset={schemaOffset}
-                  count={schemas?.count || 0}
+                  count={schemas?.pagination?.total || 0}
                   setOffset={setSchemaOffset}
                 />
               ) : null}

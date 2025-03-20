@@ -5,17 +5,19 @@ import { useSession } from '../../contexts/session-context';
 import { useVersionSchemaMutation } from '../../hooks/mutations/useVersionSchemaMutation';
 import { CombinedErrorMessage } from './components/combined-error-message';
 import { KeyValueInput } from './components/key-value-input';
+import { isSemanticVersion, incrementMinorVersion } from '../../utils/versions';
 
 // Props type definition
 type Props = {
   namespace: string;
   name: string;
-  editorHeight?: string;
-  onCancel: () => void;
-  onSubmit: () => void;
+  version: string;
   tags: Record<string, string>;
   schemaJson: object;
   contributors: string;
+  editorHeight?: string;
+  onCancel: () => void;
+  onSubmit: () => void;
 };
 
 // Form fields type definition
@@ -28,14 +30,14 @@ type FormFields = {
 };
 
 export const VersionSchemaForm = (props: Props) => {
-  const { onCancel, onSubmit, editorHeight, namespace, name, tags: oldTags, schemaJson, contributors } = props;
+  const { onCancel, onSubmit, editorHeight, namespace, name, version, tags: oldTags, schemaJson, contributors } = props;
   const { user } = useSession();
 
   // Set up form methods
   const formMethods = useForm<FormFields>({
     mode: 'onChange',
     defaultValues: {
-      version: '0.1.0',
+      version: incrementMinorVersion(version),
       release_notes: '',
       contributors: contributors,
       tags: oldTags,
@@ -112,8 +114,16 @@ export const VersionSchemaForm = (props: Props) => {
 
         <div className="namespace-name-tag-container fs-4 d-flex gap-1">
           <div className="d-flex flex-row align-items-center justify-content-between w-25">
-            <input
-              {...register('version')}
+          <input
+              {...register('version', {
+                required: {
+                  value: true,
+                  message: "empty",
+                },
+                // validate: {
+                //   isValidSemver: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
+                // }
+              })}
               id="version"
               type="text"
               className="form-control"
@@ -167,6 +177,7 @@ export const VersionSchemaForm = (props: Props) => {
                 value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
                 loading={null}
                 height={editorHeight || '50vh'}
+                options={{ readOnly: true }}
               />
             )}
           />

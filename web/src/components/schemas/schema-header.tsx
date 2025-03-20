@@ -16,10 +16,11 @@ const API_HOST = import.meta.env.VITE_API_HOST || '';
 type Props = {
   isDirty: boolean;
   handleDiscard: () => void;
+  currentVersionNumber: string;
 };
 
 export const SchemaHeader = (props: Props) => {
-  const { isDirty, handleDiscard } = props;
+  const { isDirty, handleDiscard, currentVersionNumber } = props;
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
@@ -67,7 +68,7 @@ export const SchemaHeader = (props: Props) => {
               <Dropdown.Item as="a">
                 <a
                   target="_blank"
-                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/file`}
+                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/versions/${currentVersionNumber}/file`}
                   className="text-decoration-none text-reset"
                 >
                   <i className="bi bi-file-earmark-zip me-1"></i>

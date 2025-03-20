@@ -16,7 +16,7 @@ type FormFields = {
   name: string;
   description: string;
   file: File;
-  tags: Record<string, string>; // Support multiple value types
+  tags: Record<string, string>;
   maintainers: string;
   version: string;
   release_notes: string;
@@ -97,7 +97,7 @@ export const SchemaUploadForm = (props: Props) => {
 
   return (
     <form id="upload-form" className="border-0 form-control p-0">
-      <div className="mt-3 form-check form-switch">
+      {/* <div className="mt-3 form-check form-switch">
         <label className="form-check-label" htmlFor="is-private-toggle">
           Private
         </label>
@@ -108,7 +108,7 @@ export const SchemaUploadForm = (props: Props) => {
           role="switch"
           id="is-private-toggle"
         />
-      </div>
+      </div> */}
       <div className="namespace-name-tag-container mt-3">
         <label className="fw-semibold text-sm">Namespace*</label>
         <label className="fw-semibold text-sm">Name*</label>
@@ -160,15 +160,6 @@ export const SchemaUploadForm = (props: Props) => {
           placeholder="Schema description"
         />
         
-        <label className="fw-semibold text-sm mt-2">Maintainers</label>
-        <input
-          {...register('maintainers')}
-          id="maintainers"
-          type="text"
-          className="form-control"
-          placeholder="Maintainers"
-        />
-
         <label className="fw-semibold text-sm mt-2">Lifecycle Stage</label>
         <input
           {...register('lifecycle_stage')}
@@ -176,6 +167,15 @@ export const SchemaUploadForm = (props: Props) => {
           type="text"
           className="form-control"
           placeholder="Lifecycle stage"
+        />
+
+        <label className="fw-semibold text-sm mt-2">Maintainers</label>
+        <input
+          {...register('maintainers')}
+          id="maintainers"
+          type="text"
+          className="form-control"
+          placeholder="Maintainers"
         />
 
       <label className="fw-semibold text-sm mt-2">Schema Upload</label>
@@ -208,8 +208,16 @@ export const SchemaUploadForm = (props: Props) => {
 
         <div className="namespace-name-tag-container fs-4 d-flex gap-1">
           <div className="d-flex flex-row align-items-center justify-content-between w-25">
-            <input
-              {...register('version')}
+          <input
+              {...register('version', {
+                required: {
+                  value: true,
+                  message: "empty",
+                },
+                // validate: {
+                //   isValidSemver: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
+                // }
+              })}
               id="version"
               type="text"
               className="form-control"
@@ -248,13 +256,21 @@ export const SchemaUploadForm = (props: Props) => {
       <div className="mt-2">
         <button
           onClick={() => {
+            const formValues = getValues();
+
             upload(
               {
                 namespace,
-                name: schemaName,
-                description,
-                isPrivate,
-                schema: uploadFile,
+                name: formValues.name,
+                description: formValues.description,
+                isPrivate: formValues.isPrivate,
+                schemaFile: uploadFile,
+                tags: formValues.tags,
+                maintainers: formValues.maintainers,
+                version: formValues.version,
+                release_notes: formValues.release_notes,
+                lifecycle_stage: formValues.lifecycle_stage,
+                contributors: formValues.contributors
               },
               {
                 onSuccess: () => {

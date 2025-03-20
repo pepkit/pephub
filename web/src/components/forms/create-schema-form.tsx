@@ -5,6 +5,7 @@ import { useSession } from '../../contexts/session-context';
 import { useCreateSchemaMutation } from '../../hooks/mutations/useCreateSchemaMutation';
 import { CombinedErrorMessage } from './components/combined-error-message';
 import { KeyValueInput } from './components/key-value-input';
+import { isSemanticVersion } from '../../utils/versions';
 
 // Default schema JSON
 const defaultSchemaJson = {
@@ -133,7 +134,7 @@ export const CreateSchemaForm = (props: Props) => {
   return (
     <FormProvider {...formMethods}>
       <form>
-        <div className="mt-3 form-check form-switch">
+        {/* <div className="mt-3 form-check form-switch">
           <label className="form-check-label" htmlFor="is-private-toggle">
             Private
           </label>
@@ -144,7 +145,7 @@ export const CreateSchemaForm = (props: Props) => {
             role="switch"
             id="is-private-toggle"
           />
-        </div>
+        </div> */}
         
         <div className="namespace-name-tag-container mt-3">
           <label className="fw-semibold text-sm">Namespace*</label>
@@ -248,7 +249,15 @@ export const CreateSchemaForm = (props: Props) => {
         <div className="namespace-name-tag-container fs-4 d-flex gap-1">
           <div className="d-flex flex-row align-items-center justify-content-between w-25">
             <input
-              {...register('version')}
+              {...register('version', {
+                required: {
+                  value: true,
+                  message: "empty",
+                },
+                // validate: {
+                //   isValidSemver: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
+                // }
+              })}
               id="version"
               type="text"
               className="form-control"

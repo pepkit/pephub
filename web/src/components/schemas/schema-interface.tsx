@@ -71,6 +71,14 @@ export const SchemaInterface = (props: Props) => {
     reset({ schema: currentSchemaRef.current });
   };
 
+  const handleVersionChange = (versionNumber: string) => {
+    setCurrentVersionNumber(versionNumber);
+    // Reset form dirty state when version changes
+    if (formState.isDirty) {
+      reset({ schema: {} }, { keepDirty: false });
+    }
+  };
+
   // useEffect(() => {
   //   const os = getOS();
   //   const handleSave = (e: KeyboardEvent) => {
@@ -93,13 +101,14 @@ export const SchemaInterface = (props: Props) => {
             key={schemaData?.description}
             handleDiscard={handleDiscard}
             isDirty={formState.isDirty}
+            currentVersionNumber={currentVersionNumber}
           />
         </div>
         <div className='col-9 pe-1'>
           <div className="card rounded-2 m-3 mt-0 shadow-sm">
             <div className="card-header fw-semibold text-sm d-flex align-items-center justify-content-between">
               Config (JSON)
-              {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
+              {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (sortedVersions[0]?.version === currentVersionNumber) && (
                 <>
                   <button disabled={!formState.isDirty} onClick={() => setShowSchemaVersionModal(true)} className="btn btn-xs btn-success ms-auto">
                     Save
@@ -156,16 +165,17 @@ export const SchemaInterface = (props: Props) => {
             updateDate={selectedVersion?.last_update_date}
             releaseDate={selectedVersion?.release_date}
             currentVersion={currentVersionNumber}
-            setCurrentVersionNumber={setCurrentVersionNumber}
+            setCurrentVersionNumber={handleVersionChange}
             allVersionNumbers={allVersionNumbers}
             tags={selectedVersion?.tags}
           />
         </div>
       </div>
-
+      
       <VersionSchemaModal
         namespace={namespace}
         name={name}
+        version={currentVersionNumber}
         tags={selectedVersion?.tags}
         schemaJson={getValues('schema')}
         contributors={selectedVersion?.contributors}
