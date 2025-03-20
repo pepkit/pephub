@@ -79,8 +79,8 @@ app.add_middleware(
 
 # build routes
 app.include_router(api_base)
-app.include_router(api_namespace)
 app.include_router(api_namespaces)
+app.include_router(api_namespace)
 app.include_router(api_project)
 app.include_router(api_projects)
 app.include_router(api_search)

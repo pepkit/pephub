@@ -42,7 +42,7 @@ from ....dependencies import (
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...models import FavoriteRequest, ProjectJsonRequest, ProjectRawModel
 
-from bedms.const import AVAILABLE_SCHEMAS
+# from bedms.const import AVAILABLE_SCHEMAS
 
 load_dotenv()
 
@@ -379,14 +379,23 @@ async def remove_from_stars(
 
 
 @namespaces.get(
-    "/info",
+    "/",
     summary="Get information list of biggest namespaces",
     response_model=ListOfNamespaceInfo,
 )
 async def get_namespace_information(
-    limit: Optional[int] = DEFAULT_LIMIT_INFO,
+    page: int = 0,
+    page_size: int = DEFAULT_LIMIT_INFO,
+    order_by: Literal[
+        "number_of_projects",
+        "number_of_schemas",
+    ] = "number_of_projects",
 ) -> ListOfNamespaceInfo:
-    return get_pepdb_namespace_info(limit)
+    return get_pepdb_namespace_info(
+        page=page,
+        page_size=page_size,
+        order_by=order_by,
+    )
 
 
 @namespaces.get(
@@ -459,10 +468,10 @@ async def get_archive(namespace: str, agent: PEPDatabaseAgent = Depends(get_db))
     return result
 
 
-@namespace.get(
-    "/standardizer-schemas",
-    summary="Get all available schemas from BEDMS",
-)
-async def get_schemas(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+# @namespace.get(
+#     "/standardizer-schemas",
+#     summary="Get all available schemas from BEDMS",
+# )
+# async def get_schemas(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
 
-    return AVAILABLE_SCHEMAS
+#     return AVAILABLE_SCHEMAS

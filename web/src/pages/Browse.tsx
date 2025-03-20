@@ -86,7 +86,7 @@ export function Browse() {
     orderBy,
   });
 
-  const noSchemasInDatabase = schemas?.count === 0;
+  const noSchemasInDatabase = schemas?.pagination?.total === 0;
 
   if (error) {
     return (

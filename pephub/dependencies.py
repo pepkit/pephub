@@ -157,7 +157,7 @@ def read_authorization_header(authorization: str = Header(None)) -> Union[dict, 
 
 
 def get_organizations_from_session_info(
-    session_info: Union[dict, None] = Depends(read_authorization_header)
+    session_info: Union[dict, None] = Depends(read_authorization_header),
 ) -> List[str]:
     organizations = []
     if session_info:
@@ -168,7 +168,7 @@ def get_organizations_from_session_info(
 
 
 def get_user_from_session_info(
-    session_info: Union[dict, None] = Depends(read_authorization_header)
+    session_info: Union[dict, None] = Depends(read_authorization_header),
 ) -> Union[str, None]:
     user = None
     if session_info:
@@ -405,8 +405,16 @@ def get_namespace_info(
 
 
 @cached(TTLCache(maxsize=100, ttl=5 * 60))
-def get_pepdb_namespace_info(limit: int = 10) -> ListOfNamespaceInfo:
+def get_pepdb_namespace_info(
+    page: int = 0,
+    page_size: int = 10,
+    order_by: str = "number_of_projects",
+) -> ListOfNamespaceInfo:
     """
     Get the information on the biggest namespaces in the database.
     """
-    return agent.namespace.info(limit=limit)
+    return agent.namespace.info(
+        page=page,
+        page_size=page_size,
+        order_by=order_by,
+    )

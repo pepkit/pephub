@@ -29,7 +29,7 @@ export const AddPEPModal = (props: Props) => {
             <i className="bi bi-x-lg"></i>
           </button>
           <p className='text-sm mt-1 mb-3'></p>
-          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
+          {/* <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div> */}
           <Tabs
             variant="pills" 
             justify defaultActiveKey="blank" 

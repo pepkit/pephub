@@ -2,43 +2,33 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
-import { createNewSchema } from '../../api/schemas';
+import { createSchemaVersion } from '../../api/schemas';
 import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
 
-type NewSchema = {
-  namespace: string;
-  name: string;
-  description: string;
+type VersionSchema = {
   schemaJson: object;
-  isPrivate: boolean;
   tags: Record<string, string>; 
-  maintainers: string;
   version: string;
   release_notes: string;
-  lifecycle_stage: string;
   contributors: string;
 };
 
-export const useCreateSchemaMutation = () => {
+export const useVersionSchemaMutation = (namespace: string, name: string) => {
   const { jwt } = useSession();
 
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (newSchema: NewSchema) => {
-      return createNewSchema(
-        newSchema.namespace,
-        newSchema.name,
-        newSchema.description,
-        newSchema.schemaJson,
-        newSchema.isPrivate,
-        newSchema.contributors,
-        newSchema.maintainers,
-        newSchema.tags,
-        newSchema.version,
-        newSchema.release_notes,
-        newSchema.lifecycle_stage,
+    mutationFn: (newSchemaVersion: VersionSchema) => {
+      return createSchemaVersion(
+        namespace,
+        name,
+        newSchemaVersion.schemaJson,
+        newSchemaVersion.contributors,
+        newSchemaVersion.tags,
+        newSchemaVersion.version,
+        newSchemaVersion.release_notes,
         jwt,
       );
     },
@@ -46,20 +36,20 @@ export const useCreateSchemaMutation = () => {
       queryClient.invalidateQueries({
         queryKey: ['schemas'],
       });
-      toast.success('Schema successfully created!');
+      toast.success('Schema version created!');
     },
     onError: (err: AxiosError) => {
       const message = extractErrorMessage(err);
 
       // if message is still an object, JSON.stringify it
       if (typeof message === 'object') {
-        toast.error(`Error creating schema: ${JSON.stringify(message)}`, {
+        toast.error(`Error creating schema version: ${JSON.stringify(message)}`, {
           duration: 5000,
         });
         return;
       }
 
-      toast.error(`Error creating schema: ${message}`, {
+      toast.error(`Error creating schema version: ${message}`, {
         duration: 5000,
       });
     },

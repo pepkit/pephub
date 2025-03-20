@@ -909,3 +909,23 @@ body {
 .spinner-pulse circle:nth-child(3) { animation-delay: -0.8625s; }
 .spinner-pulse circle:nth-child(2) { animation-delay: -1.00625s; }
 
+.btn-xs {
+  padding: 0.13rem 0.6rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  border-radius: 0.25rem;
+}
+
+/* Ensure appropriate sizing when used with button groups */
+.btn-group-xs > .btn {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  border-radius: 0.15rem;
+}
+
+/* Adjust icon alignment */
+.btn-xs > .bi {
+  font-size: 0.7rem;
+  vertical-align: -0.125em;
+}

@@ -13,14 +13,14 @@ import { useAddStar } from '../../hooks/mutations/useAddStar';
 import { useRemoveStar } from '../../hooks/mutations/useRemoveStar';
 import { useNamespaceStars } from '../../hooks/queries/useNamespaceStars';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
+import { useSampleTable } from '../../hooks/queries/useSampleTable';
+import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore';
 import { copyToClipboard, getOS, numberWithCommas } from '../../utils/etc';
 import { canEdit } from '../../utils/permissions';
 import { downloadZip } from '../../utils/project';
 import { ProjectHistoryModal } from '../modals/project-history';
 import { ProjectHeaderBarPlaceholder } from './placeholders/project-header-bar-placeholder';
-import { ProjectStars } from './project-stars'
-import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
-import { useSampleTable } from '../../hooks/queries/useSampleTable'
+import { ProjectStars } from './project-stars';
 
 type Props = {
   sampleTable: ReturnType<typeof useSampleTable>['data'];
@@ -146,10 +146,9 @@ export const ProjectHeaderBar = (props: Props) => {
             </button>
           </div>
         </div>
-        {projectInfo && !isLoading ? 
+        {projectInfo && !isLoading ? (
           <ProjectStars project={projectInfo} isStarred={isStarred} starNumber={projectInfo.stars_number} />
-          : null
-        }
+        ) : null}
         <Dropdown>
           <Dropdown.Toggle size="sm" variant="dark">
             <i className="bi bi-gear-fill me-1"></i>
@@ -204,13 +203,13 @@ export const ProjectHeaderBar = (props: Props) => {
                   {!projectInfo.pop && (
                     <>
                       <Dropdown.Item onClick={() => setShowProjectHistoryModal(true)}>
-                      <i className="me-1 bi bi-stopwatch" />
+                        <i className="me-1 bi bi-stopwatch" />
                         History
                       </Dropdown.Item>
-                      <Dropdown.Item onClick={() => setShowStandardizeMetadataModal(true)}>
+                      {/* <Dropdown.Item onClick={() => setShowStandardizeMetadataModal(true)}>
                         <i className="me-1 bi bi-magic"></i>
                         Standardize
-                      </Dropdown.Item>
+                      </Dropdown.Item> */}
                     </>
                   )}
                   <Dropdown.Item className="text-danger" onClick={() => setShowDeletePEPModal(true)}>

@@ -1,41 +1,35 @@
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import YAML from 'yaml';
 
 import { useSession } from '../../contexts/session-context';
-import { useEditSchemaMutation } from '../../hooks/mutations/useEditSchemaMutation';
-import { useSchema } from '../../hooks/queries/useSchema';
 import { copyToClipboard } from '../../utils/etc';
+
 import { DeleteSchemaModal } from '../modals/delete-schema';
 import { SchemaAPIEndpointsModal } from '../modals/schema-api-endpoints';
+
+import { useSchemaVersionModalStore } from '../../hooks/stores/useSchemaVersionModalStore'
+import { useSchemaEditModalStore } from '../../hooks/stores/useSchemaEditModalStore'
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 
 type Props = {
   isDirty: boolean;
-  handleSave: () => void;
   handleDiscard: () => void;
-  isUpdating: boolean;
-  description: string;
+  currentVersionNumber: string;
 };
 
 export const SchemaHeader = (props: Props) => {
-  const { isDirty, handleSave, handleDiscard, isUpdating } = props;
+  const { isDirty, handleDiscard, currentVersionNumber } = props;
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
   const [copied, setCopied] = useState(false);
-  const [editingDescription, setEditingDescription] = useState(false);
   const [showSchemaDeleteModal, setShowSchemaDeleteModal] = useState(false);
   const [showSchemaAPIModal, setShowSchemaAPIModal] = useState(false);
 
-  const [newDescription, setNewDescription] = useState(props.description);
-
-  const { data: schemaData } = useSchema(namespace, schema);
-  const { update, isPending: isUpdatingDescription } = useEditSchemaMutation(namespace!, schema!);
-
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const { setShowSchemaVersionModal } = useSchemaVersionModalStore();
+  const { setShowSchemaEditModal } = useSchemaEditModalStore();
 
   return (
     <div className="p-2 w-100">
@@ -46,17 +40,6 @@ export const SchemaHeader = (props: Props) => {
           <Breadcrumb.Item active>{schema}</Breadcrumb.Item>
         </Breadcrumb>
         <div className="d-flex align-items-center gap-1">
-          
-          {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
-            <Fragment>
-              <button disabled={!isDirty || isUpdating} onClick={handleSave} className="btn btn-sm btn-success">
-                {isUpdating ? 'Saving...' : 'Save'}
-              </button>
-              <button disabled={!isDirty || isUpdating} onClick={handleDiscard} className="btn btn-sm btn-outline-dark">
-                Discard
-              </button>
-            </Fragment>
-          )}
 
           <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">
@@ -85,7 +68,7 @@ export const SchemaHeader = (props: Props) => {
               <Dropdown.Item as="a">
                 <a
                   target="_blank"
-                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/file`}
+                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/versions/${currentVersionNumber}/file`}
                   className="text-decoration-none text-reset"
                 >
                   <i className="bi bi-file-earmark-zip me-1"></i>
@@ -96,63 +79,26 @@ export const SchemaHeader = (props: Props) => {
                 <i className="bi bi-hdd-rack me-1"></i>
                 API
               </Dropdown.Item>
-              <Fragment>
-                {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
-                  <Fragment>
-                    <Dropdown.Item onClick={() => setShowSchemaDeleteModal(true)}>
-                      <i className="me-1 bi bi-trash3"></i>
-                      Delete
-                    </Dropdown.Item>
-                  </Fragment>
-                )}
-              </Fragment>
+              {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
+                <>
+                  <Dropdown.Item onClick={() => setShowSchemaEditModal(true)}>
+                    <i className="me-1 bi bi-pencil-square"></i>
+                    Edit
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => setShowSchemaDeleteModal(true)}>
+                  <i className="me-1 bi bi-trash3"></i>
+                  Delete
+                </Dropdown.Item>
+                </>
+                
+              )}
             </Dropdown.Menu>
           </Dropdown>
 
         </div>
       </div>
-      {editingDescription ? (
-        <div className="w-100">
-          <textarea
-            ref={textAreaRef}
-            rows={5}
-            className="form-control"
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-          />
-          <div className="d-flex align-items-center justify-content-end p-1 gap-1">
-            <button className="btn btn-sm btn-outline-dark" onClick={() => setEditingDescription(false)}>
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                update(
-                  { description: newDescription },
-                  {
-                    onSuccess: () => {
-                      setEditingDescription(false);
-                    },
-                  },
-                );
-              }}
-              className="btn btn-sm btn-success"
-            >
-              {isUpdatingDescription ? 'Saving...' : 'Save'}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <span className="d-flex align-items-center gap-2">
-          <i
-            className="bi bi-pencil-fill text-muted text-sm cursor-pointer"
-            onClick={() => {
-              setEditingDescription(true);
-              textAreaRef.current?.focus();
-            }}
-          ></i>
-          <div className="text-muted">{schemaData?.description || 'No description.'}</div>
-        </span>
-      )}
+
+
       <DeleteSchemaModal
         namespace={namespace!}
         name={schema!}
