@@ -157,7 +157,32 @@ export const SampleTable = (props: Props) => {
       manualRowMove={true}
       licenseKey="non-commercial-and-evaluation"
       manualColumnResize
-      afterPaste={(coords) => {}}
+      beforeCopy={(data, coords) => {
+        if (ph_id_col === -1 || ph_id_col < coords[0].startCol || ph_id_col > coords[0].endCol) {
+          return;
+        }
+
+        const relative_ph_id_col = ph_id_col - coords[0].startCol;
+
+        if (relative_ph_id_col >=0 && relative_ph_id_col < data[0].length) {
+          for (let i = 0; i < data.length; i++) {
+            data[i].splice(relative_ph_id_col, 1);
+          }
+        }
+      }}
+      beforePaste={(data) => {
+        const paste_ph_id_col = data[0].indexOf('ph_id');
+
+        if (paste_ph_id_col === -1) {
+          return;
+        }
+
+        if (paste_ph_id_col >=0 && paste_ph_id_col < data[0].length) {
+          for (let i = 0; i < data.length; i++) {
+            data[i].splice(paste_ph_id_col, 1);
+          }
+        }
+      }}
       afterChange={(changes) => {
         if (changes && onChange) {
           changes.forEach((change) => {
