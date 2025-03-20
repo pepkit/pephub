@@ -20,7 +20,7 @@ export function Schema() {
   const canEdit = (user && (user.login === namespace || user.orgs.includes(namespace || 'NONE'))) || false;
 
   return (
-    <PageLayout title={`${namespace}/${schema} schema`} fullWidth>
+    <PageLayout title={`${namespace}/${schema} schema`} fullWidth footer={false} >
       <SchemaInterface
         namespace={namespace!}
         name={schema!}

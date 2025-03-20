@@ -244,7 +244,7 @@ export const CreateSchemaForm = (props: Props) => {
 
         <div className="namespace-name-tag-container mt-2 gap-1">
           <label className="fw-semibold text-sm">Schema Version</label>
-          <label className="fw-semibold text-sm mt-2">Version Contributors</label>
+          <label className="fw-semibold text-sm">Version Contributors</label>
         </div>
 
         <div className="namespace-name-tag-container fs-4 d-flex gap-1">

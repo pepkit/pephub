@@ -9,6 +9,7 @@ import { useSchema } from '../../hooks/queries/useSchema';
 import { useSchemaByVersion } from '../../hooks/queries/useSchemaByVersion';
 import { getOS } from '../../utils/etc';
 import { SchemaHeader } from './schema-header';
+import { SchemaSidebar } from './schema-sidebar';
 
 type FormFields = {
   schema: object;
@@ -93,69 +94,86 @@ export const SchemaInterface = (props: Props) => {
 
   return (
     <Fragment>
-      <div className="d-flex align-items-center justify-content-between px-4 border-bottom">
-        <SchemaHeader
-          key={schemaData?.description}
-          description={schemaData?.description || ''}
-          maintainers={schemaData?.maintainers}
-          isPrivate={schemaData?.private}
-          lifecycleStage={schemaData?.lifecycle_stage}
-          releaseNotes={selectedVersion?.release_notes}
-          contributors={selectedVersion?.contributors}
-          updateDate={selectedVersion?.last_update_date}
-          releaseDate={selectedVersion?.release_date}
-          currentVersion={currentVersionNumber}
-          setCurrentVersionNumber={setCurrentVersionNumber}
-          allVersionNumbers={allVersionNumbers}
-          tags={selectedVersion?.tags}
-          isUpdating={isUpdating}
-          handleDiscard={handleDiscard}
-          handleSave={handleSubmit}
-          isDirty={formState.isDirty}
-        />
-      </div>
-      <div className="p-2">
-        <Controller
-          name="schema"
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            // <Editor
-            //   options={{
-            //     readOnly: !canEdit,
-            //   }}
-            //   language={'json'}
-            //   defaultLanguage="json"
-            //   value={value}
-            //   loading={null}
-            //   height={'75vh'}
-            //   onChange={(v) => {
-            //     onChange(v);
-            //   }}
-            // />
-            <Editor
-              options={{
-                readOnly: !canEdit,
-              }}
-              onChange={(v) => {
-                try {
-                  // Try to parse the editor content as JSON
-                  const jsonValue = typeof v === 'string' ? JSON.parse(v) : v;
-                  onChange(jsonValue);
-                } catch (err) {
-                  // If it's not valid JSON, just pass it through
-                  onChange(v);
-                }
-              }}
-              saveViewState
-              language="json"
-              defaultLanguage="json"
-              value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
-              loading={null}
-              height={'75vh'}
+      <div className='row px-1'>
+        <div className="d-flex align-items-center justify-content-between px-4 mb-">
+          <SchemaHeader
+            key={schemaData?.description}
+            isUpdating={isUpdating}
+            handleDiscard={handleDiscard}
+            handleSave={handleSubmit}
+            isDirty={formState.isDirty}
+          />
+        </div>
+        <div className='col-9 pe-1'>
+          <div className="card rounded-2 m-3 mt-0 shadow-sm">
+            <div className="card-header fw-semibold text-sm">
+              Editor (JSON)
+            </div>
+            <div className='card-body ps-3 py-2'>
+            <Controller
+              name="schema"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                // <Editor
+                //   options={{
+                //     readOnly: !canEdit,
+                //   }}
+                //   language={'json'}
+                //   defaultLanguage="json"
+                //   value={value}
+                //   loading={null}
+                //   height={'75vh'}
+                //   onChange={(v) => {
+                //     onChange(v);
+                //   }}
+                // />
+                <Editor
+                  options={{
+                    readOnly: !canEdit,
+                  }}
+                  onChange={(v) => {
+                    try {
+                      // Try to parse the editor content as JSON
+                      const jsonValue = typeof v === 'string' ? JSON.parse(v) : v;
+                      onChange(jsonValue);
+                    } catch (err) {
+                      // If it's not valid JSON, just pass it through
+                      onChange(v);
+                    }
+                  }}
+                  saveViewState
+                  language="json"
+                  defaultLanguage="json"
+                  value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
+                  loading={null}
+                  height={'71vh'}
+                />
+              )}
             />
-          )}
-        />
+            </div>
+            
+          </div>
+        </div>
+
+        <div className='col-3'>
+          <SchemaSidebar
+            key={schemaData?.description}
+            description={schemaData?.description || ''}
+            maintainers={schemaData?.maintainers}
+            isPrivate={schemaData?.private}
+            lifecycleStage={schemaData?.lifecycle_stage}
+            releaseNotes={selectedVersion?.release_notes}
+            contributors={selectedVersion?.contributors}
+            updateDate={selectedVersion?.last_update_date}
+            releaseDate={selectedVersion?.release_date}
+            currentVersion={currentVersionNumber}
+            setCurrentVersionNumber={setCurrentVersionNumber}
+            allVersionNumbers={allVersionNumbers}
+            tags={selectedVersion?.tags}
+          />
+        </div>
       </div>
+      
     </Fragment>
   );
 };

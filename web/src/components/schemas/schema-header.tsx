@@ -1,15 +1,13 @@
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Breadcrumb, Dropdown } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import YAML from 'yaml';
 
 import { useSession } from '../../contexts/session-context';
-import { useEditSchemaMutation } from '../../hooks/mutations/useEditSchemaMutation';
-import { useSchema } from '../../hooks/queries/useSchema';
 import { copyToClipboard } from '../../utils/etc';
+import { VersionSchemaModal } from '../modals/version-schema';
+import { EditSchemaModal } from '../modals/edit-schema';
 import { DeleteSchemaModal } from '../modals/delete-schema';
 import { SchemaAPIEndpointsModal } from '../modals/schema-api-endpoints';
-import { dateStringToDateTime } from '../../utils/dates';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 
@@ -18,40 +16,18 @@ type Props = {
   handleSave: () => void;
   handleDiscard: () => void;
   isUpdating: boolean;
-  description: string;
-  maintainers: string;
-  isPrivate: boolean;
-  lifecycleStage: string;
-  releaseNotes: string;
-  contributors: string;
-  tags: object;
-  updateDate: string;
-  releaseDate: string;
-  currentVersion: string;
-  setCurrentVersionNumber: (versionNumber: string) => void;
-  allVersionNumbers: string[];
 };
 
 export const SchemaHeader = (props: Props) => {
-  const { isDirty, handleSave, handleDiscard, isUpdating, maintainers, isPrivate, lifecycleStage, releaseNotes, contributors, tags, updateDate, releaseDate,
-    currentVersion, setCurrentVersionNumber, allVersionNumbers
-   } = props;
+  const { isDirty, handleSave, handleDiscard, isUpdating } = props;
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
   const [copied, setCopied] = useState(false);
-  const [editingDescription, setEditingDescription] = useState(false);
+  const [showSchemaVersionModal, setShowSchemaVersionModal] = useState(false);
+  const [showSchemaEditModal, setShowSchemaEditModal] = useState(false);
   const [showSchemaDeleteModal, setShowSchemaDeleteModal] = useState(false);
   const [showSchemaAPIModal, setShowSchemaAPIModal] = useState(false);
-
-  const [newDescription, setNewDescription] = useState(props.description);
-
-  const { data: schemaData } = useSchema(namespace, schema);
-  const { update, isPending: isUpdatingDescription } = useEditSchemaMutation(namespace!, schema!);
-
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  // console.log(Object.entries(tags).map(([key, value], index) => (key + ': ' + value)))
 
   return (
     <div className="p-2 w-100">
@@ -65,7 +41,7 @@ export const SchemaHeader = (props: Props) => {
           
           {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
             <Fragment>
-              <button disabled={!isDirty || isUpdating} onClick={handleSave} className="btn btn-sm btn-success">
+              <button disabled={!isDirty || isUpdating} onClick={() => setShowSchemaVersionModal(true)} className="btn btn-sm btn-success">
                 {isUpdating ? 'Saving...' : 'Save'}
               </button>
               <button disabled={!isDirty || isUpdating} onClick={handleDiscard} className="btn btn-sm btn-outline-dark">
@@ -74,7 +50,7 @@ export const SchemaHeader = (props: Props) => {
             </Fragment>
           )}
 
-          <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
+          {/* <div className="border border-dark shadow-sm rounded-1 ps-2 d-flex align-items-center">
             <span className="text-sm fw-bold">
               {namespace}/{schema}
             </span>
@@ -90,7 +66,7 @@ export const SchemaHeader = (props: Props) => {
             >
               {copied ? <i className="bi bi-check"></i> : <i className="bi bi-clipboard" />}
             </button>
-          </div>
+          </div> */}
 
           <Dropdown>
             <Dropdown.Toggle size="sm" variant="dark">
@@ -112,122 +88,39 @@ export const SchemaHeader = (props: Props) => {
                 <i className="bi bi-hdd-rack me-1"></i>
                 API
               </Dropdown.Item>
-              <Fragment>
-                {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
-                  <Fragment>
-                    <Dropdown.Item onClick={() => setShowSchemaDeleteModal(true)}>
-                      <i className="me-1 bi bi-trash3"></i>
-                      Delete
-                    </Dropdown.Item>
-                  </Fragment>
-                )}
-              </Fragment>
+              {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
+                <>
+                  <Dropdown.Item onClick={() => setShowSchemaEditModal(true)}>
+                    <i className="me-1 bi bi-pencil-square"></i>
+                    Edit
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => setShowSchemaDeleteModal(true)}>
+                  <i className="me-1 bi bi-trash3"></i>
+                  Delete
+                </Dropdown.Item>
+                </>
+                
+              )}
             </Dropdown.Menu>
           </Dropdown>
 
         </div>
       </div>
-      {editingDescription ? (
-        <div className="w-100">
-          <textarea
-            ref={textAreaRef}
-            rows={5}
-            className="form-control"
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-          />
-          <div className="d-flex align-items-center justify-content-end p-1 gap-1">
-            <button className="btn btn-sm btn-outline-dark" onClick={() => setEditingDescription(false)}>
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                update(
-                  { description: newDescription },
-                  {
-                    onSuccess: () => {
-                      setEditingDescription(false);
-                    },
-                  },
-                );
-              }}
-              className="btn btn-sm btn-success"
-            >
-              {isUpdatingDescription ? 'Saving...' : 'Save'}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <span className="d-flex align-items-center gap-2">
-          <i
-            className="bi bi-pencil-fill text-muted text-sm cursor-pointer"
-            onClick={() => {
-              setEditingDescription(true);
-              textAreaRef.current?.focus();
-            }}
-          ></i>
-          <div className="text-muted">{schemaData?.description || 'No description.'}</div>
-        </span>
-      )}
 
-      <div className="d-flex align-items-center text-muted mt-1 mx-0 pb-3 row">
-        <small className="d-flex flex-row align-items-center justify-content-between col-md-12">
-          <div className="me-3 row">
-            <div className="col-sm-auto me-1">
-              <i className="bi bi-calendar3"></i>
-              <span className="mx-1">Created:</span>
-              <span id="project-submission-date">{dateStringToDateTime(releaseDate || '')}</span>
-            </div>
-            <div className="col-sm-auto me-1">
-              <i className="bi bi-calendar3"></i>
-              <span className="mx-1">Updated:</span>
-              <span id="project-update-date">
-                {dateStringToDateTime(updateDate || '')}
-              </span>
-            </div>
-            {/* <div className="col-sm-auto">
-              <i className="bi bi-arrows-expand"></i>
-              <span id="project-update-date">
-                {releaseDate}
-              </span>
-            </div> */}
-
-            <select
-              id="version-select"
-              value={currentVersion}
-              onChange={(e) => setCurrentVersionNumber(e.target.value)}
-              disabled={allVersionNumbers.length === 0}
-            >
-              {allVersionNumbers.map((version) => (
-                <option key={version} value={version}>
-                  {version}
-                </option>
-              ))}
-            </select>
-            <span>contributors: {contributors}</span>
-            <span>release notes: {releaseNotes}</span>
-            <span>maintainers: {maintainers}</span>
-            <span>lifecycle stage: {lifecycleStage}</span>
-            <span>tags: </span>
-            {tags ? (
-              <div className='d-flex mt-2'>
-                {Object.entries(tags).map(([key, value], index) => (
-                  <span className='border rounded-2 p-2 text-xs' key={key}>
-                    <span className='fw-bold'>{String(key)}</span>
-                    {String(value) && <span>: {String(value)}</span>}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="text-muted">No tags</span>
-            )}
-          </div>
-          <span className="">
-          </span>
-        </small>
-      </div>
-
-
+      <VersionSchemaModal
+        namespace={namespace!}
+        name={schema!}
+        show={showSchemaVersionModal}
+        onHide={() => setShowSchemaVersionModal(false)}
+        redirect={`/${namespace}?view=schemas`}
+      />
+      <EditSchemaModal
+        namespace={namespace!}
+        name={schema!}
+        show={showSchemaEditModal}
+        onHide={() => setShowSchemaEditModal(false)}
+        redirect={`/${namespace}?view=schemas`}
+      />
       <DeleteSchemaModal
         namespace={namespace!}
         name={schema!}
