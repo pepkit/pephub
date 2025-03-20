@@ -129,9 +129,9 @@ async def create_schema_for_namespace_by_file(
         raise HTTPException(
             status_code=403, detail="You do not have permission to create this schema"
         )
-    
+
     # Check if tags is a string that needs to be parsed
-    if isinstance(tags, str) and tags.startswith('{') and tags.endswith('}'):
+    if isinstance(tags, str) and tags.startswith("{") and tags.endswith("}"):
         try:
             tags = json.loads(tags)  # Parse the JSON string into a dictionary
         except json.JSONDecodeError:
