@@ -54,7 +54,7 @@ async def get_all_schemas(
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
     """
-    Search all schemas throughout the database
+    Search all schemas throughout the database. Search is performed on schema name, and description.
     """
 
     result = agent.schema.query_schemas(
@@ -71,7 +71,10 @@ async def get_all_schemas(
 @schemas.get("/{namespace}", response_model=SchemaSearchResult)
 async def get_schemas_in_namespace(
     namespace: str,
-    query: Optional[str] = None,
+    name: Optional[str] = None,
+    maintainer: Optional[str] = None,
+    lifecycle_stage: Optional[str] = None,
+    latest_version: Optional[str] = None,
     page: Optional[int] = 0,
     page_size: Optional[int] = 100,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -79,12 +82,17 @@ async def get_schemas_in_namespace(
     order_desc: bool = False,
 ):
     """
-    Search all schemas in a namespace
+    Get schemas for specific endpoint, by providing query parameters to filter the results.
+
+    ## NOTE: latest_version is not implemented yet.
     """
 
-    result = agent.schema.query_schemas(
+    result = agent.schema.fetch_schemas(
         namespace=namespace,
-        search_str=query,
+        name=name,
+        maintainer=maintainer,
+        lifecycle_stage=lifecycle_stage,
+        # latest_version=latest_version,
         page_size=page_size,
         page=page,
         order_by=order_by,
