@@ -15,10 +15,6 @@ export function Schema() {
   const { data: schemaData, isFetching: isLoading } = useSchema(namespace, schema);
   const { data: schemaVersions, refetch: refetchSchemaVersions } = useSchemaVersions(namespace, schema);
 
-  console.log(namespace)
-  console.log(schema)
-  console.log(schemaData)
-
   const {} = useForm();
 
   const canEdit = (user && (user.login === namespace || user.orgs.includes(namespace || 'NONE'))) || false;

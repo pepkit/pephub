@@ -201,9 +201,6 @@ export const createNewSchemaFiles = async (
   
   // Append the file with the correct field name expected by your backend
   formData.append('schema_file', schemaFile);
-
-
-  console.log(formData.get('lifecycle_stage'))
   
   // Send FormData with proper headers for multipart/form-data
   const { data } = await axios.post<CreateSchemaResponse>(

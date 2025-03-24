@@ -250,56 +250,59 @@ export const SchemaUploadForm = (props: Props) => {
           onRemoveTag={handleRemoveTag}
         />
 
-      <p className='text-xs mt-1'>
-        * Namespace and Schema Name are required.
-      </p>
-      <div className="mt-2">
-        <button
-          onClick={() => {
-            const formValues = getValues();
+      <div className="mt-4 d-flex flex-row align-items-center justify-content-between">
+        <p className='text-xs mt-auto mb-0'>
+          * Namespace and Schema Name are required.
+        </p>
+        <div>
+          <button
+            onClick={() => {
+              const formValues = getValues();
 
-            upload(
-              {
-                namespace,
-                name: formValues.name,
-                description: formValues.description,
-                isPrivate: formValues.isPrivate,
-                schemaFile: uploadFile,
-                tags: formValues.tags,
-                maintainers: formValues.maintainers,
-                version: formValues.version,
-                release_notes: formValues.release_notes,
-                lifecycle_stage: formValues.lifecycle_stage,
-                contributors: formValues.contributors
-              },
-              {
-                onSuccess: () => {
-                  resetForm();
-                  onSubmit();
+              upload(
+                {
+                  namespace,
+                  name: formValues.name,
+                  description: formValues.description,
+                  isPrivate: formValues.isPrivate,
+                  schemaFile: uploadFile,
+                  tags: formValues.tags,
+                  maintainers: formValues.maintainers,
+                  version: formValues.version,
+                  release_notes: formValues.release_notes,
+                  lifecycle_stage: formValues.lifecycle_stage,
+                  contributors: formValues.contributors
                 },
-              },
-            );
-          }}
-          disabled={!isValid || isUploading}
-          type="button"
-          id="new-project-submit-btn"
-          className="btn btn-success float-end"
-        >
-          <i className="bi bi-plus-circle me-1"></i>
-          {isUploading ? 'Submitting...' : 'Submit'}
-        </button>
-        <button
-          type="button"
-          className="btn btn-outline-dark me-1 float-end"
-          data-bs-dismiss="modal"
-          onClick={() => {
-            resetForm();
-            onCancel();
-          }}
-        >
-          Cancel
-        </button>
+                {
+                  onSuccess: () => {
+                    resetForm();
+                    onSubmit();
+                  },
+                },
+              );
+            }}
+            disabled={!isValid || isUploading}
+            type="button"
+            id="new-project-submit-btn"
+            className="btn btn-success float-end"
+          >
+            <i className="bi bi-plus-circle me-1"></i>
+            {isUploading ? 'Submitting...' : 'Submit'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-dark me-1 float-end"
+            data-bs-dismiss="modal"
+            onClick={() => {
+              resetForm();
+              onCancel();
+            }}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
+
     </form>
   );
 };
