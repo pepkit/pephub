@@ -1,26 +1,25 @@
 import { Modal, Tab, Tabs } from 'react-bootstrap';
 
-import { VersionSchemaForm } from '../forms/version-schema-form';
+import { EditSchemaVersionForm } from '../forms/edit-schema-version-form';
 
 interface Props {
   show: boolean;
   onHide: () => void;
   namespace: string;
   name: string;
-  version: string;
-  tags: Record<string, string>;
-  schemaJson: object;
   contributors: string;
+  releaseNotes: string;
+  refetchSchemaVersions: () => void;
 }
 
-export const VersionSchemaModal = (props: Props) => {
-  const { show, onHide, namespace, name, version, tags, schemaJson, contributors } = props;
+export const EditSchemaVersionModal = (props: Props) => {
+  const { show, onHide, namespace, name, contributors, releaseNotes, refetchSchemaVersions } = props;
   
   return (
     <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
       <Modal.Body>
         <div className='p-1 modal-pill'>
-          <h1 className="fs-5 mb-1 fw-semibold d-inline">New Schema Version</h1>
+          <h1 className="fs-5 mb-1 fw-semibold d-inline">Edit Current Schema Version</h1>
           <button
             className="btn btn-outline-dark px-1 py-0 m-0 float-end d-inline rounded-3 border-0 shadow-none"
             type="button" 
@@ -33,14 +32,13 @@ export const VersionSchemaModal = (props: Props) => {
           <p className='text-sm mt-1 mb-3'></p>
           <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
           <div className="">
-            <VersionSchemaForm
+            <EditSchemaVersionForm
               namespace={namespace}
               name={name}
-              version={version}
               editorHeight="400px"
-              tags={tags}
-              schemaJson={schemaJson}
               contributors={contributors}
+              releaseNotes={releaseNotes}
+              refetchSchemaVersions={refetchSchemaVersions}
               onCancel={onHide}
               onSubmit={() => {
                 onHide();

@@ -2,25 +2,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 
-import { createNewSchemaFiles } from '../../api/schemas';
+import { createSchemaVersionFiles } from '../../api/schemas';
 import { useSession } from '../../contexts/session-context';
 import { extractErrorMessage } from '../../utils/etc';
 
 type UploadSchemaRequest = {
-  namespace: string;
-  name: string;
-  description: string;
   schemaFile: File | undefined;
-  isPrivate: boolean;
   tags: Record<string, string>; 
-  maintainers: string;
   version: string;
   release_notes: string;
-  lifecycle_stage: string;
   contributors: string;
 };
 
-export const useUploadSchemaFile = () => {
+export const useUploadSchemaVersionFile = (namespace:string, name:string) => {
   const { jwt } = useSession();
 
   const queryClient = useQueryClient();
@@ -30,30 +24,26 @@ export const useUploadSchemaFile = () => {
       if (!uploadSchema.schemaFile) {
         throw new Error('Schema file is required');
       }
-      return createNewSchemaFiles(
-        uploadSchema.namespace,
-        uploadSchema.name,
-        uploadSchema.description,
+      return createSchemaVersionFiles(
+        namespace,
+        name,
         uploadSchema.schemaFile,
-        uploadSchema.isPrivate,
         uploadSchema.contributors,
-        uploadSchema.maintainers,
         uploadSchema.tags,
         uploadSchema.version,
         uploadSchema.release_notes,
-        uploadSchema.lifecycle_stage,
         jwt,
       );
     },
     onSuccess: () => {
-      toast.success('Schema uploaded successfully');
+      toast.success('Schema version uploaded successfully');
       queryClient.invalidateQueries({
         queryKey: ['schemas'],
       });
     },
     onError: (error: AxiosError) => {
       const message = extractErrorMessage(error);
-      toast.error(`Error uploading schema: ${message}`);
+      toast.error(`Error uploading schema version: ${message}`);
     },
   });
 

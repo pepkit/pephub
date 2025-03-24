@@ -2,19 +2,21 @@ import { Editor } from '@monaco-editor/react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 import { useSession } from '../../contexts/session-context';
-import { useVersionSchemaMutation } from '../../hooks/mutations/useVersionSchemaMutation';
+import { useCreateSchemaVersionMutation } from '../../hooks/mutations/useCreateSchemaVersionMutation';
 import { CombinedErrorMessage } from './components/combined-error-message';
 import { KeyValueInput } from './components/key-value-input';
 import { isSemanticVersion, incrementMinorVersion } from '../../utils/versions';
+
+import { useSchemaVersionNumber } from '../../hooks/stores/useSchemaVersionNumber';
 
 // Props type definition
 type Props = {
   namespace: string;
   name: string;
-  version: string;
   tags: Record<string, string>;
   schemaJson: object;
   contributors: string;
+  refetchSchemaVersions: () => void;
   editorHeight?: string;
   onCancel: () => void;
   onSubmit: () => void;
@@ -29,15 +31,17 @@ type FormFields = {
   contributors: string;
 };
 
-export const VersionSchemaForm = (props: Props) => {
-  const { onCancel, onSubmit, editorHeight, namespace, name, version, tags: oldTags, schemaJson, contributors } = props;
+export const CreateSchemaVersionForm = (props: Props) => {
+  const { onCancel, onSubmit, editorHeight, namespace, name, tags: oldTags, schemaJson, contributors, refetchSchemaVersions } = props;
   const { user } = useSession();
+
+  const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
 
   // Set up form methods
   const formMethods = useForm<FormFields>({
     mode: 'onChange',
     defaultValues: {
-      version: incrementMinorVersion(version),
+      version: incrementMinorVersion(schemaVersionNumber || ''),
       release_notes: '',
       contributors: contributors,
       tags: oldTags,
@@ -81,7 +85,7 @@ export const VersionSchemaForm = (props: Props) => {
     });
   };
 
-  const { isPending: isSubmitting, submit } = useVersionSchemaMutation(namespace, name);
+  const { isPending: isSubmitting, submit } = useCreateSchemaVersionMutation(namespace, name);
 
   const handleSubmit = () => {
     const formValues = getValues();
@@ -98,7 +102,8 @@ export const VersionSchemaForm = (props: Props) => {
         onSuccess: () => {
           reset();
           onSubmit();
-          window.location.reload();
+          refetchSchemaVersions();
+          setSchemaVersionNumber(formValues.version);
         },
       }
     );
@@ -156,7 +161,7 @@ export const VersionSchemaForm = (props: Props) => {
           onRemoveTag={handleRemoveTag}
         />
 
-        <label className="fw-semibold text-sm mt-2">Config (JSON)</label>
+        <label className="fw-semibold text-sm mt-2">Contents (JSON)</label>
         <div className="border rounded py-1">
           <Controller
             name="schemaJson"

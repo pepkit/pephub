@@ -79,6 +79,14 @@ type CreateSchemaResponse = {
   message: string;
 };
 
+type CreateSchemaVersionResponse = {
+  message: string;
+};
+
+type EditSchemaVersionResponse = {
+  message: string;
+};
+
 type DeleteSchemaResponse = {
   message: string;
 };
@@ -150,12 +158,12 @@ export const createNewSchema = async (
       description,
       schema_value: schemaValue,
       isPrivate,
-      contributors: contributors || '',
-      maintainers: maintainers || '',
+      contributors: contributors,
+      maintainers: maintainers,
       tags: tags,
       version: version || '0.1.0',
-      release_notes: releaseNotes || '',
-      lifecycle_stage: lifecycleStage || '',
+      release_notes: releaseNotes,
+      lifecycle_stage: lifecycleStage,
     },
     { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
   );
@@ -164,16 +172,16 @@ export const createNewSchema = async (
 
 export const createNewSchemaFiles = async (
   namespace: string,
-  schemaName: string | undefined | null,
-  description: string | undefined | null,
+  schemaName: string,
+  description: string,
   schemaFile: File,
   isPrivate: boolean,
-  contributors: string | undefined,
-  maintainers: string | undefined,
-  tags: Record<string, string> | undefined,
-  version: string | undefined,
-  releaseNotes: string | undefined,
-  lifecycleStage: string | undefined,
+  contributors: string,
+  maintainers: string,
+  tags: Record<string, string>,
+  version: string,
+  releaseNotes: string,
+  lifecycleStage: string,
   jwt: string | null,
 ) => {
   const url = `${API_BASE}/schemas/${namespace}/files`;
@@ -193,6 +201,9 @@ export const createNewSchemaFiles = async (
   
   // Append the file with the correct field name expected by your backend
   formData.append('schema_file', schemaFile);
+
+
+  console.log(formData.get('lifecycle_stage'))
   
   // Send FormData with proper headers for multipart/form-data
   const { data } = await axios.post<CreateSchemaResponse>(
@@ -248,12 +259,12 @@ export const createSchemaVersion = async (
   schemaValue: object,
   contributors: string | undefined,
   tags: Record<string, string> | undefined,
-  version: string | undefined,
+  version: string,
   releaseNotes: string | undefined,
   jwt: string | null,
 ) => {
   const url = `${API_BASE}/schemas/${namespace}/${schemaName}/versions/json`;
-  const { data } = await axios.post<CreateSchemaResponse>(
+  const { data } = await axios.post<CreateSchemaVersionResponse>(
     url,
     { 
       namespace,
@@ -261,10 +272,95 @@ export const createSchemaVersion = async (
       schema_value: schemaValue,
       contributors: contributors,
       tags: tags,
-      version: version || '1.0.0',
-      release_notes: releaseNotes || '',
+      version: version || '0.1.0',
+      release_notes: releaseNotes,
     },
     { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
+  );
+  return data;
+};
+
+export const createSchemaVersionFiles = async (
+  namespace: string,
+  schemaName: string,
+  schemaFile: File,
+  contributors: string,
+  tags: Record<string, string>,
+  version: string,
+  releaseNotes: string,
+  jwt: string | null,
+) => {
+  const url = `${API_BASE}/schemas/${namespace}/${schemaName}/versions/files`;
+  
+  // Create FormData object for file upload
+  const formData = new FormData();
+  formData.append('namespace', namespace);
+  formData.append('schema_name', schemaName || '');
+  formData.append('contributors', contributors || '');
+  formData.append('tags', tags ? JSON.stringify(tags) : '{}');
+  formData.append('version', version || '');
+  formData.append('release_notes', releaseNotes || '');
+  
+  // Append the file with the correct field name expected by your backend
+  formData.append('schema_file', schemaFile);
+  
+  // Send FormData with proper headers for multipart/form-data
+  const { data } = await axios.post<CreateSchemaVersionResponse>(
+    url, 
+    formData,
+    { 
+      headers: { 
+        'Authorization': `Bearer ${jwt || 'NOTAUTHORIZED'}`,
+        'Content-Type': 'multipart/form-data'  // Let Axios set the correct boundary
+      } 
+    },
+  );
+  return data;
+};
+
+
+export const updateSchemaVersion = async (
+  namespace: string,
+  schemaName: string,
+  schemaValue: object | undefined,
+  contributors: string | undefined,
+  version: string,
+  releaseNotes: string | undefined,
+  jwt: string | null,
+) => {
+  const url = `${API_BASE}/schemas/${namespace}/${schemaName}/versions/${version}`;
+  const { data } = await axios.patch<EditSchemaVersionResponse>(
+    url,
+    { 
+      namespace,
+      schema_name: schemaName,
+      semantic_version: version,
+      contributors: contributors,
+      schema_value: schemaValue,
+      release_notes: releaseNotes,
+    },
+    { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
+  );
+  return data;
+};
+
+export const deleteSchemaVersion = async (
+  namespace: string,
+  schemaName: string,
+  version: string,
+  jwt: string | null,
+) => {
+  const url = `${API_BASE}/schemas/${namespace}/${schemaName}/versions/${version}`;
+  const { data } = await axios.delete<DeleteSchemaResponse>(
+    url,
+    { 
+      headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` },
+      params: {
+        schema_name: schemaName,
+        semantic_version: version,
+      }
+    },
+    
   );
   return data;
 };

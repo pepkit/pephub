@@ -15,7 +15,7 @@ type FormFields = {
   namespace: string;
   name: string;
   description: string;
-  file: File;
+  file: File | undefined;
   tags: Record<string, string>;
   maintainers: string;
   version: string;
@@ -187,7 +187,7 @@ export const SchemaUploadForm = (props: Props) => {
               <span className="text-secondary">{uploadFile.name}</span>
               <button
                 onClick={() => {
-                  resetForm({ file: undefined });
+                  setValue('file', undefined, { shouldDirty: true });
                   fileDialogRef.current?.();
                 }}
                 className="py-0 btn btn-link text-danger shadow-none"

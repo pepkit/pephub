@@ -8,19 +8,17 @@ import { copyToClipboard } from '../../utils/etc';
 import { DeleteSchemaModal } from '../modals/delete-schema';
 import { SchemaAPIEndpointsModal } from '../modals/schema-api-endpoints';
 
-import { useSchemaVersionModalStore } from '../../hooks/stores/useSchemaVersionModalStore'
-import { useSchemaEditModalStore } from '../../hooks/stores/useSchemaEditModalStore'
+import { useSchemaVersionNumber } from '../../hooks/stores/useSchemaVersionNumber';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 
 type Props = {
   isDirty: boolean;
   handleDiscard: () => void;
-  currentVersionNumber: string;
 };
 
 export const SchemaHeader = (props: Props) => {
-  const { isDirty, handleDiscard, currentVersionNumber } = props;
+  const { isDirty, handleDiscard } = props;
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
@@ -28,8 +26,7 @@ export const SchemaHeader = (props: Props) => {
   const [showSchemaDeleteModal, setShowSchemaDeleteModal] = useState(false);
   const [showSchemaAPIModal, setShowSchemaAPIModal] = useState(false);
 
-  const { setShowSchemaVersionModal } = useSchemaVersionModalStore();
-  const { setShowSchemaEditModal } = useSchemaEditModalStore();
+  const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
 
   return (
     <div className="p-2 w-100">
@@ -68,7 +65,7 @@ export const SchemaHeader = (props: Props) => {
               <Dropdown.Item as="a">
                 <a
                   target="_blank"
-                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/versions/${currentVersionNumber}/file`}
+                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/versions/${schemaVersionNumber}/file`}
                   className="text-decoration-none text-reset"
                 >
                   <i className="bi bi-file-earmark-zip me-1"></i>
@@ -81,10 +78,6 @@ export const SchemaHeader = (props: Props) => {
               </Dropdown.Item>
               {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
                 <>
-                  <Dropdown.Item onClick={() => setShowSchemaEditModal(true)}>
-                    <i className="me-1 bi bi-pencil-square"></i>
-                    Edit
-                  </Dropdown.Item>
                   <Dropdown.Item onClick={() => setShowSchemaDeleteModal(true)}>
                   <i className="me-1 bi bi-trash3"></i>
                   Delete

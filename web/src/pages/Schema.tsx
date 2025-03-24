@@ -11,9 +11,13 @@ import { useSchemaVersions } from '../hooks/queries/useSchemaVersions';
 export function Schema() {
   const { user } = useSession();
   const { namespace, schema } = useParams();
-  const { data: schemaData, isFetching: isLoading } = useSchema(namespace, schema);
 
-  const { data: schemaVersions } = useSchemaVersions(namespace, schema);
+  const { data: schemaData, isFetching: isLoading } = useSchema(namespace, schema);
+  const { data: schemaVersions, refetch: refetchSchemaVersions } = useSchemaVersions(namespace, schema);
+
+  console.log(namespace)
+  console.log(schema)
+  console.log(schemaData)
 
   const {} = useForm();
 
@@ -28,6 +32,7 @@ export function Schema() {
         canEdit={canEdit}
         schemaData={schemaData}
         schemaVersions={schemaVersions}
+        refetchSchemaVersions={refetchSchemaVersions}
       />
     </PageLayout>
   );

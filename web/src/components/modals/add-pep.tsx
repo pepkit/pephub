@@ -79,7 +79,7 @@ export const AddPEPModal = (props: Props) => {
               eventKey="new-schema"
               title={
                 <span>
-                  <i className="bi bi-filetype-yml me-1"></i>
+                  <i className="bi bi-filetype-json me-1"></i>
                   New Schema
                 </span>
               }
