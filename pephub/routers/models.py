@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Union
 
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import UpdateItems
+from pepdbagent.models import UpdateItems, ListOfNamespaceInfo
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..const import DEFAULT_QDRANT_SCORE_THRESHOLD
@@ -198,3 +198,7 @@ class SchemaVersionTagAddModel(BaseModel):
     """
 
     tag: Optional[Union[List[str], str, Dict[str, str], List[Dict[str, str]]]] = None
+
+
+class NamespaceInfoReturnModel(ListOfNamespaceInfo):
+    server: str
