@@ -5,6 +5,7 @@ import { useSession } from '../../contexts/session-context';
 import { useCreateSchemaMutation } from '../../hooks/mutations/useCreateSchemaMutation';
 import { CombinedErrorMessage } from './components/combined-error-message';
 import { KeyValueInput } from './components/key-value-input';
+import { isSemanticVersion } from '../../utils/versions';
 
 // Default schema JSON
 const defaultSchemaJson = {
@@ -46,11 +47,11 @@ type FormFields = {
   description: string;
   schemaJson: object;
   tags: Record<string, string>;
-  maintainers: string[];
+  maintainers: string;
   version: string;
   release_notes: string;
   lifecycle_stage: string;
-  contributors: string[];
+  contributors: string;
 };
 
 export const CreateSchemaForm = (props: Props) => {
@@ -66,8 +67,8 @@ export const CreateSchemaForm = (props: Props) => {
       version: '0.1.0',
       release_notes: '',
       lifecycle_stage: '',
-      contributors: [],
-      maintainers: [user?.login || ''], 
+      contributors: '',
+      maintainers: user?.login || '', 
       isPrivate: false,
       tags: {}
     },
@@ -114,8 +115,6 @@ export const CreateSchemaForm = (props: Props) => {
   const handleSubmit = () => {
     // Get all current values from the form
     const formValues = getValues();
-    console.log("Form values at submit:", formValues);
-    console.log("Tags at submit:", formValues.tags);
     
     submit(
       {
@@ -135,7 +134,7 @@ export const CreateSchemaForm = (props: Props) => {
   return (
     <FormProvider {...formMethods}>
       <form>
-        <div className="mt-3 form-check form-switch">
+        {/* <div className="mt-3 form-check form-switch">
           <label className="form-check-label" htmlFor="is-private-toggle">
             Private
           </label>
@@ -146,7 +145,7 @@ export const CreateSchemaForm = (props: Props) => {
             role="switch"
             id="is-private-toggle"
           />
-        </div>
+        </div> */}
         
         <div className="namespace-name-tag-container mt-3">
           <label className="fw-semibold text-sm">Namespace*</label>
@@ -197,15 +196,6 @@ export const CreateSchemaForm = (props: Props) => {
           className="form-control"
           placeholder="Schema description"
         />
-        
-        <label className="fw-semibold text-sm mt-2">Maintainers</label>
-        <input
-          {...register('maintainers')}
-          id="maintainers"
-          type="text"
-          className="form-control"
-          placeholder="Maintainers"
-        />
 
         <label className="fw-semibold text-sm mt-2">Lifecycle Stage</label>
         <input
@@ -214,6 +204,15 @@ export const CreateSchemaForm = (props: Props) => {
           type="text"
           className="form-control"
           placeholder="Lifecycle stage"
+        />
+        
+        <label className="fw-semibold text-sm mt-2">Maintainers</label>
+        <input
+          {...register('maintainers')}
+          id="maintainers"
+          type="text"
+          className="form-control"
+          placeholder="Maintainers"
         />
 
         <label className="fw-semibold text-sm mt-2">Config (JSON)</label>
@@ -250,7 +249,15 @@ export const CreateSchemaForm = (props: Props) => {
         <div className="namespace-name-tag-container fs-4 d-flex gap-1">
           <div className="d-flex flex-row align-items-center justify-content-between w-25">
             <input
-              {...register('version')}
+              {...register('version', {
+                required: {
+                  value: true,
+                  message: "empty",
+                },
+                // validate: {
+                //   isValidSemver: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
+                // }
+              })}
               id="version"
               type="text"
               className="form-control"

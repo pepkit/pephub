@@ -8,10 +8,16 @@ import { extractErrorMessage } from '../../utils/etc';
 
 type UploadSchemaRequest = {
   namespace: string;
-  name?: string;
-  description?: string;
-  schema: File;
+  name: string;
+  description: string;
+  schemaFile: File;
   isPrivate: boolean;
+  tags: Record<string, string>; 
+  maintainers: string;
+  version: string;
+  release_notes: string;
+  lifecycle_stage: string;
+  contributors: string;
 };
 
 export const useUploadSchemaFile = () => {
@@ -25,8 +31,14 @@ export const useUploadSchemaFile = () => {
         uploadSchema.namespace,
         uploadSchema.name,
         uploadSchema.description,
+        uploadSchema.schemaFile,
         uploadSchema.isPrivate,
-        uploadSchema.schema,
+        uploadSchema.contributors,
+        uploadSchema.maintainers,
+        uploadSchema.tags,
+        uploadSchema.version,
+        uploadSchema.release_notes,
+        uploadSchema.lifecycle_stage,
         jwt,
       );
     },

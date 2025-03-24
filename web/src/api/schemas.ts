@@ -5,13 +5,13 @@ import { constructQueryFromPaginationParams } from '../utils/etc';
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
-export type Schema = {
-  namespace: string;
-  name: string;
-  last_update_date: string;
-  submission_date: string;
-  description: string | undefined;
-};
+// export type Schema = {
+//   namespace: string;
+//   name: string;
+//   last_update_date: string;
+//   submission_date: string;
+//   description: string | undefined;
+// };
 
 type PaginationParams = {
   offset?: number;
@@ -21,10 +21,25 @@ type PaginationParams = {
   order?: 'asc' | 'desc';
 };
 
+export interface Schema {
+  namespace: string;
+  name: string;
+  description: string | undefined;
+  maintainers: string;
+  lifecycle_stage: string;
+  latest_version: string;
+  private: boolean;
+  last_update_date: string;
+}
+
+interface Pagination {
+  page: number;
+  page_size: number;
+  total: number;
+}
+
 type GetSchemasResponse = {
-  count: number;
-  limit: number;
-  offset: number;
+  pagination: Pagination;
   results: Schema[];
 };
 
@@ -73,7 +88,9 @@ type UpdateSchemaResponse = {
 };
 
 type UpdateSchemaPayload = {
-  schema?: string;
+  maintainers?: string;
+  lifecycleStage?: string;
+  name?: string;
   description?: string;
   isPrivate?: boolean;
 };
@@ -116,8 +133,8 @@ export const createNewSchema = async (
   description: string,
   schemaValue: object,
   isPrivate: boolean,
-  contributors: string[] | undefined,
-  maintainers: string[] | undefined,
+  contributors: string | undefined,
+  maintainers: string | undefined,
   tags: Record<string, string> | undefined,
   version: string | undefined,
   releaseNotes: string | undefined,
@@ -133,12 +150,12 @@ export const createNewSchema = async (
       description,
       schema_value: schemaValue,
       isPrivate,
-      contributors: Array.isArray(contributors) ? contributors.join(',') : contributors || '',
-      maintainers: Array.isArray(maintainers) ? maintainers.join(',') : maintainers || '',
+      contributors: contributors || '',
+      maintainers: maintainers || '',
       tags: tags,
-      version: version || '1.0.0',
+      version: version || '0.1.0',
       release_notes: releaseNotes || '',
-      lifecycle_stage: lifecycleStage || 'development',
+      lifecycle_stage: lifecycleStage || '',
     },
     { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
   );
@@ -151,38 +168,42 @@ export const createNewSchemaFiles = async (
   description: string | undefined | null,
   schemaFile: File,
   isPrivate: boolean,
-  contributors: string[] | undefined,
-  maintainers: string[] | undefined,
+  contributors: string | undefined,
+  maintainers: string | undefined,
   tags: Record<string, string> | undefined,
   version: string | undefined,
   releaseNotes: string | undefined,
   lifecycleStage: string | undefined,
   jwt: string | null,
 ) => {
-  const url = `${API_BASE}/schemas/${namespace}/file`;
+  const url = `${API_BASE}/schemas/${namespace}/files`;
   
-  const reader = new FileReader();
-  const schemaValue = await new Promise<string>((resolve) => {
-    reader.onload = () => resolve(reader.result as string);
-    reader.readAsText(schemaFile);
-  });
-
+  // Create FormData object for file upload
+  const formData = new FormData();
+  formData.append('namespace', namespace);
+  formData.append('schema_name', schemaName || '');
+  formData.append('description', description || '');
+  formData.append('private', isPrivate.toString());
+  formData.append('contributors', contributors || '');
+  formData.append('maintainers', maintainers || '');
+  formData.append('tags', tags ? JSON.stringify(tags) : '{}');
+  formData.append('version', version || '');
+  formData.append('release_notes', releaseNotes || '');
+  formData.append('lifecycle_stage', lifecycleStage || '');
+  
+  // Append the file with the correct field name expected by your backend
+  formData.append('schema_file', schemaFile);
+  
+  // Send FormData with proper headers for multipart/form-data
   const { data } = await axios.post<CreateSchemaResponse>(
     url, 
-    {
-      namespace,
-      schema_value: JSON.parse(schemaValue),
-      schema_name: schemaName || '',
-      description: description || '',
-      private: isPrivate,
-      contributors: contributors ? contributors.join(',') : '',
-      maintainers: maintainers ? maintainers.join(',') : '',
-      tags: tags || [],
-      version: version || '',
-      release_notes: releaseNotes || '',
-      lifecycle_stage: lifecycleStage || ''
-    }, 
-    { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
+    formData,
+    { 
+      headers: { 
+        'Authorization': `Bearer ${jwt || 'NOTAUTHORIZED'}`,
+        'Content-Type': 'multipart/form-data'  // Let Axios set the correct boundary
+      } 
+    },
   );
   return data;
 };
@@ -191,6 +212,9 @@ export const deleteSchema = async (namespace: string, name: string, jwt: string 
   const url = `${API_BASE}/schemas/${namespace}/${name}`;
   const { data } = await axios.delete<DeleteSchemaResponse>(url, {
     headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` },
+    params: {
+      schema: name
+    }
   });
   return data;
 };
@@ -198,12 +222,49 @@ export const deleteSchema = async (namespace: string, name: string, jwt: string 
 export const updateSchema = async (
   namespace: string,
   name: string,
-  updatedSchema: UpdateSchemaPayload,
   jwt: string | null,
+  maintainers?: string,
+  lifecycleStage?: string,
+  description?: string,
+  isPrivate?: boolean,
 ) => {
   const url = `${API_BASE}/schemas/${namespace}/${name}`;
-  const { data } = await axios.patch<UpdateSchemaResponse>(url, updatedSchema, {
+  const { data } = await axios.patch<UpdateSchemaResponse>(url, {
+    namespace,
+    name,
+    description: description || '',
+    private: isPrivate,
+    maintainers: maintainers || '',
+    lifecycle_stage: lifecycleStage || ''
+  }, {
     headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` },
   });
+  return data;
+};
+
+export const createSchemaVersion = async (
+  namespace: string,
+  schemaName: string,
+  schemaValue: object,
+  contributors: string | undefined,
+  tags: Record<string, string> | undefined,
+  version: string | undefined,
+  releaseNotes: string | undefined,
+  jwt: string | null,
+) => {
+  const url = `${API_BASE}/schemas/${namespace}/${schemaName}/versions/json`;
+  const { data } = await axios.post<CreateSchemaResponse>(
+    url,
+    { 
+      namespace,
+      schema_name: schemaName,
+      schema_value: schemaValue,
+      contributors: contributors,
+      tags: tags,
+      version: version || '1.0.0',
+      release_notes: releaseNotes || '',
+    },
+    { headers: { Authorization: `Bearer ${jwt || 'NOTAUTHORIZED'}` } },
+  );
   return data;
 };

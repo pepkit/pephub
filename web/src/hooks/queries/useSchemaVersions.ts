@@ -21,7 +21,7 @@ export const useSchemaVersions = (
 
   return useQuery({
     queryKey: ['schema', namespace, name, query, tag, page, page_size],
-    queryFn: () => getSchemaVersions(namespace, name, query, tag, page, page_size),
+    queryFn: () => getSchemaVersions(namespace || '', name || '', query, tag, page, page_size),
     enabled: !!namespace && !!name,
   });
 };

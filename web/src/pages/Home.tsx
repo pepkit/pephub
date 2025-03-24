@@ -92,22 +92,22 @@ export function Home() {
                 />
               </h4>
               <div>
-                {largestNamespaces ? (
-                  largestNamespaces.results.map((namespace, index) => {
-                    return (
-                      <div key={index}>
-                        <span className="ms-2 ">
-                          {index + 1}.{' '}
-                          <a className='dark-link' href={`/${namespace.namespace}`}>
-                            {namespace.namespace}: {numberWithCommas(namespace.number_of_projects)}
-                          </a>
-                        </span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <LandingInfoPlaceholder total={3} />
-                )}
+              {largestNamespaces && largestNamespaces.results ? (
+                largestNamespaces.results.map((namespace, index) => {
+                  return (
+                    <div key={index}>
+                      <span className="ms-2 ">
+                        {index + 1}.{' '}
+                        <a className='dark-link' href={`/${namespace.namespace}`}>
+                          {namespace.namespace}: {numberWithCommas(namespace.number_of_projects)}
+                        </a>
+                      </span>
+                    </div>
+                  );
+                })
+              ) : (
+                <LandingInfoPlaceholder total={3} />
+              )}
               </div>
             </div>
             <div className="col-lg-6 col-sm-12 align-items-center">
