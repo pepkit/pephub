@@ -31,7 +31,7 @@ from ...models import (
     SchemaVersionTagAddModel,
 )
 
-from ....helpers import download_yaml
+from ....helpers import download_yaml, download_json
 from ....dependencies import (
     get_db,
     get_namespace_access_list,
@@ -368,6 +368,7 @@ async def download_schema(
     namespace: str,
     schema_name: str,
     semantic_version: str,
+    format: Literal["json", "yaml"] = "yaml",
     agent: PEPDatabaseAgent = Depends(get_db),
 ) -> Response:
     """
@@ -382,6 +383,8 @@ async def download_schema(
         raise HTTPException(
             status_code=404, detail=f"Schema {namespace}/{schema_name} not found."
         )
+    if format == "json":
+        return download_json(schema_dict, file_name=f"{namespace}/{schema_name}.json")
     return download_yaml(schema_dict, file_name=f"{namespace}/{schema_name}.yaml")
 
 

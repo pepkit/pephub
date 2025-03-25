@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Tuple, Union
 import jwt
 import pandas as pd
 import yaml
+import json
 from fastapi import Response, UploadFile
 from fastapi.exceptions import HTTPException
 from peppy.const import (
@@ -115,6 +116,29 @@ def download_yaml(content: dict, file_name: str = "unnamed.yaml") -> Response:
     return Response(
         yaml_bytes.getvalue(),
         media_type="application/x-yaml",
+        headers={"Content-Disposition": f"attachment; filename={file_name}"},
+    )
+
+
+def download_json(content: dict, file_name: str = "unnamed.json") -> Response:
+    """
+    Convert json/dict to downloading io format
+
+    :param content: content of the file
+    :param file_name: name of the file
+    return Response: response object
+    """
+
+    json_string = json.dumps(content)
+
+    json_bytes = io.BytesIO()
+    json_bytes.write(json_string.encode("utf-8"))
+    json_bytes.seek(0)  # Move the pointer to the start of the stream
+
+    # Create a streaming response with the JSON data
+    return Response(
+        json_bytes.getvalue(),
+        media_type="application/json",
         headers={"Content-Disposition": f"attachment; filename={file_name}"},
     )
 
