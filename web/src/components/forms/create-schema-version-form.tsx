@@ -125,9 +125,9 @@ export const CreateSchemaVersionForm = (props: Props) => {
                   value: true,
                   message: "empty",
                 },
-                // validate: {
-                //   isValidSemver: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
-                // }
+                validate: {
+                  isSemantic: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
+                }
               })}
               id="version"
               type="text"
@@ -145,6 +145,9 @@ export const CreateSchemaVersionForm = (props: Props) => {
           />
           </div>
         </div>
+        {errors?.version?.message && (
+           <p className="text-danger text-xs pt-1 mb-0">{errors?.version?.message}</p>
+        )}
 
         <label className="fw-semibold text-sm mt-2">Version Release Notes</label>
         <textarea
@@ -182,7 +185,7 @@ export const CreateSchemaVersionForm = (props: Props) => {
                 value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
                 loading={null}
                 height={editorHeight || '50vh'}
-                options={{ readOnly: true }}
+                // options={{ readOnly: true }}
               />
             )}
           />
@@ -192,7 +195,7 @@ export const CreateSchemaVersionForm = (props: Props) => {
           <p className='text-xs mt-auto mb-0'></p>
           <div>
             <button
-              disabled={isSubmitting || !isDirty || !isValid}
+              disabled={isSubmitting || !isValid}
               type="button"
               className="btn btn-success float-end"
               onClick={handleSubmit}

@@ -22,7 +22,7 @@ export const useUploadSchemaVersionFile = (namespace:string, name:string) => {
   const mutation = useMutation({
     mutationFn: (uploadSchema: UploadSchemaRequest) => {
       if (!uploadSchema.schemaFile) {
-        throw new Error('Schema file is required');
+        return Promise.reject(new Error('Schema file is required.'));
       }
       return createSchemaVersionFiles(
         namespace,
@@ -41,9 +41,16 @@ export const useUploadSchemaVersionFile = (namespace:string, name:string) => {
         queryKey: ['schemas'],
       });
     },
-    onError: (error: AxiosError) => {
-      const message = extractErrorMessage(error);
-      toast.error(`Error uploading schema version: ${message}`);
+    onError: (error: unknown) => {
+      let message = 'Unknown error';
+      
+      if (error instanceof AxiosError) {
+        message = extractErrorMessage(error);
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+      
+      toast.error(`Error uploading schema: ${message}`);
     },
   });
 

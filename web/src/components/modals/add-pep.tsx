@@ -15,7 +15,7 @@ interface Props {
 export const AddPEPModal = (props: Props) => {
   const { show, onHide, defaultNamespace } = props;
   return (
-    <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
+    <Modal size="lg" centered animation={false} backdrop="static" show={show} onHide={onHide}>
       <Modal.Body>
         <div className='p-1 modal-pill'>
           <h1 className="fs-5 mb-1 fw-semibold d-inline">Submit a new resource</h1>

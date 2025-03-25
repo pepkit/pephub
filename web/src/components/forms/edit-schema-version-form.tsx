@@ -96,9 +96,6 @@ export const EditSchemaVersionForm = (props: Props) => {
                   value: true,
                   message: "empty",
                 },
-                // validate: {
-                //   isValidSemver: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
-                // }
               })}
               id="version"
               type="text"
@@ -130,7 +127,7 @@ export const EditSchemaVersionForm = (props: Props) => {
           <p className='text-xs mt-auto mb-0'></p>
           <div>
             <button
-              disabled={isSubmitting || !isDirty || !isValid}
+              disabled={isSubmitting || !isValid}
               type="button"
               className="btn btn-success float-end"
               onClick={handleSubmit}

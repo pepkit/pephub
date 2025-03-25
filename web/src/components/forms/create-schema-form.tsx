@@ -254,9 +254,9 @@ export const CreateSchemaForm = (props: Props) => {
                   value: true,
                   message: "empty",
                 },
-                // validate: {
-                //   isValidSemver: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
-                // }
+                validate: {
+                  isSemantic: (value) => isSemanticVersion(value) || "Please enter a valid semantic version (e.g., 0.1.0)"
+                }
               })}
               id="version"
               type="text"
@@ -274,6 +274,9 @@ export const CreateSchemaForm = (props: Props) => {
           />
           </div>
         </div>
+        {errors?.version?.message && (
+           <p className="text-danger text-xs pt-1 mb-0">{errors?.version?.message}</p>
+        )}
 
         <label className="fw-semibold text-sm mt-2">Version Release Notes</label>
         <textarea

@@ -134,8 +134,6 @@ export const SchemaInterface = (props: Props) => {
         <div className="d-flex align-items-center justify-content-between px-3">
           <SchemaHeader
             key={schemaData?.description}
-            handleDiscard={handleDiscard}
-            isDirty={formState.isDirty}
           />
         </div>
         <div className='col-9 pe-1'>

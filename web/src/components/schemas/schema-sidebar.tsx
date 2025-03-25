@@ -51,17 +51,17 @@ export const SchemaSidebar = (props: Props) => {
               </button>
             </div>
           </div>
-          <div className="text-muted">{schemaData?.description || 'N/A'}</div>
+          <div className={`text-muted ${schemaData?.description ? '' : 'fst-italic'}`}>{schemaData?.description || 'N/A'}</div>
         </div>
 
         <div className="my-4">
           <p className='fw-semibold my-1'>Lifecycle Stage</p>
-          <div className="text-muted">{lifecycleStage || 'N/A'}</div>
+          <div className={`text-muted ${lifecycleStage ? '' : 'fst-italic'}`}>{lifecycleStage || 'N/A'}</div>
         </div>
 
         <div className="my-4">
           <p className='fw-semibold my-1'>Maintainers</p>
-          <div className="text-muted">{maintainers || 'N/A'}</div>
+          <div className={`text-muted ${maintainers ? '' : 'fst-italic'}`}>{maintainers || 'N/A'}</div>
         </div>
 
         <hr/>
@@ -82,13 +82,16 @@ export const SchemaSidebar = (props: Props) => {
               >
                 <i className='bi bi-pen'></i>
               </button>
-              <button 
+              {allVersionNumbers.length > 1 && (
+                <button 
                 className="btn btn-outline-dark border-0 shadow-none btn-sm ms-1" 
                 onClick={() => setShowDeleteSchemaVersionModal(true)}
                 disabled={allVersionNumbers.length <= 1}
-              >
-                <i className='bi bi-trash3'></i>
-              </button>
+                >
+                  <i className='bi bi-trash3'></i>
+                </button>
+              )}
+              
             </div>
           </div>
           <Select
@@ -115,18 +118,18 @@ export const SchemaSidebar = (props: Props) => {
 
         <div className="my-4">
           <p className='fw-semibold my-1'>Timestamps</p>
-          <div className="text-muted">Created: {dateStringToDateTime(releaseDate || '')}</div>
-          <div className="text-muted">Updated: {dateStringToDateTime(updateDate || '')}</div>
+          <div className={`text-muted ${releaseDate ? '' : 'fst-italic'}`}>Created: {dateStringToDateTime(releaseDate || '')}</div>
+          <div className={`text-muted ${updateDate ? '' : 'fst-italic'}`}>Updated: {dateStringToDateTime(updateDate || '')}</div>
         </div>
         
         <div className="my-4">
           <p className='fw-semibold my-1'>Release Notes</p>
-          <div className="text-muted">{releaseNotes || 'N/A'}</div>
+          <div className={`text-muted ${releaseNotes ? '' : 'fst-italic'}`}>{releaseNotes || 'N/A'}</div>
         </div>
 
         <div className="my-4">
           <p className='fw-semibold my-1'>Contributors</p>
-          <div className="text-muted">{contributors || 'N/A'}</div>
+          <div className={`text-muted ${contributors ? '' : 'fst-italic' }`}>{contributors || 'N/A'}</div>
         </div>
 
         <div className="mt-4 mb-3">
@@ -141,7 +144,7 @@ export const SchemaSidebar = (props: Props) => {
               ))}
             </div>
           ) : (
-            <span className="text-muted">N/A</span>
+            <span className="text-muted fst-italic">N/A</span>
           )}
         </div>
 

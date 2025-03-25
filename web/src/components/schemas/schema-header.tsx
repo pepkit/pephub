@@ -12,13 +12,7 @@ import { useSchemaVersionNumber } from '../../hooks/stores/useSchemaVersionNumbe
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 
-type Props = {
-  isDirty: boolean;
-  handleDiscard: () => void;
-};
-
-export const SchemaHeader = (props: Props) => {
-  const { isDirty, handleDiscard } = props;
+export const SchemaHeader = () => {
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
@@ -26,7 +20,7 @@ export const SchemaHeader = (props: Props) => {
   const [showSchemaDeleteModal, setShowSchemaDeleteModal] = useState(false);
   const [showSchemaAPIModal, setShowSchemaAPIModal] = useState(false);
 
-  const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
+  const { schemaVersionNumber } = useSchemaVersionNumber();
 
   return (
     <div className="p-2 w-100">
@@ -65,11 +59,21 @@ export const SchemaHeader = (props: Props) => {
               <Dropdown.Item as="a">
                 <a
                   target="_blank"
-                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/versions/${schemaVersionNumber}/file`}
+                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/versions/${schemaVersionNumber}/file?format=yaml`}
                   className="text-decoration-none text-reset"
                 >
-                  <i className="bi bi-file-earmark-zip me-1"></i>
-                  Download
+                  <i className="bi bi-filetype-yml me-1"></i>
+                  Download YAML
+                </a>
+              </Dropdown.Item>
+              <Dropdown.Item as="a">
+                <a
+                  target="_blank"
+                  href={`${API_HOST}/api/v1/schemas/${namespace}/${schema}/versions/${schemaVersionNumber}/file?format=json`}
+                  className="text-decoration-none text-reset"
+                >
+                  <i className="bi bi-filetype-json me-1"></i>
+                  Download JSON
                 </a>
               </Dropdown.Item>
               <Dropdown.Item onClick={() => setShowSchemaAPIModal(true)}>
