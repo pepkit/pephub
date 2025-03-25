@@ -38,9 +38,13 @@ export interface ProjectSubmissionResponse {
   msg?: string;
 }
 
+export interface PaginationResult {
+  page_size: number;
+  page: number;
+}
+
 export interface BiggestNamespaces {
-  number_of_namespaces: number;
-  limit: number;
+  pagination: PaginationResult;
   results: BiggestNamespaceResults[];
 }
 
@@ -98,7 +102,7 @@ export const getNamespaceInfo = (namespace: string, token: string | null = null)
 };
 
 export const getBiggestNamespaces = (limit: number) => {
-  const url = `${API_BASE}/namespaces/info?limit=${limit}`; // note the trailing slash
+  const url = `${API_BASE}/namespaces?page_size=${limit}`; // note the trailing slash
   return axios.get<BiggestNamespaces>(url).then((res) => res.data);
 };
 
@@ -368,4 +372,3 @@ export const getStandardizerSchemas = (namespace: string) => {
   const url = `${API_BASE}/namespaces/${namespace}/standardizer-schemas`;
   return axios.get<string[]>(url).then((res) => res.data);
 };
-
