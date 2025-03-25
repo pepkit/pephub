@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated, Any, Callable, Dict, List, Optional, Union
+from typing import Annotated, Any, Literal, Dict, List, Optional, Union
 
 import eido
 import numpy as np
@@ -237,7 +237,7 @@ async def delete_a_pep(
 @project.get("/samples", response_model=Union[SamplesResponseModel, str, list, dict])
 async def get_pep_samples(
     proj: dict = Depends(get_project),
-    format: Optional[str] = None,
+    format: Optional[Union[Literal["basic", "csv", "yaml", "json"], None]] = None,
     raw: Optional[bool] = True,
 ):
     """
@@ -277,9 +277,11 @@ async def get_pep_samples(
                 "samples": [sample.to_dict() for sample in proj.samples],
             }
         elif format == "csv":
-            return eido.convert_project(proj, "csv")["samples"]
+            return PlainTextResponse(eido.convert_project(proj, "csv")["samples"])
         elif format == "yaml":
-            return eido.convert_project(proj, "yaml-samples")["samples"]
+            return PlainTextResponse(
+                eido.convert_project(proj, "yaml-samples")["samples"]
+            )
         elif format == "basic":
             return eido.convert_project(proj, "basic")
 
