@@ -19,7 +19,7 @@ export const EditSchemaVersionModal = (props: Props) => {
     <Modal size="lg" centered animation={false} backdrop="static" show={show} onHide={onHide}>
       <Modal.Body>
         <div className='p-1 modal-pill'>
-          <h1 className="fs-5 mb-1 fw-semibold d-inline">Edit Current Schema Version</h1>
+          <h1 className="fs-5 mb-1 fw-semibold d-inline">Edit Selected Version Metadata</h1>
           <button
             className="btn btn-outline-dark px-1 py-0 m-0 float-end d-inline rounded-3 border-0 shadow-none"
             type="button" 

@@ -58,18 +58,18 @@ export const NamespaceLongRow = (props: Props) => {
           Object.values(namespaces).map((item, index) => (
             <div 
               key={index} 
-              ref={(el) => { itemRefs.current[item.namespace] = el; }}
+              ref={(el) => { itemRefs.current[item.namespace_name] = el; }}
               className="col-xxl-2 col-lg-3 col-md-4 col-sm-6 flex-shrink-0" 
               style={{ scrollSnapAlign: 'start' }}
             >
-              <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
+              <div className={`card shadow-sm position-relative cursor-pointer ${item?.namespace_name === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
                 <div className="card-body text-center px-0">
-                  <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
-                    <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
-                      {index + 1}. {item?.namespace}
+                  <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace_name === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
+                    <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace_name)}>
+                      {index + 1}. {item?.namespace_name}
                     </a>
                   </p>
-                  <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
+                  <p className={`card-text mb-2 text-sm ${item?.namespace_name === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
                     {item?.number_of_projects} {item?.number_of_projects === 1 ? 'Project' : 'Projects'}
                   </p>
                 </div>

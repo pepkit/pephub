@@ -9,7 +9,9 @@ type Props = {
 
 export const SchemaListCard = (props: Props) => {
   const { schema } = props;
-  const { namespace, name, description, last_update_date, latest_version, maintainers, private: isPrivate } = schema;
+  const { namespace, schema_name: name, description, last_update_date, latest_version, maintainers, private: isPrivate } = schema;
+
+  console.log(schema)
   
   return (
     <div className="border ps-3 pe-2 pb-3 pt-2 shadow-sm rounded mt-3 bg-body-tertiary card namespace-card">

@@ -23,7 +23,7 @@ type PaginationParams = {
 
 export interface Schema {
   namespace: string;
-  name: string;
+  schema_name: string;
   description: string | undefined;
   maintainers: string;
   lifecycle_stage: string;

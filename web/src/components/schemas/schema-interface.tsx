@@ -199,6 +199,7 @@ export const SchemaInterface = (props: Props) => {
             releaseDate={selectedVersion?.release_date}
             allVersionNumbers={allVersionNumbers}
             tags={selectedVersion?.tags}
+            canEdit={canEdit}
           />
         </div>
       </div>

@@ -202,7 +202,7 @@ export function Browse() {
               ) : (
                 <div className="schemas-grid w-100 py-2">
                   {schemas?.results.map((s, i) => (
-                    <SchemaCard key={`${i}-${s.namespace}/${s.name}`} schema={s} />
+                    <SchemaCard key={`${i}-${s.namespace}/${s.schema_name}`} schema={s} />
                   ))}
                 </div>
               )}

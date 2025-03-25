@@ -21,11 +21,11 @@ type Props = {
   updateDate: string;
   releaseDate: string;
   allVersionNumbers: string[];
+  canEdit: boolean;
 };
 
 export const SchemaSidebar = (props: Props) => {
-  const { maintainers, isPrivate, lifecycleStage, releaseNotes, contributors, tags, updateDate, releaseDate, allVersionNumbers
-   } = props;
+  const { maintainers, isPrivate, lifecycleStage, releaseNotes, contributors, tags, updateDate, releaseDate, allVersionNumbers, canEdit} = props;
 
   const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
   const { setShowCreateSchemaVersionModal } = useCreateSchemaVersionModalStore();
@@ -39,18 +39,22 @@ export const SchemaSidebar = (props: Props) => {
   return (
     <div className="pe-3">
       <small>
-        <div className="mb-4">
-          <div className='d-flex align-items-end my-1'>
-            <span className='fw-semibold'>Description</span>
+        <div className={`mb-4 d-flex align-items-end my-1 ${canEdit ? '' : 'mt-2'}`}>
+          <span className='text-base fw-semibold'>Registry Metadata</span>
+          {canEdit && (
             <div className='ms-auto' style={{marginBottom: '-.2rem'}}>
               <button 
-                className="btn btn-outline-dark border-0 shadow-none btn-sm" 
+                className="btn btn-outline-dark border shadow-none btn-sm" 
                 onClick={() => setShowSchemaEditModal(true)}
               >
                 <i className='bi bi-pen'></i>
               </button>
             </div>
-          </div>
+          )}
+        </div>
+
+        <div className="my-4">
+          <p className='fw-semibold my-1'>Description</p>
           <div className={`text-muted ${schemaData?.description ? '' : 'fst-italic'}`}>{schemaData?.description || 'N/A'}</div>
         </div>
 
@@ -66,34 +70,39 @@ export const SchemaSidebar = (props: Props) => {
 
         <hr/>
 
-        <div className="mt-3 mb-4">
+        <div className={`mb-4 ${canEdit ? 'mt-3' : 'mt-4'}`}>
           <div className='d-flex align-items-end my-2'>
-            <span className='fw-semibold'>Schema Version</span>
-            <div className='ms-auto' style={{marginBottom: '-.2rem'}}>
-              <button 
-                className="btn btn-outline-dark border-0 shadow-none btn-sm" 
-                onClick={() => setShowCreateSchemaVersionModal(true)}
-              >
-                <i className='bi bi-plus-lg'></i>
-              </button>
-              <button 
-                className="btn btn-outline-dark border-0 shadow-none btn-sm ms-1" 
-                onClick={() => setShowEditSchemaVersionModal(true)}
-              >
-                <i className='bi bi-pen'></i>
-              </button>
-              {allVersionNumbers.length > 1 && (
+            <span className='fw-semibold text-base'>Version Metadata</span>
+            {canEdit && (
+              <div className='ms-auto' style={{marginBottom: '-.2rem'}}>
                 <button 
-                className="btn btn-outline-dark border-0 shadow-none btn-sm ms-1" 
-                onClick={() => setShowDeleteSchemaVersionModal(true)}
-                disabled={allVersionNumbers.length <= 1}
+                  className="btn btn-outline-dark border shadow-none btn-sm" 
+                  onClick={() => setShowCreateSchemaVersionModal(true)}
                 >
-                  <i className='bi bi-trash3'></i>
+                  <i className='bi bi-file-earmark-plus'></i>
                 </button>
-              )}
-              
-            </div>
+                <button 
+                  className="btn btn-outline-dark border shadow-none btn-sm ms-1" 
+                  onClick={() => setShowEditSchemaVersionModal(true)}
+                >
+                  <i className='bi bi-pen'></i>
+                </button>
+                {allVersionNumbers.length > 1 && (
+                  <button 
+                  className="btn btn-danger shadow-none btn-sm ms-1" 
+                  onClick={() => setShowDeleteSchemaVersionModal(true)}
+                  disabled={allVersionNumbers.length <= 1}
+                  >
+                    <i className='bi bi-trash3'></i>
+                  </button>
+                )}
+              </div>
+            )}
+            
           </div>
+        </div>
+        <div>
+          <p className='fw-semibold my-2'>Selected Version</p>
           <Select
             value={schemaVersionNumber ? { value: schemaVersionNumber, label: schemaVersionNumber } : null}
             options={allVersionNumbers.map(version => ({value: version, label: version}))}
@@ -115,12 +124,6 @@ export const SchemaSidebar = (props: Props) => {
           />
           
         </div>
-
-        <div className="my-4">
-          <p className='fw-semibold my-1'>Timestamps</p>
-          <div className={`text-muted ${releaseDate ? '' : 'fst-italic'}`}>Created: {dateStringToDateTime(releaseDate || '')}</div>
-          <div className={`text-muted ${updateDate ? '' : 'fst-italic'}`}>Updated: {dateStringToDateTime(updateDate || '')}</div>
-        </div>
         
         <div className="my-4">
           <p className='fw-semibold my-1'>Release Notes</p>
@@ -128,11 +131,17 @@ export const SchemaSidebar = (props: Props) => {
         </div>
 
         <div className="my-4">
+          <p className='fw-semibold my-1'>Timestamps</p>
+          <div className={`text-muted ${releaseDate ? '' : 'fst-italic'}`}>Created: {dateStringToDateTime(releaseDate || '')}</div>
+          <div className={`text-muted ${updateDate ? '' : 'fst-italic'}`}>Updated: {dateStringToDateTime(updateDate || '')}</div>
+        </div>
+
+        <div className="my-4">
           <p className='fw-semibold my-1'>Contributors</p>
           <div className={`text-muted ${contributors ? '' : 'fst-italic' }`}>{contributors || 'N/A'}</div>
         </div>
 
-        <div className="mt-4 mb-3">
+        <div className="my-4">
           <p className='fw-semibold my-1'>Tags</p>
           {tags && Object.keys(tags).length > 0 ? (
             <div className='d-flex mt-2 gap-1'>

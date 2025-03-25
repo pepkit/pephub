@@ -102,7 +102,11 @@ export const NamespacePage = () => {
 
   // filter schemas by search
   const schemasFiltered =
-    schemas?.results.filter((s) => s.name.toLowerCase().includes(schemaSearch.toLowerCase())) || [];
+    schemas?.results.filter((s) => s.schema_name.toLowerCase().includes(schemaSearch.toLowerCase())) || [];
+
+  console.log(schemas?.results)
+
+  console.log(schemasFiltered)
 
   if (namespaceInfoIsLoading || starsAreLoading) {
     return (
@@ -288,7 +292,7 @@ export const NamespacePage = () => {
                   <p className="fst-italic text-muted">No schemas found.</p>
                 </div>
               ) : (
-                schemasFiltered.map((s) => <SchemaListCard key={s.name} schema={s} />)
+                schemasFiltered.map((s) => <SchemaListCard key={s.schema_name} schema={s} />)
               )}
               {schemas?.pagination?.total && schemas?.pagination?.total > schemaLimit ? (
                 <Pagination
