@@ -12,7 +12,7 @@ export function Schema() {
   const { user } = useSession();
   const { namespace, schema } = useParams();
 
-  const { data: schemaData, isFetching: isFetchingData } = useSchema(namespace, schema);
+  const { data: schemaData, error } = useSchema(namespace, schema);
   const { data: schemaVersions, refetch: refetchSchemaVersions } = useSchemaVersions(namespace, schema);
 
   const {} = useForm();
@@ -21,17 +21,7 @@ export function Schema() {
 
   return (
     <PageLayout title={`${namespace}/${schema} schema`} fullWidth footer={false} >
-      { schemaData ? (
-        <SchemaInterface
-          namespace={namespace!}
-          name={schema!}
-          // key={schemaData?.schema || 'NONE'}
-          canEdit={canEdit}
-          schemaData={schemaData}
-          schemaVersions={schemaVersions}
-          refetchSchemaVersions={refetchSchemaVersions}
-        />
-      ) : (
+      { error ? ( 
         <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
           <h1 className="fw-bold">Error 😫</h1>
           <p className="text-muted fst-italic">An error occured fetching the schema... Are you sure it exists?</p>
@@ -41,8 +31,17 @@ export function Schema() {
             </a>
           </div>
         </div>
+        ) : schemaData && (
+        <SchemaInterface
+          namespace={namespace!}
+          name={schema!}
+          // key={schemaData?.schema || 'NONE'}
+          canEdit={canEdit}
+          schemaData={schemaData}
+          schemaVersions={schemaVersions}
+          refetchSchemaVersions={refetchSchemaVersions}
+        />
       )}
-      
     </PageLayout>
   );
 }
