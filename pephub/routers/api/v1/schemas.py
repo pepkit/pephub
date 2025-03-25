@@ -108,11 +108,11 @@ async def create_schema_for_namespace_by_file(
     namespace: str,
     schema_name: str = Form(...),
     version: str = Form(...),
-    description: str = Form(None),
-    maintainers: str = Form(None),
-    lifecycle_stage: str = Form(None),
-    contributors: str = Form(None),
-    release_notes: str = Form(None),
+    description: Optional[str] = Form(None),
+    maintainers: Optional[str] = Form(None),
+    lifecycle_stage: Optional[str] = Form(None),
+    contributors: Optional[str] = Form(None),
+    release_notes: Optional[str] = Form(None),
     tags: Optional[Union[List[str], str, Dict[str, str], List[Dict[str, str]]]] = Form(
         None
     ),
@@ -147,11 +147,11 @@ async def create_schema_for_namespace_by_file(
             name=schema_name,
             version=version,
             schema_value=schema_dict,
-            description=description,
-            lifecycle_stage=lifecycle_stage,
-            maintainers=maintainers,
-            contributors=contributors,
-            release_notes=release_notes,
+            description=description or "",
+            lifecycle_stage=lifecycle_stage or "",
+            maintainers=maintainers or "",
+            contributors=contributors or "",
+            release_notes=release_notes or "",
             tags=tags,
         )
 
@@ -393,8 +393,8 @@ async def create_schema_version(
     namespace: str,
     schema_name: str,
     version: str = Form(...),
-    contributors: str = Form(None),
-    release_notes: str = Form(None),
+    contributors: Optional[str] = Form(None),
+    release_notes: Optional[str] = Form(None),
     tags: Optional[Union[List[str], str, Dict[str, str], List[Dict[str, str]]]] = Form(
         None
     ),
@@ -406,6 +406,13 @@ async def create_schema_version(
     """
     Create a new version of a schema record from a file
     """
+
+    # Check if tags is a string that needs to be parsed
+    if isinstance(tags, str) and tags.startswith("{") and tags.endswith("}"):
+        try:
+            tags = json.loads(tags)  # Parse the JSON string into a dictionary
+        except json.JSONDecodeError:
+            pass  # Keep original value if parsing fails
 
     if user_name not in list_of_admins:
         raise HTTPException(
@@ -423,8 +430,8 @@ async def create_schema_version(
             name=schema_name,
             version=version,
             schema_value=schema_dict,
-            contributors=contributors,
-            release_notes=release_notes,
+            contributors=contributors or "",
+            release_notes=release_notes or "",
             tags=tags,
         )
     except SchemaDoesNotExistError:

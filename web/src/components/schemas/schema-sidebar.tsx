@@ -4,6 +4,12 @@ import Select, { SingleValue } from 'react-select';
 import { useSchema } from '../../hooks/queries/useSchema';
 import { dateStringToDateTime } from '../../utils/dates';
 
+import { useSchemaVersionNumber } from '../../hooks/stores/useSchemaVersionNumber';
+import { useCreateSchemaVersionModalStore } from '../../hooks/stores/useCreateSchemaVersionModalStore'
+import { useEditSchemaVersionModalStore } from '../../hooks/stores/useEditSchemaVersionModalStore';
+import { useDeleteSchemaVersionModalStore } from '../../hooks/stores/useDeleteSchemaVersionModalStore';
+import { useSchemaEditModalStore } from '../../hooks/stores/useSchemaEditModalStore'
+
 type Props = {
   description: string;
   maintainers: string;
@@ -14,23 +20,37 @@ type Props = {
   tags: object;
   updateDate: string;
   releaseDate: string;
-  currentVersion: string;
-  setCurrentVersionNumber: (versionNumber: string) => void;
   allVersionNumbers: string[];
 };
 
 export const SchemaSidebar = (props: Props) => {
-  const { maintainers, isPrivate, lifecycleStage, releaseNotes, contributors, tags, updateDate, releaseDate,
-    currentVersion, setCurrentVersionNumber, allVersionNumbers
+  const { maintainers, isPrivate, lifecycleStage, releaseNotes, contributors, tags, updateDate, releaseDate, allVersionNumbers
    } = props;
+
+  const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
+  const { setShowCreateSchemaVersionModal } = useCreateSchemaVersionModalStore();
+  const { setShowEditSchemaVersionModal } = useEditSchemaVersionModalStore();
+  const { setShowDeleteSchemaVersionModal } = useDeleteSchemaVersionModalStore();
+  const { setShowSchemaEditModal } = useSchemaEditModalStore();
+
   const { namespace, schema } = useParams();
   const { data: schemaData } = useSchema(namespace, schema);
 
   return (
     <div className="pe-3">
       <small>
-        <div className="mt-3 mb-4">
-          <p className='fw-semibold my-1'>Description</p>
+        <div className="mb-4">
+          <div className='d-flex align-items-end my-1'>
+            <span className='fw-semibold'>Description</span>
+            <div className='ms-auto' style={{marginBottom: '-.2rem'}}>
+              <button 
+                className="btn btn-outline-dark border-0 shadow-none btn-sm" 
+                onClick={() => setShowSchemaEditModal(true)}
+              >
+                <i className='bi bi-pen'></i>
+              </button>
+            </div>
+          </div>
           <div className="text-muted">{schemaData?.description || 'N/A'}</div>
         </div>
 
@@ -46,22 +66,51 @@ export const SchemaSidebar = (props: Props) => {
 
         <hr/>
 
-        <div className="my-4">
-          <p className='fw-semibold my-2'>Schema Version</p>
+        <div className="mt-3 mb-4">
+          <div className='d-flex align-items-end my-2'>
+            <span className='fw-semibold'>Schema Version</span>
+            <div className='ms-auto' style={{marginBottom: '-.2rem'}}>
+              <button 
+                className="btn btn-outline-dark border-0 shadow-none btn-sm" 
+                onClick={() => setShowCreateSchemaVersionModal(true)}
+              >
+                <i className='bi bi-plus-lg'></i>
+              </button>
+              <button 
+                className="btn btn-outline-dark border-0 shadow-none btn-sm ms-1" 
+                onClick={() => setShowEditSchemaVersionModal(true)}
+              >
+                <i className='bi bi-pen'></i>
+              </button>
+              <button 
+                className="btn btn-outline-dark border-0 shadow-none btn-sm ms-1" 
+                onClick={() => setShowDeleteSchemaVersionModal(true)}
+                disabled={allVersionNumbers.length <= 1}
+              >
+                <i className='bi bi-trash3'></i>
+              </button>
+            </div>
+          </div>
           <Select
-            value={currentVersion ? { value: currentVersion, label: currentVersion } : null}
+            value={schemaVersionNumber ? { value: schemaVersionNumber, label: schemaVersionNumber } : null}
             options={allVersionNumbers.map(version => ({value: version, label: version}))}
             onChange={(newValue: SingleValue<{ label: string; value: string }>) => {
-              setCurrentVersionNumber(newValue?.value || '');
+              setSchemaVersionNumber(newValue?.value || '');
             }}
             styles={{
               control: (provided) => ({
                 ...provided,
                 borderRadius: '.375em',
-                borderColor: '#dee2e6'
+                borderColor: '#dee2e6',
+                width: 'max-content',
+              }),
+              menu: (provided) => ({
+                ...provided,
+                width: 'max-content',
               })
             }}
           />
+          
         </div>
 
         <div className="my-4">

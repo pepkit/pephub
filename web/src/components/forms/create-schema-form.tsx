@@ -215,7 +215,7 @@ export const CreateSchemaForm = (props: Props) => {
           placeholder="Maintainers"
         />
 
-        <label className="fw-semibold text-sm mt-2">Config (JSON)</label>
+        <label className="fw-semibold text-sm mt-2">Contents (JSON)</label>
         <div className="border rounded py-1">
           <Controller
             name="schemaJson"

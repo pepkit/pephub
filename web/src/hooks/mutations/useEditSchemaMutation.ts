@@ -29,7 +29,7 @@ export const useEditSchemaMutation = (namespace: string, name: string) => {
       );
     },
     onSuccess: () => {
-      toast.success('Schema updated');
+      toast.success('Schema metadata updated!');
       queryClient.invalidateQueries({
         queryKey: ['schema', namespace, name],
       });
