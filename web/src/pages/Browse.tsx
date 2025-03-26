@@ -86,7 +86,7 @@ export function Browse() {
     orderBy,
   });
 
-  const noSchemasInDatabase = schemas?.count === 0;
+  const noSchemasInDatabase = schemas?.pagination?.total === 0;
 
   if (error) {
     return (
@@ -202,7 +202,7 @@ export function Browse() {
               ) : (
                 <div className="schemas-grid w-100 py-2">
                   {schemas?.results.map((s, i) => (
-                    <SchemaCard key={`${i}-${s.namespace}/${s.name}`} schema={s} />
+                    <SchemaCard key={`${i}-${s.namespace}/${s.schema_name}`} schema={s} />
                   ))}
                 </div>
               )}

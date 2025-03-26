@@ -10,8 +10,14 @@ type NewSchema = {
   namespace: string;
   name: string;
   description: string;
+  schemaJson: object;
   isPrivate: boolean;
-  schema: string;
+  tags: Record<string, string>; 
+  maintainers: string;
+  version: string;
+  release_notes: string;
+  lifecycle_stage: string;
+  contributors: string;
 };
 
 export const useCreateSchemaMutation = () => {
@@ -25,8 +31,14 @@ export const useCreateSchemaMutation = () => {
         newSchema.namespace,
         newSchema.name,
         newSchema.description,
+        newSchema.schemaJson,
         newSchema.isPrivate,
-        newSchema.schema,
+        newSchema.contributors,
+        newSchema.maintainers,
+        newSchema.tags,
+        newSchema.version,
+        newSchema.release_notes,
+        newSchema.lifecycle_stage,
         jwt,
       );
     },

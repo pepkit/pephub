@@ -108,8 +108,9 @@ export interface ValidationResult {
 }
 
 export interface BiggestNamespaceResults {
-  namespace: string;
+  namespace_name: string;
   number_of_projects: number;
+  number_of_samples: number;
 }
 
 export interface ProjectViewAnnotation {

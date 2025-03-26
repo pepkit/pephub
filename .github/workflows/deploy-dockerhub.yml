@@ -1,11 +1,10 @@
+name: Deploy to Dockerhub on release
+
 on:
   release:
-    types:
-      - created
+    types: [published]
   workflow_dispatch:
     inputs: null
-
-name: Deploy to Dockerhub on release
 
 jobs:
   deploy:
@@ -28,5 +27,5 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          file: deployment/dockerhub/Dockerfile
+          file: deployment/dockerhub/primary.Dockerfile
           tags: databio/pephub:latest, databio/pephub:${{ github.ref_name }}
