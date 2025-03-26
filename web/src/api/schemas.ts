@@ -117,7 +117,7 @@ export const getSchema = async (namespace: string, name: string) => {
 };
 
 export const getSchemaVersions = async (namespace: string, name: string, query: string, tag: string, page: number, page_size: number) => {
-  const url = `${API_BASE}/schemas/${namespace}/${name}/versions?query=${query}&tag=${tag}&page=${page}&page_size${page_size}return_type=json`;
+  const url = `${API_BASE}/schemas/${namespace}/${name}/versions?query=${query}&tag=${tag}&page=${page}&page_size=${page_size}&return_type=json`;
   const { data } = await axios.get<GetSchemaVersionsResponse>(url);
   return data;
 };
