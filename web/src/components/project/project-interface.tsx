@@ -113,7 +113,12 @@ export const ProjectInterface = (props: Props) => {
       //   throw new Error(errorMessage);
       // }
 
-      console.log(samplesParsed)
+      // console.log(samplesParsed)
+      // I added a print here to show that right before the sample table gets submitted with any column 
+      // reordering you might have done (copy a column to a different index, then delete original column), 
+      // the parsed sample table actually has the rearranged columns. Something in the API or database is 
+      // probably keeping the original column header order if it detects no changes in the column header 
+      // values themselves
 
       submit({
         config: values.config,
