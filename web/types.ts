@@ -131,3 +131,9 @@ export type ProjectHistory = {
   _subsample_list: any[];
   _sample_dict: Sample[];
 };
+
+export interface PaginationResult {
+  page: number;
+  page_size: number;
+  total: number | null;
+}

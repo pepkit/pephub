@@ -12,12 +12,12 @@ interface KeyValueInputProps {
 export const KeyValueInput = ({ tags, onAddTag, onRemoveTag }: KeyValueInputProps) => {
   const [tagKey, setTagKey] = useState('');
   const [tagValue, setTagValue] = useState('');
-  
+
   const handleAddTag = () => {
     if (tagKey.trim()) {
       // Call parent's handler
       onAddTag(tagKey, tagValue);
-      
+
       // Reset inputs
       setTagKey('');
       setTagValue('');
@@ -35,7 +35,7 @@ export const KeyValueInput = ({ tags, onAddTag, onRemoveTag }: KeyValueInputProp
           value={tagKey}
           onChange={(e) => setTagKey(e.target.value)}
         />
-        
+
         <span className="input-group-text text-xs fw-semibold">Value</span>
         <input
           type="text"
@@ -44,9 +44,9 @@ export const KeyValueInput = ({ tags, onAddTag, onRemoveTag }: KeyValueInputProp
           value={tagValue}
           onChange={(e) => setTagValue(e.target.value)}
         />
-        
-        <button 
-          className="btn btn-success text-xs fw-semibold shadow-none" 
+
+        <button
+          className="btn btn-success text-xs fw-semibold shadow-none"
           type="button"
           onClick={handleAddTag}
           disabled={!tagKey}
@@ -54,21 +54,15 @@ export const KeyValueInput = ({ tags, onAddTag, onRemoveTag }: KeyValueInputProp
           Add
         </button>
       </div>
-      
+
       {/* Display current tags */}
       {Object.keys(tags).length > 0 && (
-        <div className='mt-2 gap-2 d-flex flex-wrap'>
-
+        <div className="mt-2 gap-2 d-flex flex-wrap">
           {Object.entries(tags).map(([key, value]) => (
-
-            <span className='border rounded-2 p-2 text-xs' key={key}>
-              <span className='fw-bold'>{String(key)}</span>
+            <span className="border rounded-2 p-2 text-xs" key={key}>
+              <span className="fw-bold">{String(key)}</span>
               {String(value) && <span>: {String(value)}</span>}
-              <a
-                className="ms-2 text-danger"
-                type="button"
-                onClick={() => onRemoveTag(key)}
-              >
+              <a className="ms-2 text-danger" type="button" onClick={() => onRemoveTag(key)}>
                 <i className="bi bi-trash3-fill"></i>
               </a>
             </span>

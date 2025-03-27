@@ -104,10 +104,6 @@ export const NamespacePage = () => {
   const schemasFiltered =
     schemas?.results.filter((s) => s.schema_name.toLowerCase().includes(schemaSearch.toLowerCase())) || [];
 
-  console.log(schemas?.results)
-
-  console.log(schemasFiltered)
-
   if (namespaceInfoIsLoading || starsAreLoading) {
     return (
       <PageLayout title={namespace}>

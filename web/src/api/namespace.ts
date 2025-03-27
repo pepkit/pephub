@@ -1,7 +1,7 @@
 import axios from 'axios';
 import YAML from 'yaml';
 
-import { BiggestNamespaceResults, Project, ProjectAnnotation, Sample } from '../../types';
+import { BiggestNamespaceResults, Project, ProjectAnnotation, Sample, PaginationResult } from '../../types';
 import { constructQueryFromPaginationParams } from '../utils/etc';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
@@ -36,11 +36,6 @@ export interface ProjectSubmissionResponse {
   tag: string;
   registry_path: string;
   msg?: string;
-}
-
-export interface PaginationResult {
-  page_size: number;
-  page: number;
 }
 
 export interface BiggestNamespaces {

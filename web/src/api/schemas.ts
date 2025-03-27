@@ -1,17 +1,10 @@
 import axios from 'axios';
 
 import { constructQueryFromPaginationParams } from '../utils/etc';
+import { PaginationResult } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
-
-// export type Schema = {
-//   namespace: string;
-//   name: string;
-//   last_update_date: string;
-//   submission_date: string;
-//   description: string | undefined;
-// };
 
 type PaginationParams = {
   offset?: number;
@@ -32,14 +25,8 @@ export interface Schema {
   last_update_date: string;
 }
 
-interface Pagination {
-  page: number;
-  page_size: number;
-  total: number;
-}
-
 type GetSchemasResponse = {
-  pagination: Pagination;
+  pagination: PaginationResult;
   results: Schema[];
 };
 
@@ -65,11 +52,7 @@ interface SchemaWithVersion {
 }
 
 interface GetSchemaVersionsResponse {
-  pagination: {
-    page: number;
-    page_size: number;
-    total: number;
-  };
+  pagination: PaginationResult;
   results: SchemaWithVersion[];
 }
 
