@@ -1,9 +1,10 @@
 from typing import Optional, Union, Literal, List, Dict
 from starlette.responses import Response
+from contextlib import suppress
 
 import yaml
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Body
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse, PlainTextResponse
 
 from pepdbagent import PEPDatabaseAgent
@@ -130,12 +131,9 @@ async def create_schema_for_namespace_by_file(
             status_code=403, detail="You do not have permission to create this schema"
         )
 
-    # Check if tags is a string that needs to be parsed
     if isinstance(tags, str) and tags.startswith("{") and tags.endswith("}"):
-        try:
-            tags = json.loads(tags)  # Parse the JSON string into a dictionary
-        except json.JSONDecodeError:
-            pass  # Keep original value if parsing fails
+        with suppress(json.JSONDecodeError):
+            tags = json.loads(tags)
 
     # parse out the schema into a dictionary
     try:
@@ -172,7 +170,7 @@ async def create_schema_for_namespace_by_file(
 
 
 @schemas.post("/{namespace}/json")
-async def create_schema_for_namespace_by_file(
+async def create_schema_for_namespace_by_json(
     namespace: str,
     schema_data: NewSchemaRecordModel,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -299,7 +297,7 @@ async def delete_schema(
 @schemas.get(
     "/{namespace}/{schema_name}/versions", response_model=SchemaVersionSearchResult
 )
-async def get_schema(
+async def get_schema_versions(
     namespace: str,
     schema_name: str,
     query: Optional[str] = "",
@@ -389,7 +387,7 @@ async def download_schema(
 
 
 @schemas.post("/{namespace}/{schema_name}/versions/files")
-async def create_schema_version(
+async def create_schema_version_file(
     namespace: str,
     schema_name: str,
     version: str = Form(...),
@@ -447,7 +445,7 @@ async def create_schema_version(
 
 
 @schemas.post("/{namespace}/{schema_name}/versions/json")
-async def create_schema_version(
+async def create_schema_version_json(
     namespace: str,
     schema_name: str,
     schema_data: NewSchemaVersionModel,

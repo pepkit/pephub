@@ -133,9 +133,8 @@ def download_json(content: dict, file_name: str = "unnamed.json") -> Response:
 
     json_bytes = io.BytesIO()
     json_bytes.write(json_string.encode("utf-8"))
-    json_bytes.seek(0)  # Move the pointer to the start of the stream
+    json_bytes.seek(0)
 
-    # Create a streaming response with the JSON data
     return Response(
         json_bytes.getvalue(),
         media_type="application/json",
