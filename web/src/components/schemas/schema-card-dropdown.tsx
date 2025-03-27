@@ -28,7 +28,7 @@ export const SchemaCardDropdown = (props: Props) => {
         style={{zIndex: 2}}
         id="dropdown-split-basic" />
       <Dropdown.Menu className='border border-light-subtle shadow-sm'>
-        <Dropdown.Item href={`/schemas/${schema.namespace}/${schema.name}`}>
+        <Dropdown.Item href={`/schemas/${schema.namespace}/${schema.schema_name}`}>
           <i className="bi bi-eye me-1"></i>
           View
         </Dropdown.Item>
@@ -39,7 +39,7 @@ export const SchemaCardDropdown = (props: Props) => {
             setTimeout(() => {
               setCopied(false);
             }, 1000);
-            copyToClipboard(`${schema.namespace}/${schema.name}`);
+            copyToClipboard(`${schema.namespace}/${schema.schema_name}`);
           }}
         >
           <i className="bi bi-copy me-1"></i>
@@ -59,7 +59,7 @@ export const SchemaCardDropdown = (props: Props) => {
         show={showSchemaDeleteModal}
         onHide={() => setShowSchemaDeleteModal(false)}
         namespace={schema.namespace}
-        name={schema.name}
+        name={schema.schema_name}
       />
     </Dropdown>
   );

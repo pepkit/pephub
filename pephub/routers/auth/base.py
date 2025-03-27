@@ -310,7 +310,7 @@ def login_success(request: Request):
 
 @auth.get("/session")
 def get_session_from_jwt(
-    session_info: Union[dict, None] = Depends(read_authorization_header)
+    session_info: Union[dict, None] = Depends(read_authorization_header),
 ):
     if session_info:
         return session_info

@@ -86,17 +86,7 @@ export function Browse() {
     orderBy,
   });
 
-  const noSchemasInDatabase = schemas?.count === 0;
-
-  if (isLoading) {
-    return (
-      <PageLayout title="Browse">
-        <div className="w-100">
-          <SchemasPagePlaceholder />
-        </div>
-      </PageLayout>
-    );
-  }
+  const noSchemasInDatabase = schemas?.pagination?.total === 0;
 
   if (error) {
     return (
@@ -205,12 +195,14 @@ export function Browse() {
               setCreateModalOpen={setShowCreateSchemaModal}
             />
             <div className="d-flex flex-col align-items-center">
-              {noSchemasInDatabase ? (
+              {isLoading ? (
+                <SchemasPagePlaceholder />
+              ) : noSchemasInDatabase ? (
                 <NoSchemas />
               ) : (
                 <div className="schemas-grid w-100 py-2">
                   {schemas?.results.map((s, i) => (
-                    <SchemaCard key={`${i}-${s.namespace}/${s.name}`} schema={s} />
+                    <SchemaCard key={`${i}-${s.namespace}/${s.schema_name}`} schema={s} />
                   ))}
                 </div>
               )}

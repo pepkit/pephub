@@ -15,16 +15,18 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => 
   const { data: schemas, isFetching: isLoading } = useAllSchemas({});
 
   const options = (schemas?.results || []).map((schema) => ({
-    label: `${schema.namespace}/${schema.name}`,
-    value: `${schema.namespace}/${schema.name}`,
+    label: `${schema.namespace}/${schema.schema_name}`,
+    value: `${schema.namespace}/${schema.schema_name}`,
   }));
 
+  const defaultSchema = 'databio/pep-2.1.0';
   const valueForSelect = options.find((option) => option.value === value);
 
   return (
     <div className="d-flex flex-row align-items-center gap-1 w-100">
       <Select
         options={options}
+        defaultValue={{label: defaultSchema, value: defaultSchema}}
         value={valueForSelect}
         onChange={(newValue: SingleValue<{ label: string; value: string }>) => {
           onChange(newValue?.value || '');

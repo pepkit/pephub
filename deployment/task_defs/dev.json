@@ -43,11 +43,11 @@
           "name": "GH_CLIENT_SECRET"
         },
         {
-          "valueFrom": "PEPHUB_GH_REDIRECT_URI",
+          "valueFrom": "PEPHUB_DEV_GH_REDIRECT_URI",
           "name": "REDIRECT_URI"
         },
         {
-          "valueFrom": "PEPHUB_BASE_URI",
+          "valueFrom": "PEPHUB_DEV_BASE_URI",
           "name": "BASE_URI"
         },
         {

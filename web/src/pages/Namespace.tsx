@@ -102,7 +102,7 @@ export const NamespacePage = () => {
 
   // filter schemas by search
   const schemasFiltered =
-    schemas?.results.filter((s) => s.name.toLowerCase().includes(schemaSearch.toLowerCase())) || [];
+    schemas?.results.filter((s) => s.schema_name.toLowerCase().includes(schemaSearch.toLowerCase())) || [];
 
   if (namespaceInfoIsLoading || starsAreLoading) {
     return (
@@ -219,7 +219,7 @@ export const NamespacePage = () => {
             numPeps={pepsInfo?.count || 0}
             numPops={popsInfo?.count || 0}
             numStars={stars?.length || 0}
-            numSchemas={schemas?.count || 0}
+            numSchemas={schemas?.pagination?.total || 0}
             view={view}
             setView={setView}
             enableStars={namespace === user?.login}
@@ -288,13 +288,13 @@ export const NamespacePage = () => {
                   <p className="fst-italic text-muted">No schemas found.</p>
                 </div>
               ) : (
-                schemasFiltered.map((s) => <SchemaListCard key={s.name} schema={s} />)
+                schemasFiltered.map((s) => <SchemaListCard key={s.schema_name} schema={s} />)
               )}
-              {schemas?.count && schemas?.count > schemaLimit ? (
+              {schemas?.pagination?.total && schemas?.pagination?.total > schemaLimit ? (
                 <Pagination
                   limit={schemaLimit}
                   offset={schemaOffset}
-                  count={schemas?.count || 0}
+                  count={schemas?.pagination?.total || 0}
                   setOffset={setSchemaOffset}
                 />
               ) : null}

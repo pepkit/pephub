@@ -108,8 +108,9 @@ export interface ValidationResult {
 }
 
 export interface BiggestNamespaceResults {
-  namespace: string;
+  namespace_name: string;
   number_of_projects: number;
+  number_of_samples: number;
 }
 
 export interface ProjectViewAnnotation {
@@ -130,3 +131,9 @@ export type ProjectHistory = {
   _subsample_list: any[];
   _sample_dict: Sample[];
 };
+
+export interface PaginationResult {
+  page: number;
+  page_size: number;
+  total: number | null;
+}

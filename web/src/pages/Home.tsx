@@ -92,14 +92,14 @@ export function Home() {
                 />
               </h4>
               <div>
-                {largestNamespaces ? (
+                {largestNamespaces && largestNamespaces.results ? (
                   largestNamespaces.results.map((namespace, index) => {
                     return (
                       <div key={index}>
                         <span className="ms-2 ">
                           {index + 1}.{' '}
-                          <a className='dark-link' href={`/${namespace.namespace}`}>
-                            {namespace.namespace}: {numberWithCommas(namespace.number_of_projects)}
+                          <a className="dark-link" href={`/${namespace.namespace_name}`}>
+                            {namespace.namespace_name}: {numberWithCommas(namespace.number_of_projects)}
                           </a>
                         </span>
                       </div>
@@ -123,7 +123,11 @@ export function Home() {
                     transition={{ duration: 0.5 }}
                     className="landing-table shadow"
                   >
-                    <SampleTable height={9 * 23 + 50} minRows={9} data={sampleListToArrays(exampleSamples?.items || [])} />
+                    <SampleTable
+                      height={9 * 23 + 50}
+                      minRows={9}
+                      data={sampleListToArrays(exampleSamples?.items || [])}
+                    />
                   </motion.div>
                 </div>
               </div>
@@ -140,7 +144,11 @@ export function Home() {
                 view detailed information about these metadata, and create projects.
               </p>
             </Col>
-            <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100 namespace-nav">
+            <Col
+              sm={6}
+              md={6}
+              className="d-flex flex-column align-items-center justify-content-center h-100 namespace-nav"
+            >
               <div className="border border-2 border-dark p-2 rounded w-100 position-relative landing-code-snippet-container shadow">
                 <Tab.Container id="code-snippets" defaultActiveKey={CODE_SNIPPETS[0].language}>
                   <div className="d-flex flex-row align-items-center text-sm">
@@ -199,7 +207,11 @@ export function Home() {
                 .
               </p>
             </Col>
-            <Col sm={6} md={6} className="d-flex flex-column align-items-center justify-content-center h-100 namespace-nav">
+            <Col
+              sm={6}
+              md={6}
+              className="d-flex flex-column align-items-center justify-content-center h-100 namespace-nav"
+            >
               <div className="border border-2 border-dark p-2 rounded w-100 position-relative landing-code-snippet-container shadow">
                 <Tab.Container id="code-snippets" defaultActiveKey={CODE_SNIPPETS[0].language}>
                   <div className="d-flex flex-row align-items-center text-sm">

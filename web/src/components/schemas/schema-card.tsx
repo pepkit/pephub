@@ -9,11 +9,11 @@ export const SchemaCard = (props: Props) => {
   const { schema } = props;
   return (
     <div className="shadow-sm rounded border border-light-subtle schema-card">
-      <a href={`/schemas/${schema.namespace}/${schema.name}`}>
+      <a href={`/schemas/${schema.namespace}/${schema.schema_name}`}>
         <div className="p-3 d-flex flex-column justify-content-between h-100">
           <div>
             <h3 className="fw-bold fs-5">
-              {schema.namespace}/{schema.name}
+              {schema.namespace}/{schema.schema_name}
             </h3>
             <p className="text-muted mb-0 my-2">{schema.description}</p>
           </div>

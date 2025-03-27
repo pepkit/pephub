@@ -22,14 +22,14 @@ export const NamespaceGrid = (props: Props) => {
           {namespaces && (
             Object.values(namespaces).map((item, index: number) => (
               <div key={index} className="col">
-                <div className={`card h-100 shadow-sm position-relative cursor-pointer ${item?.namespace === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
+                <div className={`card h-100 shadow-sm position-relative cursor-pointer ${item?.namespace_name === selectedNamespace ? 'bg-primary-subtle' : 'bg-body-tertiary namespace-card'}`}>
                   <div className="card-body text-center d-flex flex-column justify-content-center">
-                    <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
-                      <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace)}>
-                        {index + 1}. {item?.namespace}
+                    <p className={`card-title mt-2 text-primary-emphasis ${item?.namespace_name === selectedNamespace ? 'fw-bold' : 'fw-semibold'}`}>
+                      <a className='text-decoration-none text-reset stretched-link' onClick={() => handleSelectNamespace(item?.namespace_name)}>
+                        {index + 1}. {item?.namespace_name}
                       </a>
                     </p>
-                    <p className={`card-text mb-2 text-sm ${item?.namespace === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
+                    <p className={`card-text mb-2 text-sm ${item?.namespace_name === selectedNamespace ? 'fw-medium' : 'fw-normal'}`}>
                       {item?.number_of_projects} {item?.number_of_projects === 1 ? 'Project' : 'Projects'}
                     </p>
                   </div>

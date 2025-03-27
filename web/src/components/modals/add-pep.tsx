@@ -15,7 +15,7 @@ interface Props {
 export const AddPEPModal = (props: Props) => {
   const { show, onHide, defaultNamespace } = props;
   return (
-    <Modal size="lg" centered animation={false} show={show} onHide={onHide}>
+    <Modal size="lg" centered animation={false} backdrop="static" show={show} onHide={onHide}>
       <Modal.Body>
         <div className='p-1 modal-pill'>
           <h1 className="fs-5 mb-1 fw-semibold d-inline">Submit a new resource</h1>
@@ -29,7 +29,7 @@ export const AddPEPModal = (props: Props) => {
             <i className="bi bi-x-lg"></i>
           </button>
           <p className='text-sm mt-1 mb-3'></p>
-          <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div>
+          {/* <div className="border-bottom" style={{ margin: '0 -1.25em' }}></div> */}
           <Tabs
             variant="pills" 
             justify defaultActiveKey="blank" 
@@ -79,7 +79,7 @@ export const AddPEPModal = (props: Props) => {
               eventKey="new-schema"
               title={
                 <span>
-                  <i className="bi bi-filetype-yml me-1"></i>
+                  <i className="bi bi-filetype-json me-1"></i>
                   New Schema
                 </span>
               }
