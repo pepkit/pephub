@@ -31,7 +31,7 @@ export function Schema() {
             </a>
           </div>
         </div>
-        ) : schemaData && (
+        ) : schemaData && schemaVersions && (
         <SchemaInterface
           namespace={namespace!}
           name={schema!}

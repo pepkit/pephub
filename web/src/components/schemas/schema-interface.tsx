@@ -14,6 +14,8 @@ import { CreateSchemaVersionModal } from '../modals/create-schema-version';
 import { EditSchemaModal } from '../modals/edit-schema';
 import { EditSchemaVersionModal } from '../modals/edit-schema-version';
 import { DeleteSchemaVersionModal } from '../modals/delete-schema-version';
+import { LoadingSpinner } from '../spinners/loading-spinner';
+import { Schema } from '../../../types';
 
 import { useSchemaVersionNumber } from '../../hooks/stores/useSchemaVersionNumber';
 import { useCreateSchemaVersionModalStore } from '../../hooks/stores/useCreateSchemaVersionModalStore'
@@ -45,19 +47,15 @@ export const SchemaInterface = (props: Props) => {
   const { showSchemaEditModal, setShowSchemaEditModal } = useSchemaEditModalStore();
     
   const currentSchemaRef = useRef<object>({});
-
-  const sortedVersions = schemaVersions?.results?.length ? [...schemaVersions.results].sort((a, b) => 
-      (new Date(b.release_date)).getTime() - (new Date(a.release_date)).getTime()
-    ) : [];
   
-  const allVersionNumbers = sortedVersions.map(schema => schema.version)
-  const selectedVersion = sortedVersions[sortedVersions.findIndex(schema => schema.version === schemaVersionNumber)]
+  const allVersionNumbers = schemaVersions?.results.map((schema: Schema) => schema.version).sort().reverse();
+  const selectedVersion = schemaVersions?.results[schemaVersions?.results.findIndex((schema: Schema) => schema.version === schemaVersionNumber)]
 
   useEffect(() => {
-    if (sortedVersions.length > 0 && !schemaVersionNumber) {
-      setSchemaVersionNumber(sortedVersions[0].version);
+    if (schemaVersions && !schemaVersionNumber) {
+      setSchemaVersionNumber(allVersionNumbers[0]);
     }
-  }, [sortedVersions, schemaVersionNumber]);
+  }, [schemaVersionNumber]);
 
   const { data: schemaJson, isFetching: isFetching } = useSchemaByVersion(namespace, name, schemaVersionNumber);
 
@@ -103,7 +101,6 @@ export const SchemaInterface = (props: Props) => {
           reset({ schema: formValues.schema }, { keepDirty: false });
           // Update the reference to the current schema
           currentSchemaRef.current = formValues.schema;
-          // window.location.reload();
         },
       }
     );
@@ -153,7 +150,7 @@ export const SchemaInterface = (props: Props) => {
               )}
             </div>
             <div className='card-body py-2'>
-              {schemaJson && 
+              {schemaJson ? (
                 <Controller
                   name="schema"
                   control={control}
@@ -181,7 +178,17 @@ export const SchemaInterface = (props: Props) => {
                     />
                   )}
                 />
-              }
+              ) : (
+                isFetching ? (
+                  <div className="text-center pt-5" style={{height:'74vh'}}>
+                    <LoadingSpinner />
+                  </div>
+                ) : (
+                  <div className="text-center pt-5" style={{height:'74vh'}}>
+                    <span className='fw-semibold'>No Schema found for this version.</span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         </div>
