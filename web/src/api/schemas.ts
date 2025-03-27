@@ -20,7 +20,7 @@ export interface Schema {
   description: string | undefined;
   maintainers: string;
   lifecycle_stage: string;
-  latest_version: string;
+  latest_released_version: string;
   private: boolean;
   last_update_date: string;
 }
