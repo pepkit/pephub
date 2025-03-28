@@ -13,12 +13,12 @@ type TotalProjectChangeMutationProps = {
   subsamples?: Sample[];
 };
 
-export const useTotalProjectChangeMutation = (namespace: string, project: string, tag: string, schema: string| undefined = '') => {
+export const useTotalProjectChangeMutation = (namespace: string, project: string, tag: string) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (data: TotalProjectChangeMutationProps) => editTotalProject(namespace, project, tag, session.jwt, schema, data),
+    mutationFn: (data: TotalProjectChangeMutationProps) => editTotalProject(namespace, project, tag, session.jwt, data),
     onSuccess: (_data, variables) => {
       // perform an optimistic update -- this prevents a flicker
       queryClient.setQueryData([namespace, project, tag, 'samples'], (oldData: any) => {

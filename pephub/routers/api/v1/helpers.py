@@ -19,14 +19,14 @@ from ....dependencies import (
 _LOGGER = logging.getLogger(__name__)
 DEFAULT_SCHEMA_NAMESPACE = "databio"
 DEFAULT_SCHEMA_NAME = "pep"
-
+DEFAULT_SCHEMA_VERSION = "2.1.0"
 
 async def verify_updated_project(updated_project) -> peppy.Project:
     new_raw_project = {}
-
+    
     agent = get_db()
     default_schema = agent.schema.get(
-        namespace=DEFAULT_SCHEMA_NAMESPACE, name=DEFAULT_SCHEMA_NAME
+        namespace=DEFAULT_SCHEMA_NAMESPACE, name=DEFAULT_SCHEMA_NAME, version=DEFAULT_SCHEMA_VERSION
     )
 
     if not updated_project.sample_table or not updated_project.project_config_yaml:

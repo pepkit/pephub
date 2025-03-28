@@ -55,8 +55,6 @@ export const ProjectInterface = (props: Props) => {
   const { namespace, projectName, tag } = useProjectPage();
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
 
-  console.log(projectInfo?.pep_schema.split(":")[1])
-
   // get the value of which history id is being viewed
   const { currentHistoryId } = useCurrentHistoryId();
 
@@ -94,7 +92,7 @@ export const ProjectInterface = (props: Props) => {
 
   const userCanEdit = projectInfo && canEdit(user, projectInfo);
 
-  const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag, projectInfo?.pep_schema);
+  const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
 
   const setNewSamples = (samples: any[][]) => {
     projectUpdates.setValue('samples', samples, { shouldDirty: true });
