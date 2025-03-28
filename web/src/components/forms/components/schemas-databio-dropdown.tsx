@@ -9,7 +9,7 @@ interface Props {
   value?: string;
   onChange: (value: string) => void;
   showDownload?: boolean;
-  defaultValue?: string; // Default value to show in the dropdown if no value is provided
+  defaultValue?: string;
 }
 
 const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true, defaultValue = 'databio/pep'}) => {
