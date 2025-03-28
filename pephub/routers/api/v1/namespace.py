@@ -238,7 +238,7 @@ async def upload_raw_pep(
         is_private = project_from_json.is_private
         tag = project_from_json.tag
         overwrite = project_from_json.overwrite
-        pep_schema = project_from_json.pep_schema or "databio/pep-2.1.0"
+        pep_schema = project_from_json.pep_schema or "databio/pep"
         pop = project_from_json.pop or False
         if hasattr(project_from_json, NAME_KEY):
             if project_from_json.name:

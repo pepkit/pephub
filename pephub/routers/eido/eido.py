@@ -11,6 +11,8 @@ from fastapi.exceptions import HTTPException
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.utils import registry_path_converter
 from pepdbagent.exceptions import SchemaDoesNotExistError
+from pepdbagent.utils import schema_path_converter
+from pepdbagent.const import LATEST_SCHEMA_VERSION
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -124,12 +126,19 @@ async def validate(
         )
 
     if schema_registry is not None:
-        schema_namespace, schema_name = schema_registry.split("/")
+        schema_namespace, schema_name, schema_version = schema_path_converter(
+            schema_registry
+        )
 
         try:
             schema = agent.schema.get(
                 namespace=schema_namespace,
                 name=schema_name,
+                version=(
+                    schema_version
+                    if schema_version is not None
+                    else LATEST_SCHEMA_VERSION
+                ),
             )
             yaml_string = yaml.dump(schema)
 

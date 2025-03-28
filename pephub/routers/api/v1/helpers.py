@@ -18,7 +18,7 @@ from ....dependencies import (
 
 _LOGGER = logging.getLogger(__name__)
 DEFAULT_SCHEMA_NAMESPACE = "databio"
-DEFAULT_SCHEMA_NAME = "pep-2.1.0"
+DEFAULT_SCHEMA_NAME = "pep"
 
 
 async def verify_updated_project(updated_project) -> peppy.Project:

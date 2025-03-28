@@ -1,14 +1,13 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Select, { SingleValue } from 'react-select';
 
 import { useSchema } from '../../hooks/queries/useSchema';
-import { dateStringToDateTime } from '../../utils/dates';
-
-import { useSchemaVersionNumber } from '../../hooks/stores/useSchemaVersionNumber';
-import { useCreateSchemaVersionModalStore } from '../../hooks/stores/useCreateSchemaVersionModalStore'
-import { useEditSchemaVersionModalStore } from '../../hooks/stores/useEditSchemaVersionModalStore';
+import { useCreateSchemaVersionModalStore } from '../../hooks/stores/useCreateSchemaVersionModalStore';
 import { useDeleteSchemaVersionModalStore } from '../../hooks/stores/useDeleteSchemaVersionModalStore';
-import { useSchemaEditModalStore } from '../../hooks/stores/useSchemaEditModalStore'
+import { useEditSchemaVersionModalStore } from '../../hooks/stores/useEditSchemaVersionModalStore';
+import { useSchemaEditModalStore } from '../../hooks/stores/useSchemaEditModalStore';
+import { useSchemaVersionNumber } from '../../hooks/stores/useSchemaVersionNumber';
+import { dateStringToDateTime } from '../../utils/dates';
 
 type Props = {
   description: string;
@@ -25,7 +24,18 @@ type Props = {
 };
 
 export const SchemaSidebar = (props: Props) => {
-  const { maintainers, isPrivate, lifecycleStage, releaseNotes, contributors, tags, updateDate, releaseDate, allVersionNumbers, canEdit} = props;
+  const {
+    maintainers,
+    isPrivate,
+    lifecycleStage,
+    releaseNotes,
+    contributors,
+    tags,
+    updateDate,
+    releaseDate,
+    allVersionNumbers,
+    canEdit,
+  } = props;
 
   const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
   const { setShowCreateSchemaVersionModal } = useCreateSchemaVersionModalStore();
@@ -35,79 +45,85 @@ export const SchemaSidebar = (props: Props) => {
 
   const { namespace, schema } = useParams();
   const { data: schemaData } = useSchema(namespace, schema);
+  const navigate = useNavigate();
 
   return (
     <div className="pe-3">
       <small>
         <div className={`mb-4 d-flex align-items-end my-1 ${canEdit ? '' : 'mt-2'}`}>
-          <span className='text-base fw-semibold'>Registry Metadata</span>
+          <span className="text-base fw-semibold">Registry Metadata</span>
           {canEdit && (
-            <div className='ms-auto' style={{marginBottom: '-.2rem'}}>
-              <button 
-                className="btn btn-outline-dark border shadow-none btn-sm" 
+            <div className="ms-auto" style={{ marginBottom: '-.2rem' }}>
+              <button
+                className="btn btn-outline-dark border shadow-none btn-sm"
                 onClick={() => setShowSchemaEditModal(true)}
               >
-                <i className='bi bi-pen'></i>
+                <i className="bi bi-pen"></i>
               </button>
             </div>
           )}
         </div>
 
         <div className="my-4">
-          <p className='fw-semibold my-1'>Description</p>
-          <div className={`text-muted ${schemaData?.description ? '' : 'fst-italic'}`}>{schemaData?.description || 'N/A'}</div>
+          <p className="fw-semibold my-1">Description</p>
+          <div className={`text-muted ${schemaData?.description ? '' : 'fst-italic'}`}>
+            {schemaData?.description || 'N/A'}
+          </div>
         </div>
 
         <div className="my-4">
-          <p className='fw-semibold my-1'>Lifecycle Stage</p>
+          <p className="fw-semibold my-1">Lifecycle Stage</p>
           <div className={`text-muted ${lifecycleStage ? '' : 'fst-italic'}`}>{lifecycleStage || 'N/A'}</div>
         </div>
 
         <div className="my-4">
-          <p className='fw-semibold my-1'>Maintainers</p>
+          <p className="fw-semibold my-1">Maintainers</p>
           <div className={`text-muted ${maintainers ? '' : 'fst-italic'}`}>{maintainers || 'N/A'}</div>
         </div>
 
-        <hr/>
+        <hr />
 
         <div className={`mb-4 ${canEdit ? 'mt-3' : 'mt-4'}`}>
-          <div className='d-flex align-items-end my-2'>
-            <span className='fw-semibold text-base'>Version Metadata</span>
+          <div className="d-flex align-items-end my-2">
+            <span className="fw-semibold text-base">Version Metadata</span>
             {canEdit && (
-              <div className='ms-auto' style={{marginBottom: '-.2rem'}}>
-                <button 
-                  className="btn btn-outline-dark border shadow-none btn-sm" 
+              <div className="ms-auto" style={{ marginBottom: '-.2rem' }}>
+                <button
+                  className="btn btn-outline-dark border shadow-none btn-sm"
                   onClick={() => setShowCreateSchemaVersionModal(true)}
                 >
-                  <i className='bi bi-file-earmark-plus'></i>
+                  Add Version <i className="bi bi-file-earmark-plus"></i>
                 </button>
-                <button 
-                  className="btn btn-outline-dark border shadow-none btn-sm ms-1" 
+                <button
+                  className="btn btn-outline-dark border shadow-none btn-sm ms-1"
                   onClick={() => setShowEditSchemaVersionModal(true)}
                 >
-                  <i className='bi bi-pen'></i>
+                  <i className="bi bi-pen"></i>
                 </button>
                 {allVersionNumbers.length > 1 && (
-                  <button 
-                  className="btn btn-danger shadow-none btn-sm ms-1" 
-                  onClick={() => setShowDeleteSchemaVersionModal(true)}
-                  disabled={allVersionNumbers.length <= 1}
+                  <button
+                    className="btn btn-danger shadow-none btn-sm ms-1"
+                    onClick={() => setShowDeleteSchemaVersionModal(true)}
+                    disabled={allVersionNumbers.length <= 1}
                   >
-                    <i className='bi bi-trash3'></i>
+                    <i className="bi bi-trash3"></i>
                   </button>
                 )}
               </div>
             )}
-            
           </div>
         </div>
         <div>
-          <p className='fw-semibold my-2'>Selected Version</p>
+          <p className="fw-semibold my-2">Selected Version</p>
           <Select
             value={schemaVersionNumber ? { value: schemaVersionNumber, label: schemaVersionNumber } : null}
-            options={allVersionNumbers.map(version => ({value: version, label: version}))}
+            options={allVersionNumbers.map((version) => ({ value: version, label: version }))}
             onChange={(newValue: SingleValue<{ label: string; value: string }>) => {
-              setSchemaVersionNumber(newValue?.value || '');
+              const selectedVersion = newValue?.value || '';
+              setSchemaVersionNumber(selectedVersion);
+              navigate({
+                search: `?version=${selectedVersion}`,
+              });
             }}
             styles={{
               control: (provided) => ({
@@ -119,35 +135,38 @@ export const SchemaSidebar = (props: Props) => {
               menu: (provided) => ({
                 ...provided,
                 width: 'max-content',
-              })
+              }),
             }}
           />
-          
         </div>
-        
+
         <div className="my-4">
-          <p className='fw-semibold my-1'>Release Notes</p>
+          <p className="fw-semibold my-1">Release Notes</p>
           <div className={`text-muted ${releaseNotes ? '' : 'fst-italic'}`}>{releaseNotes || 'N/A'}</div>
         </div>
 
         <div className="my-4">
-          <p className='fw-semibold my-1'>Timestamps</p>
-          <div className={`text-muted ${releaseDate ? '' : 'fst-italic'}`}>Created: {dateStringToDateTime(releaseDate || '')}</div>
-          <div className={`text-muted ${updateDate ? '' : 'fst-italic'}`}>Updated: {dateStringToDateTime(updateDate || '')}</div>
+          <p className="fw-semibold my-1">Timestamps</p>
+          <div className={`text-muted ${releaseDate ? '' : 'fst-italic'}`}>
+            Created: {dateStringToDateTime(releaseDate || '')}
+          </div>
+          <div className={`text-muted ${updateDate ? '' : 'fst-italic'}`}>
+            Updated: {dateStringToDateTime(updateDate || '')}
+          </div>
         </div>
 
         <div className="my-4">
-          <p className='fw-semibold my-1'>Contributors</p>
-          <div className={`text-muted ${contributors ? '' : 'fst-italic' }`}>{contributors || 'N/A'}</div>
+          <p className="fw-semibold my-1">Contributors</p>
+          <div className={`text-muted ${contributors ? '' : 'fst-italic'}`}>{contributors || 'N/A'}</div>
         </div>
 
         <div className="my-4">
-          <p className='fw-semibold my-1'>Tags</p>
+          <p className="fw-semibold my-1">Tags</p>
           {tags && Object.keys(tags).length > 0 ? (
-            <div className='d-flex mt-2 gap-1'>
+            <div className="d-flex mt-2 gap-1">
               {Object.entries(tags).map(([key, value], index) => (
-                <span className='border rounded-2 p-2 text-xs' key={key}>
-                  <span className='fw-bold'>{String(key)}</span>
+                <span className="border rounded-2 p-2 text-xs" key={key}>
+                  <span className="fw-bold">{String(key)}</span>
                   {String(value) && <span>: {String(value)}</span>}
                 </span>
               ))}
@@ -156,9 +175,7 @@ export const SchemaSidebar = (props: Props) => {
             <span className="text-muted fst-italic">N/A</span>
           )}
         </div>
-
       </small>
     </div>
-
   );
 };
