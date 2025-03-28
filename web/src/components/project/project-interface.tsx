@@ -24,6 +24,7 @@ import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
 import { StandardizeMetadataModal } from '../modals/standardize-metadata';
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
+import { useSchemaVersions } from '../../hooks/queries/useSchemaVersions';
 
 type Props = {
   projectConfig: ReturnType<typeof useProjectConfig>['data'];
@@ -119,6 +120,7 @@ export const ProjectInterface = (props: Props) => {
       // the parsed sample table actually has the rearranged columns. Something in the API or database is 
       // probably keeping the original column header order if it detects no changes in the column header 
       // values themselves
+      console.log(values.config, samplesParsed, subsamplesParsed)
 
       submit({
         config: values.config,
@@ -126,6 +128,7 @@ export const ProjectInterface = (props: Props) => {
         subsamples: subsamplesParsed,
       });
     } catch (e) {
+      console.log(e)
       toast((t) => (
         <div className='my-1'>
           <p><strong>{'The project could not be saved.'}</strong></p>

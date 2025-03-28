@@ -23,7 +23,7 @@ export const SchemaAPIEndpointsModal: FC<Props> = ({ namespace, name, show, onHi
       <Modal.Body>
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
-          <span className="fw-bold me-1">Schema Metadata:</span>
+          <span className="fw-bold me-1">Registry Metadata:</span>
           <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}`}>
             <code>
               /api/v1/schemas/{namespace}/{name}
@@ -41,7 +41,16 @@ export const SchemaAPIEndpointsModal: FC<Props> = ({ namespace, name, show, onHi
         </p>
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
-          <span className="fw-bold me-1">Current Version JSON:</span>
+          <span className="fw-bold me-1">Current Contents:</span>
+          <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}/versions/${schemaVersionNumber}`}>
+            <code>
+              /api/v1/schemas/{namespace}/{name}/versions/{schemaVersionNumber}
+            </code>
+          </a>
+        </p>
+        <p className="mb-2">
+          <span className="badge bg-primary me-1">GET</span>
+          <span className="fw-bold me-1">Current JSON:</span>
           <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}/versions/${schemaVersionNumber}?format=json`}>
             <code>
               /api/v1/schemas/{namespace}/{name}/versions/{schemaVersionNumber}?format=json
@@ -50,7 +59,7 @@ export const SchemaAPIEndpointsModal: FC<Props> = ({ namespace, name, show, onHi
         </p>
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
-          <span className="fw-bold me-1">Current Version YAML:</span>
+          <span className="fw-bold me-1">Current YAML:</span>
           <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}/versions/${schemaVersionNumber}?format=yaml`}>
             <code>
               /api/v1/schemas/{namespace}/{name}/versions/{schemaVersionNumber}?format=yaml
