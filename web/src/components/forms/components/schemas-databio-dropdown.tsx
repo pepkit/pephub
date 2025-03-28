@@ -9,9 +9,10 @@ interface Props {
   value?: string;
   onChange: (value: string) => void;
   showDownload?: boolean;
+  defaultValue?: string; // Default value to show in the dropdown if no value is provided
 }
 
-const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => {
+const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true, defaultValue = 'databio/pep'}) => {
   const { data: schemas, isFetching: isLoading } = useAllSchemas({});
 
   const options = (schemas?.results || []).map((schema) => ({
@@ -19,7 +20,7 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true }) => 
     value: `${schema.namespace}/${schema.schema_name}`,
   }));
 
-  const defaultSchema = 'databio/pep';
+  const defaultSchema = defaultValue;
   const valueForSelect = options.find((option) => option.value === value);
 
   return (

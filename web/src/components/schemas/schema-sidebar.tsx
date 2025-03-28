@@ -92,7 +92,8 @@ export const SchemaSidebar = (props: Props) => {
                   className="btn btn-outline-dark border shadow-none btn-sm"
                   onClick={() => setShowCreateSchemaVersionModal(true)}
                 >
-                  Add Version <i className="bi bi-file-earmark-plus"></i>
+                  <i className="bi bi-file-earmark-plus me-1"></i>
+                  Version
                 </button>
                 <button
                   className="btn btn-outline-dark border shadow-none btn-sm ms-1"
