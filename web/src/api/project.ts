@@ -290,6 +290,7 @@ export const editTotalProject = (
   projectName: string,
   tag: string = 'default',
   token: string | null,
+  schema: string | undefined,
   data: {
     config?: string;
     samples?: Sample[];
@@ -306,6 +307,9 @@ export const editTotalProject = (
   }
   if (data.subsamples && data.subsamples.length > 0) {
     requestBody = { ...requestBody, subsample_tables: [data.subsamples] };
+  }
+  if (schema) {
+    requestBody = { ...requestBody, pep_schema: schema };
   }
 
   return axios.patch(url, requestBody, { headers: { Authorization: `Bearer ${token}` } });

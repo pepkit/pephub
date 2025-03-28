@@ -24,6 +24,7 @@ import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
 import { StandardizeMetadataModal } from '../modals/standardize-metadata';
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
+import { useSchemaVersions } from '../../hooks/queries/useSchemaVersions';
 
 type Props = {
   projectConfig: ReturnType<typeof useProjectConfig>['data'];
@@ -53,6 +54,8 @@ export const ProjectInterface = (props: Props) => {
   // get namespace, name, tag
   const { namespace, projectName, tag } = useProjectPage();
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
+
+  console.log(projectInfo?.pep_schema.split(":")[1])
 
   // get the value of which history id is being viewed
   const { currentHistoryId } = useCurrentHistoryId();
@@ -91,7 +94,7 @@ export const ProjectInterface = (props: Props) => {
 
   const userCanEdit = projectInfo && canEdit(user, projectInfo);
 
-  const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag);
+  const { isPending: isSubmitting, submit } = useTotalProjectChangeMutation(namespace, projectName, tag, projectInfo?.pep_schema);
 
   const setNewSamples = (samples: any[][]) => {
     projectUpdates.setValue('samples', samples, { shouldDirty: true });
@@ -119,6 +122,7 @@ export const ProjectInterface = (props: Props) => {
       // the parsed sample table actually has the rearranged columns. Something in the API or database is 
       // probably keeping the original column header order if it detects no changes in the column header 
       // values themselves
+      console.log(values.config, samplesParsed, subsamplesParsed)
 
       submit({
         config: values.config,
@@ -126,6 +130,7 @@ export const ProjectInterface = (props: Props) => {
         subsamples: subsamplesParsed,
       });
     } catch (e) {
+      console.log(e)
       toast((t) => (
         <div className='my-1'>
           <p><strong>{'The project could not be saved.'}</strong></p>
