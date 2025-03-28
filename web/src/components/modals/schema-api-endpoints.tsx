@@ -33,7 +33,7 @@ export const SchemaAPIEndpointsModal: FC<Props> = ({ namespace, name, show, onHi
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
           <span className="fw-bold me-1">Schema Versions:</span>
-          <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}`}>
+          <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}/versions`}>
             <code>
               /api/v1/schemas/{namespace}/{name}/versions
             </code>
@@ -42,18 +42,18 @@ export const SchemaAPIEndpointsModal: FC<Props> = ({ namespace, name, show, onHi
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
           <span className="fw-bold me-1">Current Version JSON:</span>
-          <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}`}>
+          <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}/versions/${schemaVersionNumber}?format=json`}>
             <code>
-              /api/v1/schemas/{namespace}/{name}/versions/{schemaVersionNumber}/file?format=json
+              /api/v1/schemas/{namespace}/{name}/versions/{schemaVersionNumber}?format=json
             </code>
           </a>
         </p>
         <p className="mb-2">
           <span className="badge bg-primary me-1">GET</span>
           <span className="fw-bold me-1">Current Version YAML:</span>
-          <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}`}>
+          <a href={`${API_HOST}/api/v1/schemas/${namespace}/${name}/versions/${schemaVersionNumber}?format=yaml`}>
             <code>
-              /api/v1/schemas/{namespace}/{name}/versions/{schemaVersionNumber}/file?format=yaml
+              /api/v1/schemas/{namespace}/{name}/versions/{schemaVersionNumber}?format=yaml
             </code>
           </a>
         </p>
