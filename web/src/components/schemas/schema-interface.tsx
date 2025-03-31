@@ -40,6 +40,10 @@ export const SchemaInterface = (props: Props) => {
   const { schemaData, schemaVersions, canEdit, namespace, name, refetchSchemaVersions } = props;
   const { user } = useSession();
 
+  const [confirmSave, setConfirmSave] = useState(false);
+  const [saveButtonText, setSavebuttonText] = useState('Save');
+  const [saveCountdown, setSaveCountdown] = useState(0);  
+
   const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
   const { showCreateSchemaVersionModal, setShowCreateSchemaVersionModal } = useCreateSchemaVersionModalStore();
   const { showEditSchemaVersionModal, setShowEditSchemaVersionModal } = useEditSchemaVersionModalStore();
@@ -73,6 +77,9 @@ export const SchemaInterface = (props: Props) => {
   }, [schemaJson, setValue]);
 
   const handleDiscard = () => {
+    setSaveCountdown(0);
+    setConfirmSave(false);
+    setSavebuttonText('Save');
     reset({ schema: currentSchemaRef.current });
   };
 
@@ -87,6 +94,9 @@ export const SchemaInterface = (props: Props) => {
   const { isPending: isSubmitting, submit } = useEditSchemaVersionMutation(namespace, name);
 
   const handleSubmit = () => {
+    setSaveCountdown(0);
+    setConfirmSave(false);
+    setSavebuttonText('Save');
     const formValues = getValues();
     
     submit(
@@ -105,17 +115,40 @@ export const SchemaInterface = (props: Props) => {
       }
     );
   };
+  
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (saveCountdown > 0) {
+      setSavebuttonText('Confirm Save and Overwrite? (' + saveCountdown + ')');
+      timer = setTimeout (() => setSaveCountdown(saveCountdown - 1), 1000);
+    } else if (saveCountdown === 0 && confirmSave) {
+      setConfirmSave(false);
+      setSavebuttonText('Save');
+    }
+
+    return () => clearTimeout(timer);
+  }, [saveCountdown, confirmSave])
+
+  const handleConfirm = () => {
+    if (!confirmSave) {
+      setSaveCountdown(5);
+      setConfirmSave(true);
+    } else {
+      handleSubmit();
+      setConfirmSave(false);
+    }
+  }
 
   useEffect(() => {
     const os = getOS();
     const handleSave = (e: KeyboardEvent) => {
       const ctrlKey = os === 'Mac OS' ? e.metaKey : e.ctrlKey;
       if (ctrlKey && e.key === 's') {
-        if (true && !isSubmitting) {
+        if (true && !isSubmitting && formState.isDirty) {
           // TODO: why does this not work in production?
           // if (projectUpdates.formState.isDirty && !isSubmitting) {
           e.preventDefault();
-          handleSubmit();
+          handleConfirm();
         }
       }
     };
@@ -140,8 +173,8 @@ export const SchemaInterface = (props: Props) => {
               {/* {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (sortedVersions[0]?.version === schemaVersionNumber) && ( */}
               {user && (user.login === namespace || user.orgs.includes(namespace || 'NONE')) && (
                 <>
-                  <button disabled={!formState.isDirty} onClick={handleSubmit} className="btn btn-xs btn-success ms-auto">
-                    Save
+                  <button disabled={!formState.isDirty} onClick={handleConfirm} className="btn btn-xs btn-success ms-auto" id='save-schema-btn'>
+                    {saveButtonText}
                   </button>
                   <button disabled={!formState.isDirty} onClick={handleDiscard} className="btn btn-xs btn-outline-dark ms-1">
                     Discard
@@ -207,6 +240,7 @@ export const SchemaInterface = (props: Props) => {
             allVersionNumbers={allVersionNumbers}
             tags={selectedVersion?.tags}
             canEdit={canEdit}
+            handleVersionChange={handleVersionChange}
           />
         </div>
       </div>

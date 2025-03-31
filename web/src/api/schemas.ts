@@ -1,15 +1,15 @@
 import axios from 'axios';
 
-import { constructQueryFromPaginationParams } from '../utils/etc';
+import { constructSchemaQueryFromPaginationParams } from '../utils/etc';
 import { PaginationResult } from '../../types';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
 
-type PaginationParams = {
-  offset?: number;
-  limit?: number;
-  search?: string;
+export type SchemaPaginationParams = {
+  page?: number;
+  pageSize?: number;
+  search?: string | undefined;
   orderBy?: string;
   order?: 'asc' | 'desc';
 };
@@ -86,8 +86,8 @@ type UpdateSchemaPayload = {
   isPrivate?: boolean;
 };
 
-export const getSchemas = async (params: PaginationParams) => {
-  const query = constructQueryFromPaginationParams(params);
+export const getSchemas = async (params: SchemaPaginationParams) => {
+  const query = constructSchemaQueryFromPaginationParams(params);
   const url = `${API_BASE}/schemas?${query.toString()}`;
   const { data } = await axios.get<GetSchemasResponse>(url);
   return data;
@@ -111,8 +111,8 @@ export const getSchemaByVersion = async (namespace: string, name: string, versio
   return data;
 };
 
-export const getNamespaceSchemas = async (namespace: string, params: PaginationParams) => {
-  const query = constructQueryFromPaginationParams(params);
+export const getNamespaceSchemas = async (namespace: string, params: SchemaPaginationParams) => {
+  const query = constructSchemaQueryFromPaginationParams(params);
   const url = `${API_BASE}/schemas/${namespace}?${query.toString()}`;
   const { data } = await axios.get<GetSchemasResponse>(url);
   return data;

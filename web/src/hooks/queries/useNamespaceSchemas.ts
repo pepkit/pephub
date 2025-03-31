@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { PaginationParams } from '../../api/namespace';
-import { getNamespaceSchemas } from '../../api/schemas';
+import { getNamespaceSchemas, SchemaPaginationParams } from '../../api/schemas';
 
-export const useNamespaceSchemas = (namespace: string | undefined, params: PaginationParams) => {
+export const useNamespaceSchemas = (namespace: string | undefined, params: SchemaPaginationParams) => {
   const query = useQuery({
     queryKey: ['schemas', namespace, params],
     queryFn: () => getNamespaceSchemas(namespace!, params),

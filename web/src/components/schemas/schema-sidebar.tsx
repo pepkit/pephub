@@ -8,6 +8,7 @@ import { useEditSchemaVersionModalStore } from '../../hooks/stores/useEditSchema
 import { useSchemaEditModalStore } from '../../hooks/stores/useSchemaEditModalStore';
 import { useSchemaVersionNumber } from '../../hooks/stores/useSchemaVersionNumber';
 import { dateStringToDateTime } from '../../utils/dates';
+import { GenericTooltip } from '../tooltips/generic-tooltip';
 
 type Props = {
   description: string;
@@ -21,6 +22,7 @@ type Props = {
   releaseDate: string;
   allVersionNumbers: string[];
   canEdit: boolean;
+  handleVersionChange: (versionNumber: string) => void;
 };
 
 export const SchemaSidebar = (props: Props) => {
@@ -35,6 +37,7 @@ export const SchemaSidebar = (props: Props) => {
     releaseDate,
     allVersionNumbers,
     canEdit,
+    handleVersionChange,
   } = props;
 
   const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
@@ -115,13 +118,14 @@ export const SchemaSidebar = (props: Props) => {
           </div>
         </div>
         <div>
-          <p className="fw-semibold my-2">Selected Version</p>
+          <p className="fw-semibold my-2">Selected Version <GenericTooltip text='Select a schema version here. Version metadata will reflect the current selected version and any unsaved changes to the editor contents will be overwritten.' /></p>
           <Select
             value={schemaVersionNumber ? { value: schemaVersionNumber, label: schemaVersionNumber } : null}
             options={allVersionNumbers.map((version) => ({ value: version, label: version }))}
             onChange={(newValue: SingleValue<{ label: string; value: string }>) => {
               const selectedVersion = newValue?.value || '';
               setSchemaVersionNumber(selectedVersion);
+              handleVersionChange(selectedVersion);
               navigate({
                 search: `?version=${selectedVersion}`,
               });
