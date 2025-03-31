@@ -118,7 +118,7 @@ export const SchemaSidebar = (props: Props) => {
           </div>
         </div>
         <div>
-          <p className="fw-semibold my-2">Selected Version <GenericTooltip text='Select a schema version here. Version metadata will reflect the current selected version and any unsaved changes to the editor contents will be overwritten.' /></p>
+          <p className="fw-semibold my-2">Selected Version <GenericTooltip text='Select a schema version here. Version metadata will reflect the selected version. Be sure to save any changes in the editor before selecting a different version, as they will be overwritten.' /></p>
           <Select
             value={schemaVersionNumber ? { value: schemaVersionNumber, label: schemaVersionNumber } : null}
             options={allVersionNumbers.map((version) => ({ value: version, label: version }))}
