@@ -79,11 +79,12 @@ export function Browse() {
     isFetching: isLoading,
     error,
   } = useAllSchemas({
-    limit,
-    offset,
     search: searchDebounced,
-    order,
+    page: offset,
+    pageSize: limit,
     orderBy,
+    // @ts-ignore - just for now, I know this will work fine
+    order,
   });
 
   const noSchemasInDatabase = schemas?.pagination?.total === 0;

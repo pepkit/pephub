@@ -99,8 +99,8 @@ export const SchemasNav = (props: Props) => {
           <option value={'name+desc'}>Name (Z-A)</option>
           <option value={'update_date+asc'}>Last update (newest)</option>
           <option value={'update_date+desc'}>Last update (oldest)</option>
-          <option value={'submission_date+asc'}>Submission date (newest)</option>
-          <option value={'submission_date+desc'}>Submission date (oldest)</option>
+          {/* <option value={'submission_date+asc'}>Submission date (newest)</option>
+          <option value={'submission_date+desc'}>Submission date (oldest)</option> */}
         </select>
       </div>
     </div>
