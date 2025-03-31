@@ -117,7 +117,7 @@ export const SchemaInterface = (props: Props) => {
   };
   
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     if (saveCountdown > 0) {
       setSavebuttonText('Confirm Save and Overwrite? (' + saveCountdown + ')');
       timer = setTimeout (() => setSaveCountdown(saveCountdown - 1), 1000);
