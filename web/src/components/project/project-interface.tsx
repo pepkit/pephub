@@ -24,6 +24,7 @@ import { ProjectConfigEditor } from './project-config';
 import { ProjectValidationAndEditButtons } from './project-validation-and-edit-buttons';
 import { StandardizeMetadataModal } from '../modals/standardize-metadata';
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
+import { useSchemaVersions } from '../../hooks/queries/useSchemaVersions';
 
 type Props = {
   projectConfig: ReturnType<typeof useProjectConfig>['data'];

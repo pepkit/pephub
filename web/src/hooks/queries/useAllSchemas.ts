@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { PaginationParams } from '../../api/namespace';
-import { getSchemas } from '../../api/schemas';
+import { getSchemas, SchemaPaginationParams } from '../../api/schemas';
 
-export const useAllSchemas = (params: PaginationParams) => {
+export const useAllSchemas = (params: SchemaPaginationParams) => {
   return useQuery({
     queryKey: ['schemas', params],
     queryFn: () => getSchemas(params),

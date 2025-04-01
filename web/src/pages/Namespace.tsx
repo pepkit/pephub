@@ -87,12 +87,11 @@ export const NamespacePage = () => {
   });
 
   const { data: schemas } = useNamespaceSchemas(namespace, {
-    limit: schemaLimit,
-    offset: schemaOffset,
+    page: schemaOffset,
+    pageSize: schemaLimit,
     orderBy: schemaOrderBy,
     // @ts-ignore - just for now, I know this will work fine
     order: schemaOrder,
-    search: schemaSearchDebounced,
   });
 
   const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
@@ -296,6 +295,7 @@ export const NamespacePage = () => {
                   offset={schemaOffset}
                   count={schemas?.pagination?.total || 0}
                   setOffset={setSchemaOffset}
+                  forSchema={true}
                 />
               ) : null}
             </div>

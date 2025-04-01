@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios';
 
 import { PaginationParams } from '../api/namespace';
+import { SchemaPaginationParams } from '../api/schemas'
 
 export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
@@ -70,6 +71,32 @@ export const constructQueryFromPaginationParams = (params: PaginationParams): UR
   }
   if (limit) {
     query.set('limit', limit.toString());
+  }
+  if (orderBy) {
+    query.set('order_by', orderBy);
+  }
+  if (order) {
+    if (order === 'asc') {
+      query.set('order_desc', 'false');
+    } else {
+      query.set('order_desc', 'true');
+    }
+  }
+  return query;
+};
+
+export const constructSchemaQueryFromPaginationParams = (params: SchemaPaginationParams): URLSearchParams => {
+  const { search, page, pageSize, orderBy, order } = params;
+  // construct query based on search, offset, and limit
+  const query = new URLSearchParams();
+  if (search) {
+    query.set('query', search);
+  }
+  if (page) {
+    query.set('page', page.toString());
+  }
+  if (pageSize) {
+    query.set('page_size', pageSize.toString());
   }
   if (orderBy) {
     query.set('order_by', orderBy);

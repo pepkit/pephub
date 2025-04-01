@@ -137,3 +137,10 @@ export interface PaginationResult {
   page_size: number;
   total: number | null;
 }
+
+export interface ValidationError {
+  loc?: string[];
+  type?: string;
+  input?: string;
+  msg: string;
+}
