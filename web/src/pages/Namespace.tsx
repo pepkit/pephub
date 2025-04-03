@@ -92,7 +92,7 @@ export const NamespacePage = () => {
     orderBy: schemaOrderBy,
     // @ts-ignore - just for now, I know this will work fine
     order: schemaOrder,
-  });
+  }, schemaSearch);
 
   const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
@@ -176,7 +176,7 @@ export const NamespacePage = () => {
             <p>
               <span className="fw-bold d-flex">
                 Organizations you belong to:
-                <div className="d-flex align-items-center">
+                <span className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
                       <a className="dark-link" style={{marginLeft: '0'}} href={`/${org}`}>
@@ -184,7 +184,7 @@ export const NamespacePage = () => {
                       </a>
                     </Fragment>
                   ))}
-                </div>
+                </span>
               </span>
             </p>
           </>
@@ -194,7 +194,7 @@ export const NamespacePage = () => {
             <p className="mb-0">
               <span className="fw-bold d-flex">
                 Organizations you belong to:
-                <div className="d-flex align-items-center">
+                <span className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
                       <a className="dark-link" style={{marginLeft: '0'}} href={`/${org}`}>
@@ -202,7 +202,7 @@ export const NamespacePage = () => {
                       </a>
                     </Fragment>
                   ))}
-                </div>
+                </span>
               </span>
             </p>
           {/*<p className="mb-0">*/}
@@ -282,14 +282,14 @@ export const NamespacePage = () => {
                 search={schemaSearch}
                 setSearch={setSchemaSearch}
               />
-              {schemasFiltered?.length === 0 ? (
+              {schemas?.results.length === 0 ? (
                 <div className="text-center mt-5">
                   <p className="fst-italic text-muted">No schemas found.</p>
                 </div>
               ) : (
-                schemasFiltered.map((s) => <SchemaListCard key={s.schema_name} schema={s} />)
+                schemas?.results.map((s) => <SchemaListCard key={s.schema_name} schema={s} />)
               )}
-              {schemas?.pagination?.total && schemas?.pagination?.total > schemaLimit ? (
+              {schemas?.pagination?.total && (schemas?.pagination?.total > schemaLimit) ? (
                 <Pagination
                   limit={schemaLimit}
                   offset={schemaOffset}

@@ -22,7 +22,7 @@ type Props = {
   releaseDate: string;
   allVersionNumbers: string[];
   canEdit: boolean;
-  handleVersionChange: (versionNumber: string) => void;
+  handleVersionChange: () => void;
 };
 
 export const SchemaSidebar = (props: Props) => {
@@ -40,7 +40,7 @@ export const SchemaSidebar = (props: Props) => {
     handleVersionChange,
   } = props;
 
-  const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
+  const { schemaVersionNumber } = useSchemaVersionNumber();
   const { setShowCreateSchemaVersionModal } = useCreateSchemaVersionModalStore();
   const { setShowEditSchemaVersionModal } = useEditSchemaVersionModalStore();
   const { setShowDeleteSchemaVersionModal } = useDeleteSchemaVersionModalStore();
@@ -53,10 +53,10 @@ export const SchemaSidebar = (props: Props) => {
   return (
     <div className="pe-3">
       <small>
-        <div className={`mb-4 d-flex align-items-end my-1 ${canEdit ? '' : 'mt-2'}`}>
+        <div className={`mb-4 d-flex flex-column flex-xxl-row align-items-start my-1 ${canEdit ? '' : 'mt-2'}`}>
           <span className="text-base fw-semibold">Registry Metadata</span>
           {canEdit && (
-            <div className="ms-auto" style={{ marginBottom: '-.2rem' }}>
+            <div className="ms-xxl-auto mt-1 mt-xxl-0" style={{ marginBottom: '-.2rem' }}>
               <button
                 className="btn btn-outline-dark border shadow-none btn-sm"
                 onClick={() => setShowSchemaEditModal(true)}
@@ -87,10 +87,10 @@ export const SchemaSidebar = (props: Props) => {
         <hr />
 
         <div className={`mb-4 ${canEdit ? 'mt-3' : 'mt-4'}`}>
-          <div className="d-flex align-items-end my-2">
-            <span className="fw-semibold text-base">Version Metadata</span>
+          <div className="d-flex flex-column flex-xxl-row align-items-start my-2">
+            <div className="fw-semibold text-base">Version Metadata</div>
             {canEdit && (
-              <div className="ms-auto" style={{ marginBottom: '-.2rem' }}>
+              <div className="ms-xxl-auto mt-1 mt-xxl-0" style={{ marginBottom: '-.2rem' }}>
                 <button
                   className="btn btn-outline-dark border shadow-none btn-sm"
                   onClick={() => setShowCreateSchemaVersionModal(true)}
@@ -124,8 +124,8 @@ export const SchemaSidebar = (props: Props) => {
             options={allVersionNumbers.map((version) => ({ value: version, label: version }))}
             onChange={(newValue: SingleValue<{ label: string; value: string }>) => {
               const selectedVersion = newValue?.value || '';
-              setSchemaVersionNumber(selectedVersion);
-              handleVersionChange(selectedVersion);
+              // setSchemaVersionNumber(selectedVersion);
+              handleVersionChange();
               navigate({
                 search: `?version=${selectedVersion}`,
               });

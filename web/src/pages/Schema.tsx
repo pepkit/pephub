@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Editor } from '@monaco-editor/react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
@@ -8,12 +9,24 @@ import { useSession } from '../contexts/session-context';
 import { useSchema } from '../hooks/queries/useSchema';
 import { useSchemaVersions } from '../hooks/queries/useSchemaVersions';
 
+import { useSchemaVersionNumber } from '../hooks/stores/useSchemaVersionNumber';
+
 export function Schema() {
   const { user } = useSession();
   const { namespace, schema } = useParams();
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVersion = urlParams.get('version');
+
+  const { schemaVersionNumber, setSchemaVersionNumber } = useSchemaVersionNumber();
 
   const { data: schemaData, error } = useSchema(namespace, schema);
   const { data: schemaVersions, refetch: refetchSchemaVersions } = useSchemaVersions(namespace, schema);
+
+  useEffect(() => {
+    if (urlVersion) {
+      setSchemaVersionNumber(urlVersion);
+    }
+  }, [urlVersion]);
 
   const {} = useForm();
 
