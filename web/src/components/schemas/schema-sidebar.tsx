@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import Select, { SingleValue } from 'react-select';
 
 import { useSchema } from '../../hooks/queries/useSchema';
@@ -48,7 +48,7 @@ export const SchemaSidebar = (props: Props) => {
 
   const { namespace, schema } = useParams();
   const { data: schemaData } = useSchema(namespace, schema);
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams()
 
   return (
     <div className="pe-3">
@@ -126,8 +126,8 @@ export const SchemaSidebar = (props: Props) => {
               const selectedVersion = newValue?.value || '';
               // setSchemaVersionNumber(selectedVersion);
               handleVersionChange();
-              navigate({
-                search: `?version=${selectedVersion}`,
+              setSearchParams({
+                version: selectedVersion,
               });
             }}
             styles={{
