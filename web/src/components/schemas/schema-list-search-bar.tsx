@@ -25,6 +25,7 @@ export const SchemaListSearchBar = ({
   setOrder,
   setOffset,
 }: Props) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   return (
     <div className="flex-row d-flex align-items-center position-relative">
       <div className="input-group shadow-sm rounded-2">
@@ -36,6 +37,12 @@ export const SchemaListSearchBar = ({
           onChange={(e) => {
             setSearch(e.target.value);
             setOffset(0);
+            if (e.target.value === '') {
+              searchParams.delete('search');
+            } else {
+              searchParams.set('search', e.target.value);
+            }
+            setSearchParams(searchParams);
           }}
           id="search-bar"
           type="text"
@@ -46,6 +53,8 @@ export const SchemaListSearchBar = ({
           value={limit}
           onChange={(e) => {
             setLimit(parseInt(e.target.value));
+            searchParams.set('limit', e.target.value);
+            setSearchParams(searchParams);
           }}
           className="form-control form-select"
         >
@@ -60,6 +69,8 @@ export const SchemaListSearchBar = ({
             const [orderBy, order] = e.target.value.split('+');
             setOrderBy(orderBy);
             setOrder(order);
+            searchParams.set('orderBy', orderBy);
+            setSearchParams(searchParams);
           }}
           className="form-control form-select"
         >
