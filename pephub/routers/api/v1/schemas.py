@@ -3,6 +3,7 @@ from starlette.responses import Response
 from contextlib import suppress
 
 import yaml
+import json
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -35,11 +36,8 @@ from ...models import (
 from ....helpers import download_yaml, download_json
 from ....dependencies import (
     get_db,
-    get_namespace_access_list,
-    get_user_from_session_info,
+    verify_user_can_write_namespace,
 )
-
-import json
 
 load_dotenv()
 
@@ -77,7 +75,7 @@ async def get_schemas_in_namespace(
     name: Optional[str] = None,
     maintainer: Optional[str] = None,
     lifecycle_stage: Optional[str] = None,
-    latest_version: Optional[str] = None,
+    # latest_version: Optional[str] = None,
     page: Optional[int] = 0,
     page_size: Optional[int] = 100,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -86,9 +84,12 @@ async def get_schemas_in_namespace(
 ):
     """
     Get schemas for specific endpoint, by providing query parameters to filter the results.
-
-    ## NOTE: latest_version is not implemented yet.
     """
+    if not agent.user.exists(namespace=namespace):
+        raise HTTPException(
+            status_code=404,
+            detail=f"Namespace '{namespace}' doesn't exist in the database.",
+        )
 
     result = agent.schema.fetch_schemas(
         namespace=namespace,
@@ -119,27 +120,23 @@ async def create_schema_for_namespace_by_file(
     ),
     schema_file: UploadFile = File(...),
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Create a new schema record with first schema version from a file
     """
 
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403, detail="You do not have permission to create this schema"
-        )
-
     if isinstance(tags, str) and tags.startswith("{") and tags.endswith("}"):
         with suppress(json.JSONDecodeError):
             tags = json.loads(tags)
 
-    # parse out the schema into a dictionary
+    schema_str = schema_file.file.read().decode("utf-8")
     try:
-        schema_str = schema_file.file.read().decode("utf-8")
         schema_dict = yaml.safe_load(schema_str)
+    except yaml.parser.ParserError as e:
+        schema_dict = json.loads(schema_str)
 
+    try:
         agent.schema.create(
             namespace=namespace,
             name=schema_name,
@@ -153,19 +150,17 @@ async def create_schema_for_namespace_by_file(
             tags=tags,
         )
 
-        return {
-            "message": "Schema created successfully",
-        }
+        return JSONResponse(
+            {
+                "message": "Schema created successfully",
+            },
+            status_code=202,
+        )
 
     except SchemaAlreadyExistsError:
         raise HTTPException(
             status_code=409,
             detail=f"Schema {namespace}/{schema_name} already exists.",
-        )
-    except yaml.parser.ParserError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"The was an error parsing the yaml: {e}",
         )
 
 
@@ -174,21 +169,13 @@ async def create_schema_for_namespace_by_json(
     namespace: str,
     schema_data: NewSchemaRecordModel,
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Create a new schema record with first schema version from a json object
     """
 
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403, detail="You do not have permission to create this schema"
-        )
-
-    # parse out the schema into a dictionary
     try:
-
         agent.schema.create(
             namespace=namespace,
             name=schema_data.schema_name,
@@ -202,19 +189,17 @@ async def create_schema_for_namespace_by_json(
             tags=schema_data.tags,
         )
 
-        return {
-            "message": "Schema created successfully",
-        }
+        return JSONResponse(
+            {
+                "message": "Schema created successfully",
+            },
+            status_code=202,
+        )
 
     except SchemaAlreadyExistsError:
         raise HTTPException(
             status_code=409,
             detail=f"Schema {namespace}/{schema_data.schema_name} already exists.",
-        )
-    except yaml.parser.ParserError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"The was an error parsing the yaml: {e}",
         )
 
 
@@ -243,17 +228,11 @@ def update_schema_info(
     schema_name: str,
     update_fields: UpdateSchemaRecordFields,
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Update a schema record
     """
-
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403, detail="You do not have permission to update this schema"
-        )
 
     try:
         agent.schema.update_schema_record(
@@ -266,32 +245,27 @@ def update_schema_info(
             status_code=404, detail=f"Schema {namespace}/{schema_name} not found."
         )
 
-    return JSONResponse({"message": "Schema updated successfully"})
+    return JSONResponse({"message": "Schema updated successfully"}, status_code=202)
 
 
 @schemas.delete("/{namespace}/{schema_name}")
 async def delete_schema(
     namespace: str,
-    schema: str,
+    schema_name: str,
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Delete a schema record
     """
 
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403, detail="You do not have permission to delete this schema"
-        )
     try:
-        agent.schema.delete_schema(namespace=namespace, name=schema)
+        agent.schema.delete_schema(namespace=namespace, name=schema_name)
     except SchemaDoesNotExistError:
         raise HTTPException(
-            status_code=404, detail=f"Schema {namespace}/{schema} not found."
+            status_code=404, detail=f"Schema {namespace}/{schema_name} not found."
         )
-    return {"message": "Schema deleted successfully"}
+    return JSONResponse({"message": "Schema deleted successfully"}, status_code=202)
 
 
 @schemas.get(
@@ -398,8 +372,7 @@ async def create_schema_version_file(
     ),
     schema_file: UploadFile = File(...),
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Create a new version of a schema record from a file
@@ -411,12 +384,6 @@ async def create_schema_version_file(
             tags = json.loads(tags)  # Parse the JSON string into a dictionary
         except json.JSONDecodeError:
             pass  # Keep original value if parsing fails
-
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to create this schema version",
-        )
 
     schema_str = schema_file.file.read().decode("utf-8")
     schema_dict = yaml.safe_load(schema_str)
@@ -441,7 +408,9 @@ async def create_schema_version_file(
             status_code=409,
             detail=f"Schema version {version} already exists for {schema_name}/{namespace}:{version}.",
         )
-    return JSONResponse({"message": "Schema version created successfully"})
+    return JSONResponse(
+        {"message": "Schema version created successfully"}, status_code=202
+    )
 
 
 @schemas.post("/{namespace}/{schema_name}/versions/json")
@@ -450,18 +419,11 @@ async def create_schema_version_json(
     schema_name: str,
     schema_data: NewSchemaVersionModel,
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Create a new version of a schema record from a json object
     """
-
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to create this schema version",
-        )
 
     try:
         agent.schema.add_version(
@@ -482,7 +444,9 @@ async def create_schema_version_json(
             status_code=409,
             detail=f"Schema version {schema_data.version} already exists for {namespace}/{schema_name}:{schema_data.version}.",
         )
-    return JSONResponse({"message": "Schema version created successfully"})
+    return JSONResponse(
+        {"message": "Schema version created successfully"}, status_code=202
+    )
 
 
 @schemas.patch("/{namespace}/{schema_name}/versions/{semantic_version}")
@@ -492,18 +456,11 @@ def update_schema_version(
     semantic_version: str,
     update_fields: UpdateSchemaVersionFields,
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Update a schema version
     """
-
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to update this schema version",
-        )
 
     try:
         agent.schema.update_schema_version(
@@ -522,7 +479,9 @@ def update_schema_version(
             detail=f"Schema version {semantic_version} not found for {namespace}/{schema_name}.",
         )
 
-    return JSONResponse({"message": "Schema version updated successfully"})
+    return JSONResponse(
+        {"message": "Schema version updated successfully"}, status_code=202
+    )
 
 
 @schemas.delete("/{namespace}/{schema_name}/versions/{semantic_version}")
@@ -531,18 +490,12 @@ async def delete_schema_version(
     schema_name: str,
     semantic_version: str,
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Delete a schema version
     """
 
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to delete this schema version",
-        )
     try:
         agent.schema.delete_version(
             namespace=namespace, name=schema_name, version=semantic_version
@@ -556,7 +509,9 @@ async def delete_schema_version(
             status_code=404,
             detail=f"Schema version {semantic_version} not found for {namespace}/{schema_name}.",
         )
-    return {"message": "Schema version deleted successfully"}
+    return JSONResponse(
+        {"message": "Schema version deleted successfully"}, status_code=202
+    )
 
 
 @schemas.post("/{namespace}/{schema_name}/versions/{semantic_version}/tags")
@@ -566,18 +521,12 @@ def add_tags_to_schema_version(
     semantic_version: str,
     tag: SchemaVersionTagAddModel,
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Add a new tag to a schema version
     """
 
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to add this tag to schema version",
-        )
     try:
         agent.schema.add_tag_to_schema(
             namespace=namespace, name=schema_name, version=semantic_version, tag=tag.tag
@@ -591,7 +540,9 @@ def add_tags_to_schema_version(
             status_code=404,
             detail=f"Schema version {semantic_version} not found for {namespace}/{schema_name}.",
         )
-    return {"message": "Tag added to schema version successfully"}
+    return JSONResponse(
+        {"message": "Tag added to schema version successfully"}, status_code=202
+    )
 
 
 # remove tags from version
@@ -602,18 +553,12 @@ def remove_tags_from_schema_version(
     semantic_version: str,
     tag: str,
     agent: PEPDatabaseAgent = Depends(get_db),
-    list_of_admins: Optional[list] = Depends(get_namespace_access_list),
-    user_name: Optional[str] = Depends(get_user_from_session_info),
+    users_admins=Depends(verify_user_can_write_namespace),
 ):
     """
     Remove a tag from a schema version
     """
 
-    if user_name not in list_of_admins:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to remove this tag from schema version",
-        )
     try:
         agent.schema.remove_tag_from_schema(
             namespace=namespace, name=schema_name, version=semantic_version, tag=tag
@@ -632,4 +577,6 @@ def remove_tags_from_schema_version(
             status_code=404,
             detail=f"Tag {tag} not found for {namespace}/{schema_name}:{tag}.",
         )
-    return {"message": "Tag removed from schema version successfully"}
+    return JSONResponse(
+        {"message": "Tag removed from schema version successfully"}, status_code=202
+    )
