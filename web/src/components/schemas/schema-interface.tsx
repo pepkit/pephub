@@ -83,8 +83,8 @@ export const SchemaInterface = (props: Props) => {
     reset({ schema: currentSchemaRef.current });
   };
 
-  const handleVersionChange = (versionNumber: string) => {
-    setSchemaVersionNumber(versionNumber);
+  const handleVersionChange = () => {
+    // setSchemaVersionNumber(versionNumber);
     // Reset form dirty state when version changes
     if (formState.isDirty) {
       reset({ schema: {} }, { keepDirty: false });

@@ -281,13 +281,17 @@ def verify_user_can_write_namespace(
     if session_info is None:
         raise HTTPException(
             401,
-            f"User must be logged in to write to namespace: '{namespace}'.",
+            f"User must be logged in to write to the namespace: '{namespace}'.",
         )
-    if session_info["login"] != namespace and namespace not in orgs:
+    orgs.append(session_info["login"])
+
+    if namespace not in orgs:
         raise HTTPException(
             403,
-            f"User does not have permission to write to namespace: '{namespace}'.",
+            f"User does not have permission to write or make modifications to the namespace: '{namespace}'.",
         )
+
+    return orgs
 
 
 def verify_user_can_read_project(

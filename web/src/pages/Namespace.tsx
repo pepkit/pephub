@@ -7,8 +7,8 @@ import { PageLayout } from '../components/layout/page-layout';
 import { Pagination } from '../components/layout/pagination';
 import { AddPEPModal } from '../components/modals/add-pep';
 import { DeveloperSettingsModal } from '../components/modals/developer-settings-modal';
-import { DownloadGeo } from '../components/namespace/archive/download-geo';
 import { NamespaceAPIEndpointsModal } from '../components/modals/namespace-api-endpoints';
+import { DownloadGeo } from '../components/namespace/archive/download-geo';
 import { NamespaceBadge } from '../components/namespace/namespace-badge';
 import { NamespacePagePlaceholder } from '../components/namespace/namespace-page-placeholder';
 import { ProjectCard } from '../components/namespace/project-cards/project-card';
@@ -46,11 +46,9 @@ export const NamespacePage = () => {
   const [order, setOrder] = useState(searchParams.get('order') || 'asc');
 
   // pagination for schemas
-  const [schemaLimit, setSchemaLimit] = useState(
-    searchParams.get('schemaLimit') ? parseInt(searchParams.get('schemaLimit')!) : 10,
-  );
+  const [schemaLimit, setSchemaLimit] = useState(searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10);
   const [schemaOffset, setSchemaOffset] = useState(
-    searchParams.get('schemaOffset') ? parseInt(searchParams.get('schemaOffset')!) : 0,
+    searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0,
   );
   const [schemaSearch, setSchemaSearch] = useState<string>(searchParams.get('schemaSearch') || '');
   const [schemaOrderBy, setSchemaOrderBy] = useState(searchParams.get('schemaOrderBy') || 'name');
@@ -92,7 +90,7 @@ export const NamespacePage = () => {
     orderBy: schemaOrderBy,
     // @ts-ignore - just for now, I know this will work fine
     order: schemaOrder,
-  });
+  }, schemaSearch);
 
   const { data: stars, isLoading: starsAreLoading } = useNamespaceStars(namespace!, {}, namespace === user?.login); // only fetch stars if the namespace is the user's
 
@@ -132,7 +130,9 @@ export const NamespacePage = () => {
         {/* breadcrumbs */}
         <div className="fw-bold mt-3">
           <Breadcrumb>
-            <Breadcrumb.Item className='text-dark' href="/">home</Breadcrumb.Item>
+            <Breadcrumb.Item className="text-dark" href="/">
+              home
+            </Breadcrumb.Item>
             <Breadcrumb.Item active>{namespace}</Breadcrumb.Item>
           </Breadcrumb>
         </div>
@@ -166,25 +166,23 @@ export const NamespacePage = () => {
             ) : null}
           </div>
         </div>
-        {namespace !== user?.login && user?.orgs && user?.orgs.some(org => org === namespace) && (
+        {namespace !== user?.login && user?.orgs && user?.orgs.some((org) => org === namespace) && (
           <>
             <p className="mb-0">
-              <span className="fw-bold d-flex">
-                You belong to this organization. 
-              </span>
+              <span className="fw-bold d-flex">You belong to this organization.</span>
             </p>
             <p>
               <span className="fw-bold d-flex">
                 Organizations you belong to:
-                <div className="d-flex align-items-center">
+                <span className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
-                      <a className="dark-link" style={{marginLeft: '0'}} href={`/${org}`}>
+                      <a className="dark-link" style={{ marginLeft: '0' }} href={`/${org}`}>
                         <NamespaceBadge className="me-1" namespace={org} />
                       </a>
                     </Fragment>
                   ))}
-                </div>
+                </span>
               </span>
             </p>
           </>
@@ -194,23 +192,23 @@ export const NamespacePage = () => {
             <p className="mb-0">
               <span className="fw-bold d-flex">
                 Organizations you belong to:
-                <div className="d-flex align-items-center">
+                <span className="d-flex align-items-center">
                   {user?.orgs.map((org) => (
                     <Fragment key={org}>
-                      <a className="dark-link" style={{marginLeft: '0'}} href={`/${org}`}>
+                      <a className="dark-link" style={{ marginLeft: '0' }} href={`/${org}`}>
                         <NamespaceBadge className="me-1" namespace={org} />
                       </a>
                     </Fragment>
                   ))}
-                </div>
+                </span>
               </span>
             </p>
-          {/*<p className="mb-0">*/}
-          {/*  <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}*/}
-          {/*</p>*/}
-          {/*<p className="mb-0">*/}
-          {/*  <span className="fw-bold">Total schemas: {numberWithCommas(schemas?.count || 0)}</span>{' '}*/}
-          {/*</p>*/}
+            {/*<p className="mb-0">*/}
+            {/*  <span className="fw-bold">Total projects: {numberWithCommas(namespaceInfo?.count || 0)}</span>{' '}*/}
+            {/*</p>*/}
+            {/*<p className="mb-0">*/}
+            {/*  <span className="fw-bold">Total schemas: {numberWithCommas(schemas?.count || 0)}</span>{' '}*/}
+            {/*</p>*/}
           </>
         )}
         <div className="mt-3 d-flex">
@@ -282,14 +280,14 @@ export const NamespacePage = () => {
                 search={schemaSearch}
                 setSearch={setSchemaSearch}
               />
-              {schemasFiltered?.length === 0 ? (
+              {schemas?.results.length === 0 ? (
                 <div className="text-center mt-5">
                   <p className="fst-italic text-muted">No schemas found.</p>
                 </div>
               ) : (
-                schemasFiltered.map((s) => <SchemaListCard key={s.schema_name} schema={s} />)
+                schemas?.results.map((s) => <SchemaListCard key={s.schema_name} schema={s} />)
               )}
-              {schemas?.pagination?.total && schemas?.pagination?.total > schemaLimit ? (
+              {schemas?.pagination?.total && (schemas?.pagination?.total > schemaLimit) ? (
                 <Pagination
                   limit={schemaLimit}
                   offset={schemaOffset}
@@ -323,21 +321,20 @@ export const NamespacePage = () => {
               </div>
             )}
           </Fragment>
-        ) : (view === 'archive' && namespace === 'geo') ? (
+        ) : view === 'archive' && namespace === 'geo' ? (
           <Fragment>
             <div className="mt-3">
-              <DownloadGeo namespace={namespace}/>
+              <DownloadGeo namespace={namespace} />
             </div>
           </Fragment>
-        ) : null
-        }
+        ) : null}
         <AddPEPModal defaultNamespace={namespace} show={showAddPEPModal} onHide={() => setShowAddPEPModal(false)} />
         <NamespaceAPIEndpointsModal
           namespace={namespace || ''}
           show={showEndpointsModal}
           onHide={() => setShowEndpointsModal(false)}
         />
-        
+
         <DeveloperSettingsModal show={showSettingsModal} onHide={() => setShowSettingsModal(false)} />
       </PageLayout>
     );

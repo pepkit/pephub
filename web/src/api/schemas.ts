@@ -111,10 +111,17 @@ export const getSchemaByVersion = async (namespace: string, name: string, versio
   return data;
 };
 
-export const getNamespaceSchemas = async (namespace: string, params: SchemaPaginationParams) => {
+export const getNamespaceSchemas = async (namespace: string, params: SchemaPaginationParams, name?: string) => {
   const query = constructSchemaQueryFromPaginationParams(params);
   const url = `${API_BASE}/schemas/${namespace}?${query.toString()}`;
-  const { data } = await axios.get<GetSchemasResponse>(url);
+  const { data } = await axios.get<GetSchemasResponse>(
+    url,
+    {
+      params: {
+        name
+      }
+    }
+  );
   return data;
 };
 
