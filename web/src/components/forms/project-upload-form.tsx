@@ -203,7 +203,7 @@ export const ProjectUploadForm = ({ onHide, defaultNamespace }: Props) => {
                 isPrivate,
                 description,
                 files: uploadFiles,
-                pepSchema: pepSchema || 'databio/pep-2.1.0',
+                pepSchema: pepSchema || 'databio/pep:2.1.0',
               },
               {
                 onSuccess: () => {

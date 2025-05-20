@@ -132,7 +132,7 @@ AUTH_CODE_EXPIRATION = 5 * 60  # seconds
 
 CALLBACK_ENDPOINT = "/auth/callback"
 
-DEFAULT_PEP_SCHEMA = "databio/pep-2.1.0"
+DEFAULT_PEP_SCHEMA = "databio/pep:2.1.0"
 DEFAULT_TAG = "default"
 
 DEFAULT_QDRANT_SCORE_THRESHOLD = (

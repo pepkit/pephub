@@ -194,7 +194,7 @@ async def create_pep(
                     tag=tag,
                     description=description,
                     is_private=is_private,
-                    pep_schema=pep_schema or "databio/pep-2.1.0",
+                    pep_schema=pep_schema or "databio/pep:2.1.0",
                 )
             except ProjectUniqueNameError:
                 raise HTTPException(
