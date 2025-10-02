@@ -7,7 +7,7 @@ This is the publicly available instance of [PEPhub](https://github.com/pepkit/pe
 ### Build the container
 
 ```
-docker build -t pephub.databio.org .
+docker build -f deployment/dockerhub/primary.Dockerfile -t pephub.databio.org .
 ```
 
 ### Run
