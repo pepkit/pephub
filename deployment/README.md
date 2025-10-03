@@ -43,7 +43,7 @@ docker run --rm -p 80:80 \
     --env GH_CLIENT_SECRET=$GH_CLIENT_SECRET \
     --env REDIRECT_URI=$REDIRECT_URI \
     --env SERVER_ENV=$SERVER_ENV \
-    --name pephub pephub
+    --name pephub pephub.databio.org
 ```
 
 3. Visit http://localhost:80 to view the server.
