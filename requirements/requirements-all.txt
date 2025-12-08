@@ -8,12 +8,12 @@ jinja2>=3.1.2
 python-multipart>=0.0.5
 uvicorn
 python-dotenv
-qdrant-client
+qdrant-client>=1.16.0
 requests
 pyjwt[crypto]
 coloredlogs
-fastembed
-numpy<2.0.0
+fastembed>=0.7.4
+numpy>2.0.0
 slowapi
 cachetools>=4.2.4
 # bedms>=0.2.0
