@@ -135,9 +135,11 @@ CALLBACK_ENDPOINT = "/auth/callback"
 DEFAULT_PEP_SCHEMA = "databio/pep:2.1.0"
 DEFAULT_TAG = "default"
 
-DEFAULT_QDRANT_SCORE_THRESHOLD = (
-    0.72  # empirical value, highly dependent on the model used
-)
+# DEFAULT_QDRANT_SCORE_THRESHOLD = (
+#     0.72  # empirical value, highly dependent on the model used
+# )
+
+DEFAULT_QDRANT_SCORE_THRESHOLD = 0.15
 
 ARCHIVE_URL_PATH = "https://cloud2.databio.org/pephub/"
 

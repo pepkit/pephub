@@ -98,10 +98,55 @@ agent = PEPDatabaseAgent(
 )
 
 # sentence_transformer model
+print(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
 embedding_model = Embedding(
     model_name=os.getenv("HF_MODEL", DEFAULT_HF_MODEL), max_length=512
 )
 # embedding_model = None
+
+
+## Qdrant connection
+def parse_boolean_env_var(env_var: str) -> bool:
+    """
+    Helper function to parse a boolean environment variable
+    """
+    return env_var.lower() in ["true", "1", "t", "y", "yes"]
+
+
+def initialize_qdrant_client() -> Union[QdrantClient, None]:
+    """
+    Initialize Qdrant client if enabled
+    """
+
+    if parse_boolean_env_var(os.environ.get("QDRANT_ENABLED", "false")):
+        try:
+            qdrant = QdrantClient(
+                url=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
+                port=os.environ.get("QDRANT_PORT", DEFAULT_QDRANT_PORT),
+                api_key=os.environ.get("QDRANT_API_KEY", None),
+            )
+            qdrant.list_full_snapshots()
+            return qdrant
+        except Exception as e:
+            _LOGGER_PEPHUB.error(f"Error connecting to Qdrant: {e}")
+
+    else:
+        _LOGGER_PEPHUB.warning(
+            "QDRANT_ENABLED is not set to true. Qdrant features will be disabled.\
+            To enable Qdrant, set the environment variable QDRANT_ENABLED to 'true'."
+        )
+    return None
+
+
+qdrant = initialize_qdrant_client()
+
+
+def get_qdrant() -> Union[QdrantClient, None]:
+    """
+    Return connection to qdrant client
+    """
+
+    return qdrant
 
 
 def generate_random_auth_code() -> str:
@@ -335,50 +380,6 @@ def verify_user_can_fork(
         yield
     else:
         raise HTTPException(401, "Unauthorized to fork this repo")
-
-
-def parse_boolean_env_var(env_var: str) -> bool:
-    """
-    Helper function to parse a boolean environment variable
-    """
-    return env_var.lower() in ["true", "1", "t", "y", "yes"]
-
-
-def get_qdrant_enabled() -> bool:
-    """
-    Check if qdrant is enabled
-    """
-    return parse_boolean_env_var(os.environ.get("QDRANT_ENABLED", "false"))
-
-
-def get_qdrant(
-    qdrant_enabled: bool = Depends(get_qdrant_enabled),
-) -> Union[QdrantClient, None]:  # type: ignore
-    """
-    Return connection to qdrant client
-    """
-    # return None if qdrant is not enabled
-    if not qdrant_enabled:
-        try:
-            yield None
-        finally:
-            pass
-    # else try to connect, test connectiona and return client if connection is successful.
-    qdrant = QdrantClient(
-        url=os.environ.get("QDRANT_HOST", DEFAULT_QDRANT_HOST),
-        port=os.environ.get("QDRANT_PORT", DEFAULT_QDRANT_PORT),
-        api_key=os.environ.get("QDRANT_API_KEY", None),
-    )
-    try:
-        # test the connection first
-        qdrant.list_full_snapshots()
-        yield qdrant
-    except ResponseHandlingException as e:
-        print(f"Error getting qdrant client: {e}")
-        yield None
-    finally:
-        # no need to close the connection
-        pass
 
 
 def get_sentence_transformer() -> Embedding:

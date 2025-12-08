@@ -1,8 +1,8 @@
 # -------------
 # BUILD BACKEND
 # -------------
-FROM python:3.10-slim
-LABEL authors="Nathan LeRoy, Nathan Sheffield"
+FROM python:3.13-slim
+LABEL authors="Nathan LeRoy, Nathan Sheffield, Oleksandr Khoroshevskyi"
 
 RUN apt-get update
 RUN apt-get install -y gcc
@@ -17,6 +17,7 @@ WORKDIR /app
 COPY . /app
 
 RUN python -m pip install --upgrade pip
-RUN pip install -r requirements/requirements-all.txt --no-cache-dir
+RUN python -m pip install uv
+RUN uv pip install -r requirements/requirements-all.txt --no-cache-dir --system
 
 CMD ["uvicorn", "pephub.main:app", "--host", "0.0.0.0", "--port", "80"]

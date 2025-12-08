@@ -143,15 +143,21 @@ export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setO
   );
 };
 
+type NamespaceHit = {
+  namespace: string;
+  number_of_projects: number;
+  number_of_samples: number;
+};
+
 interface NamespaceProps {
-  hits: string[];
+  hits: NamespaceHit[];
 }
 
 export const NamespaceSearchResults: FC<NamespaceProps> = ({ hits }) => {
   if (hits.length === 0) {
     return (
       <div className="text-muted d-flex flex-column align-items-center justify-content-center py-4">
-        <p className="mb-1">No namespaces found :(</p>
+        <p className="mb-1">No namespaces with current query, and offset(</p>
         <p>Try broadening your search</p>
       </div>
     );
@@ -160,11 +166,12 @@ export const NamespaceSearchResults: FC<NamespaceProps> = ({ hits }) => {
     <Fragment>
       <h2 className="fw-bold">Namespaces</h2>
       {hits.map((hit) => (
-        <div key={hit} className="d-flex flex-row align-items-center mt-2">
-          <GitHubAvatar namespace={hit} height={30} width={30} />
-          <a href={`/${hit}`} className="ms-1">
-            <h5 className="fw-bold m-0">{hit}</h5>
+        <div key={hit.namespace} className="d-flex flex-row align-items-center mt-2">
+          <GitHubAvatar namespace={hit.namespace} height={30} width={30} />
+          <a href={`/${hit.namespace}`} className="ms-1">
+            <h5 className="fw-bold m-0">{hit.namespace}</h5>
           </a>
+          <small className="text-muted ms-2">{hit.number_of_projects} projects</small>
         </div>
       ))}
     </Fragment>

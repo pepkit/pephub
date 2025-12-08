@@ -1,8 +1,10 @@
 from typing import List, Optional, Dict, Union
 
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import UpdateItems, ListOfNamespaceInfo
+from pepdbagent.models import UpdateItems, ListOfNamespaceInfo, Namespace
 from pydantic import BaseModel, ConfigDict, Field
+
+from qdrant_client.models import ScoredPoint
 
 from ..const import DEFAULT_QDRANT_SCORE_THRESHOLD
 
@@ -22,6 +24,15 @@ class SearchQuery(BaseModel):
     limit: Optional[int] = 100
     offset: Optional[int] = 0
     score_threshold: Optional[float] = DEFAULT_QDRANT_SCORE_THRESHOLD
+
+
+class SearchReturnModel(BaseModel):
+    query: str
+    results: List[ScoredPoint]
+    namespace_hits: List[Namespace]
+    limit: int
+    offset: int
+    total: int
 
 
 class RawValidationQuery(BaseModel):
