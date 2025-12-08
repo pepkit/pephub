@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { SearchHit } from '../../types';
+import { NamespaceHit } from '../components/search/search-results';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
 const API_BASE = `${API_HOST}/api/v1`;
@@ -8,7 +9,7 @@ const API_BASE = `${API_HOST}/api/v1`;
 export interface SearchResult {
   query: string;
   results: SearchHit[];
-  namespace_hits: string[];
+  namespace_hits: NamespaceHit[];
   limit: number;
   offset: number;
   total: number;

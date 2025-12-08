@@ -143,7 +143,7 @@ export const ProjectSearchResults: FC<SearchResultProps> = ({ hits, offset, setO
   );
 };
 
-type NamespaceHit = {
+export type NamespaceHit = {
   namespace: string;
   number_of_projects: number;
   number_of_samples: number;
