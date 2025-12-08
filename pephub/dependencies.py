@@ -98,7 +98,7 @@ agent = PEPDatabaseAgent(
 )
 
 # sentence_transformer model
-print(os.getenv("HF_MODEL", DEFAULT_HF_MODEL))
+_LOGGER_PEPHUB.info(f"HF MODEL IN USE: {os.getenv('HF_MODEL', DEFAULT_HF_MODEL)}")
 embedding_model = Embedding(
     model_name=os.getenv("HF_MODEL", DEFAULT_HF_MODEL), max_length=512
 )

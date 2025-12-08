@@ -157,7 +157,7 @@ export const NamespaceSearchResults: FC<NamespaceProps> = ({ hits }) => {
   if (hits.length === 0) {
     return (
       <div className="text-muted d-flex flex-column align-items-center justify-content-center py-4">
-        <p className="mb-1">No namespaces with current query, and offset(</p>
+        <p className="mb-1">No namespaces found with current query, and offset(</p>
         <p>Try broadening your search</p>
       </div>
     );
