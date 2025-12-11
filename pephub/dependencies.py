@@ -20,10 +20,11 @@ from pepdbagent.exceptions import ProjectNotFoundError
 from pepdbagent.models import AnnotationModel, Namespace, ListOfNamespaceInfo
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
+from sentence_transformers import SparseEncoder
 from qdrant_client.http.exceptions import ResponseHandlingException
 
 from .const import (
-    DEFAULT_HF_MODEL,
+    DENSE_ENCODER_MODEL,
     DEFAULT_POSTGRES_DB,
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -32,12 +33,14 @@ from .const import (
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
     JWT_SECRET,
+    SPARSE_ENCODER_MODEL,
+    PKG_NAME,
 )
 from .helpers import jwt_encode_user_data
 from .routers.models import ForkRequest
 from .developer_keys import dev_key_handler
 
-_LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
+_LOGGER_PEPHUB = logging.getLogger(PKG_NAME)
 
 load_dotenv()
 
@@ -98,11 +101,20 @@ agent = PEPDatabaseAgent(
 )
 
 # sentence_transformer model
-_LOGGER_PEPHUB.info(f"HF MODEL IN USE: {os.getenv('HF_MODEL', DEFAULT_HF_MODEL)}")
+_LOGGER_PEPHUB.info(f"HF MODEL IN USE: {os.getenv('HF_MODEL', DENSE_ENCODER_MODEL)}")
 embedding_model = Embedding(
-    model_name=os.getenv("HF_MODEL", DEFAULT_HF_MODEL), max_length=512
+    model_name=os.getenv("HF_MODEL", DENSE_ENCODER_MODEL), max_length=512
 )
 # embedding_model = None
+
+token = os.environ.get("HF_TOKEN", None)
+hf_model_sparse = os.environ.get("HF_MODEL_SPARSE", SPARSE_ENCODER_MODEL)
+if token is None:
+    sparse_model = None
+    _LOGGER_PEPHUB.warning("No HF_TOKEN provided, sparce model disabled.")
+else:
+    sparse_model = SparseEncoder(hf_model_sparse, token=token)
+    _LOGGER_PEPHUB.info(f"Sparce model in use: {hf_model_sparse}")
 
 
 ## Qdrant connection
@@ -387,6 +399,13 @@ def get_sentence_transformer() -> Embedding:
     Return sentence transformer encoder
     """
     return embedding_model
+
+
+def get_sparse_model() -> Union[SparseEncoder, None]:
+    """
+    Return sparce encoder model
+    """
+    return sparse_model
 
 
 def get_namespace_info(

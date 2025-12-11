@@ -7,6 +7,17 @@ from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.models import NamespaceList
 from qdrant_client import QdrantClient
+from qdrant_client.models import (
+    SparseVector,
+    Prefetch,
+    FusionQuery,
+    Fusion,
+    SearchParams,
+    FieldCondition,
+    MatchValue,
+    Filter,
+)
+from sentence_transformers import SparseEncoder
 
 from ....const import DEFAULT_QDRANT_COLLECTION_NAME
 from ....dependencies import (
@@ -14,6 +25,7 @@ from ....dependencies import (
     get_namespace_access_list,
     get_qdrant,
     get_sentence_transformer,
+    get_sparse_model,
 )
 from ...models import SearchQuery, SearchReturnModel
 from qdrant_client.models import ScoredPoint
@@ -42,6 +54,7 @@ async def search_for_pep(
     query: SearchQuery,
     qdrant: QdrantClient = Depends(get_qdrant),
     model: Embedding = Depends(get_sentence_transformer),
+    model_sparce: SparseEncoder = Depends(get_sparse_model),
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access: List[str] = Depends(get_namespace_access_list),
 ) -> SearchReturnModel:
@@ -59,14 +72,55 @@ async def search_for_pep(
     ).results
 
     if qdrant is not None:
-        query_vec = list(model.embed(query.query))[0]
+        dense_query = list(list(model.embed(query.query))[0])
+
+        if model_sparce:
+            sparse_result = model_sparce.encode(query.query).coalesce()
+            sparse_embeddings = SparseVector(
+                indices=sparse_result.indices().tolist()[0],
+                values=sparse_result.values().tolist(),
+            )
+        else:
+            sparse_embeddings = None
+
+        should_statement = [
+            FieldCondition(
+                key="name",
+                match=MatchValue(value=query.query),
+            )
+        ]
+
+        if sparse_embeddings:
+            hybrid_query = [
+                # Dense retrieval: semantic understanding
+                Prefetch(query=dense_query, using="dense", limit=100),
+                # Sparse retrieval: exact technical term matching
+                Prefetch(query=sparse_embeddings, using="sparse", limit=100),
+                # Exact match retrieval: precise filtering
+                Prefetch(filter=Filter(must=should_statement), limit=10),
+            ]
+        else:
+            hybrid_query = [
+                # Dense retrieval: semantic understanding
+                Prefetch(query=dense_query, using="dense", limit=100),
+                # Exact match retrieval: precise filtering
+                Prefetch(filter=Filter(must=should_statement), limit=10),
+            ]
 
         vector_results = qdrant.query_points(
-            collection_name=(query.collection_name or DEFAULT_QDRANT_COLLECTION_NAME),
-            query=query_vec,
+            collection_name=DEFAULT_QDRANT_COLLECTION_NAME,
             limit=limit,
             offset=offset,
-            score_threshold=score_threshold,
+            prefetch=hybrid_query,
+            query=FusionQuery(fusion=Fusion.RRF),
+            with_payload=True,
+            with_vectors=False,
+            search_params=SearchParams(
+                exact=True,
+            ),
+            # query_filter=(
+            #     models.Filter(must=should_statement) if should_statement else None
+            # ),
         ).points
 
         return SearchReturnModel(
