@@ -116,6 +116,7 @@ else:
     sparse_model = SparseEncoder(hf_model_sparse, token=token)
     _LOGGER_PEPHUB.info(f"Sparce model in use: {hf_model_sparse}")
 
+
 ## Qdrant connection
 def parse_boolean_env_var(env_var: str) -> bool:
     """
@@ -398,6 +399,7 @@ def get_sentence_transformer() -> Embedding:
     Return sentence transformer encoder
     """
     return embedding_model
+
 
 def get_sparse_model() -> Union[SparseEncoder, None]:
     """

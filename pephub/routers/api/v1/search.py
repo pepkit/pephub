@@ -7,7 +7,16 @@ from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.models import NamespaceList
 from qdrant_client import QdrantClient
-from qdrant_client.models import SparseVector, Prefetch, FusionQuery, Fusion, SearchParams, FieldCondition, MatchValue, Filter
+from qdrant_client.models import (
+    SparseVector,
+    Prefetch,
+    FusionQuery,
+    Fusion,
+    SearchParams,
+    FieldCondition,
+    MatchValue,
+    Filter,
+)
 from sentence_transformers import SparseEncoder
 
 from ....const import DEFAULT_QDRANT_COLLECTION_NAME
@@ -69,7 +78,7 @@ async def search_for_pep(
             sparse_result = model_sparce.encode(query.query).coalesce()
             sparse_embeddings = SparseVector(
                 indices=sparse_result.indices().tolist()[0],
-                values=sparse_result.values().tolist()
+                values=sparse_result.values().tolist(),
             )
         else:
             sparse_embeddings = None
@@ -88,14 +97,14 @@ async def search_for_pep(
                 # Sparse retrieval: exact technical term matching
                 Prefetch(query=sparse_embeddings, using="sparse", limit=100),
                 # Exact match retrieval: precise filtering
-                Prefetch(filter=Filter(must=should_statement), limit=10)
+                Prefetch(filter=Filter(must=should_statement), limit=10),
             ]
         else:
             hybrid_query = [
                 # Dense retrieval: semantic understanding
                 Prefetch(query=dense_query, using="dense", limit=100),
                 # Exact match retrieval: precise filtering
-                Prefetch(filter=Filter(must=should_statement), limit=10)
+                Prefetch(filter=Filter(must=should_statement), limit=10),
             ]
 
         vector_results = qdrant.query_points(
