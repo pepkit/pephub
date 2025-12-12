@@ -23,6 +23,10 @@
           "name": "POSTGRES_HOST"
         },
         {
+          "valueFrom": "HF_TOKEN",
+          "name": "HF_TOKEN"
+        },
+        {
           "valueFrom": "PEPHUB_POSTGRES_DB",
           "name": "POSTGRES_DB"
         },
