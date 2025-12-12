@@ -54,7 +54,7 @@ async def search_for_pep(
     query: SearchQuery,
     qdrant: QdrantClient = Depends(get_qdrant),
     model: Embedding = Depends(get_sentence_transformer),
-    model_sparce: SparseEncoder = Depends(get_sparse_model),
+    model_sparse: SparseEncoder = Depends(get_sparse_model),
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access: List[str] = Depends(get_namespace_access_list),
 ) -> SearchReturnModel:
@@ -74,8 +74,8 @@ async def search_for_pep(
     if qdrant is not None:
         dense_query = list(list(model.embed(query.query))[0])
 
-        if model_sparce:
-            sparse_result = model_sparce.encode(query.query).coalesce()
+        if model_sparse:
+            sparse_result = model_sparse.encode(query.query).coalesce()
             sparse_embeddings = SparseVector(
                 indices=sparse_result.indices().tolist()[0],
                 values=sparse_result.values().tolist(),

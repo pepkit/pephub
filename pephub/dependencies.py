@@ -111,10 +111,10 @@ token = os.environ.get("HF_TOKEN", None)
 hf_model_sparse = os.environ.get("HF_MODEL_SPARSE", SPARSE_ENCODER_MODEL)
 if token is None:
     sparse_model = None
-    _LOGGER_PEPHUB.warning("No HF_TOKEN provided, sparce model disabled.")
+    _LOGGER_PEPHUB.warning("No HF_TOKEN provided, sparse model disabled.")
 else:
     sparse_model = SparseEncoder(hf_model_sparse, token=token)
-    _LOGGER_PEPHUB.info(f"Sparce model in use: {hf_model_sparse}")
+    _LOGGER_PEPHUB.info(f"Sparse model in use: {hf_model_sparse}")
 
 
 ## Qdrant connection
@@ -403,7 +403,7 @@ def get_sentence_transformer() -> Embedding:
 
 def get_sparse_model() -> Union[SparseEncoder, None]:
     """
-    Return sparce encoder model
+    Return sparse encoder model
     """
     return sparse_model
 
