@@ -17,3 +17,4 @@ numpy>2.0.0
 slowapi
 cachetools>=4.2.4
 # bedms>=0.2.0
+sentence-transformers>=5.2.0
