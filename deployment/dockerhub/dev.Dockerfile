@@ -18,6 +18,7 @@ COPY . /app
 
 RUN python -m pip install --upgrade pip
 RUN python -m pip install uv
+RUN uv pip install torch --index-url https://download.pytorch.org/whl/cpu --system
 RUN uv pip install -r requirements/requirements-all.txt --no-cache-dir --system
 
 CMD ["uvicorn", "pephub.main:app", "--host", "0.0.0.0", "--port", "80"]
