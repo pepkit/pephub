@@ -65,7 +65,7 @@ BLANK_PEP_SAMPLE_TABLE = pd.DataFrame(
 # figure 4
 # great speed to accuracy tradeoff
 DENSE_ENCODER_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-SPARSE_ENCODER_MODEL = "naver/splade-v3"
+SPARSE_ENCODER_MODEL = "prithivida/Splade_PP_en_v2"
 
 EIDO_TEMPLATES_DIRNAME = "templates/eido"
 EIDO_TEMPLATES_PATH = os.path.join(
