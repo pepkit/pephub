@@ -22,7 +22,7 @@ class SearchQuery(BaseModel):
     query: str
     limit: Optional[int] = 100
     offset: Optional[int] = 0
-    score_threshold: Optional[float] = DEFAULT_QDRANT_SCORE_THRESHOLD
+    # score_threshold: Optional[float] = DEFAULT_QDRANT_SCORE_THRESHOLD
 
 
 class SearchReturnModel(BaseModel):

@@ -64,7 +64,6 @@ async def search_for_pep(
     """
     limit = query.limit
     offset = query.offset
-    score_threshold = query.score_threshold
 
     # get namespaces:
     namespaces: list[Namespace] = agent.namespace.get(
@@ -83,7 +82,7 @@ async def search_for_pep(
         else:
             sparse_embeddings = None
 
-        should_statement = [
+        must_statement = [
             FieldCondition(
                 key="name",
                 match=MatchValue(value=query.query),
@@ -93,18 +92,18 @@ async def search_for_pep(
         if sparse_embeddings:
             hybrid_query = [
                 # Dense retrieval: semantic understanding
-                Prefetch(query=dense_query, using="dense", limit=100),
+                Prefetch(query=dense_query, using="dense", limit=limit),
                 # Sparse retrieval: exact technical term matching
-                Prefetch(query=sparse_embeddings, using="sparse", limit=100),
+                Prefetch(query=sparse_embeddings, using="sparse", limit=limit),
                 # Exact match retrieval: precise filtering
-                Prefetch(filter=Filter(must=should_statement), limit=10),
+                Prefetch(filter=Filter(must=must_statement), limit=10),
             ]
         else:
             hybrid_query = [
                 # Dense retrieval: semantic understanding
-                Prefetch(query=dense_query, using="dense", limit=100),
+                Prefetch(query=dense_query, using="dense", limit=limit),
                 # Exact match retrieval: precise filtering
-                Prefetch(filter=Filter(must=should_statement), limit=10),
+                Prefetch(filter=Filter(must=must_statement), limit=10),
             ]
 
         vector_results = qdrant.query_points(
