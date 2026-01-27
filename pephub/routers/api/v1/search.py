@@ -92,16 +92,16 @@ async def search_for_pep(
         if sparse_embeddings:
             hybrid_query = [
                 # Dense retrieval: semantic understanding
-                Prefetch(query=dense_query, using="dense", limit=limit),
+                Prefetch(query=dense_query, using="dense", limit=limit + offset),
                 # Sparse retrieval: exact technical term matching
-                Prefetch(query=sparse_embeddings, using="sparse", limit=limit),
+                Prefetch(query=sparse_embeddings, using="sparse", limit=limit + offset),
                 # Exact match retrieval: precise filtering
                 Prefetch(filter=Filter(must=must_statement), limit=10),
             ]
         else:
             hybrid_query = [
                 # Dense retrieval: semantic understanding
-                Prefetch(query=dense_query, using="dense", limit=limit),
+                Prefetch(query=dense_query, using="dense", limit=limit + offset),
                 # Exact match retrieval: precise filtering
                 Prefetch(filter=Filter(must=must_statement), limit=10),
             ]
