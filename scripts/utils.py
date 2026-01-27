@@ -83,8 +83,6 @@ def extract_project_file_name(path_to_proj: str) -> str:
     # catch no .pep.yaml exists
     except FileNotFoundError:
         if not os.path.exists(f"{path_to_proj}/project_config.yaml"):
-            print(
-                f"No project config file found for {path_to_proj}.\
-                This project will not be accessible by pephub. "
-            )
+            print(f"No project config file found for {path_to_proj}.\
+                This project will not be accessible by pephub. ")
         return "project_config.yaml"

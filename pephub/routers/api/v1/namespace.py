@@ -85,6 +85,7 @@ async def get_namespace_projects(
     limit: int = 10,
     offset: int = 0,
     query: str = None,
+    tag: str = None,
     admin_list: List[str] = Depends(get_namespace_access_list),
     order_by: Optional[
         Literal["update_date", "name", "submission_date", "stars"]
@@ -113,6 +114,7 @@ async def get_namespace_projects(
         search_result = agent.annotation.get(
             query=query,
             namespace=namespace,
+            tag=tag,
             limit=limit,
             offset=offset,
             admin=admin_list,
@@ -126,6 +128,7 @@ async def get_namespace_projects(
     else:
         search_result = agent.annotation.get(
             namespace=namespace,
+            tag=tag,
             limit=limit,
             offset=offset,
             admin=admin_list,
