@@ -35,7 +35,7 @@ export const ProjectDescription = () => {
         <div ref={projectDescriptionRef} className="col-md-12" style={{ maxHeight: MAX_DESC_HEIGHT, overflow: 'hidden' }}>
           <Markdown>
             {currentHistoryId !== null
-              ? YAML.parse(projectHistoryQuery.data?._config || '')?.description || 'No description'
+              ? YAML.parse(projectHistoryQuery.data?.config || '')?.description || 'No description'
               : projectInfo?.description || 'No description'}
           </Markdown>
         </div>

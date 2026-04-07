@@ -127,9 +127,9 @@ export type ProjectAllHistory = {
 };
 
 export type ProjectHistory = {
-  _config: string;
-  _subsample_list: any[];
-  _sample_dict: Sample[];
+  config: string;
+  subsamples: any[];
+  samples: Sample[];
 };
 
 export interface PaginationResult {

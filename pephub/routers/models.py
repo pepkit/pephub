@@ -74,25 +74,25 @@ class JWTDeviceTokenResponse(BaseModel):
 
 
 class ProjectRawModel(BaseModel):
-    config: dict = Field(alias="_config")
-    subsample_list: Optional[list] = Field(alias="_subsample_list", default=None)
-    sample_list: list[dict] = Field(alias="_sample_dict")
+    config: dict
+    subsamples: Optional[list] = None
+    samples: list[dict]
 
     model_config = ConfigDict(populate_by_name=True)
 
 
 class ProjectHistoryResponse(BaseModel):
-    config: str = Field(alias="_config")
-    subsample_list: Optional[list] = Field(alias="_subsample_list", default=None)
-    sample_list: list[dict] = Field(alias="_sample_dict")
+    config: str
+    subsamples: Optional[list] = None
+    samples: list[dict]
 
     model_config = ConfigDict(populate_by_name=True)
 
 
 class ProjectRawRequest(BaseModel):
     config: dict
-    subsample_list: Optional[List[List[dict]]] = None
-    sample_list: List[dict]
+    subsamples: Optional[List[List[dict]]] = None
+    samples: List[dict]
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -120,7 +120,7 @@ class DeveloperKey(BaseModel):
 
 class VersionResponseModel(BaseModel):
     pephub_version: str
-    peppy_version: str
+    peprs_version: str
     python_version: str
     fastapi_version: str
     pepdbagent_version: str

@@ -1,10 +1,9 @@
 import logging
 from typing import Annotated, Any, Literal, Dict, List, Optional, Union
 
-import eido
 import numpy as np
 import pandas as pd
-import peppy
+import peprs
 import yaml
 from dotenv import load_dotenv
 from fastapi import APIRouter, Body, Depends, Query
@@ -29,7 +28,7 @@ from pepdbagent.models import (
     ProjectViews,
     HistoryAnnotationModel,
 )
-from peppy.const import SAMPLE_RAW_DICT_KEY
+from peprs.const import SAMPLE_RAW_DICT_KEY
 
 # from ....const import SAMPLE_CONVERSION_FUNCTIONS
 from ....dependencies import (
@@ -262,25 +261,23 @@ async def get_pep_samples(
             )
 
         if isinstance(proj, dict):
-            if len(proj["_sample_dict"]) > MAX_PROCESSED_PROJECT_SIZE:
+            if len(proj[SAMPLE_RAW_DICT_KEY]) > MAX_PROCESSED_PROJECT_SIZE:
                 raise HTTPException(
                     status_code=400,
                     detail=f"Project is too large. View raw samples, or create a view. Limit is {MAX_PROCESSED_PROJECT_SIZE} samples.",
                 )
-            proj = peppy.Project.from_dict(proj)
+            proj = peprs.Project.from_dict(proj)
 
         if format == "json":
             return {
                 "samples": [sample.to_dict() for sample in proj.samples],
             }
         elif format == "csv":
-            return PlainTextResponse(eido.convert_project(proj, "csv")["samples"])
+            return PlainTextResponse(proj.to_csv_string())
         elif format == "yaml":
-            return PlainTextResponse(
-                eido.convert_project(proj, "yaml-samples")["samples"]
-            )
+            return PlainTextResponse(proj.to_yaml_string())
         elif format == "basic":
-            return eido.convert_project(proj, "basic")
+            return proj.to_dict()
 
     if raw:
         df = pd.DataFrame(proj[SAMPLE_RAW_DICT_KEY])
@@ -289,12 +286,12 @@ async def get_pep_samples(
             items=df.replace({np.nan: None}).to_dict(orient="records"),
         )
     if isinstance(proj, dict):
-        if len(proj["_sample_dict"]) > MAX_PROCESSED_PROJECT_SIZE:
+        if len(proj[SAMPLE_RAW_DICT_KEY]) > MAX_PROCESSED_PROJECT_SIZE:
             raise HTTPException(
                 status_code=400,
                 detail=f"Project is too large. View raw samples, or create a view. Limit is {MAX_PROCESSED_PROJECT_SIZE} samples.",
             )
-        proj = peppy.Project.from_dict(proj)
+        proj = peprs.Project.from_dict(proj)
     return [sample.to_dict() for sample in proj.samples]
 
 
@@ -500,7 +497,7 @@ async def delete_sample(
 
 @project.get("/subsamples", response_model=SamplesResponseModel)
 async def get_subsamples_endpoint(
-    subsamples: peppy.Project = Depends(get_subsamples),
+    subsamples: list = Depends(get_subsamples),
     download: bool = False,
 ):
     """
@@ -543,11 +540,8 @@ async def convert_pep(
     format: Optional[str] = "plain",
 ):
     """
-    Convert a PEP to a specific format, f. For a list of available formats/filters,
-    see /eido/filters.
-
-    See, http://eido.databio.org/en/latest/filters/#convert-a-pep-into-an-alternative-format-with-a-filter
-    for more information.
+    Convert a PEP to a specific format. Supported filters are: basic, csv, yaml,
+    yaml-samples, json.
 
     Don't have a namespace, or project?
 
@@ -559,18 +553,26 @@ async def convert_pep(
     """
     # default to basic
     if filter is None:
-        filter = "basic"  # default to basic
+        filter = "basic"
 
-    # validate filter exists
-    filter_list = eido.get_available_pep_filters()
-    if filter not in filter_list:
+    # eido filter infrastructure is not in peprs; emulate the previously supported
+    # filters using peprs Project conversion methods.
+    available_filters = ["basic", "csv", "yaml", "yaml-samples", "json"]
+    if filter not in available_filters:
         raise HTTPException(
-            400, f"Unknown filter '{filter}'. Available filters: {filter_list}"
+            400, f"Unknown filter '{filter}'. Available filters: {available_filters}"
         )
 
-    # generate result
-    peppy_project = peppy.Project.from_dict(proj)
-    conv_result = eido.run_filter(peppy_project, filter, verbose=False)
+    peprs_project = peprs.Project.from_dict(proj)
+
+    if filter == "basic":
+        conv_result = {"project_config.yaml": peprs_project.to_yaml_string()}
+    elif filter == "csv":
+        conv_result = {"sample_table.csv": peprs_project.to_csv_string()}
+    elif filter in ("yaml", "yaml-samples"):
+        conv_result = {"sample_table.yaml": peprs_project.to_yaml_string()}
+    else:  # json
+        conv_result = {"project.json": peprs_project.to_json_string()}
 
     if format == "plain":
         return_str = "\n".join([conv_result[k] for k in conv_result])
@@ -996,7 +998,7 @@ def get_project_history_by_id(
             with_id=True,
         )
         # convert the config to a yaml string
-        project_at_history["_config"] = yaml.dump(project_at_history["_config"])
+        project_at_history["config"] = yaml.dump(project_at_history["config"])
         return project_at_history
 
     except ProjectNotFoundError:

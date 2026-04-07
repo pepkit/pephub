@@ -253,7 +253,7 @@ export const ProjectInterface = (props: Props) => {
                     view !== undefined
                       ? sampleListToArrays(viewSamples)
                       : currentHistoryId
-                      ? sampleListToArrays(historyData?._sample_dict || [])
+                      ? sampleListToArrays(historyData?.samples || [])
                       : newSamples
                   }
                   // height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
@@ -272,7 +272,7 @@ export const ProjectInterface = (props: Props) => {
                   onChange={(subsamples) => {
                     onChange(subsamples);
                   }}
-                  data={currentHistoryId ? sampleListToArrays(historyData?._subsample_list[0] || []) : newSubsamples}
+                  data={currentHistoryId ? sampleListToArrays(historyData?.subsamples?.[0] || []) : newSubsamples}
                   // height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                   readOnly={!userCanEdit}
                 />
@@ -285,7 +285,7 @@ export const ProjectInterface = (props: Props) => {
               name="config"
               render={({ field: { onChange } }) => (
                 <ProjectConfigEditor
-                  value={currentHistoryId ? historyData?._config || '' : newConfig}
+                  value={currentHistoryId ? historyData?.config || '' : newConfig}
                   setValue={(val) => {
                     onChange(val);
                   }}

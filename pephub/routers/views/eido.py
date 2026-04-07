@@ -1,15 +1,16 @@
 from platform import python_version
 
-import eido
 import jinja2
+import requests
+import yaml
 from dotenv import load_dotenv
 from fastapi import APIRouter, Request
+from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse
-from peppy import __version__ as peppy_version
 from starlette.templating import Jinja2Templates
 
 from ..._version import __version__ as pephub_version
-from ...const import EIDO_TEMPLATES_PATH
+from ...const import EIDO_TEMPLATES_PATH, peprs_version
 
 load_dotenv()
 
@@ -18,7 +19,7 @@ je = jinja2.Environment(loader=jinja2.FileSystemLoader(EIDO_TEMPLATES_PATH))
 
 ALL_VERSIONS = {
     "pephub_version": pephub_version,
-    "peppy_version": peppy_version,
+    "peprs_version": peprs_version,
     "python_version": python_version(),
     "api_version": 1,
 }
@@ -35,7 +36,13 @@ async def get_schema(request: Request, namespace: str, project: str):
     # endpoint to schema.databio.org/...
     # like pipelines/ProseqPEP.yaml
 
-    schema = eido.read_schema(f"http://schema.databio.org/{namespace}/{project}")
+    # peprs.eido has no read_schema helper, so fetch and parse the YAML directly.
+    try:
+        resp = requests.get(f"http://schema.databio.org/{namespace}/{project}")
+        resp.raise_for_status()
+        schema = yaml.safe_load(resp.text)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Schema not found")
 
     return templates.TemplateResponse(
         "schema.html",

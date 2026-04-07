@@ -24,7 +24,7 @@ const Footer: FC = () => {
         <div className="d-flex flex-column">
           <div>
             <span className="badge rounded-pill bg-secondary me-1">pephub {data?.pephub_version || ''}</span>
-            <span className="badge rounded-pill bg-secondary me-1">peppy {data?.peppy_version || ''}</span>
+            <span className="badge rounded-pill bg-secondary me-1">peprs {data?.peprs_version || ''}</span>
             <span className="badge rounded-pill bg-secondary me-1">Python {data?.python_version || ''}</span>
             <span className="badge rounded-pill bg-secondary me-1">pepdbagent {data?.pepdbagent_version || ''}</span>
           </div>
