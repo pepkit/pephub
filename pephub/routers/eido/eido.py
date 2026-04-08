@@ -64,6 +64,9 @@ async def get_schema(request: Request, namespace: str, project: str):
     return schema
 
 
+# Note: The pephub web UI now runs validation client-side via the
+# @pepkit/peprs WASM bindings. This server-side endpoint is kept for
+# programmatic/API consumers. See validation_wasm_plan.md.
 @router.post("/validate")
 async def validate(
     # accept both pep_registry and pep_files, both should be optional

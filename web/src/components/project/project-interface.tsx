@@ -25,6 +25,8 @@ import { ProjectValidationAndEditButtons } from './project-validation-and-edit-b
 import { StandardizeMetadataModal } from '../modals/standardize-metadata';
 import { useStandardizeModalStore } from '../../hooks/stores/useStandardizeModalStore'
 import { useSchemaVersions } from '../../hooks/queries/useSchemaVersions';
+import { useSchemaJson } from '../../hooks/queries/useSchemaJson';
+import { useClientSidePepValidation } from '../../hooks/useClientSidePepValidation';
 
 type Props = {
   projectConfig: ReturnType<typeof useProjectConfig>['data'];
@@ -89,6 +91,37 @@ export const ProjectInterface = (props: Props) => {
   const newSamples = projectUpdates.watch('samples');
   const newSubsamples = projectUpdates.watch('subsamples');
   const newConfig = projectUpdates.watch('config');
+
+  // Client-side live validation via peprs WASM.
+  const { data: schemaJson } = useSchemaJson(projectInfo?.pep_schema);
+
+  const liveValidationInput = (() => {
+    try {
+      const samples = arraysToSampleList(newSamples || [], 'Sample') as unknown as Record<string, unknown>[];
+      const subsamplesParsed = newSubsamples && newSubsamples.length > 1
+        ? [arraysToSampleList(newSubsamples, 'Subsample') as unknown as Record<string, unknown>[]]
+        : undefined;
+      return { samples, subsamples: subsamplesParsed, parseError: undefined as string | undefined };
+    } catch (e) {
+      return {
+        samples: undefined,
+        subsamples: undefined,
+        parseError: e instanceof Error ? e.message : String(e),
+      };
+    }
+  })();
+
+  const { isValidating, result: validationResult } = useClientSidePepValidation({
+    configYaml: newConfig,
+    samples: liveValidationInput.samples,
+    subsamples: liveValidationInput.subsamples,
+    schema: schemaJson,
+    enabled: !!schemaJson && !liveValidationInput.parseError,
+  });
+
+  const effectiveValidationResult = liveValidationInput.parseError
+    ? { state: 'error' as const, message: liveValidationInput.parseError }
+    : validationResult;
 
   const userCanEdit = projectInfo && canEdit(user, projectInfo);
 
@@ -175,11 +208,9 @@ export const ProjectInterface = (props: Props) => {
           ctrlKey = e.ctrlKey;
           break;
       }
-      // SAVE (ctrl + s)
+      // SAVE (ctrl + s) — only when the form is actually dirty.
       if (ctrlKey && e.key === 's') {
-        if (true && !isSubmitting) {
-          // TODO: why does this not work in production?
-          // if (projectUpdates.formState.isDirty && !isSubmitting) {
+        if (projectUpdates.formState.isDirty && !isSubmitting) {
           e.preventDefault();
           handleSubmit();
         }
@@ -229,13 +260,13 @@ export const ProjectInterface = (props: Props) => {
     <Fragment>
         <div className="pt-0 px-2 bg-body-secondary bg-opacity-25" style={{ flex: '0 0 3.5em' }}>
           <ProjectValidationAndEditButtons
-            isDirty={true}
-            // TODO: why does this not work in production?
-            // isDirty={projectUpdates.formState.isDirty}
+            isDirty={projectUpdates.formState.isDirty}
             isUpdatingProject={isSubmitting}
             reset={projectUpdates.reset}
             handleSubmit={handleSubmit}
             filteredSamples={filteredSamples || []}
+            validationResult={effectiveValidationResult}
+            isValidating={isValidating}
           />
         </div>
         <div ref={projectDataRef} className='d-flex flex-column' style={{flex: 'auto'}}>
