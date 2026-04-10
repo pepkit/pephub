@@ -150,13 +150,34 @@ export const validatePep = async (
   let hasProject = false;
   let hasSamples = false;
   const messages: string[] = [];
+
+  // Group sample errors by message so we don't repeat the same line
+  // hundreds of times for large projects.
+  const sampleErrorGroups = new Map<string, string[]>();
   for (const err of rawErrors) {
     if (err.sample_name) {
       hasSamples = true;
-      messages.push(`${err.message} (sample: ${err.sample_name})`);
+      const existing = sampleErrorGroups.get(err.message);
+      if (existing) {
+        existing.push(err.sample_name);
+      } else {
+        sampleErrorGroups.set(err.message, [err.sample_name]);
+      }
     } else {
       hasProject = true;
       messages.push(err.message);
+    }
+  }
+
+  const MAX_SAMPLE_NAMES = 20;
+  for (const [msg, names] of sampleErrorGroups) {
+    if (names.length === 1) {
+      messages.push(`${msg} (sample: ${names[0]})`);
+    } else if (names.length <= MAX_SAMPLE_NAMES) {
+      messages.push(`${msg} (samples: ${names.join(', ')})`);
+    } else {
+      const shown = names.slice(0, MAX_SAMPLE_NAMES).join(', ');
+      messages.push(`${msg} (samples: ${shown}, and ${names.length - MAX_SAMPLE_NAMES} more)`);
     }
   }
 
