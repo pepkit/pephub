@@ -70,6 +70,7 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
   const [isValidating, setIsValidating] = useState(false);
   const [result, setResult] = useState<PepValidationOutcome | undefined>();
   const [runError, setRunError] = useState<string | undefined>();
+  const [validationTimeMs, setValidationTimeMs] = useState<number | undefined>();
 
   const resetValidator = () => {
     resetForm({
@@ -87,6 +88,7 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
     setIsValidating(true);
     setResult(undefined);
     setRunError(undefined);
+    setValidationTimeMs(undefined);
     try {
       const pep = useExistingPEP
         ? await preparePepFromRegistry(pepRegistryPath?.value || '')
@@ -98,12 +100,14 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
         pasted: !useExistingSchema && !schemaFile && schemaPasteValue ? schemaPasteValue : undefined,
       });
 
+      const t0 = performance.now();
       const outcome = await validatePep({
         configYaml: pep.configYaml,
         samples: pep.samples,
         subsamples: pep.subsamples,
         schema,
       });
+      setValidationTimeMs(performance.now() - t0);
       setResult(outcome);
     } catch (e) {
       setRunError(e instanceof Error ? e.message : String(e));
@@ -309,7 +313,12 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
         ) : result ? (
           result.state === 'valid' ? (
             <div className="alert alert-success" role="alert">
-              <p className="mb-0">PEP is valid!</p>
+              <p className="mb-0">
+                PEP is valid!
+                {validationTimeMs !== undefined && (
+                  <span className="ms-2 text-muted small">({(validationTimeMs / 1000).toFixed(2)}s)</span>
+                )}
+              </p>
             </div>
           ) : result.state === 'error' ? (
             <div className="alert alert-danger" role="alert">
@@ -318,7 +327,12 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
             </div>
           ) : (
             <div className="alert alert-danger" role="alert">
-              <p className="mb-0">PEP is invalid!</p>
+              <p className="mb-0">
+                PEP is invalid!
+                {validationTimeMs !== undefined && (
+                  <span className="ms-2 text-muted small">({(validationTimeMs / 1000).toFixed(2)}s)</span>
+                )}
+              </p>
               <p className="mb-0">Errors found in {result.errorType}</p>
               <code className="error-code">
                 {result.errors.map((e, i) => (
