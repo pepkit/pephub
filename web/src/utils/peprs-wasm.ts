@@ -11,12 +11,11 @@ export const loadPeprsWasm = (): Promise<PeprsModule> => {
   if (!modPromise) {
     modPromise = (async () => {
       const mod = await import('@pepkit/peprs');
-      // Vite will emit the .wasm as an asset and rewrite this URL.
-      const wasmUrl = new URL(
-        '@pepkit/peprs/peprs_wasm_bg.wasm',
-        import.meta.url,
-      );
-      await mod.default(wasmUrl);
+      // The default export (__wbg_init) resolves the .wasm URL relative
+      // to the package's own JS file via its built-in import.meta.url.
+      // Calling with no arguments lets Vite handle the URL correctly in
+      // both dev and production builds.
+      await mod.default();
       return mod;
     })().catch((err) => {
       // reset so a later retry can try again
