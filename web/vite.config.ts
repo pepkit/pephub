@@ -16,13 +16,4 @@ export default defineConfig({
   build: {
     target: browserslistToEsbuild(),
   },
-  server: {
-    fs: {
-      // Allow serving files from the sibling peprs-wasm package (linked
-      // via `file:../../peprs/peprs-wasm/pkg`). Vite's default fs.allow
-      // is rooted at the project, so the symlinked wasm blob is blocked
-      // without this.
-      allow: ['..', '../../peprs'],
-    },
-  },
 });
