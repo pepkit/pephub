@@ -25,7 +25,7 @@ type ProjectUpdateMetadata = ProjectUpdateItems & {
   sample_table?: Sample[] | null;
   project_config_yaml?: string | null;
   description?: string | null;
-  subsample_list?: string[] | null;
+  subsample_tables?: any[][] | null;
 };
 export type SampleTableResponse = {
   count: number;

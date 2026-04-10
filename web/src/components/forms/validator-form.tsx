@@ -6,8 +6,12 @@ import Select from 'react-select';
 
 import { useSession } from '../../contexts/session-context';
 import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
-import { ValidationParams } from '../../hooks/queries/useValidation';
-import { useValidation } from '../../hooks/queries/useValidation';
+import { PepValidationOutcome, validatePep } from '../../utils/validate-pep';
+import {
+  prepareSchema,
+  preparePepFromFiles,
+  preparePepFromRegistry,
+} from '../../utils/validator-form-helpers';
 import { popFileFromFileList } from '../../utils/dragndrop';
 import { FileDropZone } from './components/file-dropzone';
 import { SchemaDropdown } from './components/schemas-databio-dropdown';
@@ -35,7 +39,6 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
   const { user, login } = useSession();
   const { data: projects } = useNamespaceProjects(user?.login, {});
 
-  // instantiate form
   const {
     reset: resetForm,
     setValue: setFormValue,
@@ -45,16 +48,10 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
   } = useForm<ValidatorFormInputs>({
     defaultValues: {
       pepRegistryPath: defaultPepRegistryPath
-        ? {
-            label: defaultPepRegistryPath || '',
-            value: defaultPepRegistryPath || '',
-          }
+        ? { label: defaultPepRegistryPath, value: defaultPepRegistryPath }
         : null,
       schemaRegistryPath: defaultSchemaRegistryPath
-        ? {
-            label: defaultSchemaRegistryPath || '',
-            value: defaultSchemaRegistryPath || '',
-          }
+        ? { label: defaultSchemaRegistryPath, value: defaultSchemaRegistryPath }
         : null,
     },
   });
@@ -64,42 +61,16 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
   const [useExistingPEP, setUseExistingPEP] = useState(true);
   const [useExistingSchema, setUseExistingSchema] = useState(true);
 
-  // watch the form data so we can use it
   const pepFiles = watch('pepFiles');
   const pepRegistryPath = watch('pepRegistryPath');
   const schemaFile = watch('schemaFile');
   const schemaRegistryPath = watch('schemaRegistryPath');
   const schemaPasteValue = watch('schemaPaste');
 
-  // validation params for the useValidation hook
-  let params = {
-    enabled: false,
-  } as ValidationParams;
-
-  // populate params based on form data for the PEP
-  if (useExistingPEP) {
-    params.pepRegistry = pepRegistryPath?.value;
-    params.pepFiles = undefined;
-  } else {
-    params.pepRegistry = undefined;
-    params.pepFiles = pepFiles;
-  }
-
-  // populate params based on form data for the schema
-  if (useExistingSchema) {
-    params.schema_registry = schemaRegistryPath?.value;
-    params.schema = undefined;
-  } else if (schemaPasteValue) {
-    params.schema_registry = undefined;
-    params.schema = schemaPasteValue;
-  } else {
-    params.schema_registry = undefined;
-    // just take the first file they give
-    params.schema_file = schemaFile && schemaFile.length > 0 ? schemaFile[0] : undefined;
-  }
-
-  // validator hook
-  const { data: result, error, isFetching: isValidating, refetch } = useValidation(params);
+  const [isValidating, setIsValidating] = useState(false);
+  const [result, setResult] = useState<PepValidationOutcome | undefined>();
+  const [runError, setRunError] = useState<string | undefined>();
+  const [validationTimeMs, setValidationTimeMs] = useState<number | undefined>();
 
   const resetValidator = () => {
     resetForm({
@@ -109,29 +80,44 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
       schemaRegistryPath: null,
       schemaPaste: undefined,
     });
+    setResult(undefined);
+    setRunError(undefined);
   };
 
-  const runValidation = () => {
-    refetch();
+  const runValidation = async () => {
+    setIsValidating(true);
+    setResult(undefined);
+    setRunError(undefined);
+    setValidationTimeMs(undefined);
+    try {
+      const pep = useExistingPEP
+        ? await preparePepFromRegistry(pepRegistryPath?.value || '')
+        : await preparePepFromFiles(pepFiles as FileList);
+
+      const schema = await prepareSchema({
+        registryPath: useExistingSchema ? schemaRegistryPath?.value : undefined,
+        file: !useExistingSchema && schemaFile && schemaFile.length > 0 ? schemaFile[0] : undefined,
+        pasted: !useExistingSchema && !schemaFile && schemaPasteValue ? schemaPasteValue : undefined,
+      });
+
+      const t0 = performance.now();
+      const outcome = await validatePep({
+        configYaml: pep.configYaml,
+        samples: pep.samples,
+        subsamples: pep.subsamples,
+        schema,
+      });
+      setValidationTimeMs(performance.now() - t0);
+      setResult(outcome);
+    } catch (e) {
+      setRunError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setIsValidating(false);
+    }
   };
 
   return (
     <>
-      {/* Only in development mode  */}
-      {/* render the params */}
-      {/* @ts-ignore */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="my-3">
-          <pre>
-            <code>{JSON.stringify(params, null, 2)}</code>
-          </pre>
-          <pre>
-            <code>Use existing PEP: {JSON.stringify(useExistingPEP)}</code>
-            <br />
-            <code>Use existing schema: {JSON.stringify(useExistingSchema)}</code>
-          </pre>
-        </div>
-      )}
       <form className="form-control border-dark shadow-sm">
         <div className="p-2">
           <label className="form-label fw-bold h5">1. Select your PEP</label>
@@ -243,10 +229,7 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
                     <SchemaDropdown
                       value={field.value?.value || undefined}
                       onChange={(schema) => {
-                        setFormValue('schemaRegistryPath', {
-                          value: schema,
-                          label: schema,
-                        });
+                        setFormValue('schemaRegistryPath', { value: schema, label: schema });
                       }}
                     />
                   )}
@@ -298,8 +281,13 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
             </Tab>
           </Tabs>
           <div className="mt-3">
-            <button onClick={() => runValidation()} disabled={!isValid} type="button" className="me-1 btn btn-success">
-              Validate
+            <button
+              onClick={() => runValidation()}
+              disabled={!isValid || isValidating}
+              type="button"
+              className="me-1 btn btn-success"
+            >
+              {isValidating ? 'Validating...' : 'Validate'}
             </button>
             <button
               disabled={!isDirty}
@@ -318,37 +306,44 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
             <img className="bounce" src="/pep-dark.svg" alt="loading" width="50" height="50" />
             <p className="text-muted">Validating...</p>
           </div>
-        ) : error ? (
+        ) : runError ? (
           <div className="alert alert-danger" role="alert">
-            <pre>
-              <code>{JSON.stringify(error, null, 2)}</code>
-            </pre>
+            <pre className="mb-0"><code>{runError}</code></pre>
           </div>
         ) : result ? (
-          <>
-            {result.valid ? (
-              <div className="alert alert-success" role="alert">
-                <p className="mb-0">PEP is valid!</p>
-              </div>
-            ) : (
-              <>
-                <div className="alert alert-danger" role="alert">
-                  <p className="mb-0">
-                    {result.error_type === 'Schema' ? 'Schema is invalid, found issue with:' : 'PEP is invalid!'}
-                  </p>
-                  <p className="mb-0">{result.error_type !== 'Schema' && <>Errors found in {result.error_type} </>}</p>
-                  <code className="error-code">
-                    {result.errors.map((e) => (
-                      <pre className="mb-2 text-danger" key={e}>
-                        <i className="bi bi bi-exclamation-triangle me-2"></i>
-                        {`${e}`}
-                      </pre>
-                    ))}
-                  </code>
-                </div>
-              </>
-            )}
-          </>
+          result.state === 'valid' ? (
+            <div className="alert alert-success" role="alert">
+              <p className="mb-0">
+                PEP is valid!
+                {validationTimeMs !== undefined && (
+                  <span className="ms-2 text-muted small">({(validationTimeMs / 1000).toFixed(2)}s)</span>
+                )}
+              </p>
+            </div>
+          ) : result.state === 'error' ? (
+            <div className="alert alert-danger" role="alert">
+              <p className="mb-0">Validation could not run:</p>
+              <pre className="mb-0"><code>{result.message}</code></pre>
+            </div>
+          ) : (
+            <div className="alert alert-danger" role="alert">
+              <p className="mb-0">
+                PEP is invalid!
+                {validationTimeMs !== undefined && (
+                  <span className="ms-2 text-muted small">({(validationTimeMs / 1000).toFixed(2)}s)</span>
+                )}
+              </p>
+              <p className="mb-0">Errors found in {result.errorType}</p>
+              <code className="error-code">
+                {result.errors.map((e, i) => (
+                  <pre className="mb-2 text-danger" key={i}>
+                    <i className="bi bi bi-exclamation-triangle me-2"></i>
+                    {e}
+                  </pre>
+                ))}
+              </code>
+            </div>
+          )
         ) : null}
       </div>
     </>

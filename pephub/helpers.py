@@ -9,15 +9,17 @@ import yaml
 import json
 from fastapi import Response, UploadFile
 from fastapi.exceptions import HTTPException
-from peppy.const import (
-    CFG_SAMPLE_TABLE_KEY,
-    CFG_SUBSAMPLE_TABLE_KEY,
+from peprs.const import (
     CONFIG_KEY,
-    NAME_KEY,
     SAMPLE_RAW_DICT_KEY,
-    SUBSAMPLE_RAW_LIST_KEY,
+    SUBSAMPLE_RAW_DICT_KEY,
 )
 from .const import JWT_EXPIRATION, JWT_SECRET
+
+# peprs.const does not export these — they are PEP config schema strings.
+CFG_SAMPLE_TABLE_KEY = "sample_table"
+CFG_SUBSAMPLE_TABLE_KEY = "subsample_table"
+NAME_KEY = "name"
 
 
 def jwt_encode_user_data(user_data: dict, exp: datetime = None) -> str:
@@ -53,15 +55,15 @@ def zip_pep(project: Dict[str, Any]) -> Response:
             project[SAMPLE_RAW_DICT_KEY]
         ).to_csv(index=False)
 
-    if project[SUBSAMPLE_RAW_LIST_KEY] is not None:
-        if not isinstance(project[SUBSAMPLE_RAW_LIST_KEY], list):
+    if project[SUBSAMPLE_RAW_DICT_KEY] is not None:
+        if not isinstance(project[SUBSAMPLE_RAW_DICT_KEY], list):
             config[CFG_SUBSAMPLE_TABLE_KEY] = ["subsample_table1.csv"]
             content_to_zip["subsample_table1.csv"] = pd.DataFrame(
-                project[SUBSAMPLE_RAW_LIST_KEY]
+                project[SUBSAMPLE_RAW_DICT_KEY]
             ).to_csv(index=False)
         else:
             config[CFG_SUBSAMPLE_TABLE_KEY] = []
-            for number, file in enumerate(project[SUBSAMPLE_RAW_LIST_KEY]):
+            for number, file in enumerate(project[SUBSAMPLE_RAW_DICT_KEY]):
                 file_name = f"subsample_table{number + 1}.csv"
                 config[CFG_SUBSAMPLE_TABLE_KEY].append(file_name)
                 content_to_zip[file_name] = pd.DataFrame(file).to_csv(index=False)

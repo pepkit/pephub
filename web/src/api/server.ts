@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export interface ApiBase {
   pephub_version: string;
-  peppy_version: string;
+  peprs_version: string;
   python_version: string;
   fastapi_version: string;
   pepdbagent_version: string;

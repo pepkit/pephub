@@ -6,10 +6,12 @@ from secrets import token_hex
 import pandas as pd
 from fastapi import __version__ as fastapi_version
 from pepdbagent import __version__ as pepdbagent_version
-from peppy import __version__ as peppy_version
-from peppy.const import PEP_LATEST_VERSION
 
 from ._version import __version__ as pephub_version
+
+# peprs has no __version__ attribute and no PEP_LATEST_VERSION constant.
+PEP_LATEST_VERSION = "2.1.0"
+peprs_version = "unknown"
 
 PKG_NAME = "pephub"
 DATA_REPO = "https://github.com/pepkit/data.pephub.git"
@@ -17,7 +19,7 @@ DATA_REPO = "https://github.com/pepkit/data.pephub.git"
 
 ALL_VERSIONS = {
     "pephub_version": pephub_version,
-    "peppy_version": peppy_version,
+    "peprs_version": peprs_version,
     "python_version": python_version(),
     "fastapi_version": fastapi_version,
     "pepdbagent_version": pepdbagent_version,

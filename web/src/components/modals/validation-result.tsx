@@ -4,13 +4,13 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
-import { useValidation } from '../../hooks/queries/useValidation';
+import { PepValidationOutcome } from '../../utils/validate-pep';
 import { SchemaDropdown } from '../forms/components/schemas-databio-dropdown';
 
 type Props = {
   show: boolean;
   onHide: () => void;
-  validationResult: ReturnType<typeof useValidation>['data'];
+  validationResult: PepValidationOutcome | undefined;
   currentSchema: string | undefined;
 };
 
@@ -58,7 +58,7 @@ export const ValidationResultModal = (props: Props) => {
         <h1 className="modal-title fs-5">
           {currentSchema ? (
             <>
-              {validationResult?.valid ? (
+              {validationResult?.state === 'valid' ? (
                 <span className="text-success d-flex align-items-center gap-1">
                   <i className="bi bi-check-circle"></i>
                   Validation Passed
@@ -78,16 +78,25 @@ export const ValidationResultModal = (props: Props) => {
       <Modal.Body>
         {currentSchema && (
           <>
-            {validationResult?.valid ? (
+            {validationResult?.state === 'valid' ? (
               <p>Your PEP is valid against the schema.</p>
-            ) : (
+            ) : validationResult?.state === 'invalid' ? (
               <Fragment>
                 <p>Your PEP is invalid against the schema.</p>
-                <p>Validation result:</p>
+                <p>Errors found in {validationResult.errorType}:</p>
                 <pre>
-                  <code>{JSON.stringify(validationResult, null, 2)}</code>
+                  <code>{validationResult.errors.join('\n')}</code>
                 </pre>
               </Fragment>
+            ) : validationResult?.state === 'error' ? (
+              <Fragment>
+                <p>Validation could not run:</p>
+                <pre>
+                  <code>{validationResult.message}</code>
+                </pre>
+              </Fragment>
+            ) : (
+              <p>Validating...</p>
             )}
           </>
         )}

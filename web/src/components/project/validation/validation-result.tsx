@@ -1,28 +1,27 @@
 import { useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-import { useValidation } from '../../../hooks/queries/useValidation';
+import { PepValidationOutcome } from '../../../utils/validate-pep';
 import { StatusIcon } from '../../badges/status-icons';
 import { ValidationResultModal } from '../../modals/validation-result';
 
 type Props = {
   schemaRegistry: string | undefined;
   isValidating: boolean;
-  validationResult: ReturnType<typeof useValidation>['data'];
-  shouldValidate: boolean;
+  validationResult: PepValidationOutcome | undefined;
 };
 
 export const ValidationResult = (props: Props) => {
-  const { validationResult, isValidating, schemaRegistry, shouldValidate } = props;
+  const { validationResult, isValidating, schemaRegistry } = props;
 
   const [validationModalIsOpen, setValidationModalIsOpen] = useState(false);
 
+  const isValid = validationResult?.state === 'valid';
+
   let wrapperClassName = 'py-1 px-2 rounded-1 bg-opacity-10 validation-button';
-  if (shouldValidate) {
+  if (isValidating || !validationResult) {
     wrapperClassName += ' border border-warning text-warning bg-warning';
-  } else if (isValidating) {
-    wrapperClassName += ' border border-warning text-warning bg-warning';
-  } else if (validationResult?.valid) {
+  } else if (isValid) {
     wrapperClassName += ' border border-success text-success bg-success';
   } else {
     wrapperClassName += ' border border-danger text-danger bg-danger';
@@ -48,9 +47,9 @@ export const ValidationResult = (props: Props) => {
             className={wrapperClassName}
           >
             <div className="d-flex flex-row align-items-center gap-2 text-sm py-0">
-              {isValidating || shouldValidate ? (
+              {isValidating || !validationResult ? (
                 <span className="bg-warning text-warning rounded-pill validation-badge"></span>
-              ) : validationResult?.valid ? (
+              ) : isValid ? (
                 <span className="bg-success text-success rounded-pill validation-badge"></span>
               ) : (
                 <span className="bg-danger text-danger rounded-pill validation-badge"></span>
