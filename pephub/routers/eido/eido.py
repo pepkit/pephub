@@ -55,9 +55,7 @@ async def get_schema(request: Request, namespace: str, project: str):
     # like pipelines/ProseqPEP.yaml
 
     try:
-        schema = _read_schema(
-            f"https://schema.databio.org/{namespace}/{project}.yaml"
-        )
+        schema = _read_schema(f"https://schema.databio.org/{namespace}/{project}.yaml")
     except Exception:
         raise HTTPException(status_code=404, detail="Schema not found")
 
