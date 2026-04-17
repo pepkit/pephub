@@ -12,7 +12,7 @@ interface Props {
   defaultValue?: string;
 }
 
-const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true, defaultValue = 'databio/pep'}) => {
+const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true, defaultValue }) => {
   const { data: schemas, isFetching: isLoading } = useAllSchemas({});
 
   const options = (schemas?.results || []).map((schema) => ({
@@ -20,14 +20,16 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true, defau
     value: `${schema.namespace}/${schema.schema_name}`,
   }));
 
-  const defaultSchema = defaultValue;
-  const valueForSelect = options.find((option) => option.value === value);
+  const valueForSelect = options.find((option) => option.value === value) ?? null;
+  const defaultValueForSelect = defaultValue
+    ? { label: defaultValue, value: defaultValue }
+    : undefined;
 
   return (
     <div className="d-flex flex-row align-items-center gap-1 w-100">
       <Select
         options={options}
-        defaultValue={{ label: defaultSchema, value: defaultSchema }}
+        defaultValue={defaultValueForSelect}
         value={valueForSelect}
         onChange={(newValue: SingleValue<{ label: string; value: string }>) => {
           onChange(newValue?.value || '');
