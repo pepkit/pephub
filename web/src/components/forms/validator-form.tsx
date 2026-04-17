@@ -1,11 +1,12 @@
 import Editor from '@monaco-editor/react';
-import { FC, useRef, useState } from 'react';
+import { useQueries } from '@tanstack/react-query';
+import { FC, useMemo, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 
+import { getNamespaceProjects } from '../../api/namespace';
 import { useSession } from '../../contexts/session-context';
-import { useNamespaceProjects } from '../../hooks/queries/useNamespaceProjects';
 import { PepValidationOutcome, validatePep } from '../../utils/validate-pep';
 import {
   prepareSchema,
@@ -36,8 +37,35 @@ interface ValidatorFormProps {
 }
 
 export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, defaultSchemaRegistryPath }) => {
-  const { user, login } = useSession();
-  const { data: projects } = useNamespaceProjects(user?.login, {});
+  const { user, jwt, login } = useSession();
+
+  const namespaces = useMemo(
+    () => (user ? [user.login, ...(user.orgs ?? [])] : []),
+    [user],
+  );
+
+  const projectQueries = useQueries({
+    queries: namespaces.map((ns) => ({
+      queryKey: [ns, {}],
+      queryFn: () => getNamespaceProjects(ns, jwt, {}),
+      enabled: !!ns,
+    })),
+  });
+
+  const pepOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const opts: { label: string; value: string }[] = [];
+    projectQueries.forEach((q) => {
+      q.data?.results?.forEach((project) => {
+        const path = `${project.namespace}/${project.name}:${project.tag}`;
+        if (!seen.has(path)) {
+          seen.add(path);
+          opts.push({ value: path, label: path });
+        }
+      });
+    });
+    return opts;
+  }, [projectQueries]);
 
   const {
     reset: resetForm,
@@ -144,17 +172,12 @@ export const ValidatorForm: FC<ValidatorFormProps> = ({ defaultPepRegistryPath, 
                       placeholder="Select a PEP"
                       className="mt-2"
                       // @ts-ignore
-                      options={
-                        projects?.results.map((project) => ({
-                          value: `${project.namespace}/${project.name}:${project.tag}`,
-                          label: `${project.namespace}/${project.name}:${project.tag}`,
-                        })) || []
-                      }
+                      options={pepOptions}
                       noOptionsMessage={() => {
                         if (user) {
                           return (
                             <span>
-                              No PEPs found in your namespace. <a href={`/${user.login}`}>Create a new PEP</a>.
+                              No PEPs found in your namespaces. <a href={`/${user.login}`}>Create a new PEP</a>.
                             </span>
                           );
                         } else {
