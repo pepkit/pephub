@@ -1,4 +1,4 @@
-import { HotTable, HotTableClass } from '@handsontable/react';
+import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
 import { useRef } from 'react';
@@ -46,7 +46,7 @@ export const SampleTable = (props: Props) => {
     tableClassName += ` ${className}`;
   }
 
-  const hotRef = useRef<HotTableClass>(null);
+  const hotRef = useRef<HotTable>(null);
 
   if (hotRef) {
     hotRef.current?.hotInstance?.updateSettings({
@@ -79,7 +79,7 @@ export const SampleTable = (props: Props) => {
           const hotdata = hotRef.current?.hotInstance?.getData() || [];
           const filteredSamples = hotdata
             .map((subArray) => subArray[sampleTableIndexCol])
-            .filter((element): element is string => element != null);
+            .filter((element) => element != null);
           if (sampleTableIndex) {
             const sampleTableIndexIndex = filteredSamples.indexOf(sampleTableIndex);
             if (sampleTableIndexIndex > -1) {
@@ -93,7 +93,6 @@ export const SampleTable = (props: Props) => {
         }
       }}
       ref={hotRef}
-      style={{ height: '100%' }}
       data={data}
       stretchH={stretchH || 'all'}
       // height={height || tableHeight}
@@ -165,7 +164,7 @@ export const SampleTable = (props: Props) => {
 
         const relative_ph_id_col = ph_id_col - coords[0].startCol;
 
-        if (relative_ph_id_col >= 0 && relative_ph_id_col < data[0].length) {
+        if (relative_ph_id_col >=0 && relative_ph_id_col < data[0].length) {
           for (let i = 0; i < data.length; i++) {
             data[i].splice(relative_ph_id_col, 1);
           }
@@ -178,7 +177,7 @@ export const SampleTable = (props: Props) => {
           return;
         }
 
-        if (paste_ph_id_col >= 0 && paste_ph_id_col < data[0].length) {
+        if (paste_ph_id_col >=0 && paste_ph_id_col < data[0].length) {
           for (let i = 0; i < data.length; i++) {
             data[i].splice(paste_ph_id_col, 1);
           }
