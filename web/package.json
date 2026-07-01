@@ -11,11 +11,11 @@
     "generate-types": "npx openapi-typescript http:localhost:8000/openapi.json -o pephub-types.d.ts"
   },
   "dependencies": {
-    "@handsontable/react": "^12.3.3",
+    "@databio/peprs": "^0.2.1",
+    "@handsontable/react": "^16.2.0",
     "@hookform/error-message": "^2.0.1",
     "@mdx-js/react": "^3.0.0",
     "@monaco-editor/react": "^4.4.6",
-    "@databio/peprs": "^0.2.0",
     "@popperjs/core": "^2.11.6",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-query-devtools": "^5.0.0",
@@ -31,7 +31,7 @@
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
     "framer-motion": "^10.12.4",
-    "handsontable": "^12.3.3",
+    "handsontable": "^16.2.0",
     "jwt-decode": "^3.1.2",
     "prettier": "^2.8.8",
     "react": "^18.2.0",
@@ -61,10 +61,10 @@
     "@types/js-yaml": "^4.0.9",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "@vitejs/plugin-react-swc": "^3.0.0",
+    "@vitejs/plugin-react-swc": "^4.3.1",
     "browserslist": "^4.22.2",
     "browserslist-to-esbuild": "^2.1.1",
     "typescript": "^5.3.3",
-    "vite": "^5.0.0"
+    "vite": "^8.1.2"
   }
 }

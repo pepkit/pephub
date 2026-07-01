@@ -259,7 +259,7 @@ async def upload_raw_pep(
             description = project_from_json.pep_dict.config.get(DESC_KEY)
 
         # This configurations needed due to Issue #124 Should be removed in the future
-        project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
+        project_dict = ProjectRawModel(**project_from_json.pep_dict.model_dump())
         ff = project_dict.model_dump(by_alias=True)
         p_project = peprs.Project.from_dict(ff)
 
