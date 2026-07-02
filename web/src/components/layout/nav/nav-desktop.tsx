@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSession } from '../../../contexts/session-context';
 import { getOS } from '../../../utils/etc';
 import { GitHubAvatar } from '../../badges/github-avatar';
+import { DeveloperSettingsModal } from '../../modals/developer-settings-modal';
 import { SearchBox } from '../search-box';
 
 const API_HOST = import.meta.env.VITE_API_HOST || '';
@@ -41,6 +42,7 @@ export const NavDesktop = () => {
   const navigate = useNavigate();
   const [globalSearch, setGlobalSearch] = useState('');
   const [showTooltip, setShowTooltip] = useState(true);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // on landing page?
   const isLandingPage = window.location.pathname === '/';
@@ -255,9 +257,14 @@ export const NavDesktop = () => {
                   Report a Bug
                 </Dropdown.Item>
                 <Dropdown.Divider />
+                <Dropdown.Item onClick={() => setShowSettingsModal(true)}>
+                  <i className="bi bi-gear me-1"></i>
+                  Settings
+                </Dropdown.Item>
                 <Dropdown.Item onClick={() => logout()}>Log out</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
+            <DeveloperSettingsModal show={showSettingsModal} onHide={() => setShowSettingsModal(false)} />
           </div>
         ) : (
           <div className="my-0 me-3 nav-item h5 pt-1">
