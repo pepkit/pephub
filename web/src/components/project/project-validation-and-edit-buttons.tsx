@@ -1,12 +1,10 @@
 import { Fragment } from 'react';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useSession } from '../../contexts/session-context';
 import { useProjectAnnotation } from '../../hooks/queries/useProjectAnnotation';
-import { useValidation } from '../../hooks/queries/useValidation';
+import { PepValidationOutcome } from '../../utils/validate-pep';
 import { canEdit } from '../../utils/permissions';
-import { StatusIcon } from '../badges/status-icons';
 import { ProjectDataNav } from '../layout/project-data-nav';
 import { ValidationResult } from './validation/validation-result';
 
@@ -16,26 +14,26 @@ type ProjectValidationAndEditButtonsProps = {
   reset: () => void;
   handleSubmit: () => void;
   filteredSamples: string[];
+  validationResult: PepValidationOutcome | undefined;
+  isValidating: boolean;
 };
 
-const MAX_SAMPLES_FOR_VALIDATION = 5000;
-
 export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditButtonsProps) => {
-  const { isDirty, isUpdatingProject, reset, handleSubmit, filteredSamples } = props;
+  const {
+    isDirty,
+    isUpdatingProject,
+    reset,
+    handleSubmit,
+    filteredSamples,
+    validationResult,
+    isValidating,
+  } = props;
   const { user } = useSession();
 
   const { namespace, projectName, tag } = useProjectPage();
 
   const { data: projectInfo } = useProjectAnnotation(namespace, projectName, tag);
-  const shouldValidate: boolean = (projectInfo?.number_of_samples || 0) > MAX_SAMPLES_FOR_VALIDATION;
 
-  const projectValidationQuery = useValidation({
-    pepRegistry: `${namespace}/${projectName}:${tag}`,
-    schema_registry: projectInfo?.pep_schema || 'pep/2.0.0',
-    enabled: !!projectInfo?.pep_schema,
-  });
-
-  const validationResult = projectValidationQuery.data;
   const projectSchema = projectInfo?.pep_schema;
 
   const userHasOwnership = user && projectInfo && canEdit(user, projectInfo);
@@ -50,14 +48,14 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
             <div>
               <ValidationResult
                 schemaRegistry={projectSchema}
-                isValidating={projectValidationQuery.isLoading}
+                isValidating={isValidating}
                 validationResult={validationResult}
-                shouldValidate={shouldValidate}
               />
             </div>
             <div className="ps-1">
               <Fragment>
                 <button
+                  type="button"
                   disabled={isUpdatingProject || !isDirty}
                   onClick={() => handleSubmit()}
                   className="fst-italic btn btn-sm btn-success me-1 border-dark"
@@ -65,6 +63,7 @@ export const ProjectValidationAndEditButtons = (props: ProjectValidationAndEditB
                   {isUpdatingProject ? 'Saving...' : 'Save'}
                 </button>
                 <button
+                  type="button"
                   disabled={isUpdatingProject || !isDirty}
                   className="fst-italic btn btn-sm btn-outline-dark bg-white"
                   onClick={() => reset()}

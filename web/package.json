@@ -1,7 +1,7 @@
 {
   "name": "web",
   "private": true,
-  "version": "0.15.4",
+  "version": "0.16.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +15,7 @@
     "@hookform/error-message": "^2.0.1",
     "@mdx-js/react": "^3.0.0",
     "@monaco-editor/react": "^4.4.6",
+    "@databio/peprs": "^0.2.1",
     "@popperjs/core": "^2.11.6",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-query-devtools": "^5.0.0",

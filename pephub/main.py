@@ -28,12 +28,12 @@ coloredlogs.install(
     fmt="[%(levelname)s] [%(asctime)s] [PEPDBAGENT] %(message)s",
 )
 
-_LOGGER_PEPPY = logging.getLogger("peppy")
+_LOGGER_PEPRS = logging.getLogger("peprs")
 coloredlogs.install(
-    logger=_LOGGER_PEPPY,
+    logger=_LOGGER_PEPRS,
     level=logging.ERROR,
     datefmt="%b %d %Y %H:%M:%S",
-    fmt="[%(levelname)s] [%(asctime)s] [PEPPY] %(message)s",
+    fmt="[%(levelname)s] [%(asctime)s] [PEPRS] %(message)s",
 )
 
 _LOGGER_PEPHUB = logging.getLogger("uvicorn.access")

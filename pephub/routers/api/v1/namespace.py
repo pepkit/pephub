@@ -3,7 +3,7 @@ import tempfile
 from typing import List, Literal, Optional, Union
 import os
 
-import peppy
+import peprs
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Request
 from fastapi.responses import JSONResponse
@@ -22,9 +22,12 @@ from pepdbagent.models import (
     NamespaceStats,
     TarNamespaceModelReturn,
 )
-from peppy import Project
-from peppy.const import DESC_KEY, NAME_KEY
+from peprs import Project
 from typing_extensions import Annotated
+
+# peprs.const does not export these — they are PEP config schema strings.
+NAME_KEY = "name"
+DESC_KEY = "description"
 
 from ....const import (
     DEFAULT_TAG,
@@ -213,7 +216,7 @@ async def create_pep(
                 },
                 status_code=202,
             )
-    # create a blank peppy.Project object with fake files
+    # create a blank peprs.Project object with fake files
     else:
         raise HTTPException(
             detail="Project files were not provided",
@@ -256,23 +259,25 @@ async def upload_raw_pep(
             description = project_from_json.pep_dict.config.get(DESC_KEY)
 
         # This configurations needed due to Issue #124 Should be removed in the future
-        project_dict = ProjectRawModel(**project_from_json.pep_dict.dict())
+        project_dict = ProjectRawModel(**project_from_json.pep_dict.model_dump())
         ff = project_dict.model_dump(by_alias=True)
-        p_project = peppy.Project().from_dict(ff)
+        p_project = peprs.Project.from_dict(ff)
 
-        p_project.namespace = name
+        # peprs.Project has no `namespace` attribute, so we set the registry name
+        # in the config and pass `name` separately to agent.project.create.
+        p_project.name = name
         p_project.description = description
 
     except Exception as e:
         raise HTTPException(
-            detail=f"Incorrect raw project was provided. Couldn't initiate peppy object: {e}",
+            detail=f"Incorrect raw project was provided. Couldn't initiate peprs object: {e}",
             status_code=417,
         )
     try:
         agent.project.create(
             p_project,
             namespace=namespace,
-            name=p_project.namespace,
+            name=name,
             tag=tag,
             description=description,
             is_private=is_private,
@@ -282,15 +287,15 @@ async def upload_raw_pep(
         )
     except ProjectUniqueNameError:
         raise HTTPException(
-            detail=f"Project '{namespace}/{p_project.namespace}:{tag}' already exists in namespace",
+            detail=f"Project '{namespace}/{name}:{tag}' already exists in namespace",
             status_code=400,
         )
     return JSONResponse(
         content={
             "namespace": namespace,
-            "name": p_project.namespace,
+            "name": name,
             "tag": tag,
-            "registry_path": f"{namespace}/{p_project.namespace}:{tag}",
+            "registry_path": f"{namespace}/{name}:{tag}",
         },
         status_code=202,
     )

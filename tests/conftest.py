@@ -4,7 +4,7 @@ import tempfile
 import pytest
 import requests
 from pepdbagent import PEPDatabaseAgent
-from peppy import Project
+from peprs import Project
 
 
 @pytest.fixture

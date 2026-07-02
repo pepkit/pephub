@@ -219,7 +219,7 @@ export const submitProjectJSON = (
       {
         pep_dict: {
           config: config_json,
-          sample_list: sample_table,
+          samples: sample_table,
         },
         description: description || '',
         name: name,
@@ -269,7 +269,7 @@ export const submitPop = (
       {
         pep_dict: {
           config: config_json,
-          sample_list: peps,
+          samples: peps,
           pep_schema: pep_schema,
         },
         description: description || '',

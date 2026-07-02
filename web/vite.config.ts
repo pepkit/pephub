@@ -16,4 +16,5 @@ export default defineConfig({
   build: {
     target: browserslistToEsbuild(),
   },
+  assetsInclude: ['**/*.wasm'],
 });

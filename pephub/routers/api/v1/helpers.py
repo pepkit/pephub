@@ -1,16 +1,14 @@
 import logging
 
-import eido
-from eido.validation import validate_config
-from eido.exceptions import EidoValidationError
-import peppy
+import peprs
 import yaml
 from fastapi.exceptions import HTTPException
-from peppy import Project
-from peppy.const import (
+from peprs import Project
+from peprs.eido import EidoValidationError, validate_config, validate_project
+from peprs.const import (
     CONFIG_KEY,
     SAMPLE_RAW_DICT_KEY,
-    SUBSAMPLE_RAW_LIST_KEY,
+    SUBSAMPLE_RAW_DICT_KEY,
 )
 from ....dependencies import (
     get_db,
@@ -22,7 +20,7 @@ DEFAULT_SCHEMA_NAME = "pep"
 DEFAULT_SCHEMA_VERSION = "2.1.0"
 
 
-async def verify_updated_project(updated_project) -> peppy.Project:
+async def verify_updated_project(updated_project) -> peprs.Project:
     new_raw_project = {}
 
     agent = get_db()
@@ -37,43 +35,23 @@ async def verify_updated_project(updated_project) -> peppy.Project:
             status_code=400,
             detail="Please provide a sample table and project config yaml to update project",
         )
-    try:
-        validate_config(
-            yaml.safe_load(updated_project.project_config_yaml), default_schema
-        )
-    except EidoValidationError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Config structure error: {', '.join(list(e.errors_by_type.keys()))}. Please check schema definition and try again.",
-        )
-    # sample table update
-    new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
 
     try:
         yaml_dict = yaml.safe_load(updated_project.project_config_yaml)
-        new_raw_project[CONFIG_KEY] = yaml_dict
     except yaml.scanner.ScannerError as e:
         raise HTTPException(
             status_code=400,
             detail=f"Could not parse provided yaml. Error: {e}",
         )
 
-    # sample_table_index_col = yaml_dict.get(
-    #     SAMPLE_TABLE_INDEX_KEY, SAMPLE_NAME_ATTR  # default to sample_name
-    # )
-
-    # await check_sample_names(
-    #     new_raw_project[SAMPLE_RAW_DICT_KEY], sample_table_index_col
-    # )
+    new_raw_project[CONFIG_KEY] = yaml_dict
+    new_raw_project[SAMPLE_RAW_DICT_KEY] = updated_project.sample_table
 
     # subsample table update
     if updated_project.subsample_tables is not None:
         subsamples = list(updated_project.subsample_tables[0][0].values())
-        new_raw_project[SUBSAMPLE_RAW_LIST_KEY] = (
-            updated_project.subsample_tables
-            if len(subsamples) > 0 and subsamples[0]
-            else None
-        )
+        if len(subsamples) > 0 and subsamples[0]:
+            new_raw_project[SUBSAMPLE_RAW_DICT_KEY] = updated_project.subsample_tables
 
     try:
         new_project = Project.from_dict(new_raw_project)
@@ -83,9 +61,19 @@ async def verify_updated_project(updated_project) -> peppy.Project:
             detail=f"Could not create PEP from provided data. Error: {e}",
         )
 
+    # peprs.eido.validate_config takes a Project (not a raw dict like eido did),
+    # so we validate after constructing the Project.
+    try:
+        validate_config(new_project, default_schema)
+    except EidoValidationError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Config structure error: {', '.join(list(e.errors_by_type.keys()))}. Please check schema definition and try again.",
+        )
+
     try:
         # validate project (it will also validate samples)
-        eido.validate_project(new_project, default_schema)
+        validate_project(new_project, default_schema)
     except Exception as _:
         raise HTTPException(
             status_code=400,

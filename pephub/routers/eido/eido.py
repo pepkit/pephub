@@ -2,8 +2,7 @@ import shutil
 import tempfile
 from typing import List, Optional, Tuple
 
-import eido
-import peppy
+import peprs
 import requests
 import yaml
 from fastapi import APIRouter, Depends, Form, UploadFile
@@ -13,6 +12,7 @@ from pepdbagent.utils import registry_path_converter
 from pepdbagent.exceptions import SchemaDoesNotExistError
 from pepdbagent.utils import schema_path_converter
 from pepdbagent.const import LATEST_SCHEMA_VERSION
+from peprs.eido import EidoValidationError, validate_project
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -31,6 +31,20 @@ async def status():
     return JSONResponse(schemas_to_test)
 
 
+def _read_schema(path_or_url: str) -> dict:
+    """
+    Fetch and parse an eido YAML schema from a local file path or URL.
+    peprs.eido does not yet expose a read_schema helper, so we inline a
+    minimal implementation here.
+    """
+    if path_or_url.startswith(("http://", "https://")):
+        resp = requests.get(path_or_url)
+        resp.raise_for_status()
+        return yaml.safe_load(resp.text)
+    with open(path_or_url) as f:
+        return yaml.safe_load(f)
+
+
 @router.get("/schemas/{namespace}/{project}")
 async def get_schema(request: Request, namespace: str, project: str):
     """
@@ -41,15 +55,16 @@ async def get_schema(request: Request, namespace: str, project: str):
     # like pipelines/ProseqPEP.yaml
 
     try:
-        schema = eido.read_schema(
-            f"https://schema.databio.org/{namespace}/{project}.yaml"
-        )[0]
-    except IndexError:
+        schema = _read_schema(f"https://schema.databio.org/{namespace}/{project}.yaml")
+    except Exception:
         raise HTTPException(status_code=404, detail="Schema not found")
 
     return schema
 
 
+# Note: The pephub web UI now runs validation client-side via the
+# @pepkit/peprs WASM bindings. This server-side endpoint is kept for
+# programmatic/API consumers. See validation_wasm_plan.md.
 @router.post("/validate")
 async def validate(
     # accept both pep_registry and pep_files, both should be optional
@@ -90,12 +105,12 @@ async def validate(
 
         pep_annot = agent.annotation.get(namespace=namespace, name=name, tag=tag)
 
-        if pep_annot.results[0].number_of_samples > MAX_PROCESSED_PROJECT_SIZE:
-            return {
-                "valid": False,
-                "error_type": "Project size",
-                "errors": ["Project is too large. Can't validate."],
-            }
+        # if pep_annot.results[0].number_of_samples > MAX_PROCESSED_PROJECT_SIZE:
+        #     return {
+        #         "valid": False,
+        #         "error_type": "Project size",
+        #         "errors": ["Project is too large. Can't validate."],
+        #     }
 
         p = agent.project.get(namespace, name, tag, raw=False)
     else:
@@ -115,7 +130,7 @@ async def validate(
                     with open(f"{dirpath}/{upload_file.filename}", "wb") as local_tmpf:
                         shutil.copyfileobj(upload_file.file, local_tmpf)
 
-            p = peppy.Project(f"{dirpath}/{init_file.filename}")
+            p = peprs.Project(f"{dirpath}/{init_file.filename}")
 
     if schema is None and schema_registry is None and schema_file is None:
         raise HTTPException(
@@ -156,28 +171,28 @@ async def validate(
         contents = schema_file.file.read()
         schema_dict = yaml.safe_load(contents)
     else:
-        # save schema string to temp file, then read in with eido
-        with tempfile.NamedTemporaryFile(mode="w") as schema_file:
-            schema_file.write(schema)
-            schema_file.flush()
-            try:
-                schema_dict = eido.read_schema(schema_file.name)[0]
-            except eido.exceptions.EidoSchemaInvalidError as e:
-                raise HTTPException(
-                    status_code=200,
-                    detail={"error": f"Schema is invalid: {str(e)}"},
-                )
+        # parse the schema string directly; peprs.eido has no read_schema /
+        # EidoSchemaInvalidError, so any parse failure is reported as a schema error.
+        try:
+            schema_dict = yaml.safe_load(schema)
+            if not isinstance(schema_dict, dict):
+                raise ValueError("Schema must parse to a YAML mapping")
+        except Exception as e:
+            raise HTTPException(
+                status_code=200,
+                detail={"error": f"Schema is invalid: {str(e)}"},
+            )
 
     # validate project
     try:
-        eido.validate_project(
+        validate_project(
             p,
             schema_dict,
         )
 
     # while we catch this, its still a 200 response since we want to
     # return the validation errors
-    except eido.exceptions.EidoValidationError as e:
+    except EidoValidationError as e:
         error_type, property_names = await eido_error_string_converter(e)
 
         return {"valid": False, "error_type": error_type, "errors": property_names}
@@ -193,33 +208,57 @@ async def validate(
 
 
 async def eido_error_string_converter(
-    e: eido.exceptions.EidoValidationError,
+    e: EidoValidationError,
 ) -> Tuple[str, List[str]]:
     """
     Convert eido error into nice modified string
 
-    :param e: eido Validation error
+    peprs.eido.EidoValidationError.errors_by_type has the shape:
+        {
+            "<error_type>": [
+                {"path": ..., "message": ..., "sample_names": [...optional]},
+                ...
+            ],
+            ...
+        }
+    An item without "sample_names" is a project-level error; otherwise it
+    is a sample-level error affecting the listed samples.
+
+    :param e: peprs.eido Validation error
     :return: error_type, property_names
     """
-    property_names = []
-    error_type_list = []
-    for item_list in e.errors_by_type.values():
-        property_type = item_list[0]["type"]
-        property_name_list = []
-        for item in item_list:
-            if item["sample_name"] == "project":
-                error_type_list.append("Project")
-                break
-            else:
-                error_type_list.append("Samples")
-                if len(item_list) > 20:
-                    property_names = ["More than 20 samples have encountered errors."]
-                else:
-                    property_name_list.append(item["sample_name"])
+    property_names: List[str] = []
+    error_type_set = set()
+    messages = []
 
-        if len(property_name_list) > 0:
-            property_names.append(f"{property_type} ({', '.join(property_name_list)})")
-        else:
-            property_names.append(f"{property_type} in the project")
-    error_type = " and ".join(set(error_type_list))
+    for error_type_key, item_list in e.errors_by_type.items():
+        sample_names_all: List[str] = []
+        has_project_level = False
+        for item in item_list:
+            sample_names = item.get("sample_names") or []
+            if sample_names:
+                sample_names_all.extend(sample_names)
+                messages.append(item.get("message"))
+            else:
+                has_project_level = True
+
+        if sample_names_all:
+            error_type_set.add("Samples")
+            if len(sample_names_all) > 20:
+                property_names.append(
+                    f"{error_type_key}: more than 20 samples have encountered errors."
+                )
+            else:
+                property_names.append(
+                    f"{error_type_key} ({', '.join(sample_names_all)})"
+                )
+        if not sample_names_all:
+            property_names = messages
+
+        if has_project_level:
+            error_type_set.add("Project")
+            property_names.append(f"{error_type_key} in the project")
+
+    error_type = " and ".join(sorted(error_type_set))
+
     return error_type, property_names
