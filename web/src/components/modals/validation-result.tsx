@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
+import { parseSchemaRegistryPath } from '../../hooks/queries/useSchemaJson';
 import { PepValidationOutcome } from '../../utils/validate-pep';
 import { SchemaDropdown } from '../forms/components/schemas-databio-dropdown';
 
@@ -31,6 +32,12 @@ export const ValidationResultModal = (props: Props) => {
 
   const { isPending: isSubmitting, submit } = useEditProjectMetaMutation(namespace, projectName, tag);
   const newSchema = updateForm.watch('schema');
+
+  const parsedSchema = parseSchemaRegistryPath(currentSchema);
+  const schemaHref = parsedSchema
+    ? `/schemas/${parsedSchema.namespace}/${parsedSchema.name}` +
+      (currentSchema?.includes(':') ? `?version=${parsedSchema.version}` : '')
+    : `/schemas/${currentSchema}`;
 
   const handleSubmit = () => {
     const updateData = {
@@ -136,7 +143,7 @@ export const ValidationResultModal = (props: Props) => {
         <div className="d-flex align-items-center justify-content-between w-100">
           {currentSchema && (
             <div className="d-flex align-items-center">
-              <a href={`/schemas/${props.currentSchema}`}>
+              <a href={schemaHref}>
                 <button className="btn btn-sm btn-outline-dark">
                   <span className="d-flex align-items-center gap-1">
                     <i className="bi bi-arrow-left"></i>
