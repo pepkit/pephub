@@ -3,6 +3,7 @@ import os
 from platform import python_version
 from secrets import token_hex
 
+import importlib.metadata
 import pandas as pd
 from fastapi import __version__ as fastapi_version
 from pepdbagent import __version__ as pepdbagent_version
@@ -11,11 +12,16 @@ from ._version import __version__ as pephub_version
 
 # peprs has no __version__ attribute and no PEP_LATEST_VERSION constant.
 PEP_LATEST_VERSION = "2.1.0"
-peprs_version = "unknown"
 
 PKG_NAME = "pephub"
 DATA_REPO = "https://github.com/pepkit/data.pephub.git"
 
+peprs_version = "UNKNOWN"
+
+try:
+    peprs_version = importlib.metadata.version("peprs")
+except importlib.metadata.PackageNotFoundError:
+    pass
 
 ALL_VERSIONS = {
     "pephub_version": pephub_version,
