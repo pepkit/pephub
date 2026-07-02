@@ -290,6 +290,7 @@ export const ProjectInterface = (props: Props) => {
                   // height={window.innerHeight - 15 - (projectDataRef.current?.offsetTop || 300)}
                   setFilteredSamples={(samples) => setFilteredSamples(samples)}
                   sampleTableIndex={sampleTableIndex}
+                  enableSearch
                 />
               )}
             />
