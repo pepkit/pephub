@@ -35,18 +35,73 @@ export type ValidatePepInput = {
   schema: object | string;
 };
 
-const normalizeSchema = (schema: object | string): string => {
+const parseSchemaObject = (schema: object | string): Record<string, unknown> => {
+  let parsed: unknown = schema;
   if (typeof schema === 'string') {
     // Try JSON first, fall back to YAML.
     try {
-      const parsed = JSON.parse(schema);
-      return JSON.stringify(parsed);
+      parsed = JSON.parse(schema);
     } catch {
-      const parsed = yaml.load(schema);
-      return JSON.stringify(parsed);
+      parsed = yaml.load(schema);
     }
   }
-  return JSON.stringify(schema);
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Schema must parse to an object.');
+  }
+  return parsed as Record<string, unknown>;
+};
+
+// Session-level cache of fetched import URLs so live validation doesn't
+// re-fetch the same base schema on every keystroke.
+const importCache = new Map<string, Promise<Record<string, unknown>>>();
+
+const fetchImportedSchema = (url: string): Promise<Record<string, unknown>> => {
+  const cached = importCache.get(url);
+  if (cached) return cached;
+  const promise = (async () => {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch imported schema ${url}: HTTP ${res.status}`);
+    }
+    const parsed = yaml.load(await res.text());
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error(`Imported schema ${url} did not parse to an object.`);
+    }
+    return parsed as Record<string, unknown>;
+  })();
+  importCache.set(url, promise);
+  promise.catch(() => importCache.delete(url));
+  return promise;
+};
+
+// Flatten a schema and its eido `imports` chain into standalone schemas,
+// imports first — the same order peprs validates in natively. The WASM
+// build can't fetch URLs itself, so imports are dereferenced here and the
+// `imports` key is stripped before each schema is handed to the validator.
+export const resolveSchemaChain = async (
+  schema: Record<string, unknown>,
+  seen: Set<string> = new Set(),
+): Promise<Record<string, unknown>[]> => {
+  const chain: Record<string, unknown>[] = [];
+  const imports = Array.isArray(schema.imports) ? schema.imports : [];
+  for (const imp of imports) {
+    if (typeof imp !== 'string') {
+      throw new Error(`Schema import entries must be strings, got: ${JSON.stringify(imp)}`);
+    }
+    if (!/^https?:\/\//.test(imp)) {
+      throw new Error(
+        `Schema import "${imp}" is not a URL — relative imports are not supported in browser validation.`,
+      );
+    }
+    if (seen.has(imp)) continue;
+    seen.add(imp);
+    const imported = await fetchImportedSchema(imp);
+    chain.push(...(await resolveSchemaChain(imported, seen)));
+  }
+  const self = { ...schema };
+  delete self.imports;
+  chain.push(self);
+  return chain;
 };
 
 const parseConfig = (configYaml: string): Record<string, unknown> => {
@@ -66,7 +121,7 @@ export const validatePep = async (
   const { configYaml, samples, subsamples, schema } = input;
 
   let projectJson: string;
-  let schemaJson: string;
+  let schemaChain: Record<string, unknown>[];
 
   try {
     const config = parseConfig(configYaml);
@@ -86,11 +141,11 @@ export const validatePep = async (
   }
 
   try {
-    schemaJson = normalizeSchema(schema);
+    schemaChain = await resolveSchemaChain(parseSchemaObject(schema));
   } catch (e) {
     return {
       state: 'error',
-      message: `Schema is invalid: ${
+      message: `Could not load schema: ${
         e instanceof Error ? e.message : String(e)
       }`,
     };
@@ -120,13 +175,17 @@ export const validatePep = async (
     };
   }
 
-  let result: { valid: boolean; errors?: PepValidationErrorItem[] } | null =
-    null;
+  const rawErrors: PepValidationErrorItem[] = [];
   try {
-    result = mod.validate(proj, schemaJson) as {
-      valid: boolean;
-      errors?: PepValidationErrorItem[];
-    };
+    for (const s of schemaChain) {
+      const result = mod.validate(proj, JSON.stringify(s)) as {
+        valid: boolean;
+        errors?: PepValidationErrorItem[];
+      };
+      if (!result.valid) {
+        rawErrors.push(...(result.errors ?? []));
+      }
+    }
   } catch (e) {
     return {
       state: 'error',
@@ -138,15 +197,10 @@ export const validatePep = async (
     proj?.free();
   }
 
-  if (!result) {
-    return { state: 'error', message: 'Validator returned no result.' };
-  }
-
-  if (result.valid) {
+  if (rawErrors.length === 0) {
     return { state: 'valid' };
   }
 
-  const rawErrors = result.errors ?? [];
   let hasProject = false;
   let hasSamples = false;
   const messages: string[] = [];

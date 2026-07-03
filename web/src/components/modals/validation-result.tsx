@@ -41,14 +41,14 @@ export const ValidationResultModal = (props: Props) => {
 
   const handleSubmit = () => {
     const updateData = {
-      newDescription: undefined, 
-      newIsPrivate: undefined, 
-      newName: undefined, 
-      newTag: undefined, 
+      newDescription: undefined,
+      newIsPrivate: undefined,
+      newName: undefined,
+      newTag: undefined,
       newSchema: newSchema === '' ? undefined : newSchema,
-      isPop: undefined 
+      isPop: undefined,
     };
-    
+
     submit(updateData);
   };
 
@@ -119,7 +119,12 @@ export const ValidationResultModal = (props: Props) => {
               control={updateForm.control}
               name="schema"
               render={({ field }) => (
-                <SchemaDropdown showDownload={false} value={field.value} onChange={field.onChange} defaultValue={currentSchema}/>
+                <SchemaDropdown
+                  showDownload={false}
+                  value={field.value}
+                  onChange={field.onChange}
+                  defaultValue={currentSchema}
+                />
               )}
             />
 
