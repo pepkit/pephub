@@ -55,6 +55,8 @@ export const ValidationResultModal = (props: Props) => {
   return (
     <Modal
       centered
+      scrollable
+      size="lg"
       animation={false}
       show={show}
       onHide={() => {
@@ -91,16 +93,16 @@ export const ValidationResultModal = (props: Props) => {
               <Fragment>
                 <p>Your PEP is invalid against the schema.</p>
                 <p>Errors found in {validationResult.errorType}:</p>
-                <pre>
-                  <code>{validationResult.errors.join('\n')}</code>
-                </pre>
+                <ul className="text-break">
+                  {validationResult.errors.map((error, i) => (
+                    <li key={i}>{error}</li>
+                  ))}
+                </ul>
               </Fragment>
             ) : validationResult?.state === 'error' ? (
               <Fragment>
                 <p>Validation could not run:</p>
-                <pre>
-                  <code>{validationResult.message}</code>
-                </pre>
+                <p className="text-break">{validationResult.message}</p>
               </Fragment>
             ) : (
               <p>Validating...</p>
