@@ -36,13 +36,19 @@ const SchemaDropdown: FC<Props> = ({ value, onChange, showDownload = true, defau
         }}
         placeholder={isLoading ? 'Fetching schemas...' : 'Assign a schema...'}
         // isClearable
-        menuPlacement="top"
+        menuPlacement="auto"
+        menuPortalTarget={document.body}
+        menuPosition="fixed"
         className="w-100"
         styles={{
           control: (provided) => ({
             ...provided,
             borderRadius: '.375em',
             borderColor: '#dee2e6',
+          }),
+          menuPortal: (provided) => ({
+            ...provided,
+            zIndex: 1060,
           }),
         }}
       />
