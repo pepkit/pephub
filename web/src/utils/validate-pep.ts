@@ -55,7 +55,24 @@ const parseSchemaObject = (schema: object | string): Record<string, unknown> => 
 // re-fetch the same base schema on every keystroke.
 const importCache = new Map<string, Promise<Record<string, unknown>>>();
 
-const fetchImportedSchema = (url: string): Promise<Record<string, unknown>> => {
+// When the page is served over https, upgrade http:// import URLs to
+// https:// so the browser doesn't block them as mixed content. Many
+// registry schemas (e.g. pepatac) still declare imports as
+// http://schema.databio.org/..., which fails with "Failed to fetch" on
+// the deployed https site but works on a local http preview.
+const upgradeImportUrl = (url: string): string => {
+  if (
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    url.startsWith('http://')
+  ) {
+    return 'https://' + url.slice('http://'.length);
+  }
+  return url;
+};
+
+const fetchImportedSchema = (rawUrl: string): Promise<Record<string, unknown>> => {
+  const url = upgradeImportUrl(rawUrl);
   const cached = importCache.get(url);
   if (cached) return cached;
   const promise = (async () => {
