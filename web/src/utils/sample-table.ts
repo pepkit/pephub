@@ -54,9 +54,7 @@ export const sampleListToArrays = (sampleList: Sample[]) => {
 
 export const arraysToSampleList = (arraysList: any[][], tableType: string) => {
   // Replace all instances of '' with null
-  const updatedArraysList = arraysList.map(row =>
-    row.map(value => value === '' ? null : value)
-  );
+  const updatedArraysList = arraysList.map((row) => row.map((value) => (value === '' ? null : value)));
 
   const uniquePhIds = new Set<string>();
 
@@ -66,7 +64,7 @@ export const arraysToSampleList = (arraysList: any[][], tableType: string) => {
   // look for duplicate values in the header row
   const duplicateHeaders: Record<string, number[]> = {};
   headerRow.forEach((header, index) => {
-    if (header && (header in duplicateHeaders)) {
+    if (header && header in duplicateHeaders) {
       duplicateHeaders[header].push(index);
     } else {
       duplicateHeaders[header] = [index];
@@ -74,19 +72,20 @@ export const arraysToSampleList = (arraysList: any[][], tableType: string) => {
   });
 
   // Filter out non-duplicates and prepare error message
-  const realDuplicates = Object.entries(duplicateHeaders)
-    .filter(([_, indices]) => indices.length > 1);
+  const realDuplicates = Object.entries(duplicateHeaders).filter(([_, indices]) => indices.length > 1);
 
   // If there are duplicate headers, throw an error
   if (realDuplicates.length > 0) {
     const errorMessage = realDuplicates
       .map(([header, indices]) => `"${header}" at columns ${indices.map((i) => i + 1).join(', ')}`)
       .join('; ');
-    throw new Error(`PEPs cannot have duplicate column headers. Rename the duplicate headers. \n\n Duplicate headers found in ${tableType} Table: ${errorMessage}`);
+    throw new Error(
+      `PEPs cannot have duplicate column headers. Rename the duplicate headers. \n\n Duplicate headers found in ${tableType} Table: ${errorMessage}`,
+    );
   }
 
   // find ph_id index
-  let phIdIndex = headerRow.findIndex(header => header === 'ph_id');
+  let phIdIndex = headerRow.findIndex((header) => header === 'ph_id');
   if (phIdIndex === -1) {
     phIdIndex = headerRow.length; // Use the last column index if 'ph_id' is not found
   }
@@ -101,8 +100,8 @@ export const arraysToSampleList = (arraysList: any[][], tableType: string) => {
   const columnsToRemove: number[] = [];
   for (let colIndex = lastNonNullIndex; colIndex < phIdIndex; colIndex++) {
     // Check if all values in this column are null
-    const allNull = updatedArraysList.slice(1).every(row => row[colIndex] === null);
-    
+    const allNull = updatedArraysList.slice(1).every((row) => row[colIndex] === null);
+
     if (allNull) {
       columnsToRemove.push(colIndex);
     }
@@ -118,11 +117,13 @@ export const arraysToSampleList = (arraysList: any[][], tableType: string) => {
 
   // Check for null column headers
   const nullHeaderIndices = updatedArraysList[0]
-    .map((header, index) => header === null ? index : -1)
-    .filter(index => index !== -1);
+    .map((header, index) => (header === null ? index : -1))
+    .filter((index) => index !== -1);
 
   if (nullHeaderIndices.length > 0) {
-    const errorMessage = `PEPs cannot have empty column headers. Either add column headers or remove the columns using the context menu (right click). \n\n Empty headers found in ${tableType} Table at columns: ${nullHeaderIndices.map(i => i + 1).join(', ')}`;
+    const errorMessage = `PEPs cannot have empty column headers. Either add column headers or remove the columns using the context menu (right click). \n\n Empty headers found in ${tableType} Table at columns: ${nullHeaderIndices
+      .map((i) => i + 1)
+      .join(', ')}`;
     throw new Error(errorMessage);
   }
 
@@ -165,16 +166,24 @@ export const arraysToSampleList = (arraysList: any[][], tableType: string) => {
     return hasNonNull;
   });
 
-  // add the ph_id column to the sample list if it doesn't exist
-  sampleList.forEach((sample) => {
-    if (!sample[PH_ID_COL]) {
-      sample[PH_ID_COL] = null;
-    } else if (uniquePhIds.has(sample[PH_ID_COL])) {
-      sample[PH_ID_COL] = null;
-    } else {
-      uniquePhIds.add(sample[PH_ID_COL]);
-    }
-  });
+  if (tableType === 'Sample') {
+    // add the ph_id column to the sample list if it doesn't exist
+    sampleList.forEach((sample) => {
+      if (!sample[PH_ID_COL]) {
+        sample[PH_ID_COL] = null;
+      } else if (uniquePhIds.has(sample[PH_ID_COL])) {
+        sample[PH_ID_COL] = null;
+      } else {
+        uniquePhIds.add(sample[PH_ID_COL]);
+      }
+    });
+  } else {
+    // subsamples must never carry ph_id; also cleans up projects
+    // polluted by this bug (#454) on their next save
+    sampleList.forEach((sample) => {
+      delete sample[PH_ID_COL];
+    });
+  }
   return sampleList;
 };
 

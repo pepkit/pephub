@@ -550,6 +550,13 @@ async def convert_pep(
         project: example
         namespace: databio
 
+    Available filters:
+    - basic: returns the project in yaml format
+    - csv: returns the project in csv format
+    - yaml: returns the project in yaml format
+    - json: returns the project in json format
+    - json-samples: returns the project in json format
+
     """
     # default to basic
     if filter is None:

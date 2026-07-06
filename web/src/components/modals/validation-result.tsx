@@ -4,6 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { useProjectPage } from '../../contexts/project-page-context';
 import { useEditProjectMetaMutation } from '../../hooks/mutations/useEditProjectMetaMutation';
+import { parseSchemaRegistryPath } from '../../hooks/queries/useSchemaJson';
 import { PepValidationOutcome } from '../../utils/validate-pep';
 import { SchemaDropdown } from '../forms/components/schemas-databio-dropdown';
 
@@ -32,22 +33,30 @@ export const ValidationResultModal = (props: Props) => {
   const { isPending: isSubmitting, submit } = useEditProjectMetaMutation(namespace, projectName, tag);
   const newSchema = updateForm.watch('schema');
 
+  const parsedSchema = parseSchemaRegistryPath(currentSchema);
+  const schemaHref = parsedSchema
+    ? `/schemas/${parsedSchema.namespace}/${parsedSchema.name}` +
+      (currentSchema?.includes(':') ? `?version=${parsedSchema.version}` : '')
+    : `/schemas/${currentSchema}`;
+
   const handleSubmit = () => {
     const updateData = {
-      newDescription: undefined, 
-      newIsPrivate: undefined, 
-      newName: undefined, 
-      newTag: undefined, 
+      newDescription: undefined,
+      newIsPrivate: undefined,
+      newName: undefined,
+      newTag: undefined,
       newSchema: newSchema === '' ? undefined : newSchema,
-      isPop: undefined 
+      isPop: undefined,
     };
-    
+
     submit(updateData);
   };
 
   return (
     <Modal
       centered
+      scrollable
+      size="lg"
       animation={false}
       show={show}
       onHide={() => {
@@ -84,16 +93,16 @@ export const ValidationResultModal = (props: Props) => {
               <Fragment>
                 <p>Your PEP is invalid against the schema.</p>
                 <p>Errors found in {validationResult.errorType}:</p>
-                <pre>
-                  <code>{validationResult.errors.join('\n')}</code>
-                </pre>
+                <ul className="text-break">
+                  {validationResult.errors.map((error, i) => (
+                    <li key={i}>{error}</li>
+                  ))}
+                </ul>
               </Fragment>
             ) : validationResult?.state === 'error' ? (
               <Fragment>
                 <p>Validation could not run:</p>
-                <pre>
-                  <code>{validationResult.message}</code>
-                </pre>
+                <p className="text-break">{validationResult.message}</p>
               </Fragment>
             ) : (
               <p>Validating...</p>
@@ -112,7 +121,12 @@ export const ValidationResultModal = (props: Props) => {
               control={updateForm.control}
               name="schema"
               render={({ field }) => (
-                <SchemaDropdown showDownload={false} value={field.value} onChange={field.onChange} defaultValue={currentSchema}/>
+                <SchemaDropdown
+                  showDownload={false}
+                  value={field.value}
+                  onChange={field.onChange}
+                  defaultValue={currentSchema}
+                />
               )}
             />
 
@@ -136,7 +150,7 @@ export const ValidationResultModal = (props: Props) => {
         <div className="d-flex align-items-center justify-content-between w-100">
           {currentSchema && (
             <div className="d-flex align-items-center">
-              <a href={`/schemas/${props.currentSchema}`}>
+              <a href={schemaHref}>
                 <button className="btn btn-sm btn-outline-dark">
                   <span className="d-flex align-items-center gap-1">
                     <i className="bi bi-arrow-left"></i>
