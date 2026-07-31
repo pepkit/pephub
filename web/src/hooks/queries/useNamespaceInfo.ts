@@ -6,7 +6,7 @@ import { useSession } from '../../contexts/session-context';
 export const useNamespaceInfo = (namespace: string) => {
   const session = useSession();
   const query = useQuery({
-    queryKey: [namespace],
+    queryKey: [namespace, 'info'],
     queryFn: () => getNamespaceInfo(namespace, session.jwt),
     enabled: namespace !== undefined && session.jwt !== null,
     retry: false,

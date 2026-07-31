@@ -4,7 +4,7 @@ import { getNamespaceArchive } from '../../api/namespace';
 
 export const useNamespaceArchive = (namespace: string | undefined) => {
   return useQuery({
-    queryKey: [namespace],
+    queryKey: [namespace, 'archive'],
     queryFn: () => getNamespaceArchive(namespace || ''),
   });
 };
