@@ -1,0 +1,8 @@
+# PEPhub — https://pephub.databio.org
+#
+# This site is a client-rendered single-page app and serves no meaningful HTML to
+# clients that do not execute JavaScript. Machine-readable guidance, including the
+# API base URL and OpenAPI spec location, is in /llms.txt.
+
+User-agent: *
+Allow: /

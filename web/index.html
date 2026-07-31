@@ -6,9 +6,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    <link rel="service-desc" type="application/vnd.oai.openapi+json" href="https://pephub-api.databio.org/openapi.json" />
+    <link rel="service-doc" type="text/html" href="https://pephub-api.databio.org/api/v1/docs" />
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>PEPhub</h1>
+      <p>
+        PEPhub is a database and web interface for biological sample metadata, organized as PEPs (Portable
+        Encapsulated Projects). This interface requires JavaScript.
+      </p>
+      <p>
+        If you are an automated client, use the REST API instead of this page. The API is served from a
+        different hostname than this site: requests to <code>https://pephub.databio.org/api/...</code> do not
+        reach it.
+      </p>
+      <ul>
+        <li>API base URL: <a href="https://pephub-api.databio.org">https://pephub-api.databio.org</a></li>
+        <li>OpenAPI spec: <a href="https://pephub-api.databio.org/openapi.json">https://pephub-api.databio.org/openapi.json</a></li>
+        <li>Interactive docs: <a href="https://pephub-api.databio.org/api/v1/docs">https://pephub-api.databio.org/api/v1/docs</a></li>
+        <li>Guidance for automated clients: <a href="/llms.txt">/llms.txt</a></li>
+      </ul>
+      <p>
+        Namespace archives are listed at
+        <code>https://pephub-api.databio.org/api/v1/namespaces/{namespace}/archive</code>. That endpoint is the
+        only way to learn the current archive filename; the CDN that stores them does not support directory
+        listing.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

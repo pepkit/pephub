@@ -1,0 +1,103 @@
+# PEPhub
+
+> PEPhub is a database and web interface for biological sample metadata. Metadata is
+> organized as PEPs (Portable Encapsulated Projects): a sample table plus a config file,
+> addressed as `namespace/project`, optionally validated against a versioned JSON schema.
+
+**This web interface is a client-rendered single-page app.** Fetching a page over plain
+HTTP returns a JavaScript shell with no content in it. If you are not executing
+JavaScript, use the REST API described below instead of scraping pages.
+
+**The API is on a different hostname than this site.** Requests to
+`https://pephub.databio.org/api/...` do not reach the API; on some deployments they
+return the SPA shell with a 200 status rather than an error.
+
+## API
+
+- Base URL: <https://pephub-api.databio.org>
+- OpenAPI spec: <https://pephub-api.databio.org/openapi.json>
+- Interactive docs: <https://pephub-api.databio.org/api/v1/docs>
+- Version and health: <https://pephub-api.databio.org/api/v1/_version>
+
+All API paths below are relative to the base URL. Responses are JSON. Reads are public;
+writes require a token (see Authentication).
+
+## Reading metadata
+
+- `GET /api/v1/namespaces` — the largest namespaces
+- `GET /api/v1/namespaces/{namespace}/projects` — projects in a namespace
+- `GET /api/v1/projects/{namespace}/{project}` — a single PEP
+- `GET /api/v1/projects/{namespace}/{project}/annotation` — summary metadata only; prefer
+  this over fetching the whole project when you just need a description or sample count
+- `GET /api/v1/projects/{namespace}/{project}/samples` — the sample table
+- `GET /api/v1/projects/{namespace}/{project}/config` — the project config
+- `GET /api/v1/projects/{namespace}/{project}/zip` — the whole project as a zip
+
+Projects are versioned by tag. Every project endpoint accepts `?tag=`, which defaults to
+`default`. The full address form is `namespace/project:tag`.
+
+Example:
+
+    curl https://pephub-api.databio.org/api/v1/projects/databio/example/samples
+
+## Search
+
+- `POST /api/v1/search/` — search for PEPs. Backed by semantic (vector) search when
+  available, falling back to SQL string matching.
+- `GET /api/v1/search/namespaces` — search for namespaces
+
+## Schemas and validation
+
+- `GET /api/v1/schemas` — all schemas
+- `GET /api/v1/schemas/{namespace}/{schema_name}` — one schema
+- `GET /api/v1/schemas/{namespace}/{schema_name}/versions` — available versions
+- `GET /api/v1/schemas/{namespace}/{schema_name}/versions/{semantic_version}/file` —
+  download the JSON Schema itself
+- `POST /api/v1/eido/validate` — validate a PEP against a schema
+
+To produce metadata PEPhub will accept: fetch the applicable schema, fill it in, validate
+against `/api/v1/eido/validate`, then submit.
+
+## Writing metadata
+
+- `POST /api/v1/namespaces/{namespace}/projects/json` — create a PEP from raw JSON
+- `POST /api/v1/namespaces/{namespace}/projects/files` — create a PEP from files
+- `PATCH /api/v1/projects/{namespace}/{project}` — update a PEP
+- `POST /api/v1/projects/{namespace}/{project}/forks` — fork into your own namespace
+
+Prefer forking into a namespace you control over writing to a curated namespace such as
+`geo`.
+
+## Bulk archives
+
+Whole namespaces are published periodically as tar archives.
+
+- `GET /api/v1/namespaces/{namespace}/archive` — list archives (note: singular `archive`)
+
+The response lists each archive with a `file_path` URL on `cloud2.databio.org`, a
+creation date, a project count, and a file size. That CDN host serves exact paths but
+does not support directory listing, so the archive list endpoint is the only way to learn
+the current filename. Archives are large; `geo` is over 1.5 GB.
+
+## Authentication
+
+Reads do not require authentication. For writes:
+
+- `POST /auth/device/init` then `POST /auth/device/token` — device code flow, intended for
+  headless and command-line clients
+- `GET|POST|DELETE /auth/user/keys` — mint and manage long-lived API keys
+
+Pass the token in the `Authorization` header.
+
+## Python client
+
+    pip install pephubclient
+
+The `pephubclient` package wraps the endpoints above and honors a `PEPHUB_BASE_URL`
+environment variable if you need to point it at another deployment.
+
+## Related
+
+- PEP specification: <https://pep.databio.org>
+- Source code: <https://github.com/pepkit/pephub>
+- Python client source: <https://github.com/pepkit/pephubclient>

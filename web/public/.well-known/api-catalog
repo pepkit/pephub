@@ -1,0 +1,33 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://pephub-api.databio.org/api/v1/",
+      "service-desc": [
+        {
+          "href": "https://pephub-api.databio.org/openapi.json",
+          "type": "application/vnd.oai.openapi+json",
+          "title": "PEPhub OpenAPI description"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://pephub-api.databio.org/api/v1/docs",
+          "type": "text/html",
+          "title": "PEPhub interactive API documentation"
+        },
+        {
+          "href": "https://pephub.databio.org/llms.txt",
+          "type": "text/plain",
+          "title": "PEPhub guidance for automated clients"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://pephub-api.databio.org/api/v1/_version",
+          "type": "application/json",
+          "title": "PEPhub version and health"
+        }
+      ]
+    }
+  ]
+}
