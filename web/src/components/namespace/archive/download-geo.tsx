@@ -24,9 +24,15 @@ export const DownloadGeo = (props: Props) => {
         All GEO PEPs are archived quarterly into a single <code>tar</code> file.
         Each archive is slightly over 1 gb in size.
       </p>
-      {data ? <NamespaceArchiveTable data={data} /> : 
+      {isFetching ? (
+        <p className='text-center pt-4 fw-semibold'>Loading archives...</p>
+      ) : isError ? (
+        <p className='text-center pt-4 fw-semibold'>Could not load archives.</p>
+      ) : data && data.count > 0 ? (
+        <NamespaceArchiveTable data={data} />
+      ) : (
         <p className='text-center pt-4 fw-semibold'>No archives currently exist for this namespace.</p>
-      }
+      )}
     </div>
   );
 };

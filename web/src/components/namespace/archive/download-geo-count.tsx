@@ -14,7 +14,7 @@ export const DownloadGeoCount = (props: Props) => {
     data,
   } = useNamespaceArchive(namespace);
 
-  return (
-    <span>{data ? data.count : 0}</span>
-  );
+  if (isFetching) return <span>-</span>;
+  if (isError || !data) return <span>0</span>;
+  return <span>{data.count}</span>;
 };
