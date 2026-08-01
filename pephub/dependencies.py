@@ -16,8 +16,11 @@ from fastapi.security import HTTPBearer
 from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
+from pepdbagent.db_utils import Projects, User
 from pepdbagent.exceptions import ProjectNotFoundError
 from pepdbagent.models import AnnotationModel, Namespace, ListOfNamespaceInfo
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
 from sentence_transformers import SparseEncoder
@@ -413,21 +416,32 @@ def get_sparse_model() -> Union[SparseEncoder, None]:
 def get_namespace_info(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
-    user: str = Depends(get_user_from_session_info),
-) -> Namespace:  # type: ignore
+) -> Namespace:
     """
     Get the information on a namespace, if it exists.
+
+    Counts include private projects, like pepdbagent's namespace.info().
     """
-    # TODO: is this the best way to do this? By grabbing the first result?
-    try:
-        yield agent.namespace.get(query=namespace, admin=user).results[0]
-    except IndexError:
-        # namespace doesnt exist in database, so we must return a blank namespace
-        yield Namespace(
-            namespace=namespace,
-            number_of_projects=0,
-            number_of_samples=0,
+    with Session(agent.connection) as session:
+        number_of_projects = session.scalar(
+            select(User.number_of_projects).where(User.namespace == namespace)
         )
+        if number_of_projects is None:
+            return Namespace(
+                namespace=namespace,
+                number_of_projects=0,
+                number_of_samples=0,
+            )
+        number_of_samples = session.scalar(
+            select(func.coalesce(func.sum(Projects.number_of_samples), 0)).where(
+                Projects.namespace == namespace
+            )
+        )
+    return Namespace(
+        namespace=namespace,
+        number_of_projects=number_of_projects,
+        number_of_samples=number_of_samples,
+    )
 
 
 @cached(TTLCache(maxsize=100, ttl=5 * 60))
