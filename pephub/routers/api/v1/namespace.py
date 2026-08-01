@@ -62,7 +62,7 @@ namespace = APIRouter(prefix="/api/v1/namespaces/{namespace}", tags=["namespace"
     summary="Fetch details about a particular namespace.",
     response_model=Namespace,
 )
-async def get_namespace(
+def get_namespace(
     namespace_info: Namespace = Depends(get_namespace_info),
 ):
     """
@@ -82,7 +82,7 @@ async def get_namespace(
     summary="Fetch all projects inside a particular namespace.",
     response_model=AnnotationList,
 )
-async def get_namespace_projects(
+def get_namespace_projects(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
     limit: int = 10,
@@ -154,7 +154,7 @@ async def get_namespace_projects(
     summary="Create a PEP in the current namespace",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
-async def create_pep(
+def create_pep(
     namespace: str,
     name: str = Form(...),
     is_private: bool = Form(False),
@@ -229,7 +229,7 @@ async def create_pep(
     summary="Upload raw project to database.",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
-async def upload_raw_pep(
+def upload_raw_pep(
     namespace: str,
     project_from_json: ProjectJsonRequest,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -308,7 +308,7 @@ async def upload_raw_pep(
     dependencies=[Depends(verify_user_can_write_namespace)],
     response_model=AnnotationList,
 )
-async def get_user_stars(
+def get_user_stars(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
 ):
@@ -325,7 +325,7 @@ async def get_user_stars(
         Depends(verify_user_can_write_namespace),
     ],
 )
-async def add_to_stars(
+def add_to_stars(
     project: FavoriteRequest,
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -360,7 +360,7 @@ async def add_to_stars(
     summary="Delete project from favorites.",
     dependencies=[Depends(verify_user_can_write_namespace)],
 )
-async def remove_from_stars(
+def remove_from_stars(
     project: FavoriteRequest,
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -395,7 +395,7 @@ async def remove_from_stars(
     summary="Get information list of biggest namespaces",
     response_model=NamespaceInfoReturnModel,
 )
-async def get_namespace_information(
+def get_namespace_information(
     request: Request,
     page: int = 0,
     page_size: int = DEFAULT_LIMIT_INFO,
@@ -419,7 +419,7 @@ async def get_namespace_information(
     summary="Get statistics about each namespace",
     response_model=NamespaceStats,
 )
-async def get_namespace_stats(
+def get_namespace_stats(
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace: Optional[str] = None,
 ):
@@ -474,7 +474,7 @@ def remove_user(
     summary="Get metadata of all archived files of all projects in the namespace",
     response_model=TarNamespaceModelReturn,
 )
-async def get_archive(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
+def get_archive(namespace: str, agent: PEPDatabaseAgent = Depends(get_db)):
 
     result = agent.namespace.get_tar_info(namespace)
 

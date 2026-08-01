@@ -46,7 +46,7 @@ def _read_schema(path_or_url: str) -> dict:
 
 
 @router.get("/schemas/{namespace}/{project}")
-async def get_schema(request: Request, namespace: str, project: str):
+def get_schema(request: Request, namespace: str, project: str):
     """
     Takes namespace and project values for a schema endpoint
     and returns a custom validator HTML page.

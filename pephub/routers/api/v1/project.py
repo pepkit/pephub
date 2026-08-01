@@ -80,7 +80,7 @@ project = APIRouter(
     summary="Get list of annotations for list of projects",
     response_model=AnnotationList,
 )
-async def get_namespace_projects_list(
+def get_namespace_projects_list(
     namespace_access: List[str] = Depends(get_namespace_access_list),
     agent: PEPDatabaseAgent = Depends(get_db),
     registry_paths: Annotated[str, Query()] = None,
@@ -100,7 +100,7 @@ async def get_namespace_projects_list(
     response_model=ProjectRawRequest,
     response_model_by_alias=False,
 )
-async def get_a_pep(
+def get_a_pep(
     proj: dict = Depends(get_project),
 ):
     """
@@ -197,7 +197,7 @@ async def update_pep(
 
 
 @project.delete("", summary="Delete a PEP")
-async def delete_a_pep(
+def delete_a_pep(
     namespace: str,
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
@@ -231,7 +231,7 @@ async def delete_a_pep(
 
 
 @project.get("/samples", response_model=Union[SamplesResponseModel, str, list, dict])
-async def get_pep_samples(
+def get_pep_samples(
     proj: dict = Depends(get_project),
     format: Optional[Union[Literal["basic", "csv", "yaml", "json"], None]] = None,
     raw: Optional[bool] = True,
@@ -296,7 +296,7 @@ async def get_pep_samples(
 
 
 @project.get("/config", summary="Get project configuration file")
-async def get_pep_config(
+def get_pep_config(
     config: dict = Depends(get_config),
 ):
     """
@@ -317,7 +317,7 @@ async def get_pep_config(
     "/samples/{sample_name}",
     summary="Get a particular sample",
 )
-async def get_sample(
+def get_sample(
     namespace: str,
     project: str,
     sample_name: str,
@@ -365,7 +365,7 @@ async def get_sample(
     "/samples/{sample_name}",
     summary="Update particular sample in a project",
 )
-async def update_sample(
+def update_sample(
     namespace: str,
     project: str,
     sample_name: str,
@@ -408,7 +408,7 @@ async def update_sample(
     "/samples/{sample_name}",
     summary="Upload sample to a project",
 )
-async def upload_sample(
+def upload_sample(
     namespace: str,
     project: str,
     tag: Optional[str] = DEFAULT_TAG,
@@ -458,7 +458,7 @@ async def upload_sample(
     "/samples/{sample_name}",
     summary="Delete sample from the project",
 )
-async def delete_sample(
+def delete_sample(
     namespace: str,
     project: str,
     sample_name: str,
@@ -496,7 +496,7 @@ async def delete_sample(
 
 
 @project.get("/subsamples", response_model=SamplesResponseModel)
-async def get_subsamples_endpoint(
+def get_subsamples_endpoint(
     subsamples: list = Depends(get_subsamples),
     download: bool = False,
 ):
@@ -534,7 +534,7 @@ async def get_subsamples_endpoint(
 
 
 @project.get("/convert")
-async def convert_pep(
+def convert_pep(
     proj: dict = Depends(get_project),
     filter: Optional[str] = "basic",
     format: Optional[str] = "plain",
@@ -593,7 +593,7 @@ async def convert_pep(
 
 
 @project.get("/zip", response_class=FileResponse)
-async def zip_pep_for_download(proj: Dict[str, Any] = Depends(get_project)):
+def zip_pep_for_download(proj: Dict[str, Any] = Depends(get_project)):
     """
     Zip a pep
 
@@ -613,7 +613,7 @@ async def zip_pep_for_download(proj: Dict[str, Any] = Depends(get_project)):
     summary="Fork project to user namespace.",
     dependencies=[Depends(verify_user_can_fork)],
 )
-async def fork_pep_to_namespace(
+def fork_pep_to_namespace(
     fork_request: ForkRequest,
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -659,7 +659,7 @@ async def fork_pep_to_namespace(
 
 
 @project.get("/annotation", response_model=AnnotationModel)
-async def get_project_annotation(
+def get_project_annotation(
     proj_annotation: AnnotationModel = Depends(get_project_annotation),
 ):
     """
@@ -690,7 +690,7 @@ def get_views(
     response_model=Union[ProjectRawModel, dict],
     tags=["views"],
 )
-async def get_view_of_the_project(
+def get_view_of_the_project(
     namespace: str,
     project: str,
     view: str,
@@ -732,7 +732,7 @@ async def get_view_of_the_project(
     summary="Create a view",
     tags=["views"],
 )
-async def create_view_of_the_project(
+def create_view_of_the_project(
     namespace: str,
     project: str,
     view: str,
@@ -794,7 +794,7 @@ async def create_view_of_the_project(
     tags=["views"],
     response_class=FileResponse,
 )
-async def zip_view_of_the_view(
+def zip_view_of_the_view(
     namespace: str,
     project: str,
     view: str,
@@ -820,7 +820,7 @@ async def zip_view_of_the_view(
     summary="Add sample to the view",
     tags=["views"],
 )
-async def add_sample_to_view(
+def add_sample_to_view(
     namespace: str,
     project: str,
     view: str,

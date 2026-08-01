@@ -39,7 +39,7 @@ search = APIRouter(prefix="/api/v1/search", tags=["search"])
 @search.get(
     "/namespaces", summary="Search for namespaces", response_model=NamespaceList
 )
-async def search_for_namespaces(
+def search_for_namespaces(
     limit: Optional[int] = 1_000,
     query: Optional[str] = "",
     offset: Optional[int] = 0,
@@ -50,7 +50,7 @@ async def search_for_namespaces(
 
 # perform a search
 @search.post("/", summary="Search for a PEP", response_model=SearchReturnModel)
-async def search_for_pep(
+def search_for_pep(
     query: SearchQuery,
     qdrant: QdrantClient = Depends(get_qdrant),
     model: Embedding = Depends(get_sentence_transformer),
