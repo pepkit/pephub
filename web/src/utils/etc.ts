@@ -69,7 +69,7 @@ export const constructQueryFromPaginationParams = (params: PaginationParams): UR
   if (offset) {
     query.set('offset', offset.toString());
   }
-  if (limit) {
+  if (limit !== undefined) {
     query.set('limit', limit.toString());
   }
   if (orderBy) {

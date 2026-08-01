@@ -65,16 +65,9 @@ export const NamespacePage = () => {
   const schemaSearchDebounced = useDebounce<string>(schemaSearch, 500);
 
   // data fetching
-  const {
-    // data: namespaceInfo,
-    isLoading: namespaceInfoIsLoading,
-    error,
-  } = useNamespaceProjects(namespace, {
-    limit: 0,
-  });
   const { data: popsInfo } = useNamespaceProjects(namespace, { type: 'pop', limit: 0 });
   const { data: pepsInfo } = useNamespaceProjects(namespace, { type: 'pep', limit: 0 });
-  const { data: projects, isLoading: projectsIsLoading } = useNamespaceProjects(namespace, {
+  const { data: projects, isLoading: projectsIsLoading, error } = useNamespaceProjects(namespace, {
     limit,
     offset,
     orderBy,
@@ -101,7 +94,7 @@ export const NamespacePage = () => {
   const schemasFiltered =
     schemas?.results.filter((s) => s.schema_name.toLowerCase().includes(schemaSearch.toLowerCase())) || [];
 
-  if (namespaceInfoIsLoading || starsAreLoading) {
+  if (projectsIsLoading || starsAreLoading) {
     return (
       <PageLayout title={namespace}>
         <NamespacePagePlaceholder />
