@@ -1,6 +1,7 @@
 import logging
 
 import coloredlogs
+import logmuse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
@@ -20,28 +21,27 @@ from .routers.api.v1.schemas import groups as api_groups
 from .routers.auth.base import auth as auth_router
 from .routers.eido.eido import router as eido_router
 
-_LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
-coloredlogs.install(
-    logger=_LOGGER_PEPDBAGENT,
-    level=logging.INFO,
-    datefmt="%b %d %Y %H:%M:%S",
-    fmt="[%(levelname)s] [%(asctime)s] [PEPDBAGENT] %(message)s",
-)
+DATE_FMT = "%b %d %Y %H:%M:%S"
 
-_LOGGER_PEPRS = logging.getLogger("peprs")
-coloredlogs.install(
-    logger=_LOGGER_PEPRS,
-    level=logging.ERROR,
-    datefmt="%b %d %Y %H:%M:%S",
-    fmt="[%(levelname)s] [%(asctime)s] [PEPRS] %(message)s",
-)
+# This module is the application entry point (uvicorn loads `pephub.main:app`),
+# so it is where logging gets configured. Don't move this into `__init__.py`.
+#
+# Configuring the root logger covers pephub and its dependencies at once. Each
+# line is tagged with its logger name, so there is no need to attach a handler
+# per package to identify where a message came from.
+logmuse.init_logger("", make_root=True, level=logging.INFO, datefmt=DATE_FMT)
 
-_LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
+# peprs is noisy at INFO.
+logging.getLogger("peprs").setLevel(logging.ERROR)
+
+# uvicorn owns its own logger tree: `uvicorn.access` and its parent both have
+# propagate=False, so the root handler above cannot reach them. Access logs have
+# to be formatted explicitly to match everything else.
 coloredlogs.install(
-    logger=_LOGGER_PEPHUB,
+    logger=logging.getLogger("uvicorn.access"),
     level=logging.INFO,
-    datefmt="%b %d %Y %H:%M:%S",
-    fmt="[%(levelname)s] [%(asctime)s] [PEPHUB] %(message)s",
+    datefmt=DATE_FMT,
+    fmt="[%(levelname)s] [%(asctime)s] [%(name)s] %(message)s",
 )
 
 
