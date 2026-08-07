@@ -8,6 +8,8 @@ ignore = ["F403", "F405", "E501"]
 [lint.per-file-ignores]
 # Tests put the repo root on sys.path before importing pephub.
 "tests/*" = ["E402"]
+# Logging is set up before the rest of pephub is imported.
+"pephub/main.py" = ["E402"]
 
 [lint.isort]
 known-first-party = ["pephub"]
