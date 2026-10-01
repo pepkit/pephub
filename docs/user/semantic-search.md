@@ -1,0 +1,5 @@
+# PEPhub's semantic search
+
+PEPhub's main search box (accessible from the [home page](https://pephub.databio.org/)) provides a powerful semantic search.
+
+When a user provides a natural-language search query, PEPhub transforms the query using the same-sentence transformer in real time, then queries the Qdrant API to retrieve the most semantically similar PEP vectors. Qdrant identifies similar PEPs by calculating nearest neighbors in vector space. PEPhub then returns the results to the client with their associated description and registry path. PEPhub’s search engine uses a semantic approach, which provides several advantages: first, the system returns results with similar meaning whether or not they include the terms of the original query. Second, it is tolerant of misspellings and is not limited to any ontology or taxonomy. Finally, because each PEP is represented as a vector, we can use high-speed nearest-neighbor algorithms to identify relevant PEPs, making the search very fast. This method scales to millions of PEPs, and the speed is limited only by network speeds. Users may also tune results with limits, offsets, and relevance score cutoffs.
