@@ -50,7 +50,9 @@ Example:
   (`NCBITaxon:9606` or `Homo sapiens`); `tissue` also matches more specific terms
   (liver finds hepatocyte). Repeat a parameter for OR; different parameters combine
   with AND. Each result gives the sample accession, its study, the PEP that holds it,
-  SRA and BioSample IDs, and the claims that matched with their confidence.
+  SRA and BioSample IDs, and the claims that matched with their confidence. Add
+  `q=<free text>` to rank results by meaning (semantic search over sample
+  descriptions); each result then has a `score`.
 
   Example:
 

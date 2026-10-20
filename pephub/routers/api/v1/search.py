@@ -76,21 +76,30 @@ def search_for_samples(
         description="any: a sample matches if any of its claims for a field matches. "
         "best: only its highest-confidence claims for that field count.",
     ),
+    q: Optional[str] = Query(
+        None,
+        description="Free-text query, e.g. 'fetal liver chromatin'. Results are ranked by similarity "
+        "of the sample description (semantic search); the other parameters still filter.",
+    ),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     agent: PEPDatabaseAgent = Depends(get_db),
+    model: Embedding = Depends(get_sentence_transformer),
 ) -> IndexSearchResult:
     """
     Find samples by what the sample index says about them. Different parameters
     combine with AND; repeat a parameter to combine its values with OR. Each result
     lists the claims that matched, with their confidence and the submitter text they
-    came from.
+    came from. With q, results are ranked by meaning instead of by accession.
     """
-    if not (organism or assay or tissue or sample_type):
+    if not (organism or assay or tissue or sample_type or q):
         raise HTTPException(
             status_code=400,
-            detail="Give at least one of: organism, assay, tissue, sample_type",
+            detail="Give at least one of: q, organism, assay, tissue, sample_type",
         )
+    if q and match != "any":
+        raise HTTPException(status_code=400, detail="q works with match=any only")
+    embedding = list(next(iter(model.embed([q])))) if q else None
     return agent.index.search(
         organism=organism,
         assay=assay,
@@ -100,6 +109,7 @@ def search_for_samples(
         match=match,
         limit=limit,
         offset=offset,
+        query_embedding=embedding,
     )
 
 
