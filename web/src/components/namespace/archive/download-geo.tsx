@@ -22,7 +22,7 @@ export const DownloadGeo = (props: Props) => {
       <p className='text-sm mt-1 mb-3'>
         Download all available PEPs for the Gene Expresion Omnibus (GEO). 
         All GEO PEPs are archived quarterly into a single <code>tar</code> file.
-        Each archive is slightly over 1 gb in size.
+        The table below lists each archive's size.
       </p>
       {isFetching ? (
         <p className='text-center pt-4 fw-semibold'>Loading archives...</p>
