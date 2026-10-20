@@ -45,6 +45,16 @@ Example:
 - `POST /api/v1/search/` — search for PEPs. Backed by semantic (vector) search when
   available, falling back to SQL string matching.
 - `GET /api/v1/search/namespaces` — search for namespaces
+- `GET /api/v1/search/samples` — find samples by `organism`, `assay`, `tissue` (tissue or
+  cell type), and `sample_type`. Values are ontology term IDs or exact names
+  (`NCBITaxon:9606` or `Homo sapiens`); `tissue` also matches more specific terms
+  (liver finds hepatocyte). Repeat a parameter for OR; different parameters combine
+  with AND. Each result gives the sample accession, its study, the PEP that holds it,
+  SRA and BioSample IDs, and the claims that matched with their confidence.
+
+  Example:
+
+      curl "https://pephub-api.databio.org/api/v1/search/samples?organism=Homo%20sapiens&assay=ATAC-seq&tissue=liver"
 
 ## Schemas and validation
 

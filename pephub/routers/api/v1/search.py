@@ -1,11 +1,11 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
-from pepdbagent.models import NamespaceList
+from pepdbagent.models import IndexSearchResult, NamespaceList
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     SparseVector,
@@ -46,6 +46,61 @@ async def search_for_namespaces(
     agent: PEPDatabaseAgent = Depends(get_db),
 ) -> NamespaceList:
     return agent.namespace.get(limit=limit, query=query or "", offset=offset)
+
+
+@search.get(
+    "/samples",
+    summary="Search for samples by organism, assay, tissue, and sample type",
+    response_model=IndexSearchResult,
+)
+def search_for_samples(
+    organism: List[str] = Query(
+        None, description="Term ID or name, e.g. NCBITaxon:9606 or Homo sapiens"
+    ),
+    assay: List[str] = Query(
+        None, description="Term ID or name, e.g. EFO:0007045 or ATAC-seq"
+    ),
+    tissue: List[str] = Query(
+        None,
+        description="Tissue or cell type, as a term ID or name, e.g. UBERON:0002107 "
+        "or liver. Also matches every term below it (liver finds hepatocyte).",
+    ),
+    sample_type: List[str] = Query(
+        None,
+        description="tissue, primary cell, cell line, organoid, in vitro "
+        "differentiated cells, cell-free sample, or whole organisms",
+    ),
+    min_confidence: Literal["low", "medium", "high"] = "low",
+    match: Literal["any", "best"] = Query(
+        "any",
+        description="any: a sample matches if any of its claims for a field matches. "
+        "best: only its highest-confidence claims for that field count.",
+    ),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    agent: PEPDatabaseAgent = Depends(get_db),
+) -> IndexSearchResult:
+    """
+    Find samples by what the sample index says about them. Different parameters
+    combine with AND; repeat a parameter to combine its values with OR. Each result
+    lists the claims that matched, with their confidence and the submitter text they
+    came from.
+    """
+    if not (organism or assay or tissue or sample_type):
+        raise HTTPException(
+            status_code=400,
+            detail="Give at least one of: organism, assay, tissue, sample_type",
+        )
+    return agent.index.search(
+        organism=organism,
+        assay=assay,
+        tissue=tissue,
+        sample_type=sample_type,
+        min_confidence=min_confidence,
+        match=match,
+        limit=limit,
+        offset=offset,
+    )
 
 
 # perform a search
