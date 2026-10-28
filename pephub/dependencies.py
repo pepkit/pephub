@@ -13,18 +13,18 @@ from dotenv import load_dotenv
 from fastapi import Depends, Header, Query
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
-from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.exceptions import ProjectNotFoundError
 from pepdbagent.models import AnnotationModel, Namespace, ListOfNamespaceInfo
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
-from sentence_transformers import SparseEncoder
 from qdrant_client.http.exceptions import ResponseHandlingException
 
 from .const import (
     DENSE_ENCODER_MODEL,
+    DEFAULT_EMBEDDING_TIMEOUT,
+    DEFAULT_QDRANT_COLLECTION_NAME,
     DEFAULT_POSTGRES_DB,
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -35,6 +35,14 @@ from .const import (
     JWT_SECRET,
     SPARSE_ENCODER_MODEL,
     PKG_NAME,
+)
+from .embedding import (
+    Encoder,
+    EncoderConfigError,
+    EncoderError,
+    EncoderModelMismatch,
+    LocalEncoder,
+    TEIEncoder,
 )
 from .helpers import jwt_encode_user_data
 from .routers.models import ForkRequest
@@ -100,24 +108,6 @@ agent = PEPDatabaseAgent(
     port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
 )
 
-# sentence_transformer model
-_LOGGER_PEPHUB.info(f"HF MODEL IN USE: {os.getenv('HF_MODEL', DENSE_ENCODER_MODEL)}")
-embedding_model = Embedding(
-    model_name=os.getenv("HF_MODEL", DENSE_ENCODER_MODEL), max_length=512
-)
-# embedding_model = None
-
-# token = os.environ.get("HF_TOKEN", None)
-# hf_model_sparse = os.environ.get("HF_MODEL_SPARSE", SPARSE_ENCODER_MODEL)
-# if token is None:
-#     sparse_model = None
-#     _LOGGER_PEPHUB.warning("No HF_TOKEN provided, sparse model disabled.")
-# else:
-
-hf_model_sparse = os.environ.get("HF_MODEL_SPARSE", SPARSE_ENCODER_MODEL)
-sparse_model = SparseEncoder(hf_model_sparse)
-_LOGGER_PEPHUB.info(f"Sparse model in use: {hf_model_sparse}")
-
 
 ## Qdrant connection
 def parse_boolean_env_var(env_var: str) -> bool:
@@ -153,6 +143,102 @@ def initialize_qdrant_client() -> Union[QdrantClient, None]:
 
 
 qdrant = initialize_qdrant_client()
+
+
+def initialize_encoder() -> Encoder:
+    """
+    Build the query encoder for semantic search from EMBEDDING_* settings.
+
+    EMBEDDING_MODE=local (default) loads the models in this process.
+    EMBEDDING_MODE=tei calls Hugging Face Text Embeddings Inference servers,
+    so fastembed, sentence-transformers, and torch are never imported.
+    """
+    mode = os.environ.get("EMBEDDING_MODE", "local").strip().lower()
+    dense_model = os.environ.get("EMBEDDING_DENSE_MODEL") or None
+    sparse_env = os.environ.get("EMBEDDING_SPARSE_MODEL")
+
+    if mode == "local":
+        return LocalEncoder(
+            dense_model=dense_model or DENSE_ENCODER_MODEL,
+            # unset -> default model; empty string -> sparse search off
+            sparse_model=SPARSE_ENCODER_MODEL if sparse_env is None else sparse_env,
+        )
+    elif mode == "tei":
+        dense_url = os.environ.get("EMBEDDING_DENSE_URL")
+        if not dense_url:
+            raise EncoderConfigError("EMBEDDING_MODE=tei requires EMBEDDING_DENSE_URL")
+        try:
+            timeout = float(os.environ.get("EMBEDDING_TIMEOUT") or DEFAULT_EMBEDDING_TIMEOUT)
+        except ValueError:
+            raise EncoderConfigError(
+                f"EMBEDDING_TIMEOUT must be a number of seconds, "
+                f"got '{os.environ.get('EMBEDDING_TIMEOUT')}'"
+            )
+        return TEIEncoder(
+            dense_url=dense_url,
+            sparse_url=os.environ.get("EMBEDDING_SPARSE_URL") or None,
+            api_key=os.environ.get("EMBEDDING_API_KEY") or None,
+            expected_dense_model=dense_model,
+            expected_sparse_model=sparse_env or None,
+            timeout=timeout,
+        )
+    raise EncoderConfigError(
+        f"Unknown EMBEDDING_MODE '{mode}'. Use 'local' or 'tei'."
+    )
+
+
+def verify_encoder(encoder: Encoder, qdrant: QdrantClient) -> None:
+    """
+    Check the encoder against its server(s) and the Qdrant collection.
+    Raises an EncoderError on a mismatch.
+    """
+    encoder.check()
+
+    try:
+        collection = qdrant.get_collection(DEFAULT_QDRANT_COLLECTION_NAME)
+    except Exception as e:
+        _LOGGER_PEPHUB.warning(
+            f"Could not read Qdrant collection '{DEFAULT_QDRANT_COLLECTION_NAME}' "
+            f"({e}); skipping vector dimension checks."
+        )
+    else:
+        params = collection.config.params
+        vectors = params.vectors
+        if isinstance(vectors, dict) and "dense" in vectors:
+            expected_size = vectors["dense"].size
+            actual_size = len(encoder.embed_dense("pephub dimension check"))
+            if actual_size != expected_size:
+                raise EncoderModelMismatch(
+                    f"dense vectors are {actual_size}-d but Qdrant collection "
+                    f"'{DEFAULT_QDRANT_COLLECTION_NAME}' expects {expected_size}-d"
+                )
+        if encoder.has_sparse and "sparse" not in (params.sparse_vectors or {}):
+            raise EncoderModelMismatch(
+                f"sparse embeddings are configured but Qdrant collection "
+                f"'{DEFAULT_QDRANT_COLLECTION_NAME}' has no 'sparse' vector"
+            )
+
+    _LOGGER_PEPHUB.info("Embeddings: " + encoder.describe())
+
+
+def build_encoder(qdrant: Union[QdrantClient, None]) -> Union[Encoder, None]:
+    """
+    Build and verify the encoder when Qdrant is up. Fails fast: a bad
+    configuration stops the server instead of failing every search.
+    """
+    if qdrant is None:
+        _LOGGER_PEPHUB.info("Qdrant disabled; semantic search encoder not loaded")
+        return None
+    try:
+        enc = initialize_encoder()
+        verify_encoder(enc, qdrant)
+    except EncoderError as e:
+        _LOGGER_PEPHUB.error(f"Embedding setup failed: {e} (check EMBEDDING_* settings)")
+        raise
+    return enc
+
+
+encoder = build_encoder(qdrant)
 
 
 def get_qdrant() -> Union[QdrantClient, None]:
@@ -396,18 +482,12 @@ def verify_user_can_fork(
         raise HTTPException(401, "Unauthorized to fork this repo")
 
 
-def get_sentence_transformer() -> Embedding:
+def get_encoder() -> Union[Encoder, None]:
     """
-    Return sentence transformer encoder
+    Return the query encoder (local models or a TEI server), or None when
+    Qdrant is disabled
     """
-    return embedding_model
-
-
-def get_sparse_model() -> Union[SparseEncoder, None]:
-    """
-    Return sparse encoder model
-    """
-    return sparse_model
+    return encoder
 
 
 def get_namespace_info(

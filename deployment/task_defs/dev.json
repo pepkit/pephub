@@ -19,6 +19,18 @@
       ],
       "secrets": [
         {
+          "valueFrom": "PEPHUB_EMBEDDING_DENSE_URL",
+          "name": "EMBEDDING_DENSE_URL"
+        },
+        {
+          "valueFrom": "PEPHUB_EMBEDDING_SPARSE_URL",
+          "name": "EMBEDDING_SPARSE_URL"
+        },
+        {
+          "valueFrom": "PEPHUB_EMBEDDING_API_KEY",
+          "name": "EMBEDDING_API_KEY"
+        },
+        {
           "valueFrom": "HF_TOKEN",
           "name": "HF_TOKEN"
         },
@@ -81,7 +93,12 @@
       "entryPoint": null,
       "command": null,
       "linuxParameters": null,
-      "environment": null,
+      "environment": [
+        {
+          "name": "EMBEDDING_MODE",
+          "value": "tei"
+        }
+      ],
       "resourceRequirements": null,
       "ulimits": null,
       "dnsServers": null,

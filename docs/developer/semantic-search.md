@@ -7,3 +7,5 @@ By using sentence transformer based semantic search, *pephub* can understand the
 We leverage [Qdrant](https://qdrant.tech) to store, manage, and search through PEP description embeddings. Qdrant (read: quadrant ) is a vector similarity search engine. It provides a production-ready service with a convenient API to store, search, and manage points - vectors with an additional payload.
 
 ![Semantic search](../img/SemanticSearch.png)
+
+Query embeddings come either from models loaded inside *pephub* or from a Hugging Face Text Embeddings Inference (TEI) server, chosen with `EMBEDDING_MODE`. See [server settings](server-settings.md#embeddings).

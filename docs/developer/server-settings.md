@@ -22,8 +22,15 @@ Server settings are supplied through environment variables. You may choose to ma
     - [`GH_CLIENT_ID`](#gh_client_id)
     - [`GH_CLIENT_SECRET`](#gh_client_secret)
     - [`REDIRECT_URI`](#redirect_uri)
-  - [Sentence Transformer](#sentence-transformer)
-    - [`HF_MODEL`](#hf_model)
+  - [Embeddings](#embeddings)
+    - [`EMBEDDING_MODE`](#embedding_mode)
+    - [`EMBEDDING_DENSE_MODEL`](#embedding_dense_model)
+    - [`EMBEDDING_SPARSE_MODEL`](#embedding_sparse_model)
+    - [`EMBEDDING_DENSE_URL`](#embedding_dense_url)
+    - [`EMBEDDING_SPARSE_URL`](#embedding_sparse_url)
+    - [`EMBEDDING_API_KEY`](#embedding_api_key)
+    - [`EMBEDDING_TIMEOUT`](#embedding_timeout)
+    - [Startup checks](#startup-checks)
 
 ## General
 
@@ -107,10 +114,55 @@ Coming soon...
 - Required: Yes
 - Default Value: http://localhost:8000/auth/callback
 
-## Sentence Transformer
+## Embeddings
 
-### `HF_MODEL`
+Semantic search embeds each query as a dense vector and, optionally, a sparse (SPLADE) vector. These settings are only used when Qdrant is enabled. The models must match the ones used to build the Qdrant index.
 
-- Description: HuggingFace model name
+### `EMBEDDING_MODE`
+
+- Description: Where embeddings come from. `local` loads the models in the PEPhub process (needs `requirements/requirements-embed-local.txt`). `tei` calls Hugging Face Text Embeddings Inference servers. Any other value stops the server at startup.
 - Required: No
-- Default Value: "BAAI/bge-small-en-v1.5"
+- Default Value: local
+
+### `EMBEDDING_DENSE_MODEL`
+
+- Description: In `local` mode, the fastembed model to load. In `tei` mode, the model id the dense server is expected to serve; startup fails if `/info` reports a different one. If unset in `tei` mode, the served model is only logged.
+- Required: No
+- Default Value: sentence-transformers/all-MiniLM-L6-v2 (local mode)
+
+### `EMBEDDING_SPARSE_MODEL`
+
+- Description: In `local` mode, the sentence-transformers SPLADE model to load; set it to an empty string to turn sparse search off. In `tei` mode, the model id the sparse server is expected to serve (optional).
+- Required: No
+- Default Value: prithivida/Splade_PP_en_v2 (local mode)
+
+### `EMBEDDING_DENSE_URL`
+
+- Description: `tei` mode only. Base URL of the TEI server for the dense model, e.g. `http://localhost:8080`.
+- Required: Yes, in `tei` mode
+
+### `EMBEDDING_SPARSE_URL`
+
+- Description: `tei` mode only. Base URL of the TEI server for the sparse model. It must be a different server than the dense one, started with `--pooling splade`. Leave unset for dense-only search.
+- Required: No
+
+### `EMBEDDING_API_KEY`
+
+- Description: `tei` mode only. Sent as `Authorization: Bearer <key>` to the TEI servers (start them with `--api-key`).
+- Required: No
+
+### `EMBEDDING_TIMEOUT`
+
+- Description: `tei` mode only. Seconds to wait for a TEI server.
+- Required: No
+- Default Value: 10
+
+### Startup checks
+
+When Qdrant is enabled, PEPhub checks its embedding setup before serving and exits with an error if it finds a problem:
+
+- in `tei` mode, each server's `/info` must report an embedding model (with SPLADE pooling for the sparse server) and, if you set the model variables, the expected model id;
+- the dense vector length must equal the size of the `dense` vector in the `pephub` Qdrant collection;
+- if sparse embeddings are configured, the collection must have a `sparse` vector.
+
+The length check cannot tell apart two models with the same size, so make sure the model matches the one that built the index. If a TEI server fails while serving a search, the request returns a 503 error.

@@ -75,6 +75,9 @@ BLANK_PEP_SAMPLE_TABLE = pd.DataFrame(
 DENSE_ENCODER_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 SPARSE_ENCODER_MODEL = "prithivida/Splade_PP_en_v2"
 
+# seconds to wait for a TEI embedding server (EMBEDDING_MODE=tei)
+DEFAULT_EMBEDDING_TIMEOUT = 10
+
 EIDO_TEMPLATES_DIRNAME = "templates/eido"
 EIDO_TEMPLATES_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), EIDO_TEMPLATES_DIRNAME

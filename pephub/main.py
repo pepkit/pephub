@@ -51,7 +51,7 @@ app = FastAPI(
     description="A web interface and RESTful API for PEPs",
     docs_url="/api/v1/docs",
     version=server_v,
-    tags=TAGS_METADATA,
+    openapi_tags=TAGS_METADATA,
 )
 
 # import logfire

@@ -1,0 +1,6 @@
+# In-process embedding models, needed for EMBEDDING_MODE=local (the default).
+# Skip this file with EMBEDDING_MODE=tei (embeddings from a TEI server).
+# These pull in torch; for a CPU-only torch, install it first with
+# `uv pip install torch --index-url https://download.pytorch.org/whl/cpu`.
+fastembed>=0.7.4
+sentence-transformers>=5.2.0
