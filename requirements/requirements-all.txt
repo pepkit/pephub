@@ -8,13 +8,13 @@ python-multipart>=0.0.5
 uvicorn
 python-dotenv
 qdrant-client>=1.16.0
+httpx
 requests
+pyyaml
 pyjwt[crypto]
 coloredlogs
-fastembed>=0.7.4
 numpy>2.0.0
 slowapi
 cachetools>=4.2.4
 # bedms>=0.2.0
-sentence-transformers>=5.2.0
 pandas>=2.0.0
