@@ -11,6 +11,7 @@ qdrant-client>=1.16.0
 requests
 pyjwt[crypto]
 coloredlogs
+logmuse>=0.3.1
 fastembed>=0.7.4
 numpy>2.0.0
 slowapi

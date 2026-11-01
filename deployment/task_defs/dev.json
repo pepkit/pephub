@@ -19,6 +19,10 @@
       ],
       "secrets": [
         {
+          "valueFrom": "HF_TOKEN",
+          "name": "HF_TOKEN"
+        },
+        {
           "valueFrom": "POSTGRES_HOST_AWS",
           "name": "POSTGRES_HOST"
         },
