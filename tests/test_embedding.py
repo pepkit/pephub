@@ -223,7 +223,11 @@ def test_check_passes_on_model_id():
 
 
 def test_check_passes_on_served_model_name():
-    info = {"dense.test": dict(DENSE_INFO, model_id="/data/model", served_model_name="my-name")}
+    info = {
+        "dense.test": dict(
+            DENSE_INFO, model_id="/data/model", served_model_name="my-name"
+        )
+    }
     make(fake_tei([], info), sparse=False, expected_dense_model="my-name").check()
 
 
@@ -232,7 +236,9 @@ def test_check_without_expected_model_passes():
 
 
 def test_check_model_mismatch_names_both():
-    enc = make(fake_tei([]), expected_dense_model="sentence-transformers/all-MiniLM-L6-v2")
+    enc = make(
+        fake_tei([]), expected_dense_model="sentence-transformers/all-MiniLM-L6-v2"
+    )
     with pytest.raises(EncoderModelMismatch) as e:
         enc.check()
     assert "BAAI/bge-small-en-v1.5" in str(e.value)
@@ -252,7 +258,9 @@ def test_check_rejects_reranker():
 
 
 def test_check_rejects_sparse_server_without_splade_pooling():
-    info = {"sparse.test": dict(SPARSE_INFO, model_type={"embedding": {"pooling": "cls"}})}
+    info = {
+        "sparse.test": dict(SPARSE_INFO, model_type={"embedding": {"pooling": "cls"}})
+    }
     with pytest.raises(EncoderModelMismatch) as e:
         make(fake_tei([], info)).check()
     assert "SPLADE" in str(e.value)
@@ -261,6 +269,82 @@ def test_check_rejects_sparse_server_without_splade_pooling():
 def test_check_info_401_is_config_error():
     with pytest.raises(EncoderConfigError):
         make(status_handler(401, b"")).check()
+
+
+EMBEDAPI = "http://embed.test/tei"
+# shapes of GET /tei/<model>/info from embedapi
+EMBEDAPI_INFO = {
+    "/tei/all-MiniLM-L6-v2/info": dict(
+        DENSE_INFO,
+        model_id="sentence-transformers/all-MiniLM-L6-v2",
+        served_model_name="all-MiniLM-L6-v2",
+        model_type={"embedding": {"pooling": "mean"}},
+        max_input_length=256,
+    ),
+    "/tei/splade-pp-en-v2-int8/info": dict(
+        SPARSE_INFO, served_model_name="splade-pp-en-v2-int8", model_dtype="int8"
+    ),
+}
+
+
+def fake_embedapi(seen):
+    """A fake embedapi: one TEI base URL per model under /tei/<model>."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        path = request.url.path
+        if path in EMBEDAPI_INFO:
+            return httpx.Response(200, json=EMBEDAPI_INFO[path])
+        if path == "/tei/all-MiniLM-L6-v2/embed":
+            return httpx.Response(200, json=[DENSE])
+        if path == "/tei/splade-pp-en-v2-int8/embed_sparse":
+            return httpx.Response(200, json=[SPARSE])
+        return httpx.Response(
+            404, json={"error": "not found", "error_type": "Validation"}
+        )
+
+    return handler
+
+
+def make_embedapi(seen, **kwargs):
+    return TEIEncoder(
+        dense_url=EMBEDAPI + "/all-MiniLM-L6-v2",
+        sparse_url=EMBEDAPI + "/splade-pp-en-v2-int8",
+        api_key="ems_test",
+        transport=httpx.MockTransport(fake_embedapi(seen)),
+        **kwargs,
+    )
+
+
+def test_embedapi_base_urls_keep_their_path():
+    seen = []
+    enc = make_embedapi(seen)
+    assert enc.embed_dense("lung cancer") == DENSE
+    assert enc.embed_sparse("lung cancer") == SparseVector(
+        indices=[5, 42], values=[0.7, 1.3]
+    )
+    assert [str(r.url) for r in seen] == [
+        "http://embed.test/tei/all-MiniLM-L6-v2/embed",
+        "http://embed.test/tei/splade-pp-en-v2-int8/embed_sparse",
+    ]
+    assert all(r.headers["authorization"] == "Bearer ems_test" for r in seen)
+
+
+def test_embedapi_check_passes_with_default_models_and_warns_on_int8(caplog):
+    seen = []
+    enc = make_embedapi(
+        seen,
+        expected_dense_model="sentence-transformers/all-MiniLM-L6-v2",
+        expected_sparse_model="prithivida/Splade_PP_en_v2",
+    )
+    with caplog.at_level("WARNING", logger="pephub"):
+        enc.check()
+    assert [r.url.path for r in seen] == [
+        "/tei/all-MiniLM-L6-v2/info",
+        "/tei/splade-pp-en-v2-int8/info",
+    ]
+    warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+    assert len(warnings) == 1 and "int8" in warnings[0]
 
 
 def test_check_unreachable_is_unavailable():
@@ -379,8 +463,29 @@ def test_initialize_encoder_tei_reads_settings(deps, monkeypatch):
     assert enc._dense_http.timeout.read == 3
 
 
+def test_initialize_encoder_tei_checks_default_models(deps, monkeypatch):
+    monkeypatch.setenv("EMBEDDING_MODE", "tei")
+    monkeypatch.setenv("EMBEDDING_DENSE_URL", "http://d.test")
+    monkeypatch.delenv("EMBEDDING_DENSE_MODEL", raising=False)
+    monkeypatch.delenv("EMBEDDING_SPARSE_MODEL", raising=False)
+    enc = deps.initialize_encoder()
+    assert enc.expected_dense_model == deps.DENSE_ENCODER_MODEL
+    assert enc.expected_sparse_model == deps.SPARSE_ENCODER_MODEL
+
+
 def test_build_encoder_without_qdrant(deps):
     assert deps.build_encoder(None) is None
+
+
+def test_build_encoder_survives_unreachable_server(deps, monkeypatch, caplog):
+    class DownEncoder(FakeEncoder):
+        def check(self):
+            raise EncoderUnavailable("embedding server at http://d.test unreachable")
+
+    monkeypatch.setattr(deps, "initialize_encoder", lambda: DownEncoder())
+    enc = deps.build_encoder(fake_qdrant())
+    assert isinstance(enc, DownEncoder)
+    assert "unreachable" in caplog.text
 
 
 def test_build_encoder_fails_fast(deps, monkeypatch):
@@ -403,13 +508,18 @@ class FailingEncoder(FakeEncoder):
 
 
 @pytest.mark.parametrize(
-    "error,status",
+    "error,status,detail",
     [
-        (EncoderUnavailable("server at http://tei.test unreachable"), 503),
-        (EncoderInputError("inputs cannot be empty"), 400),
+        # the 503 reply must not name the internal server
+        (
+            EncoderUnavailable("server at http://tei.test unreachable"),
+            503,
+            "Semantic search is temporarily unavailable",
+        ),
+        (EncoderInputError("inputs cannot be empty"), 400, "inputs cannot be empty"),
     ],
 )
-def test_search_route_maps_encoder_errors(deps, error, status):
+def test_search_route_maps_encoder_errors(deps, error, status, detail):
     from fastapi.testclient import TestClient
 
     # the auth router reads BASE_URI at import time
@@ -426,7 +536,8 @@ def test_search_route_maps_encoder_errors(deps, error, status):
     finally:
         app.dependency_overrides.clear()
     assert resp.status_code == status
-    assert str(error) in resp.json()["detail"]
+    assert detail in resp.json()["detail"]
+    assert "tei.test" not in resp.json()["detail"]
 
 
 # -- import hygiene --------------------------------------------------------
@@ -458,15 +569,12 @@ assert not loaded, loaded
 def test_tei_mode_does_not_import_ml_libs():
     # fresh interpreter so other tests' imports don't leak in;
     # the database agent is mocked so no postgres is needed
-    code = (
-        """
+    code = """
 from unittest import mock
 with mock.patch("pepdbagent.PEPDatabaseAgent"):
     import pephub.dependencies as d
 assert d.get_encoder() is None
-"""
-        + HEAVY_CHECK
-    )
+""" + HEAVY_CHECK
     result = run_python(
         code,
         EMBEDDING_MODE="tei",
@@ -477,13 +585,10 @@ assert d.get_encoder() is None
 
 
 def test_building_tei_encoder_does_not_import_ml_libs():
-    code = (
-        """
+    code = """
 from pephub.embedding import TEIEncoder
 TEIEncoder(dense_url="http://tei.test")
-"""
-        + HEAVY_CHECK
-    )
+""" + HEAVY_CHECK
     result = run_python(code)
     assert result.returncode == 0, result.stderr
 

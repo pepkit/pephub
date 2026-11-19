@@ -75,10 +75,11 @@ def search_for_pep(
                 status_code=400,
                 content={"detail": f"Could not embed the search query: {e}"},
             )
-        except EncoderError as e:
+        except EncoderError:
+            # the cause is logged; it names internal servers, so keep it out of the reply
             return JSONResponse(
                 status_code=503,
-                content={"detail": f"Semantic search is temporarily unavailable: {e}"},
+                content={"detail": "Semantic search is temporarily unavailable"},
             )
 
         must_statement = [

@@ -7,7 +7,8 @@ Two encoders share one small interface (``Encoder``):
 - ``TEIEncoder`` calls any server that speaks the Hugging Face Text Embeddings
   Inference (TEI) HTTP API: ``GET /info``, ``POST /embed``, ``POST /embed_sparse``.
   TEI serves one model per server, so the dense and sparse models each get
-  their own base URL.
+  their own base URL. embedapi (embed.databio.org) speaks the same API with
+  one base URL per model, e.g. ``<embedapi>/tei/all-MiniLM-L6-v2``.
 
 The heavy ML libraries are only imported inside ``LocalEncoder``, so a server
 running with ``EMBEDDING_MODE=tei`` never loads fastembed, sentence-transformers,
@@ -211,7 +212,9 @@ class TEIEncoder:
         if is_input:
             _LOGGER.info(f"{url}{path} rejected the input: {error_text}")
             raise EncoderInputError(error_text)
-        msg = f"{url}{path} returned {resp.status_code} {error_type or ''}: {error_text}"
+        msg = (
+            f"{url}{path} returned {resp.status_code} {error_type or ''}: {error_text}"
+        )
         _LOGGER.error(msg)
         raise EncoderUnavailable(msg.replace("  ", " "))
 
@@ -265,7 +268,9 @@ class TEIEncoder:
         if not isinstance(info, dict):
             raise self._bad_shape(client, "/info")
         model_type = info.get("model_type")
-        embedding = model_type.get("embedding") if isinstance(model_type, dict) else None
+        embedding = (
+            model_type.get("embedding") if isinstance(model_type, dict) else None
+        )
         if embedding is None:
             raise EncoderModelMismatch(
                 f"{kind} server at {url} is not an embedding model "
@@ -281,18 +286,27 @@ class TEIEncoder:
 
         model_id = info.get("model_id")
         served = info.get("served_model_name")
-        if expected:
-            if expected not in (model_id, served):
-                raise EncoderModelMismatch(
-                    f"{kind} server at {url} serves '{model_id}', "
-                    f"expected '{expected}' ({env_name})"
-                )
-        else:
-            _LOGGER.info(f"{kind} server at {url} serves model '{model_id}'")
+        if expected and expected not in (model_id, served):
+            raise EncoderModelMismatch(
+                f"{kind} server at {url} serves '{model_id}', "
+                f"expected '{expected}' ({env_name})"
+            )
+        dtype = info.get("model_dtype")
+        _LOGGER.info(f"{kind} server at {url} serves model '{model_id}' ({dtype})")
+        if dtype and dtype != "float32":
+            # e.g. an int8 copy of the model: its vectors are close to, not
+            # the same as, the float32 vectors the Qdrant index was built with
+            _LOGGER.warning(
+                f"{kind} server at {url} runs '{model_id}' as {dtype}; search "
+                f"results will differ from the float32 model the index was built with"
+            )
 
     def check(self) -> None:
         self._check_server(
-            self._dense_http, "dense", self.expected_dense_model, "EMBEDDING_DENSE_MODEL"
+            self._dense_http,
+            "dense",
+            self.expected_dense_model,
+            "EMBEDDING_DENSE_MODEL",
         )
         if self._sparse_http is not None:
             self._check_server(

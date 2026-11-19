@@ -44,6 +44,7 @@ from .embedding import (
     EncoderConfigError,
     EncoderError,
     EncoderModelMismatch,
+    EncoderUnavailable,
     LocalEncoder,
     TEIEncoder,
 )
@@ -171,7 +172,9 @@ def initialize_encoder() -> Encoder:
         if not dense_url:
             raise EncoderConfigError("EMBEDDING_MODE=tei requires EMBEDDING_DENSE_URL")
         try:
-            timeout = float(os.environ.get("EMBEDDING_TIMEOUT") or DEFAULT_EMBEDDING_TIMEOUT)
+            timeout = float(
+                os.environ.get("EMBEDDING_TIMEOUT") or DEFAULT_EMBEDDING_TIMEOUT
+            )
         except ValueError:
             raise EncoderConfigError(
                 f"EMBEDDING_TIMEOUT must be a number of seconds, "
@@ -181,13 +184,15 @@ def initialize_encoder() -> Encoder:
             dense_url=dense_url,
             sparse_url=os.environ.get("EMBEDDING_SPARSE_URL") or None,
             api_key=os.environ.get("EMBEDDING_API_KEY") or None,
-            expected_dense_model=dense_model,
-            expected_sparse_model=sparse_env or None,
+            # the servers must serve the models the Qdrant index was built with
+            expected_dense_model=dense_model or DENSE_ENCODER_MODEL,
+            # unset -> default model; empty string -> no model check
+            expected_sparse_model=(
+                SPARSE_ENCODER_MODEL if sparse_env is None else sparse_env or None
+            ),
             timeout=timeout,
         )
-    raise EncoderConfigError(
-        f"Unknown EMBEDDING_MODE '{mode}'. Use 'local' or 'tei'."
-    )
+    raise EncoderConfigError(f"Unknown EMBEDDING_MODE '{mode}'. Use 'local' or 'tei'.")
 
 
 def verify_encoder(encoder: Encoder, qdrant: QdrantClient) -> None:
@@ -228,6 +233,8 @@ def build_encoder(qdrant: Union[QdrantClient, None]) -> Union[Encoder, None]:
     """
     Build and verify the encoder when Qdrant is up. Fails fast: a bad
     configuration stops the server instead of failing every search.
+    An embedding server that is down at startup does not stop the server:
+    the rest of pephub keeps working and searches return 503 until it is back.
     """
     if qdrant is None:
         _LOGGER_PEPHUB.info("Qdrant disabled; semantic search encoder not loaded")
@@ -235,8 +242,15 @@ def build_encoder(qdrant: Union[QdrantClient, None]) -> Union[Encoder, None]:
     try:
         enc = initialize_encoder()
         verify_encoder(enc, qdrant)
+    except EncoderUnavailable as e:
+        _LOGGER_PEPHUB.error(
+            f"Embedding server not reachable at startup, checks skipped: {e}. "
+            f"Searches return 503 until it is back."
+        )
     except EncoderError as e:
-        _LOGGER_PEPHUB.error(f"Embedding setup failed: {e} (check EMBEDDING_* settings)")
+        _LOGGER_PEPHUB.error(
+            f"Embedding setup failed: {e} (check EMBEDDING_* settings)"
+        )
         raise
     return enc
 
