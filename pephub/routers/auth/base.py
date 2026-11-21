@@ -30,10 +30,13 @@ from ..models import (
     GitHubAppConfig,
     InitializeDeviceCodeResponse,
     JWTDeviceTokenResponse,
+    RefreshTokenRequest,
+    RefreshTokenResponse,
     TokenExchange,
     RevokeRequest,
 )
 from ...developer_keys import dev_key_handler
+from ...refresh_tokens import refresh_store
 
 load_dotenv()
 
@@ -176,12 +179,12 @@ def callback(
         org["login"] = org["login"].lower()
 
     # encode the token
-    token = CLIAuthSystem.jwt_encode_user_data(
-        dict(orgs=[org["login"] for org in organizations], **u)
-    )
+    claims = dict(orgs=[org["login"] for org in organizations], **u)
+    token = CLIAuthSystem.jwt_encode_user_data(claims)
 
     if state.get("device"):
         DEVICE_CODES[state["device_code"]]["token"] = token
+        DEVICE_CODES[state["device_code"]]["claims"] = claims
         return "/login/device/success"
 
     else:
@@ -291,14 +294,52 @@ def return_token(
         if DEVICE_CODES.get(device_code).get("token"):
             if DEVICE_CODES[device_code].get("client_host") == client_host:
                 token = DEVICE_CODES[device_code].get("token")
+                claims = DEVICE_CODES[device_code].get("claims")
                 DEVICE_CODES.pop(device_code)
-                return JWTDeviceTokenResponse(jwt_token=token)
+                refresh = refresh_store.issue(claims) if claims else None
+                return JWTDeviceTokenResponse(jwt_token=token, refresh_token=refresh)
             else:
                 raise HTTPException(status_code=401, detail="Incorrect host")
         else:
             raise HTTPException(status_code=401, detail="User didn't log in")
     else:
         raise HTTPException(status_code=400, detail="Item not found")
+
+
+@auth.post("/token/refresh")
+@limiter.limit("30/minute")
+def refresh_token(request: Request, body: RefreshTokenRequest):
+    """
+    Exchange a device-login refresh token for a new JWT and a new refresh
+    token. The old refresh token stops working (rotation); presenting it again
+    revokes the whole chain.
+    """
+    result = refresh_store.rotate(body.refresh_token)
+    if result is None:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    claims, new_refresh = result
+    return RefreshTokenResponse(
+        jwt_token=CLIAuthSystem.jwt_encode_user_data(claims),
+        refresh_token=new_refresh,
+    )
+
+
+@auth.post("/token/revoke")
+def revoke_refresh_token(body: RefreshTokenRequest):
+    """Revoke a refresh token (and its rotation chain)."""
+    refresh_store.revoke(body.refresh_token)
+    return JSONResponse({"message": "Revoked."}, status_code=202)
+
+
+@auth.delete("/token/refresh")
+def revoke_all_refresh_tokens(
+    session_info: Union[dict, None] = Depends(read_authorization_header),
+):
+    """Revoke every refresh token of the signed-in user."""
+    if not session_info:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    n = refresh_store.revoke_login(session_info["login"])
+    return JSONResponse({"revoked": n}, status_code=202)
 
 
 @auth.get("/login/success")

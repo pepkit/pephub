@@ -71,6 +71,16 @@ class GitHubAppConfig(BaseModel):
 
 class JWTDeviceTokenResponse(BaseModel):
     jwt_token: str
+    refresh_token: Optional[str] = None
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+
+class RefreshTokenResponse(BaseModel):
+    jwt_token: str
+    refresh_token: str
 
 
 class ProjectRawModel(BaseModel):
