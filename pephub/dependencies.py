@@ -1,14 +1,10 @@
-import json
 import logging
 import os
-from datetime import datetime
 from secrets import token_hex
 from typing import Any, Dict, List, Optional, Union
 from cachetools import cached, TTLCache
 
 import jwt
-import pydantic
-import requests
 from dotenv import load_dotenv
 from fastapi import Depends, Header, Query
 from fastapi.exceptions import HTTPException
@@ -21,7 +17,6 @@ from pepdbagent.exceptions import ProjectNotFoundError
 from pepdbagent.models import AnnotationModel, Namespace, ListOfNamespaceInfo
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 from qdrant_client import QdrantClient
 from sentence_transformers import SparseEncoder
 from qdrant_client.http.exceptions import ResponseHandlingException
@@ -39,7 +34,6 @@ from .const import (
     SPARSE_ENCODER_MODEL,
     PKG_NAME,
 )
-from .helpers import jwt_encode_user_data
 from .routers.models import ForkRequest
 from .developer_keys import dev_key_handler
 
@@ -49,49 +43,6 @@ load_dotenv()
 
 # Scheme for the Authorization header
 token_auth_scheme = HTTPBearer()
-
-
-class UserData(BaseModel):
-    login: str
-    id: int
-    organizations: Optional[List[str]]
-
-
-class CLIAuthSystem:
-    GITHUB_BASE_API_URL = "https://api.github.com"
-
-    def get_jwt(self, access_token: str) -> str:
-        """
-        Based on access token request GitHub for user data and encode it using secret.
-        """
-        user_data = self._request_user_data_from_github(access_token)
-        return self.jwt_encode_user_data(user_data.dict())
-
-    @staticmethod
-    def _request_user_data_from_github(access_token: str) -> UserData:
-        response = requests.get(
-            f"{CLIAuthSystem.GITHUB_BASE_API_URL}/user",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Accept": "application/vnd.github+json",
-            },
-        )
-        try:
-            return UserData(**json.loads(response.content.decode("utf-8")))
-        except (
-            AttributeError,
-            UnicodeDecodeError,
-            json.JSONDecodeError,
-            pydantic.ValidationError,
-        ):
-            raise HTTPException(
-                status_code=400,
-                detail="Can't decode GitHub response. Please check it manually.",
-            )
-
-    @staticmethod
-    def jwt_encode_user_data(user_data: dict, exp: datetime = None) -> str:
-        return jwt_encode_user_data(user_data, exp=exp)
 
 
 # database connection
@@ -221,12 +172,17 @@ def read_authorization_header(authorization: str = Header(None)) -> Union[dict, 
 def get_organizations_from_session_info(
     session_info: Union[dict, None] = Depends(read_authorization_header),
 ) -> List[str]:
-    organizations = []
-    if session_info:
-        organizations = session_info.get("orgs")
-        if organizations:
-            organizations = [x.lower() for x in organizations]
-    return organizations
+    """
+    Return the user's organizations from the token, lowercased.
+
+    Always returns a new list, even when the token has no "orgs" field.
+    """
+    if not session_info:
+        return []
+    orgs = session_info.get("orgs") or []
+    if not isinstance(orgs, list):
+        return []
+    return [str(x).lower() for x in orgs]
 
 
 def get_user_from_session_info(
@@ -340,20 +296,21 @@ def verify_user_can_write_namespace(
 
     See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#submiting-a-new-pep
     """
-    if session_info is None:
+    login = session_info.get("login") if session_info else None
+    if not login:
         raise HTTPException(
             401,
             f"User must be logged in to write to the namespace: '{namespace}'.",
         )
-    orgs.append(session_info["login"])
+    allowed = [*orgs, login.lower()]
 
-    if namespace not in orgs:
+    if namespace.lower() not in allowed:
         raise HTTPException(
             403,
             f"User does not have permission to write or make modifications to the namespace: '{namespace}'.",
         )
 
-    return orgs
+    return allowed
 
 
 def verify_user_can_read_project(
@@ -375,12 +332,10 @@ def verify_user_can_read_project(
             raise HTTPException(
                 404, f"Project, '{namespace}/{project}:{tag}', not found."
             )
-        elif any(
-            [
-                session_info.get("login") != namespace
-                and namespace
-                not in orgs,  # user doesnt own namespace or is not member of organization
-            ]
+        elif (
+            # user doesnt own namespace and is not a member of the organization
+            (session_info.get("login") or "").lower() != namespace.lower()
+            and namespace.lower() not in orgs
         ):
             # raise 404 since we don't want to reveal that the project exists
             raise HTTPException(
