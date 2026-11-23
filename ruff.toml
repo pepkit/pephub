@@ -1,0 +1,13 @@
+line-length = 88
+extend-exclude = ["web", "docs"]
+
+[lint]
+select = ["E", "F", "I"]
+ignore = ["F403", "F405", "E501"]
+
+[lint.per-file-ignores]
+# Tests put the repo root on sys.path before importing pephub.
+"tests/*" = ["E402"]
+
+[lint.isort]
+known-first-party = ["pephub"]

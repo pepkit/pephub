@@ -9,10 +9,8 @@ import requests
 from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
-from ...limiter import limiter
 
 from ...const import (
     AUTH_CODE_EXPIRATION,
@@ -25,15 +23,16 @@ from ...dependencies import (
     generate_random_device_code,
     read_authorization_header,
 )
+from ...developer_keys import dev_key_handler
 from ...helpers import build_authorization_url, jwt_encode_user_data
+from ...limiter import limiter
 from ..models import (
     GitHubAppConfig,
     InitializeDeviceCodeResponse,
     JWTDeviceTokenResponse,
-    TokenExchange,
     RevokeRequest,
+    TokenExchange,
 )
-from ...developer_keys import dev_key_handler
 
 load_dotenv()
 

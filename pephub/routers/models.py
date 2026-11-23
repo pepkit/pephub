@@ -1,12 +1,9 @@
-from typing import List, Optional, Dict, Union
+from typing import Dict, List, Optional, Union
 
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.models import UpdateItems, ListOfNamespaceInfo, Namespace
-from pydantic import BaseModel, ConfigDict, Field
-
+from pepdbagent.models import ListOfNamespaceInfo, Namespace, UpdateItems
+from pydantic import BaseModel, ConfigDict
 from qdrant_client.models import ScoredPoint
-
-from ..const import DEFAULT_QDRANT_SCORE_THRESHOLD
 
 
 class ProjectOptional(UpdateItems):

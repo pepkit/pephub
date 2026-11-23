@@ -1,14 +1,12 @@
+import secrets
 from datetime import datetime, timedelta
 from typing import Dict, List
 
-import secrets
-
 from fastapi import HTTPException
 
-from .routers.models import DeveloperKey
-
-from .helpers import jwt_encode_user_data
 from .const import MAX_NEW_KEYS
+from .helpers import jwt_encode_user_data
+from .routers.models import DeveloperKey
 
 
 class DeveloperKeyHandler:

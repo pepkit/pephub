@@ -1,9 +1,9 @@
+import importlib.metadata
 import logging
 import os
 from platform import python_version
 from secrets import token_hex
 
-import importlib.metadata
 import pandas as pd
 from fastapi import __version__ as fastapi_version
 from pepdbagent import __version__ as pepdbagent_version

@@ -4,12 +4,13 @@ import peprs
 import yaml
 from fastapi.exceptions import HTTPException
 from peprs import Project
-from peprs.eido import EidoValidationError, validate_config, validate_project
 from peprs.const import (
     CONFIG_KEY,
     SAMPLE_RAW_DICT_KEY,
     SUBSAMPLE_RAW_DICT_KEY,
 )
+from peprs.eido import EidoValidationError, validate_config, validate_project
+
 from ....dependencies import (
     get_db,
 )

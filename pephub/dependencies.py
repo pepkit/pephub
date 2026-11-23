@@ -2,9 +2,9 @@ import logging
 import os
 from secrets import token_hex
 from typing import Any, Dict, List, Optional, Union
-from cachetools import cached, TTLCache
 
 import jwt
+from cachetools import TTLCache, cached
 from dotenv import load_dotenv
 from fastapi import Depends, Header, Query
 from fastapi.exceptions import HTTPException
@@ -14,15 +14,13 @@ from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
 from pepdbagent.db_utils import Projects, User
 from pepdbagent.exceptions import ProjectNotFoundError
-from pepdbagent.models import AnnotationModel, Namespace, ListOfNamespaceInfo
-from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from pepdbagent.models import AnnotationModel, ListOfNamespaceInfo, Namespace
 from qdrant_client import QdrantClient
 from sentence_transformers import SparseEncoder
-from qdrant_client.http.exceptions import ResponseHandlingException
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from .const import (
-    DENSE_ENCODER_MODEL,
     DEFAULT_POSTGRES_DB,
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
@@ -30,12 +28,13 @@ from .const import (
     DEFAULT_POSTGRES_USER,
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
+    DENSE_ENCODER_MODEL,
     JWT_SECRET,
-    SPARSE_ENCODER_MODEL,
     PKG_NAME,
+    SPARSE_ENCODER_MODEL,
 )
-from .routers.models import ForkRequest
 from .developer_keys import dev_key_handler
+from .routers.models import ForkRequest
 
 _LOGGER_PEPHUB = logging.getLogger(PKG_NAME)
 

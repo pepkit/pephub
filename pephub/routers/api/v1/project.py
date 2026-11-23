@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated, Any, Literal, Dict, List, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -8,9 +8,10 @@ import yaml
 from dotenv import load_dotenv
 from fastapi import APIRouter, Body, Depends, Query
 from fastapi.exceptions import HTTPException
-from fastapi.responses import JSONResponse, PlainTextResponse, FileResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.exceptions import (
+    HistoryNotFoundError,
     ProjectNotFoundError,
     ProjectUniqueNameError,
     SampleAlreadyExistsError,
@@ -19,16 +20,19 @@ from pepdbagent.exceptions import (
     SampleNotInViewError,
     ViewAlreadyExistsError,
     ViewNotFoundError,
-    HistoryNotFoundError,
 )
 from pepdbagent.models import (
     AnnotationList,
     AnnotationModel,
     CreateViewDictModel,
-    ProjectViews,
     HistoryAnnotationModel,
+    ProjectViews,
 )
 from peprs.const import SAMPLE_RAW_DICT_KEY
+
+from ....const import (
+    MAX_PROCESSED_PROJECT_SIZE,
+)
 
 # from ....const import SAMPLE_CONVERSION_FUNCTIONS
 from ....dependencies import (
@@ -39,22 +43,19 @@ from ....dependencies import (
     get_project,
     get_project_annotation,
     get_subsamples,
+    get_user_from_session_info,
     verify_user_can_fork,
     verify_user_can_read_project,
-    get_user_from_session_info,
 )
 from ....helpers import zip_conv_result, zip_pep
 from ...models import (
+    ConfigResponseModel,
     ForkRequest,
+    ProjectHistoryResponse,
     ProjectOptional,
     ProjectRawModel,
     ProjectRawRequest,
-    ProjectHistoryResponse,
     SamplesResponseModel,
-    ConfigResponseModel,
-)
-from ....const import (
-    MAX_PROCESSED_PROJECT_SIZE,
 )
 from .helpers import verify_updated_project
 
@@ -253,7 +254,6 @@ def get_pep_samples(
     AVALIABLE_FORMATS = ["basic", "csv", "yaml", "json"]
 
     if format:
-
         if format not in AVALIABLE_FORMATS:
             raise HTTPException(
                 status_code=400,
@@ -1129,7 +1129,6 @@ def get_zip_snapshot(
             status_code=404,
         )
     try:
-
         return zip_pep(
             agent.project.get_project_from_history(
                 namespace,

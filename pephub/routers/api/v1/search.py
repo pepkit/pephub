@@ -2,20 +2,20 @@ from typing import List, Optional
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
 from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
-from pepdbagent.models import NamespaceList
+from pepdbagent.models import Namespace, NamespaceList
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
-    SparseVector,
-    Prefetch,
-    FusionQuery,
-    Fusion,
-    SearchParams,
     FieldCondition,
-    MatchValue,
     Filter,
+    Fusion,
+    FusionQuery,
+    MatchValue,
+    Prefetch,
+    ScoredPoint,
+    SearchParams,
+    SparseVector,
 )
 from sentence_transformers import SparseEncoder
 
@@ -28,8 +28,6 @@ from ....dependencies import (
     get_sparse_model,
 )
 from ...models import SearchQuery, SearchReturnModel
-from qdrant_client.models import ScoredPoint
-from pepdbagent.models import Namespace
 
 load_dotenv()
 

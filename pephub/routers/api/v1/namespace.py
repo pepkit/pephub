@@ -1,11 +1,11 @@
+import os
 import shutil
 import tempfile
 from typing import List, Literal, Optional, Union
-import os
 
 import peprs
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_LIMIT_INFO
@@ -25,29 +25,29 @@ from pepdbagent.models import (
 from peprs import Project
 from typing_extensions import Annotated
 
-# peprs.const does not export these — they are PEP config schema strings.
-NAME_KEY = "name"
-DESC_KEY = "description"
-
 from ....const import (
-    DEFAULT_TAG,
     ARCHIVE_URL_PATH,
+    DEFAULT_TAG,
 )
 from ....dependencies import (
     get_db,
     get_namespace_access_list,
     get_namespace_info,
+    get_pepdb_namespace_info,
     get_user_from_session_info,
     verify_user_can_write_namespace,
-    get_pepdb_namespace_info,
 )
 from ....helpers import parse_user_file_upload, split_upload_files_on_init_file
 from ...models import (
     FavoriteRequest,
+    NamespaceInfoReturnModel,
     ProjectJsonRequest,
     ProjectRawModel,
-    NamespaceInfoReturnModel,
 )
+
+# peprs.const does not export these — they are PEP config schema strings.
+NAME_KEY = "name"
+DESC_KEY = "description"
 
 # from bedms.const import AVAILABLE_SCHEMAS
 

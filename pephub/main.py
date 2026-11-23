@@ -5,18 +5,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
-
 from ._version import __version__ as server_v
 from .const import ALL_VERSIONS, PKG_NAME, TAGS_METADATA
-from .limiter import limiter, _custom_rate_limit_exceeded_handler
+from .limiter import _custom_rate_limit_exceeded_handler, limiter
 from .routers.api.v1.base import api as api_base
 from .routers.api.v1.namespace import namespace as api_namespace
 from .routers.api.v1.namespace import namespaces as api_namespaces
 from .routers.api.v1.project import project as api_project
 from .routers.api.v1.project import projects as api_projects
-from .routers.api.v1.search import search as api_search
-from .routers.api.v1.schemas import schemas as api_schemas
 from .routers.api.v1.schemas import groups as api_groups
+from .routers.api.v1.schemas import schemas as api_schemas
+from .routers.api.v1.search import search as api_search
 from .routers.auth.base import auth as auth_router
 from .routers.eido.eido import router as eido_router
 
