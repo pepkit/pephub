@@ -46,6 +46,7 @@ from ....dependencies import (
     get_user_from_session_info,
     verify_user_can_fork,
     verify_user_can_read_project,
+    verify_user_can_write_namespace,
 )
 from ....helpers import zip_conv_result, zip_pep
 from ...models import (
@@ -197,7 +198,11 @@ async def update_pep(
     )
 
 
-@project.delete("", summary="Delete a PEP")
+@project.delete(
+    "",
+    summary="Delete a PEP",
+    dependencies=[Depends(verify_user_can_write_namespace)],
+)
 def delete_a_pep(
     namespace: str,
     project: str,

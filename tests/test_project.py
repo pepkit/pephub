@@ -56,6 +56,13 @@ def test_upload_read_delete_project():
         assert client.get(f"{url}/samples/frog_1").status_code == 200
         assert client.get(f"{url}/samples/no-such-frog").status_code == 404
         assert client.get(f"{url}-missing").status_code == 404
+
+        # only the owner may delete
+        other = jwt_encode_user_data({"login": "someone-else", "id": 2, "orgs": []})
+        assert client.delete(url).status_code == 401
+        res = client.delete(url, headers={"Authorization": f"Bearer {other}"})
+        assert res.status_code == 403
+        assert client.get(url).status_code == 200
     finally:
         assert client.delete(url, headers=headers).status_code == 202
         client.delete(f"{schema_url}/{SCHEMA}", headers=headers)
