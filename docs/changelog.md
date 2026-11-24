@@ -2,14 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
-## [0.16.2] - 24-11-2026
-- Fixed a security hole: deleting a PEP now requires write access to its namespace. Before, anyone could delete a public PEP without signing in
+## [0.17.0] - 24-11-2026
+- Fixed a security hole: anyone could delete a public PEP without signing in. Deleting a PEP now needs write access to its namespace
+- PEPhub can now get search embeddings from an embedding server such as embedapi (`EMBEDDING_MODE=tei`), which saves about 1.2 GB of memory. The default still loads the models in PEPhub. `HF_MODEL` is renamed to `EMBEDDING_DENSE_MODEL`
+- Every server log line now names the logger it came from
 - Fixed server errors for sign-in tokens that have no organizations list
 - Fixed startup on newer FastAPI versions
-- API requests no longer wait in a single line behind slow database calls
-- Faster namespace page: project counts are read directly, and a redundant query is gone
-- Fixed namespace pages showing cached data from the wrong request
-- Archive tab now shows loading and error states, and no longer shows an out-of-date archive size
+- API requests no longer queue up behind slow database calls
+- The namespace page loads faster and no longer shows cached data from the wrong request
+- The archive tab shows loading and error states, and no longer shows an out-of-date archive size
 - Switched linting from black to ruff, and replaced stale tests
 
 ## [0.14.0] - 18-09-2024
