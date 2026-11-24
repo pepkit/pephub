@@ -1,8 +1,9 @@
+import logging
 from typing import List, Optional
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
-from fastembed.embedding import TextEmbedding as Embedding
+from fastapi.responses import JSONResponse
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.models import Namespace, NamespaceList
 from qdrant_client import QdrantClient
@@ -15,21 +16,21 @@ from qdrant_client.models import (
     Prefetch,
     ScoredPoint,
     SearchParams,
-    SparseVector,
 )
-from sentence_transformers import SparseEncoder
 
 from ....const import DEFAULT_QDRANT_COLLECTION_NAME
 from ....dependencies import (
     get_db,
+    get_encoder,
     get_namespace_access_list,
     get_qdrant,
-    get_sentence_transformer,
-    get_sparse_model,
 )
+from ....embedding import Encoder, EncoderError, EncoderInputError
 from ...models import SearchQuery, SearchReturnModel
 
 load_dotenv()
+
+_LOGGER = logging.getLogger(__name__)
 
 search = APIRouter(prefix="/api/v1/search", tags=["search"])
 
@@ -51,8 +52,7 @@ def search_for_namespaces(
 def search_for_pep(
     query: SearchQuery,
     qdrant: QdrantClient = Depends(get_qdrant),
-    model: Embedding = Depends(get_sentence_transformer),
-    model_sparse: SparseEncoder = Depends(get_sparse_model),
+    encoder: Optional[Encoder] = Depends(get_encoder),
     agent: PEPDatabaseAgent = Depends(get_db),
     namespace_access: List[str] = Depends(get_namespace_access_list),
 ) -> SearchReturnModel:
@@ -69,16 +69,22 @@ def search_for_pep(
     ).results
 
     if qdrant is not None:
-        dense_query = list(list(model.embed(query.query))[0])
-
-        if model_sparse:
-            sparse_result = model_sparse.encode(query.query).coalesce()
-            sparse_embeddings = SparseVector(
-                indices=sparse_result.indices().tolist()[0],
-                values=sparse_result.values().tolist(),
+        try:
+            dense_query = encoder.embed_dense(query.query)
+            sparse_embeddings = encoder.embed_sparse(query.query)
+        except EncoderInputError as e:
+            _LOGGER.info(f"Search query rejected: {e}")
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "The search query could not be embedded"},
             )
-        else:
-            sparse_embeddings = None
+        except EncoderError as e:
+            # the error names internal servers, so it goes to the log, not the reply
+            _LOGGER.error(f"Search embedding failed: {e}")
+            return JSONResponse(
+                status_code=503,
+                content={"detail": "Semantic search is temporarily unavailable"},
+            )
 
         must_statement = [
             FieldCondition(
