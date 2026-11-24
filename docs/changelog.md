@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.17.0] - 24-11-2026
 - Fixed a security hole: anyone could delete a public PEP without signing in. Deleting a PEP now needs write access to its namespace
-- PEPhub can now get search embeddings from an embedding server such as embedapi (`EMBEDDING_MODE=tei`), which saves about 1.2 GB of memory. The default still loads the models in PEPhub. `HF_MODEL` is renamed to `EMBEDDING_DENSE_MODEL`
+- PEPhub can now get search embeddings from an embedding server (`EMBEDDING_MODE=tei`), which saves about 1.2 GB of memory. The default still loads the models in PEPhub. `HF_MODEL` is renamed to `EMBEDDING_DENSE_MODEL`
 - Every server log line now names the logger it came from
 - Fixed server errors for sign-in tokens that have no organizations list
 - Fixed startup on newer FastAPI versions

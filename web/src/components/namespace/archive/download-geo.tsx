@@ -10,7 +10,7 @@ export const DownloadGeo = (props: Props) => {
   const namespace = props.namespace;
 
   const {
-    isFetching,
+    isLoading,
     isError,
     error,
     data,
@@ -24,7 +24,7 @@ export const DownloadGeo = (props: Props) => {
         All GEO PEPs are archived quarterly into a single <code>tar</code> file.
         The table below lists each archive's size.
       </p>
-      {isFetching ? (
+      {isLoading ? (
         <p className='text-center pt-4 fw-semibold'>Loading archives...</p>
       ) : isError ? (
         <p className='text-center pt-4 fw-semibold'>Could not load archives.</p>

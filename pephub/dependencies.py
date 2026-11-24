@@ -231,17 +231,9 @@ def read_authorization_header(authorization: str = Header(None)) -> Union[dict, 
 def get_organizations_from_session_info(
     session_info: Union[dict, None] = Depends(read_authorization_header),
 ) -> List[str]:
-    """
-    Return the user's organizations from the token, lowercased.
-
-    Always returns a new list, even when the token has no "orgs" field.
-    """
-    if not session_info:
-        return []
-    orgs = session_info.get("orgs") or []
-    if not isinstance(orgs, list):
-        return []
-    return [str(x).lower() for x in orgs]
+    """Return the user's organizations from the token, lowercased."""
+    orgs = (session_info or {}).get("orgs") or []
+    return [org.lower() for org in orgs]
 
 
 def get_user_from_session_info(
@@ -347,29 +339,24 @@ def get_project_annotation(
 
 def verify_user_can_write_namespace(
     namespace: str,
-    session_info: Union[dict, None] = Depends(read_authorization_header),
-    orgs: List = Depends(get_organizations_from_session_info),
+    access_list: List[str] = Depends(get_namespace_access_list),
 ):
     """
     Authorization flow for writing to a namespace.
 
     See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#submiting-a-new-pep
     """
-    login = session_info.get("login") if session_info else None
-    if not login:
+    if not access_list:
         raise HTTPException(
             401,
             f"User must be logged in to write to the namespace: '{namespace}'.",
         )
-    allowed = [*orgs, login.lower()]
-
-    if namespace.lower() not in allowed:
+    if namespace not in access_list:
         raise HTTPException(
             403,
             f"User does not have permission to write or make modifications to the namespace: '{namespace}'.",
         )
-
-    return allowed
+    return access_list
 
 
 def verify_user_can_read_project(
@@ -393,8 +380,7 @@ def verify_user_can_read_project(
             )
         elif (
             # user doesnt own namespace and is not a member of the organization
-            (session_info.get("login") or "").lower() != namespace.lower()
-            and namespace.lower() not in orgs
+            session_info.get("login") != namespace and namespace not in orgs
         ):
             # raise 404 since we don't want to reveal that the project exists
             raise HTTPException(

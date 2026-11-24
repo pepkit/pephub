@@ -127,7 +127,7 @@ def get_a_pep(
     "",
     summary="Update a PEP",
 )
-async def update_pep(
+def update_pep(
     namespace: str,
     project: str,
     updated_project: ProjectOptional,
@@ -160,7 +160,7 @@ async def update_pep(
             updated_project.subsample_tables,
         ]
     ):
-        new_project = await verify_updated_project(updated_project)
+        new_project = verify_updated_project(updated_project)
     else:
         new_project = None
 

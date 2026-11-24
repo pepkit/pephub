@@ -20,7 +20,7 @@ from pephub.embedding import (
     TEIEncoder,
 )
 
-# embedapi style: one TEI base URL per model
+# one TEI base URL per model
 DENSE_URL = "http://embed.test/tei/all-MiniLM-L6-v2"
 SPARSE_URL = "http://embed.test/tei/splade-pp-en-v2"
 DENSE_MODEL = "sentence-transformers/all-MiniLM-L6-v2"

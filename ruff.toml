@@ -3,7 +3,7 @@ extend-exclude = ["web", "docs"]
 
 [lint]
 select = ["E", "F", "I"]
-ignore = ["F403", "F405", "E501"]
+ignore = ["E501"]
 
 [lint.per-file-ignores]
 # Tests put the repo root on sys.path before importing pephub.

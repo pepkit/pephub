@@ -114,7 +114,7 @@ Coming soon...
 
 ## Search embeddings
 
-Semantic search turns each query into a dense vector and a sparse vector. They must come from the same models that built the Qdrant index. PEPhub can load the models itself (`local` mode), or ask a server that speaks the Hugging Face [Text Embeddings Inference](https://github.com/huggingface/text-embeddings-inference) (TEI) API, such as embedapi (`tei` mode). TEI mode saves about 1.2 GB of memory.
+Semantic search turns each query into a dense vector and a sparse vector. They must come from the same models that built the Qdrant index. PEPhub can load the models itself (`local` mode), or ask a server that speaks the Hugging Face [Text Embeddings Inference](https://github.com/huggingface/text-embeddings-inference) (TEI) API (`tei` mode). TEI mode saves about 1.2 GB of memory.
 
 Local mode needs the ML libraries, which are in their own requirements file. The Docker images include them, unless you build with `--build-arg LOCAL_EMBED=false`:
 
@@ -144,15 +144,15 @@ When Qdrant is enabled, PEPhub checks the setup at startup. It stops if a server
 
 ### `EMBEDDING_DENSE_URL`
 
-- Description: TEI mode: base URL of the dense model server, for example `https://embed.databio.org/tei/all-MiniLM-L6-v2`
+- Description: TEI mode: base URL of the dense model server, for example `https://embeddings.example.org/tei/all-MiniLM-L6-v2`
 - Required: In TEI mode
 
 ### `EMBEDDING_SPARSE_URL`
 
-- Description: TEI mode: base URL of the sparse model server, for example `https://embed.databio.org/tei/splade-pp-en-v2`. Needed when the Qdrant collection has sparse vectors
+- Description: TEI mode: base URL of the sparse model server, for example `https://embeddings.example.org/tei/splade-pp-en-v2`. Needed when the Qdrant collection has sparse vectors
 - Required: In TEI mode, for hybrid search
 
 ### `EMBEDDING_API_KEY`
 
-- Description: TEI mode: key sent as `Authorization: Bearer <key>`, for example an embedapi service key
+- Description: TEI mode: key sent as `Authorization: Bearer <key>`
 - Required: No

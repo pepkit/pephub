@@ -3,9 +3,8 @@ Query encoders for semantic search.
 
 ``LocalEncoder`` loads the models in this process. ``TEIEncoder`` calls servers
 that speak the Hugging Face Text Embeddings Inference (TEI) API, one base URL per
-model; embedapi (embed.databio.org) serves its models this way. The ML libraries
-are only imported inside ``LocalEncoder``, so ``EMBEDDING_MODE=tei`` never loads
-fastembed, sentence-transformers or torch.
+model. The ML libraries are only imported inside ``LocalEncoder``, so
+``EMBEDDING_MODE=tei`` never loads fastembed, sentence-transformers or torch.
 """
 
 import logging

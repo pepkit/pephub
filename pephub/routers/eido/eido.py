@@ -64,7 +64,7 @@ def get_schema(request: Request, namespace: str, project: str):
 # @pepkit/peprs WASM bindings. This server-side endpoint is kept for
 # programmatic/API consumers. See validation_wasm_plan.md.
 @router.post("/validate")
-async def validate(
+def validate(
     # accept both pep_registry and pep_files, both should be optional
     pep_registry: Optional[str] = Form(None),
     pep_files: Optional[List[UploadFile]] = None,
@@ -182,7 +182,7 @@ async def validate(
     # while we catch this, its still a 200 response since we want to
     # return the validation errors
     except EidoValidationError as e:
-        error_type, property_names = await eido_error_string_converter(e)
+        error_type, property_names = eido_error_string_converter(e)
 
         return {"valid": False, "error_type": error_type, "errors": property_names}
 
@@ -196,7 +196,7 @@ async def validate(
         return {"valid": True, "errors": None}
 
 
-async def eido_error_string_converter(
+def eido_error_string_converter(
     e: EidoValidationError,
 ) -> Tuple[str, List[str]]:
     """

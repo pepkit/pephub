@@ -4,6 +4,7 @@ Needs a running database, but no data loaded in advance.
 """
 
 import os
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -37,7 +38,7 @@ def test_upload_read_delete_project():
     assert res.status_code == 202, res.text
 
     files = [
-        ("files", (f, open(os.path.join(DATA, f), "rb")))
+        ("files", (f, Path(DATA, f).read_bytes()))
         for f in ["project_config.yaml", "sample_table.csv"]
     ]
     res = client.post(
@@ -63,7 +64,9 @@ def test_upload_read_delete_project():
         res = client.delete(url, headers={"Authorization": f"Bearer {other}"})
         assert res.status_code == 403
         assert client.get(url).status_code == 200
-    finally:
+
         assert client.delete(url, headers=headers).status_code == 202
+        assert client.get(url).status_code == 404
+    finally:
+        client.delete(url, headers=headers)
         client.delete(f"{schema_url}/{SCHEMA}", headers=headers)
-    assert client.get(url).status_code == 404
