@@ -15,25 +15,24 @@ DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 NAMESPACE = "pephub-test"
 NAME = "frogs"
 SCHEMA = "pep"
+SCHEMA_URL = f"/api/v1/schemas/{NAMESPACE}"
+OWNER = {
+    "Authorization": f"Bearer {jwt_encode_user_data({'login': NAMESPACE, 'id': 1, 'orgs': []})}"
+}
+OTHER = {
+    "Authorization": f"Bearer {jwt_encode_user_data({'login': 'someone-else', 'id': 2, 'orgs': []})}"
+}
 
 
-def test_upload_read_delete_project():
-    client = TestClient(app)
-    token = jwt_encode_user_data({"login": NAMESPACE, "id": 1, "orgs": []})
-    headers = {"Authorization": f"Bearer {token}"}
-    url = f"/api/v1/projects/{NAMESPACE}/{NAME}"
-    schema_url = f"/api/v1/schemas/{NAMESPACE}"
-
+def upload(client, url, is_private=False):
+    """Upload the frogs PEP to url, with the schema every project must point at."""
     # clear anything left over from an earlier failed run
-    client.delete(url, headers=headers)
-    client.delete(f"{schema_url}/{SCHEMA}", headers=headers)
-
-    # every project must point at a schema that exists
+    cleanup(client, url)
     res = client.post(
-        f"{schema_url}/files",
+        f"{SCHEMA_URL}/files",
         data={"schema_name": SCHEMA, "version": "1.0.0"},
         files={"schema_file": ("pep.yaml", b"type: object\n")},
-        headers=headers,
+        headers=OWNER,
     )
     assert res.status_code == 202, res.text
 
@@ -43,12 +42,26 @@ def test_upload_read_delete_project():
     ]
     res = client.post(
         f"/api/v1/namespaces/{NAMESPACE}/projects/files",
-        data={"name": NAME, "pep_schema": f"{NAMESPACE}/{SCHEMA}:1.0.0"},
+        data={
+            "name": url.rsplit("/", 1)[1],
+            "pep_schema": f"{NAMESPACE}/{SCHEMA}:1.0.0",
+            "is_private": str(is_private).lower(),
+        },
         files=files,
-        headers=headers,
+        headers=OWNER,
     )
     assert res.status_code == 202, res.text
 
+
+def cleanup(client, url):
+    client.delete(url, headers=OWNER)
+    client.delete(f"{SCHEMA_URL}/{SCHEMA}", headers=OWNER)
+
+
+def test_upload_read_delete_project():
+    client = TestClient(app)
+    url = f"/api/v1/projects/{NAMESPACE}/{NAME}"
+    upload(client, url)
     try:
         assert client.get(url).status_code == 200
         assert client.get(f"{url}/config").status_code == 200
@@ -59,14 +72,28 @@ def test_upload_read_delete_project():
         assert client.get(f"{url}-missing").status_code == 404
 
         # only the owner may delete
-        other = jwt_encode_user_data({"login": "someone-else", "id": 2, "orgs": []})
         assert client.delete(url).status_code == 401
-        res = client.delete(url, headers={"Authorization": f"Bearer {other}"})
-        assert res.status_code == 403
+        assert client.delete(url, headers=OTHER).status_code == 403
         assert client.get(url).status_code == 200
 
-        assert client.delete(url, headers=headers).status_code == 202
+        assert client.delete(url, headers=OWNER).status_code == 202
         assert client.get(url).status_code == 404
     finally:
-        client.delete(url, headers=headers)
-        client.delete(f"{schema_url}/{SCHEMA}", headers=headers)
+        cleanup(client, url)
+
+
+def test_namespace_counts_hide_private_projects():
+    client = TestClient(app)
+    url = f"/api/v1/projects/{NAMESPACE}/{NAME}-private"
+    upload(client, url, is_private=True)
+    try:
+
+        def counts(headers=None):
+            info = client.get(f"/api/v1/namespaces/{NAMESPACE}/", headers=headers)
+            return info.json()["number_of_projects"], info.json()["number_of_samples"]
+
+        assert counts(OWNER) == (1, 2)
+        assert counts() == (0, 0)
+        assert counts(OTHER) == (0, 0)
+    finally:
+        cleanup(client, url)

@@ -11,7 +11,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
-from pepdbagent.db_utils import Projects, User
+from pepdbagent.db_utils import Projects
 from pepdbagent.exceptions import ProjectNotFoundError
 from pepdbagent.models import AnnotationModel, ListOfNamespaceInfo, Namespace
 from qdrant_client import QdrantClient
@@ -410,27 +410,19 @@ def get_encoder() -> Union[Encoder, None]:
 def get_namespace_info(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
+    access_list: List[str] = Depends(get_namespace_access_list),
 ) -> Namespace:
     """
-    Get the information on a namespace, if it exists.
-
-    Counts include private projects, like pepdbagent's namespace.info().
+    Count a namespace's projects and samples. Private projects are counted
+    only for the namespace's owner and organization members.
     """
+    query = select(
+        func.count(), func.coalesce(func.sum(Projects.number_of_samples), 0)
+    ).where(Projects.namespace == namespace)
+    if namespace not in access_list:
+        query = query.where(Projects.private.is_(False))
     with Session(agent.connection) as session:
-        number_of_projects = session.scalar(
-            select(User.number_of_projects).where(User.namespace == namespace)
-        )
-        if number_of_projects is None:
-            return Namespace(
-                namespace=namespace,
-                number_of_projects=0,
-                number_of_samples=0,
-            )
-        number_of_samples = session.scalar(
-            select(func.coalesce(func.sum(Projects.number_of_samples), 0)).where(
-                Projects.namespace == namespace
-            )
-        )
+        number_of_projects, number_of_samples = session.execute(query).one()
     return Namespace(
         namespace=namespace,
         number_of_projects=number_of_projects,
