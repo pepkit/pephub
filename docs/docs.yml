@@ -1,0 +1,31 @@
+site_name: PEPhub
+nav:
+  - PEPhub: README.md
+  - User guide:
+    - Getting started: user/getting-started.md
+    - Use a PEP in an existing pipeline: user/pipelines.md
+    - Validating PEPs: user/validation.md
+    - Version control: user/version-control.md
+    - Semantic search: user/semantic-search.md
+    - How to use views: user/views.md
+    - PEP of PEPs (POP): user/pops.md
+    - Accessing GEO metadata: user/geo.md
+    - PEPhub organization: user/organization.md
+    - PEPHubClient: /pephubclient/
+  - Developer guide:
+    - Setup: developer/setup.md
+    - Deployment: developer/deployment.md
+    - Development: developer/development.md
+    - Authentication: developer/authentication.md
+    - Authentication Device: developer/authentication-device.md
+    - Semantic search: developer/semantic-search.md
+    - Server settings: developer/server-settings.md
+    - Archiving namespaces: developer/tar_namespace.md
+    - PEPembed:
+      - PEPembed: developer/pepembed/README.md
+    - pepdbagent: /pepdbagent/
+    - geopephub: /geopephub/
+  - Reference:
+    - Schema registry: https://schema.databio.org
+    - How to cite: /citations/
+    - Changelog: changelog.md
