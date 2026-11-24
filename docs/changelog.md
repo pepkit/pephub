@@ -2,6 +2,16 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.16.2] - 24-11-2026
+- Fixed a security hole: deleting a PEP now requires write access to its namespace. Before, anyone could delete a public PEP without signing in
+- Fixed server errors for sign-in tokens that have no organizations list
+- Fixed startup on newer FastAPI versions
+- API requests no longer wait in a single line behind slow database calls
+- Faster namespace page: project counts are read directly, and a redundant query is gone
+- Fixed namespace pages showing cached data from the wrong request
+- Archive tab now shows loading and error states, and no longer shows an out-of-date archive size
+- Switched linting from black to ruff, and replaced stale tests
+
 ## [0.14.0] - 18-09-2024
 - Added BEDMS standardizer to PEPhub
 - Updated schema endpoints 
