@@ -48,7 +48,7 @@ class Encoder(Protocol):
     def describe(self) -> str: ...
 
 
-class LocalEncoder:
+class LocalEncoder(Encoder):
     """Embed queries with models loaded in this process."""
 
     has_sparse = True
@@ -85,7 +85,7 @@ class LocalEncoder:
         return f"local dense={self.dense_name}, sparse={self.sparse_name}"
 
 
-class TEIEncoder:
+class TEIEncoder(Encoder):
     """
     Embed queries by calling TEI servers. The constructor does no network I/O;
     call ``check()`` at startup to confirm the servers run the expected models.
