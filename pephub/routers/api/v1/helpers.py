@@ -4,12 +4,13 @@ import peprs
 import yaml
 from fastapi.exceptions import HTTPException
 from peprs import Project
-from peprs.eido import EidoValidationError, validate_config, validate_project
 from peprs.const import (
     CONFIG_KEY,
     SAMPLE_RAW_DICT_KEY,
     SUBSAMPLE_RAW_DICT_KEY,
 )
+from peprs.eido import EidoValidationError, validate_config, validate_project
+
 from ....dependencies import (
     get_db,
 )
@@ -20,7 +21,7 @@ DEFAULT_SCHEMA_NAME = "pep"
 DEFAULT_SCHEMA_VERSION = "2.1.0"
 
 
-async def verify_updated_project(updated_project) -> peprs.Project:
+def verify_updated_project(updated_project) -> peprs.Project:
     new_raw_project = {}
 
     agent = get_db()
@@ -83,7 +84,7 @@ async def verify_updated_project(updated_project) -> peprs.Project:
     return new_project
 
 
-async def check_sample_names(sample_list: list, sample_table_index_col: str) -> None:
+def check_sample_names(sample_list: list, sample_table_index_col: str) -> None:
     for sample in sample_list:
         if sample_table_index_col not in sample:
             raise HTTPException(

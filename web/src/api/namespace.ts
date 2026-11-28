@@ -87,15 +87,6 @@ export interface ArchiveResponse {
   results: ArchiveItem[];
 }
 
-export const getNamespaceInfo = (namespace: string, token: string | null = null) => {
-  const url = `${API_BASE}/namespaces/${namespace}/`; // note the trailing slash
-  if (!token) {
-    return axios.get<NamespaceResponse>(url).then((res) => res.data);
-  } else {
-    return axios.get<NamespaceResponse>(url, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.data);
-  }
-};
-
 export const getBiggestNamespaces = (limit: number) => {
   const url = `${API_BASE}/namespaces?page_size=${limit}`; // note the trailing slash
   return axios.get<BiggestNamespaces>(url).then((res) => res.data);

@@ -22,8 +22,13 @@ Server settings are supplied through environment variables. You may choose to ma
     - [`GH_CLIENT_ID`](#gh_client_id)
     - [`GH_CLIENT_SECRET`](#gh_client_secret)
     - [`REDIRECT_URI`](#redirect_uri)
-  - [Sentence Transformer](#sentence-transformer)
-    - [`HF_MODEL`](#hf_model)
+  - [Search embeddings](#search-embeddings)
+    - [`EMBEDDING_MODE`](#embedding_mode)
+    - [`EMBEDDING_DENSE_MODEL`](#embedding_dense_model)
+    - [`EMBEDDING_SPARSE_MODEL`](#embedding_sparse_model)
+    - [`EMBEDDING_DENSE_URL`](#embedding_dense_url)
+    - [`EMBEDDING_SPARSE_URL`](#embedding_sparse_url)
+    - [`EMBEDDING_API_KEY`](#embedding_api_key)
 
 ## General
 
@@ -107,10 +112,47 @@ Coming soon...
 - Required: Yes
 - Default Value: http://localhost:8000/auth/callback
 
-## Sentence Transformer
+## Search embeddings
 
-### `HF_MODEL`
+Semantic search turns each query into a dense vector and a sparse vector. They must come from the same models that built the Qdrant index. PEPhub can load the models itself (`local` mode), or ask a server that speaks the Hugging Face [Text Embeddings Inference](https://github.com/huggingface/text-embeddings-inference) (TEI) API (`tei` mode). TEI mode saves about 1.2 GB of memory.
 
-- Description: HuggingFace model name
+Local mode needs the ML libraries, which are in their own requirements file. The Docker images include them, unless you build with `--build-arg LOCAL_EMBED=false`:
+
+```bash
+uv pip install --torch-backend cpu -r requirements/requirements-embed-local.txt
+```
+
+When Qdrant is enabled, PEPhub checks the setup at startup. It stops if a server serves the wrong model, rejects the key, or gives vectors that do not fit the Qdrant collection. If the server is down, PEPhub still starts, and searches return a 503 error until the server is back.
+
+### `EMBEDDING_MODE`
+
+- Description: `local` loads the models in PEPhub; `tei` gets the vectors from TEI servers
 - Required: No
-- Default Value: "BAAI/bge-small-en-v1.5"
+- Default Value: `local`
+
+### `EMBEDDING_DENSE_MODEL`
+
+- Description: Dense model. Local mode loads it; TEI mode checks that the server serves it
+- Required: No
+- Default Value: `sentence-transformers/all-MiniLM-L6-v2`
+
+### `EMBEDDING_SPARSE_MODEL`
+
+- Description: Sparse model, used the same way
+- Required: No
+- Default Value: `prithivida/Splade_PP_en_v2`
+
+### `EMBEDDING_DENSE_URL`
+
+- Description: TEI mode: base URL of the dense model server, for example `https://embeddings.example.org/tei/all-MiniLM-L6-v2`
+- Required: In TEI mode
+
+### `EMBEDDING_SPARSE_URL`
+
+- Description: TEI mode: base URL of the sparse model server, for example `https://embeddings.example.org/tei/splade-pp-en-v2`. Needed when the Qdrant collection has sparse vectors
+- Required: In TEI mode, for hybrid search
+
+### `EMBEDDING_API_KEY`
+
+- Description: TEI mode: key sent as `Authorization: Bearer <key>`
+- Required: No

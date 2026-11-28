@@ -1,82 +1,99 @@
+"""
+Upload a small PEP, read it back through the API, then delete it.
+Needs a running database, but no data loaded in advance.
+"""
+
 import os
-import sys
-
-import jwt
-import pytest
-
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + "/../")
-from unittest.mock import Mock
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from pephub.dependencies import CLIAuthSystem
+from pephub.helpers import jwt_encode_user_data
 from pephub.main import app
 
-client = TestClient(app)
-from fastapi.exceptions import HTTPException
+DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+NAMESPACE = "pephub-test"
+NAME = "frogs"
+SCHEMA = "pep"
+SCHEMA_URL = f"/api/v1/schemas/{NAMESPACE}"
+OWNER = {
+    "Authorization": f"Bearer {jwt_encode_user_data({'login': NAMESPACE, 'id': 1, 'orgs': []})}"
+}
+OTHER = {
+    "Authorization": f"Bearer {jwt_encode_user_data({'login': 'someone-else', 'id': 2, 'orgs': []})}"
+}
 
 
-# fetch a project
-def test_fetch_project():
-    res = client.get("/pep/demo/BiocProject")
-    assert res.status_code == 200
+def upload(client, url, is_private=False):
+    """Upload the frogs PEP to url, with the schema every project must point at."""
+    # clear anything left over from an earlier failed run
+    cleanup(client, url)
+    res = client.post(
+        f"{SCHEMA_URL}/files",
+        data={"schema_name": SCHEMA, "version": "1.0.0"},
+        files={"schema_file": ("pep.yaml", b"type: object\n")},
+        headers=OWNER,
+    )
+    assert res.status_code == 202, res.text
+
+    files = [
+        ("files", (f, Path(DATA, f).read_bytes()))
+        for f in ["project_config.yaml", "sample_table.csv"]
+    ]
+    res = client.post(
+        f"/api/v1/namespaces/{NAMESPACE}/projects/files",
+        data={
+            "name": url.rsplit("/", 1)[1],
+            "pep_schema": f"{NAMESPACE}/{SCHEMA}:1.0.0",
+            "is_private": str(is_private).lower(),
+        },
+        files=files,
+        headers=OWNER,
+    )
+    assert res.status_code == 202, res.text
 
 
-# attempt to fetch a project that does not
-# exist
-def test_project_dne():
-    DNE_NAME = "frosty-hedgehog"
-    res = client.get(f"/pep/demo/{DNE_NAME}")
-    assert res.status_code == 404
+def cleanup(client, url):
+    client.delete(url, headers=OWNER)
+    client.delete(f"{SCHEMA_URL}/{SCHEMA}", headers=OWNER)
 
 
-# fetch a projects configuration file
-def test_fetch_config():
-    res = client.get("/pep/demo/BiocProject/config")
-    assert res.status_code == 200
+def test_upload_read_delete_project():
+    client = TestClient(app)
+    url = f"/api/v1/projects/{NAMESPACE}/{NAME}"
+    upload(client, url)
+    try:
+        assert client.get(url).status_code == 200
+        assert client.get(f"{url}/config").status_code == 200
+        samples = client.get(f"{url}/samples").json()
+        assert [s["sample_name"] for s in samples["items"]] == ["frog_1", "frog_2"]
+        assert client.get(f"{url}/samples/frog_1").status_code == 200
+        assert client.get(f"{url}/samples/no-such-frog").status_code == 404
+        assert client.get(f"{url}-missing").status_code == 404
+
+        # only the owner may delete
+        assert client.delete(url).status_code == 401
+        assert client.delete(url, headers=OTHER).status_code == 403
+        assert client.get(url).status_code == 200
+
+        assert client.delete(url, headers=OWNER).status_code == 202
+        assert client.get(url).status_code == 404
+    finally:
+        cleanup(client, url)
 
 
-# fetch a projects list of samples
-def test_fetch_samples():
-    res = client.get("/pep/demo/BiocProject/samples")
-    assert res.status_code == 200
+def test_namespace_counts_hide_private_projects():
+    client = TestClient(app)
+    url = f"/api/v1/projects/{NAMESPACE}/{NAME}-private"
+    upload(client, url, is_private=True)
+    try:
 
-    # verify two sample files in project
-    assert len(res.json()) == 2
+        def counts(headers=None):
+            info = client.get(f"/api/v1/namespaces/{NAMESPACE}/", headers=headers)
+            return info.json()["number_of_projects"], info.json()["number_of_samples"]
 
-
-# fetch a specific sample/file in a project
-def test_fetch_sample():
-    res = client.get("/pep/demo/BiocProject/samples/laminB1Lads")
-    assert res.status_code == 200
-
-
-def test_jwt_is_generated_correctly(mocker, test_access_token, test_user_data):
-    mocker.patch("requests.get", return_value=Mock(content=test_user_data))
-
-    jwt_token = CLIAuthSystem().get_jwt(test_access_token)
-
-    assert jwt.decode(jwt_token, options={"verify_signature": False}) == {
-        "login": "test_login",
-        "id": 12345,
-        "organizations": ["org1", "org2"],
-    }
-
-
-@pytest.mark.parametrize(
-    "respose_content",
-    [
-        b"",
-        {"data": "some_data"},
-    ],
-)
-def test_get_jwt_raises_correct_error(
-    mocker, test_access_token, test_user_data, respose_content
-):
-    mocker.patch("requests.get", return_value=Mock(content=respose_content))
-
-    with pytest.raises(HTTPException) as e:
-        CLIAuthSystem().get_jwt(test_access_token)
-
-    assert e.value.status_code == 400
+        assert counts(OWNER) == (1, 2)
+        assert counts() == (0, 0)
+        assert counts(OTHER) == (0, 0)
+    finally:
+        cleanup(client, url)

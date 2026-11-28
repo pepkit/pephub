@@ -78,7 +78,9 @@ export const SessionProvider = ({ children }: ProviderProps) => {
 
   // decode the session cookie
   if (jwt) {
-    decoded = jwt_decode(jwt) as User;
+    const payload = jwt_decode(jwt) as User;
+    // tokens are not guaranteed to carry an orgs list
+    decoded = { ...payload, orgs: Array.isArray(payload.orgs) ? payload.orgs : [] };
   }
 
   return (

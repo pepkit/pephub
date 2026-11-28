@@ -8,17 +8,15 @@ import yaml
 from fastapi import APIRouter, Depends, Form, UploadFile
 from fastapi.exceptions import HTTPException
 from pepdbagent import PEPDatabaseAgent
-from pepdbagent.utils import registry_path_converter
-from pepdbagent.exceptions import SchemaDoesNotExistError
-from pepdbagent.utils import schema_path_converter
 from pepdbagent.const import LATEST_SCHEMA_VERSION
+from pepdbagent.exceptions import SchemaDoesNotExistError
+from pepdbagent.utils import registry_path_converter, schema_path_converter
 from peprs.eido import EidoValidationError, validate_project
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from ...dependencies import DEFAULT_TAG, get_db
 from ...helpers import parse_user_file_upload, split_upload_files_on_init_file
-from ...const import MAX_PROCESSED_PROJECT_SIZE
 
 schemas_url = "https://schema.databio.org/list.json"
 schemas_to_test = requests.get(schemas_url).json()
@@ -46,7 +44,7 @@ def _read_schema(path_or_url: str) -> dict:
 
 
 @router.get("/schemas/{namespace}/{project}")
-async def get_schema(request: Request, namespace: str, project: str):
+def get_schema(request: Request, namespace: str, project: str):
     """
     Takes namespace and project values for a schema endpoint
     and returns a custom validator HTML page.
@@ -66,7 +64,7 @@ async def get_schema(request: Request, namespace: str, project: str):
 # @pepkit/peprs WASM bindings. This server-side endpoint is kept for
 # programmatic/API consumers. See validation_wasm_plan.md.
 @router.post("/validate")
-async def validate(
+def validate(
     # accept both pep_registry and pep_files, both should be optional
     pep_registry: Optional[str] = Form(None),
     pep_files: Optional[List[UploadFile]] = None,
@@ -102,15 +100,6 @@ async def validate(
     if pep_registry is not None:
         namespace, name, tag = registry_path_converter(pep_registry)
         tag = tag or DEFAULT_TAG
-
-        pep_annot = agent.annotation.get(namespace=namespace, name=name, tag=tag)
-
-        # if pep_annot.results[0].number_of_samples > MAX_PROCESSED_PROJECT_SIZE:
-        #     return {
-        #         "valid": False,
-        #         "error_type": "Project size",
-        #         "errors": ["Project is too large. Can't validate."],
-        #     }
 
         p = agent.project.get(namespace, name, tag, raw=False)
     else:
@@ -193,7 +182,7 @@ async def validate(
     # while we catch this, its still a 200 response since we want to
     # return the validation errors
     except EidoValidationError as e:
-        error_type, property_names = await eido_error_string_converter(e)
+        error_type, property_names = eido_error_string_converter(e)
 
         return {"valid": False, "error_type": error_type, "errors": property_names}
 
@@ -207,7 +196,7 @@ async def validate(
         return {"valid": True, "errors": None}
 
 
-async def eido_error_string_converter(
+def eido_error_string_converter(
     e: EidoValidationError,
 ) -> Tuple[str, List[str]]:
     """

@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import time
 from typing import Union
@@ -8,10 +9,8 @@ import requests
 from dotenv import load_dotenv
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
 from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
-from ...limiter import limiter
 
 from ...const import (
     AUTH_CODE_EXPIRATION,
@@ -20,22 +19,24 @@ from ...const import (
     JWT_SECRET,
 )
 from ...dependencies import (
-    CLIAuthSystem,
     generate_random_auth_code,
     generate_random_device_code,
     read_authorization_header,
 )
-from ...helpers import build_authorization_url
+from ...developer_keys import dev_key_handler
+from ...helpers import build_authorization_url, jwt_encode_user_data
+from ...limiter import limiter
 from ..models import (
     GitHubAppConfig,
     InitializeDeviceCodeResponse,
     JWTDeviceTokenResponse,
-    TokenExchange,
     RevokeRequest,
+    TokenExchange,
 )
-from ...developer_keys import dev_key_handler
 
 load_dotenv()
+
+_LOGGER = logging.getLogger(__name__)
 
 REDIRECT_CODES = {}
 CODE_EXCHANGE = {}
@@ -172,12 +173,14 @@ def callback(
         u["organizations_url"],
         headers={"Authorization": f"Bearer {x['access_token']}"},
     ).json()
-    for org in organizations:
-        org["login"] = org["login"].lower()
+    if not isinstance(organizations, list):
+        # GitHub sent an error object (e.g. rate limit); sign in with no orgs
+        _LOGGER.warning(f"Could not read GitHub organizations: {organizations}")
+        organizations = []
 
     # encode the token
-    token = CLIAuthSystem.jwt_encode_user_data(
-        dict(orgs=[org["login"] for org in organizations], **u)
+    token = jwt_encode_user_data(
+        dict(orgs=[org["login"].lower() for org in organizations], **u)
     )
 
     if state.get("device"):

@@ -1,42 +1,39 @@
-from typing import Optional, Union, Literal, List, Dict
-from starlette.responses import Response
+import json
 from contextlib import suppress
+from typing import Dict, List, Literal, Optional, Union
 
 import yaml
-import json
-from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from fastapi.responses import JSONResponse, PlainTextResponse
-
-from pepdbagent import PEPDatabaseAgent
-from pepdbagent.exceptions import (
-    SchemaDoesNotExistError,
-    SchemaAlreadyExistsError,
-    SchemaVersionDoesNotExistError,
-    SchemaVersionAlreadyExistsError,
-    SchemaTagDoesNotExistError,
-)
 import yaml.parser
 import yaml.scanner
-
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import JSONResponse, PlainTextResponse
+from pepdbagent import PEPDatabaseAgent
+from pepdbagent.exceptions import (
+    SchemaAlreadyExistsError,
+    SchemaDoesNotExistError,
+    SchemaTagDoesNotExistError,
+    SchemaVersionAlreadyExistsError,
+    SchemaVersionDoesNotExistError,
+)
 from pepdbagent.models import (
-    SchemaSearchResult,
     SchemaRecordAnnotation,
+    SchemaSearchResult,
     SchemaVersionSearchResult,
     UpdateSchemaRecordFields,
     UpdateSchemaVersionFields,
 )
+from starlette.responses import Response
 
+from ....dependencies import (
+    get_db,
+    verify_user_can_write_namespace,
+)
+from ....helpers import download_json, download_yaml
 from ...models import (
     NewSchemaRecordModel,
     NewSchemaVersionModel,
     SchemaVersionTagAddModel,
-)
-
-from ....helpers import download_yaml, download_json
-from ....dependencies import (
-    get_db,
-    verify_user_can_write_namespace,
 )
 
 load_dotenv()
@@ -46,7 +43,7 @@ schemas = APIRouter(prefix="/api/v1/schemas", tags=["schemas"])
 
 
 @schemas.get("", response_model=SchemaSearchResult)
-async def get_all_schemas(
+def get_all_schemas(
     query: Optional[str] = None,
     page: Optional[int] = 0,
     page_size: Optional[int] = 100,
@@ -70,7 +67,7 @@ async def get_all_schemas(
 
 
 @schemas.get("/{namespace}", response_model=SchemaSearchResult)
-async def get_schemas_in_namespace(
+def get_schemas_in_namespace(
     namespace: str,
     name: Optional[str] = None,
     maintainer: Optional[str] = None,
@@ -106,7 +103,7 @@ async def get_schemas_in_namespace(
 
 
 @schemas.post("/{namespace}/files")
-async def create_schema_for_namespace_by_file(
+def create_schema_for_namespace_by_file(
     namespace: str,
     schema_name: str = Form(...),
     version: str = Form(...),
@@ -133,7 +130,7 @@ async def create_schema_for_namespace_by_file(
     schema_str = schema_file.file.read().decode("utf-8")
     try:
         schema_dict = yaml.safe_load(schema_str)
-    except yaml.parser.ParserError as e:
+    except yaml.parser.ParserError:
         schema_dict = json.loads(schema_str)
 
     try:
@@ -165,7 +162,7 @@ async def create_schema_for_namespace_by_file(
 
 
 @schemas.post("/{namespace}/json")
-async def create_schema_for_namespace_by_json(
+def create_schema_for_namespace_by_json(
     namespace: str,
     schema_data: NewSchemaRecordModel,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -204,7 +201,7 @@ async def create_schema_for_namespace_by_json(
 
 
 @schemas.get("/{namespace}/{schema_name}", response_model=SchemaRecordAnnotation)
-async def get_schema(
+def get_schema(
     namespace: str, schema_name: str, agent: PEPDatabaseAgent = Depends(get_db)
 ):
     """
@@ -249,7 +246,7 @@ def update_schema_info(
 
 
 @schemas.delete("/{namespace}/{schema_name}")
-async def delete_schema(
+def delete_schema(
     namespace: str,
     schema_name: str,
     agent: PEPDatabaseAgent = Depends(get_db),
@@ -271,7 +268,7 @@ async def delete_schema(
 @schemas.get(
     "/{namespace}/{schema_name}/versions", response_model=SchemaVersionSearchResult
 )
-async def get_schema_versions(
+def get_schema_versions(
     namespace: str,
     schema_name: str,
     query: Optional[str] = "",
@@ -304,7 +301,7 @@ async def get_schema_versions(
     "/{namespace}/{schema_name}/versions/{semantic_version}",
     response_model=Union[dict, str],
 )
-async def get_schema_versions(
+def get_schema_version(
     namespace: str,
     schema_name: str,
     semantic_version: str,
@@ -336,7 +333,7 @@ async def get_schema_versions(
 
 
 @schemas.get("/{namespace}/{schema_name}/versions/{semantic_version}/file")
-async def download_schema(
+def download_schema(
     namespace: str,
     schema_name: str,
     semantic_version: str,
@@ -361,7 +358,7 @@ async def download_schema(
 
 
 @schemas.post("/{namespace}/{schema_name}/versions/files")
-async def create_schema_version_file(
+def create_schema_version_file(
     namespace: str,
     schema_name: str,
     version: str = Form(...),
@@ -414,7 +411,7 @@ async def create_schema_version_file(
 
 
 @schemas.post("/{namespace}/{schema_name}/versions/json")
-async def create_schema_version_json(
+def create_schema_version_json(
     namespace: str,
     schema_name: str,
     schema_data: NewSchemaVersionModel,
@@ -485,7 +482,7 @@ def update_schema_version(
 
 
 @schemas.delete("/{namespace}/{schema_name}/versions/{semantic_version}")
-async def delete_schema_version(
+def delete_schema_version(
     namespace: str,
     schema_name: str,
     semantic_version: str,

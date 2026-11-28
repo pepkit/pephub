@@ -11,7 +11,7 @@ export const useStandardize = (
   const session = useSession();
 
   const query = useQuery<StandardizeColsResponse, Error>({
-    queryKey: [namespace, project, tag],
+    queryKey: [namespace, project, tag, 'standardize'],
     queryFn: () => 
       getStandardizedCols(
         namespace || '', 

@@ -10,7 +10,7 @@ export const DownloadGeo = (props: Props) => {
   const namespace = props.namespace;
 
   const {
-    isFetching,
+    isLoading,
     isError,
     error,
     data,
@@ -22,11 +22,17 @@ export const DownloadGeo = (props: Props) => {
       <p className='text-sm mt-1 mb-3'>
         Download all available PEPs for the Gene Expresion Omnibus (GEO). 
         All GEO PEPs are archived quarterly into a single <code>tar</code> file.
-        Each archive is slightly over 1 gb in size.
+        The table below lists each archive's size.
       </p>
-      {data ? <NamespaceArchiveTable data={data} /> : 
+      {isLoading ? (
+        <p className='text-center pt-4 fw-semibold'>Loading archives...</p>
+      ) : isError ? (
+        <p className='text-center pt-4 fw-semibold'>Could not load archives.</p>
+      ) : data && data.count > 0 ? (
+        <NamespaceArchiveTable data={data} />
+      ) : (
         <p className='text-center pt-4 fw-semibold'>No archives currently exist for this namespace.</p>
-      }
+      )}
     </div>
   );
 };

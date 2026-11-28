@@ -73,6 +73,22 @@
         {
           "valueFrom": "QDRANT_API_KEY",
           "name": "QDRANT_API_KEY"
+        },
+        {
+          "valueFrom": "arn:aws:ssm:us-east-1:235728444054:parameter/yeti/pephub/EMBEDDING_MODE",
+          "name": "EMBEDDING_MODE"
+        },
+        {
+          "valueFrom": "arn:aws:ssm:us-east-1:235728444054:parameter/yeti/pephub/EMBEDDING_DENSE_URL",
+          "name": "EMBEDDING_DENSE_URL"
+        },
+        {
+          "valueFrom": "arn:aws:ssm:us-east-1:235728444054:parameter/yeti/pephub/EMBEDDING_SPARSE_URL",
+          "name": "EMBEDDING_SPARSE_URL"
+        },
+        {
+          "valueFrom": "arn:aws:ssm:us-east-1:235728444054:parameter/yeti/pephub/EMBEDDING_API_KEY",
+          "name": "EMBEDDING_API_KEY"
         }
       ],
       "dnsSearchDomains": null,

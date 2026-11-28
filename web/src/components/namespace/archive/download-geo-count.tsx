@@ -15,6 +15,6 @@ export const DownloadGeoCount = (props: Props) => {
   } = useNamespaceArchive(namespace);
 
   return (
-    <span>{data ? data.count : 0}</span>
+    <span>{data ? data.count : '-'}</span>
   );
 };

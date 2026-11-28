@@ -1,44 +1,46 @@
-import json
 import logging
 import os
-from datetime import datetime
 from secrets import token_hex
 from typing import Any, Dict, List, Optional, Union
-from cachetools import cached, TTLCache
 
 import jwt
-import pydantic
-import requests
+from cachetools import TTLCache, cached
 from dotenv import load_dotenv
 from fastapi import Depends, Header, Query
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
-from fastembed.embedding import TextEmbedding as Embedding
 from pepdbagent import PEPDatabaseAgent
 from pepdbagent.const import DEFAULT_TAG
+from pepdbagent.db_utils import Projects
 from pepdbagent.exceptions import ProjectNotFoundError
-from pepdbagent.models import AnnotationModel, Namespace, ListOfNamespaceInfo
-from pydantic import BaseModel
+from pepdbagent.models import AnnotationModel, ListOfNamespaceInfo, Namespace
 from qdrant_client import QdrantClient
-from sentence_transformers import SparseEncoder
-from qdrant_client.http.exceptions import ResponseHandlingException
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from .const import (
-    DENSE_ENCODER_MODEL,
     DEFAULT_POSTGRES_DB,
     DEFAULT_POSTGRES_HOST,
     DEFAULT_POSTGRES_PASSWORD,
     DEFAULT_POSTGRES_PORT,
     DEFAULT_POSTGRES_USER,
+    DEFAULT_QDRANT_COLLECTION_NAME,
     DEFAULT_QDRANT_HOST,
     DEFAULT_QDRANT_PORT,
+    DENSE_ENCODER_MODEL,
     JWT_SECRET,
-    SPARSE_ENCODER_MODEL,
     PKG_NAME,
+    SPARSE_ENCODER_MODEL,
 )
-from .helpers import jwt_encode_user_data
-from .routers.models import ForkRequest
 from .developer_keys import dev_key_handler
+from .embedding import (
+    Encoder,
+    EncoderConfigError,
+    EncoderUnavailable,
+    LocalEncoder,
+    TEIEncoder,
+)
+from .routers.models import ForkRequest
 
 _LOGGER_PEPHUB = logging.getLogger(PKG_NAME)
 
@@ -46,49 +48,6 @@ load_dotenv()
 
 # Scheme for the Authorization header
 token_auth_scheme = HTTPBearer()
-
-
-class UserData(BaseModel):
-    login: str
-    id: int
-    organizations: Optional[List[str]]
-
-
-class CLIAuthSystem:
-    GITHUB_BASE_API_URL = "https://api.github.com"
-
-    def get_jwt(self, access_token: str) -> str:
-        """
-        Based on access token request GitHub for user data and encode it using secret.
-        """
-        user_data = self._request_user_data_from_github(access_token)
-        return self.jwt_encode_user_data(user_data.dict())
-
-    @staticmethod
-    def _request_user_data_from_github(access_token: str) -> UserData:
-        response = requests.get(
-            f"{CLIAuthSystem.GITHUB_BASE_API_URL}/user",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Accept": "application/vnd.github+json",
-            },
-        )
-        try:
-            return UserData(**json.loads(response.content.decode("utf-8")))
-        except (
-            AttributeError,
-            UnicodeDecodeError,
-            json.JSONDecodeError,
-            pydantic.ValidationError,
-        ):
-            raise HTTPException(
-                status_code=400,
-                detail="Can't decode GitHub response. Please check it manually.",
-            )
-
-    @staticmethod
-    def jwt_encode_user_data(user_data: dict, exp: datetime = None) -> str:
-        return jwt_encode_user_data(user_data, exp=exp)
 
 
 # database connection
@@ -99,24 +58,6 @@ agent = PEPDatabaseAgent(
     database=os.environ.get("POSTGRES_DB") or DEFAULT_POSTGRES_DB,
     port=os.environ.get("POSTGRES_PORT") or DEFAULT_POSTGRES_PORT,
 )
-
-# sentence_transformer model
-_LOGGER_PEPHUB.info(f"HF MODEL IN USE: {os.getenv('HF_MODEL', DENSE_ENCODER_MODEL)}")
-embedding_model = Embedding(
-    model_name=os.getenv("HF_MODEL", DENSE_ENCODER_MODEL), max_length=512
-)
-# embedding_model = None
-
-# token = os.environ.get("HF_TOKEN", None)
-# hf_model_sparse = os.environ.get("HF_MODEL_SPARSE", SPARSE_ENCODER_MODEL)
-# if token is None:
-#     sparse_model = None
-#     _LOGGER_PEPHUB.warning("No HF_TOKEN provided, sparse model disabled.")
-# else:
-
-hf_model_sparse = os.environ.get("HF_MODEL_SPARSE", SPARSE_ENCODER_MODEL)
-sparse_model = SparseEncoder(hf_model_sparse)
-_LOGGER_PEPHUB.info(f"Sparse model in use: {hf_model_sparse}")
 
 
 ## Qdrant connection
@@ -153,6 +94,78 @@ def initialize_qdrant_client() -> Union[QdrantClient, None]:
 
 
 qdrant = initialize_qdrant_client()
+
+
+def initialize_encoder() -> Encoder:
+    """
+    Build the query encoder from the EMBEDDING_* settings. EMBEDDING_MODE=local
+    (the default) loads the models in this process; EMBEDDING_MODE=tei calls TEI
+    servers instead. Either way, the models must be the ones the Qdrant index was
+    built with.
+    """
+    mode = os.environ.get("EMBEDDING_MODE", "local").strip().lower()
+    dense_model = os.environ.get("EMBEDDING_DENSE_MODEL") or DENSE_ENCODER_MODEL
+    sparse_model = os.environ.get("EMBEDDING_SPARSE_MODEL") or SPARSE_ENCODER_MODEL
+    if mode == "local":
+        return LocalEncoder(dense_model, sparse_model)
+    if mode == "tei":
+        dense_url = os.environ.get("EMBEDDING_DENSE_URL")
+        if not dense_url:
+            raise EncoderConfigError("EMBEDDING_MODE=tei requires EMBEDDING_DENSE_URL")
+        return TEIEncoder(
+            dense_url=dense_url,
+            dense_model=dense_model,
+            sparse_url=os.environ.get("EMBEDDING_SPARSE_URL") or None,
+            sparse_model=sparse_model,
+            api_key=os.environ.get("EMBEDDING_API_KEY") or None,
+        )
+    raise EncoderConfigError(f"Unknown EMBEDDING_MODE '{mode}'. Use 'local' or 'tei'.")
+
+
+def build_encoder(qdrant: Union[QdrantClient, None]) -> Union[Encoder, None]:
+    """
+    Build the encoder and check it against its servers and the Qdrant collection.
+    Bad settings stop the server. An embedding server that is down at startup
+    does not: the rest of pephub works, and searches return 503 until it is back.
+    """
+    if qdrant is None:
+        return None
+    encoder = initialize_encoder()
+    try:
+        encoder.check()
+        dense_size = len(encoder.embed_dense("pephub dimension check"))
+    except EncoderUnavailable as e:
+        _LOGGER_PEPHUB.error(f"Embedding server not reachable, checks skipped: {e}")
+        return encoder
+    try:
+        params = qdrant.get_collection(DEFAULT_QDRANT_COLLECTION_NAME).config.params
+    except Exception as e:
+        _LOGGER_PEPHUB.warning(
+            f"Could not read Qdrant collection '{DEFAULT_QDRANT_COLLECTION_NAME}' "
+            f"({e}); skipping vector checks."
+        )
+        return encoder
+
+    collection = f"Qdrant collection '{DEFAULT_QDRANT_COLLECTION_NAME}'"
+    vectors = params.vectors
+    if isinstance(vectors, dict) and "dense" in vectors:
+        if dense_size != vectors["dense"].size:
+            raise EncoderConfigError(
+                f"dense vectors are {dense_size}-d but {collection} expects "
+                f"{vectors['dense'].size}-d"
+            )
+    collection_has_sparse = "sparse" in (params.sparse_vectors or {})
+    if encoder.has_sparse and not collection_has_sparse:
+        raise EncoderConfigError(f"{collection} has no 'sparse' vector")
+    if collection_has_sparse and not encoder.has_sparse:
+        raise EncoderConfigError(
+            f"{collection} has a 'sparse' vector, so set EMBEDDING_SPARSE_URL"
+        )
+    _LOGGER_PEPHUB.info("Embeddings: " + encoder.describe())
+    return encoder
+
+
+encoder = build_encoder(qdrant)
 
 
 def get_qdrant() -> Union[QdrantClient, None]:
@@ -218,12 +231,9 @@ def read_authorization_header(authorization: str = Header(None)) -> Union[dict, 
 def get_organizations_from_session_info(
     session_info: Union[dict, None] = Depends(read_authorization_header),
 ) -> List[str]:
-    organizations = []
-    if session_info:
-        organizations = session_info.get("orgs")
-        if organizations:
-            organizations = [x.lower() for x in organizations]
-    return organizations
+    """Return the user's organizations from the token, lowercased."""
+    orgs = (session_info or {}).get("orgs") or []
+    return [org.lower() for org in orgs]
 
 
 def get_user_from_session_info(
@@ -329,28 +339,24 @@ def get_project_annotation(
 
 def verify_user_can_write_namespace(
     namespace: str,
-    session_info: Union[dict, None] = Depends(read_authorization_header),
-    orgs: List = Depends(get_organizations_from_session_info),
+    access_list: List[str] = Depends(get_namespace_access_list),
 ):
     """
     Authorization flow for writing to a namespace.
 
     See: https://github.com/pepkit/pephub/blob/master/docs/authentication.md#submiting-a-new-pep
     """
-    if session_info is None:
+    if not access_list:
         raise HTTPException(
             401,
             f"User must be logged in to write to the namespace: '{namespace}'.",
         )
-    orgs.append(session_info["login"])
-
-    if namespace not in orgs:
+    if namespace not in access_list:
         raise HTTPException(
             403,
             f"User does not have permission to write or make modifications to the namespace: '{namespace}'.",
         )
-
-    return orgs
+    return access_list
 
 
 def verify_user_can_read_project(
@@ -372,12 +378,9 @@ def verify_user_can_read_project(
             raise HTTPException(
                 404, f"Project, '{namespace}/{project}:{tag}', not found."
             )
-        elif any(
-            [
-                session_info.get("login") != namespace
-                and namespace
-                not in orgs,  # user doesnt own namespace or is not member of organization
-            ]
+        elif (
+            # user doesnt own namespace and is not a member of the organization
+            session_info.get("login") != namespace and namespace not in orgs
         ):
             # raise 404 since we don't want to reveal that the project exists
             raise HTTPException(
@@ -396,38 +399,35 @@ def verify_user_can_fork(
         raise HTTPException(401, "Unauthorized to fork this repo")
 
 
-def get_sentence_transformer() -> Embedding:
+def get_encoder() -> Union[Encoder, None]:
     """
-    Return sentence transformer encoder
+    Return the query encoder (local models or a TEI server), or None when
+    Qdrant is disabled
     """
-    return embedding_model
-
-
-def get_sparse_model() -> Union[SparseEncoder, None]:
-    """
-    Return sparse encoder model
-    """
-    return sparse_model
+    return encoder
 
 
 def get_namespace_info(
     namespace: str,
     agent: PEPDatabaseAgent = Depends(get_db),
-    user: str = Depends(get_user_from_session_info),
-) -> Namespace:  # type: ignore
+    access_list: List[str] = Depends(get_namespace_access_list),
+) -> Namespace:
     """
-    Get the information on a namespace, if it exists.
+    Count a namespace's projects and samples. Private projects are counted
+    only for the namespace's owner and organization members.
     """
-    # TODO: is this the best way to do this? By grabbing the first result?
-    try:
-        yield agent.namespace.get(query=namespace, admin=user).results[0]
-    except IndexError:
-        # namespace doesnt exist in database, so we must return a blank namespace
-        yield Namespace(
-            namespace=namespace,
-            number_of_projects=0,
-            number_of_samples=0,
-        )
+    query = select(
+        func.count(), func.coalesce(func.sum(Projects.number_of_samples), 0)
+    ).where(Projects.namespace == namespace)
+    if namespace not in access_list:
+        query = query.where(Projects.private.is_(False))
+    with Session(agent.connection) as session:
+        number_of_projects, number_of_samples = session.execute(query).one()
+    return Namespace(
+        namespace=namespace,
+        number_of_projects=number_of_projects,
+        number_of_samples=number_of_samples,
+    )
 
 
 @cached(TTLCache(maxsize=100, ttl=5 * 60))

@@ -28,7 +28,7 @@ views = APIRouter(prefix="/eido", tags=["views", "user interface", "interface"])
 
 
 @views.get("/schema/{namespace}/{project}", response_class=HTMLResponse)
-async def get_schema(request: Request, namespace: str, project: str):
+def get_schema(request: Request, namespace: str, project: str):
     """
     Takes namespace and project values for a schema endpoint
     and returns a custom validator HTML page.

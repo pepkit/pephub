@@ -1,49 +1,39 @@
 import logging
 
-import coloredlogs
+import logmuse
+
+# Set up logging before importing the rest of pephub, so lines logged at import
+# time get the same format. Each line names the logger it came from.
+logmuse.init_logger("", make_root=True, level=logging.INFO, datefmt="%b %d %Y %H:%M:%S")
+# Other libraries log warnings only. peprs is noisy, so errors only.
+logging.getLogger().setLevel(logging.WARNING)
+logging.getLogger("pephub").setLevel(logging.INFO)
+logging.getLogger("pepdbagent").setLevel(logging.INFO)
+logging.getLogger("peprs").setLevel(logging.ERROR)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
-
 from ._version import __version__ as server_v
 from .const import ALL_VERSIONS, PKG_NAME, TAGS_METADATA
-from .limiter import limiter, _custom_rate_limit_exceeded_handler
+from .limiter import _custom_rate_limit_exceeded_handler, limiter
 from .routers.api.v1.base import api as api_base
 from .routers.api.v1.namespace import namespace as api_namespace
 from .routers.api.v1.namespace import namespaces as api_namespaces
 from .routers.api.v1.project import project as api_project
 from .routers.api.v1.project import projects as api_projects
-from .routers.api.v1.search import search as api_search
-from .routers.api.v1.schemas import schemas as api_schemas
 from .routers.api.v1.schemas import groups as api_groups
+from .routers.api.v1.schemas import schemas as api_schemas
+from .routers.api.v1.search import search as api_search
 from .routers.auth.base import auth as auth_router
 from .routers.eido.eido import router as eido_router
 
-_LOGGER_PEPDBAGENT = logging.getLogger("pepdbagent")
-coloredlogs.install(
-    logger=_LOGGER_PEPDBAGENT,
-    level=logging.INFO,
-    datefmt="%b %d %Y %H:%M:%S",
-    fmt="[%(levelname)s] [%(asctime)s] [PEPDBAGENT] %(message)s",
-)
-
-_LOGGER_PEPRS = logging.getLogger("peprs")
-coloredlogs.install(
-    logger=_LOGGER_PEPRS,
-    level=logging.ERROR,
-    datefmt="%b %d %Y %H:%M:%S",
-    fmt="[%(levelname)s] [%(asctime)s] [PEPRS] %(message)s",
-)
-
-_LOGGER_PEPHUB = logging.getLogger("uvicorn.access")
-coloredlogs.install(
-    logger=_LOGGER_PEPHUB,
-    level=logging.INFO,
-    datefmt="%b %d %Y %H:%M:%S",
-    fmt="[%(levelname)s] [%(asctime)s] [PEPHUB] %(message)s",
-)
-
+# uvicorn and pepdbagent give their loggers their own handlers. Send their lines
+# through the root handler instead, so every line has the same format.
+for name in ("uvicorn", "uvicorn.access", "pepdbagent"):
+    logging.getLogger(name).handlers.clear()
+    logging.getLogger(name).propagate = True
 
 # build server
 app = FastAPI(
@@ -51,7 +41,7 @@ app = FastAPI(
     description="A web interface and RESTful API for PEPs",
     docs_url="/api/v1/docs",
     version=server_v,
-    tags=TAGS_METADATA,
+    openapi_tags=TAGS_METADATA,
 )
 
 # import logfire
